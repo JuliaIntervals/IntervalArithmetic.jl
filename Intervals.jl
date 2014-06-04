@@ -8,10 +8,10 @@
 
 module Intervals
 
-import 
-    Base: in, zero, one, show, 
-        sqrt, exp, log, sin, cos, tan, 
-        union, intersect, isempty
+import Base: in, zero, one, show, 
+    sqrt, exp, log, sin, cos, tan, inv, 
+    union, intersect, isempty,
+    convert, promote_rule
 
 export 
     @roundingDown, @roundingUp, @roundingDirect, @rounded_interval,
@@ -40,7 +40,7 @@ macro roundingUp(expr)
 end
 
 ## Interval constructor
-immutable Interval <: Real
+immutable Interval <: Number
     lo :: Real
     hi :: Real
 
@@ -58,7 +58,6 @@ immutable Interval <: Real
         elseif T == Rational{Int64} || T == Rational{BigInt} || T == Rational{Int32}
             lo = @roundingDown( BigFloat(a) )
         else
-            #lo = BigFloat(string(a), RoundDown)
             lo = @roundingDown( BigFloat(string(a)) )
         end
 
@@ -68,7 +67,6 @@ immutable Interval <: Real
         elseif T == Rational{Int64} || T == Rational{BigInt} || T == Rational{Int32}
             hi = @roundingUp( BigFloat(b) )
         else
-            #hi = BigFloat(string(b), RoundUp)
             hi = @roundingUp( BigFloat(string(b)) )
         end
 
@@ -76,32 +74,27 @@ immutable Interval <: Real
     end
 end
 Interval(a::Interval) = a
-Interval(a::Tuple) = Interval(a[1], a[2])
-#?Interval(a::BigFloat) = Interval( @roundingDown("$a"), @roundingUp("$a") )
-Interval(b::Bool) = Interval(int(b))   ## Included because a warning: Bool <: Real --> true
+Interval(a::Tuple) = Interval(a...)
 Interval(a::Real) = Interval(a, a)
+
+# Convertion and promotion
+convert(::Type{Interval},x::Real) = Interval(x)
+promote_rule{A<:Real}(::Type{Interval}, ::Type{A}) = Interval
 
 ## Equalities and neg-equalities
 ==(a::Interval, b::Interval) = a.lo == b.lo && a.hi == b.hi
-==(a::Interval, x::Real) = ==(a, Interval(x))
-==(x::Real, a::Interval) = ==(a, Interval(x))
 !=(a::Interval, b::Interval) = a.lo != b.lo || a.hi != b.hi
-!=(a::Interval, x::Real) = !=(a, Interval(x))
-!=(x::Real, a::Interval) = !=(a, Interval(x))
 
 ## Inclusion/containment functions
 in(a::Interval, b::Interval) = b.lo <= a.lo && a.hi <= b.hi
-in(x::Rational, a::Interval) = a.lo <= BigFloat(x) <= a.hi
-in(x::BigFloat, a::Interval) = a.lo <= x <= a.hi
-in(x::Real, a::Interval) = a.lo <= BigFloat(string(x)) <= a.hi
+in(x::Real, a::Interval) = in(promote(x,a)...)
+
 isinside(a::Interval, b::Interval) = b.lo < a.lo && a.hi < b.hi
-isinside(x::Rational, a::Interval) = a.lo < BigFloat(x) < a.hi
-isinside(x::BigFloat, a::Interval) = a.lo < x < a.hi
-isinside(x::Real, a::Interval) = a.lo < BigFloat(string(x)) < a.hi
+isinside(x::Real, a::Interval) = isinside(promote(x,a)...)
 
 ## zero and one functions
-zero(a::Interval) = Interval(BigFloat("0"))
-one(a::Interval) = Interval(BigFloat("1"))
+zero(a::Interval) = Interval(zero(BigFloat))
+one(a::Interval) = Interval(one(BigFloat))
 
 ## Addition
 function +(a::Interval, b::Interval)
@@ -112,7 +105,6 @@ function +(a::Interval, b::Interval)
     set_rounding(BigFloat, RoundNearest)
     Interval( lo, hi )
 end
-#?+(a::Interval, b::Interval) = @rounded_interval( a.lo+b.lo, a.hi+b.hi )
 +(a::Interval) = a
 
 ## Substraction
@@ -124,7 +116,6 @@ function -(a::Interval, b::Interval)
     set_rounding(BigFloat, RoundNearest)
     Interval( lo, hi )
 end
-#?-(a::Interval, b::Interval) = @rounded_interval( a.lo-b.hi, a.hi-b.lo )
 -(a::Interval) = Interval(-a.hi,-a.lo)
 
 ## Multiplication
@@ -135,15 +126,6 @@ function *(a::Interval, b::Interval)
     hi = max( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi )
     set_rounding(BigFloat, RoundNearest)
     Interval( lo, hi )
-end
-# The following is needed because to avoid a silly warning
-*(a::Interval, b::Bool) = b ? a : zero(a)
-*(b::Bool, a::Interval) = b ? a : zero(a)
-
-## Operations mixing Interval and Real
-for op in (:+, :-, :*)
-    @eval $(op)(a::Interval, x::Real) = $(op)(a, Interval(x))
-    @eval $(op)(x::Real, a::Interval) = $(op)(Interval(x), a)
 end
 
 ## Division
@@ -161,9 +143,8 @@ function reciprocal(a::Interval)
     set_rounding(BigFloat, RoundNearest)
     Interval( lo, hi )
 end
+inv(a::Interval) = reciprocal(a)
 /(a::Interval, b::Interval) = a*reciprocal(b)
-/(a::Interval, x::Real) = a*reciprocal( Interval(x) )
-/(x::Real, a::Interval) = Interval(x)*reciprocal(a)
 
 ## Some scalar functions on intervals
 diam(a::Interval) = a.hi - a.lo
@@ -173,7 +154,6 @@ mig(a::Interval) = in(BigFloat(0.0),a) ? BigFloat(0.0) : min( abs(a.lo), abs(a.h
 
 ## Intersection
 isempty(a::Interval, b::Interval) = a.hi < b.lo || b.hi < a.lo
-#?isempty(a::Interval, x::Real) = isempty(a, Interval(x))
 function intersect(a::Interval, b::Interval)
     if isempty(a,b)
         warn("Intersection is empty")
@@ -198,16 +178,18 @@ function hull(a::Interval, b::Interval)
     set_rounding(BigFloat, RoundNearest)
     Interval( lo, hi )
 end
-hull(a::Interval, x::Real) = hull(a, Interval(x))
-hull(x::Real, a::Interval) = hull(a, Interval(x))
 
 ## union
 function union(a::Interval, b::Interval)
     isempty(a,b) && warn("Empty intersection; union is computed as hull")
     hull(a,b)
 end
-union(a::Interval, x::Real) = union(a, Interval(x))
-union(x::Real, a::Interval) = union(Interval(x), a)
+
+## Extending operators that mix Interval and Real
+for fn in (:intersect, :hull, :union)
+    @eval $(fn)(a::Interval, x::Real) = $(fn)(promote(a,x)...)
+    @eval $(fn)(x::Real, a::Interval) = $(fn)(promote(x,a)...)
+end
 
 #----- From here on, NEEDS TESTING ------
 ## Int power
