@@ -1,6 +1,6 @@
 ## Intervals.jl
 ##
-## Last modification: 2014.04.10
+## Last modification: 2014.06.09
 ## Luis Benet and David P. Sanders, UNAM
 ##
 ## Julia module for handling Interval arithmetics
@@ -146,7 +146,7 @@ end
 inv(a::Interval) = reciprocal(a)
 /(a::Interval, b::Interval) = a*reciprocal(b)
 
-## Some scalar functions on intervals
+## Some scalar functions on intervals; no direct rounding used
 diam(a::Interval) = a.hi - a.lo
 mid(a::Interval) = BigFloat(0.5) * (a.hi + a.lo)
 mag(a::Interval) = max( abs(a.lo), abs(a.hi) )
@@ -191,7 +191,6 @@ for fn in (:intersect, :hull, :union)
     @eval $(fn)(x::Real, a::Interval) = $(fn)(promote(x,a)...)
 end
 
-#----- From here on, NEEDS TESTING ------
 ## Int power
 function ^(a::Interval, n::Integer)
     n < zero(n) && return reciprocal( a^(-n) )
@@ -252,26 +251,28 @@ function ^(a::Interval, x::Interval)
     # Is x a thin interval?
     diam( x ) < eps( mid(x) ) && return a^(x.lo)
     z = zero(BigFloat)
-    z > a.hi && error("Undefined operation; Interval is strictly negative and power is not an integer")
+    z > a.hi && error("Undefined operation;\n",
+        "Interval is strictly negative and power is not an integer")
     #
     domainPow = Interval(z, inf(BigFloat))
     aRestricted = intersect(a, domainPow)
     set_rounding(BigFloat, RoundDown)
-    lolo = aRestricted.lo^x.lo
-    lohi = aRestricted.lo^x.hi
+    lolo = aRestricted.lo^(x.lo)
+    lohi = aRestricted.lo^(x.hi)
     set_rounding(BigFloat, RoundUp)
-    hilo = aRestricted.hi^x.lo
-    hihi = aRestricted.hi^x.hi
+    hilo = aRestricted.hi^(x.lo)
+    hihi = aRestricted.hi^(x.hi)
     set_rounding(BigFloat, RoundNearest)
-    lo = min( lolo, lohi)
-    hi = min( hilo, hihi)
+    lo = min( lolo, lohi )
+    hi = min( hilo, hihi )
     Interval( lo, hi )
 end
 
 ## sqrt
 function sqrt(a::Interval)
     z = zero(BigFloat)
-    z > a.hi && error("Undefined operation; Interval is strictly negative and power is not an integer")
+    z > a.hi && error("Undefined operation;\n", 
+        "Interval is strictly negative and power is not an integer")
     #
     domainSqrt = Interval(z, inf(BigFloat))
     aRestricted = intersect(a, domainSqrt)
@@ -308,6 +309,7 @@ function log(a::Interval)
     Interval( lo, hi )
 end
 
+#----- From here on, NEEDS TESTING ------
 ## sin
 function sin(a::Interval)
     piHalf = pi*BigFloat("0.5")
@@ -451,13 +453,13 @@ function tan(a::Interval)
     hi = tan( a.hi )
     set_rounding(BigFloat, RoundNearest)
     
-    if (loHalf > hiHalf) || ( loHalf == hiHalf && lo_modpi < hi_modpi) 
+    if (loHalf > hiHalf) || ( loHalf == hiHalf && loModpi <= hiModpi)
         return Interval( lo, hi )
     end
 
-    disjoint2 = Interval( tan_xlo, BigFloat(Inf) )
-    disjoint1 = Interval( BigFloat(-Inf), tan_xhi )
-    info(string("\n The resulting interval is disjoint:\n", disjoint1, disjoint2,
+    disjoint2 = Interval( lo, BigFloat(Inf) )
+    disjoint1 = Interval( BigFloat(-Inf), hi )
+    info(string("The resulting interval is disjoint:\n", disjoint1, "\n", disjoint2,
         "\n The hull of the disjoint subintervals is considered:\n", domainTan))
     return domainTan
 end
