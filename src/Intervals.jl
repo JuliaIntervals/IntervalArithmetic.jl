@@ -136,14 +136,15 @@ function reciprocal(a::Interval)
 
     @interval(uno/a.hi, uno/a.lo)
 end
+
 inv(a::Interval) = reciprocal(a)
 /(a::Interval, b::Interval) = a*reciprocal(b)
 
 ## Some scalar functions on intervals; no direct rounding used
 diam(a::Interval) = a.hi - a.lo
-mid(a::Interval) = BigFloat(0.5) * (a.hi + a.lo)
+mid(a::Interval) = one(a.lo) / 2 * (a.hi + a.lo)
 mag(a::Interval) = max( abs(a.lo), abs(a.hi) )
-mig(a::Interval) = in(BigFloat(0.0),a) ? BigFloat(0.0) : min( abs(a.lo), abs(a.hi) )
+mig(a::Interval) = in(zero(BigFloat),a) ? zero(BigFloat) : min( abs(a.lo), abs(a.hi) )
 
 ## Intersection
 isempty(a::Interval, b::Interval) = a.hi < b.lo || b.hi < a.lo
