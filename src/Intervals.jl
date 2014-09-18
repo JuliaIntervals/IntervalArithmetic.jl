@@ -6,38 +6,56 @@
 ## Julia module for handling Interval arithmetics
 ##
 
-module Intervals
+#module Intervals
 
-import Base: in, zero, one, show, 
-    sqrt, exp, log, sin, cos, tan, inv, 
-    union, intersect, isempty,
-    convert, promote_rule
+import Base: in, zero, one, show,
+sqrt, exp, log, sin, cos, tan, inv,
+union, intersect, isempty,
+convert, promote_rule
 
-export 
-    @roundingDown, @roundingUp, @roundingDirect, @rounded_interval,
-    Interval, isinside, diam, mid, mag, mig, hull
+export
+# @round_down, @round_up, @directed_rounding,
+Interval, isinside, diam, mid, mag, mig, hull
 
 ## Changing the default precision
 set_bigfloat_precision(53)
 
-## Some macros for rounding
-macro roundingDown(expr)
+## Macros for directed rounding:
+macro round_down(expr)
     quote
         set_rounding(BigFloat, RoundDown)
         c = $expr
-        set_rounding(BigFloat, RoundNearest)
+        # set_rounding(BigFloat, RoundNearest)
         c
     end
 end
 
-macro roundingUp(expr)
+macro round_up(expr)
     quote
         set_rounding(BigFloat, RoundUp)
         c = $expr
-        set_rounding(BigFloat, RoundNearest)
+        # set_rounding(BigFloat, RoundNearest)
         c
     end
 end
+
+
+macro directed_rounding(expr1, expr2)
+    quote
+        set_rounding(BigFloat, RoundDown)
+        c = $expr1
+        set_rounding(BigFloat, RoundUp)
+        d = $expr2
+        (c,d)
+    end
+end
+
+macro interval(expr1, expr2)
+    quote
+        Interval( @directed_rounding($expr1, $expr2) )
+    end
+end
+
 
 ## Interval constructor
 immutable Interval <: Number
@@ -50,24 +68,24 @@ immutable Interval <: Number
             a, b = b, a
         end
 
-        # Directed rounding: We avoid rounding a BigFloat, since BigFloats 
+        # Directed rounding: We avoid rounding a BigFloat, since BigFloats
         # are already rounded
         T = typeof(a)
         if T == BigFloat
             lo = a
         elseif T == Rational{Int64} || T == Rational{BigInt} || T == Rational{Int32}
-            lo = @roundingDown( BigFloat(a) )
+            lo = @round_down( BigFloat(a) )
         else
-            lo = @roundingDown( BigFloat(string(a)) )
+            lo = @round_down( BigFloat(string(a)) )
         end
 
         T = typeof(b)
         if T == BigFloat
             hi = b
         elseif T == Rational{Int64} || T == Rational{BigInt} || T == Rational{Int32}
-            hi = @roundingUp( BigFloat(b) )
+            hi = @round_up( BigFloat(b) )
         else
-            hi = @roundingUp( BigFloat(string(b)) )
+            hi = @round_up( BigFloat(string(b)) )
         end
 
         new(lo, hi)
@@ -105,6 +123,9 @@ function +(a::Interval, b::Interval)
     set_rounding(BigFloat, RoundNearest)
     Interval( lo, hi )
 end
+
++(a::Interval, b::Interval) = @interval(a.lo + b.lo, a.hi + b.hi)
+
 +(a::Interval) = a
 
 ## Substraction
@@ -120,7 +141,7 @@ end
 
 ## Multiplication
 function *(a::Interval, b::Interval)
-    set_rounding(BigFloat, RoundDown)    
+    set_rounding(BigFloat, RoundDown)
     lo = min( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi )
     set_rounding(BigFloat, RoundUp)
     hi = max( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi )
@@ -136,7 +157,7 @@ function reciprocal(a::Interval)
         warn("\nInterval in denominator contains 0.")
         return Interval(-Inf,Inf)
     end
-    set_rounding(BigFloat, RoundDown)    
+    set_rounding(BigFloat, RoundDown)
     lo = uno/a.hi
     set_rounding(BigFloat, RoundUp)
     hi = uno/a.lo
@@ -160,7 +181,7 @@ function intersect(a::Interval, b::Interval)
         return nothing
     end
     z = zero(BigFloat)
-    set_rounding(BigFloat, RoundDown)    
+    set_rounding(BigFloat, RoundDown)
     lo = max(a.lo, b.lo)
     set_rounding(BigFloat, RoundUp)
     hi = min(a.hi, b.hi)
@@ -171,7 +192,7 @@ end
 ## hull
 function hull(a::Interval, b::Interval)
     z = zero(BigFloat)
-    set_rounding(BigFloat, RoundDown)    
+    set_rounding(BigFloat, RoundDown)
     lo = min(a.lo, b.lo)
     set_rounding(BigFloat, RoundUp)
     hi = max(a.hi, b.hi)
@@ -208,7 +229,7 @@ function ^(a::Interval, n::Integer)
         set_rounding(BigFloat, RoundNearest)
         return Interval( lo, hi )
     end
-    #    
+    #
     ## even power
     if n%2 == 0
         set_rounding(BigFloat, RoundDown)
@@ -252,7 +273,7 @@ function ^(a::Interval, x::Interval)
     diam( x ) < eps( mid(x) ) && return a^(x.lo)
     z = zero(BigFloat)
     z > a.hi && error("Undefined operation;\n",
-        "Interval is strictly negative and power is not an integer")
+                      "Interval is strictly negative and power is not an integer")
     #
     domainPow = Interval(z, inf(BigFloat))
     aRestricted = intersect(a, domainPow)
@@ -271,8 +292,8 @@ end
 ## sqrt
 function sqrt(a::Interval)
     z = zero(BigFloat)
-    z > a.hi && error("Undefined operation;\n", 
-        "Interval is strictly negative and power is not an integer")
+    z > a.hi && error("Undefined operation;\n",
+                      "Interval is strictly negative and power is not an integer")
     #
     domainSqrt = Interval(z, inf(BigFloat))
     aRestricted = intersect(a, domainSqrt)
@@ -286,7 +307,7 @@ end
 
 ## exp
 function exp(a::Interval)
-    set_rounding(BigFloat, RoundDown)    
+    set_rounding(BigFloat, RoundDown)
     lo = exp( a.lo )
     set_rounding(BigFloat, RoundUp)
     hi = exp( a.hi )
@@ -325,9 +346,9 @@ function sin(a::Interval)
     hiMod2pi = mod(a.hi, twoPi)
     loQuartile = floor( loMod2pi / piHalf )
     hiQuartile = floor( hiMod2pi / piHalf )
-    
+
     # 20 different cases
-    if loQuartile == hiQuartile # Interval limits in the same quartile 
+    if loQuartile == hiQuartile # Interval limits in the same quartile
         loMod2pi > hiMod2pi && return domainSin
         set_rounding(BigFloat, RoundDown)
         lo = sin( a.lo )
@@ -386,9 +407,9 @@ function cos(a::Interval)
     hiMod2pi = mod(a.hi, twoPi)
     loQuartile = floor( loMod2pi / piHalf )
     hiQuartile = floor( hiMod2pi / piHalf )
-    
+
     # 20 different cases
-    if loQuartile == hiQuartile # Interval limits in the same quartile 
+    if loQuartile == hiQuartile # Interval limits in the same quartile
         loMod2pi > hiMod2pi && return domainCos
         set_rounding(BigFloat, RoundDown)
         lo = cos( a.hi )
@@ -452,7 +473,7 @@ function tan(a::Interval)
     set_rounding(BigFloat, RoundUp)
     hi = tan( a.hi )
     set_rounding(BigFloat, RoundNearest)
-    
+
     if (loHalf > hiHalf) || ( loHalf == hiHalf && loModpi <= hiModpi)
         return Interval( lo, hi )
     end
@@ -460,7 +481,7 @@ function tan(a::Interval)
     disjoint2 = Interval( lo, BigFloat(Inf) )
     disjoint1 = Interval( BigFloat(-Inf), hi )
     info(string("The resulting interval is disjoint:\n", disjoint1, "\n", disjoint2,
-        "\n The hull of the disjoint subintervals is considered:\n", domainTan))
+                "\n The hull of the disjoint subintervals is considered:\n", domainTan))
     return domainTan
 end
 
@@ -474,4 +495,4 @@ function show(io::IO, a::Interval)
 end
 
 
-end
+#end
