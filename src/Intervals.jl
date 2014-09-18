@@ -24,18 +24,16 @@ set_bigfloat_precision(53)
 macro round_down(expr)
     quote
         set_rounding(BigFloat, RoundDown)
-        c = $expr
+        $expr
         # set_rounding(BigFloat, RoundNearest)
-        c
     end
 end
 
 macro round_up(expr)
     quote
         set_rounding(BigFloat, RoundUp)
-        c = $expr
+        $expr
         # set_rounding(BigFloat, RoundNearest)
-        c
     end
 end
 
