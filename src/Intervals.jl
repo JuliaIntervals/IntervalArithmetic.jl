@@ -148,34 +148,23 @@ mig(a::Interval) = in(zero(BigFloat),a) ? zero(BigFloat) : min( abs(a.lo), abs(a
 
 ## Intersection
 isempty(a::Interval, b::Interval) = a.hi < b.lo || b.hi < a.lo
+
 function intersect(a::Interval, b::Interval)
     if isempty(a,b)
-        warn("Intersection is empty")
+        # warn("Intersection is empty")
         return nothing
     end
-    z = zero(BigFloat)
-    set_rounding(BigFloat, RoundDown)
-    lo = max(a.lo, b.lo)
-    set_rounding(BigFloat, RoundUp)
-    hi = min(a.hi, b.hi)
-    set_rounding(BigFloat, RoundNearest)
-    Interval( lo, hi )
+
+    @interval(max(a.lo, b.lo), min(a.hi, b.hi))
+
 end
 
 ## hull
-function hull(a::Interval, b::Interval)
-    z = zero(BigFloat)
-    set_rounding(BigFloat, RoundDown)
-    lo = min(a.lo, b.lo)
-    set_rounding(BigFloat, RoundUp)
-    hi = max(a.hi, b.hi)
-    set_rounding(BigFloat, RoundNearest)
-    Interval( lo, hi )
-end
+hull(a::Interval, b::Interval) = @interval(min(a.lo, b.lo), max(a.hi, b.hi))
 
 ## union
 function union(a::Interval, b::Interval)
-    isempty(a,b) && warn("Empty intersection; union is computed as hull")
+    # isempty(a,b) && warn("Empty intersection; union is computed as hull")
     hull(a,b)
 end
 
