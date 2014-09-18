@@ -40,21 +40,16 @@ macro round_up(expr)
 end
 
 
-macro directed_rounding(expr1, expr2)
+macro interval(expr1, expr2)
     quote
         set_rounding(BigFloat, RoundDown)
         c = $expr1
         set_rounding(BigFloat, RoundUp)
         d = $expr2
-        (c,d)
+        Interval(c,d)
     end
 end
 
-macro interval(expr1, expr2)
-    quote
-        Interval( @directed_rounding($expr1, $expr2) )
-    end
-end
 
 
 ## Interval constructor

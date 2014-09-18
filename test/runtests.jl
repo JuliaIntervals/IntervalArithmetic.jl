@@ -1,5 +1,6 @@
 # Simple tests for Intervals
-using Intervals
+#using Intervals
+using Validated
 using Base.Test
 
 a = Interval(1.1,0.1)
