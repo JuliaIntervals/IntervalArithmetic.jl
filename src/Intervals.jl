@@ -110,29 +110,14 @@ zero(a::Interval) = Interval(zero(BigFloat))
 one(a::Interval) = Interval(one(BigFloat))
 
 ## Addition
-function +(a::Interval, b::Interval)
-    set_rounding(BigFloat, RoundDown)
-    lo = a.lo+b.lo
-    set_rounding(BigFloat, RoundDown)
-    hi = a.hi+b.hi
-    set_rounding(BigFloat, RoundNearest)
-    Interval( lo, hi )
-end
 
 +(a::Interval, b::Interval) = @interval(a.lo + b.lo, a.hi + b.hi)
-
 +(a::Interval) = a
 
-## Substraction
-function -(a::Interval, b::Interval)
-    set_rounding(BigFloat, RoundDown)
-    lo = a.lo-b.hi
-    set_rounding(BigFloat, RoundDown)
-    hi = a.hi-b.lo
-    set_rounding(BigFloat, RoundNearest)
-    Interval( lo, hi )
-end
--(a::Interval) = Interval(-a.hi,-a.lo)
+## Subtraction
+
+-(a::Interval) = Interval(-a.hi, -a.lo)
+-(a::Interval, b::Interval) = a + (-b) # @interval(a.lo - b.hi, a.hi - b.lo)
 
 ## Multiplication
 function *(a::Interval, b::Interval)
