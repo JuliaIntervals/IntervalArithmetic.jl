@@ -15,7 +15,7 @@ convert, promote_rule
 
 export
 # @round_down, @round_up, @directed_rounding,
-Interval, isinside, diam, mid, mag, mig, hull
+Interval, diam, mid, mag, mig, hull, isinside
 
 ## Changing the default precision
 set_bigfloat_precision(53)
@@ -98,6 +98,7 @@ promote_rule{A<:Real}(::Type{Interval}, ::Type{A}) = Interval
 in(a::Interval, b::Interval) = b.lo <= a.lo && a.hi <= b.hi
 in(x::Real, a::Interval) = in(promote(x,a)...)
 
+# strict inclusion:
 isinside(a::Interval, b::Interval) = b.lo < a.lo && a.hi < b.hi
 isinside(x::Real, a::Interval) = isinside(promote(x,a)...)
 
@@ -126,6 +127,7 @@ function reciprocal(a::Interval)
     uno = one(BigFloat)
     z = zero(BigFloat)
     if isinside(z,a)
+    #if z in a
         warn("\nInterval in denominator contains 0.")
         return Interval(-inf(z),inf(z))  # inf(z) returns inf of type of z
     end

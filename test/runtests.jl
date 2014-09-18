@@ -55,6 +55,7 @@ c = Interval(0.25,4.0)
 
 @test in(0.1,Interval(0.1))
 @test !isinside(0.1,Interval(0.1))
+@test 0.1 in Interval(0.1)
 @test intersect(a,Interval(-1)) == nothing
 @test intersect(a,hull(a,b)) == a
 @test union(a,b) == Interval(a.lo,b.hi)
