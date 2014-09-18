@@ -163,16 +163,19 @@ end
 hull(a::Interval, b::Interval) = @interval(min(a.lo, b.lo), max(a.hi, b.hi))
 
 ## union
-function union(a::Interval, b::Interval)
-    # isempty(a,b) && warn("Empty intersection; union is computed as hull")
-    hull(a,b)
-end
+# function union(a::Interval, b::Interval)
+#     # isempty(a,b) && warn("Empty intersection; union is computed as hull")
+#     hull(a,b)
+# end
+
+union(a::Interval, b::Interval) = hull(a, b)
+
 
 ## Extending operators that mix Interval and Real
-for fn in (:intersect, :hull, :union)
-    @eval $(fn)(a::Interval, x::Real) = $(fn)(promote(a,x)...)
-    @eval $(fn)(x::Real, a::Interval) = $(fn)(promote(x,a)...)
-end
+# for fn in (:intersect, :hull, :union)
+#     @eval $(fn)(a::Interval, x::Real) = $(fn)(promote(a,x)...)
+#     @eval $(fn)(x::Real, a::Interval) = $(fn)(promote(x,a)...)
+# end
 
 ## Int power
 function ^(a::Interval, n::Integer)
@@ -184,32 +187,20 @@ function ^(a::Interval, n::Integer)
     if n == 2*one(n)
         xmi = mig(a)
         xma = mag(a)
-        set_rounding(BigFloat, RoundDown)
-        lo = xmi * xmi
-        set_rounding(BigFloat, RoundUp)
-        hi = xma * xma
-        set_rounding(BigFloat, RoundNearest)
-        return Interval( lo, hi )
+
+        return @interval(xmi * xmi, xma * xma)
     end
     #
     ## even power
     if n%2 == 0
-        set_rounding(BigFloat, RoundDown)
-        lo = ( mig(a) )^n
-        set_rounding(BigFloat, RoundUp)
-        hi = ( mag(a) )^n
-        set_rounding(BigFloat, RoundNearest)
-        return Interval( lo, hi )
+        return @interval(mig(a)^n, mag(a)^n)
     end
     ## odd power
-    set_rounding(BigFloat, RoundDown)
-    lo = a.lo^n
-    set_rounding(BigFloat, RoundUp)
-    hi = a.hi^n
-    set_rounding(BigFloat, RoundNearest)
-    return Interval( lo, hi )
+
+    @interval(a.lo^n, a.hi^n)
 end
 ^(a::Interval, r::Rational) = a^( Interval(r) )
+
 function ^(a::Interval, x::Real)
     x == int(x) && return a^(int(x))
     x < zero(x) && return reciprocal( a^(-x) )
@@ -223,12 +214,8 @@ function ^(a::Interval, x::Real)
     # xInterv is a thin interval
     domainPow = Interval(z, inf(BigFloat))
     aRestricted = intersect(a, domainPow)
-    set_rounding(BigFloat, RoundDown)
-    lo = aRestricted.lo^x
-    set_rounding(BigFloat, RoundUp)
-    hi = aRestricted.hi^x
-    set_rounding(BigFloat, RoundNearest)
-    Interval( lo, hi )
+    @interval(aRestricted.lo^x, aRestricted.hi^x)
+
 end
 function ^(a::Interval, x::Interval)
     # Is x a thin interval?
@@ -239,16 +226,17 @@ function ^(a::Interval, x::Interval)
     #
     domainPow = Interval(z, inf(BigFloat))
     aRestricted = intersect(a, domainPow)
-    set_rounding(BigFloat, RoundDown)
-    lolo = aRestricted.lo^(x.lo)
-    lohi = aRestricted.lo^(x.hi)
-    set_rounding(BigFloat, RoundUp)
-    hilo = aRestricted.hi^(x.lo)
-    hihi = aRestricted.hi^(x.hi)
-    set_rounding(BigFloat, RoundNearest)
-    lo = min( lolo, lohi )
-    hi = min( hilo, hihi )
-    Interval( lo, hi )
+
+    @interval(begin
+                  lolo = aRestricted.lo^(x.lo)
+                  lohi = aRestricted.lo^(x.hi)
+                  min( lolo, lohi )
+              end,
+              begin
+                  hilo = aRestricted.hi^(x.lo)
+                  hihi = aRestricted.hi^(x.hi)
+              end
+              )
 end
 
 ## sqrt

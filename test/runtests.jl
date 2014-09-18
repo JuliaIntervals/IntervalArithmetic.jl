@@ -41,11 +41,11 @@ c = Interval(0.25,4.0)
 @test Interval(-3,2)^2 == Interval(0,9)
 @test Interval(-3,2)^3 == Interval(-27,8)
 @test Interval(-3,4)^0.5 == Interval(0,2) == Interval(-3,4)^(1//2)
-@test Interval(1,27)^Interval(1//3) == Interval(1,3)
+@test Interval(1,27)^Interval(1//3) == Interval(1, big(3.0000000000000004e+00))  #Interval(1,3)
 @test Interval(-3,2)^Interval(2) == Interval(0,9)
 @test Interval(-3,4)^Interval(0.5) == Interval(0,2)
 @test Interval(0.1,0.7)^(1/3) ==
-    Interval(BigFloat("4.6415888336127786e-01"), BigFloat("8.8790400174260076e-01"))
+    Interval(big(4.6415888336127786e-01), big(8.8790400174260076e-01))
 
 @test inv(zero(a)) == Interval(Inf,Inf)
 @test inv(Interval(0,1)) == Interval(1,Inf)
