@@ -62,7 +62,8 @@ immutable Interval <: Number
         T = typeof(a)
         if T == BigFloat
             lo = a
-        elseif T == Rational{Int64} || T == Rational{BigInt} || T == Rational{Int32}
+        #elseif T == Rational{Int64} || T == Rational{BigInt} || T == Rational{Int32}
+        elseif T <: Rational
             lo = @round_down( BigFloat(a) )
         else
             lo = @round_down( BigFloat(string(a)) )
@@ -71,7 +72,8 @@ immutable Interval <: Number
         T = typeof(b)
         if T == BigFloat
             hi = b
-        elseif T == Rational{Int64} || T == Rational{BigInt} || T == Rational{Int32}
+        #elseif T == Rational{Int64} || T == Rational{BigInt} || T == Rational{Int32}
+        elseif T <: Rational
             hi = @round_up( BigFloat(b) )
         else
             hi = @round_up( BigFloat(string(b)) )
