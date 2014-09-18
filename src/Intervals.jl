@@ -120,14 +120,10 @@ one(a::Interval) = Interval(one(BigFloat))
 -(a::Interval, b::Interval) = a + (-b) # @interval(a.lo - b.hi, a.hi - b.lo)
 
 ## Multiplication
-function *(a::Interval, b::Interval)
-    set_rounding(BigFloat, RoundDown)
-    lo = min( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi )
-    set_rounding(BigFloat, RoundUp)
-    hi = max( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi )
-    set_rounding(BigFloat, RoundNearest)
-    Interval( lo, hi )
-end
+
+*(a::Interval, b::Interval) = @interval(min( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi ),
+                                        max( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi )
+                                        )
 
 ## Division
 function reciprocal(a::Interval)
@@ -135,14 +131,10 @@ function reciprocal(a::Interval)
     z = zero(BigFloat)
     if isinside(z,a)
         warn("\nInterval in denominator contains 0.")
-        return Interval(-Inf,Inf)
+        return Interval(-inf(z),inf(z))  # inf(z) returns inf of type of z
     end
-    set_rounding(BigFloat, RoundDown)
-    lo = uno/a.hi
-    set_rounding(BigFloat, RoundUp)
-    hi = uno/a.lo
-    set_rounding(BigFloat, RoundNearest)
-    Interval( lo, hi )
+
+    @interval(uno/a.hi, uno/a.lo)
 end
 inv(a::Interval) = reciprocal(a)
 /(a::Interval, b::Interval) = a*reciprocal(b)
