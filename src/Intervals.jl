@@ -146,7 +146,7 @@ mid(a::Interval) = one(a.lo) / 2 * (a.hi + a.lo)
 mag(a::Interval) = max( abs(a.lo), abs(a.hi) )
 mig(a::Interval) = in(zero(BigFloat),a) ? zero(BigFloat) : min( abs(a.lo), abs(a.hi) )
 
-## Intersection
+
 isempty(a::Interval, b::Interval) = a.hi < b.lo || b.hi < a.lo
 
 function intersect(a::Interval, b::Interval)
@@ -159,23 +159,15 @@ function intersect(a::Interval, b::Interval)
 
 end
 
-## hull
 hull(a::Interval, b::Interval) = @interval(min(a.lo, b.lo), max(a.hi, b.hi))
-
-## union
-# function union(a::Interval, b::Interval)
-#     # isempty(a,b) && warn("Empty intersection; union is computed as hull")
-#     hull(a,b)
-# end
-
 union(a::Interval, b::Interval) = hull(a, b)
 
 
-## Extending operators that mix Interval and Real
-# for fn in (:intersect, :hull, :union)
-#     @eval $(fn)(a::Interval, x::Real) = $(fn)(promote(a,x)...)
-#     @eval $(fn)(x::Real, a::Interval) = $(fn)(promote(x,a)...)
-# end
+# Extending operators that mix Interval and Real
+for fn in (:intersect, :hull, :union)
+    @eval $(fn)(a::Interval, x::Real) = $(fn)(promote(a,x)...)
+    @eval $(fn)(x::Real, a::Interval) = $(fn)(promote(x,a)...)
+end
 
 ## Int power
 function ^(a::Interval, n::Integer)
