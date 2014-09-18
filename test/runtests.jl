@@ -45,7 +45,7 @@ c = Interval(0.25,4.0)
 @test Interval(-3,2)^Interval(2) == Interval(0,9)
 @test Interval(-3,4)^Interval(0.5) == Interval(0,2)
 @test Interval(0.1,0.7)^(1/3) ==
-    Interval(big(4.6415888336127786e-01), big(8.8790400174260076e-01))
+    Interval(big(4.6415888336127786e-01), big(8.8790400174260087e-01))
 
 @test inv(zero(a)) == Interval(Inf,Inf)
 @test inv(Interval(0,1)) == Interval(1,Inf)

@@ -165,7 +165,8 @@ for fn in (:intersect, :hull, :union)
     @eval $(fn)(x::Real, a::Interval) = $(fn)(promote(x,a)...)
 end
 
-## Int power
+## Powers
+# Integer power of an interval:
 function ^(a::Interval, n::Integer)
     n < zero(n) && return reciprocal( a^(-n) )
     n == zero(n) && return one(a)
@@ -189,6 +190,7 @@ function ^(a::Interval, n::Integer)
 end
 ^(a::Interval, r::Rational) = a^( Interval(r) )
 
+# Real power of an interval:
 function ^(a::Interval, x::Real)
     x == int(x) && return a^(int(x))
     x < zero(x) && return reciprocal( a^(-x) )
@@ -205,6 +207,8 @@ function ^(a::Interval, x::Real)
     @interval(aRestricted.lo^x, aRestricted.hi^x)
 
 end
+
+# Interval power of an interval:
 function ^(a::Interval, x::Interval)
     # Is x a thin interval?
     diam( x ) < eps( mid(x) ) && return a^(x.lo)
@@ -223,6 +227,7 @@ function ^(a::Interval, x::Interval)
               begin
                   hilo = aRestricted.hi^(x.lo)
                   hihi = aRestricted.hi^(x.hi)
+                  max( hilo, hihi)
               end
               )
 end
