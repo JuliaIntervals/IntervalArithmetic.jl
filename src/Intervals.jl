@@ -261,13 +261,8 @@ function log(a::Interval)
     domainLog = Interval(z, inf(BigFloat))
     z > a.hi && error("Undefined log; Interval is strictly negative")
     aRestricted = intersect(a, domainLog)
-    #
-    set_rounding(BigFloat, RoundDown)
-    lo = log( aRestricted.lo )
-    set_rounding(BigFloat, RoundUp)
-    hi = log( aRestricted.hi )
-    set_rounding(BigFloat, RoundNearest)
-    Interval( lo, hi )
+
+    @interval(log(aRestricted.lo), log(aRestricted.hi))
 end
 
 #----- From here on, NEEDS TESTING ------
