@@ -247,23 +247,13 @@ function sqrt(a::Interval)
     #
     domainSqrt = Interval(z, inf(BigFloat))
     aRestricted = intersect(a, domainSqrt)
-    set_rounding(BigFloat, RoundDown)
-    lo = sqrt( aRestricted.lo )
-    set_rounding(BigFloat, RoundUp)
-    hi = sqrt( aRestricted.hi )
-    set_rounding(BigFloat, RoundNearest)
-    Interval( lo, hi )
+
+    @interval(sqrt(aRestricted.lo), sqrt(aRestricted.hi))
+
 end
 
 ## exp
-function exp(a::Interval)
-    set_rounding(BigFloat, RoundDown)
-    lo = exp( a.lo )
-    set_rounding(BigFloat, RoundUp)
-    hi = exp( a.hi )
-    set_rounding(BigFloat, RoundNearest)
-    Interval( lo, hi )
-end
+exp(a::Interval) = @interval(exp(a.lo), exp(a.hi))
 
 ## log
 function log(a::Interval)
