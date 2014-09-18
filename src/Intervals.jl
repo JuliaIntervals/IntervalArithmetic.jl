@@ -21,6 +21,9 @@ Interval, diam, mid, mag, mig, hull, isinside
 set_bigfloat_precision(53)
 
 ## Macros for directed rounding:
+
+# Could use with rounding to ensure previous rounding mode is correctly reset
+
 macro round_down(expr)
     quote
         set_rounding(BigFloat, RoundDown)
@@ -175,11 +178,8 @@ function ^(a::Interval, n::Integer)
     n == one(n) && return a
     #
     ## NOTE: square(x) is deprecated in favor of x*x
-    if n == 2*one(n)
-        xmi = mig(a)
-        xma = mag(a)
-
-        return @interval(xmi * xmi, xma * xma)
+    if n == 2*one(n)   # this is unnecessary as stands, but  mig(a)*mig(a) is supposed to be more efficient
+        return @interval(mig(a)^2, mag(a)^2)
     end
     #
     ## even power
