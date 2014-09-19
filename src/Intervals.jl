@@ -88,7 +88,7 @@ immutable Interval <: Number
 
         new(a, b)
     end
-
+end
 
 Interval(a::Interval) = a
 Interval(a::Tuple) = Interval(a...)
