@@ -1,13 +1,18 @@
-# Intervals.jl #
+# ValidatedNumerics.jl #
 
-Interval arithmetics on the real line with julia
+This is is a package for performing *Validated Numerics* in Julia, i.e. rigorous floating-point computations. The basic tool is interval arithmetic, provided by `Intervals.jl`.
+
+
+## `Intervals.jl`
+
+Interval arithmetic on the real line with Julia.
 
 #### Related Work ####
-- [MPFI.jl][1]: Wrapper of [MPFI library][http://perso.ens-lyon.fr/nathalie.revol/software.html] (multiple precision interval arithmetic library based on MPFR) for julia.
+- [MPFI.jl][1]: Wrapper of the [MPFI library][http://perso.ens-lyon.fr/nathalie.revol/software.html] (multiple precision interval arithmetic library based on MPFR) for julia.
 
 #### References ####
-- *Validated Numerics: A short introduction to rigurous computations*, W. Tucker, Princeton University Press (2010).
-- *Introduction to Interval Analysis*, R.E. Moore, R.B. Kearfott, M.J. Cloud, SIAM (2009).
+- *Validated Numerics: A Short Introduction to Rigurous Computations*, W. Tucker, Princeton University Press (2010)
+- *Introduction to Interval Analysis*, R.E. Moore, R.B. Kearfott, M.J. Cloud, SIAM (2009)
 
 #### Contributors ####
 - Luis Benet, Instituto de Ciencias Físicas, Universidad Nacional Autónoma de México (UNAM)
@@ -15,9 +20,10 @@ Interval arithmetics on the real line with julia
 
 
 ## Design and implementation ##
-`Intervals.jl` is a julia module to perform *validated numerics*, i.e. *rigorous* computations with finite-precision floating-point arithmetic.
+`Intervals.jl` is a Julia module to perform *validated numerics*, i.e. 
+*rigorous* computations with finite-precision floating-point arithmetic.
 
-The basic constructor is `Interval`, which takes pairs of `Real`-type values as arguments, or alternatively, single values for *thin* intervals. Yet, if the number is not exactly representable in base 2, rounding-off errors appear due to the finite precision floating-point arithmetic. Incorporating *directed rounding* may thus create intervals whose *diameter* or *width* is non-zero, despite of *a priori* being thin intervals. Directed rounding is incorporated for any `Real`-type values *except* for `BigFloat`, since this type implements already rounding. Direct access to `RoundDown` and `RoundUp` modes is obtained through the macros `@roundingDown` and `@roundingUp`.
+The basic constructor is `Interval`, which takes pairs of `Real`-type values as arguments, or alternatively, single values for *thin* intervals. Yet, if the number is not exactly representable in base 2, rounding-off errors appear due to the finite precision floating-point arithmetic. Incorporating *directed rounding* may thus create intervals whose *diameter* or *width* is non-zero, despite *a priori* being thin intervals. Directed rounding is available via the macros `@round_down` and `@round_up`.
 
 The following provides some examples. 
 ```julia
