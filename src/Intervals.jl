@@ -14,21 +14,28 @@ union, intersect, isempty,
 convert, promote_rule
 
 export
-# @round_down, @round_up, @directed_rounding,
+@round_down, @round_up, @interval,
 Interval, diam, mid, mag, mig, hull, isinside
 
-## Changing the default precision
+## Change the default precision:
 set_bigfloat_precision(53)
+
+
+## Fix some issues with MathConst:
+import Base.MPFR.BigFloat
+BigFloat(a::MathConst) = big(a)
+
+<(a::MathConst, b::MathConst) = float(a) < float(b)
+
 
 ## Macros for directed rounding:
 
-# Could use with rounding to ensure previous rounding mode is correctly reset
+# (Could use "with rounding" to ensure previous rounding mode is correctly reset)
 
 macro round_down(expr)
     quote
         set_rounding(BigFloat, RoundDown)
         $expr
-        # set_rounding(BigFloat, RoundNearest)
     end
 end
 
@@ -36,7 +43,6 @@ macro round_up(expr)
     quote
         set_rounding(BigFloat, RoundUp)
         $expr
-        # set_rounding(BigFloat, RoundNearest)
     end
 end
 
@@ -54,37 +60,36 @@ immutable Interval <: Number
     lo :: Real
     hi :: Real
 
-    ## Inner constructor
-    function Interval(a, b)
+    function Interval(a::Real, b::Real)
+
         if a > b
             a, b = b, a
         end
 
-        # Directed rounding: We avoid rounding a BigFloat, since BigFloats
-        # are already rounded
-        T = typeof(a)
-        if T == BigFloat
-            lo = a
-        #elseif T == Rational{Int64} || T == Rational{BigInt} || T == Rational{Int32}
-        elseif T <: Rational
-            lo = @round_down( BigFloat(a) )
-        else
-            lo = @round_down( BigFloat(string(a)) )
+        try
+            a = @round_down(BigFloat("$a"))
+        catch
+            a = @round_down(big(a))
+
+            if !isa(a, BigFloat)   # to catch rationals
+               a = @round_down(BigFloat(a))
+            end
         end
 
-        T = typeof(b)
-        if T == BigFloat
-            hi = b
-        #elseif T == Rational{Int64} || T == Rational{BigInt} || T == Rational{Int32}
-        elseif T <: Rational
-            hi = @round_up( BigFloat(b) )
-        else
-            hi = @round_up( BigFloat(string(b)) )
+        try
+            b = @round_up(BigFloat("$b"))
+        catch
+            b = @round_up(BigFloat(b))
+
+           if !isa(b, BigFloat)
+               b = @round_up(BigFloat(b))
+           end
         end
 
-        new(lo, hi)
+        new(a, b)
     end
-end
+
+
 Interval(a::Interval) = a
 Interval(a::Tuple) = Interval(a...)
 Interval(a::Real) = Interval(a, a)
@@ -420,8 +425,9 @@ end
 function show(io::IO, a::Interval)
     lo = a.lo
     hi = a.hi
-    prec = a.lo.prec
-    print(io, string(" [", lo, ", ", hi, "] with ", prec, " bits of precision"))
+    #prec = a.lo.prec
+    #print(io, string(" [", lo, ", ", hi, "] with ", prec, " bits of precision"))
+    print(io, "[$(a.lo), $(a.hi)]")
 end
 
 
