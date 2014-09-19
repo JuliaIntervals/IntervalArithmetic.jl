@@ -1,6 +1,6 @@
 # Simple tests for Intervals
 #using Intervals
-using Validated
+using ValidatedNumerics
 using Base.Test
 
 set_bigfloat_precision(53)
