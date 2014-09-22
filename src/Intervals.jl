@@ -11,10 +11,11 @@
 import Base: in, zero, one, show,
 sqrt, exp, log, sin, cos, tan, inv,
 union, intersect, isempty,
-convert, promote_rule
+convert, promote_rule,
+BigFloat, string
 
 export
-@round_down, @round_up, @interval,
+@round_down, @round_up, @interval, @make_interval, @thin_interval,
 Interval, diam, mid, mag, mig, hull, isinside
 
 ## Change the default precision:
@@ -33,6 +34,8 @@ BigFloat(a::MathConst) = big(a)
 # (Could use "with rounding" to ensure previous rounding mode is correctly reset)
 
 macro round_down(expr)
+            @show("round_down", expr)
+
     quote
         set_rounding(BigFloat, RoundDown)
         $expr
@@ -40,6 +43,8 @@ macro round_down(expr)
 end
 
 macro round_up(expr)
+            @show("round_up", expr)
+
     quote
         set_rounding(BigFloat, RoundUp)
         $expr
@@ -47,12 +52,45 @@ macro round_up(expr)
 end
 
 
-macro interval(expr1, expr2)
+## Wrap user input for correct rounding:
+
+
+macro thin_interval(expr)
     quote
-        Interval(@round_down($expr1), @round_up($expr2))
+        Interval(@round_down($expr), @round_up($expr))
     end
 end
 
+
+
+transform(a::Number) = :( @thin_interval(BigFloat(string($a))) )
+transform(a::Symbol) = isa(eval(a), MathConst) ? :(@thin_interval(big($a))) : a
+
+function transform(expr::Expr)
+    ex = copy(expr)
+    for (i, arg) in enumerate(expr.args)
+        # println(i, " ", arg)
+        ex.args[i] = transform(arg)
+    end
+    return ex
+end
+
+
+macro make_interval(expr1, expr2)
+    expr1 = transform(expr1)
+    expr2 = transform(expr2)
+
+    @show expr1
+    @show expr2
+
+    return :(hull($expr1, $expr2))
+end
+
+macro interval(expr1, expr2)
+    quote
+        Interval(@round_down($expr1), @round_up(transform($expr2)))
+    end
+end
 
 
 ## Interval constructor
@@ -66,25 +104,28 @@ immutable Interval <: Number
             a, b = b, a
         end
 
-        try
-            a = @round_down(BigFloat("$a"))
-        catch
-            a = @round_down(big(a))
+        #a = @round_down(interpret(a))
+        #b = @round_up(interpret(b))
 
-            if !isa(a, BigFloat)   # to catch rationals
-               a = @round_down(BigFloat(a))
-            end
-        end
+#         try
+#             a = @round_down(BigFloat(string(a)))
+#         catch
+#             a = @round_down(big(a))
 
-        try
-            b = @round_up(BigFloat("$b"))
-        catch
-            b = @round_up(BigFloat(b))
+#             if !isa(a, BigFloat)   # to catch rationals
+#                a = @round_down(BigFloat(a))
+#             end
+#         end
 
-           if !isa(b, BigFloat)
-               b = @round_up(BigFloat(b))
-           end
-        end
+#         try
+#             b = @round_up(BigFloat(string(b)))
+#         catch
+#             b = @round_up(BigFloat(b))
+
+#            if !isa(b, BigFloat)
+#                b = @round_up(BigFloat(b))
+#            end
+#         end
 
         new(a, b)
     end
@@ -116,7 +157,7 @@ one(a::Interval) = Interval(one(BigFloat))
 
 ## Addition
 
-+(a::Interval, b::Interval) = @interval(a.lo + b.lo, a.hi + b.hi)
++(a::Interval, b::Interval) = Interval(a.lo + b.lo, a.hi + b.hi)
 +(a::Interval) = a
 
 ## Subtraction
@@ -145,6 +186,9 @@ end
 
 inv(a::Interval) = reciprocal(a)
 /(a::Interval, b::Interval) = a*reciprocal(b)
+//(a::Interval, b::Interval) = a / b    # to deal with rationals
+
+
 
 ## Some scalar functions on intervals; no direct rounding used
 diam(a::Interval) = a.hi - a.lo
@@ -165,7 +209,7 @@ function intersect(a::Interval, b::Interval)
 
 end
 
-hull(a::Interval, b::Interval) = @interval(min(a.lo, b.lo), max(a.hi, b.hi))
+hull(a::Interval, b::Interval) = Interval(min(a.lo, b.lo), max(a.hi, b.hi))
 union(a::Interval, b::Interval) = hull(a, b)
 
 
