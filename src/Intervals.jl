@@ -34,8 +34,6 @@ BigFloat(a::MathConst) = big(a)
 # (Could use "with rounding" to ensure previous rounding mode is correctly reset)
 
 macro round_down(expr)
-            @show("round_down", expr)
-
     quote
         set_rounding(BigFloat, RoundDown)
         $expr
@@ -43,8 +41,6 @@ macro round_down(expr)
 end
 
 macro round_up(expr)
-            @show("round_up", expr)
-
     quote
         set_rounding(BigFloat, RoundUp)
         $expr
@@ -80,15 +76,15 @@ macro make_interval(expr1, expr2)
     expr1 = transform(expr1)
     expr2 = transform(expr2)
 
-    @show expr1
-    @show expr2
+#     @show expr1
+#     @show expr2
 
     return :(hull($expr1, $expr2))
 end
 
 macro interval(expr1, expr2)
     quote
-        Interval(@round_down($expr1), @round_up(transform($expr2)))
+        Interval(@round_down($expr1), @round_up($expr2))
     end
 end
 
