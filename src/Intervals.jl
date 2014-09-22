@@ -153,7 +153,7 @@ one(a::Interval) = Interval(one(BigFloat))
 
 ## Addition
 
-+(a::Interval, b::Interval) = Interval(a.lo + b.lo, a.hi + b.hi)
++(a::Interval, b::Interval) = @interval(a.lo + b.lo, a.hi + b.hi)
 +(a::Interval) = a
 
 ## Subtraction
