@@ -15,7 +15,7 @@ convert, promote_rule,
 BigFloat, string
 
 export
-@round_down, @round_up, @interval, @make_interval, @thin_interval,
+@round_down, @round_up, @round, @make_interval, @thin_interval,
 Interval, diam, mid, mag, mig, hull, isinside
 
 ## Change the default precision:
@@ -72,7 +72,7 @@ function transform(expr::Expr)
 end
 
 
-macro make_interval(expr1, expr2)
+macro interval(expr1, expr2)
     expr1 = transform(expr1)
     expr2 = transform(expr2)
 
@@ -82,7 +82,7 @@ macro make_interval(expr1, expr2)
     return :(hull($expr1, $expr2))
 end
 
-macro interval(expr1, expr2)
+macro round(expr1, expr2)
     quote
         Interval(@round_down($expr1), @round_up($expr2))
     end
@@ -153,17 +153,17 @@ one(a::Interval) = Interval(one(BigFloat))
 
 ## Addition
 
-+(a::Interval, b::Interval) = @interval(a.lo + b.lo, a.hi + b.hi)
++(a::Interval, b::Interval) = @round(a.lo + b.lo, a.hi + b.hi)
 +(a::Interval) = a
 
 ## Subtraction
 
 -(a::Interval) = Interval(-a.hi, -a.lo)
--(a::Interval, b::Interval) = a + (-b) # @interval(a.lo - b.hi, a.hi - b.lo)
+-(a::Interval, b::Interval) = a + (-b) # @round(a.lo - b.hi, a.hi - b.lo)
 
 ## Multiplication
 
-*(a::Interval, b::Interval) = @interval(min( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi ),
+*(a::Interval, b::Interval) = @round(min( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi ),
                                         max( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi )
                                         )
 
@@ -177,7 +177,7 @@ function reciprocal(a::Interval)
         return Interval(-inf(z),inf(z))  # inf(z) returns inf of type of z
     end
 
-    @interval(uno/a.hi, uno/a.lo)
+    @round(uno/a.hi, uno/a.lo)
 end
 
 inv(a::Interval) = reciprocal(a)
@@ -201,7 +201,7 @@ function intersect(a::Interval, b::Interval)
         return nothing
     end
 
-    @interval(max(a.lo, b.lo), min(a.hi, b.hi))
+    @round(max(a.lo, b.lo), min(a.hi, b.hi))
 
 end
 
@@ -224,16 +224,16 @@ function ^(a::Interval, n::Integer)
     #
     ## NOTE: square(x) is deprecated in favor of x*x
     if n == 2*one(n)   # this is unnecessary as stands, but  mig(a)*mig(a) is supposed to be more efficient
-        return @interval(mig(a)^2, mag(a)^2)
+        return @round(mig(a)^2, mag(a)^2)
     end
     #
     ## even power
     if n%2 == 0
-        return @interval(mig(a)^n, mag(a)^n)
+        return @round(mig(a)^n, mag(a)^n)
     end
     ## odd power
 
-    @interval(a.lo^n, a.hi^n)
+    @round(a.lo^n, a.hi^n)
 end
 ^(a::Interval, r::Rational) = a^( Interval(r) )
 
@@ -251,7 +251,7 @@ function ^(a::Interval, x::Real)
     # xInterv is a thin interval
     domainPow = Interval(z, inf(BigFloat))
     aRestricted = intersect(a, domainPow)
-    @interval(aRestricted.lo^x, aRestricted.hi^x)
+    @round(aRestricted.lo^x, aRestricted.hi^x)
 
 end
 
@@ -266,7 +266,7 @@ function ^(a::Interval, x::Interval)
     domainPow = Interval(z, inf(BigFloat))
     aRestricted = intersect(a, domainPow)
 
-    @interval(begin
+    @round(begin
                   lolo = aRestricted.lo^(x.lo)
                   lohi = aRestricted.lo^(x.hi)
                   min( lolo, lohi )
@@ -288,12 +288,12 @@ function sqrt(a::Interval)
     domainSqrt = Interval(z, inf(BigFloat))
     aRestricted = intersect(a, domainSqrt)
 
-    @interval(sqrt(aRestricted.lo), sqrt(aRestricted.hi))
+    @round(sqrt(aRestricted.lo), sqrt(aRestricted.hi))
 
 end
 
 ## exp
-exp(a::Interval) = @interval(exp(a.lo), exp(a.hi))
+exp(a::Interval) = @round(exp(a.lo), exp(a.hi))
 
 ## log
 function log(a::Interval)
@@ -302,7 +302,7 @@ function log(a::Interval)
     z > a.hi && error("Undefined log; Interval is strictly negative")
     aRestricted = intersect(a, domainLog)
 
-    @interval(log(aRestricted.lo), log(aRestricted.hi))
+    @round(log(aRestricted.lo), log(aRestricted.hi))
 end
 
 #----- From here on, NEEDS TESTING ------
