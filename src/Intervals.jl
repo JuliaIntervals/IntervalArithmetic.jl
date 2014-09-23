@@ -15,7 +15,7 @@ convert, promote_rule,
 BigFloat, string
 
 export
-@round_down, @round_up, @round, @make_interval, @thin_interval,
+@round_down, @round_up, @round, @interval, @thin_interval,
 Interval, diam, mid, mag, mig, hull, isinside
 
 ## Change the default precision:
