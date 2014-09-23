@@ -9,15 +9,15 @@ a = @interval(1.1,0.1)
 b = @interval(0.9,2.0)
 c = @interval(0.25,4.0)
 
-@test isa(@interval(1,2),@interval)
-@test isa(@interval(big(0.1)),@interval)
+@test isa(@interval(1,2), Interval)
+@test isa(@interval(big(0.1)), Interval)
 @test zero(b) == 0.0
 @test one(a) == big(1.0)
 @test !(a == b)
 @test a != b
 @test 1 == zero(a)+one(b)
 @test @interval(0.25)-one(c)/4 == zero(c)
-@test isempty(a,@interval(-1))
+@test isempty(a, @interval(-1))
 
 @test @interval(0.1) == @interval(0.0999999999999999999,0.1)
 @test a == @interval(a.lo,a.hi)
@@ -33,7 +33,7 @@ c = @interval(0.25,4.0)
 @test c/4.0 == @interval(0.0625,1.0)
 
 @test inv(zero(a)) == @interval(Inf,Inf)
-@test inv(@interval(0,1)) == @interval(1,Inf)
+@test inv(@interval(0,1)) == @interval(1, Inf)
 @test inv(@interval(1,Inf)) == @interval(0,1)
 @test inv(c) == c
 @test one(a)/b == inv(b)
