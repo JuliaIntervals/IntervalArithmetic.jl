@@ -15,7 +15,7 @@ convert, promote_rule,
 BigFloat, string
 
 export
-@round_down, @round_up, @round, @interval, @thin_interval,
+@round_down, @round_up, @round, @interval, @thin_interval, transform,
 Interval, diam, mid, mag, mig, hull, isinside
 
 ## Change the default precision:
@@ -58,8 +58,21 @@ macro thin_interval(expr)
 end
 
 
+transform(a::BigFloat) = ( @thin_interval(a))
 transform(a::Number) = :( @thin_interval(BigFloat(string($a))) )
-transform(a::Symbol) = isa(eval(a), MathConst) ? :(@thin_interval(big($a))) : a
+
+function transform(a::Symbol)
+
+    b = eval(Main, a)   # use module_parent
+
+    if isa(b, MathConst)
+        :(@thin_interval(big($a)))
+    elseif isa(b, Number)
+        :(@thin_interval(BigFloat(string($b))))
+    else
+        a  # symbols like :+
+    end
+end
 
 function transform(expr::Expr)
     ex = copy(expr)
@@ -72,6 +85,7 @@ end
 
 
 macro interval(expr1, expr2...)
+    @show expr1
     expr1 = transform(expr1)
 
     if isempty(expr2)
@@ -80,25 +94,9 @@ macro interval(expr1, expr2...)
         expr2 = transform(expr2[1])
     end
 
-#     if expr2 == nothing
-#         expr2 = expr1
-#     else
-#         expr2 = transform(expr2)
-#     end
-
-    #expr2 = transform(expr2)
-
-#     @show expr1
-#     @show expr2
-
     return :(hull($expr1, $expr2))
 end
 
-# macro interval(expr)
-#     quote
-#     @interval($expr, $expr)
-#     end
-# end
 
 macro round(expr1, expr2)
     quote
