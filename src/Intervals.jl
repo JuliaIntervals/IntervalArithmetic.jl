@@ -324,9 +324,9 @@ end
 #----- From here on, NEEDS TESTING ------
 ## sin
 function sin(a::Interval)
-    piHalf = pi*BigFloat("0.5")
-    twoPi = pi*BigFloat("2.0")
-    domainSin = Interval( BigFloat(-1.0), BigFloat(1.0) )
+    piHalf = big(pi) / 2
+    twoPi = big(pi) * 2
+    domainSin = Interval( big(-1.0), big(1.0) )
 
     # Checking the specific case
     diam(a) >= twoPi && return domainSin
@@ -341,40 +341,20 @@ function sin(a::Interval)
     # 20 different cases
     if loQuartile == hiQuartile # Interval limits in the same quartile
         loMod2pi > hiMod2pi && return domainSin
-        set_rounding(BigFloat, RoundDown)
-        lo = sin( a.lo )
-        set_rounding(BigFloat, RoundUp)
-        hi = sin( a.hi )
-        set_rounding(BigFloat, RoundNearest)
-        return Interval( lo, hi )
+        return @round(sin(a.lo), sin(a.hi))
+
     elseif loQuartile == 3 && hiQuartile==0
-        set_rounding(BigFloat, RoundDown)
-        lo = sin( a.lo )
-        set_rounding(BigFloat, RoundUp)
-        hi = sin( a.hi )
-        set_rounding(BigFloat, RoundNearest)
-        return Interval( lo, hi )
+        return @round(sin(a.lo), sin(a.hi))
+
     elseif loQuartile == 1 && hiQuartile==2
-        set_rounding(BigFloat, RoundDown)
-        lo = sin( a.hi )
-        set_rounding(BigFloat, RoundUp)
-        hi = sin( a.lo )
-        set_rounding(BigFloat, RoundNearest)
-        return Interval( lo, hi )
+        return @round(sin(a.hi), sin(a.lo))
+
     elseif ( loQuartile == 0 || loQuartile==3 ) && ( hiQuartile==1 || hiQuartile==2 )
-        set_rounding(BigFloat, RoundDown)
-        slo = sin( a.lo )
-        shi = sin( a.hi )
-        set_rounding(BigFloat, RoundNearest)
-        lo = min( slo, shi )
-        return Interval( lo, BigFloat(1.0) )
+        return @round(min(sin(a.lo), sin(a.hi)), big(1.0))
+
     elseif ( loQuartile == 1 || loQuartile==2 ) && ( hiQuartile==3 || hiQuartile==0 )
-        set_rounding(BigFloat, RoundUp)
-        slo = sin( a.lo )
-        shi = sin( a.hi )
-        set_rounding(BigFloat, RoundNearest)
-        hi = max( slo, shi )
-        return Interval( BigFloat(-1.0), hi )
+        return @round(big(-1.0), max(sin(a.lo), sin(a.hi)))
+
     elseif ( loQuartile == 0 && hiQuartile==3 ) || ( loQuartile == 2 && hiQuartile==1 )
         return domainSin
     else
@@ -385,8 +365,8 @@ end
 
 ## cos
 function cos(a::Interval)
-    piHalf = pi*BigFloat("0.5")
-    twoPi = pi*BigFloat("2.0")
+    piHalf = big(pi) / 2
+    twoPi = big(pi) * 2
     domainCos = Interval( BigFloat(-1.0), BigFloat(1.0) )
 
     # Checking the specific case
@@ -402,40 +382,20 @@ function cos(a::Interval)
     # 20 different cases
     if loQuartile == hiQuartile # Interval limits in the same quartile
         loMod2pi > hiMod2pi && return domainCos
-        set_rounding(BigFloat, RoundDown)
-        lo = cos( a.hi )
-        set_rounding(BigFloat, RoundUp)
-        hi = cos( a.lo )
-        set_rounding(BigFloat, RoundNearest)
-        return Interval( lo, hi )
+        return @round(cos(a.hi), cos(a.lo))
+
     elseif loQuartile == 2 && hiQuartile==3
-        set_rounding(BigFloat, RoundDown)
-        lo = cos( a.lo )
-        set_rounding(BigFloat, RoundUp)
-        hi = cos( a.hi )
-        set_rounding(BigFloat, RoundNearest)
-        return Interval( lo, hi )
+        return @round(cos(a.lo), cos(a.hi))
+
     elseif loQuartile == 0 && hiQuartile==1
-        set_rounding(BigFloat, RoundDown)
-        lo = cos( a.hi )
-        set_rounding(BigFloat, RoundUp)
-        hi = cos( a.lo )
-        set_rounding(BigFloat, RoundNearest)
-        return Interval( lo, hi )
+        return @round(cos(a.hi), cos(a.lo))
+
     elseif ( loQuartile == 2 || loQuartile==3 ) && ( hiQuartile==0 || hiQuartile==1 )
-        set_rounding(BigFloat, RoundDown)
-        clo = cos( a.lo )
-        chi = cos( a.hi )
-        set_rounding(BigFloat, RoundNearest)
-        lo = min( clo, chi )
-        return Interval( lo, BigFloat(1.0) )
+        return @round(min(cos(a.lo), cos(a.hi)), big(1.0))
+
     elseif ( loQuartile == 0 || loQuartile==1 ) && ( hiQuartile==2 || hiQuartile==3 )
-        set_rounding(BigFloat, RoundUp)
-        clo = cos( a.lo )
-        chi = cos( a.hi )
-        set_rounding(BigFloat, RoundNearest)
-        hi = max( clo, chi )
-        return Interval( BigFloat(-1.0), hi )
+        return @round(big(-1.0), max(cos(a.lo), cos(a.hi)))
+
     elseif ( loQuartile == 3 && hiQuartile==2 ) || ( loQuartile == 1 && hiQuartile==0 )
         return domainCos
     else
@@ -446,8 +406,8 @@ end
 
 ## tan
 function tan(a::Interval)
-    bigPi = pi*BigFloat("1.0")
-    piHalf = pi*BigFloat("0.5")
+    bigPi = big(pi)
+    piHalf = big(pi) / 2
     domainTan = Interval( BigFloat(-Inf), BigFloat(Inf) )
 
     # Checking the specific case
@@ -459,18 +419,15 @@ function tan(a::Interval)
     hiModpi = mod(a.hi, bigPi)
     loHalf = floor( loModpi / piHalf )
     hiHalf = floor( hiModpi / piHalf )
-    set_rounding(BigFloat, RoundDown)
-    lo = tan( a.lo )
-    set_rounding(BigFloat, RoundUp)
-    hi = tan( a.hi )
-    set_rounding(BigFloat, RoundNearest)
+
+    I = @round(tan(a.lo), tan(a.hi))
 
     if (loHalf > hiHalf) || ( loHalf == hiHalf && loModpi <= hiModpi)
-        return Interval( lo, hi )
+        return I
     end
 
-    disjoint2 = Interval( lo, BigFloat(Inf) )
-    disjoint1 = Interval( BigFloat(-Inf), hi )
+    disjoint2 = Interval( I.lo, BigFloat(Inf) )
+    disjoint1 = Interval( BigFloat(-Inf), I.hi )
     info(string("The resulting interval is disjoint:\n", disjoint1, "\n", disjoint2,
                 "\n The hull of the disjoint subintervals is considered:\n", domainTan))
     return domainTan
