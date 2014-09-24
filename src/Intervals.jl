@@ -85,7 +85,7 @@ end
 
 
 macro interval(expr1, expr2...)
-    @show expr1
+
     expr1 = transform(expr1)
 
     if isempty(expr2)
