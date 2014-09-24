@@ -481,9 +481,11 @@ end
 function show(io::IO, a::Interval)
     lo = a.lo
     hi = a.hi
-    #prec = a.lo.prec
+    prec = a.lo.prec
     #print(io, string(" [", lo, ", ", hi, "] with ", prec, " bits of precision"))
-    print(io, "[$(a.lo), $(a.hi)]")
+    #print(io, "[$(a.lo), $(a.hi)]")
+    print(io, "[$(a.lo), $(a.hi)] with $prec bits of precision")
+
 end
 
 
