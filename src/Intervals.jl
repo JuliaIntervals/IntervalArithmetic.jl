@@ -26,7 +26,8 @@ set_bigfloat_precision(53)
 import Base.MPFR.BigFloat
 BigFloat(a::MathConst) = big(a)
 
-<(a::MathConst, b::MathConst) = float(a) < float(b)
+<(a::MathConst, b::MathConst) = big(a) < big(b)
+
 
 
 ## Macros for directed rounding:
@@ -403,8 +404,8 @@ function tan(a::Interval)
         return I
     end
 
-    disjoint2 = Interval( I.lo, BigFloat(Inf) )
-    disjoint1 = Interval( BigFloat(-Inf), I.hi )
+    disjoint2 = Interval( I.lo, big(Inf))
+    disjoint1 = Interval( big(-Inf), I.hi )
     info(string("The resulting interval is disjoint:\n", disjoint1, "\n", disjoint2,
                 "\n The hull of the disjoint subintervals is considered:\n", domainTan))
     return domainTan
