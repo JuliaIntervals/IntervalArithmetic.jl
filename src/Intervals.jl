@@ -116,29 +116,6 @@ immutable Interval <: Number
             a, b = b, a
         end
 
-        #a = @round_down(interpret(a))
-        #b = @round_up(interpret(b))
-
-#         try
-#             a = @round_down(BigFloat(string(a)))
-#         catch
-#             a = @round_down(big(a))
-
-#             if !isa(a, BigFloat)   # to catch rationals
-#                a = @round_down(BigFloat(a))
-#             end
-#         end
-
-#         try
-#             b = @round_up(BigFloat(string(b)))
-#         catch
-#             b = @round_up(BigFloat(b))
-
-#            if !isa(b, BigFloat)
-#                b = @round_up(BigFloat(b))
-#            end
-#         end
-
         new(a, b)
     end
 end
@@ -279,7 +256,7 @@ function ^(a::Interval, x::Interval)
     z > a.hi && error("Undefined operation;\n",
                       "Interval is strictly negative and power is not an integer")
     #
-    domainPow = Interval(z, inf(BigFloat))
+    domainPow = Interval(z, big(inf))
     aRestricted = intersect(a, domainPow)
 
     @round(begin
@@ -301,7 +278,7 @@ function sqrt(a::Interval)
     z > a.hi && error("Undefined operation;\n",
                       "Interval is strictly negative and power is not an integer")
     #
-    domainSqrt = Interval(z, inf(BigFloat))
+    domainSqrt = Interval(z, big(inf))
     aRestricted = intersect(a, domainSqrt)
 
     @round(sqrt(aRestricted.lo), sqrt(aRestricted.hi))
@@ -314,7 +291,7 @@ exp(a::Interval) = @round(exp(a.lo), exp(a.hi))
 ## log
 function log(a::Interval)
     z = zero(BigFloat)
-    domainLog = Interval(z, inf(BigFloat))
+    domainLog = Interval(z, big(inf))
     z > a.hi && error("Undefined log; Interval is strictly negative")
     aRestricted = intersect(a, domainLog)
 
@@ -367,7 +344,7 @@ end
 function cos(a::Interval)
     piHalf = big(pi) / 2
     twoPi = big(pi) * 2
-    domainCos = Interval( BigFloat(-1.0), BigFloat(1.0) )
+    domainCos = Interval( big(-1.0), big(1.0) )
 
     # Checking the specific case
     diam(a) >= twoPi && return domainCos
@@ -408,7 +385,7 @@ end
 function tan(a::Interval)
     bigPi = big(pi)
     piHalf = big(pi) / 2
-    domainTan = Interval( BigFloat(-Inf), BigFloat(Inf) )
+    domainTan = Interval( big(-Inf), big(Inf) )
 
     # Checking the specific case
     diam(a) >= bigPi && return domainTan
