@@ -256,7 +256,7 @@ function ^(a::Interval, x::Interval)
     z > a.hi && error("Undefined operation;\n",
                       "Interval is strictly negative and power is not an integer")
     #
-    domainPow = Interval(z, big(inf))
+    domainPow = Interval(z, big(Inf))
     aRestricted = intersect(a, domainPow)
 
     @round(begin
@@ -278,7 +278,7 @@ function sqrt(a::Interval)
     z > a.hi && error("Undefined operation;\n",
                       "Interval is strictly negative and power is not an integer")
     #
-    domainSqrt = Interval(z, big(inf))
+    domainSqrt = Interval(z, big(Inf))
     aRestricted = intersect(a, domainSqrt)
 
     @round(sqrt(aRestricted.lo), sqrt(aRestricted.hi))
@@ -291,7 +291,7 @@ exp(a::Interval) = @round(exp(a.lo), exp(a.hi))
 ## log
 function log(a::Interval)
     z = zero(BigFloat)
-    domainLog = Interval(z, big(inf))
+    domainLog = Interval(z, big(Inf))
     z > a.hi && error("Undefined log; Interval is strictly negative")
     aRestricted = intersect(a, domainLog)
 
