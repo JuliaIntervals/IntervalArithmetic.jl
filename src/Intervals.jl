@@ -242,7 +242,7 @@ function ^(a::Interval, x::Real)
     xInterv = Interval( x )
     diam( xInterv ) >= eps(x) && return a^xInterv
     # xInterv is a thin interval
-    domainPow = Interval(z, inf(BigFloat))
+    domainPow = Interval(z, big(Inf))
     aRestricted = intersect(a, domainPow)
     @round(aRestricted.lo^x, aRestricted.hi^x)
 
