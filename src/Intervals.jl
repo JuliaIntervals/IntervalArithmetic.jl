@@ -78,7 +78,7 @@ function transform(expr::Expr)
 
     if expr.head == :(.)   # e.g. a.lo
         value = eval(Main, expr)
-        return :(@thin_interval(BigFloat(string($value))))
+        return transform(value)
     end
 
     ex = copy(expr)
