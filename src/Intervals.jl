@@ -76,6 +76,12 @@ function transform(a::Symbol)
 end
 
 function transform(expr::Expr)
+
+    if expr.head == :(.)   # e.g. a.lo
+        value = eval(Main, expr)
+        return :(@thin_interval(BigFloat(string($value))))
+    end
+
     ex = copy(expr)
     for (i, arg) in enumerate(expr.args)
         # println(i, " ", arg)
@@ -158,15 +164,15 @@ one(a::Interval) = Interval(one(BigFloat))
 ## Multiplication
 
 *(a::Interval, b::Interval) = @round(min( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi ),
-                                        max( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi )
-                                        )
+                                     max( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi )
+                                     )
 
 ## Division
 function reciprocal(a::Interval)
     uno = one(BigFloat)
     z = zero(BigFloat)
     if isinside(z,a)
-    #if z in a
+        #if z in a
         warn("\nInterval in denominator contains 0.")
         return Interval(-inf(z),inf(z))  # inf(z) returns inf of type of z
     end
@@ -261,16 +267,16 @@ function ^(a::Interval, x::Interval)
     aRestricted = intersect(a, domainPow)
 
     @round(begin
-                  lolo = aRestricted.lo^(x.lo)
-                  lohi = aRestricted.lo^(x.hi)
-                  min( lolo, lohi )
-              end,
-              begin
-                  hilo = aRestricted.hi^(x.lo)
-                  hihi = aRestricted.hi^(x.hi)
-                  max( hilo, hihi)
-              end
-              )
+               lolo = aRestricted.lo^(x.lo)
+               lohi = aRestricted.lo^(x.hi)
+               min( lolo, lohi )
+           end,
+           begin
+               hilo = aRestricted.hi^(x.lo)
+               hihi = aRestricted.hi^(x.hi)
+               max( hilo, hihi)
+           end
+           )
 end
 
 ## sqrt
