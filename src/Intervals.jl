@@ -59,17 +59,20 @@ macro thin_interval(expr)
 end
 
 
+transform(a::MathConst) = ( @thin_interval(big(a)))
 transform(a::BigFloat) = ( @thin_interval(a))
 transform(a::Number) = :( @thin_interval(BigFloat(string($a))) )
 
 function transform(a::Symbol)
 
-    b = eval(Main, a)   # use module_parent
+    b = eval(Main, a)   # should use module_parent
 
     if isa(b, MathConst)
-        :(@thin_interval(big($a)))
+        # :(@thin_interval(big($a)))
+        transform(b)
     elseif isa(b, Number)
-        :(@thin_interval(BigFloat(string($b))))
+        transform(b)
+        # :(@thin_interval(BigFloat(string($b))))
     else
         a  # symbols like :+
     end
