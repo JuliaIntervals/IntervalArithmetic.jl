@@ -65,14 +65,10 @@ transform(a::Number) = :( @thin_interval(BigFloat(string($a))) )
 
 function transform(a::Symbol)
 
-    b = eval(Main, a)   # should use module_parent
+    value = eval(Main, a)   # should use module_parent
 
-    if isa(b, MathConst)
-        # :(@thin_interval(big($a)))
-        transform(b)
-    elseif isa(b, Number)
-        transform(b)
-        # :(@thin_interval(BigFloat(string($b))))
+    if isa(value, MathConst) || isa(value, Number)
+        transform(value)
     else
         a  # symbols like :+
     end
