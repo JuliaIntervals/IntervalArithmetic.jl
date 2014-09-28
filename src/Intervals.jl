@@ -234,7 +234,8 @@ function ^(a::Interval, n::Integer)
 
     @round(a.lo^n, a.hi^n)
 end
-^(a::Interval, r::Rational) = a^( Interval(r) )
+
+^(a::Interval, r::Rational) = (a^(r.num)) ^ (1/r.den)
 
 # Real power of an interval:
 function ^(a::Interval, x::Real)
@@ -411,8 +412,8 @@ function tan(a::Interval)
 
     disjoint2 = Interval( I.lo, big(Inf))
     disjoint1 = Interval( big(-Inf), I.hi )
-    info(string("The resulting interval is disjoint:\n", disjoint1, "\n", disjoint2,
-                "\n The hull of the disjoint subintervals is considered:\n", domainTan))
+    # info(string("The resulting interval is disjoint:\n", disjoint1, "\n", disjoint2,
+    #            "\n The hull of the disjoint subintervals is considered:\n", domainTan))
     return domainTan
 end
 
