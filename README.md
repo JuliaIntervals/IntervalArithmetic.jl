@@ -29,6 +29,7 @@ and currently, all intervals contain `BigFloat`s, with default precision 53 bits
 (the same as standard floating-point arithmetic). 
 
 
+
 ### Examples
 ```julia
 julia> using ValidatedNumerics    
@@ -195,6 +196,18 @@ julia> c = @interval(0.1x, x^pi)
 
 Some elementary functions (`exp`, `log`, `sin`, `cos` & `tan`) 
 have also been implemented, and more will come with time (and patience).
+
+#### Changing the precision
+To change the precision, use e.g.
+```julia
+julia> set_bigfloat_precision(100)
+100
+```
+Intervals will then be created with the new precision.
+```
+julia> @interval(0.1, 0.2)
+[9.9999999999999999999999999999921e-02, 2.0000000000000000000000000000004e-01] with 100 bits of precision
+```
 
 
 #### Related Work ####
