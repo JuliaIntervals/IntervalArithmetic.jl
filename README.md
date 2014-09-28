@@ -160,6 +160,39 @@ julia> c^2
 The last result shows that `^` is implemented independently from the product; 
 this is related to the *dependency problem*.
 
+
+#### Intervals from expressions
+
+Due to the problems with floating-point calculations, the `@interval` macro
+allows the use of expressions which are converted into appropriate intervals:
+
+```julia
+julia> a = @interval(0.1, 0.1+pi)
+[9.9999999999999992e-02, 3.2415926535897936e+00] with 53 bits of precision
+
+julia> b = @interval( (2-pi)*(2+pi) )
+[-5.8696044010893615e+00, -5.8696044010893571e+00] with 53 bits of precision
+```
+
+It is also possible to use variables, although this is not recommended, for 
+the same reason (the values stored in the variables have a defined rounding):
+
+```julia
+julia> x = 0.1
+0.1
+
+julia> c = @interval(x, 3x)
+[9.9999999999999992e-02, 3.0000000000000004e-01] with 53 bits of precision
+
+julia> c = @interval(0.1x, x^pi)
+[7.2178415907472697e-04, 1.0000000000000002e-02] with 53 bits of precision
+
+```
+
+
+
+#### Elementary functions
+
 Some elementary functions (`exp`, `log`, `sin`, `cos` & `tan`) 
 have also been implemented, and more will come with time (and patience).
 
