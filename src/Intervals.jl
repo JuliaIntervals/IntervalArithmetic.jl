@@ -422,12 +422,15 @@ end
 function show(io::IO, a::Interval)
     lo = a.lo
     hi = a.hi
-    prec = a.lo.prec
-    #print(io, string(" [", lo, ", ", hi, "] with ", prec, " bits of precision"))
-    #print(io, "[$(a.lo), $(a.hi)]")
-    print(io, "[$(a.lo), $(a.hi)] with $prec bits of precision")
+
+    if typeof(a.lo) == typeof(a.hi) == BigFloat
+        prec = a.lo.prec
+        print(io, "[$(a.lo), $(a.hi)] with $prec bits of precision")
+    else
+        print(io, "[$(a.lo), $(a.hi)]")
+    end
 
 end
 
 
-#end
+# end    # this end is required if Intervals.jl is a module on its own

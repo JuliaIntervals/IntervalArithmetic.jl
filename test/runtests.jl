@@ -1,4 +1,5 @@
 # Tests for ValidatedNumerics
+
 using ValidatedNumerics
 using Base.Test
 
