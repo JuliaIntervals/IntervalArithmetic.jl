@@ -1,7 +1,7 @@
 # ValidatedNumerics.jl #
 
-This is a package for performing *Validated Numerics* in Julia, i.e. rigorous 
-computations with finite-precision floating-point arithmetic. 
+This is a package for performing *Validated Numerics* in Julia, i.e. rigorous
+computations with finite-precision floating-point arithmetic.
 The fundamental tool is interval arithmetic, provided by `Intervals.jl`.
 
 
@@ -12,13 +12,13 @@ Interval arithmetic over the real numbers with Julia.
 
 ### Design and implementation ##
 
-Intervals are constructed using `@interval`, which takes pairs of 
-numerical expressions as arguments, or, alternatively, single expressions 
-for *thin* intervals. 
+Intervals are constructed using `@interval`, which takes pairs of
+numerical expressions as arguments, or, alternatively, single expressions
+for *thin* intervals.
 
 If the arguments are not exactly representable in finite-precision floating-point
 arithmetic, *directed rounding* is used, i.e., the lower bound of the interval
-is rounded down, and the upper bound is rounded up. This guarantees that the 
+is rounded down, and the upper bound is rounded up. This guarantees that the
 resulting interval contains the true desired value.
 
 Directed rounding is available via the macros `@round_down` and `@round_up`,
@@ -26,13 +26,13 @@ although the `@interval` macro is usually more appropriate.
 
 The aim of the package is correctness, rather than speed,
 and currently, all intervals contain `BigFloat`s, with default precision 53 bits
-(the same as standard floating-point arithmetic). 
+(the same as standard floating-point arithmetic).
 
 
 
 ### Examples
 ```julia
-julia> using ValidatedNumerics    
+julia> using ValidatedNumerics
 
 help?> Interval
 DataType   : Interval (constructor with 4 methods)
@@ -74,23 +74,23 @@ julia> c = Interval(@round_down(BigFloat("0.1")), @round_up(BigFloat("0.1")))
 
 ```
 
-The last definition of `c` is equivalent to `c = @interval(0.1)`; the 
+The last definition of `c` is equivalent to `c = @interval(0.1)`; the
 `@interval` macro performs the hard work for us.
 
 Note that the naive definition of `b` results in an interval that *does not contain*
 0.1.
 
-It is worth emphasizing that the behavior implemented by the definition of 
-`Interval` above is *not the same* as that implemented by [MPFI][1], 
-which in all cases above would yield thin intervals. 
-(Using `MPFI`, the behaviour above is obtained with `Interval("0.1")`, 
+It is worth emphasizing that the behavior implemented by the definition of
+`Interval` above is *not the same* as that implemented by [MPFI][1],
+which in all cases above would yield thin intervals.
+(Using `MPFI`, the behaviour above is obtained with `Interval("0.1")`,
 which is not defined in our implementation.) This is the main design difference.
 
-The upper and lower bounds of the interval may be accessed as the fields 
-`lo` and `hi`, which are `BigFloat`s. 
+The upper and lower bounds of the interval may be accessed as the fields
+`lo` and `hi`, which are `BigFloat`s.
 
-The diameter is obtained using `diam(a)`; 
-note that for non-exactly representable numbers in base 2 
+The diameter is obtained using `diam(a)`;
+note that for non-exactly representable numbers in base 2
 (i.e., whose *binary* expansion is infinite or exceeds the current precision)
  the diameter of newly-created thin intervals corresponds to the local `eps` value.
 
@@ -113,11 +113,11 @@ true
 ```
 
 ## Operations and functions ##
-The basic arithmetic operations among intervals (`+`, `-`, `*`, `/`, `^`) 
+The basic arithmetic operations among intervals (`+`, `-`, `*`, `/`, `^`)
 have been implemented following the usual definitions, in particular using
-*directed rounding*. That is, the resulting lower (left) bound is 
-systematically rounded down, while the upper (right) one is rounded up. 
-In particular, the implementation for `^` distinguishes whether non-integer 
+*directed rounding*. That is, the resulting lower (left) bound is
+systematically rounded down, while the upper (right) one is rounded up.
+In particular, the implementation for `^` distinguishes whether non-integer
 powers define a thin interval or not.
 
 ```julia
@@ -140,7 +140,7 @@ julia> a / b
 [5.4999999999999993e-01, 1.1000000000000001e+00] with 53 bits of precision
 
 julia> b / @interval(-1, 1)
-WARNING: 
+WARNING:
 Interval in denominator contains 0.
 [-inf, inf] with 53 bits of precision
 
@@ -158,7 +158,7 @@ julia> c^2
 
 ```
 
-The last result shows that `^` is implemented independently from the product; 
+The last result shows that `^` is implemented independently from the product;
 this is related to the *dependency problem*.
 
 
@@ -175,7 +175,7 @@ julia> b = @interval( (2-pi)*(2+pi) )
 [-5.8696044010893615e+00, -5.8696044010893571e+00] with 53 bits of precision
 ```
 
-It is also possible to use variables, although this is not recommended, for 
+It is also possible to use variables, although this is not recommended, for
 the same reason (the values stored in the variables have a defined rounding):
 
 ```julia
@@ -194,7 +194,7 @@ julia> c = @interval(0.1x, x^pi)
 
 #### Elementary functions
 
-Some elementary functions (`exp`, `log`, `sin`, `cos` & `tan`) 
+Some elementary functions (`exp`, `log`, `sin`, `cos` & `tan`)
 have also been implemented, and more will come with time (and patience).
 
 #### Changing the precision
@@ -209,6 +209,22 @@ julia> @interval(0.1, 0.2)
 [9.9999999999999999999999999999921e-02, 2.0000000000000000000000000000004e-01] with 100 bits of precision
 ```
 
+#### Intervals with other types
+
+Intervals may be created containing types other than `BigFloat`s by using directly the `Interval` constructor:
+```julia
+a = Interval(1//2, 3//4)
+[1//2, 3//4]
+
+julia> b = Interval(3//7, 9//12)
+[3//7, 3//4]
+
+julia> a + b
+[13//14, 3//2]
+
+julia> sqrt(a+b)
+[9.636241116594314e-01, 1.2247448713915892e+00] with 53 bits of precision
+```
 
 #### Related Work ####
 - [MPFI.jl][1]: Wrapper of the [MPFI library][http://perso.ens-lyon.fr/nathalie.revol/software.html] (multiple precision interval arithmetic library based on MPFR) for Julia.
@@ -219,7 +235,7 @@ julia> @interval(0.1, 0.2)
 
 #### Authors ####
 - Luis Benet, Instituto de Ciencias Físicas, Universidad Nacional Autónoma de México (UNAM)
-- [David P. Sanders](http://sistemas.fciencias.unam.mx/~dsanders), 
+- [David P. Sanders](http://sistemas.fciencias.unam.mx/~dsanders),
 Departamento de Física, Facultad de Ciencias, Universidad Nacional Autónoma de México (UNAM)
 
 
