@@ -112,7 +112,7 @@ end
 
 
 ## Interval constructor
-immutable Interval <: Number
+immutable Interval <: Real
     lo :: Real
     hi :: Real
 
