@@ -423,11 +423,11 @@ function show(io::IO, a::Interval)
     lo = a.lo
     hi = a.hi
 
+    print(io, "[$(a.lo), $(a.hi)]")
+
     if typeof(a.lo) == typeof(a.hi) == BigFloat
         prec = a.lo.prec
-        print(io, "[$(a.lo), $(a.hi)] with $prec bits of precision")
-    else
-        print(io, "[$(a.lo), $(a.hi)]")
+        print(io, " with $prec bits of precision")
     end
 
 end
