@@ -13,6 +13,7 @@ c = @interval(0.25, 4.0)
 @test isa( zero(b), Interval )
 
 @test zero(b) == 0.0
+@test one(a) == 1.0
 @test one(a) == big(1.0)
 @test !(a == b)
 @test a != b

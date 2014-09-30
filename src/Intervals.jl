@@ -117,7 +117,7 @@ end
 
 
 ## Interval constructor
-immutable Interval <: Real
+immutable Interval <: Number
     lo :: Real
     hi :: Real
 
@@ -136,8 +136,10 @@ Interval(a::Tuple) = Interval(a...)
 Interval(a::Real) = Interval(a, a)
 
 # Convertion and promotion
-convert(::Type{Interval},x::Real) = Interval(x)
+
+convert(::Type{Interval}, x::Real) = Interval(x)
 promote_rule{A<:Real}(::Type{Interval}, ::Type{A}) = Interval
+
 
 ## Equalities and neg-equalities
 ==(a::Interval, b::Interval) = a.lo == b.lo && a.hi == b.hi
