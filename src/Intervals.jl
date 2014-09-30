@@ -121,7 +121,7 @@ end
 
 
 ## Interval constructor
-immutable Interval <: Number
+immutable Interval <: Real
     lo :: Real
     hi :: Real
 
@@ -143,7 +143,7 @@ Interval(a::Real) = Interval(a, a)
 
 convert(::Type{Interval}, x::Real) = Interval(x)
 promote_rule{A<:Real}(::Type{Interval}, ::Type{A}) = Interval
-
+promote_rule(::Type{BigFloat}, ::Type{Interval}) = Interval
 
 ## Equalities and neg-equalities
 ==(a::Interval, b::Interval) = a.lo == b.lo && a.hi == b.hi
