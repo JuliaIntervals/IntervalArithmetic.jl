@@ -230,7 +230,7 @@ julia> sqrt(a+b)
 - [MPFI.jl][1]: Wrapper of the [MPFI library][http://perso.ens-lyon.fr/nathalie.revol/software.html] (multiple precision interval arithmetic library based on MPFR) for Julia.
 
 #### References ####
-- *Validated Numerics: A Short Introduction to Rigurous Computations*, W. Tucker, Princeton University Press (2010)
+- *Validated Numerics: A Short Introduction to Rigorous Computations*, W. Tucker, Princeton University Press (2010)
 - *Introduction to Interval Analysis*, R.E. Moore, R.B. Kearfott & M.J. Cloud, SIAM (2009)
 
 #### Authors ####
