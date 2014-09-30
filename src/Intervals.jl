@@ -90,6 +90,11 @@ function transform(expr::Expr)
 end
 
 
+# The main way to create an interval is the following @interval macro
+# It converts each expression into a small interval that is guaranteed to contain the true value passed
+# by the user in the one or two expressions
+# It then takes the hull of the resulting two intervals to give a guaranteed containing interval
+
 macro interval(expr1, expr2...)
 
     expr1 = transform(expr1)
