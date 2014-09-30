@@ -36,15 +36,19 @@ BigFloat(a::MathConst) = big(a)
 
 macro round_down(expr)
     quote
-        set_rounding(BigFloat, RoundDown)
-        $expr
+        #set_rounding(BigFloat, RoundDown)
+        with_rounding(BigFloat, RoundDown) do
+            $expr
+        end
     end
 end
 
 macro round_up(expr)
     quote
-        set_rounding(BigFloat, RoundUp)
-        $expr
+        #set_rounding(BigFloat, RoundUp)
+         with_rounding(BigFloat, RoundUp) do
+            $expr
+        end
     end
 end
 
