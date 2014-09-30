@@ -11,42 +11,113 @@
 import Base: in, zero, one, show,
 sqrt, exp, log, sin, cos, tan, inv,
 union, intersect, isempty,
-convert, promote_rule
+convert, promote_rule,
+BigFloat, string
 
 export
-# @round_down, @round_up, @directed_rounding,
+@round_down, @round_up, @round, @interval, @thin_interval, transform,
 Interval, diam, mid, mag, mig, hull, isinside
 
-## Changing the default precision
+## Change the default precision:
 set_bigfloat_precision(53)
+
+
+## Fix some issues with MathConst:
+import Base.MPFR.BigFloat
+BigFloat(a::MathConst) = big(a)
+
+<(a::MathConst, b::MathConst) = big(a) < big(b)
+
+
 
 ## Macros for directed rounding:
 
-# Could use with rounding to ensure previous rounding mode is correctly reset
+# (Could use "with rounding" to ensure previous rounding mode is correctly reset)
 
 macro round_down(expr)
     quote
-        set_rounding(BigFloat, RoundDown)
-        $expr
-        # set_rounding(BigFloat, RoundNearest)
+        #set_rounding(BigFloat, RoundDown)
+        with_rounding(BigFloat, RoundDown) do
+            $expr
+        end
     end
 end
 
 macro round_up(expr)
     quote
-        set_rounding(BigFloat, RoundUp)
-        $expr
-        # set_rounding(BigFloat, RoundNearest)
+        #set_rounding(BigFloat, RoundUp)
+         with_rounding(BigFloat, RoundUp) do
+            $expr
+        end
     end
 end
 
 
-macro interval(expr1, expr2)
+## Wrap user input for correct rounding:
+
+
+macro thin_interval(expr)
+    quote
+        Interval(@round_down($expr), @round_up($expr))
+    end
+end
+
+
+transform(a::MathConst) = ( @thin_interval(big(a)))
+transform(a::BigFloat) = ( @thin_interval(a))
+transform(a::Number) = :( @thin_interval(BigFloat(string($a))) )
+
+function transform(a::Symbol)
+
+    value = eval(Main, a)   # should use module_parent
+
+    if isa(value, MathConst) || isa(value, Number)
+        transform(value)
+    else
+        a  # symbols like :+
+    end
+end
+
+function transform(expr::Expr)
+
+    if expr.head == :(.)   # e.g. a.lo
+        value = eval(Main, expr)
+        return transform(value)
+    end
+
+    ex = copy(expr)
+    for (i, arg) in enumerate(expr.args)
+        # println(i, " ", arg)
+        ex.args[i] = transform(arg)
+    end
+    return ex
+end
+
+
+# The main way to create an interval is the following @interval macro
+# It converts each expression into a small interval that is guaranteed to contain the true value passed
+# by the user in the one or two expressions
+# It then takes the hull of the resulting two intervals to give a guaranteed containing interval
+
+macro interval(expr1, expr2...)
+
+    expr1 = transform(expr1)
+
+    if isempty(expr2)
+        expr2 = expr1
+    else
+        expr2 = transform(expr2[1])
+    end
+
+    return :(hull($expr1, $expr2))
+end
+
+
+macro round(expr1, expr2)
     quote
         Interval(@round_down($expr1), @round_up($expr2))
     end
 end
-
 
 
 ## Interval constructor
@@ -54,44 +125,25 @@ immutable Interval <: Number
     lo :: Real
     hi :: Real
 
-    ## Inner constructor
-    function Interval(a, b)
+    function Interval(a::Real, b::Real)
+
         if a > b
             a, b = b, a
         end
 
-        # Directed rounding: We avoid rounding a BigFloat, since BigFloats
-        # are already rounded
-        T = typeof(a)
-        if T == BigFloat
-            lo = a
-        #elseif T == Rational{Int64} || T == Rational{BigInt} || T == Rational{Int32}
-        elseif T <: Rational
-            lo = @round_down( BigFloat(a) )
-        else
-            lo = @round_down( BigFloat(string(a)) )
-        end
-
-        T = typeof(b)
-        if T == BigFloat
-            hi = b
-        #elseif T == Rational{Int64} || T == Rational{BigInt} || T == Rational{Int32}
-        elseif T <: Rational
-            hi = @round_up( BigFloat(b) )
-        else
-            hi = @round_up( BigFloat(string(b)) )
-        end
-
-        new(lo, hi)
+        new(a, b)
     end
 end
+
 Interval(a::Interval) = a
 Interval(a::Tuple) = Interval(a...)
 Interval(a::Real) = Interval(a, a)
 
 # Convertion and promotion
-convert(::Type{Interval},x::Real) = Interval(x)
+
+convert(::Type{Interval}, x::Real) = Interval(x)
 promote_rule{A<:Real}(::Type{Interval}, ::Type{A}) = Interval
+
 
 ## Equalities and neg-equalities
 ==(a::Interval, b::Interval) = a.lo == b.lo && a.hi == b.hi
@@ -111,35 +163,38 @@ one(a::Interval) = Interval(one(BigFloat))
 
 ## Addition
 
-+(a::Interval, b::Interval) = @interval(a.lo + b.lo, a.hi + b.hi)
++(a::Interval, b::Interval) = @round(a.lo + b.lo, a.hi + b.hi)
 +(a::Interval) = a
 
 ## Subtraction
 
 -(a::Interval) = Interval(-a.hi, -a.lo)
--(a::Interval, b::Interval) = a + (-b) # @interval(a.lo - b.hi, a.hi - b.lo)
+-(a::Interval, b::Interval) = a + (-b) # @round(a.lo - b.hi, a.hi - b.lo)
 
 ## Multiplication
 
-*(a::Interval, b::Interval) = @interval(min( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi ),
-                                        max( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi )
-                                        )
+*(a::Interval, b::Interval) = @round(min( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi ),
+                                     max( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi )
+                                     )
 
 ## Division
 function reciprocal(a::Interval)
     uno = one(BigFloat)
     z = zero(BigFloat)
     if isinside(z,a)
-    #if z in a
+        #if z in a
         warn("\nInterval in denominator contains 0.")
         return Interval(-inf(z),inf(z))  # inf(z) returns inf of type of z
     end
 
-    @interval(uno/a.hi, uno/a.lo)
+    @round(uno/a.hi, uno/a.lo)
 end
 
 inv(a::Interval) = reciprocal(a)
 /(a::Interval, b::Interval) = a*reciprocal(b)
+//(a::Interval, b::Interval) = a / b    # to deal with rationals
+
+
 
 ## Some scalar functions on intervals; no direct rounding used
 diam(a::Interval) = a.hi - a.lo
@@ -156,11 +211,11 @@ function intersect(a::Interval, b::Interval)
         return nothing
     end
 
-    @interval(max(a.lo, b.lo), min(a.hi, b.hi))
+    @round(max(a.lo, b.lo), min(a.hi, b.hi))
 
 end
 
-hull(a::Interval, b::Interval) = @interval(min(a.lo, b.lo), max(a.hi, b.hi))
+hull(a::Interval, b::Interval) = Interval(min(a.lo, b.lo), max(a.hi, b.hi))
 union(a::Interval, b::Interval) = hull(a, b)
 
 
@@ -179,18 +234,19 @@ function ^(a::Interval, n::Integer)
     #
     ## NOTE: square(x) is deprecated in favor of x*x
     if n == 2*one(n)   # this is unnecessary as stands, but  mig(a)*mig(a) is supposed to be more efficient
-        return @interval(mig(a)^2, mag(a)^2)
+        return @round(mig(a)^2, mag(a)^2)
     end
     #
     ## even power
     if n%2 == 0
-        return @interval(mig(a)^n, mag(a)^n)
+        return @round(mig(a)^n, mag(a)^n)
     end
     ## odd power
 
-    @interval(a.lo^n, a.hi^n)
+    @round(a.lo^n, a.hi^n)
 end
-^(a::Interval, r::Rational) = a^( Interval(r) )
+
+^(a::Interval, r::Rational) = (a^(r.num)) ^ (1/r.den)
 
 # Real power of an interval:
 function ^(a::Interval, x::Real)
@@ -204,9 +260,9 @@ function ^(a::Interval, x::Real)
     xInterv = Interval( x )
     diam( xInterv ) >= eps(x) && return a^xInterv
     # xInterv is a thin interval
-    domainPow = Interval(z, inf(BigFloat))
+    domainPow = Interval(z, big(Inf))
     aRestricted = intersect(a, domainPow)
-    @interval(aRestricted.lo^x, aRestricted.hi^x)
+    @round(aRestricted.lo^x, aRestricted.hi^x)
 
 end
 
@@ -218,20 +274,20 @@ function ^(a::Interval, x::Interval)
     z > a.hi && error("Undefined operation;\n",
                       "Interval is strictly negative and power is not an integer")
     #
-    domainPow = Interval(z, inf(BigFloat))
+    domainPow = Interval(z, big(Inf))
     aRestricted = intersect(a, domainPow)
 
-    @interval(begin
-                  lolo = aRestricted.lo^(x.lo)
-                  lohi = aRestricted.lo^(x.hi)
-                  min( lolo, lohi )
-              end,
-              begin
-                  hilo = aRestricted.hi^(x.lo)
-                  hihi = aRestricted.hi^(x.hi)
-                  max( hilo, hihi)
-              end
-              )
+    @round(begin
+               lolo = aRestricted.lo^(x.lo)
+               lohi = aRestricted.lo^(x.hi)
+               min( lolo, lohi )
+           end,
+           begin
+               hilo = aRestricted.hi^(x.lo)
+               hihi = aRestricted.hi^(x.hi)
+               max( hilo, hihi)
+           end
+           )
 end
 
 ## sqrt
@@ -240,32 +296,32 @@ function sqrt(a::Interval)
     z > a.hi && error("Undefined operation;\n",
                       "Interval is strictly negative and power is not an integer")
     #
-    domainSqrt = Interval(z, inf(BigFloat))
+    domainSqrt = Interval(z, big(Inf))
     aRestricted = intersect(a, domainSqrt)
 
-    @interval(sqrt(aRestricted.lo), sqrt(aRestricted.hi))
+    @round(sqrt(aRestricted.lo), sqrt(aRestricted.hi))
 
 end
 
 ## exp
-exp(a::Interval) = @interval(exp(a.lo), exp(a.hi))
+exp(a::Interval) = @round(exp(a.lo), exp(a.hi))
 
 ## log
 function log(a::Interval)
     z = zero(BigFloat)
-    domainLog = Interval(z, inf(BigFloat))
+    domainLog = Interval(z, big(Inf))
     z > a.hi && error("Undefined log; Interval is strictly negative")
     aRestricted = intersect(a, domainLog)
 
-    @interval(log(aRestricted.lo), log(aRestricted.hi))
+    @round(log(aRestricted.lo), log(aRestricted.hi))
 end
 
 #----- From here on, NEEDS TESTING ------
 ## sin
 function sin(a::Interval)
-    piHalf = pi*BigFloat("0.5")
-    twoPi = pi*BigFloat("2.0")
-    domainSin = Interval( BigFloat(-1.0), BigFloat(1.0) )
+    piHalf = big(pi) / 2
+    twoPi = big(pi) * 2
+    domainSin = Interval( big(-1.0), big(1.0) )
 
     # Checking the specific case
     diam(a) >= twoPi && return domainSin
@@ -280,40 +336,20 @@ function sin(a::Interval)
     # 20 different cases
     if loQuartile == hiQuartile # Interval limits in the same quartile
         loMod2pi > hiMod2pi && return domainSin
-        set_rounding(BigFloat, RoundDown)
-        lo = sin( a.lo )
-        set_rounding(BigFloat, RoundUp)
-        hi = sin( a.hi )
-        set_rounding(BigFloat, RoundNearest)
-        return Interval( lo, hi )
+        return @round(sin(a.lo), sin(a.hi))
+
     elseif loQuartile == 3 && hiQuartile==0
-        set_rounding(BigFloat, RoundDown)
-        lo = sin( a.lo )
-        set_rounding(BigFloat, RoundUp)
-        hi = sin( a.hi )
-        set_rounding(BigFloat, RoundNearest)
-        return Interval( lo, hi )
+        return @round(sin(a.lo), sin(a.hi))
+
     elseif loQuartile == 1 && hiQuartile==2
-        set_rounding(BigFloat, RoundDown)
-        lo = sin( a.hi )
-        set_rounding(BigFloat, RoundUp)
-        hi = sin( a.lo )
-        set_rounding(BigFloat, RoundNearest)
-        return Interval( lo, hi )
+        return @round(sin(a.hi), sin(a.lo))
+
     elseif ( loQuartile == 0 || loQuartile==3 ) && ( hiQuartile==1 || hiQuartile==2 )
-        set_rounding(BigFloat, RoundDown)
-        slo = sin( a.lo )
-        shi = sin( a.hi )
-        set_rounding(BigFloat, RoundNearest)
-        lo = min( slo, shi )
-        return Interval( lo, BigFloat(1.0) )
+        return @round(min(sin(a.lo), sin(a.hi)), big(1.0))
+
     elseif ( loQuartile == 1 || loQuartile==2 ) && ( hiQuartile==3 || hiQuartile==0 )
-        set_rounding(BigFloat, RoundUp)
-        slo = sin( a.lo )
-        shi = sin( a.hi )
-        set_rounding(BigFloat, RoundNearest)
-        hi = max( slo, shi )
-        return Interval( BigFloat(-1.0), hi )
+        return @round(big(-1.0), max(sin(a.lo), sin(a.hi)))
+
     elseif ( loQuartile == 0 && hiQuartile==3 ) || ( loQuartile == 2 && hiQuartile==1 )
         return domainSin
     else
@@ -324,9 +360,9 @@ end
 
 ## cos
 function cos(a::Interval)
-    piHalf = pi*BigFloat("0.5")
-    twoPi = pi*BigFloat("2.0")
-    domainCos = Interval( BigFloat(-1.0), BigFloat(1.0) )
+    piHalf = big(pi) / 2
+    twoPi = big(pi) * 2
+    domainCos = Interval( big(-1.0), big(1.0) )
 
     # Checking the specific case
     diam(a) >= twoPi && return domainCos
@@ -341,40 +377,20 @@ function cos(a::Interval)
     # 20 different cases
     if loQuartile == hiQuartile # Interval limits in the same quartile
         loMod2pi > hiMod2pi && return domainCos
-        set_rounding(BigFloat, RoundDown)
-        lo = cos( a.hi )
-        set_rounding(BigFloat, RoundUp)
-        hi = cos( a.lo )
-        set_rounding(BigFloat, RoundNearest)
-        return Interval( lo, hi )
+        return @round(cos(a.hi), cos(a.lo))
+
     elseif loQuartile == 2 && hiQuartile==3
-        set_rounding(BigFloat, RoundDown)
-        lo = cos( a.lo )
-        set_rounding(BigFloat, RoundUp)
-        hi = cos( a.hi )
-        set_rounding(BigFloat, RoundNearest)
-        return Interval( lo, hi )
+        return @round(cos(a.lo), cos(a.hi))
+
     elseif loQuartile == 0 && hiQuartile==1
-        set_rounding(BigFloat, RoundDown)
-        lo = cos( a.hi )
-        set_rounding(BigFloat, RoundUp)
-        hi = cos( a.lo )
-        set_rounding(BigFloat, RoundNearest)
-        return Interval( lo, hi )
+        return @round(cos(a.hi), cos(a.lo))
+
     elseif ( loQuartile == 2 || loQuartile==3 ) && ( hiQuartile==0 || hiQuartile==1 )
-        set_rounding(BigFloat, RoundDown)
-        clo = cos( a.lo )
-        chi = cos( a.hi )
-        set_rounding(BigFloat, RoundNearest)
-        lo = min( clo, chi )
-        return Interval( lo, BigFloat(1.0) )
+        return @round(min(cos(a.lo), cos(a.hi)), big(1.0))
+
     elseif ( loQuartile == 0 || loQuartile==1 ) && ( hiQuartile==2 || hiQuartile==3 )
-        set_rounding(BigFloat, RoundUp)
-        clo = cos( a.lo )
-        chi = cos( a.hi )
-        set_rounding(BigFloat, RoundNearest)
-        hi = max( clo, chi )
-        return Interval( BigFloat(-1.0), hi )
+        return @round(big(-1.0), max(cos(a.lo), cos(a.hi)))
+
     elseif ( loQuartile == 3 && hiQuartile==2 ) || ( loQuartile == 1 && hiQuartile==0 )
         return domainCos
     else
@@ -385,9 +401,9 @@ end
 
 ## tan
 function tan(a::Interval)
-    bigPi = pi*BigFloat("1.0")
-    piHalf = pi*BigFloat("0.5")
-    domainTan = Interval( BigFloat(-Inf), BigFloat(Inf) )
+    bigPi = big(pi)
+    piHalf = big(pi) / 2
+    domainTan = Interval( big(-Inf), big(Inf) )
 
     # Checking the specific case
     diam(a) >= bigPi && return domainTan
@@ -398,20 +414,17 @@ function tan(a::Interval)
     hiModpi = mod(a.hi, bigPi)
     loHalf = floor( loModpi / piHalf )
     hiHalf = floor( hiModpi / piHalf )
-    set_rounding(BigFloat, RoundDown)
-    lo = tan( a.lo )
-    set_rounding(BigFloat, RoundUp)
-    hi = tan( a.hi )
-    set_rounding(BigFloat, RoundNearest)
+
+    I = @round(tan(a.lo), tan(a.hi))
 
     if (loHalf > hiHalf) || ( loHalf == hiHalf && loModpi <= hiModpi)
-        return Interval( lo, hi )
+        return I
     end
 
-    disjoint2 = Interval( lo, BigFloat(Inf) )
-    disjoint1 = Interval( BigFloat(-Inf), hi )
-    info(string("The resulting interval is disjoint:\n", disjoint1, "\n", disjoint2,
-                "\n The hull of the disjoint subintervals is considered:\n", domainTan))
+    disjoint2 = Interval( I.lo, big(Inf))
+    disjoint1 = Interval( big(-Inf), I.hi )
+    # info(string("The resulting interval is disjoint:\n", disjoint1, "\n", disjoint2,
+    #            "\n The hull of the disjoint subintervals is considered:\n", domainTan))
     return domainTan
 end
 
@@ -420,9 +433,15 @@ end
 function show(io::IO, a::Interval)
     lo = a.lo
     hi = a.hi
-    prec = a.lo.prec
-    print(io, string(" [", lo, ", ", hi, "] with ", prec, " bits of precision"))
+
+    print(io, "[$(a.lo), $(a.hi)]")
+
+    if typeof(a.lo) == typeof(a.hi) == BigFloat
+        prec = a.lo.prec
+        print(io, " with $prec bits of precision")
+    end
+
 end
 
 
-#end
+# end    # this end is required if Intervals.jl is a module on its own
