@@ -8,7 +8,7 @@
 
 #module Intervals
 
-import Base: in, zero, one, show,
+import Base: in, zero, one, abs, real, show,
 sqrt, exp, log, sin, cos, tan, inv,
 union, intersect, isempty,
 convert, promote_rule,
@@ -151,15 +151,16 @@ promote_rule(::Type{BigFloat}, ::Type{Interval}) = Interval
 
 ## Inclusion/containment functions
 in(a::Interval, b::Interval) = b.lo <= a.lo && a.hi <= b.hi
-in(x::Real, a::Interval) = in(promote(x,a)...)
+in(x::Real, a::Interval) = a.lo <= x <= a.hi
 
 # strict inclusion:
 isinside(a::Interval, b::Interval) = b.lo < a.lo && a.hi < b.hi
 isinside(x::Real, a::Interval) = isinside(promote(x,a)...)
 
 ## zero and one functions
-zero(a::Interval) = Interval(zero(BigFloat))
-one(a::Interval) = Interval(one(BigFloat))
+zero(a::Interval) = Interval(big(0.0))
+one(a::Interval) = Interval(big(1.0))
+
 
 ## Addition
 
@@ -200,7 +201,13 @@ inv(a::Interval) = reciprocal(a)
 diam(a::Interval) = a.hi - a.lo
 mid(a::Interval) = one(a.lo) / 2 * (a.hi + a.lo)
 mag(a::Interval) = max( abs(a.lo), abs(a.hi) )
-mig(a::Interval) = in(zero(BigFloat),a) ? zero(BigFloat) : min( abs(a.lo), abs(a.hi) )
+mig(a::Interval) = 0 in a ? big(0.0) : min( abs(a.lo), abs(a.hi) )
+
+
+## Functions needed for generic linear algebra routines to work
+<(a::Interval, b::Interval) = a.hi < b.lo
+real(a::Interval) = a
+abs(a::Interval) = Interval(mig(a), mag(a))
 
 
 isempty(a::Interval, b::Interval) = a.hi < b.lo || b.hi < a.lo
