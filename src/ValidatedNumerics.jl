@@ -9,7 +9,7 @@ import Base:
   BigFloat, string
 
 export
-  @interval, Interval
+  @interval, Interval,
   @round_down, @round_up, @round, @thin_interval,
   diam, mid, mag, mig, hull, isinside
 
