@@ -3,6 +3,8 @@
 This is a package for performing *Validated Numerics* in Julia, i.e. rigorous
 computations with finite-precision floating-point arithmetic.
 The fundamental tool is interval arithmetic, provided by `Intervals.jl`.
+The package is written in pure Julia, and (currently) uses `BigFloat`s throughout;
+it is thus easy to change the precision with which calculations are carried out.
 
 To download the package, execute the command
 
