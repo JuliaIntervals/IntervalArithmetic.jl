@@ -4,10 +4,9 @@ This is a package for performing *Validated Numerics* in Julia, i.e. rigorous
 computations with finite-precision floating-point arithmetic.
 The fundamental tool is interval arithmetic, provided by `Intervals.jl`.
 
+To download the package, execute the command
 
-## `Intervals.jl`
-
-Interval arithmetic over the real numbers with Julia.
+    julia> Pkg.add("ValidatedNumerics")
 
 
 ### Design and implementation ##
