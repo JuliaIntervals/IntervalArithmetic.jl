@@ -7,6 +7,7 @@ set_bigfloat_precision(53)
 
 include("Intervals.jl")
 
+include("interval_macros.jl")
 include("interval_trig.jl")
 include("interval_functions.jl")
 
