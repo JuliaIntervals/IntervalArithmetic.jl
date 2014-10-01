@@ -79,8 +79,8 @@ The last definition of `c` is equivalent to `c = @interval(0.1)`; the
 Note that the naive definition of `b` results in an interval that *does not contain*
 0.1.
 
-It is worth emphasizing that the behavior implemented by the definition of
-`Interval` above is *not the same* as that implemented by [MPFI][1],
+It is worth noting that the behavior implemented by the definition of
+`Interval` above is *not the same* as that implemented by the MPFI library (see References below),
 which in all cases above would yield thin intervals.
 (Using `MPFI`, the behaviour above is obtained with `Interval("0.1")`,
 which is not defined in our implementation.) This is the main design difference.
@@ -225,10 +225,9 @@ julia> sqrt(a+b)
 [9.636241116594314e-01, 1.2247448713915892e+00] with 53 bits of precision
 ```
 
-#### Related Work ####
-- [MPFI.jl](https://github.com/andrioni/MPFI.jl), a Julia wrapper around the [MPFI C library](http://perso.ens-lyon.fr/nathalie.revol/software.html), a multiple-precision interval arithmetic library based on MPFR 
-
 #### References ####
+
+- [MPFI.jl](https://github.com/andrioni/MPFI.jl), a Julia wrapper around the [MPFI C library](http://perso.ens-lyon.fr/nathalie.revol/software.html), a multiple-precision interval arithmetic library based on MPFR 
 - *Validated Numerics: A Short Introduction to Rigorous Computations*, W. Tucker, Princeton University Press (2010)
 - *Introduction to Interval Analysis*, R.E. Moore, R.B. Kearfott & M.J. Cloud, SIAM (2009)
 
