@@ -53,7 +53,7 @@ function newton(f::Function, x::Interval)
             return refine(f, Nx)
         end
 
-        if Nx == empty_interval  # this is a type instability, since nothing is not an Interval
+        if isempty(Nx)  # this is a type instability, since nothing is not an Interval
             return []
         end
 
