@@ -23,7 +23,13 @@ function N(f::Function, x::Interval, deriv=None)
 #     @show m
 
     m = (x.lo + x.hi) / 2
+    if m == 0  # midpoint exactly 0
+        alpha = 0.45
+        m = alpha*x.lo + (1-alpha)*x.hi   # displace to another point in interval
+    end
+
     m = Interval(m)
+
 
     Nx = m - ( f(m) / deriv )
 
@@ -32,7 +38,8 @@ end
 
 function refine(f::Function, x::Interval)
     println("Refining $x")
-    while true
+    i = 0
+    while i < 20  # avoid problem with tiny floating-point numbers if 0 is a root
         Nx = N(f, x)
         Nx = Nx ∩ x
         @show x, Nx
@@ -41,8 +48,10 @@ function refine(f::Function, x::Interval)
             return @show (x, :unique)
         end
         x = Nx
+        i += 1
         #@show x
     end
+    return x
 end
 
 newton(f::Function, x::Nothing) = []
@@ -55,6 +64,9 @@ newton(f::Function, x::Nothing) = []
 
 function newton(f::Function, x::Interval)
 
+    if isempty(x)
+        return []
+    end
     # @show x
 
     m = mid(x)
@@ -90,6 +102,8 @@ function newton(f::Function, x::Interval)
 
         y1 = N(f, x, y1) ∩ x
         y2 = N(f, x, y2) ∩ x
+
+        @show (y1, y2)
 
 
         return vcat(newton(f, y1),
