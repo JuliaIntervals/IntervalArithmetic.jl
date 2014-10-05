@@ -1,7 +1,12 @@
 using ValidatedNumerics
 using AutoDiff
 
-isthin(x) = (m = mid(x); m == x.lo || m == x.hi)  # no more precision
+isthin(x) = (m = (x.lo + x.hi) / 2; m == x.lo || m == x.hi)  # no more precision
+
+
+#mid(x::Interval) = @interval((x.lo + x.hi) / 2)
+
+#mid(x::Interval) = Interval(@round_down( (x.lo + x.hi) / 2 ), @round_up( (x.lo + x.hi) / 2) )
 
 function N(f::Function, x::Interval, deriv=None)
 
@@ -10,9 +15,9 @@ function N(f::Function, x::Interval, deriv=None)
     end
 
     m = mid(x)
-    Nx = m - f(m) / deriv
+    m = @interval(m)
 
-    Nx ∩ x
+    Nx = m - ( f(m) / deriv )
 
 end
 
@@ -23,10 +28,10 @@ function refine(f::Function, x::Interval)
         Nx = N(f, x)
         @show x, Nx
         # if Nx == x
-        if Nx == x # diam(Nx) >= diam(x)
-            return (x, :unique)
+        if Nx == x  || !(Nx ⊂ x)
+            return @show (x, :unique)
         end
-        x = Nx
+        x = Nx ∩ x
         #@show x
     end
 end
@@ -53,7 +58,7 @@ function newton(f::Function, x::Interval)
             return refine(f, Nx)
         end
 
-        if isempty(Nx)  # this is a type instability, since nothing is not an Interval
+        if isempty(Nx ∩ x)   # this is a type instability, since nothing is not an Interval
             return []
         end
 
@@ -70,9 +75,9 @@ function newton(f::Function, x::Interval)
         y1 = Interval(deriv.lo, -0.0)
         y2 = Interval(0.0, deriv.hi)
 
-        y1 = N(f, x, y1)
-        #y1 = y1 ∩ x
-        y2 = N(f, x, y2)
+        y1 = N(f, x, y1) ∩ x
+        y2 = N(f, x, y2) ∩ x
+
 
         return vcat(newton(f, y1),
                     newton(f, y2))
@@ -81,4 +86,4 @@ end
 
 import Base.show
 
-show(io::IO, x::Interval) = print(io, "[$(round(float(x.lo), 5)), $(round(float(x.hi), 5))]")
+#show(io::IO, x::Interval) = print(io, "[$(round(float(x.lo), 5)), $(round(float(x.hi), 5))]")
