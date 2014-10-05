@@ -44,7 +44,8 @@ function refine(f::Function, x::Interval)
         i += 1
         #@show x
     end
-    return x
+
+    (x, :unique)
 end
 
 newton(f::Function, x::Nothing) = []
@@ -107,6 +108,28 @@ function newton(f::Function, x::Interval)
         return vcat(newton(f, y1),
                     newton(f, y2))
     end
+end
+
+function process_newton(f::Function, x::Interval)
+
+    roots = newton(f, x)
+
+    unique_roots = Interval[]
+    unknown_roots = Interval[]
+
+    for root in roots
+        @show root
+        if root[2] == :unique
+            push!(unique_roots, root[1])
+        else
+            push!(unknown_roots, root[1])
+        end
+    end
+
+    sort!(unique_roots)
+    sort!(unknown_roots)
+
+    unique_roots, unknown_roots
 end
 
 import Base.show
