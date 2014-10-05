@@ -14,8 +14,16 @@ function N(f::Function, x::Interval, deriv=None)
         deriv = differentiate(f, x)
     end
 
-    m = mid(x)
-    m = @interval(m)
+#     set_rounding(BigFloat, RoundDown)
+#     m1 = (x.lo + x.hi) / 2
+#     set_rounding(BigFloat, RoundUp)
+#     m2 = (x.lo + x.hi) / 2
+
+#     m = Interval(m1, m2)  # rounded mid-point
+#     @show m
+
+    m = (x.lo + x.hi) / 2
+    m = Interval(m)
 
     Nx = m - ( f(m) / deriv )
 
@@ -26,12 +34,13 @@ function refine(f::Function, x::Interval)
     println("Refining $x")
     while true
         Nx = N(f, x)
+        Nx = Nx ∩ x
         @show x, Nx
         # if Nx == x
-        if Nx == x  || !(Nx ⊂ x)
+        if Nx == x
             return @show (x, :unique)
         end
-        x = Nx ∩ x
+        x = Nx
         #@show x
     end
 end
@@ -53,12 +62,17 @@ function newton(f::Function, x::Interval)
 
     if !(0 in deriv)
         Nx = N(f, x, deriv)
+        Nx = Nx ∩ x
 
-        if Nx ⊂ x
+        println("Inside newton")
+        @show (x, Nx)
+
+        #if Nx ⊂ x
+        if Nx in x && diam(Nx) < diam(x)
             return refine(f, Nx)
         end
 
-        if isempty(Nx ∩ x)   # this is a type instability, since nothing is not an Interval
+        if isempty(Nx)   # this is a type instability, since nothing is not an Interval
             return []
         end
 
