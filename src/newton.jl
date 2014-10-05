@@ -62,7 +62,6 @@ function newton(f::Function, x::Interval)
 
     if !(0 in deriv)
         Nx = N(f, x, deriv)
-        Nx = Nx ∩ x
 
         println("Inside newton")
         @show (x, Nx)
@@ -72,7 +71,7 @@ function newton(f::Function, x::Interval)
             return refine(f, Nx)
         end
 
-        if isempty(Nx)   # this is a type instability, since nothing is not an Interval
+        if isempty(Nx ∩ x)   # this is a type instability, since nothing is not an Interval
             return []
         end
 
