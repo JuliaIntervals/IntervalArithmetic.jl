@@ -69,7 +69,7 @@ isempty(a::Interval, b::Interval) = a.hi < b.lo || b.hi < a.lo
 function intersect(a::Interval, b::Interval)
     if isempty(a,b)
         # warn("Intersection is empty")
-        return nothing
+        return empty_interval
     end
 
     @round(max(a.lo, b.lo), min(a.hi, b.hi))

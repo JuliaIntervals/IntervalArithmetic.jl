@@ -22,6 +22,12 @@ immutable Interval <: Real
     end
 end
 
+immutable EmptyInterval <: Interval
+end
+
+empty_interval = EmptyInterval()
+isempty(x::Interval) = x == empty_interval
+
 Interval(a::Interval) = a
 Interval(a::Tuple) = Interval(a...)
 Interval(a::Real) = Interval(a, a)
