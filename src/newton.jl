@@ -69,11 +69,11 @@ function newton(f::Function, x::Interval)
     if !(0 in deriv)
         Nx = N(f, x, deriv)
 
-        println("Inside newton")
+        #println("Inside newton")
         #@show (x, Nx)
 
         #if Nx ⊂ x
-        if Nx in x && diam(Nx) < diam(x)
+        if Nx ⊆ x #&& diam(Nx) < diam(x)
             return refine(f, Nx)
         end
 
@@ -87,7 +87,7 @@ function newton(f::Function, x::Interval)
 
         # bisect:
 
-        println("Bisecting...")
+        #println("Bisecting...")
 
         m = mid(x)
         return vcat(newton(f, Interval(x.lo, m)),  # must be careful with rounding of m ?
