@@ -2,13 +2,13 @@ using ValidatedNumerics
 using AutoDiff
 
 isthin(x) = (m = (x.lo + x.hi) / 2; m == x.lo || m == x.hi)  # no more precision
-
+# this won't ever be the case with BigFloat if the interval is centered around 0?
 
 function guarded_mid(x)
     m = (x.lo + x.hi) / 2
-    if m == 0  # midpoint exactly 0
+    if m == 0.0  # midpoint exactly 0
         alpha = 0.45
-        m = alpha*x.lo + (1-alpha)*x.hi   # displace to another point in interval
+        m = alpha*x.lo + (1-alpha)*x.hi   # displace to another point in the interval
     end
 
     m
@@ -29,20 +29,18 @@ function N(f::Function, x::Interval, deriv=None)
 end
 
 
-function refine(f::Function, x::Interval)
+function refine(f::Function, x::Interval, tolerance=1e-16)
     #println("Refining $x")
     i = 0
-    while i < 20  # avoid problem with tiny floating-point numbers if 0 is a root
+    while diam(x) > tolerance  # avoid problem with tiny floating-point numbers if 0 is a root
         Nx = N(f, x)
         Nx = Nx ∩ x
-        #@show x, Nx
-        # if Nx == x
+
         if Nx == x
             return (x, :unique)
         end
         x = Nx
-        i += 1
-        #@show x
+
     end
 
     (x, :unique)
@@ -58,10 +56,14 @@ newton(f::Function, x::Nothing) = []
 ⊂(a::Interval, b::Interval) = b.lo < a.lo && a.hi < b.hi
 #⊂(a::Nothing, b::Interval) = false
 
-function newton(f::Function, x::Interval)
+function newton(f::Function, x::Interval, tolerance=1e-16)
 
     if isempty(x)
         return []
+    end
+
+    if diam(x) < tolerance
+        return (x, :unknown)
     end
 
 
@@ -102,11 +104,12 @@ function newton(f::Function, x::Interval)
         y1 = N(f, x, y1) ∩ x
         y2 = N(f, x, y2) ∩ x
 
-        #@show (y1, y2)
 
-
-        return vcat(newton(f, y1),
-                    newton(f, y2))
+        return sort!(vcat(
+                         newton(f, y1),
+                         newton(f, y2)
+                         )
+                     )
     end
 end
 
@@ -132,6 +135,5 @@ function process_newton(f::Function, x::Interval)
     unique_roots, unknown_roots
 end
 
-import Base.show
-
+#import Base.show
 #show(io::IO, x::Interval) = print(io, "[$(round(float(x.lo), 5)), $(round(float(x.hi), 5))]")
