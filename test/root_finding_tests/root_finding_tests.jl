@@ -25,15 +25,16 @@ function wilkinson_type(n)
 
     #wilkinson(x) = polyval(w, x)
 
-    a = @interval(-1, 21)
-
-    #@time newton_roots = newton(wilkinson, a)
-    @time krawczyk_roots = krawczyk(f, a)
-    @time newton_roots = newton(f, a)
+    a = @interval(-1.1, 21.05)
 
     println("Roots for n = $n: ")
+
+    @time krawczyk_roots = krawczyk(f, a)
     display(krawczyk_roots)
+
+    @time newton_roots = newton(f, a)
     display(newton_roots)
+
     println()
 end
 
