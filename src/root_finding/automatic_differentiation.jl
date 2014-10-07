@@ -1,52 +1,35 @@
-#module AutomaticDifferentiation
-
-
 ## Automatic differentiation
+## Adapted from original version by Nikolay Kryukov
 
-
-#using ValidatedNumerics
-
-
-# module AutomaticDifferentiation
-#export Ad, differentiate, jacobian
-
+## Represents the jet of a function u at the point a by (u(a), u'(a))
 
 type Ad
     u
     up
 end
 
-#Ad(c) = Ad(c, Interval(0))
 Ad(c) = Ad(c, 0)
 
 # Arithmetic between two Ad
 +(x::Ad, y::Ad) = Ad(x.u + y.u, x.up + y.up)
 -(x::Ad, y::Ad) = Ad(x.u - y.u, x.up - y.up)
 *(x::Ad, y::Ad) = Ad(x.u*y.u, x.u*y.up + y.u*x.up)
+
 function /(x::Ad, y::Ad)
-    ff = x.u/y.u
-    dd = (x.up - ff*y.up)/y.u
-    Ad(ff, dd)
+    quotient = x.u / y.u
+    deriv = (x.up - ff*y.up) / y.u
+
+    Ad(quotient, deriv)
 end
 
-# Power; two functions for power because it is less costly
-#= Commented out because it gave errors
-^(x::Ad, a::Integer)= Ad(x.u^a, a*x.u^(a-1)*x.up)
-
-function ^(x::Ad, a::Real)
-    ff = x.u^(a-1)
-    Ad(ff*x.u, a*ff*x.up)
-end
-=#
 
 # Arithmetic operations between Ad and intervals/numbers
+# This may be able to be replaced by suitable promotion and convert statements
 
 for op in (:+, :-, :*, :/)
     @eval begin
-        $op(u::Ad, c::Number) = $op(u, Ad(c))
-        $op(c::Number, u::Ad) = $op(Ad(c), u)
-#        $op(u::Ad, c::Number) = $op(u, Ad(c))
-#        $op(c::Real, u::Ad) = $op(Ad(c), u)
+        $op(u::Ad, c::Real) = $op(u, Ad(c))
+        $op(c::Real, u::Ad) = $op(Ad(c), u)
     end
 end
 
@@ -55,21 +38,17 @@ end
 
 # Elementary functions
 
-import Base.sin
 sin(x::Ad) = Ad(sin(x.u), x.up*cos(x.u))
-
-import Base.cos
 cos(x::Ad) = Ad(cos(x.u), -x.up*sin(x.u))
 
-e^(x::Ad) = Ad(e^x.u, x.up*e^x.u)
-
-import Base.exp
+# e^(x::Ad) = Ad(e^x.u, x.up*e^x.u)
 exp(x::Ad) = Ad(exp(x.u), x.up*exp(x.u))
-
-import Base.log
 log(x::Ad) = Ad(log(x.u), x.up/x.u)
 
-#(x::Ad)^y::Interval = Ad(x.u^y, x.up*y*x.u^(y-1))
+^(x::Ad, n::Integer) = n==0 ? Ad(0, 0) : Ad( (x.u)^n, y * (x.u)^(n-1) * x.up )
+^(x::Ad, y::Real) = Ad( (x.u)^y, y * (x.u)^(y-1) * x.up )
+
+# (x::Ad)^y::Interval = Ad(x.u^y, x.up*y*x.u^(y-1))
 
 differentiate(f, a) = f(Ad(a, 1.)).up
 
