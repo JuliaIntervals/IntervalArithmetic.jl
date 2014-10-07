@@ -1,4 +1,5 @@
 
+
 ## Equalities and neg-equalities
 ==(a::Interval, b::Interval) = a.lo == b.lo && a.hi == b.hi
 !=(a::Interval, b::Interval) = a.lo != b.lo || a.hi != b.hi
@@ -66,10 +67,15 @@ abs(a::Interval) = Interval(mig(a), mag(a))
 
 isempty(a::Interval, b::Interval) = a.hi < b.lo || b.hi < a.lo
 
+
+# this definition of empty_interval is not nice:
+empty_interval = Interval(Inf)  # interval from Inf to Inf
+isempty(x::Interval) = x == empty_interval
+
 function intersect(a::Interval, b::Interval)
     if isempty(a,b)
         # warn("Intersection is empty")
-        return nothing
+        return empty_interval
     end
 
     @round(max(a.lo, b.lo), min(a.hi, b.hi))

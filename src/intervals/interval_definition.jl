@@ -22,6 +22,7 @@ immutable Interval <: Real
     end
 end
 
+
 Interval(a::Interval) = a
 Interval(a::Tuple) = Interval(a...)
 Interval(a::Real) = Interval(a, a)

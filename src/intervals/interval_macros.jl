@@ -32,6 +32,7 @@ macro thin_interval(expr)
 end
 
 
+
 transform(a::MathConst) = ( @thin_interval(big(a)))
 transform(a::BigFloat) = ( @thin_interval(a))
 transform(a::Number) = :( @thin_interval(BigFloat(string($a))) )
@@ -80,6 +81,8 @@ macro interval(expr1, expr2...)
 
     return :(hull($expr1, $expr2))
 end
+
+
 
 
 macro round(expr1, expr2)
