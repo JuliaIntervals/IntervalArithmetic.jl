@@ -1,7 +1,7 @@
 
 const D = differentiate
 
-function guarded_deriv(f, x::Interval)
+function guarded_deriv_midpoint(f, x::Interval)
     # avoid 0 derivative
 
     alpha = 0.5
@@ -12,12 +12,17 @@ function guarded_deriv(f, x::Interval)
         m = alpha*x.lo + (1-alpha)*x.hi
     end
 
+    m = Interval(m)
     return m, 1./D(f, m)
 end
 
-K(f, xx::Interval, x, C) = x - C*f(x) + (1 - C*D(f, xx)) * (xx - x)
+K(f, xx::Interval, m, C) = (
+                            # m = Interval(m);
+                            # C = Interval(C);
+                            m - C*f(m) + (Interval(1.) - C*D(f, xx)) * (xx - m)
+                            )
 
-K(f, x::Interval) = ( (m, C) = guarded_deriv(f, x);
+K(f, x::Interval) = ( (m, C) = guarded_deriv_midpoint(f, x);
                       K(f, x, m, C)
                      )
 
@@ -25,6 +30,7 @@ function krawczyk_refine(f::Function, x::Interval, tolerance=1e-18)
     #println("Refining $x")
     i = 0
     while diam(x) > tolerance  # avoid problem with tiny floating-point numbers if 0 is a root
+
         Kx = K(f, x) ∩ x
 
         if Kx == x
