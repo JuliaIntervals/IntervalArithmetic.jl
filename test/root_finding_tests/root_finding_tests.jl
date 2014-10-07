@@ -9,11 +9,12 @@ function wilkinson_type(n)
     p = poly(collect(1:n))
     coeffs = map(BigFloat, p.a)
 
+    # define the polynomial
+    # TODO: use Horner's rule for efficiency?
     f(x) = sum( [coeffs[i]*x^(i-1) for i in 1:length(coeffs)] )
 
-    #wilkinson(x) = polyval(w, x)
 
-    a = @interval(-1.1, 21.05)
+    a = @interval(-1.1, 21.05)   # where to look for the roots
 
     println("Roots for n = $n: ")
 
