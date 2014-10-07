@@ -27,10 +27,6 @@ BigFloat(a::MathConst) = big(a)
 
 ## Includes:
 
-include("interval_definition.jl")
-include("interval_macros.jl")
-include("interval_arithmetic.jl")
-include("interval_trig.jl")
-include("interval_functions.jl")
+include("intervals/intervals.jl")
 
 end # module ValidatedNumerics
