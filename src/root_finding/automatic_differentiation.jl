@@ -46,7 +46,7 @@ cos(x::Ad) = Ad(cos(x.u), -x.up*sin(x.u))
 exp(x::Ad) = Ad(exp(x.u), x.up * exp(x.u))
 log(x::Ad) = Ad(log(x.u), x.up / x.u)
 
-^(x::Ad, n::Integer) = n==0 ? Ad(0, 0) : Ad( (x.u)^n, y * (x.u)^(n-1) * x.up )
+^(x::Ad, n::Integer) = n==0 ? Ad(0, 0) : Ad( (x.u)^n, n * (x.u)^(n-1) * x.up )
 ^(x::Ad, y::Real) = Ad( (x.u)^y, y * (x.u)^(y-1) * x.up )
 
 differentiate(f, a) = f(Ad(a, 1.)).up
