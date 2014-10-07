@@ -8,6 +8,7 @@ type Ad
     up
 end
 
+# Constants:
 Ad(c) = Ad(c, 0)
 
 # Arithmetic between two Ad
@@ -17,7 +18,7 @@ Ad(c) = Ad(c, 0)
 
 function /(x::Ad, y::Ad)
     quotient = x.u / y.u
-    deriv = (x.up - ff*y.up) / y.u
+    deriv = (x.up - quotient*y.up) / y.u
 
     Ad(quotient, deriv)
 end
@@ -36,24 +37,19 @@ end
 +(x::Ad) = x
 -(x::Ad) = Ad(-x.u, -x.up)
 
+
 # Elementary functions
 
 sin(x::Ad) = Ad(sin(x.u), x.up*cos(x.u))
 cos(x::Ad) = Ad(cos(x.u), -x.up*sin(x.u))
 
-# e^(x::Ad) = Ad(e^x.u, x.up*e^x.u)
-exp(x::Ad) = Ad(exp(x.u), x.up*exp(x.u))
-log(x::Ad) = Ad(log(x.u), x.up/x.u)
+exp(x::Ad) = Ad(exp(x.u), x.up * exp(x.u))
+log(x::Ad) = Ad(log(x.u), x.up / x.u)
 
 ^(x::Ad, n::Integer) = n==0 ? Ad(0, 0) : Ad( (x.u)^n, y * (x.u)^(n-1) * x.up )
 ^(x::Ad, y::Real) = Ad( (x.u)^y, y * (x.u)^(y-1) * x.up )
 
-# (x::Ad)^y::Interval = Ad(x.u^y, x.up*y*x.u^(y-1))
-
 differentiate(f, a) = f(Ad(a, 1.)).up
-
-# End of module
-#end
 
 function jacobian(f, a)
 
