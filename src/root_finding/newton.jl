@@ -1,5 +1,3 @@
-using ValidatedNumerics
-using AutoDiff
 
 isthin(x) = (m = (x.lo + x.hi) / 2; m == x.lo || m == x.hi)  # no more precision
 # this won't ever be the case with BigFloat if the interval is centered around 0?
@@ -29,7 +27,7 @@ function N(f::Function, x::Interval, deriv=None)
 end
 
 
-function refine(f::Function, x::Interval, tolerance=1e-16)
+function newton_refine(f::Function, x::Interval, tolerance=1e-16)
     #println("Refining $x")
     i = 0
     while diam(x) > tolerance  # avoid problem with tiny floating-point numbers if 0 is a root
@@ -46,15 +44,7 @@ function refine(f::Function, x::Interval, tolerance=1e-16)
     (x, :unique)
 end
 
-newton(f::Function, x::Nothing) = []
-
-# subset:
-⊆(a::Interval, b::Interval) = b.lo <= a.lo && a.hi <= b.hi
-#⊆(a::Nothing, b::Interval) = false
-
-# strict subset:
-⊂(a::Interval, b::Interval) = b.lo < a.lo && a.hi < b.hi
-#⊂(a::Nothing, b::Interval) = false
+#newton(f::Function, x::Nothing) = []
 
 function newton(f::Function, x::Interval, tolerance=1e-16)
 
@@ -72,17 +62,14 @@ function newton(f::Function, x::Interval, tolerance=1e-16)
     if !(0 in deriv)
         Nx = N(f, x, deriv)
 
-        #println("Inside newton")
-        #@show (x, Nx)
-
-        #if Nx ⊂ x
-        if Nx ⊆ x #&& diam(Nx) < diam(x)
-            return refine(f, Nx)
-        end
-
-        if isempty(Nx ∩ x)   # this is a type instability, since nothing is not an Interval
+        if isempty(Nx ∩ x)
             return []
         end
+
+        if Nx ⊆ x
+            return newton_refine(f, Nx)
+        end
+
 
         if isthin(x)
             return (x, :unknown)
@@ -113,27 +100,27 @@ function newton(f::Function, x::Interval, tolerance=1e-16)
     end
 end
 
-function process_newton(f::Function, x::Interval)
+# function process_newton(f::Function, x::Interval)
 
-    roots = newton(f, x)
+#     roots = newton(f, x)
 
-    unique_roots = Interval[]
-    unknown_roots = Interval[]
+#     unique_roots = Interval[]
+#     unknown_roots = Interval[]
 
-    for root in roots
-        @show root
-        if root[2] == :unique
-            push!(unique_roots, root[1])
-        else
-            push!(unknown_roots, root[1])
-        end
-    end
+#     for root in roots
+#         @show root
+#         if root[2] == :unique
+#             push!(unique_roots, root[1])
+#         else
+#             push!(unknown_roots, root[1])
+#         end
+#     end
 
-    sort!(unique_roots)
-    sort!(unknown_roots)
+#     sort!(unique_roots)
+#     sort!(unknown_roots)
 
-    unique_roots, unknown_roots
-end
+#     unique_roots, unknown_roots
+# end
 
 #import Base.show
 #show(io::IO, x::Interval) = print(io, "[$(round(float(x.lo), 5)), $(round(float(x.hi), 5))]")

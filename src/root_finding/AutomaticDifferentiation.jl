@@ -1,11 +1,14 @@
-    ## Automatic differentiation (interval version)
+module AutomaticDifferentiation
+
+
+## Automatic differentiation
 
 
 using ValidatedNumerics
 
 
-module AutoDiff
-export differentiate, Ad, Interval, rad, diam, mid, mig, mag, belong, hd, hull, isect, isectext, lo, hi, make_intervals, det2
+# module AutomaticDifferentiation
+export Ad, differentiate, jacobian
 
 
 type Ad

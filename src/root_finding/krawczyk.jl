@@ -1,26 +1,27 @@
-using ValidatedNumerics
-using AutoDiff
 
 const D = differentiate
 
+function guarded_deriv(f, x::Interval)
+    # avoid 0 derivative
 
-# subset:
-⊆(a::Interval, b::Interval) = b.lo <= a.lo && a.hi <= b.hi
-#⊆(a::Nothing, b::Interval) = false
+    alpha = 0.5
+    m = alpha*x.lo + (1-alpha)*x.hi
 
-# strict subset:
-⊂(a::Interval, b::Interval) = b.lo < a.lo && a.hi < b.hi
-#⊂(a::Nothing, b::Interval) = false
+    while D(f, m) == 0
+        alpha /= 2
+        m = alpha*x.lo + (1-alpha)*x.hi
+    end
 
+    return m, 1./D(f, m)
+end
 
 K(f, xx::Interval, x, C) = x - C*f(x) + (1 - C*D(f, xx)) * (xx - x)
 
-K(f, x::Interval) = ( m = mid(x);
-                      C = 1/D(f, m);
+K(f, x::Interval) = ( (m, C) = guarded_deriv(f, x);
                       K(f, x, m, C)
                      )
 
-function refine(f::Function, x::Interval, tolerance=1e-16)
+function krawczyk_refine(f::Function, x::Interval, tolerance=1e-18)
     #println("Refining $x")
     i = 0
     while diam(x) > tolerance  # avoid problem with tiny floating-point numbers if 0 is a root
@@ -45,8 +46,8 @@ function krawczyk(f::Function, x::Interval)
         return []
     end
 
-    if Kx ⊂ x
-        return refine(f, Kx)
+    if Kx ⊊ x
+        return krawczyk_refine(f, Kx)
     end
 
     m = mid(x)
