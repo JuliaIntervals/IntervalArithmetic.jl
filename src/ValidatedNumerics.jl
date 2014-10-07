@@ -9,9 +9,11 @@ import Base:
     BigFloat, string
 
 export
-    @interval, Interval, empty_interval, isempty,
+    @interval, Interval,
     @round_down, @round_up, @round, @thin_interval,
-    diam, mid, mag, mig, hull, isinside
+    diam, mid, mag, mig, hull, isinside,
+    empty_interval, ∅, isempty, ⊊
+
 
 export
     newton, krawczyk

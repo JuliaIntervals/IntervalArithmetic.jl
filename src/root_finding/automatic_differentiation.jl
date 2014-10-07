@@ -1,14 +1,14 @@
-module AutomaticDifferentiation
+#module AutomaticDifferentiation
 
 
 ## Automatic differentiation
 
 
-using ValidatedNumerics
+#using ValidatedNumerics
 
 
 # module AutomaticDifferentiation
-export Ad, differentiate, jacobian
+#export Ad, differentiate, jacobian
 
 
 type Ad
@@ -74,7 +74,7 @@ log(x::Ad) = Ad(log(x.u), x.up/x.u)
 differentiate(f, a) = f(Ad(a, 1.)).up
 
 # End of module
-end
+#end
 
 function jacobian(f, a)
 
