@@ -14,7 +14,7 @@ convert(::Type{Jet}, c::Real) = Jet(c)
 promote_rule{T <: Real}(::Type{Jet}, ::Type{T}) = Jet
 
 # Constants:
-Jet(c::Real) = Jet(c, 0)
+Jet(c::Real) = Jet(c, zero(c))
 
 # Arithmetic between two Jet
 +(x::Jet, y::Jet) = Jet(x.val + y.val, x.der + y.der)
