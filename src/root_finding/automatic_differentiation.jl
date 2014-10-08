@@ -8,13 +8,18 @@ immutable Jet <: Number  # is this really a Number?  Then promotion rules work
     der   # derative u'(a)
 end
 
-import Base.convert, Base.promote_rule
+import Base:
+    convert, promote_rule, zero, one
 
 convert(::Type{Jet}, c::Real) = Jet(c)
 promote_rule{T <: Real}(::Type{Jet}, ::Type{T}) = Jet
 
 # Constants:
 Jet(c::Real) = Jet(c, zero(c))
+
+zero(x::Jet) = Jet(zero(x.val), zero(x.der))
+one(x::Jet) = Jet(one(x.val), zero(x.der))
+
 
 # Arithmetic between two Jet
 +(x::Jet, y::Jet) = Jet(x.val + y.val, x.der + y.der)
@@ -39,7 +44,7 @@ cos(x::Jet) = Jet(cos(x.val), -x.der*sin(x.val))
 exp(x::Jet) = Jet(exp(x.val), x.der * exp(x.val))
 log(x::Jet) = Jet(log(x.val), x.der / x.val)
 
-^(x::Jet, n::Integer) = n==0 ? Jet(0, 0) : Jet( (x.val)^n, n * (x.val)^(n-1) * x.der )
+^(x::Jet, n::Integer) = n==0 ? zero(x) : Jet( (x.val)^n, n * (x.val)^(n-1) * x.der )
 ^(x::Jet, r::Rational) = x^(r.num)^(1/r.den)
 ^(x::Jet, y::Real) = Jet( (x.val)^y, y * (x.val)^(y-1) * x.der )
 
