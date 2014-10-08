@@ -28,21 +28,6 @@ function /(x::Jet, y::Jet)
     Jet(quotient, der)
 end
 
-
-# Arithmetic operations between Jet and intervals/numbers
-# This may be able to be replaced by suitable promotion and convert statements
-
-# for op in (:+, :-, :*, :/)
-#     @eval begin
-#         $op(u::Jet, c::Real) = $op(u, Jet(c))
-#         $op(c::Real, u::Jet) = $op(Jet(c), u)
-#     end
-# end
-
-
-#promote_rule(::Type{BigFloat}, ::Type{Interval}) = Interval
-
-+(x::Jet) = x
 -(x::Jet) = Jet(-x.val, -x.der)
 
 
