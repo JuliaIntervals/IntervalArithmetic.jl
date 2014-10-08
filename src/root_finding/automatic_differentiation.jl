@@ -43,7 +43,7 @@ log(x::Jet) = Jet(log(x.val), x.der / x.val)
 ^(x::Jet, r::Rational) = x^(r.num)^(1/r.den)
 ^(x::Jet, y::Real) = Jet( (x.val)^y, y * (x.val)^(y-1) * x.der )
 
-differentiate(f, a) = f( Jet(a, 1) ).der
+differentiate(f::Function, a::Number) = f( Jet(a, one(a)) ).der
 const D = differentiate
 
 function jacobian(f, a)
@@ -52,16 +52,16 @@ function jacobian(f, a)
 	f2(x) = f(x)[2]
 
 	f11(x1) = f1([x1, a[2]])
-	J11 = differentiate(f11, a[1])
+	J11 = D(f11, a[1])
 
 	f12(x2) = f1([a[1], x2])
-	J12 = differentiate(f12, a[2])
+	J12 = D(f12, a[2])
 
 	f21(x1) = f2([x1, a[2]])
-	J21 = differentiate(f21, a[1])
+	J21 = D(f21, a[1])
 
 	f22(x2) = f2([a[1], x2])
-	J22 = differentiate(f22, a[2])
+	J22 = D(f22, a[2])
 
 	[J11 J12; J21 J22]
 

@@ -26,7 +26,7 @@ function wilkinson_type(n)
     println()
 end
 
-for n in 1:10
-    println("Doing n = $n")
-    wilkinson_type(n)
-end
+# for n in 1:7
+#     println("Doing n = $n")
+#     wilkinson_type(n)
+# end
