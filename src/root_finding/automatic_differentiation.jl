@@ -1,5 +1,5 @@
 ## Automatic differentiation
-## Jetapted from original version by Nikolay Kryukov
+## Adapted from original version by Nikolay Kryukov
 
 ## Represents the jet of a function u at the point a by (u(a), u'(a))
 
