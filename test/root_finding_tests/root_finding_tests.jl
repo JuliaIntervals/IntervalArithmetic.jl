@@ -13,7 +13,6 @@ function wilkinson_type(n)
     # TODO: use Horner's rule for efficiency?
     f(x) = sum( [coeffs[i]*x^(i-1) for i in 1:length(coeffs)] )
 
-
     a = @interval(-1.1, 21.05)   # where to look for the roots
 
     println("Roots for n = $n: ")
