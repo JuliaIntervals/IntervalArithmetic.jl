@@ -1,55 +1,56 @@
 ## Automatic differentiation
-## Adapted from original version by Nikolay Kryukov
+## Jetapted from original version by Nikolay Kryukov
 
 ## Represents the jet of a function u at the point a by (u(a), u'(a))
 
-type Ad
-    u
-    up
+type Jet
+    value
+    deriv
 end
 
 # Constants:
-Ad(c) = Ad(c, 0)
+Jet(c) = Jet(c, 0)
 
-# Arithmetic between two Ad
-+(x::Ad, y::Ad) = Ad(x.u + y.u, x.up + y.up)
--(x::Ad, y::Ad) = Ad(x.u - y.u, x.up - y.up)
-*(x::Ad, y::Ad) = Ad(x.u*y.u, x.u*y.up + y.u*x.up)
+# Arithmetic between two Jet
++(x::Jet, y::Jet) = Jet(x.value + y.value, x.deriv + y.deriv)
+-(x::Jet, y::Jet) = Jet(x.value - y.value, x.deriv - y.deriv)
+*(x::Jet, y::Jet) = Jet(x.value*y.value, x.value*y.deriv + y.value*x.deriv)
 
-function /(x::Ad, y::Ad)
-    quotient = x.u / y.u
-    deriv = (x.up - quotient*y.up) / y.u
+function /(x::Jet, y::Jet)
+    quotient = x.value / y.value
+    deriv = (x.deriv - quotient*y.deriv) / y.value
 
-    Ad(quotient, deriv)
+    Jet(quotient, deriv)
 end
 
 
-# Arithmetic operations between Ad and intervals/numbers
+# Arithmetic operations between Jet and intervals/numbers
 # This may be able to be replaced by suitable promotion and convert statements
 
 for op in (:+, :-, :*, :/)
     @eval begin
-        $op(u::Ad, c::Real) = $op(u, Ad(c))
-        $op(c::Real, u::Ad) = $op(Ad(c), u)
+        $op(u::Jet, c::Real) = $op(u, Jet(c))
+        $op(c::Real, u::Jet) = $op(Jet(c), u)
     end
 end
 
-+(x::Ad) = x
--(x::Ad) = Ad(-x.u, -x.up)
++(x::Jet) = x
+-(x::Jet) = Jet(-x.value, -x.deriv)
 
 
 # Elementary functions
 
-sin(x::Ad) = Ad(sin(x.u), x.up*cos(x.u))
-cos(x::Ad) = Ad(cos(x.u), -x.up*sin(x.u))
+sin(x::Jet) = Jet(sin(x.value), x.deriv*cos(x.value))
+cos(x::Jet) = Jet(cos(x.value), -x.deriv*sin(x.value))
 
-exp(x::Ad) = Ad(exp(x.u), x.up * exp(x.u))
-log(x::Ad) = Ad(log(x.u), x.up / x.u)
+exp(x::Jet) = Jet(exp(x.value), x.deriv * exp(x.value))
+log(x::Jet) = Jet(log(x.value), x.deriv / x.value)
 
-^(x::Ad, n::Integer) = n==0 ? Ad(0, 0) : Ad( (x.u)^n, n * (x.u)^(n-1) * x.up )
-^(x::Ad, y::Real) = Ad( (x.u)^y, y * (x.u)^(y-1) * x.up )
+^(x::Jet, n::Integer) = n==0 ? Jet(0, 0) : Jet( (x.value)^n, n * (x.value)^(n-1) * x.deriv )
+^(x::Jet, y::Real) = Jet( (x.value)^y, y * (x.value)^(y-1) * x.deriv )
 
-differentiate(f, a) = f(Ad(a, 1.)).up
+differentiate(f, a) = f(Jet(a, 1.)).deriv
+const D = differentiate
 
 function jacobian(f, a)
 
