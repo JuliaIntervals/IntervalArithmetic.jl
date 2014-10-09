@@ -13,10 +13,10 @@ function guarded_mid(x)
 
 end
 
-function N(f::Function, x::Interval, deriv=None)
+function N(f::Function, f_prime::Function, x::Interval, deriv=None)
 
     if deriv==None
-        deriv = differentiate(f, x)
+        deriv = f_prime(x)
     end
 
     m = guarded_mid(x)
@@ -27,11 +27,12 @@ function N(f::Function, x::Interval, deriv=None)
 end
 
 
-function newton_refine(f::Function, x::Interval, tolerance=1e-16)
+
+function newton_refine(f::Function, f_prime::Function, x::Interval, tolerance=1e-16)
     #println("Refining $x")
     i = 0
     while diam(x) > tolerance  # avoid problem with tiny floating-point numbers if 0 is a root
-        Nx = N(f, x)
+        Nx = N(f, f_prime, x)
         Nx = Nx ∩ x
 
         if Nx == x
@@ -46,7 +47,11 @@ end
 
 #newton(f::Function, x::Nothing) = []
 
-function newton(f::Function, x::Interval, tolerance=1e-16)
+
+newton(f::Function, x::Interval, tolerance=1e-16) = newton(f, D(f), x, tolerance)
+ # use automatic differentiation if no derivative function given
+
+function newton(f::Function, f_prime::Function, x::Interval, tolerance=1e-16)
 
     if isempty(x)
         return []
@@ -57,17 +62,18 @@ function newton(f::Function, x::Interval, tolerance=1e-16)
     end
 
 
-    deriv = differentiate(f, x)
+    #deriv = differentiate(f, x)
+    deriv = f_prime(x)
 
     if !(0 in deriv)
-        Nx = N(f, x, deriv)
+        Nx = N(f, f_prime, x, deriv)
 
         if isempty(Nx ∩ x)
             return []
         end
 
         if Nx ⊆ x
-            return newton_refine(f, Nx)
+            return newton_refine(f, f_prime, Nx)
         end
 
 
@@ -80,21 +86,21 @@ function newton(f::Function, x::Interval, tolerance=1e-16)
         #println("Bisecting...")
 
         m = mid(x)
-        return vcat(newton(f, Interval(x.lo, m)),  # must be careful with rounding of m ?
-                    newton(f, Interval(m, x.hi))
+        return vcat(newton(f, f_prime, Interval(x.lo, m)),  # must be careful with rounding of m ?
+                    newton(f, f_prime, Interval(m, x.hi))
                     )
 
     else  # 0 in deriv; this does extended interval division by hand
         y1 = Interval(deriv.lo, -0.0)
         y2 = Interval(0.0, deriv.hi)
 
-        y1 = N(f, x, y1) ∩ x
-        y2 = N(f, x, y2) ∩ x
+        y1 = N(f, f_prime, x, y1) ∩ x
+        y2 = N(f, f_prime, x, y2) ∩ x
 
 
         return sort!(vcat(
-                         newton(f, y1),
-                         newton(f, y2)
+                         newton(f, f_prime, y1),
+                         newton(f, f_prime, y2)
                          )
                      )
     end
