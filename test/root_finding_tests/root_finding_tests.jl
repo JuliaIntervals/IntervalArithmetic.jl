@@ -34,6 +34,21 @@ function wilkinson_type(n)
     @time newton_roots = newton(f, f_prime, a)
     display(newton_roots)
 
+    a = floatinterval(a)
+    @time krawczyk_roots = krawczyk(f, a)
+    display(krawczyk_roots)
+
+    @time newton_roots = newton(f, a)
+    display(newton_roots)
+
+    @time krawczyk_roots = krawczyk(f, f_prime, a)
+    display(krawczyk_roots)
+
+    @time newton_roots = newton(f, f_prime, a)
+    display(newton_roots)
+
+
+
     println()
 end
 

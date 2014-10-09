@@ -16,8 +16,8 @@ isinside(x::Real, a::Interval) = a.lo < x < a.hi
 ⊆(a::Interval, b::Interval) = b.lo ≤ a.lo && a.hi ≤ b.hi
 
 ## zero and one functions
-zero(a::Interval) = Interval(big(0.0))
-one(a::Interval) = Interval(big(1.0))
+zero(a::Interval) = Interval(zero(a.lo))
+one(a::Interval) = Interval(zero(a.hi))
 
 
 ## Addition
@@ -38,19 +38,19 @@ one(a::Interval) = Interval(big(1.0))
 
 ## Division
 function reciprocal(a::Interval)
-    uno = one(BigFloat)
-    z = zero(BigFloat)
-    if isinside(z,a)
+    # uno = one(BigFloat)
+    # z = zero(BigFloat)
+    if isinside(0, a)
         #if z in a
         warn("\nInterval in denominator contains 0.")
-        return Interval(-inf(z),inf(z))  # inf(z) returns inf of type of z
+        return Interval(-inf(a.lo),inf(a.lo))  # inf(z) returns inf of type of z
     end
 
-    @round(uno/a.hi, uno/a.lo)
+    @round(1 / a.hi, 1 / a.lo)
 end
 
 inv(a::Interval) = reciprocal(a)
-/(a::Interval, b::Interval) = a*reciprocal(b)
+/(a::Interval, b::Interval) = a * reciprocal(b)
 //(a::Interval, b::Interval) = a / b    # to deal with rationals
 
 
