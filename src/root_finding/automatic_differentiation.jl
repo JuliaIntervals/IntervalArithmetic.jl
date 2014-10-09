@@ -49,6 +49,10 @@ log(x::Jet) = Jet(log(x.val), x.der / x.val)
 ^(x::Jet, y::Real) = Jet( (x.val)^y, y * (x.val)^(y-1) * x.der )
 
 differentiate(f::Function, a::Number) = f( Jet(a, one(a)) ).der
+
+differentiate(f::Function) = x -> differentiate(f, x)
+# caution: anonymous functions are currently slow (v0.3 of Julia)
+
 const D = differentiate
 
 function jacobian(f, a)
