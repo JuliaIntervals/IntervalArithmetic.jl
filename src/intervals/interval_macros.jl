@@ -3,7 +3,7 @@
 
 # (Could use "with rounding" to ensure previous rounding mode is correctly reset)
 
-evaluate(expr) = eval(Main, expr)
+#evaluate(expr) = eval(Main, expr)
 
 macro round_down(expr)
 #     value = evaluate(expr)
@@ -22,6 +22,10 @@ macro round_down(expr)
             set_rounding(BigFloat, RoundDown)
             set_rounding(Float64, RoundDown)
                 $expr
+      #      set_rounding(BigFloat, RoundNearest)
+      #      set_rounding(Float64, RoundNearest)
+
+
            # end
         end
 #     end
@@ -34,6 +38,9 @@ macro round_up(expr)
          #with_rounding(BigFloat, RoundUp) do
             $expr
         #end
+      #  set_rounding(BigFloat, RoundNearest)
+      #  set_rounding(Float64, RoundNearest)
+
     end
 end
 

@@ -4,7 +4,7 @@ isthin(x) = (m = (x.lo + x.hi) / 2; m == x.lo || m == x.hi)  # no more precision
 
 function guarded_mid(x)
     m = (x.lo + x.hi) / 2
-    if m == 0.0  # midpoint exactly 0
+    if m == zero(x.lo)  # midpoint exactly 0
         alpha = 0.45
         m = alpha*x.lo + (1-alpha)*x.hi   # displace to another point in the interval
     end
@@ -30,7 +30,7 @@ end
 
 function newton_refine(f::Function, f_prime::Function, x::Interval, tolerance=1e-16)
     #println("Refining $x")
-    i = 0
+    #i = 0
     while diam(x) > tolerance  # avoid problem with tiny floating-point numbers if 0 is a root
         Nx = N(f, f_prime, x)
         Nx = Nx ∩ x
@@ -91,8 +91,8 @@ function newton(f::Function, f_prime::Function, x::Interval, tolerance=1e-16)
                     )
 
     else  # 0 in deriv; this does extended interval division by hand
-        y1 = Interval(deriv.lo, -0.0)
-        y2 = Interval(0.0, deriv.hi)
+        y1 = Interval(deriv.lo, -zero(deriv.lo))
+        y2 = Interval(zero(deriv.lo), deriv.hi)
 
         y1 = N(f, f_prime, x, y1) ∩ x
         y2 = N(f, f_prime, x, y2) ∩ x

@@ -59,7 +59,7 @@ inv(a::Interval) = reciprocal(a)
 diam(a::Interval) = a.hi - a.lo
 mid(a::Interval) = one(a.lo) / 2 * (a.hi + a.lo)
 mag(a::Interval) = max( abs(a.lo), abs(a.hi) )
-mig(a::Interval) = 0 in a ? big(0.0) : min( abs(a.lo), abs(a.hi) )
+mig(a::Interval) = zero(a.lo) in a ? zero(a.lo) : min( abs(a.lo), abs(a.hi) )
 
 
 ## Functions needed for generic linear algebra routines to work

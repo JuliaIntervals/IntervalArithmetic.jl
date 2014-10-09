@@ -34,7 +34,19 @@ function wilkinson_type(n)
     @time newton_roots = newton(f, f_prime, a)
     display(newton_roots)
 
+
+    # repeat with Float64 intervals
+
     a = floatinterval(a)
+
+    coeffs = map(float, p.a)
+    coeffs_prime = map(float, p_prime.a)
+
+    # define the polynomial
+    # TODO: use Horner's rule for efficiency?
+    f(x) = sum( [coeffs[i]*x^(i-1) for i in 1:length(coeffs)] )
+    f_prime(x) = sum( [coeffs_prime[i]*x^(i-1) for i in 1:length(coeffs_prime)] )
+
     @time krawczyk_roots = krawczyk(f, a)
     display(krawczyk_roots)
 
