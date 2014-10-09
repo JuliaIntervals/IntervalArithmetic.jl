@@ -17,7 +17,7 @@ isinside(x::Real, a::Interval) = a.lo < x < a.hi
 
 ## zero and one functions
 zero(a::Interval) = Interval(zero(a.lo))
-one(a::Interval) = Interval(zero(a.hi))
+one(a::Interval) = Interval(one(a.lo))
 
 
 ## Addition
