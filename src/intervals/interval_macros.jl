@@ -31,6 +31,53 @@ macro round_down(expr)
 #     end
 end
 
+macro new_round_down(expr, T)
+
+    if T in (:Float64, :BigFloat)
+        quote
+            with_rounding($T, RoundDown) do
+                $expr
+            end
+        end
+
+    else
+        expr
+    end
+
+end
+
+macro rounding(expr, T, rounding_mode)
+
+    if T in (:Float64, :BigFloat)
+        quote
+            set_rounding($T, $rounding_mode)
+            temp = $expr
+            set_rounding($T, RoundNearest)
+            temp
+        end
+
+    else
+        expr
+    end
+
+end
+
+macro all_rounding(expr, rounding_mode)
+    quote
+        set_rounding(Float64, $rounding_mode)
+        set_rounding(BigFloat, $rounding_mode)
+
+        temp = $expr
+
+        set_rounding(Float64, RoundNearest)
+        set_rounding(BigFloat, RoundNearest)
+
+        temp
+    end
+
+end
+
+
 macro round_up(expr)
     quote
         set_rounding(BigFloat, RoundUp)
@@ -97,22 +144,40 @@ macro interval(expr1, expr2...)
 
     expr1 = transform(expr1)
 
+    use_float = false
+
     if isempty(expr2)
         expr2 = expr1
     else
+        if length(expr2) > 1 && ( expr2[2] in (:Float64, :(ValidatedNumerics.Float64)) )
+            use_float = true
+        end
+
         expr2 = transform(expr2[1])
     end
 
-    return :(hull($expr1, $expr2))
+    if use_float
+        return :(floatinterval(hull($expr1, $expr2)))
+
+    else
+        return :(hull($expr1, $expr2))   # BigFloat by default
+    end
 end
 
 
+
+# macro round(expr1, expr2)
+#     quote
+#         Interval(@round_down($expr1), @round_up($expr2))
+#     end
+# end
 
 macro round(expr1, expr2)
     quote
-        Interval(@round_down($expr1), @round_up($expr2))
+        Interval(@all_rounding($expr1, RoundDown), @all_rounding($expr2, RoundUp))
     end
 end
+
 
 
 # macro floatinterval(expr1, expr2)
@@ -145,4 +210,13 @@ function floatinterval(x::Interval)
     hi = round_BigFloat_to_float(x.hi, RoundUp)
 
     Interval(lo, hi)
+end
+
+macro floatinterval(expr1, expr2...)
+
+    if isempty(expr2)
+        expr2 = expr1
+    end
+
+    :(floatinterval(@interval($expr1, $expr2)))
 end

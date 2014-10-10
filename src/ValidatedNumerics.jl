@@ -6,7 +6,7 @@ import Base:
     sqrt, exp, log, sin, cos, tan, inv,
     union, intersect, isempty,
     convert, promote_rule,
-    BigFloat, string
+    BigFloat, string, Float64
 
 export
     @interval, Interval,
@@ -14,7 +14,7 @@ export
     diam, mid, mag, mig, hull, isinside,
     empty_interval, ∅, isempty, ⊊,
     differentiate, D,  # should these be exported?
-    floatinterval
+    floatinterval, @floatinterval
 
 
 export
