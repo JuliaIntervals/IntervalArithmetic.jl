@@ -63,15 +63,12 @@ macro thin_interval(expr)
     end
 end
 
+
 ## Wrap user input for correct rounding:
-
-
-
 
 transform(a::MathConst) =  ( @thin_interval(big(a)))
 transform(a::BigFloat)  =  ( @thin_interval(a))
 transform(a::Number)    = :( @thin_interval(BigFloat(string($a))) )
-
 
 function transform(a::Symbol)
 
@@ -130,7 +127,7 @@ macro interval(expr1, expr2...)
 end
 
 
-
+## The following are used to construct a floating-point interval
 
 function round_BigFloat_to_float(x, rounding_mode::RoundingMode)
      with_rounding(BigFloat, rounding_mode) do
