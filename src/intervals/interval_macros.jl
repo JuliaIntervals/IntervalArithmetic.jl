@@ -3,39 +3,11 @@
 
 # (Could use "with rounding" to ensure previous rounding mode is correctly reset)
 
-#evaluate(expr) = eval(Main, expr)
-
-macro round_down(expr)
-#     value = evaluate(expr)
-
-#     if typeof(value) == Float64
-#         quote
-#             set_rounding(Float64, RoundDown)
-#             $expr
-#         end
-
-#     else
-
-        quote
-            #set_rounding(BigFloat, RoundDown)
-            #with_rounding(BigFloat, RoundDown) do
-            set_rounding(BigFloat, RoundDown)
-            set_rounding(Float64, RoundDown)
-                $expr
-      #      set_rounding(BigFloat, RoundNearest)
-      #      set_rounding(Float64, RoundNearest)
-
-
-           # end
-        end
-#     end
-end
-
-macro new_round_down(expr, T)
+macro new_rounding(expr, T, rounding_mode)
 
     if T in (:Float64, :BigFloat)
         quote
-            with_rounding($T, RoundDown) do
+            with_rounding($T, $rounding_mode) do
                 $expr
             end
         end
@@ -78,28 +50,21 @@ macro all_rounding(expr, rounding_mode)
 end
 
 
-macro round_up(expr)
+macro round(expr1, expr2)
     quote
-        set_rounding(BigFloat, RoundUp)
-        set_rounding(Float64, RoundUp)
-         #with_rounding(BigFloat, RoundUp) do
-            $expr
-        #end
-      #  set_rounding(BigFloat, RoundNearest)
-      #  set_rounding(Float64, RoundNearest)
-
+        Interval(@all_rounding($expr1, RoundDown), @all_rounding($expr2, RoundUp))
     end
 end
-
-
-## Wrap user input for correct rounding:
 
 
 macro thin_interval(expr)
     quote
-        Interval(@round_down($expr), @round_up($expr))
+        @round($expr, $expr)
     end
 end
+
+## Wrap user input for correct rounding:
+
 
 
 
@@ -166,38 +131,6 @@ end
 
 
 
-# macro round(expr1, expr2)
-#     quote
-#         Interval(@round_down($expr1), @round_up($expr2))
-#     end
-# end
-
-macro round(expr1, expr2)
-    quote
-        Interval(@all_rounding($expr1, RoundDown), @all_rounding($expr2, RoundUp))
-    end
-end
-
-
-
-# macro floatinterval(expr1, expr2)
-
-#     expr3 = @interval($expr1, $expr2)
-#     I = eval(expr3)
-
-#     quote
-#         set_rounding(Float64, RoundDown)
-#         f1 = float(I.lo)
-
-#         set_rounding(Float64, RoundUp)
-#         f2 = float(I.hi)
-
-#         Interval(f1, f2)
-
-#     end
-
-# end
-
 
 function round_BigFloat_to_float(x, rounding_mode::RoundingMode)
      with_rounding(BigFloat, rounding_mode) do
@@ -216,6 +149,8 @@ macro floatinterval(expr1, expr2...)
 
     if isempty(expr2)
         expr2 = expr1
+    else
+        expr2 = expr2[1]
     end
 
     :(floatinterval(@interval($expr1, $expr2)))
