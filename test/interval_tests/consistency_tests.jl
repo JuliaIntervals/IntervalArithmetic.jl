@@ -28,22 +28,15 @@ c = @interval(0.25, 4.0)
 @test a*b == @interval(a.lo*b.lo, a.hi*b.hi)
 
 
-@test inv( zero(a) ) == @interval(Inf,Inf)
-@test inv( @interval(0, 1) ) == @interval(1, Inf)
-@test inv( @interval(1, Inf) ) == @interval(0, 1)
-@test inv(c) == c
-@test one(a)/b == inv(b)
-
-
-@test inv(zero(a)) == @interval(Inf,Inf)
-@test inv(@interval(0,1)) == @interval(1,Inf)
-@test inv(@interval(1,Inf)) == @interval(0,1)
+@test inv( zero(a) ) == Interval(Inf, Inf)
+@test inv( @interval(0, 1) ) == Interval(1, Inf)
+@test inv( @interval(1, Inf) ) == Interval(0, 1)
 @test inv(c) == c
 @test one(a)/b == inv(b)
 
 @test 0.1 ∈ @interval(0.1)
 @test 0.1 in @interval(0.1)
-@test !isinside(0.1, @interval(0.1))
+#@test !isinside(0.1, @interval(0.1))
 @test intersect(a, @interval(-1)) == ∅
 @test a ∩ @interval(-1) == empty_interval
 @test isempty(a ∩ @interval(-1) )

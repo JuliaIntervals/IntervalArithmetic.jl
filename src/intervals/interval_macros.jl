@@ -34,15 +34,29 @@ macro rounding(expr, T, rounding_mode)
 
 end
 
-macro all_rounding(expr, rounding_mode)
+# macro all_rounding(T, expr, rounding_mode)
+#     quote
+#         set_rounding(Float64, $rounding_mode)
+#         set_rounding(BigFloat, $rounding_mode)
+
+#         temp = $expr
+
+#         set_rounding(Float64, RoundNearest)
+#         set_rounding(BigFloat, RoundNearest)
+
+#         temp
+#     end
+
+# end
+
+
+set_rounding(whatever, rounding_mode) = ()
+
+macro all_rounding(T, expr, rounding_mode)
     quote
-        set_rounding(Float64, $rounding_mode)
-        set_rounding(BigFloat, $rounding_mode)
-
+        set_rounding($T, $rounding_mode)
         temp = $expr
-
-        set_rounding(Float64, RoundNearest)
-        set_rounding(BigFloat, RoundNearest)
+        set_rounding($T, RoundNearest)
 
         temp
     end
@@ -50,16 +64,16 @@ macro all_rounding(expr, rounding_mode)
 end
 
 
-macro round(expr1, expr2)
+macro round(T, expr1, expr2)
     quote
-        Interval(@all_rounding($expr1, RoundDown), @all_rounding($expr2, RoundUp))
+        Interval(@all_rounding($T, $expr1, RoundDown), @all_rounding($T, $expr2, RoundUp))
     end
 end
 
 
 macro thin_interval(expr)
     quote
-        @round($expr, $expr)
+        @round(BigFloat, $expr, $expr)
     end
 end
 

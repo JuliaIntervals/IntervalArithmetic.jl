@@ -9,11 +9,13 @@
 in(x::Real, a::Interval) = a.lo <= x <= a.hi
 
 # strict inclusion:
-isinside(a::Interval, b::Interval) = b.lo < a.lo && a.hi < b.hi
-isinside(x::Real, a::Interval) = a.lo < x < a.hi
+#isinside(a::Interval, b::Interval) = b.lo < a.lo && a.hi < b.hi
+#isinside(x::Real, a::Interval) = a.lo < x < a.hi
 
 ⊊(a::Interval, b::Interval) = b.lo < a.lo && a.hi < b.hi
 ⊆(a::Interval, b::Interval) = b.lo ≤ a.lo && a.hi ≤ b.hi
+
+
 
 ## zero and one functions
 zero{T}(a::Interval{T}) = Interval(zero(T))
@@ -22,35 +24,31 @@ one{T}(a::Interval{T}) = Interval(one(T))
 
 ## Addition
 
-+(a::Interval, b::Interval) = @round(a.lo + b.lo, a.hi + b.hi)
++{T}(a::Interval{T}, b::Interval{T}) = @round(T, a.lo + b.lo, a.hi + b.hi)
 +(a::Interval) = a
 
 ## Subtraction
 
--(a::Interval) = Interval(-a.hi, -a.lo)
+-{T}(a::Interval{T}) = @round(T, -a.hi, -a.lo)
 -(a::Interval, b::Interval) = a + (-b) # @round(a.lo - b.hi, a.hi - b.lo)
 
 ## Multiplication
 
-*(a::Interval, b::Interval) = @round(min( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi ),
+*{T}(a::Interval{T}, b::Interval{T}) = @round(T,
+                                     min( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi ),
                                      max( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi )
                                      )
 
 ## Division
-function reciprocal(a::Interval)
-    # uno = one(BigFloat)
-    # z = zero(BigFloat)
-    if isinside(0, a)
-        #if z in a
-        warn("\nInterval in denominator contains 0.")
-        return Interval(-inf(a.lo),inf(a.lo))  # inf(z) returns inf of type of z
+function inv{T}(a::Interval{T})
+    if a.lo < zero(T) < a.hi  # strict inclusion
+        return Interval(-inf(T), inf(T))  # inf(z) returns inf of type of z
     end
 
-    @round(1 / a.hi, 1 / a.lo)
+    @round(T, inv(a.hi), inv(a.lo))
 end
 
-inv(a::Interval) = reciprocal(a)
-/(a::Interval, b::Interval) = a * reciprocal(b)
+/(a::Interval, b::Interval) = a * inv(b)
 //(a::Interval, b::Interval) = a / b    # to deal with rationals
 
 
@@ -76,16 +74,16 @@ const empty_interval = Interval(Inf)  # interval from Inf to Inf
 isempty(x::Interval) = x == empty_interval
 const ∅ = empty_interval
 
-function intersect(a::Interval, b::Interval)
+function intersect{T}(a::Interval{T}, b::Interval{T})
     if a.hi < b.lo || b.hi < a.lo
         # warn("Intersection is empty")
         return empty_interval
     end
 
-    @round(max(a.lo, b.lo), min(a.hi, b.hi))
+    @round(T, max(a.lo, b.lo), min(a.hi, b.hi))
 
 end
 
-hull(a::Interval, b::Interval) = Interval(min(a.lo, b.lo), max(a.hi, b.hi))
+hull{T}(a::Interval{T}, b::Interval{T}) = @round(T, min(a.lo, b.lo), max(a.hi, b.hi))
 union(a::Interval, b::Interval) = hull(a, b)
 
