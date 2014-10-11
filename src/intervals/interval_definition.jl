@@ -8,9 +8,9 @@
 
 
 ## Interval constructor
-immutable Interval <: Real
-    lo :: Real
-    hi :: Real
+immutable Interval{T<:Real} <: Real
+    lo :: T
+    hi :: T
 
     function Interval(a::Real, b::Real)
 
@@ -22,7 +22,7 @@ immutable Interval <: Real
     end
 end
 
-
+Interval{T<:Real}(a::T,b::T) = Interval{T}(a,b)  # not sure why this is necessary, but it is used in Rational
 Interval(a::Interval) = a
 Interval(a::Tuple) = Interval(a...)
 Interval(a::Real) = Interval(a, a)
