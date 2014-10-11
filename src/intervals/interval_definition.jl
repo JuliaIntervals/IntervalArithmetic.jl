@@ -26,6 +26,7 @@ Interval{T<:Real}(a::T,b::T) = Interval{T}(a,b)  # not sure why this is necessar
 Interval(a::Interval) = a
 Interval(a::Tuple) = Interval(a...)
 Interval(a::Real) = Interval(a, a)
+Interval{T<:Real, S<:Real}(a::T, b::S) = Interval(promote(a,b)...)
 
 # Convertion and promotion
 
