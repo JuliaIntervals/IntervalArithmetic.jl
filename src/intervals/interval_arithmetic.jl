@@ -16,8 +16,8 @@ isinside(x::Real, a::Interval) = a.lo < x < a.hi
 ⊆(a::Interval, b::Interval) = b.lo ≤ a.lo && a.hi ≤ b.hi
 
 ## zero and one functions
-zero(a::Interval) = Interval(zero(a.lo))
-one(a::Interval) = Interval(one(a.lo))
+zero{T}(a::Interval{T}) = Interval(zero(T))
+one{T}(a::Interval{T}) = Interval(one(T))
 
 
 ## Addition

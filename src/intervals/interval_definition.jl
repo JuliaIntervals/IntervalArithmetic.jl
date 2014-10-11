@@ -29,9 +29,9 @@ Interval(a::Real) = Interval(a, a)
 
 # Convertion and promotion
 
-convert(::Type{Interval}, x::Real) = Interval(x)
-promote_rule{A<:Real}(::Type{Interval}, ::Type{A}) = Interval
-promote_rule(::Type{BigFloat}, ::Type{Interval}) = Interval
+convert{T<:Real}(::Type{Interval{T}}, x::Real) = Interval(convert(T,x))
+promote_rule{T<:Real, A<:Real}(::Type{Interval{T}}, ::Type{A}) = Interval{T}
+promote_rule{T<:Real}(::Type{BigFloat}, ::Type{Interval{T}}) = Interval{T}
 
 
 ## Output
