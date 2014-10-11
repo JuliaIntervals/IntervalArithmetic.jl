@@ -66,7 +66,7 @@ end
 
 ## sqrt
 
-inf(x::Rational) = inf(BigFloat)  # to allow sqrt()
+inf(x::Rational) = 1//0  # to allow sqrt()
 
 function sqrt(a::Interval)
     z = zero(a.hi)

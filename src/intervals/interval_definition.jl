@@ -1,5 +1,4 @@
 ##
-## Last modification: 1 Oct 2014
 ## Luis Benet & David P. Sanders
 ## Universidad Nacional Autónoma de México (UNAM)
 ##
@@ -37,18 +36,10 @@ promote_rule{T<:Real}(::Type{BigFloat}, ::Type{Interval{T}}) = Interval{T}
 
 
 ## Output
-function show(io::IO, a::Interval)
-    lo = a.lo
-    hi = a.hi
+show(io::IO, a::Interval)  = print(io, "[$(a.lo), $(a.hi)]")
+show(io::IO, a::Interval{BigFloat}) =
+    print(io, "[$(a.lo), $(a.hi)] with $(a.lo.prec) bits of precision")
 
-    print(io, "[$(a.lo), $(a.hi)]")
-
-    if typeof(a.lo) == typeof(a.hi) == BigFloat
-        prec = a.lo.prec
-        print(io, " with $prec bits of precision")
-    end
-
-end
 
 
 # end    # this end is required if Intervals.jl is a module on its own
