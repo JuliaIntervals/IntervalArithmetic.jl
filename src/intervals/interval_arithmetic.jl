@@ -68,7 +68,7 @@ real(a::Interval) = a
 abs(a::Interval) = Interval(mig(a), mag(a))
 
 
-isempty(a::Interval, b::Interval) = a.hi < b.lo || b.hi < a.lo
+# isempty(a::Interval, b::Interval) = a.hi < b.lo || b.hi < a.lo
 
 
 # this definition of empty_interval is not nice:
@@ -77,7 +77,7 @@ isempty(x::Interval) = x == empty_interval
 const ∅ = empty_interval
 
 function intersect(a::Interval, b::Interval)
-    if isempty(a,b)
+    if a.hi < b.lo || b.hi < a.lo
         # warn("Intersection is empty")
         return empty_interval
     end

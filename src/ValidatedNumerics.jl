@@ -6,7 +6,8 @@ import Base:
     sqrt, exp, log, sin, cos, tan, inv,
     union, intersect, isempty,
     convert, promote_rule,
-    BigFloat, string, Float64
+    BigFloat, string, Float64,
+    inf
 
 export
     @interval, Interval,

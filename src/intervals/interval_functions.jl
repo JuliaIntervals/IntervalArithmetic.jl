@@ -65,6 +65,9 @@ function ^(a::Interval, x::Interval)
 end
 
 ## sqrt
+
+inf(x::Rational) = inf(BigFloat)  # to allow sqrt()
+
 function sqrt(a::Interval)
     z = zero(a.hi)
     z > a.hi && error("Undefined operation;\n",
