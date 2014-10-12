@@ -83,6 +83,7 @@ end
 transform(a::MathConst) =  ( @thin_interval(big(a)))
 transform(a::BigFloat)  =  ( @thin_interval(a))
 transform(a::Number)    = :( @thin_interval(BigFloat(string($a))) )
+transform(f::Function) = f   # needed for @floatinterval
 
 function transform(a::Symbol)
 
