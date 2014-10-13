@@ -1,58 +1,10 @@
 
 ## Macros for directed rounding:
 
-# (Could use "with rounding" to ensure previous rounding mode is correctly reset)
 
-macro new_rounding(expr, T, rounding_mode)
+set_rounding(whatever, rounding_mode) = ()  # for types other than Float64 and BigFloat
 
-    if T in (:Float64, :BigFloat)
-        quote
-            with_rounding($T, $rounding_mode) do
-                $expr
-            end
-        end
-
-    else
-        expr
-    end
-
-end
-
-macro rounding(expr, T, rounding_mode)
-
-    if T in (:Float64, :BigFloat)
-        quote
-            set_rounding($T, $rounding_mode)
-            temp = $expr
-            set_rounding($T, RoundNearest)
-            temp
-        end
-
-    else
-        expr
-    end
-
-end
-
-# macro all_rounding(T, expr, rounding_mode)
-#     quote
-#         set_rounding(Float64, $rounding_mode)
-#         set_rounding(BigFloat, $rounding_mode)
-
-#         temp = $expr
-
-#         set_rounding(Float64, RoundNearest)
-#         set_rounding(BigFloat, RoundNearest)
-
-#         temp
-#     end
-
-# end
-
-
-set_rounding(whatever, rounding_mode) = ()
-
-macro all_rounding(T, expr, rounding_mode)
+macro rounding(T, expr, rounding_mode)
     quote
         set_rounding($T, $rounding_mode)
         temp = $expr
@@ -66,7 +18,7 @@ end
 
 macro round(T, expr1, expr2)
     quote
-        Interval(@all_rounding($T, $expr1, RoundDown), @all_rounding($T, $expr2, RoundUp))
+        Interval(@rounding($T, $expr1, RoundDown), @rounding($T, $expr2, RoundUp))
     end
 end
 
@@ -83,7 +35,7 @@ end
 transform(a::MathConst) =  ( @thin_interval(big(a)))
 transform(a::BigFloat)  =  ( @thin_interval(a))
 transform(a::Number)    = :( @thin_interval(BigFloat(string($a))) )
-transform(f::Function) = f   # needed for @floatinterval
+transform(f::Function)  =  f   # needed for @floatinterval
 
 function transform(a::Symbol)
 
@@ -118,7 +70,6 @@ end
 # It then takes the hull of the resulting two intervals to give a guaranteed containing interval
 
 macro interval(expr1, expr2...)
-
     expr1 = transform(expr1)
 
     use_float = false
@@ -142,23 +93,13 @@ macro interval(expr1, expr2...)
 end
 
 
-## The following are used to construct a floating-point interval
-
-function round_BigFloat_to_float(x, rounding_mode::RoundingMode)
-     with_rounding(BigFloat, rounding_mode) do
-        convert(Float64, x)
-    end
-end
+## Construct interval with Float64s instead of BigFloats:
 
 function floatinterval(x::Interval)
-    lo = round_BigFloat_to_float(x.lo, RoundDown)
-    hi = round_BigFloat_to_float(x.hi, RoundUp)
-
-    Interval(lo, hi)
+    @round(BigFloat, convert(Float64, x.lo), convert(Float64, x.hi))
 end
 
 macro floatinterval(expr1, expr2...)
-
     if isempty(expr2)
         expr2 = expr1
     else
