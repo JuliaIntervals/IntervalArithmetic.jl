@@ -21,7 +21,7 @@ end
 K(f::Function, f_prime::Function, xx::Interval, m, C) = (
                             # m = Interval(m);
                             # C = Interval(C);
-                            m - C*f(m) + (Interval(1.) - C*f_prime(xx)) * (xx - m)
+                            m - C*f(m) + (1. - C*f_prime(xx)) * (xx - m)
                             )
 
 K(f::Function, f_prime::Function, x::Interval) =
