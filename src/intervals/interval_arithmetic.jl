@@ -1,11 +1,10 @@
 
 ## Empty interval:
 
-empty_interval(T) = Interval(nan(T))  # interval from Inf to Inf
+empty_interval(T::Type) = Interval(nan(T))  # interval from Inf to Inf
+empty_interval(x::Interval) = Interval(nan(x.lo))
 isempty(x::Interval) = isnan(x.lo) || isnan(x.hi)
-#const ∅ = empty_interval
-
-is_∅ = isempty
+∅ = empty_interval(Float64)   # I don't see how to define this according to the type
 
 ## Equalities and neg-equalities
 ==(a::Interval, b::Interval) = (isempty(a) || isempty(b)) ? (isempty(a) && isempty(b)) : a.lo == b.lo && a.hi == b.hi
@@ -21,7 +20,6 @@ in(x::Real, a::Interval) = a.lo <= x <= a.hi
 
 ⊊(a::Interval, b::Interval) = b.lo < a.lo && a.hi < b.hi
 ⊆(a::Interval, b::Interval) = b.lo ≤ a.lo && a.hi ≤ b.hi
-
 
 
 ## zero and one functions

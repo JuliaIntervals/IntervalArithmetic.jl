@@ -36,10 +36,13 @@ promote_rule{T<:Real}(::Type{BigFloat}, ::Type{Interval{T}}) = Interval{T}
 
 
 ## Output
-show(io::IO, a::Interval)  = print(io, "[$(a.lo), $(a.hi)]")
-show(io::IO, a::Interval{BigFloat}) =
-    print(io, "[$(a.lo), $(a.hi)] with $(a.lo.prec) bits of precision")
 
+basic_show(io::IO, a::Interval) = isempty(a) ? print(io, "∅") : print(io, "[$(a.lo), $(a.hi)]")
+
+show(io::IO, a::Interval) = basic_show(io, a)
+show(io::IO, a::Interval{BigFloat}) = ( basic_show(io, a); print(io, " with $(a.lo.prec) bits of precision") )
+
+#fullshow(a::Interval) = print(io, "[$(a.lo), $(a.hi)]")
 
 
 # end    # this end is required if Intervals.jl is a module on its own
