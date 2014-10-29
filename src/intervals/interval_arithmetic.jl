@@ -1,8 +1,15 @@
 
+## Empty interval:
+
+empty_interval(T) = Interval(nan(T))  # interval from Inf to Inf
+isempty(x::Interval) = isnan(x.lo) || isnan(x.hi)
+#const ∅ = empty_interval
+
+is_∅ = isempty
 
 ## Equalities and neg-equalities
-==(a::Interval, b::Interval) = a.lo == b.lo && a.hi == b.hi
-!=(a::Interval, b::Interval) = a.lo != b.lo || a.hi != b.hi
+==(a::Interval, b::Interval) = (isempty(a) || isempty(b)) ? (isempty(a) && isempty(b)) : a.lo == b.lo && a.hi == b.hi
+!=(a::Interval, b::Interval) = !(a==b)
 
 ## Inclusion/containment functions
 # in(a::Interval, b::Interval) = b.lo <= a.lo && a.hi <= b.hi
@@ -66,18 +73,11 @@ real(a::Interval) = a
 abs(a::Interval) = Interval(mig(a), mag(a))
 
 
-# isempty(a::Interval, b::Interval) = a.hi < b.lo || b.hi < a.lo
-
-
-# this definition of empty_interval is not nice:
-const empty_interval = Interval(Inf)  # interval from Inf to Inf
-isempty(x::Interval) = x == empty_interval
-const ∅ = empty_interval
 
 function intersect{T}(a::Interval{T}, b::Interval{T})
     if a.hi < b.lo || b.hi < a.lo
         # warn("Intersection is empty")
-        return empty_interval
+        return empty_interval(T)
     end
 
     @round(T, max(a.lo, b.lo), min(a.hi, b.hi))
