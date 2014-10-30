@@ -2,11 +2,12 @@
 ## Luis Benet & David P. Sanders
 ## Universidad Nacional Autónoma de México (UNAM)
 ##
-## Julia module for handling interval arithmetic
+## Julia module for interval arithmetic
 ##
 
 
-## Interval constructor
+## Interval type
+
 immutable Interval{T<:Real} <: Real
     lo :: T
     hi :: T
@@ -21,13 +22,17 @@ immutable Interval{T<:Real} <: Real
     end
 end
 
+
+## Outer constructors
+
 Interval{T<:Real}(a::T,b::T) = Interval{T}(a,b)  # not sure why this is necessary, but it is used in Rational
 Interval(a::Interval) = a
 Interval(a::Tuple) = Interval(a...)
 Interval(a::Real) = Interval(a, a)
 Interval{T<:Real, S<:Real}(a::T, b::S) = Interval(promote(a,b)...)
 
-# Convertion and promotion
+
+## Convertion and promotion
 
 convert{T<:Real}(::Type{Interval{T}}, x::Interval) = Interval(convert(T,x.lo), convert(T,x.hi))
 convert{T<:Real}(::Type{Interval{T}}, x::Real) = Interval(convert(T,x))
@@ -41,8 +46,3 @@ basic_show(io::IO, a::Interval) = isempty(a) ? print(io, "∅") : print(io, "[$(
 
 show(io::IO, a::Interval) = basic_show(io, a)
 show(io::IO, a::Interval{BigFloat}) = ( basic_show(io, a); print(io, " with $(a.lo.prec) bits of precision") )
-
-#fullshow(a::Interval) = print(io, "[$(a.lo), $(a.hi)]")
-
-
-# end    # this end is required if Intervals.jl is a module on its own

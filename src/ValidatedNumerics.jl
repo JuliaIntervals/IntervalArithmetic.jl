@@ -17,10 +17,9 @@ export
     differentiate, D,  # should these be exported?
     floatinterval, @floatinterval
 
-
+## Root finding
 export
     newton, krawczyk
-
 
 
 ## Default precision:
@@ -31,7 +30,7 @@ set_bigfloat_precision(53)
 import Base.MPFR.BigFloat
 BigFloat(a::MathConst) = big(a)
 
-<(a::MathConst, b::MathConst) = big(a) < big(b)
+<(a::MathConst, b::MathConst) = float(a) < float(b)
 
 
 ## Includes:
