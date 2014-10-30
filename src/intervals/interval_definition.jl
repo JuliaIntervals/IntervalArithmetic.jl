@@ -44,7 +44,7 @@ promote_rule{T<:Real}(::Type{BigFloat}, ::Type{Interval{T}}) = Interval{T}
 
 function basic_show(io::IO, a::Interval)
     if isempty(a)
-        "∅"
+        output = "∅"
     else
         output = "[$(a.lo), $(a.hi)]"
         output = replace(output, "inf", "∞")
