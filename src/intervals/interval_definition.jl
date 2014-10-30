@@ -42,7 +42,17 @@ promote_rule{T<:Real}(::Type{BigFloat}, ::Type{Interval{T}}) = Interval{T}
 
 ## Output
 
-basic_show(io::IO, a::Interval) = isempty(a) ? print(io, "∅") : print(io, "[$(a.lo), $(a.hi)]")
+function basic_show(io::IO, a::Interval)
+    if isempty(a)
+        "∅"
+    else
+        output = "[$(a.lo), $(a.hi)]"
+        output = replace(output, "inf", "∞")
+        output
+    end
+
+    print(io, output)
+end
 
 show(io::IO, a::Interval) = basic_show(io, a)
 show(io::IO, a::Interval{BigFloat}) = ( basic_show(io, a); print(io, " with $(a.lo.prec) bits of precision") )
