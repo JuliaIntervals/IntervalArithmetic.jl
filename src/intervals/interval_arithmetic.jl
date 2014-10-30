@@ -60,7 +60,7 @@ end
 
 ## Some scalar functions on intervals; no direct rounding used
 diam(a::Interval) = a.hi - a.lo
-mid(a::Interval) = one(a.lo) / 2 * (a.hi + a.lo)
+mid(a::Interval) = (a.hi + a.lo) / 2
 mag(a::Interval) = max( abs(a.lo), abs(a.hi) )
 mig(a::Interval) = zero(a.lo) in a ? zero(a.lo) : min( abs(a.lo), abs(a.hi) )
 
