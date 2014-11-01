@@ -12,4 +12,4 @@ function find_roots(f::Function, f_prime::Function, a::Interval, method::Functio
     method(f, f_prime, a)
 end
 
-find_roots(f::Function, a::Real, b::Real) = find_roots(Interval(a,b))
+find_roots(f::Function, a::Real, b::Real) = find_roots(f, Interval(float(a), float(b)))
