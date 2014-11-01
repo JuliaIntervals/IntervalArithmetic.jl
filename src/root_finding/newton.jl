@@ -1,16 +1,15 @@
 
-isthin(x) = (m = (x.lo + x.hi) / 2; m == x.lo || m == x.hi)  # no more precision
+isthin(x::Interval) = (m = mid(x); m == x.lo || m == x.hi)  # no more precision
 # this won't ever be the case with BigFloat if the interval is centered around 0?
 
-function guarded_mid(x)
-    m = (x.lo + x.hi) / 2
+function guarded_mid(x::Interval)
+    m = mid(x)
     if m == zero(x.lo)  # midpoint exactly 0
         alpha = 0.45
         m = alpha*x.lo + (1-alpha)*x.hi   # displace to another point in the interval
     end
 
     m
-
 end
 
 function N(f::Function, f_prime::Function, x::Interval, deriv=None)
@@ -29,8 +28,9 @@ end
 
 
 function newton_refine(f::Function, f_prime::Function, x::Interval, tolerance=1e-16)
-    #println("Refining $x")
-    #i = 0
+    print("Entering newton_refine:")
+    @show x
+
     while diam(x) > tolerance  # avoid problem with tiny floating-point numbers if 0 is a root
         Nx = N(f, f_prime, x)
         Nx = Nx ∩ x
@@ -56,6 +56,9 @@ function newton(f::Function, f_prime::Function, x::Interval, tolerance=1e-16)
     if isempty(x)
         return []
     end
+
+    print("Entering Newton: ")
+    @show(x)
 
     if diam(x) < tolerance
         return (x, :unknown)

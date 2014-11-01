@@ -6,8 +6,8 @@ import Base:
     sqrt, exp, log, sin, cos, tan, inv,
     union, intersect, isempty,
     convert, promote_rule,
-    BigFloat, string, Float64,
-    inf, set_rounding
+    BigFloat,
+    set_rounding
 
 export
     @interval, Interval,
@@ -15,7 +15,8 @@ export
     diam, mid, mag, mig, hull, isinside,
     empty_interval, ∅, isempty, ⊊,
     differentiate, D,  # should these be exported?
-    floatinterval, @floatinterval
+    floatinterval, @floatinterval,
+    find_roots
 
 ## Root finding
 export

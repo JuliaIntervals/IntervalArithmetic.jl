@@ -5,25 +5,28 @@ using Polynomials
 # Wilkinson-type polynomial defined by its roots:
 # wₙ(x) = (x-1)⋅(x-2)⋅ ⋯ ⋅ (x-n)
 
-function wilkinson_type(n)
+function generate_wilkinson(n, type_constructor=BigFloat)
     p = poly(collect(1:n))
     p_prime = polyder(p)
 
-    coeffs = map(BigFloat, p.a)
-    coeffs_prime = map(BigFloat, p_prime.a)
+    coeffs = map(type_constructor, p.a)
+    coeffs_prime = map(type_constructor, p_prime.a)
 
-    # define the polynomial
-    # TODO: use Horner's rule for efficiency?
     f(x) = sum( [coeffs[i]*x^(i-1) for i in 1:length(coeffs)] )
     f_prime(x) = sum( [coeffs_prime[i]*x^(i-1) for i in 1:length(coeffs_prime)] )
 
+    return f, f_prime
+end
 
-    a = @interval(-1.1, 21.05)   # where to look for the roots
+
+function run_wilkinson(a::Interval, n::Int)
+
+    f, f_prime = generate_wilkinson(n, BigFloat)
 
     println("Roots for n = $n: ")
 
-    @time krawczyk_roots = krawczyk(f, a)
-    display(krawczyk_roots)
+    #@time krawczyk_roots = krawczyk(f, a)
+    #display(krawczyk_roots)
 
     @time newton_roots = newton(f, a)
     display(newton_roots)
@@ -37,15 +40,9 @@ function wilkinson_type(n)
 
     # repeat with Float64 intervals
 
+
+    f, f_prime = generate_wilkinson(n, float)
     a = floatinterval(a)
-
-    coeffs = map(float, p.a)
-    coeffs_prime = map(float, p_prime.a)
-
-    # define the polynomial
-    # TODO: use Horner's rule for efficiency?
-    f(x) = sum( [coeffs[i]*x^(i-1) for i in 1:length(coeffs)] )
-    f_prime(x) = sum( [coeffs_prime[i]*x^(i-1) for i in 1:length(coeffs_prime)] )
 
     @time krawczyk_roots = krawczyk(f, a)
     display(krawczyk_roots)

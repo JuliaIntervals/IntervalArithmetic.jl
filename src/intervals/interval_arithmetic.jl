@@ -57,12 +57,13 @@ end
 //(a::Interval, b::Interval) = a / b    # to deal with rationals
 
 
-
 ## Some scalar functions on intervals; no direct rounding used
+
+mid(a::Interval) = (a.lo + a.hi) / 2
+
 diam(a::Interval) = a.hi - a.lo
-mid(a::Interval) = (a.hi + a.lo) / 2
 mag(a::Interval) = max( abs(a.lo), abs(a.hi) )
-mig(a::Interval) = zero(a.lo) in a ? zero(a.lo) : min( abs(a.lo), abs(a.hi) )
+mig(a::Interval) = ( zero(a.lo) ∈ a ) ? zero(a.lo) : min( abs(a.lo), abs(a.hi) )
 
 
 ## Functions needed for generic linear algebra routines to work
