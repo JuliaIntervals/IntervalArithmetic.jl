@@ -11,3 +11,5 @@ end
 function find_roots(f::Function, f_prime::Function, a::Interval, method=newton)
     method(f, f_prime, a)
 end
+
+find_roots(f::Function, a::Real, b::Real) = find_roots(Interval(a,b))
