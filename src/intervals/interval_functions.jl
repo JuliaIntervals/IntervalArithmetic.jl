@@ -2,7 +2,7 @@
 ## Powers
 # Integer power of an interval:
 function ^{T}(a::Interval{T}, n::Integer)
-    n < zero(n) && return reciprocal( a^(-n) )
+    n < zero(n) && return inv( a^(-n) )
     n == zero(n) && return one(a)
     n == one(n) && return a
     #

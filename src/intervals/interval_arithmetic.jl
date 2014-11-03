@@ -1,8 +1,8 @@
 
 ## Empty interval:
 
-empty_interval(T::Type) = Interval(nan(T))  # interval from Inf to Inf
-empty_interval(x::Interval) = Interval(nan(x.lo))
+empty_interval(T::Type) = Interval(convert(T, NaN))  # interval from Inf to Inf
+empty_interval(x::Interval) = Interval(oftype(x.lo), NaN)
 isempty(x::Interval) = isnan(x.lo) || isnan(x.hi)
 ∅ = empty_interval(Float64)   # I don't see how to define this according to the type
 
@@ -58,7 +58,7 @@ end
 //(a::Interval, b::Interval) = a / b    # to deal with rationals
 
 
-## Some scalar functions on intervals; no direct rounding used
+## Scalar functions on intervals (no directed rounding used)
 
 mid(a::Interval) = (a.lo + a.hi) / 2
 
@@ -68,21 +68,26 @@ mig(a::Interval) = ( zero(a.lo) ∈ a ) ? zero(a.lo) : min( abs(a.lo), abs(a.hi)
 
 
 ## Functions needed for generic linear algebra routines to work
+
 <(a::Interval, b::Interval) = a.hi < b.lo
 real(a::Interval) = a
 abs(a::Interval) = Interval(mig(a), mag(a))
 
 
+## Set operations
 
 function intersect{T}(a::Interval{T}, b::Interval{T})
+
+    if isempty(a) || isempty(b)
+        return empty_interval(T)
+    end
+
     if a.hi < b.lo || b.hi < a.lo
         # warn("Intersection is empty")
         return empty_interval(T)
     end
 
-    if isempty(a) || isempty(b)
-        return empty_interval(T)
-    end
+
 
     @round(T, max(a.lo, b.lo), min(a.hi, b.hi))
 
