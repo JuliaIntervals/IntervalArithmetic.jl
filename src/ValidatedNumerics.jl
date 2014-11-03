@@ -17,7 +17,7 @@ export
     empty_interval, ∅, isempty, ⊊,
     differentiate, D,  # should these be exported?
     floatinterval, @floatinterval,
-    find_roots
+    findroots
 
 ## Root finding
 export
