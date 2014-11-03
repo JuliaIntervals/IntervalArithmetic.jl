@@ -8,7 +8,7 @@
 
 ## Interval type
 
-immutable Interval{T<:Real} <: Number
+immutable Interval{T<:Real} <: Real
     lo :: T
     hi :: T
 
