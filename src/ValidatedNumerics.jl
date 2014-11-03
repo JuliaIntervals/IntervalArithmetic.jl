@@ -7,7 +7,8 @@ import Base:
     union, intersect, isempty,
     convert, promote_rule,
     BigFloat,
-    set_rounding
+    set_rounding,
+    ⊆
 
 export
     @interval, Interval,

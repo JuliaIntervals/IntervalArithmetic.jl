@@ -6,36 +6,36 @@ empty_interval(x::Interval) = Interval(nan(x.lo))
 isempty(x::Interval) = isnan(x.lo) || isnan(x.hi)
 ∅ = empty_interval(Float64)   # I don't see how to define this according to the type
 
+
 ## Equalities and neg-equalities
+
 ==(a::Interval, b::Interval) = (isempty(a) || isempty(b)) ? (isempty(a) && isempty(b)) : a.lo == b.lo && a.hi == b.hi
 !=(a::Interval, b::Interval) = !(a==b)
 
-## Inclusion/containment functions
-# in(a::Interval, b::Interval) = b.lo <= a.lo && a.hi <= b.hi
-in(x::Real, a::Interval) = a.lo <= x <= a.hi
 
-# strict inclusion:
-#isinside(a::Interval, b::Interval) = b.lo < a.lo && a.hi < b.hi
-#isinside(x::Real, a::Interval) = a.lo < x < a.hi
+## Inclusion/containment functions
+
+in(x::Real, a::Interval) = a.lo <= x <= a.hi
 
 ⊊(a::Interval, b::Interval) = b.lo < a.lo && a.hi < b.hi
 ⊆(a::Interval, b::Interval) = b.lo ≤ a.lo && a.hi ≤ b.hi
+⊂ = ⊊  # do we really want this?
 
 
 ## zero and one functions
+
 zero{T}(a::Interval{T}) = Interval(zero(T))
 one{T}(a::Interval{T}) = Interval(one(T))
 
 
-## Addition
+## Addition and subtraction
 
 +{T}(a::Interval{T}, b::Interval{T}) = @round(T, a.lo + b.lo, a.hi + b.hi)
 +(a::Interval) = a
 
-## Subtraction
-
 -{T}(a::Interval{T}) = @round(T, -a.hi, -a.lo)
--(a::Interval, b::Interval) = a + (-b) # @round(a.lo - b.hi, a.hi - b.lo)
+-(a::Interval, b::Interval) = a + (-b)  # @round(a.lo - b.hi, a.hi - b.lo)
+
 
 ## Multiplication
 
@@ -45,9 +45,10 @@ one{T}(a::Interval{T}) = Interval(one(T))
                                      )
 
 ## Division
+
 function inv{T}(a::Interval{T})
     if a.lo < zero(T) < a.hi  # strict inclusion
-        return Interval(-inf(T), inf(T))  # inf(z) returns inf of type of z
+        return Interval(-convert(T, Inf), convert(T, Inf))  # inf(z) returns inf of type of z
     end
 
     @round(T, inv(a.hi), inv(a.lo))
@@ -76,6 +77,10 @@ abs(a::Interval) = Interval(mig(a), mag(a))
 function intersect{T}(a::Interval{T}, b::Interval{T})
     if a.hi < b.lo || b.hi < a.lo
         # warn("Intersection is empty")
+        return empty_interval(T)
+    end
+
+    if isempty(a) || isempty(b)
         return empty_interval(T)
     end
 
