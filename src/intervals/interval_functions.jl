@@ -34,7 +34,7 @@ function ^{T}(a::Interval{T}, x::Real)
     xInterv = convert(Interval{T}, Interval(x))
     diam( xInterv ) >= eps(x) && return a^xInterv
     # xInterv is a thin interval
-    domainPow = Interval(z, inf(a.hi))
+    domainPow = Interval(z, oftype(a.hi, Inf))
     aRestricted = intersect(a, domainPow)
     @round(T, aRestricted.lo^x, aRestricted.hi^x)
 
@@ -48,7 +48,7 @@ function ^{T}(a::Interval{T}, x::Interval)
     z > a.hi && error("Undefined operation;\n",
                       "Interval is strictly negative and power is not an integer")
     #
-    domainPow = Interval(z, inf(a.hi))
+    domainPow = Interval(z, oftype(a.hi, Inf))
     aRestricted = intersect(a, domainPow)
 
     @round(T,
@@ -74,7 +74,7 @@ function sqrt{T}(a::Interval{T})
     z > a.hi && error("Undefined operation;\n",
                       "Interval is strictly negative and power is not an integer")
     #
-    domainSqrt = Interval(z, inf(a.hi))
+    domainSqrt = Interval(z, oftype(a.hi, Inf))
     aRestricted = intersect(a, domainSqrt)
 
     @round(T, sqrt(aRestricted.lo), sqrt(aRestricted.hi))
@@ -87,7 +87,7 @@ exp{T}(a::Interval{T}) = @round(T, exp(a.lo), exp(a.hi))
 ## log
 function log{T}(a::Interval{T})
     z = zero(T)
-    domainLog = Interval(z, inf(a.hi))
+    domainLog = Interval(z, oftype(a.hi, Inf))
     z > a.hi && error("Undefined log; Interval is strictly negative")
     aRestricted = intersect(a, domainLog)
 

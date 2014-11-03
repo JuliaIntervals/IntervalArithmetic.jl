@@ -2,7 +2,7 @@
 ## Empty interval:
 
 empty_interval(T::Type) = Interval(convert(T, NaN))  # interval from Inf to Inf
-empty_interval(x::Interval) = Interval(oftype(x.lo), NaN)
+empty_interval(x::Interval) = Interval(oftype(x.lo, NaN))
 isempty(x::Interval) = isnan(x.lo) || isnan(x.hi)
 ∅ = empty_interval(Float64)   # I don't see how to define this according to the type
 
