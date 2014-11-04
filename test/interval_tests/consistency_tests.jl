@@ -38,7 +38,7 @@ c = @interval(0.25, 4.0)
 @test 0.1 in @interval(0.1)
 #@test !isinside(0.1, @interval(0.1))
 # @test intersect(a, @interval(-1)) == ∅
-@test a ∩ @interval(-1) == empty_interval(a)
+@test a ∩ @interval(-1) == emptyinterval(a)
 @test isempty(a ∩ @interval(-1) )
 @test intersect(a, hull(a,b)) == a
 @test union(a,b) == @interval(a.lo, b.hi)

@@ -1,10 +1,10 @@
 
 ## Empty interval:
 
-empty_interval(T::Type) = Interval(convert(T, NaN))  # interval from Inf to Inf
-empty_interval(x::Interval) = Interval(oftype(x.lo, NaN))
+emptyinterval(T::Type) = Interval(convert(T, NaN))  # interval from Inf to Inf
+emptyinterval(x::Interval) = Interval(oftype(x.lo, NaN))
 isempty(x::Interval) = isnan(x.lo) || isnan(x.hi)
-∅ = empty_interval(BigFloat)   # I don't see how to define this according to the type
+∅ = emptyinterval(Float64)   # I don't see how to define this according to the type
 
 
 ## Equalities and neg-equalities
@@ -79,12 +79,12 @@ abs(a::Interval) = Interval(mig(a), mag(a))
 function intersect{T}(a::Interval{T}, b::Interval{T})
 
     if isempty(a) || isempty(b)
-        return empty_interval(T)
+        return emptyinterval(T)
     end
 
     if a.hi < b.lo || b.hi < a.lo
         # warn("Intersection is empty")
-        return empty_interval(T)
+        return emptyinterval(T)
     end
 
 

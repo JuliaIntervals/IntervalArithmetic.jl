@@ -14,7 +14,7 @@ export
     @interval, Interval,
     @round_down, @round_up, @round, @thin_interval,
     diam, mid, mag, mig, hull, isinside,
-    empty_interval, ∅, isempty, ⊊,
+    emptyinterval, ∅, isempty, ⊊,
     differentiate, D,  # should these be exported?
     floatinterval, @floatinterval,
     findroots
