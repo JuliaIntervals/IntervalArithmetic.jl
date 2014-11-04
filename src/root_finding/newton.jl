@@ -1,6 +1,4 @@
-
-isthin(x::Interval) = (m = mid(x); m == x.lo || m == x.hi)  # no more precision
-# this won't ever be the case with BigFloat if the interval is centered around 0?
+# Newton method
 
 function guarded_mid(x::Interval)
     m = mid(x)

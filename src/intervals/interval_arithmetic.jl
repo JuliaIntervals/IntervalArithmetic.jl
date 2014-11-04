@@ -7,6 +7,12 @@ isempty(x::Interval) = isnan(x.lo) || isnan(x.hi)
 ∅ = emptyinterval(Float64)   # I don't see how to define this according to the type
 
 
+## Thin interval (no more precision):
+
+isthin(x::Interval) = (m = mid(x); m == x.lo || m == x.hi)
+# This won't ever be the case with BigFloat if the interval is centered around 0?
+
+
 ## Equalities and neg-equalities
 
 ==(a::Interval, b::Interval) = (isempty(a) || isempty(b)) ? (isempty(a) && isempty(b)) : a.lo == b.lo && a.hi == b.hi
