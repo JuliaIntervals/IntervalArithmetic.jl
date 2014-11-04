@@ -34,13 +34,13 @@ function newton_refine(f::Function, f_prime::Function, x::Interval, tolerance=1e
         Nx = Nx ∩ x
 
         if Nx == x
-            return (x, :unique)
+            return Any[(x, :unique)]
         end
         x = Nx
 
     end
 
-    (x, :unique)
+    Any[(x, :unique)]
 end
 
 #newton(f::Function, x::Nothing) = []
@@ -52,18 +52,18 @@ newton(f::Function, x::Interval, tolerance=1e-16) = newton(f, D(f), x, 0, tolera
 function newton(f::Function, f_prime::Function, x::Interval, level::Int=0, tolerance=1e-16)
 
     if isempty(x)
-        if level==0
-            return [(∅, :none)]
-        else
+#        if level==0
+#            return [(∅, :none)]
+ #       else
             return []
-        end
+  #      end
     end
 
     #print("Entering Newton: ")
     #@show(x, level)
 
     if diam(x) < tolerance
-        return (x, :unknown)
+        return Any[(x, :unknown)]
     end
 
 
@@ -74,11 +74,11 @@ function newton(f::Function, f_prime::Function, x::Interval, level::Int=0, toler
         Nx = N(f, f_prime, x, deriv)
 
         if isempty(Nx ∩ x)
-            if level==0
-                return [(∅, :none)]
-            else
+         #   if level==0
+         #       return [(∅, :none)]
+         #   else
                 return []
-            end
+          #  end
         end
 
         if Nx ⊆ x
@@ -100,11 +100,11 @@ function newton(f::Function, f_prime::Function, x::Interval, level::Int=0, toler
                     newton(f, f_prime, Interval(m, x.hi), level+1)
                     )
 
-         if length(roots) == 0 && level==0
-            return [(∅, :none)]
-        else
+        # if length(roots) == 0 && level==0
+        #    return [(∅, :none)]
+        #else
             return sort!(roots)
-        end
+        #end
 
     else  # 0 in deriv; this does extended interval division by hand
         y1 = Interval(deriv.lo, -zero(deriv.lo))
@@ -120,11 +120,11 @@ function newton(f::Function, f_prime::Function, x::Interval, level::Int=0, toler
 
         #@show roots
 
-        if length(roots) == 0 && level==0
-            return [(∅, :none)]
-        else
+      #  if length(roots) == 0 && level==0
+      #      return [(∅, :none)]
+      #  else
             return sort!(roots)
-        end
+       # end
 
 #         return sort!(vcat(
 #                          newton(f, f_prime, y1),
