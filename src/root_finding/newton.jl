@@ -49,7 +49,7 @@ end
 newton(f::Function, x::Interval, tolerance=1e-16) = newton(f, D(f), x, tolerance)
  # use automatic differentiation if no derivative function given
 
-function newton(f::Function, f_prime::Function, x::Interval, tolerance=1e-16)
+function newton(f::Function, f_prime::Function, x::Interval, level=0, tolerance=1e-16)
 
     if isempty(x)
         return []
@@ -70,7 +70,11 @@ function newton(f::Function, f_prime::Function, x::Interval, tolerance=1e-16)
         Nx = N(f, f_prime, x, deriv)
 
         if isempty(Nx ∩ x)
-            return []
+            if level==0
+                return [(∅, :none)]
+            else
+                return []
+            end
         end
 
         if Nx ⊆ x
@@ -87,8 +91,8 @@ function newton(f::Function, f_prime::Function, x::Interval, tolerance=1e-16)
         #println("Bisecting...")
 
         m = mid(x)
-        return vcat(newton(f, f_prime, Interval(x.lo, m)),  # must be careful with rounding of m ?
-                    newton(f, f_prime, Interval(m, x.hi))
+        return vcat(newton(f, f_prime, Interval(x.lo, m), level+1),  # must be careful with rounding of m ?
+                    newton(f, f_prime, Interval(m, x.hi), level+1)
                     )
 
     else  # 0 in deriv; this does extended interval division by hand
