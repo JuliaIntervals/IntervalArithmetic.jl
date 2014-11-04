@@ -26,8 +26,8 @@ end
 
 
 function newton_refine(f::Function, f_prime::Function, x::Interval, tolerance=1e-16)
-    print("Entering newton_refine:")
-    @show x
+    #print("Entering newton_refine:")
+    #@show x
 
     while diam(x) > tolerance  # avoid problem with tiny floating-point numbers if 0 is a root
         Nx = N(f, f_prime, x)
@@ -59,8 +59,8 @@ function newton(f::Function, f_prime::Function, x::Interval, level::Int=0, toler
         end
     end
 
-    print("Entering Newton: ")
-    @show(x, level)
+    #print("Entering Newton: ")
+    #@show(x, level)
 
     if diam(x) < tolerance
         return (x, :unknown)
@@ -118,7 +118,7 @@ function newton(f::Function, f_prime::Function, x::Interval, level::Int=0, toler
                          newton(f, f_prime, y2, level+1)
                          )
 
-        @show roots
+        #@show roots
 
         if length(roots) == 0 && level==0
             return [(∅, :none)]
