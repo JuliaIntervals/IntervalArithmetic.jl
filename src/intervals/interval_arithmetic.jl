@@ -93,14 +93,8 @@ function intersect{T}(a::Interval{T}, b::Interval{T})
 
 end
 
-#intersect(a::Interval, b::Interval) = intersect(promote(a,b)...)
-
-intersect{T,S}(a::Interval{T}, b::Interval{S}) =
-    begin
-        (a, b) = promote(a, b)
-        intersect(a, b)
-    end
-
+# Specific promotion rule for intersect:
+intersect{T,S}(a::Interval{T}, b::Interval{S}) = intersect(promote(a,b)...)
 
 hull{T}(a::Interval{T}, b::Interval{T}) = @round(T, min(a.lo, b.lo), max(a.hi, b.hi))
 union(a::Interval, b::Interval) = hull(a, b)
