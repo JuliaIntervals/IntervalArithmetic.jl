@@ -24,9 +24,9 @@ end
 
 # Real power of an interval:
 function ^{T}(a::Interval{T}, x::Real)
-    x == int(x) && return a^(int(x))
+    isinteger(x) && return a^(int(x))
     x < zero(x) && return inv( a^(-x) )
-    x == 0.5*one(x) && return sqrt(a)
+    x == one(x)/2 && return sqrt(a)
     #
     z = zero(a.hi)
     z > a.hi && error("Undefined operation; Interval is strictly negative and power is not an integer")
