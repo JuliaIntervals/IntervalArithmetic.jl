@@ -46,17 +46,21 @@ end
 #newton(f::Function, x::Nothing) = []
 
 
-newton(f::Function, x::Interval, tolerance=1e-16) = newton(f, D(f), x, tolerance)
+newton(f::Function, x::Interval, tolerance=1e-16) = newton(f, D(f), x, 0, tolerance)
  # use automatic differentiation if no derivative function given
 
-function newton(f::Function, f_prime::Function, x::Interval, level=0, tolerance=1e-16)
+function newton(f::Function, f_prime::Function, x::Interval, level::Int=0, tolerance=1e-16)
 
     if isempty(x)
-        return []
+        if level==0
+            return [(∅, :none)]
+        else
+            return []
+        end
     end
 
     print("Entering Newton: ")
-    @show(x)
+    @show(x, level)
 
     if diam(x) < tolerance
         return (x, :unknown)
@@ -91,9 +95,16 @@ function newton(f::Function, f_prime::Function, x::Interval, level=0, tolerance=
         #println("Bisecting...")
 
         m = mid(x)
-        return vcat(newton(f, f_prime, Interval(x.lo, m), level+1),  # must be careful with rounding of m ?
+
+        roots = vcat(newton(f, f_prime, Interval(x.lo, m), level+1),  # must be careful with rounding of m ?
                     newton(f, f_prime, Interval(m, x.hi), level+1)
                     )
+
+         if length(roots) == 0 && level==0
+            return [(∅, :none)]
+        else
+            return sort!(roots)
+        end
 
     else  # 0 in deriv; this does extended interval division by hand
         y1 = Interval(deriv.lo, -zero(deriv.lo))
@@ -102,12 +113,24 @@ function newton(f::Function, f_prime::Function, x::Interval, level=0, tolerance=
         y1 = N(f, f_prime, x, y1) ∩ x
         y2 = N(f, f_prime, x, y2) ∩ x
 
-
-        return sort!(vcat(
-                         newton(f, f_prime, y1),
-                         newton(f, f_prime, y2)
+        roots = vcat(
+                         newton(f, f_prime, y1, level+1),
+                         newton(f, f_prime, y2, level+1)
                          )
-                     )
+
+        @show roots
+
+        if length(roots) == 0 && level==0
+            return [(∅, :none)]
+        else
+            return sort!(roots)
+        end
+
+#         return sort!(vcat(
+#                          newton(f, f_prime, y1),
+#                          newton(f, f_prime, y2)
+#                          )
+#                      )
     end
 end
 
