@@ -4,7 +4,7 @@
 empty_interval(T::Type) = Interval(convert(T, NaN))  # interval from Inf to Inf
 empty_interval(x::Interval) = Interval(oftype(x.lo, NaN))
 isempty(x::Interval) = isnan(x.lo) || isnan(x.hi)
-∅ = empty_interval(Float64)   # I don't see how to define this according to the type
+∅ = empty_interval(BigFloat)   # I don't see how to define this according to the type
 
 
 ## Equalities and neg-equalities
@@ -92,6 +92,15 @@ function intersect{T}(a::Interval{T}, b::Interval{T})
     @round(T, max(a.lo, b.lo), min(a.hi, b.hi))
 
 end
+
+#intersect(a::Interval, b::Interval) = intersect(promote(a,b)...)
+
+intersect{T,S}(a::Interval{T}, b::Interval{S}) =
+    begin
+        (a, b) = promote(a, b)
+        intersect(a, b)
+    end
+
 
 hull{T}(a::Interval{T}, b::Interval{T}) = @round(T, min(a.lo, b.lo), max(a.hi, b.hi))
 union(a::Interval, b::Interval) = hull(a, b)
