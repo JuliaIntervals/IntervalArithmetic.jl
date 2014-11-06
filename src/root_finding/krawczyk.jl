@@ -42,27 +42,27 @@ K(f::Function, x::Interval) = K(f, D(f), x)
 
 function krawczyk_refine(f::Function, f_prime::Function, x::Interval, tolerance=1e-18)
 
-    print("Entering krawczyk_refine: ")
-    @show x
+    #print("Entering krawczyk_refine: ")
+    #@show x
 
     i = 0
     while diam(x) > tolerance  # avoid problem with tiny floating-point numbers if 0 is a root
 
-        @show x
+        #@show x
         Kx = K(f, f_prime, x) ∩ x
 
         if Kx == x
-            return (x, :unique)
+            return Any[(x, :unique)]
         end
 
         if isempty(Kx)   # shouldn't happen?
-            return []
+            return Any[]
         end
 
         x = Kx
     end
 
-    (x, :unique)
+    Any[(x, :unique)]
 end
 
 
@@ -70,13 +70,13 @@ end
 
 function krawczyk(f::Function, f_prime::Function, x::Interval)
 
-    print("Entering Krawczyk: ")
-    @show x
+    #print("Entering Krawczyk: ")
+    #@show x
 
     Kx = K(f, f_prime, x) ∩ x
 
     if isempty(Kx)
-        return []
+        return Any[]
     end
 
     if Kx ⊊ x
@@ -84,7 +84,7 @@ function krawczyk(f::Function, f_prime::Function, x::Interval)
     end
 
     if isthin(x)
-        return [(x, :unknown)]
+        return Any[(x, :unknown)]
     end
 
     m = mid(x)

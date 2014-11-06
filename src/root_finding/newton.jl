@@ -55,7 +55,7 @@ function newton(f::Function, f_prime::Function, x::Interval, level::Int=0, toler
 #        if level==0
 #            return [(∅, :none)]
  #       else
-            return []
+            return Any[]
   #      end
     end
 
@@ -77,7 +77,7 @@ function newton(f::Function, f_prime::Function, x::Interval, level::Int=0, toler
          #   if level==0
          #       return [(∅, :none)]
          #   else
-                return []
+                return Any[]
           #  end
         end
 
@@ -87,7 +87,7 @@ function newton(f::Function, f_prime::Function, x::Interval, level::Int=0, toler
 
 
         if isthin(x)
-            return (x, :unknown)
+            return Any[(x, :unknown)]
         end
 
         # bisect:
