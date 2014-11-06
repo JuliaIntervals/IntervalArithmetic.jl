@@ -2,16 +2,26 @@ module ValidatedNumerics
 
 
 import Base:
-  in, zero, one, abs, real, show,
-  sqrt, exp, log, sin, cos, tan, inv,
-  union, intersect, isempty,
-  convert, promote_rule,
-  BigFloat, string
+    in, zero, one, abs, real, show,
+    sqrt, exp, log, sin, cos, tan, inv,
+    union, intersect, isempty,
+    convert, promote_rule,
+    BigFloat,
+    set_rounding,
+    ⊆
 
 export
-  @interval, Interval,
-  @round_down, @round_up, @round, @thin_interval,
-  diam, mid, mag, mig, hull, isinside
+    @interval, Interval,
+    @round_down, @round_up, @round, @thin_interval,
+    diam, mid, mag, mig, hull, isinside,
+    emptyinterval, ∅, isempty, ⊊,
+    differentiate, D,  # should these be exported?
+    floatinterval, @floatinterval,
+    findroots
+
+## Root finding
+export
+    newton, krawczyk
 
 
 ## Default precision:
@@ -22,15 +32,12 @@ set_bigfloat_precision(53)
 import Base.MPFR.BigFloat
 BigFloat(a::MathConst) = big(a)
 
-<(a::MathConst, b::MathConst) = big(a) < big(b)
+<(a::MathConst, b::MathConst) = float(a) < float(b)
 
 
 ## Includes:
 
-include("interval_definition.jl")
-include("interval_macros.jl")
-include("interval_arithmetic.jl")
-include("interval_trig.jl")
-include("interval_functions.jl")
+include("intervals/intervals.jl")
+include("root_finding/root_finding.jl")
 
 end # module ValidatedNumerics

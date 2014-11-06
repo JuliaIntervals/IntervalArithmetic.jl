@@ -5,11 +5,9 @@ using Base.Test
 
 # Tests for Intervals.jl:
 
-include("consistency_tests.jl")
-include("numeric_tests.jl")
-include("trig_tests.jl")
-include("non_BigFloat_tests.jl")
-include("lin_alg_tests.jl")
+include("interval_tests/interval_tests.jl")
+#include("root_finding_tests/auto_diff_tests.jl")
+#include("root_finding_tests/root_finding_tests.jl")
 
 
 println("    \033[32;1mSUCCESS\033[0m")

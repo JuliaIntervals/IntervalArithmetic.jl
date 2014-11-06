@@ -1,10 +1,10 @@
 
 #----- From here on, NEEDS TESTING ------
-## sin
-function sin(a::Interval)
-    piHalf = big(pi) / 2
-    twoPi = big(pi) * 2
-    domainSin = Interval( big(-1.0), big(1.0) )
+
+function sin{T}(a::Interval{T})
+    piHalf = convert(T, pi) / 2
+    twoPi = convert(T, pi) * 2
+    domainSin = Interval{T}(-1, 1)
 
     # Checking the specific case
     diam(a) >= twoPi && return domainSin
@@ -19,19 +19,19 @@ function sin(a::Interval)
     # 20 different cases
     if loQuartile == hiQuartile # Interval limits in the same quartile
         loMod2pi > hiMod2pi && return domainSin
-        return @round(sin(a.lo), sin(a.hi))
+        return @round(T, sin(a.lo), sin(a.hi))
 
     elseif loQuartile == 3 && hiQuartile==0
-        return @round(sin(a.lo), sin(a.hi))
+        return @round(T, sin(a.lo), sin(a.hi))
 
     elseif loQuartile == 1 && hiQuartile==2
-        return @round(sin(a.hi), sin(a.lo))
+        return @round(T, sin(a.hi), sin(a.lo))
 
     elseif ( loQuartile == 0 || loQuartile==3 ) && ( hiQuartile==1 || hiQuartile==2 )
-        return @round(min(sin(a.lo), sin(a.hi)), big(1.0))
+        return @round(T, min(sin(a.lo), sin(a.hi)), big(1.0))
 
     elseif ( loQuartile == 1 || loQuartile==2 ) && ( hiQuartile==3 || hiQuartile==0 )
-        return @round(big(-1.0), max(sin(a.lo), sin(a.hi)))
+        return @round(T, -one(T), max(sin(a.lo), sin(a.hi)))
 
     elseif ( loQuartile == 0 && hiQuartile==3 ) || ( loQuartile == 2 && hiQuartile==1 )
         return domainSin
@@ -41,11 +41,11 @@ function sin(a::Interval)
     end
 end
 
-## cos
-function cos(a::Interval)
-    piHalf = big(pi) / 2
-    twoPi = big(pi) * 2
-    domainCos = Interval( big(-1.0), big(1.0) )
+
+function cos{T}(a::Interval{T})
+    piHalf = convert(T, pi) / 2
+    twoPi = convert(T, pi) * 2
+    domainCos = convert(Interval{T}, Interval(-1, 1))
 
     # Checking the specific case
     diam(a) >= twoPi && return domainCos
@@ -60,19 +60,19 @@ function cos(a::Interval)
     # 20 different cases
     if loQuartile == hiQuartile # Interval limits in the same quartile
         loMod2pi > hiMod2pi && return domainCos
-        return @round(cos(a.hi), cos(a.lo))
+        return @round(T, cos(a.hi), cos(a.lo))
 
     elseif loQuartile == 2 && hiQuartile==3
-        return @round(cos(a.lo), cos(a.hi))
+        return @round(T, cos(a.lo), cos(a.hi))
 
     elseif loQuartile == 0 && hiQuartile==1
-        return @round(cos(a.hi), cos(a.lo))
+        return @round(T, cos(a.hi), cos(a.lo))
 
     elseif ( loQuartile == 2 || loQuartile==3 ) && ( hiQuartile==0 || hiQuartile==1 )
-        return @round(min(cos(a.lo), cos(a.hi)), big(1.0))
+        return @round(T, min(cos(a.lo), cos(a.hi)), big(1.0))
 
     elseif ( loQuartile == 0 || loQuartile==1 ) && ( hiQuartile==2 || hiQuartile==3 )
-        return @round(big(-1.0), max(cos(a.lo), cos(a.hi)))
+        return @round(T, -one(T), max(cos(a.lo), cos(a.hi)))
 
     elseif ( loQuartile == 3 && hiQuartile==2 ) || ( loQuartile == 1 && hiQuartile==0 )
         return domainCos
@@ -82,10 +82,10 @@ function cos(a::Interval)
     end
 end
 
-## tan
-function tan(a::Interval)
-    bigPi = big(pi)
-    piHalf = big(pi) / 2
+
+function tan{T}(a::Interval{T})
+    bigPi = convert(T, pi)
+    piHalf = bigPi / 2
     domainTan = Interval( big(-Inf), big(Inf) )
 
     # Checking the specific case
@@ -98,7 +98,7 @@ function tan(a::Interval)
     loHalf = floor( loModpi / piHalf )
     hiHalf = floor( hiModpi / piHalf )
 
-    I = @round(tan(a.lo), tan(a.hi))
+    I = @round(T, tan(a.lo), tan(a.hi))
 
     if (loHalf > hiHalf) || ( loHalf == hiHalf && loModpi <= hiModpi)
         return I

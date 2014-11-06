@@ -1,57 +1,58 @@
 
 ## Powers
 # Integer power of an interval:
-function ^(a::Interval, n::Integer)
-    n < zero(n) && return reciprocal( a^(-n) )
+function ^{T}(a::Interval{T}, n::Integer)
+    n < zero(n) && return inv( a^(-n) )
     n == zero(n) && return one(a)
     n == one(n) && return a
     #
     ## NOTE: square(x) is deprecated in favor of x*x
     if n == 2*one(n)   # this is unnecessary as stands, but  mig(a)*mig(a) is supposed to be more efficient
-        return @round(mig(a)^2, mag(a)^2)
+        return @round(T, mig(a)^2, mag(a)^2)
     end
     #
     ## even power
     if n%2 == 0
-        return @round(mig(a)^n, mag(a)^n)
+        return @round(T, mig(a)^n, mag(a)^n)
     end
     ## odd power
 
-    @round(a.lo^n, a.hi^n)
+    @round(T, a.lo^n, a.hi^n)
 end
 
-^(a::Interval, r::Rational) = (a^(r.num)) ^ (1/r.den)
+^{T}(a::Interval{T}, r::Rational) = (a^(r.num)) ^ (1/r.den)
 
 # Real power of an interval:
-function ^(a::Interval, x::Real)
-    x == int(x) && return a^(int(x))
-    x < zero(x) && return reciprocal( a^(-x) )
-    x == 0.5*one(x) && return sqrt(a)
+function ^{T}(a::Interval{T}, x::Real)
+    isinteger(x) && return a^(int(x))
+    x < zero(x) && return inv( a^(-x) )
+    x == one(x)/2 && return sqrt(a)
     #
-    z = zero(BigFloat)
+    z = zero(a.hi)
     z > a.hi && error("Undefined operation; Interval is strictly negative and power is not an integer")
     #
-    xInterv = Interval( x )
+    xInterv = convert(Interval{T}, Interval(x))
     diam( xInterv ) >= eps(x) && return a^xInterv
     # xInterv is a thin interval
-    domainPow = Interval(z, big(Inf))
+    domainPow = Interval(z, oftype(a.hi, Inf))
     aRestricted = intersect(a, domainPow)
-    @round(aRestricted.lo^x, aRestricted.hi^x)
+    @round(T, aRestricted.lo^x, aRestricted.hi^x)
 
 end
 
 # Interval power of an interval:
-function ^(a::Interval, x::Interval)
+function ^{T}(a::Interval{T}, x::Interval)
     # Is x a thin interval?
-    diam( x ) < eps( mid(x) ) && return a^(x.lo)
-    z = zero(BigFloat)
+    diam(x) < eps( mid(x) ) && return a^(x.lo)
+    z = zero(T)
     z > a.hi && error("Undefined operation;\n",
                       "Interval is strictly negative and power is not an integer")
     #
-    domainPow = Interval(z, big(Inf))
+    domainPow = Interval(z, oftype(a.hi, Inf))
     aRestricted = intersect(a, domainPow)
 
-    @round(begin
+    @round(T,
+           begin
                lolo = aRestricted.lo^(x.lo)
                lohi = aRestricted.lo^(x.hi)
                min( lolo, lohi )
@@ -65,27 +66,30 @@ function ^(a::Interval, x::Interval)
 end
 
 ## sqrt
-function sqrt(a::Interval)
-    z = zero(BigFloat)
+
+inf(x::Rational) = 1//0  # to allow sqrt()
+
+function sqrt{T}(a::Interval{T})
+    z = zero(T)
     z > a.hi && error("Undefined operation;\n",
                       "Interval is strictly negative and power is not an integer")
     #
-    domainSqrt = Interval(z, big(Inf))
+    domainSqrt = Interval(z, oftype(a.hi, Inf))
     aRestricted = intersect(a, domainSqrt)
 
-    @round(sqrt(aRestricted.lo), sqrt(aRestricted.hi))
+    @round(T, sqrt(aRestricted.lo), sqrt(aRestricted.hi))
 
 end
 
 ## exp
-exp(a::Interval) = @round(exp(a.lo), exp(a.hi))
+exp{T}(a::Interval{T}) = @round(T, exp(a.lo), exp(a.hi))
 
 ## log
-function log(a::Interval)
-    z = zero(BigFloat)
-    domainLog = Interval(z, big(Inf))
+function log{T}(a::Interval{T})
+    z = zero(T)
+    domainLog = Interval(z, oftype(a.hi, Inf))
     z > a.hi && error("Undefined log; Interval is strictly negative")
     aRestricted = intersect(a, domainLog)
 
-    @round(log(aRestricted.lo), log(aRestricted.hi))
+    @round(T, log(aRestricted.lo), log(aRestricted.hi))
 end
