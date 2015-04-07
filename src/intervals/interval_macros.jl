@@ -104,7 +104,7 @@ function float(x::Interval)
 end
 
 @doc doc"""The `floatinterval` macro constructs an interval with `Float64` entries,
-instead of `BigFloat`. It is just a wrapper of the `@interval` macro."""
+instead of `BigFloat`. It is just a wrapper of the `@interval` macro.""" ->
 
 macro floatinterval(expr1, expr2...)
     if isempty(expr2)
