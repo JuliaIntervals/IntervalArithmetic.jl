@@ -10,7 +10,6 @@ if VERSION > v"0.4-"
     Base.Rounding.set_rounding_raw(whatever, rounding_mode) = ()
 end
 
-#Base.with_rounding(f, whatever, rounding_mode) = whatever
 
 macro rounding(T, expr, rounding_mode)
 
@@ -98,12 +97,14 @@ macro interval(expr1, expr2...)
 end
 
 
-## Construct interval with Float64s instead of BigFloats:
 
 function float(x::Interval)
     # @round(BigFloat, convert(Float64, x.lo), convert(Float64, x.hi))
     convert(Interval{Float64}, x)
 end
+
+@doc doc"""The `floatinterval` macro constructs an interval with `Float64` entries,
+instead of `BigFloat`. It is just a wrapper of the `@interval` macro.""" ->
 
 macro floatinterval(expr1, expr2...)
     if isempty(expr2)
