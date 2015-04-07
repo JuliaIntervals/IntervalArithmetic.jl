@@ -1,5 +1,6 @@
 module ValidatedNumerics
 
+(VERSION < v"0.4-") && using Docile
 
 import Base:
     in, zero, one, abs, real, show,
