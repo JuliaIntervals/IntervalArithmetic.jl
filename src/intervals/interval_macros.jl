@@ -41,7 +41,7 @@ end
 
 transf(a::MathConst) =  @thin_interval(big(a))
 transf(a::BigFloat)  =  @thin_interval(a)
-transf(a::Number)    =  @thin_interval(BigFloat("$a"))
+transf(a::Number)    =  @thin_interval(BigFloat("$a"))   # dangerous for floats!
 transf(a::String)    =  @thin_interval(BigFloat(a))
 
 
