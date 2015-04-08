@@ -1,9 +1,13 @@
 using ValidatedNumerics
-using Base.Test
+using FactCheck
 
-a = Interval(1//2, 3//4)
-b = Interval(3//7, 9//12)
+facts("Tests with rational intervals") do
 
-@test a + b == Interval(13//14, 3//2)
+    a = Interval(1//2, 3//4)
+    b = Interval(3//7, 9//12)
 
-@test sqrt(a + b) == Interval(0.9636241116594315, 1.224744871391589)
+    @fact a + b => Interval(13//14, 3//2)
+
+    @fact sqrt(a + b) => Interval(0.9636241116594315, 1.224744871391589)
+
+end
