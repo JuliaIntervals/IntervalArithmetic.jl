@@ -42,14 +42,14 @@ end
 transf(a::MathConst) =  @thin_interval(big(a))
 transf(a::BigFloat)  =  @thin_interval(a)
 transf(a::Number)    =  @thin_interval(BigFloat("$a"))
+transf(a::String)    =  @thin_interval(BigFloat(a))
 
 
 @doc doc"""`transform` transforms a string by applying the function `transf` to each argument, e.g
 `:(x+y)` is transformed to (approximately)
 `:(transf(x) + transf(y))`
 """ ->
-transform(x::Symbol) = :(transf($(esc(x))))
-transform(x::Number) = :(transf($(esc(x))))
+transform(x) = :(transf($(esc(x))))   # use if x is not an expression
 
 function transform(expr::Expr)
 
@@ -115,3 +115,4 @@ macro floatinterval(expr1, expr2...)
 
     :(float(@interval($expr1, $expr2)))
 end
+
