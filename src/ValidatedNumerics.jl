@@ -1,28 +1,27 @@
 module ValidatedNumerics
 
+(VERSION < v"0.4-") && using Docile
 
 import Base:
     in, zero, one, abs, real, show,
     sqrt, exp, log, sin, cos, tan, inv,
     union, intersect, isempty,
     convert, promote_rule,
-    BigFloat,
+    BigFloat, float,
     set_rounding,
     ⊆
 
 export
     @interval, Interval,
-    @round_down, @round_up, @round, @thin_interval,
     diam, mid, mag, mig, hull, isinside,
     emptyinterval, ∅, isempty, ⊊,
-    differentiate, D,  # should these be exported?
-    floatinterval, @floatinterval,
+    @floatinterval,
     findroots
 
 ## Root finding
 export
-    newton, krawczyk
-
+    newton, krawczyk,
+    differentiate, D # should these be exported?
 
 ## Default precision:
 set_bigfloat_precision(53)

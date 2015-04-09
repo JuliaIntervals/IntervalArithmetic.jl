@@ -31,7 +31,7 @@ function ^{T}(a::Interval{T}, x::Real)
     z = zero(a.hi)
     z > a.hi && error("Undefined operation; Interval is strictly negative and power is not an integer")
     #
-    xInterv = convert(Interval{T}, Interval(x))
+    xInterv = convert(Interval{T}, x)  # @interval(x) ?
     diam( xInterv ) >= eps(x) && return a^xInterv
     # xInterv is a thin interval
     domainPow = Interval(z, oftype(a.hi, Inf))

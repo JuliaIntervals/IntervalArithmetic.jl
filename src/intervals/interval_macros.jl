@@ -1,18 +1,23 @@
 
 ## Macros for directed rounding:
 
+# Use the following empty definitions for rounding types other than Float64:
+Base.set_rounding(whatever, rounding_mode) = ()
+Base.get_rounding(whatever) = ()
 
-set_rounding(whatever, rounding_mode) = ()  # for types other than Float64 and BigFloat
+if VERSION > v"0.4-"
+    Base.Rounding.get_rounding_raw(whatever) = ()
+    Base.Rounding.set_rounding_raw(whatever, rounding_mode) = ()
+end
+
 
 macro rounding(T, expr, rounding_mode)
+
     quote
-        set_rounding($T, $rounding_mode)
-        temp = $expr
-        set_rounding($T, RoundNearest)
-
-        temp
+        with_rounding($T, $rounding_mode) do
+            $expr
+        end
     end
-
 end
 
 
@@ -30,74 +35,77 @@ macro thin_interval(expr)
 end
 
 
+
 ## Wrap user input for correct rounding:
+# These transf functions are called after the initial @interval macro has been expanded
 
-transform(a::MathConst) =  ( @thin_interval(big(a)))
-transform(a::BigFloat)  =  ( @thin_interval(a))
-transform(a::Number)    = :( @thin_interval(BigFloat(string($a))) )
-transform(f::Function)  =  f   # needed for @floatinterval
+transf(a::MathConst) =  @thin_interval(big(a))
+transf(a::Rational)  =  transf(a.num) / transf(a.den)
+transf(a::BigFloat)  =  @thin_interval(a)
+transf(a::Number)    =  @thin_interval(BigFloat("$a"))   # dangerous for floats!
+transf(a::String)    =  @thin_interval(BigFloat(a))
 
-function transform(a::Symbol)
 
-    value = eval(Main, a)   # should use module_parent
-
-    if isa(value, MathConst) || isa(value, Number)
-        transform(value)
-    else
-        a  # symbols like :+
-    end
-end
+@doc doc"""`transform` transforms a string by applying the function `transf` to each argument, e.g
+`:(x+y)` is transformed to (approximately)
+`:(transf(x) + transf(y))`
+""" ->
+transform(x) = :(transf($(esc(x))))   # use if x is not an expression
 
 function transform(expr::Expr)
 
     if expr.head == :(.)   # e.g. a.lo
-        value = eval(Main, expr)
-        return transform(value)
+        return :(transf($(esc(expr))))
     end
 
-    ex = copy(expr)
-    for (i, arg) in enumerate(expr.args)
-        # println(i, " ", arg)
-        ex.args[i] = transform(arg)
+    new_expr = copy(expr)
+
+
+    start = 1
+    if expr.head == :call
+        start = 2  # omit operator
     end
-    return ex
+
+    for (i, arg) in enumerate(expr.args)
+        i < start && continue
+        #@show i,arg
+
+        new_expr.args[i] = transform(arg)
+
+    end
+
+    return new_expr
 end
 
 
-# The main way to create an interval is the following @interval macro
-# It converts each expression into a small interval that is guaranteed to contain the true value passed
-# by the user in the one or two expressions
-# It then takes the hull of the resulting two intervals to give a guaranteed containing interval
+@doc doc"""The `@interval` macro is the main way to create an interval of `BigFloat`s.
+It converts each expression into a small interval that is guaranteed to contain the true value passed
+by the user in the one or two expressions passed to it.
+It takes the hull of the resulting two intervals to give a guaranteed containing interval.
+"""->
 
 macro interval(expr1, expr2...)
+
     expr1 = transform(expr1)
 
-    use_float = false
-
-    if isempty(expr2)
-        expr2 = expr1
-    else
-        if length(expr2) > 1 && ( expr2[2] in (:Float64, :(ValidatedNumerics.Float64)) )
-            use_float = true
-        end
-
-        expr2 = transform(expr2[1])
+    if isempty(expr2)  # only one argument
+        return expr1
     end
 
-    if use_float
-        return :(floatinterval(hull($expr1, $expr2)))
+    expr2 = transform(expr2[1])
 
-    else
-        return :(hull($expr1, $expr2))   # BigFloat by default
-    end
+    :(hull($expr1, $expr2))   # BigFloat by default
 end
 
 
-## Construct interval with Float64s instead of BigFloats:
 
-function floatinterval(x::Interval)
-    @round(BigFloat, convert(Float64, x.lo), convert(Float64, x.hi))
+function float(x::Interval)
+    # @round(BigFloat, convert(Float64, x.lo), convert(Float64, x.hi))
+    convert(Interval{Float64}, x)
 end
+
+@doc doc"""The `floatinterval` macro constructs an interval with `Float64` entries,
+instead of `BigFloat`. It is just a wrapper of the `@interval` macro.""" ->
 
 macro floatinterval(expr1, expr2...)
     if isempty(expr2)
@@ -106,5 +114,6 @@ macro floatinterval(expr1, expr2...)
         expr2 = expr2[1]
     end
 
-    :(floatinterval(@interval($expr1, $expr2)))
+    :(float(@interval($expr1, $expr2)))
 end
+
