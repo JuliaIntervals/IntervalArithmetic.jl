@@ -49,7 +49,24 @@ facts("Numeric tests") do
     @fact abs(@interval(0.1, 0.2)) => Interval(9.9999999999999992e-02, 2.0000000000000001e-01)
     @fact abs(@interval(-1, 2)) => Interval(0, 2)
 
-    #real
+    # real
     @fact real(@interval(-1, 1)) => Interval(-1, 1)
+
+    # rationals
+
+    f = 1 // 3
+    g = 1 // 3
+
+    @fact @interval(f*g) => Interval(1.1111111111111109e-01, 1.1111111111111115e-01)
+    @fact big(1.)/9 ∈ @interval(f*g) => true
+
+    h = 1/3
+    i = 1/3
+
+    @fact @interval(h*i) => Interval(1.1111111111111105e-01, 1.111111111111111e-01)
+    @fact big(1.)/9 ∈ @interval(h*i) => true
+    # NB: Does NOT contain true 1/9
+    # but DOES contain big(1)/9 !
+
 
 end
