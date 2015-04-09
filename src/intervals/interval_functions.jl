@@ -24,7 +24,7 @@ end
 
 # Real power of an interval:
 function ^{T}(a::Interval{T}, x::Real)
-    isinteger(x) && return a^(int(x))
+    isinteger(x) && return a^round(Int,x)
     x < zero(x) && return inv( a^(-x) )
     x == one(x)/2 && return sqrt(a)
     #
