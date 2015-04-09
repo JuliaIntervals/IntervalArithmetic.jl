@@ -28,7 +28,7 @@ facts("Numeric tests") do
     @fact @interval(1,27)^@interval(1/3) => Interval(1., 3.0000000000000004e+00)  # @interval(1, 3)
     @fact @interval(-3,2)^@interval(2) => Interval(0, 9)
     @fact @interval(-3,4)^@interval(0.5) => Interval(0, 2)
-    @fact @interval(0.1, 0.7)^(1/3) => Interval(4.6415888336127786e-01, 8.8790400174260076e-01)
+    @fact @interval(0.1, 0.7)^(1/3) => Interval(4.6415888336127786e-01, 8.8790400174260087e-01)
 
     # exp and log
     @fact exp( @interval(1//2) ) => Interval(1.648721270700128e+00, 1.6487212707001282e+00)
