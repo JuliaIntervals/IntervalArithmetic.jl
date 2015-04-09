@@ -13,10 +13,9 @@ import Base:
 
 export
     @interval, Interval,
-    @round_down, @round_up, @round, @thin_interval,
     diam, mid, mag, mig, hull, isinside,
     emptyinterval, ∅, isempty, ⊊,
-    floatinterval, @floatinterval,
+    @floatinterval,
     findroots
 
 ## Root finding
