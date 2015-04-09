@@ -40,6 +40,7 @@ end
 # These transf functions are called after the initial @interval macro has been expanded
 
 transf(a::MathConst) =  @thin_interval(big(a))
+transf(a::Rational)  =  transf(a.num) / transf(a.den)
 transf(a::BigFloat)  =  @thin_interval(a)
 transf(a::Number)    =  @thin_interval(BigFloat("$a"))   # dangerous for floats!
 transf(a::String)    =  @thin_interval(BigFloat(a))
