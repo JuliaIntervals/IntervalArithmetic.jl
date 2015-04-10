@@ -56,4 +56,13 @@ function basic_show(io::IO, a::Interval)
 end
 
 show(io::IO, a::Interval) = basic_show(io, a)
-show(io::IO, a::Interval{BigFloat}) = ( basic_show(io, a); print(io, " with $(a.lo.prec) bits of precision") )
+show(io::IO, a::Interval{BigFloat}) = ( basic_show(io, a); print(io, subscriptify(precision(a.lo))) )
+
+
+function subscriptify(n::Int)
+    subscript_digits = [c for c in "₀₁₂₃₄₅₆₇₈₉"]
+    dig = reverse(digits(n))
+    join([subscript_digits[i+1] for i in dig])
+end
+
+
