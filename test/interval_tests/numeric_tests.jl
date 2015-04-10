@@ -28,10 +28,12 @@ facts("Numeric tests") do
     @fact @interval(1,27)^@interval(1/3) => Interval(1., 3.0000000000000004e+00)  # @interval(1, 3)
     @fact @interval(-3,2)^@interval(2) => Interval(0, 9)
     @fact @interval(-3,4)^@interval(0.5) => Interval(0, 2)
-    @fact @interval(0.1, 0.7)^(1/3) => Interval(4.6415888336127786e-01, 8.8790400174260087e-01)
+
+    @fact @interval(0.1,0.7)^(1//3) => Interval(4.6415888336127781e-01, 8.8790400174260076e-01)
+    @fact @interval(0.1,0.7)^(1/3)  => Interval(4.6415888336127781e-01, 8.8790400174260076e-01)
 
     # exp and log
-    @fact exp( @interval(1//2) ) => Interval(1.648721270700128e+00, 1.6487212707001282e+00)
+    @fact exp(@interval(1//2)) => Interval(1.648721270700128e+00, 1.6487212707001282e+00)
     @fact exp(@interval(0.1)) => Interval(1.1051709180756475e+00, 1.1051709180756477e+00)
     @fact diam(exp(@interval(0.1))) => eps(exp(0.1))
     @fact log(@interval(1//2)) => Interval(-6.931471805599454e-01, -6.9314718055994529e-01)
@@ -59,14 +61,16 @@ facts("Numeric tests") do
 
     @fact @interval(f*g) => Interval(1.1111111111111109e-01, 1.1111111111111115e-01)
     @fact big(1.)/9 ∈ @interval(f*g) => true
+    @fact @interval(1)/9 ⊆ @interval(f*g) => true
+    @fact @interval(1)/9 ≠ @interval(f*g) => true
 
     h = 1/3
     i = 1/3
 
-    @fact @interval(h*i) => Interval(1.1111111111111105e-01, 1.111111111111111e-01)
+    @fact @interval(h*i) => Interval(1.1111111111111109e-01, 1.1111111111111115e-01)
     @fact big(1.)/9 ∈ @interval(h*i) => true
-    # NB: Does NOT contain true 1/9
-    # but DOES contain big(1)/9 !
+
+    @fact @interval(h*i) == @interval(f*g) => true
 
 
 end
