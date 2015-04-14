@@ -1,8 +1,12 @@
 module ValidatedNumerics
 
 (VERSION < v"0.4-") && using Docile
+
 using Compat
+
 @compat round
+@compat parsefloat
+#@compat Float64
 
 import Base:
     in, zero, one, abs, real, show,
@@ -10,14 +14,14 @@ import Base:
     union, intersect, isempty,
     convert, promote_rule,
     BigFloat, float,
-    set_rounding,
+    set_rounding, widen,
     ⊆
 
 export
-    @interval, Interval,
+    Interval, @interval, @floatinterval,
     diam, mid, mag, mig, hull, isinside,
     emptyinterval, ∅, isempty, ⊊,
-    @floatinterval,
+    widen,
     findroots
 
 ## Root finding
