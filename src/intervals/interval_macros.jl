@@ -70,10 +70,10 @@ big_transf(x::BigFloat)  =  @thin_interval(x)  # NB: this will give a true thin 
 big_transf(x::Interval)  =  convert(Interval{BigFloat}, x)
 
 
-float_transf(x::String)    =  @thin_float_interval(@compat parsefloat(x))
+float_transf(x::String)    =  @thin_float_interval(parsefloat(x))
 float_transf(x::MathConst) =  convert(Interval{Float64}, @thin_interval(big(x)))   # this should be improved
 
-float_transf(x::Integer)   =  @thin_float_interval(@compat float64(x))
+float_transf(x::Integer)   =  @thin_float_interval(float(x))
 float_transf(x::Rational)  =  float_transf(x.num) / float_transf(x.den)
 float_transf(x::Float64)   =  float_transf(rationalize(x))  # NB: converts a float to a rational
 

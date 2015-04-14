@@ -1,8 +1,12 @@
 module ValidatedNumerics
 
 (VERSION < v"0.4-") && using Docile
+
 using Compat
+
 @compat round
+@compat parsefloat
+#@compat Float64
 
 import Base:
     in, zero, one, abs, real, show,
