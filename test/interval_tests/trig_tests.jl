@@ -1,3 +1,5 @@
+using ValidatedNumerics
+using FactCheck
 
 facts("Trig tests") do
     @fact sin(@interval(0.5)) => Interval(0.47942553860420295, 0.47942553860420301)
