@@ -27,7 +27,7 @@ function newton_refine{T<:Real}(f::Function, f_prime::Function, x::Interval{T};
     while diam(x) > tolerance  # avoid problem with tiny floating-point numbers if 0 is a root
         deriv = f_prime(x)
         Nx = N(f, x, deriv)
-        debug && show(x, Nx)
+        debug && @show(x, Nx)
         Nx = Nx ∩ x
         Nx == x && break
         x = Nx
@@ -44,7 +44,7 @@ newton{T<:Real}(f::Function, x::Interval{T}; tolerance=eps(one(T)), debug=false)
 function newton{T<:Real}(f::Function, f_prime::Function, x::Interval{T}, level::Int=0;
     tolerance=eps(one(T)), debug=false)
 
-    debug && (print("Entering newton:"); @show (x, level))
+    debug && (print("Entering newton:"); @show(level); @show(x))
 
     # Maximum level of bisection
     level >= 30 && return Any[(x, :unknown)]
@@ -89,8 +89,7 @@ function newton{T<:Real}(f::Function, f_prime::Function, x::Interval{T}, level::
         y2 = Interval(z, deriv.hi)
 
         if debug
-            println("0 in deriv")
-            @show deriv
+            @show (z in deriv, deriv)
             @show (y1, y2)
             @show N(f, x, y1)
             @show N(f, x, y2)

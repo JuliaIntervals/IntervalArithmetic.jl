@@ -32,6 +32,21 @@ facts("Testing zeros of sin(x) in [-5,5]") do
     @fact :unique == roots_sin[3][2] => true
 end
 
+# roots of cos(x)
+facts("Testing zeros of cos(x) in [-7.5,7.5] using @floatinterval") do
+    a = @floatinterval -7.5 7.5
+    f(x) = cos(x)
+    roots_cos = newton(f,a)
+    @fact -3pi/2 ∈ roots_cos[1][1] => true
+    @fact :unique == roots_cos[1][2] => true
+    @fact -pi/2 ∈ roots_cos[2][1] => true
+    @fact :unique == roots_cos[2][2] => true
+    @fact pi/2 ∈ roots_cos[3][1] => true
+    @fact :unique == roots_cos[3][2] => true
+    @fact 3pi/2 ∈ roots_cos[4][1] => true
+    @fact :unique == roots_cos[1][2] => true
+end
+
 facts("Testing zeros of W₃ in [-7.3,7.3]") do
     b = @interval -7.3 7.3
     g, gprime = generate_wilkinson(3)
