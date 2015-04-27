@@ -1,10 +1,10 @@
-using ValidatedNumerics
 using Polynomials
 
+a = @interval -5 5
+b = @interval -7.3 7.3
 
 # Wilkinson-type polynomial defined by its roots:
 # wₙ(x) = (x-1)⋅(x-2)⋅ ⋯ ⋅ (x-n)
-
 function generate_wilkinson(n, type_constructor=BigFloat)
     p = poly(collect(1:n))
     p_prime = polyder(p)
@@ -19,49 +19,28 @@ function generate_wilkinson(n, type_constructor=BigFloat)
 end
 
 
-function run_wilkinson(a::Interval, n::Int)
-
-    f, f_prime = generate_wilkinson(n, BigFloat)
-
-    println("Roots for n = $n: ")
-
-    #@time krawczyk_roots = krawczyk(f, a)
-    #display(krawczyk_roots)
-
-    @time newton_roots = newton(f, a)
-    display(newton_roots)
-
-    @time krawczyk_roots = krawczyk(f, f_prime, a)
-    display(krawczyk_roots)
-
-    @time newton_roots = newton(f, f_prime, a)
-    display(newton_roots)
-
-
-    # repeat with Float64 intervals
-
-
-    f, f_prime = generate_wilkinson(n, float)
-    a = floatinterval(a)
-
-    @time krawczyk_roots = krawczyk(f, a)
-    display(krawczyk_roots)
-
-    @time newton_roots = newton(f, a)
-    display(newton_roots)
-
-    @time krawczyk_roots = krawczyk(f, f_prime, a)
-    display(krawczyk_roots)
-
-    @time newton_roots = newton(f, f_prime, a)
-    display(newton_roots)
-
-
-
-    println()
+# roots of sin(x)
+facts("Testing zeros of sin(x) in [-5,5]") do
+    a = @interval -5 5
+    f(x) = sin(x)
+    roots_sin = newton(f,a)
+    @fact -pi ∈ roots_sin[1][1] => true
+    @fact :unique == roots_sin[1][2] => true
+    @fact zero(eltype(a)) ∈ roots_sin[2][1] => true
+    @fact :unique == roots_sin[2][2] => true
+    @fact pi ∈ roots_sin[3][1] => true
+    @fact :unique == roots_sin[3][2] => true
 end
 
-# for n in 1:7
-#     println("Doing n = $n")
-#     wilkinson_type(n)
-# end
+facts("Testing zeros of W₃ in [-7.3,7.3]") do
+    b = @interval -7.3 7.3
+    g, gprime = generate_wilkinson(3)
+    roots_w3 = newton(g,b)
+    @fact 1.0 ∈ roots_w3[1][1] => true
+    @fact :unique == roots_w3[1][2] => true
+    @fact 2.0 ∈ roots_w3[2][1] => true
+    @fact :unique == roots_w3[2][2] => true
+    @fact 3.0 ∈ roots_w3[3][1] => true
+    @fact :unique == roots_w3[3][2] => true
+end
+
