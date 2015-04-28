@@ -59,10 +59,12 @@ end
 ## Wrap user input for correct rounding:
 # These transf functions are called after the initial @interval macro has been expanded
 
-big_transf(x::String)    =  @thin_interval(BigFloat(x))
+# big_transf(x::String)    =  @thin_interval(BigFloat(x))
+big_transf(x::String)    =  @thin_interval(@compat parse(BigFloat,x))
 big_transf(x::MathConst) =  @thin_interval(big(x))
 
-big_transf(x::Integer)   =  @thin_interval(BigFloat("$x"))
+# big_transf(x::Integer)   =  @thin_interval(BigFloat("$x"))
+big_transf(x::Integer)   =  @thin_interval(@compat parse(BigFloat,"$x"))
 big_transf(x::Rational)  =  big_transf(x.num) / big_transf(x.den)
 big_transf(x::Float64)   =  big_transf(rationalize(x))  # NB: converts a float to a rational
 
