@@ -6,7 +6,7 @@ using Compat
 
 @compat round
 @compat parsefloat
-#@compat Float64
+
 
 import Base:
     in, zero, one, abs, real, show,
@@ -27,7 +27,8 @@ export
 ## Root finding
 export
     newton, krawczyk,
-    differentiate, D # should these be exported?
+    differentiate, D, # should these be exported?
+    Root
 
 ## Default precision:
 set_bigfloat_precision(53)

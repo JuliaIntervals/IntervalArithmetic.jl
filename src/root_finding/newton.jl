@@ -1,5 +1,6 @@
 # Newton method
 
+
 function guarded_mid(x::Interval)
     m = mid(x)
     if m == zero(x.lo)  # midpoint exactly 0
@@ -33,7 +34,8 @@ function newton_refine{T<:Real}(f::Function, f_prime::Function, x::Interval{T};
         x = Nx
     end
 
-    Any[(x, :unique)]
+
+    return [(x, :unique)]
 end
 
 
@@ -44,20 +46,22 @@ newton{T<:Real}(f::Function, x::Interval{T}; tolerance=eps(one(T)), debug=false)
 function newton{T<:Real}(f::Function, f_prime::Function, x::Interval{T}, level::Int=0;
     tolerance=eps(one(T)), debug=false)
 
+    #roots = Root{T}[]
     debug && (print("Entering newton:"); @show(level); @show(x))
 
     # Maximum level of bisection
-    level >= 30 && return Any[(x, :unknown)]
+    level >= 30 && return [(x, :unknown)]#return Root{T}[(x, :unknown)]
 
-    isempty(x) && return Any[(x, :none)]
+    isempty(x) && return [(x, :none)]
 
     # Shall we make sure tolerance>=eps(1.0) ?
     z = zero(x.lo)
     tolerance = abs(tolerance)
+
     if diam(x) < tolerance
         z in f(x) && newton(f, f_prime, x, level+1, tolerance=tolerance, debug=debug)
         println("Error: ", z in f(x), " ", x, " ", f(x))
-        return Any[(x, :error)]
+        return [(x, :error)]
     end
 
     # deriv = differentiate(f, x)
@@ -66,7 +70,7 @@ function newton{T<:Real}(f::Function, f_prime::Function, x::Interval{T}, level::
     if !(z in deriv)
         Nx = N(f, x, deriv)
 
-        isempty(Nx ∩ x) && return Any[(x,:none)]
+        isempty(Nx ∩ x) && return [(x, :none)]
 
         if Nx ⊆ x
             debug && (print("Refining "); @show(x))
@@ -78,7 +82,7 @@ function newton{T<:Real}(f::Function, f_prime::Function, x::Interval{T}, level::
         debug && @show(x,m)
 
         # bisecting
-        rootsN = vcat(
+        roots = vcat(
             newton(f, f_prime, Interval(x.lo, m), level+1, tolerance=tolerance, debug=debug),
             newton(f, f_prime, Interval(m, x.hi), level+1, tolerance=tolerance, debug=debug)
             )
@@ -100,22 +104,27 @@ function newton{T<:Real}(f::Function, f_prime::Function, x::Interval{T}, level::
 
         debug && @show(y1, y2)
 
-        rootsN = vcat(
+        roots = vcat(
             newton(f, f_prime, y1, level+1, tolerance=tolerance, debug=debug),
             newton(f, f_prime, y2, level+1, tolerance=tolerance, debug=debug)
             )
 
-        debug && @show(rootsN)
+        debug && @show(roots)
 
     end
 
-    # This cleans-up the tuples with `:none` or `:empty` from the rootsN vector
-    rrootsN = Any[]
-    for i in 1:length(rootsN)
-        tup = copy(rootsN[i])
-        (tup[2] == symbol(:none) || tup[2] == symbol(:empty)) && continue
-         push!(rrootsN, tup)
-    end
+    # This cleans-up the tuples with `:none` from the roots vector
+    cleaned_roots = similar(roots, 0)
 
-    return sort!(rrootsN)
+    debug && @show(roots)
+
+    # for root in roots
+    #     # tup = copy(roots[i])
+    #     root[2] == :none && continue
+    #     push!(cleaned_roots, root)
+    # end
+
+    cleaned_roots = filter(x -> x[2] != :none, roots)
+
+    return sort!(cleaned_roots)
 end
