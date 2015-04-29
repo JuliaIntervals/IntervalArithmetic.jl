@@ -8,6 +8,11 @@ using Compat
 @compat parsefloat
 
 
+if VERSION < v"0.4.0-dev+4539"
+    typealias AbstractString String
+    Base.parse(::Type{BigFloat}, s::AbstractString) = BigFloat(s)
+end
+
 import Base:
     in, zero, one, abs, real, show,
     sqrt, exp, log, sin, cos, tan, inv,
