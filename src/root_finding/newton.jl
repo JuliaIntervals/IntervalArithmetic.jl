@@ -40,17 +40,16 @@ end
 
 
 # use automatic differentiation if no derivative function given
-newton{T<:Real}(f::Function, x::Interval{T}; tolerance=eps(one(T)), debug=false) =
-    newton(f, D(f), x, 0, tolerance=tolerance, debug=debug)
+newton{T<:Real}(f::Function, x::Interval{T}; tolerance=eps(one(T)), debug=false, maxlevel=30) =
+    newton(f, D(f), x, 0, tolerance=tolerance, debug=debug, maxlevel=maxlevel)
 
 function newton{T<:Real}(f::Function, f_prime::Function, x::Interval{T}, level::Int=0;
-    tolerance=eps(one(T)), debug=false)
+    tolerance=eps(one(T)), debug=false, maxlevel=30)
 
-    #roots = Root{T}[]
     debug && (print("Entering newton:"); @show(level); @show(x))
 
     # Maximum level of bisection
-    level >= 30 && return [(x, :unknown)]#return Root{T}[(x, :unknown)]
+    level >= maxlevel && return [(x, :unknown)]
 
     isempty(x) && return [(x, :none)]
 
@@ -59,7 +58,7 @@ function newton{T<:Real}(f::Function, f_prime::Function, x::Interval{T}, level::
     tolerance = abs(tolerance)
 
     if diam(x) < tolerance
-        z in f(x) && newton(f, f_prime, x, level+1, tolerance=tolerance, debug=debug)
+        z in f(x) && newton(f, f_prime, x, level+1, tolerance=tolerance, debug=debug, maxlevel=maxlevel)
         println("Error: ", z in f(x), " ", x, " ", f(x))
         return [(x, :error)]
     end
@@ -83,8 +82,8 @@ function newton{T<:Real}(f::Function, f_prime::Function, x::Interval{T}, level::
 
         # bisecting
         roots = vcat(
-            newton(f, f_prime, Interval(x.lo, m), level+1, tolerance=tolerance, debug=debug),
-            newton(f, f_prime, Interval(m, x.hi), level+1, tolerance=tolerance, debug=debug)
+            newton(f, f_prime, Interval(x.lo, m), level+1, tolerance=tolerance, debug=debug, maxlevel=maxlevel),
+            newton(f, f_prime, Interval(m, x.hi), level+1, tolerance=tolerance, debug=debug, maxlevel=maxlevel)
             )
 
     else  # 0 in deriv; this does extended interval division by hand
@@ -105,8 +104,8 @@ function newton{T<:Real}(f::Function, f_prime::Function, x::Interval{T}, level::
         debug && @show(y1, y2)
 
         roots = vcat(
-            newton(f, f_prime, y1, level+1, tolerance=tolerance, debug=debug),
-            newton(f, f_prime, y2, level+1, tolerance=tolerance, debug=debug)
+            newton(f, f_prime, y1, level+1, tolerance=tolerance, debug=debug, maxlevel=maxlevel),
+            newton(f, f_prime, y2, level+1, tolerance=tolerance, debug=debug, maxlevel=maxlevel)
             )
 
         debug && @show(roots)
@@ -117,12 +116,6 @@ function newton{T<:Real}(f::Function, f_prime::Function, x::Interval{T}, level::
     cleaned_roots = similar(roots, 0)
 
     debug && @show(roots)
-
-    # for root in roots
-    #     # tup = copy(roots[i])
-    #     root[2] == :none && continue
-    #     push!(cleaned_roots, root)
-    # end
 
     cleaned_roots = filter(x -> x[2] != :none, roots)
 

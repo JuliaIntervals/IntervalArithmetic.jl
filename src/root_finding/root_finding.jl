@@ -3,10 +3,7 @@ include("automatic_differentiation.jl")
 include("newton.jl")
 include("krawczyk.jl")
 
-#@compat Tuple{Interval{T}, Symbol}
-typealias Root{T<:Real} @compat Tuple{Interval{T}, Symbol} #Tuple{Interval{T}, Symbol}
-
-
+typealias Root{T<:Real} @compat Tuple{Interval{T}, Symbol}
 
 function findroots(f::Function, a::Interval, method::Function=newton)
     method(f, a)
@@ -16,4 +13,5 @@ function findroots(f::Function, f_prime::Function, a::Interval, method::Function
     method(f, f_prime, a)
 end
 
-findroots(f::Function, a::Real, b::Real, method::Function=newton) = findroots(f, Interval(float(a), float(b)), method)
+findroots(f::Function, a::Real, b::Real, method::Function=newton) =
+	findroots(f, Interval(float(a), float(b)), method)

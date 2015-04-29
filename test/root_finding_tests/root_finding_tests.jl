@@ -57,7 +57,6 @@ end
 
 b = @interval(-7.3, 7.3)
 W₃, W₃_prime = generate_wilkinson(3)
-
 facts("Testing zeros of W₃ in $b") do 
     roots_w3 = newton(W₃, b)
     @fact 1.0 ∈ roots_w3[1][1] => true
