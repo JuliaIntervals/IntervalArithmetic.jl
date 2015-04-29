@@ -1,13 +1,13 @@
 
 #----- From here on, NEEDS TESTING ------
 
-function sin{T}(a::Interval{T})
+function sin{T<:Real}(a::Interval{T})
     piHalf = convert(T, pi) / 2
     twoPi = convert(T, pi) * 2
-    domainSin = Interval{T}(-1, 1)
+    rangeSin = @round(T, -one(T), one(T))
 
     # Checking the specific case
-    diam(a) >= twoPi && return domainSin
+    diam(a) >= twoPi && return rangeSin
 
     # Limits within 1 full period of sin(x)
     # Abbreviations
@@ -18,7 +18,7 @@ function sin{T}(a::Interval{T})
 
     # 20 different cases
     if loQuartile == hiQuartile # Interval limits in the same quartile
-        loMod2pi > hiMod2pi && return domainSin
+        loMod2pi > hiMod2pi && return rangeSin
         return @round(T, sin(a.lo), sin(a.hi))
 
     elseif loQuartile == 3 && hiQuartile==0
@@ -28,13 +28,13 @@ function sin{T}(a::Interval{T})
         return @round(T, sin(a.hi), sin(a.lo))
 
     elseif ( loQuartile == 0 || loQuartile==3 ) && ( hiQuartile==1 || hiQuartile==2 )
-        return @round(T, min(sin(a.lo), sin(a.hi)), big(1.0))
+        return @round(T, min(sin(a.lo), sin(a.hi)), one(T))
 
     elseif ( loQuartile == 1 || loQuartile==2 ) && ( hiQuartile==3 || hiQuartile==0 )
         return @round(T, -one(T), max(sin(a.lo), sin(a.hi)))
 
     elseif ( loQuartile == 0 && hiQuartile==3 ) || ( loQuartile == 2 && hiQuartile==1 )
-        return domainSin
+        return rangeSin
     else
         # This should be never reached!
         error(string("SOMETHING WENT WRONG in sin.\nThis should have never been reached") )
@@ -42,13 +42,13 @@ function sin{T}(a::Interval{T})
 end
 
 
-function cos{T}(a::Interval{T})
+function cos{T<:Real}(a::Interval{T})
     piHalf = convert(T, pi) / 2
     twoPi = convert(T, pi) * 2
-    domainCos = convert(Interval{T}, Interval(-1, 1))
+    rangeCos = @round(T, -one(T), one(T))
 
     # Checking the specific case
-    diam(a) >= twoPi && return domainCos
+    diam(a) >= twoPi && return rangeCos
 
     # Limits within 1 full period of sin(x)
     # Abbreviations
@@ -59,7 +59,7 @@ function cos{T}(a::Interval{T})
 
     # 20 different cases
     if loQuartile == hiQuartile # Interval limits in the same quartile
-        loMod2pi > hiMod2pi && return domainCos
+        loMod2pi > hiMod2pi && return rangeCos
         return @round(T, cos(a.hi), cos(a.lo))
 
     elseif loQuartile == 2 && hiQuartile==3
@@ -69,13 +69,13 @@ function cos{T}(a::Interval{T})
         return @round(T, cos(a.hi), cos(a.lo))
 
     elseif ( loQuartile == 2 || loQuartile==3 ) && ( hiQuartile==0 || hiQuartile==1 )
-        return @round(T, min(cos(a.lo), cos(a.hi)), big(1.0))
+        return @round(T, min(cos(a.lo), cos(a.hi)), one(T))
 
     elseif ( loQuartile == 0 || loQuartile==1 ) && ( hiQuartile==2 || hiQuartile==3 )
         return @round(T, -one(T), max(cos(a.lo), cos(a.hi)))
 
     elseif ( loQuartile == 3 && hiQuartile==2 ) || ( loQuartile == 1 && hiQuartile==0 )
-        return domainCos
+        return rangeCos
     else
         # This should be never reached!
         error(string("SOMETHING WENT WRONG in cos.\nThis should have never been reached") )
@@ -86,10 +86,10 @@ end
 function tan{T}(a::Interval{T})
     bigPi = convert(T, pi)
     piHalf = bigPi / 2
-    domainTan = Interval( big(-Inf), big(Inf) )
+    rangeTan = Interval{T}( -Inf, Inf )
 
     # Checking the specific case
-    diam(a) >= bigPi && return domainTan
+    diam(a) >= bigPi && return rangeTan
 
     # within 1 full period of tan(x) --> 4 cases
     # some abreviations
@@ -104,10 +104,10 @@ function tan{T}(a::Interval{T})
         return I
     end
 
-    disjoint2 = Interval( I.lo, big(Inf))
-    disjoint1 = Interval( big(-Inf), I.hi )
+    disjoint2 = Interval{T}( I.lo, Inf )
+    disjoint1 = Interval{T}( -Inf, I.hi)
     # info(string("The resulting interval is disjoint:\n", disjoint1, "\n", disjoint2,
-    #            "\n The hull of the disjoint subintervals is considered:\n", domainTan))
-    return domainTan
+    #            "\n The hull of the disjoint subintervals is considered:\n", rangeTan))
+    return rangeTan
 end
 
