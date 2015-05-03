@@ -59,7 +59,7 @@ end
 
 cos{T<:Real}(a::Interval{T}) = sin(half_pi(T) - a)
 
-tan{T<:Real}(a::Interval{T}) = sin(a) / cos(a)
+#tan{T<:Real}(a::Interval{T}) = sin(a) / cos(a)
 
 
 # function cos{T<:Real}(a::Interval{T})
@@ -103,47 +103,32 @@ tan{T<:Real}(a::Interval{T}) = sin(a) / cos(a)
 # end
 
 
-# function tan{T}(a::Interval{T})
-# #     bigPi = convert(T, pi)
-# #     half_pi = bigPi / 2
-#     whole_range = Interval{T}(-Inf, Inf)
-
-#     # Checking the specific case
-#     diam(a) >= get_pi(T) && return whole_range
-
-#     # within 1 full period of tan(x) --> 4 cases
-#     # some abreviations
-# #     loModpi = mod(a.lo, bigPi)
-# #     hiModpi = mod(a.hi, bigPi)
-# #     loHalf = floor( loModpi / half_pi )
-# #     hiHalf = floor( hiModpi / half_pi )
-
-#     lo_quartile = minimum(find_quartiles(a.lo))
-#     hi_quartile = maximum(find_quartiles(a.hi))
-
-#     lo_quartile_mod = mod(lo_quartile, 2)
-#     hi_quartile_mod = mod(hi_quartile, 2)
-
-#     #I = @round(T, tan(a.lo), tan(a.hi))
-
-#     if lo_quartile_mod == 0 && lo_quartile_mod == 1
-#         return whole_range
+function tan{T<:Real}(a::Interval{T})
+    whole_range = Interval{T}(-Inf, Inf)
 
 
-#     elseif lo_quartile_mod == hi_quartile_mod && hi_quartile_mod > lo_quartile_mod
-#         return whole_range
-#     end
+    diam(a) >= get_pi(T).lo && return whole_range
 
-#     @round(T, tan(a.lo), tan(a.hi))
-# #     if (lo_quartile > hiHalf) || ( loHalf == hiHalf && loModpi <= hiModpi)
-# #         return I
-# #     end
+    lo_quartile = minimum(find_quartiles(a.lo))
+    hi_quartile = maximum(find_quartiles(a.hi))
 
-#     # could return two disjoint intervals:
-#     # disjoint2 = Interval{T}( I.lo, Inf )
-#     # disjoint1 = Interval{T}( -Inf, I.hi)
-#     # info(string("The resulting interval is disjoint:\n", disjoint1, "\n", disjoint2,
-#     #            "\n The hull of the disjoint subintervals is considered:\n", rangeTan))
-# #     return whole_range
-# end
+    lo_quartile_mod = mod(lo_quartile, 2)
+    hi_quartile_mod = mod(hi_quartile, 2)
+
+    if lo_quartile_mod == 0 && lo_quartile_mod == 1
+        return whole_range
+
+    elseif lo_quartile_mod == hi_quartile_mod && hi_quartile > lo_quartile
+        return whole_range
+    end
+
+    @round(T, tan(a.lo), tan(a.hi))
+
+    # could return two disjoint intervals:
+    # disjoint2 = Interval{T}( I.lo, Inf )
+    # disjoint1 = Interval{T}( -Inf, I.hi)
+    # info(string("The resulting interval is disjoint:\n", disjoint1, "\n", disjoint2,
+    #            "\n The hull of the disjoint subintervals is considered:\n", rangeTan))
+#     return whole_range
+end
 
