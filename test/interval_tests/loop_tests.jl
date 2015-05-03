@@ -57,17 +57,50 @@ function calc_pi3(N)
     sqrt(6*S3)
 end
 
+function calc_pi4(N)
+    S4 = @floatinterval(0)
+    II = @floatinterval(1)
+
+    for i in N:-1:1
+        S4 += II / (i^2)
+    end
+    S4 += II / @floatinterval(N, N+1)
+
+    sqrt(6*S4)
+end
+
+function calc_pi5(N)
+    S5 = @floatinterval(0)
+    II = @floatinterval(1)
+
+    for i in N:-1:1
+        S5 += 1 // (i^2)
+    end
+    S5 += 1 / @floatinterval(N, N+1)
+
+    sqrt(6*S5)
+end
+
 
 facts("Pi tests") do
+
+    big_pi = with_bigfloat_precision(256) do
+        big(pi)
+    end
 
     N = 10000
     pi1 = calc_pi1(N)
     pi2 = calc_pi2(N)
     pi3 = calc_pi3(N)
+    pi4 = calc_pi4(N)
+    pi5 = calc_pi5(N)
 
-    @fact big(pi) ∈ pi1 => true
-    @fact big(pi) ∈ pi2 => true
-    @fact big(pi) ∈ pi3 => true
+
+    @fact big_pi ∈ pi1 => true
+    @fact big_pi ∈ pi2 => true
+    @fact big_pi ∈ pi3 => true
+    @fact big_pi ∈ pi4 => true
+    @fact big_pi ∈ pi5 => true
 
     @fact pi1 == pi2 => true
     @fact pi2 == pi3 => true

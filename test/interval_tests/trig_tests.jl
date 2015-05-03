@@ -1,3 +1,5 @@
+using ValidatedNumerics
+using FactCheck
 
 facts("Trig tests") do
     @fact sin(@interval(0.5)) => Interval(0.47942553860420295, 0.47942553860420301)
@@ -5,6 +7,8 @@ facts("Trig tests") do
     @fact sin(@interval(1.67,3.2)) => Interval(-5.8374143427580093e-02, 9.9508334981018021e-01)
     @fact sin(@interval(2.1, 5.6)) => Interval(-1.0, 8.6320936664887404e-01)
     @fact sin(@interval(0.5,8.5)) => Interval(-1.0, 1.0)
+    @fact sin(@floatinterval(-4.5, 0.1)) => Interval(-1.0, 0.9775301176650971)
+    @fact sin(@floatinterval(1.3, 6.3)) => Interval(-1.0, 1.0)
 
     @fact cos(@interval(0.5)) => Interval(0.87758256189037265, 0.87758256189037276)
     @fact cos(@interval(0.5,1.67)) => Interval(-0.099041036598728246, 0.87758256189037276)

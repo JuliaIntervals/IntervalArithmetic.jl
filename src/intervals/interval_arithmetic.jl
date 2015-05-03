@@ -96,15 +96,14 @@ function intersect{T}(a::Interval{T}, b::Interval{T})
         return emptyinterval(T)
     end
 
-
-
-    @round(T, max(a.lo, b.lo), min(a.hi, b.hi))
+    #@round(T, max(a.lo, b.lo), min(a.hi, b.hi))
+    Interval(max(a.lo, b.lo), min(a.hi, b.hi))
 
 end
 
 # Specific promotion rule for intersect:
 intersect{T,S}(a::Interval{T}, b::Interval{S}) = intersect(promote(a,b)...)
 
-hull{T}(a::Interval{T}, b::Interval{T}) = @round(T, min(a.lo, b.lo), max(a.hi, b.hi))
+hull{T}(a::Interval{T}, b::Interval{T}) = Interval(min(a.lo, b.lo), max(a.hi, b.hi))
 union(a::Interval, b::Interval) = hull(a, b)
 

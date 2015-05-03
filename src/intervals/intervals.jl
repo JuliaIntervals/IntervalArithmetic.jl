@@ -1,5 +1,6 @@
 include("interval_definition.jl")
-include("interval_macros.jl")
+include("rationalize.jl")
+include("interval_rounding.jl")
 include("interval_conversion_promotion.jl")
 include("interval_arithmetic.jl")
 include("interval_trig.jl")
