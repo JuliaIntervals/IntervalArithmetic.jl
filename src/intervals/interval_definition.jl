@@ -41,6 +41,8 @@ function basic_show(io::IO, a::Interval)
     else
         output = "[$(a.lo), $(a.hi)]"
         output = replace(output, "inf", "∞")
+        output = replace(output, "Inf", "∞")
+
         output
     end
 
