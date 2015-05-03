@@ -6,7 +6,7 @@ using Compat
 
 @compat round
 @compat parsefloat
-
+@compat ifloor
 
 if VERSION < v"0.4.0-dev+4539"
     typealias AbstractString String
