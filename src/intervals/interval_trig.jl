@@ -16,7 +16,7 @@ half_pi(x::FloatingPoint) = half_pi(typeof(x))
 
 function find_quartiles(x::FloatingPoint)
     temp = x / half_pi(x)
-    (itrunc(temp.lo), itrunc(temp.hi))
+    (ifloor(temp.lo), ifloor(temp.hi))
 end
 
 function sin{T<:Real}(a::Interval{T})
