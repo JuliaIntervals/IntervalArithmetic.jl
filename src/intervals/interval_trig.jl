@@ -33,7 +33,7 @@ function sin{T<:Real}(a::Interval{T})
 
     # Different cases depending on the two quartiles:
     if lo_quartile == hi_quartile # Interval limits in the same quartile
-        lo > hi && return whole_range
+        a.lo > a.hi && return whole_range
         return @round(T, sin(a.lo), sin(a.hi))
 
     elseif lo_quartile==3 && hi_quartile==0
@@ -57,50 +57,50 @@ function sin{T<:Real}(a::Interval{T})
 end
 
 
-function alternative_cos{T<:Real}(a::Interval{T})
-    sin(a - half_pi(T))
-end
+cos{T<:Real}(a::Interval{T}) = sin(half_pi(T) - a)
+
+#tan{T:<Real}(a::Interval{T}) = sin(a) / cos(a)
 
 
-function cos{T<:Real}(a::Interval{T})
-    half_pi = convert(T, pi) / 2
-    two_pi = convert(T, pi) * 2
-    rangeCos = @round(T, -one(T), one(T))
+# function cos{T<:Real}(a::Interval{T})
+#     half_pi = convert(T, pi) / 2
+#     two_pi = convert(T, pi) * 2
+#     rangeCos = @round(T, -one(T), one(T))
 
-    # Checking the specific case
-    diam(a) >= two_pi && return rangeCos
+#     # Checking the specific case
+#     diam(a) >= two_pi && return rangeCos
 
-    # Limits within 1 full period of sin(x)
-    # Abbreviations
-    lo = mod(a.lo, two_pi)
-    hi = mod(a.hi, two_pi)
-    lo_quartile = floor( lo / half_pi )
-    hi_quartile = floor( hi / half_pi )
+#     # Limits within 1 full period of sin(x)
+#     # Abbreviations
+#     lo = mod(a.lo, two_pi)
+#     hi = mod(a.hi, two_pi)
+#     lo_quartile = floor( lo / half_pi )
+#     hi_quartile = floor( hi / half_pi )
 
-    # 20 different cases
-    if lo_quartile == hi_quartile # Interval limits in the same quartile
-        lo > hi && return rangeCos
-        return @round(T, cos(a.hi), cos(a.lo))
+#     # 20 different cases
+#     if lo_quartile == hi_quartile # Interval limits in the same quartile
+#         lo > hi && return rangeCos
+#         return @round(T, cos(a.hi), cos(a.lo))
 
-    elseif lo_quartile == 2 && hi_quartile==3
-        return @round(T, cos(a.lo), cos(a.hi))
+#     elseif lo_quartile == 2 && hi_quartile==3
+#         return @round(T, cos(a.lo), cos(a.hi))
 
-    elseif lo_quartile == 0 && hi_quartile==1
-        return @round(T, cos(a.hi), cos(a.lo))
+#     elseif lo_quartile == 0 && hi_quartile==1
+#         return @round(T, cos(a.hi), cos(a.lo))
 
-    elseif ( lo_quartile == 2 || lo_quartile==3 ) && ( hi_quartile==0 || hi_quartile==1 )
-        return @round(T, min(cos(a.lo), cos(a.hi)), one(T))
+#     elseif ( lo_quartile == 2 || lo_quartile==3 ) && ( hi_quartile==0 || hi_quartile==1 )
+#         return @round(T, min(cos(a.lo), cos(a.hi)), one(T))
 
-    elseif ( lo_quartile == 0 || lo_quartile==1 ) && ( hi_quartile==2 || hi_quartile==3 )
-        return @round(T, -one(T), max(cos(a.lo), cos(a.hi)))
+#     elseif ( lo_quartile == 0 || lo_quartile==1 ) && ( hi_quartile==2 || hi_quartile==3 )
+#         return @round(T, -one(T), max(cos(a.lo), cos(a.hi)))
 
-    elseif ( lo_quartile == 3 && hi_quartile==2 ) || ( lo_quartile == 1 && hi_quartile==0 )
-        return rangeCos
-    else
-        # This should be never reached!
-        error(string("SOMETHING WENT WRONG in cos.\nThis should have never been reached") )
-    end
-end
+#     elseif ( lo_quartile == 3 && hi_quartile==2 ) || ( lo_quartile == 1 && hi_quartile==0 )
+#         return rangeCos
+#     else
+#         # This should be never reached!
+#         error(string("SOMETHING WENT WRONG in cos.\nThis should have never been reached") )
+#     end
+# end
 
 
 function tan{T}(a::Interval{T})
