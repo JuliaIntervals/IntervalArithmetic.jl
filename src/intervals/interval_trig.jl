@@ -23,7 +23,7 @@ function sin{T<:Real}(a::Interval{T})
 
     whole_range = Interval(-one(T), one(T))
 
-    diam(a) >= two_pi(T).lo && return whole_range
+    diam(a) >= 3*half_pi(T).lo && return whole_range
 
     lo_quartile = minimum(find_quartiles(a.lo))
     hi_quartile = maximum(find_quartiles(a.hi))
@@ -33,7 +33,7 @@ function sin{T<:Real}(a::Interval{T})
 
     # Different cases depending on the two quartiles:
     if lo_quartile == hi_quartile # Interval limits in the same quartile
-        a.lo > a.hi && return whole_range
+        #hi_quartile_true > lo_quartile_true && return whole_range
         return @round(T, sin(a.lo), sin(a.hi))
 
     elseif lo_quartile==3 && hi_quartile==0
