@@ -115,7 +115,7 @@ function tan{T<:Real}(a::Interval{T})
     lo_quartile_mod = mod(lo_quartile, 2)
     hi_quartile_mod = mod(hi_quartile, 2)
 
-    if lo_quartile_mod == 0 && lo_quartile_mod == 1
+    if lo_quartile_mod == 0 && hi_quartile_mod == 1
         return whole_range
 
     elseif lo_quartile_mod == hi_quartile_mod && hi_quartile > lo_quartile
