@@ -1,5 +1,8 @@
-site_name: ValidatedNumerics.jl: A Julia package for rigorous numerics
+site_name: ValidatedNumerics.jl. A Julia package for rigorous numerics
 
 pages:
     - [index.md, Validated Numerics]
     - [rounding.md, Rounding]
+
+theme: readthedocs
+
