@@ -1,0 +1,5 @@
+site_name: My Docs
+
+pages:
+    - [index.md, Home]
+    - [rounding.md, Rounding]
