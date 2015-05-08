@@ -35,9 +35,20 @@ We see that the true 0.1 is now correctly contained in the intervals, so that an
 
     julia> f(x) = 2x + 0.2
 
-then we can apply the function `f` to our interval `a` to obtain
+then we can apply the function `f` to the interval `c` to obtain
 
     julia> f(a)
     [3.9999999999999997e-01, 4.0000000000000002e-01]₅₃
 
 The result correctly contains the true 0.4.
+
+
+### Creating intervals from expressions
+
+The macros `@interval` and `@floatinterval` can also create intervals from expressions, e.g.
+
+```
+julia> @interval(2.3*3.4)
+[7.8199999999999958e+00, 7.8200000000000021e+00]₅₃
+```
+Internally, each term in the expression is wrapped in the (non-exported) `make_interval` function; furthermore, floating-point numbers are converted into rationals.
