@@ -4,14 +4,9 @@ module ValidatedNumerics
 
 using Compat
 
-@compat round
-@compat parsefloat
-@compat ifloor
-
-if VERSION < v"0.4.0-dev+4539"
-    typealias AbstractString String
-    Base.parse(::Type{BigFloat}, s::AbstractString) = BigFloat(s)
-end
+# @compat round
+# @compat parsefloat
+# @compat ifloor
 
 import Base:
     in, zero, one, abs, real, show,

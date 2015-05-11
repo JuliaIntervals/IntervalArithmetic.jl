@@ -25,7 +25,7 @@ Tucker, *Validated Numerics*."""->
 
 function find_quadrants(x::FloatingPoint)
     temp = x / half_pi(x)
-    (ifloor(temp.lo), ifloor(temp.hi))
+    @compat (floor(Int, temp.lo), floor(Int, temp.hi))
 end
 
 function sin{T<:Real}(a::Interval{T})
