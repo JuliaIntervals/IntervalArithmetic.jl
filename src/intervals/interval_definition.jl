@@ -31,7 +31,7 @@ Interval(a::Tuple) = Interval(a...)
 Interval(a::Real) = Interval(a, a)
 Interval{T<:Real, S<:Real}(a::T, b::S) = Interval(promote(a,b)...)
 
-eltype{T<:Real}(::Interval{T}) = T
+eltype{T<:Real}(x::Interval{T}) = T
 
 ## Output
 
