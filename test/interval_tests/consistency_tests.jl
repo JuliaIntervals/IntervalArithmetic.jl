@@ -50,4 +50,10 @@ facts("Consistency tests") do
 
     @fact log(@interval(-2,5)) => @interval(-Inf,log(5.0))
 
+    # Test putting functions in @interval:
+    @fact @interval(sin(0.1) + cos(0.2)) => sin(@interval(0.1)) + cos(@interval(0.2))
+
+    f(x) = 2x
+    @fact @interval(f(0.1)) => f(@interval(0.1))
+
 end

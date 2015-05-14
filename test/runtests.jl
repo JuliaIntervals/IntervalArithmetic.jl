@@ -1,7 +1,11 @@
-module ValidatedNumericsTests
+#module ValidatedNumericsTests
 
 using ValidatedNumerics
 using FactCheck
+
+
+FactCheck.roughly(a::Interval) = b -> (dist(a, b) < 2*max(eps(a), eps(b)))
+roughly = FactCheck.roughly
 
 # Interval tests:
 
@@ -15,4 +19,4 @@ include("root_finding_tests/root_finding_tests.jl")
 
 FactCheck.exitstatus()
 
-end
+#end

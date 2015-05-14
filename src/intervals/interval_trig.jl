@@ -1,17 +1,8 @@
 
-#----- From here on, NEEDS TESTING ------
-
-
-const float_pi_interval = @floatinterval(pi)
-const big_pi_interval = @interval(pi)
-
-get_pi(::Type{BigFloat}) = big_pi_interval
-get_pi(::Type{Float64})  = float_pi_interval
-
 half_pi{T}(::Type{T}) = get_pi(T) / 2
 two_pi{T}(::Type{T})  = get_pi(T) * 2
 
-half_pi(x::FloatingPoint) = half_pi(typeof(x))
+half_pi{T<:FloatingPoint}(x::T) = half_pi(T)
 
 
 @doc doc"""Finds the quadrant(s) corresponding to a given floating-point
@@ -42,7 +33,7 @@ function sin{T<:Real}(a::Interval{T})
 
     # Different cases depending on the two quadrants:
     if lo_quadrant == hi_quadrant
-        a.hi - a.lo > pi && return whole_range  # in same quadrant but separated by almost 2pi
+        a.hi - a.lo > get_pi(T).lo && return whole_range  # in same quadrant but separated by almost 2pi
         return @round(T, sin(a.lo), sin(a.hi))
 
     elseif lo_quadrant==3 && hi_quadrant==0
@@ -66,12 +57,6 @@ function sin{T<:Real}(a::Interval{T})
 end
 
 
-# Could define cos in terms of sin as follows, but it's slightly less accurate:
-# cos{T<:Real}(a::Interval{T}) = sin(half_pi(T) - a)
-
-#tan{T<:Real}(a::Interval{T}) = sin(a) / cos(a)
-
-
 function cos{T<:Real}(a::Interval{T})
 
     whole_range = Interval(-one(T), one(T))
@@ -86,7 +71,7 @@ function cos{T<:Real}(a::Interval{T})
 
     # Different cases depending on the two quadrants:
     if lo_quadrant == hi_quadrant # Interval limits in the same quadrant
-        a.hi - a.lo > pi && return whole_range
+        a.hi - a.lo > get_pi(T).lo && return whole_range
         return @round(T, cos(a.hi), cos(a.lo))
 
     elseif lo_quadrant == 2 && hi_quadrant==3
@@ -138,4 +123,13 @@ function tan{T<:Real}(a::Interval{T})
     #            "\n The hull of the disjoint subintervals is considered:\n", rangeTan))
 #     return whole_range
 end
+
+
+## Alternative definitions:
+
+# Could define cos in terms of sin as follows, but it's slightly less accurate:
+# cos{T<:Real}(a::Interval{T}) = sin(half_pi(T) - a)
+
+# And tan in terms of sin and cos:
+# tan{T<:Real}(a::Interval{T}) = sin(a) / cos(a)
 
