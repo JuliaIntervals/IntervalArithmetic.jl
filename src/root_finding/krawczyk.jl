@@ -1,98 +1,97 @@
+# Krawczyk method, following Tucker
 
-const D = differentiate
+# const D = differentiate
 
-function guarded_deriv_midpoint(f, f_prime, x::Interval)
-    # avoid 0 derivative
+@doc doc"""Returns two intervals, the first being a point within the
+interval x such that the interval corresponding to the derivative of f there
+does not contain zero, and the second is the inverse of its derivative""" ->
+function guarded_derivative_midpoint{T}(f::Function, f_prime::Function, x::Interval{T})
 
+    alpha = convert(T,0.46875)   # close to 0.5, but exactly representable as a floating point
+    m = guarded_mid(x)
+    m = Interval(m)
+    C = inv(f_prime(m))
 
-
-    alpha = 0.5
-    m = alpha*x.lo + (1-alpha)*x.hi
-
+    # Check that 0 is not in C; if so, consider another point rather than m
     i = 0
-
-    while abs(f(m)) < 1e-10   # don't bisect at/near a root
-        alpha /= 1.1
-        m = alpha*x.lo + (1-alpha)*x.hi
+    while zero(T) ∈ C
+        m = alpha*x.lo + (one(m)-alpha)*x.hi
+        m = Interval(m)
+        C = inv(f_prime(m))
         i += 1
-        if i>10
-            break
-        end
+        alpha /= 2
+        i > 10 && error("""Error in guarded_deriv_midpoint:
+            the derivative of the function seems too flat""")
     end
 
-    m = Interval(m)
-    return m, 1./f_prime(m)
+    return m, C
 end
 
 
+function K{T}(f::Function, f_prime::Function, x::Interval{T})
+    m, C = guarded_derivative_midpoint(f, f_prime, x)
+    deriv = f_prime(x)
+    Kx = m - C*f(m) + (one(T) - C*deriv) * (x - m)
+    Kx
+end
 
-K(f::Function, f_prime::Function, xx::Interval, m, C) = (
-                            # m = Interval(m);
-                            # C = Interval(C);
-                            m - C*f(m) + (1 - C*f_prime(xx)) * (xx - m)
-                            )
 
-K(f::Function, f_prime::Function, x::Interval) =
-    (
-        (m, C) = guarded_deriv_midpoint(f, f_prime, x);
-        K(f, f_prime, x, m, C)
-    )
+function krawczyk_refine{T}(f::Function, f_prime::Function, x::Interval{T};
+    tolerance=eps(one(T)), debug=false)
 
-K(f::Function, x::Interval) = K(f, D(f), x)
+    debug && (print("Entering krawczyk_refine:"); @show x)
 
-function krawczyk_refine(f::Function, f_prime::Function, x::Interval, tolerance=1e-18)
-
-    #print("Entering krawczyk_refine: ")
-    #@show x
-
-    i = 0
     while diam(x) > tolerance  # avoid problem with tiny floating-point numbers if 0 is a root
-
-        #@show x
-        Kx = K(f, f_prime, x) ∩ x
-
-        if Kx == x
-            return Any[(x, :unique)]
-        end
-
-        if isempty(Kx)   # shouldn't happen?
-            return Any[]
-        end
-
+        Kx = K(f, f_prime, x)
+        debug && @show(x, Kx)
+        Kx = Kx ∩ x
+        Kx == x && break
         x = Kx
     end
 
-    Any[(x, :unique)]
+    return [(x, :unique)]
 end
 
 
+# use automatic differentiation if no derivative function given
+krawczyk{T}(f::Function,x::Interval{T}; tolerance=eps(one(T)),
+    debug=false, maxlevel=30) =
+    krawczyk(f, D(f), x, 0, tolerance=tolerance, debug=debug, maxlevel=maxlevel)
 
+function krawczyk{T}(f::Function, f_prime::Function, x::Interval{T}, level::Int=0;
+    tolerance=eps(one(T)), debug=false, maxlevel=30)
 
-function krawczyk(f::Function, f_prime::Function, x::Interval)
+    debug && (print("Entering krawczyk:"); @show(level); @show(x))
 
-    #print("Entering Krawczyk: ")
-    #@show x
+    # Maximum level of bisection
+    level >= maxlevel && return [(x, :unknown)]
 
+    isempty(x) && return [(x, :none)]
     Kx = K(f, f_prime, x) ∩ x
 
-    if isempty(Kx)
-        return Any[]
-    end
+    isempty(Kx ∩ x) && return [(x, :none)]
 
     if Kx ⊊ x
-        return krawczyk_refine(f, f_prime, Kx)
+        debug && (print("Refining "); @show(x))
+        return krawczyk_refine(f, f_prime, Kx, tolerance=tolerance, debug=debug)
     end
 
-    if isthin(x)
-        return Any[(x, :unknown)]
-    end
+    m = guarded_mid(x)
 
-    m = mid(x)
+    debug && @show(x,m)
 
-    return vcat(
-                krawczyk(f, f_prime, Interval(x.lo, m)),
-                krawczyk(f, f_prime, Interval(m, x.hi))
-                )
+    isthin(x) && return [(x, :unknown)]
+
+    # bisecting
+    roots = vcat(
+        krawczyk(f, f_prime, Interval(x.lo, m), level+1, tolerance=tolerance,
+            debug=debug, maxlevel=maxlevel),
+        krawczyk(f, f_prime, Interval(m, x.hi), level+1, tolerance=tolerance,
+            debug=debug, maxlevel=maxlevel)
+        )
+
+    # This cleans-up the tuples with `:none` from the roots vector
+    debug && @show(roots)
+    clean_roots!(roots)
+    return roots
 end
-
-krawczyk(f::Function, x::Interval) = krawczyk(f, D(f), x)
