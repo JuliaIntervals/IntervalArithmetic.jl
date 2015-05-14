@@ -1,10 +1,12 @@
 # Newton method
 
 
-function guarded_mid(x::Interval)
+@doc doc"""Returns the midpoint of the interval x, slightly shifted in case
+it is zero""" ->
+function guarded_mid{T}(x::Interval{T})
     m = mid(x)
-    if m == zero(x.lo)  # midpoint exactly 0
-        alpha = 0.46875 # close to 0.5, but exactly representable as a floating point
+    if m == zero(T)                     # midpoint exactly 0
+        alpha = convert(T,0.46875)      # close to 0.5, but exactly representable as a floating point
         m = alpha*x.lo + (one(m)-alpha)*x.hi   # displace to another point in the interval
     end
 
@@ -20,7 +22,7 @@ function N(f::Function, x::Interval, deriv::Interval)
 end
 
 
-function newton_refine{T<:Real}(f::Function, f_prime::Function, x::Interval{T};
+function newton_refine{T}(f::Function, f_prime::Function, x::Interval{T};
     tolerance=eps(one(T)), debug=false)
 
     debug && (print("Entering newton_refine:"); @show x)
@@ -34,16 +36,15 @@ function newton_refine{T<:Real}(f::Function, f_prime::Function, x::Interval{T};
         x = Nx
     end
 
-
     return [(x, :unique)]
 end
 
 
 # use automatic differentiation if no derivative function given
-newton{T<:Real}(f::Function, x::Interval{T}; tolerance=eps(one(T)), debug=false, maxlevel=30) =
+newton{T}(f::Function, x::Interval{T}; tolerance=eps(one(T)), debug=false, maxlevel=30) =
     newton(f, D(f), x, 0, tolerance=tolerance, debug=debug, maxlevel=maxlevel)
 
-function newton{T<:Real}(f::Function, f_prime::Function, x::Interval{T}, level::Int=0;
+function newton{T}(f::Function, f_prime::Function, x::Interval{T}, level::Int=0;
     tolerance=eps(one(T)), debug=false, maxlevel=30)
 
     debug && (print("Entering newton:"); @show(level); @show(x))
@@ -113,11 +114,19 @@ function newton{T<:Real}(f::Function, f_prime::Function, x::Interval{T}, level::
     end
 
     # This cleans-up the tuples with `:none` from the roots vector
-    cleaned_roots = similar(roots, 0)
+    debug && (println("Entering clean_roots!"); @show(roots))
+    clean_roots!(roots)
+    return roots
+end
 
-    debug && @show(roots)
 
-    cleaned_roots = filter(x -> x[2] != :none, roots)
-
-    return sort!(cleaned_roots)
+# This cleans-up the tuples with `:none` from the roots vector
+function clean_roots!(roots)
+    for i in length(roots):-1:1
+        x = roots[i]
+        if x[2] == :none
+            deleteat!(roots,i)
+        end
+    end
+    return sort!(roots)
 end

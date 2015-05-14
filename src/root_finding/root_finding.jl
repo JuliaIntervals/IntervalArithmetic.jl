@@ -5,13 +5,17 @@ include("krawczyk.jl")
 
 typealias Root{T<:Real} @compat Tuple{Interval{T}, Symbol}
 
-function findroots(f::Function, a::Interval, method::Function=newton)
-    method(f, a)
+function find_roots(f::Function, a::Interval, method::Function=newton;
+    tolerance=eps(one(T)), debug=false, maxlevel=30)
+    method(f, a, tolerance=tolerance, debug=debug, maxlevel=maxlevel)
 end
 
-function findroots(f::Function, f_prime::Function, a::Interval, method::Function=newton)
-    method(f, f_prime, a)
+function find_roots(f::Function, f_prime::Function, a::Interval, method::Function=newton;
+    tolerance=eps(one(T)), debug=false, maxlevel=30)
+    method(f, f_prime, a, tolerance=tolerance, debug=debug, maxlevel=maxlevel)
 end
 
-findroots(f::Function, a::Real, b::Real, method::Function=newton) =
-	findroots(f, Interval(float(a), float(b)), method)
+find_roots(f::Function, a::Real, b::Real, method::Function=newton;
+    tolerance=eps(one(T)), debug=false, maxlevel=30) =
+    find_roots(f, Interval(float(a), float(b)), method, tolerance=tolerance,
+        debug=debug, maxlevel=maxlevel)

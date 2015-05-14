@@ -4,15 +4,6 @@ module ValidatedNumerics
 
 using Compat
 
-@compat round
-@compat parsefloat
-
-
-if VERSION < v"0.4.0-dev+4539"
-    typealias AbstractString String
-    Base.parse(::Type{BigFloat}, s::AbstractString) = BigFloat(s)
-end
-
 import Base:
     in, zero, one, abs, real, show,
     sqrt, exp, log, sin, cos, tan, inv,
@@ -24,16 +15,17 @@ import Base:
 
 export
     Interval, @interval, @floatinterval,
+    get_interval_rounding, set_interval_rounding,
     diam, mid, mag, mig, hull, isinside,
     emptyinterval, ∅, isempty, ⊊,
-    widen,
-    findroots
+    widen
 
 ## Root finding
 export
     newton, krawczyk,
     differentiate, D, # should these be exported?
-    Root
+    Root,
+    find_roots
 
 ## Default precision:
 set_bigfloat_precision(53)

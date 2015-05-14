@@ -40,6 +40,7 @@ end
 
 sin(x::Jet) = Jet(sin(x.val), x.der*cos(x.val))
 cos(x::Jet) = Jet(cos(x.val), -x.der*sin(x.val))
+tan(x::Jet) = Jet(tan(x.val), x.der / cos(x.val)^2 )
 
 exp(x::Jet) = Jet(exp(x.val), x.der * exp(x.val))
 log(x::Jet) = Jet(log(x.val), x.der / x.val)
