@@ -10,3 +10,7 @@ julia:
 
 notifications:
   email: false
+
+after_success:
+- julia -e 'cd(Pkg.dir("MyPkg")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
+
