@@ -80,10 +80,10 @@ W7(x) = -5040 + 13068x - 13132x^2 + 6769x^3 - 1960x^4 + 322x^5 - 28x^6 + x^7
 
 # Format:  (function, derivative, lower_bound, upper_bound, [true_roots])
 function_list = [
-                    (sin, cos,    -5,  5,  [ -big_pi, zero, big_pi ] ) ,
-                    (cos, D(cos), -8,  8,  [ -three_halves_pi, -half_pi, half_pi, three_halves_pi ] ),
-                    (W3, D(W3),   -10, 10, [ @interval(1), @interval(2.), @interval(3.) ] ),
-                    (W7, D(W7),   -10, 10, [ @interval(i) for i in 1:7 ] )
+                    (sin, cos,    -5,  5,    [ -big_pi, zero, big_pi ] ) ,
+                    (cos, D(cos), -7.5, 7.5, [ -three_halves_pi, -half_pi, half_pi, three_halves_pi ] ),
+                    (W3, D(W3),   -10, 10,   [ @interval(1), @interval(2.), @interval(3.) ] ),
+                    (W7, D(W7),   -10, 10,   [ @interval(i) for i in 1:7 ] )
                 ]
 
 println("Here")
