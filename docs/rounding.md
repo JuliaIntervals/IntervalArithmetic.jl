@@ -20,35 +20,46 @@ Suppose now that we created an interval as
     julia> II = Interval(0.1)
     [0.1, 0.1]
 
-It looks like the interval contains the true value 0.1, but from the above discussion we see that, in fact, *it does not*! In order to contain the true value 0.1, the end-points of the interval must be rounded outwards: the lower bound is rounded down, and the upper bound is rounded up. This is all handled by the `@interval` and `@floatinterval` macros, which generate correctly-rounded intervals of `BigFloat`s and `Float64`s, respectively:
+It looks like the interval contains the true value 0.1, but from the above discussion we see that, in fact, *it does not*. In order to contain the true value 0.1, the end-points of the interval must be rounded outwards ("directed rounding"): the lower bound is rounded down, and the upper bound is rounded up. 
 
-```
+This rounding is handled by the `@interval`  macro, which generates correctly-rounded intervals:
+
+```julia
 julia> a = @interval(0.1)
-[9.9999999999999992e-02, 1.0000000000000001e-01]₅₃
-
-julia> b = @floatinterval(0.1)
 [0.09999999999999999, 0.1]
 ```
-[Note the subscript "53" at the end of the first output, which indicates the precision of the `BigFloat`s contained in the interval.]
 
-We see that the true 0.1 is now correctly contained in the intervals, so that any calculations on these intervals will contain the true result of calculating with 0.1. For example, if we define
-
-    julia> f(x) = 2x + 0.2
-
-then we can apply the function `f` to the interval `c` to obtain
-
-    julia> f(a)
-    [3.9999999999999997e-01, 4.0000000000000002e-01]₅₃
-
+The true 0.1 is now correctly contained in the intervals, so that any calculations on these intervals will contain the true result of calculating with 0.1. For example, if we define
+```julia
+julia> f(x) = 2x + 0.2
+```
+then we can apply the function `f` to the interval `a` to obtain
+```julia
+julia> f(a)
+[0.39999999999999997, 0.4]
+```
 The result correctly contains the true 0.4.
 
+## More detail
+Let's look at the internal representation of the `Float64` number 0.1:
 
-### Creating intervals from expressions
-
-The macros `@interval` and `@floatinterval` can also create intervals from expressions, e.g.
-
+```julia
+julia> bits(0.1)
+"0011111110111001100110011001100110011001100110011001100110011010"
 ```
-julia> @interval(2.3*3.4)
-[7.8199999999999958e+00, 7.8200000000000021e+00]₅₃
+The last 53 bits of these 64 bits correspond to the binary expansion of 0.1, which is
 ```
-Internally, each term in the expression is wrapped in the (non-exported) `make_interval` function; furthermore, floating-point numbers are converted into rationals.
+0.000110011001100110011001100110011001100...
+```
+We see that the expansion is periodic; in fact, the binary expansion of 0.1 has an infinite repetition of the sequence of digits `1100`. It is thus *impossible* to represent the decimal 0.1 in binary, with *any* precision.
+
+Julia allows us to get closer to the true value using `BigFloat`s:
+```julia
+julia> using Compat
+
+julia> @compat parse(BigFloat, "0.1")
+1.000000000000000000000000000000000000000000000000000000000000000000000000000002e-01 with 256 bits of precision
+```
+But the 2 and the end of the decimal expansion is the giveaway that this number is still not exactly 0.1
+
+The true value must be approximated by a floating-point number with fixed precision -- this procedure is called **rounding**. Rounding down may be accomplished simply by truncating the expansion; rounding up is accomplished by incrementing the final binary digit and propagating any resulting changes.
