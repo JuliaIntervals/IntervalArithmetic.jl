@@ -89,7 +89,7 @@ function_list = [
 println("Here")
 
 facts("Testing root finding") do
-    for precision_type in ( (BigFloat,53), (BigFloat,256), (BigFloat,1000) )#, (Float64, -1)
+    for precision_type in ( (BigFloat,53), (BigFloat,256), (BigFloat,1024) )#, (Float64, -1)
         set_interval_precision(precision_type)
 
         for method in (newton, krawczyk)
