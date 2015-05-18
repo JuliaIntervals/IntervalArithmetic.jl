@@ -133,3 +133,24 @@ end
 # And tan in terms of sin and cos:
 # tan{T<:Real}(a::Interval{T}) = sin(a) / cos(a)
 
+
+function asin{T<:Real}(a::Interval{T})
+    domain = Interval(-one(T), one(T))
+
+    a = a ∩ domain
+
+    @round(T, asin(a.lo), asin(a.hi))
+end
+
+function acos{T<:Real}(a::Interval{T})
+    domain = Interval{T}(-one(T), one(T))
+
+    a = a ∩ domain
+
+    @round(T, acos(a.lo), acos(a.hi))
+end
+
+function atan{T<:Real}(a::Interval{T})
+
+    @round(T, atan(a.lo), atan(a.hi))
+end

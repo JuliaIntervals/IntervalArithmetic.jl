@@ -83,36 +83,48 @@ function_list = [
                     (sin, cos,    -5,  5,    [ -big_pi, zero, big_pi ] ) ,
                     (cos, D(cos), -7.5, 7.5, [ -three_halves_pi, -half_pi, half_pi, three_halves_pi ] ),
                     (W3, D(W3),   -10, 10,   [ @interval(1), @interval(2.), @interval(3.) ] ),
-                    (W7, D(W7),   -10, 10,   [ @interval(i) for i in 1:7 ] )
+                    (W7, D(W7),   -10, 10,   [ @interval(i) for i in 1:7 ] ),
+                    (x->exp(x)-2, D(x->exp(x)-2),  -20, 20,  [log(@biginterval(2))] )
                 ]
 
-println("Here")
 
 facts("Testing root finding") do
-    for precision_type in ( (BigFloat,53), (BigFloat,256), (BigFloat,1024) )#, (Float64, -1)
-        set_interval_precision(precision_type)
+    for interval_precision in (:wide, :narrow)
 
-        for method in (newton, krawczyk)
+        context("Interval precision: $interval_precision") do
 
-            for func in function_list
+            for precision_type in ( (BigFloat,53), (BigFloat,256) ) #, (BigFloat,1024) )#, (Float64, -1)
+                context("Precision: $precision_type") do
 
-                f, f_prime, a_lower, a_upper, true_roots = func
-                a = @interval(a_lower, a_upper)
+                    set_interval_precision(precision_type)
+
+                    for method in (newton, krawczyk)
+
+                        context("Method $method") do
+
+                            for func in function_list
+
+                                f, f_prime, a_lower, a_upper, true_roots = func
+                                a = @interval(a_lower, a_upper)
 
 
-                context("Function $f; interval $a; method $method; precision $precision_type") do
+                                context("Function $f; interval $a") do
 
-                    roots = method(f, f_prime, a)
+                                    roots = method(f, f_prime, a)
 
-                    for i in 1:length(roots)
-                        root = roots[i]
+                                    for i in 1:length(roots)
+                                        root = roots[i]
 
-                        @fact true_roots[i] ⊆ root => true
-                        @fact isa(root, Root{precision_type[1]}) => true
-                        @fact is_unique(root) => true
+                                        @fact true_roots[i] ⊆ root => true
+                                        @fact isa(root, Root{precision_type[1]}) => true
+                                        @fact is_unique(root) => true
+                                    end
+                                end
+
+                            end
+                        end
                     end
                 end
-
             end
         end
     end

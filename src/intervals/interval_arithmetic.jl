@@ -92,6 +92,10 @@ mig(a::Interval) = ( zero(a.lo) ∈ a ) ? zero(a.lo) : min( abs(a.lo), abs(a.hi)
 real(a::Interval) = a
 abs(a::Interval) = Interval(mig(a), mag(a))
 
+# <=(a::Interval, b::Interval) = a < b || a == b
+# Not clear how to define <= in a sensible way?
+
+# Don't define isless since that's for total orders
 
 ## Set operations
 
@@ -121,3 +125,6 @@ union(a::Interval, b::Interval) = hull(a, b)
 dist(a::Interval, b::Interval) = max(abs(a.lo-b.lo), abs(a.hi-b.hi))
 eps(a::Interval) = max(eps(a.lo), eps(a.hi))
 
+
+floor(a::Interval) = Interval(floor(a.lo), floor(a.hi))
+ceil(a::Interval) = Interval(ceil(a.lo), ceil(a.hi))

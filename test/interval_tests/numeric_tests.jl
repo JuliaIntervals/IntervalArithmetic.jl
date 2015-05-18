@@ -54,9 +54,11 @@ facts("Numeric tests") do
     @fact diam(log(@interval(0.1))) => eps(log(0.1))
 
     # comparison
-    d = @interval(0.1, 0.2)
+    d = @interval(0.1, 2)
 
     @fact d < 3 => true
+    #@fact d <= 2 => true
+    @fact d < 2 => false
     @fact -1 < d => true
     @fact !(d < 0.15) => true
 
@@ -101,6 +103,9 @@ facts("Numeric tests") do
     a = @interval(0.1)
     b = Interval(0.1, 0.1)
     @fact dist(a,b) <= eps(a) => true
+
+    @fact floor(@interval(0.1, 1.1)) => @interval(0, 1)
+    @fact ceil(@interval(0.1, 1.1)) => @interval(1, 2)
 
 
 end
