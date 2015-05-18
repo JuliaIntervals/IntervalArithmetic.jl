@@ -1,5 +1,8 @@
 # ValidatedNumerics.jl #
 
+![Build status](https://travis-ci.org/dpsanders/ValidatedNumerics.jl.svg?branch=master)
+[![Coverage Status](https://coveralls.io/repos/dpsanders/ValidatedNumerics.jl/badge.svg?branch=interval_parameters_new)](https://coveralls.io/r/dpsanders/ValidatedNumerics.jl?branch=interval_parameters_new)
+
 This is a package for performing *Validated Numerics* in Julia, i.e. rigorous
 computations with finite-precision floating-point arithmetic.
 The fundamental tool is interval arithmetic, provided by `Intervals.jl`, 
