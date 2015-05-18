@@ -9,8 +9,8 @@ end
 Jet{T}(a::T, b::T) = Jet{T}(a, b)
 #Jet(a, b) = Jet{T}(a,b)
 
-import Base:
-    convert, promote_rule, zero, one
+# import Base:
+#     convert, promote_rule, zero, one
 
 convert(::Type{Jet}, c::Real) = Jet(c)
 promote_rule{T<:Real, S<:Real}(::Type{Jet{T}}, ::Type{S}) = Jet
@@ -46,7 +46,6 @@ tan(x::Jet) = Jet(tan(x.val), x.der / cos(x.val)^2 )
 asin(x::Jet) = Jet(asin(x.val), x.der / sqrt(1-x.val^2))
 acos(x::Jet) = Jet(acos(x.val), -x.der / sqrt(1-x.val^2))
 atan(x::Jet) = Jet(atan(x.val), x.der / (1+x.val^2))
-
 
 exp(x::Jet) = Jet(exp(x.val), x.der * exp(x.val))
 log(x::Jet) = Jet(log(x.val), x.der / x.val)

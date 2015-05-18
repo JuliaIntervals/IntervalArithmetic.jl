@@ -110,7 +110,7 @@ transform(x, f, T) = :($f($(esc(T)), $(esc(x))))   # use if x is not an expressi
 
 function transform(expr::Expr, f::Symbol, T)
 
-    if expr.head == :(.)   # e.g. a.lo
+    if expr.head in ( :(.), :ref )   # of form  a.lo  or  a[i]
         return :($f($(esc(T)), $(esc(expr))))
     end
 

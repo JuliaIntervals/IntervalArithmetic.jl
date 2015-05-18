@@ -14,6 +14,16 @@ function set_interval_precision(::Type{BigFloat}, prec::Int=256)
     prec
 end
 
+function with_interval_precision(f::Function, prec::Int=256)
+    old_interval_precision = get_interval_precision()
+    set_interval_precision(prec)
+    try
+        return f()
+    finally
+        set_interval_precision(old_interval_precision)
+    end
+end
+
 set_interval_precision(prec) = set_interval_precision(BigFloat, prec)
 set_interval_precision(t::Tuple) = set_interval_precision(t...)
 
