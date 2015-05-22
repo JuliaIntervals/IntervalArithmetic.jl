@@ -13,11 +13,9 @@ immutable Interval{T<:Real} <: Real
     hi :: T
 
     function Interval(a::Real, b::Real)
-
         if a > b
             a, b = b, a
         end
-
         new(a, b)
     end
 end
@@ -25,10 +23,10 @@ end
 
 ## Outer constructors
 
-Interval{T<:Real}(a::T,b::T) = Interval{T}(a,b)  # not sure why this is necessary, but it is used in Rational
-Interval(a::Interval) = a
-Interval(a::Tuple) = Interval(a...)
+Interval{T<:Real}(a::T, b::T) = Interval{T}(a, b)
+Interval{T<:Real}(a::T) = Interval(a, a)
 Interval(a::Real) = Interval(a, a)
+Interval(a::Tuple) = Interval(a...)
 Interval{T<:Real, S<:Real}(a::T, b::S) = Interval(promote(a,b)...)
 
 eltype{T<:Real}(x::Interval{T}) = T
@@ -51,7 +49,6 @@ end
 
 show(io::IO, a::Interval) = basic_show(io, a)
 show(io::IO, a::Interval{BigFloat}) = ( basic_show(io, a); print(io, subscriptify(precision(a.lo))) )
-
 
 function subscriptify(n::Int)
     subscript_digits = [c for c in "₀₁₂₃₄₅₆₇₈₉"]

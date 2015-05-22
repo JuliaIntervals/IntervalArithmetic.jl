@@ -7,20 +7,20 @@ interval x such that the interval corresponding to the derivative of f there
 does not contain zero, and the second is the inverse of its derivative""" ->
 function guarded_derivative_midpoint{T}(f::Function, f_prime::Function, x::Interval{T})
 
-    alpha = convert(T,0.46875)   # close to 0.5, but exactly representable as a floating point
-    m = guarded_mid(x)
-    m = Interval(m)
+    α = convert(T, 0.46875)   # close to 0.5, but exactly representable as a floating point
+    m = Interval( guarded_mid(x) )
+
     C = inv(f_prime(m))
 
     # Check that 0 is not in C; if so, consider another point rather than m
     i = 0
     while zero(T) ∈ C
-        m = alpha*x.lo + (one(m)-alpha)*x.hi
-        m = Interval(m)
+        m = Interval( α*x.lo + (one(T)-α)*x.hi )
         C = inv(f_prime(m))
+
         i += 1
-        alpha /= 2
-        i > 10 && error("""Error in guarded_deriv_midpoint:
+        α /= 2
+        i > 20 && error("""Error in guarded_deriv_midpoint:
             the derivative of the function seems too flat""")
     end
 
@@ -92,6 +92,6 @@ function krawczyk{T}(f::Function, f_prime::Function, x::Interval{T}, level::Int=
 
     # This cleans-up the tuples with `:none` from the roots vector
     debug && @show(roots)
-    clean_roots!(roots)
-    return roots
+
+    clean_roots(roots)
 end

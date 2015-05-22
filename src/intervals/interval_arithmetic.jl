@@ -1,16 +1,25 @@
 
 ## Empty interval:
 
-emptyinterval(T::Type) = Interval(convert(T, NaN))  # interval from Inf to Inf
-emptyinterval(x::Interval) = Interval(oftype(x.lo, NaN))
+@doc doc"""Empty intervals are represented as intervals of `NaN`s.
+The automatic propagation of `NaN`s means that any operation with an empty interval gives back
+an empty interval.""" ->
+
+emptyinterval(T::Type) = Interval(convert(T, NaN))
+emptyinterval(x::Interval) = Interval(convert(eltype(x), NaN))
+
+∅ = emptyinterval(Float64)
+emptyinterval() = ∅
+
 isempty(x::Interval) = isnan(x.lo) || isnan(x.hi)
-∅ = emptyinterval(Float64)   # I don't see how to define this according to the type
 
+eps(x::Interval) = max(eps(x.lo), eps(x.hi))
 
-## "Thin" interval (no more precision):
+## "Thin" interval (one for which there is "no more precision")
+# Note that this is not the standard usage of "thin interval", which is one for
+# which the two endpoints are *strictly* equal
 
 isthin(x::Interval) = (m = mid(x); m == x.lo || m == x.hi)
-# This won't ever be the case with BigFloat if the interval is centered around 0?
 
 ## Widen:
 widen{T<:FloatingPoint}(x::Interval{T}) = Interval(prevfloat(x.lo), nextfloat(x.hi))
@@ -18,7 +27,8 @@ widen{T<:FloatingPoint}(x::Interval{T}) = Interval(prevfloat(x.lo), nextfloat(x.
 
 ## Equalities and neg-equalities
 
-==(a::Interval, b::Interval) = (isempty(a) || isempty(b)) ? (isempty(a) && isempty(b)) : a.lo == b.lo && a.hi == b.hi
+==(a::Interval, b::Interval) =
+    (isempty(a) || isempty(b)) ? (isempty(a) && isempty(b)) : a.lo == b.lo && a.hi == b.hi
 !=(a::Interval, b::Interval) = !(a==b)
 
 
@@ -44,7 +54,7 @@ one{T}(a::Interval{T}) = Interval(one(T))
 
 -{T}(a::Interval{T}) = @round(T, -a.hi, -a.lo)
 -(a::Interval, b::Interval) = a + (-b)  # @round(a.lo - b.hi, a.hi - b.lo)
-
+(((())))
 
 ## Multiplication
 
@@ -106,4 +116,8 @@ intersect{T,S}(a::Interval{T}, b::Interval{S}) = intersect(promote(a,b)...)
 
 hull{T}(a::Interval{T}, b::Interval{T}) = Interval(min(a.lo, b.lo), max(a.hi, b.hi))
 union(a::Interval, b::Interval) = hull(a, b)
+
+
+dist(a::Interval, b::Interval) = max(abs(a.lo-b.lo), abs(a.hi-b.hi))
+eps(a::Interval) = max(eps(a.lo), eps(a.hi))
 

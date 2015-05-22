@@ -1,51 +1,62 @@
 # Newton method
 
-
+# What is this guarded_mid for? Shouldn't it be checking if f(m)==0?
 @doc doc"""Returns the midpoint of the interval x, slightly shifted in case
 it is zero""" ->
 function guarded_mid{T}(x::Interval{T})
     m = mid(x)
     if m == zero(T)                     # midpoint exactly 0
-        alpha = convert(T,0.46875)      # close to 0.5, but exactly representable as a floating point
-        m = alpha*x.lo + (one(m)-alpha)*x.hi   # displace to another point in the interval
+        α = convert(T, 0.46875)      # close to 0.5, but exactly representable as a floating point
+        m = α*x.lo + (one(T)-α)*x.hi   # displace to another point in the interval
     end
+
+    @assert m ∈ x
 
     m
 end
 
 
-function N(f::Function, x::Interval, deriv::Interval)
+function N{T}(f::Function, x::Interval{T}, deriv::Interval{T})
     m = guarded_mid(x)
     m = Interval(m)
-    Nx = m - f(m) / deriv
-    Nx
+
+    m - (f(m) / deriv)
 end
 
 
+@doc doc"""If a root is known to be inside an interval, `newton_refine`
+just iterates the interval Newton method until that root is found.""" ->
 function newton_refine{T}(f::Function, f_prime::Function, x::Interval{T};
-    tolerance=eps(one(T)), debug=false)
+                          tolerance = 10*eps(T), debug = false)
 
     debug && (print("Entering newton_refine:"); @show x)
 
     while diam(x) > tolerance  # avoid problem with tiny floating-point numbers if 0 is a root
         deriv = f_prime(x)
         Nx = N(f, x, deriv)
+
         debug && @show(x, Nx)
+
         Nx = Nx ∩ x
         Nx == x && break
+
         x = Nx
     end
+
+    debug && @show "Refined root", x
 
     return [(x, :unique)]
 end
 
 
-# use automatic differentiation if no derivative function given
-newton{T}(f::Function, x::Interval{T}; tolerance=eps(one(T)), debug=false, maxlevel=30) =
+# use automatic differentiation if no derivative function given:
+newton{T}(f::Function, x::Interval{T};
+          tolerance = eps(T), debug = false, maxlevel=30) =
     newton(f, D(f), x, 0, tolerance=tolerance, debug=debug, maxlevel=maxlevel)
 
+
 function newton{T}(f::Function, f_prime::Function, x::Interval{T}, level::Int=0;
-    tolerance=eps(one(T)), debug=false, maxlevel=30)
+                   tolerance=eps(T), debug=false, maxlevel=30)
 
     debug && (print("Entering newton:"); @show(level); @show(x))
 
@@ -64,7 +75,6 @@ function newton{T}(f::Function, f_prime::Function, x::Interval{T}, level::Int=0;
         return [(x, :error)]
     end
 
-    # deriv = differentiate(f, x)
     deriv = f_prime(x)
 
     if !(z in deriv)
@@ -86,6 +96,8 @@ function newton{T}(f::Function, f_prime::Function, x::Interval{T}, level::Int=0;
             newton(f, f_prime, Interval(x.lo, m), level+1, tolerance=tolerance, debug=debug, maxlevel=maxlevel),
             newton(f, f_prime, Interval(m, x.hi), level+1, tolerance=tolerance, debug=debug, maxlevel=maxlevel)
             )
+
+        debug && @show(roots)
 
     else  # 0 in deriv; this does extended interval division by hand
 
@@ -114,19 +126,13 @@ function newton{T}(f::Function, f_prime::Function, x::Interval{T}, level::Int=0;
     end
 
     # This cleans-up the tuples with `:none` from the roots vector
-    debug && (println("Entering clean_roots!"); @show(roots))
-    clean_roots!(roots)
-    return roots
+    debug && (println("Entering clean_roots"); @show(roots))
+
+    new_roots = clean_roots(roots)
+    debug && @show(new_roots)
+
+    new_roots
 end
 
+#is_possibly_root(root::Root) = root[2] != :none  # :unknown or :unique
 
-# This cleans-up the tuples with `:none` from the roots vector
-function clean_roots!(roots)
-    for i in length(roots):-1:1
-        x = roots[i]
-        if x[2] == :none
-            deleteat!(roots,i)
-        end
-    end
-    return sort!(roots)
-end

@@ -1,7 +1,7 @@
 ## Automatic differentiation
-## Adapted from original version by Nikolay Kryukov
-
 ## Represents the jet of a function u at the point a by (u(a), u'(a))
+
+# TODO: Parametrize
 
 immutable Jet <: Number  # is this really a Number?  Then promotion rules work
     val   # value u(a)
