@@ -9,16 +9,20 @@ using Compat
 import Base:
     in, zero, one, abs, real, show,
     sqrt, exp, log, sin, cos, tan, inv,
+    asin, acos, atan,
     union, intersect, isempty,
     convert, promote_rule, eltype,
     BigFloat, float,
     set_rounding, widen,
-    ⊆, eps
+    ⊆, eps,
+    floor, ceil
+
 
 
 
 export
-    Interval, @interval, @floatinterval,
+    Interval,
+    @interval, @biginterval, @floatinterval, @make_interval,
     get_interval_rounding, set_interval_rounding,
     diam, mid, mag, mig, hull, isinside,
     emptyinterval, ∅, isempty, ⊊,
@@ -26,8 +30,6 @@ export
     set_interval_precision, get_interval_precision,
     interval_parameters, eps, dist, roughly,
     get_pi
-
-
 
 ## Root finding
 export

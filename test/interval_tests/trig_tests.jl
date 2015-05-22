@@ -20,4 +20,21 @@ facts("Trig tests") do
     @fact tan(@interval(0.5, 1.67)) => Interval(-Inf, Inf)
     @fact tan(@interval(1.67, 3.2)) => Interval(-1.0047182299210329e+01, 5.8473854459578652e-02)
 
+
+    @fact asin(@interval(1)) => get_pi(Float64)/2
+    @fact asin(@interval(0.9, 2)) => asin(@interval(0.9, 1))
+    @fact asin(@interval(3, 4)) => ∅
+
+    @fact acos(@interval(1)) => Interval(0., 0.)
+    @fact acos(@interval(-2, -0.9)) => acos(@interval(-1, -0.9))
+    @fact acos(@interval(3, 4)) => ∅
+
+
+    @fact atan(@interval(-1,1)) => Interval(-get_pi(Float64).lo/4, get_pi(Float64).hi/4)
+    @fact atan(@interval(0)) => Interval(0.0, 0.0)
+
+    for a in ( @interval(17, 19), @interval(0.5, 1.2) )
+        @fact tan(a) ⊆ sin(a)/cos(a) => true
+    end
+
 end
