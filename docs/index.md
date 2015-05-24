@@ -2,10 +2,6 @@
 
 `ValidatedNumerics.jl` is a Julia package for performing *Validated Numerics* in Julia, i.e. *rigorous* computations with finite-precision floating-point arithmetic.
 
-![Build status](https://travis-ci.org/dpsanders/ValidatedNumerics.jl.svg?branch=master)
-[![Coverage Status](https://coveralls.io/repos/dpsanders/ValidatedNumerics.jl/badge.svg?branch=interval_parameters_new)](https://coveralls.io/r/dpsanders/ValidatedNumerics.jl?branch=interval_parameters_new)
-
-
 ## Installation
 To install the package, from within Julia do
 
@@ -17,10 +13,13 @@ All calculations are carried out using **interval arithmetic**: all quantities a
 
 The aim of the package is correctness over speed, although performance considerations are also taken into account
 
-## Documentation
-Documentation is available [**here**](http://dpsanders.github.io/ValidatedNumerics.jl/).
+## Contents:
+- [Basic usage](usage.md)
+- [Root finding](root_finding.md)
+- [Rounding](rounding.md)
 
-## Bibliography
+
+## Bibliography 
 
 - *Validated Numerics: A Short Introduction to Rigorous Computations*, W. Tucker, Princeton University Press (2010)
 - *Introduction to Interval Analysis*, R.E. Moore, R.B. Kearfott & M.J. Cloud, SIAM (2009)
@@ -29,7 +28,7 @@ Documentation is available [**here**](http://dpsanders.github.io/ValidatedNumeri
 - [MPFI.jl](https://github.com/andrioni/MPFI.jl), a Julia wrapper around the [MPFI C library](http://perso.ens-lyon.fr/nathalie.revol/software.html), a multiple-precision interval arithmetic library based on MPFR
 - [Intervals.jl](https://github.com/andrioni/Intervals.jl), an alternative implementation of basic interval functions.
 
-## Authors
+## Authors 
 - Luis Benet, Instituto de Ciencias Físicas, Universidad Nacional Autónoma de México (UNAM)
 - [David P. Sanders](http://sistemas.fciencias.unam.mx/~dsanders),
 Departamento de Física, Facultad de Ciencias, Universidad Nacional Autónoma de México (UNAM)
