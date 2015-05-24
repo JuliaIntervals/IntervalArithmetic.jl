@@ -19,7 +19,7 @@ The aim of the package is correctness over speed, although performance considera
 - [Rounding](rounding.md)
 
 
-## Bibliography 
+## Bibliography
 
 - *Validated Numerics: A Short Introduction to Rigorous Computations*, W. Tucker, Princeton University Press (2010)
 - *Introduction to Interval Analysis*, R.E. Moore, R.B. Kearfott & M.J. Cloud, SIAM (2009)
@@ -28,8 +28,9 @@ The aim of the package is correctness over speed, although performance considera
 - [MPFI.jl](https://github.com/andrioni/MPFI.jl), a Julia wrapper around the [MPFI C library](http://perso.ens-lyon.fr/nathalie.revol/software.html), a multiple-precision interval arithmetic library based on MPFR
 - [Intervals.jl](https://github.com/andrioni/Intervals.jl), an alternative implementation of basic interval functions.
 
-## Authors 
-- Luis Benet, Instituto de Ciencias Físicas, Universidad Nacional Autónoma de México (UNAM)
+## Authors
+- [Luis Benet](http://www.cicc.unam.mx/~benet/), Instituto de Ciencias Físicas,
+Universidad Nacional Autónoma de México (UNAM)
 - [David P. Sanders](http://sistemas.fciencias.unam.mx/~dsanders),
 Departamento de Física, Facultad de Ciencias, Universidad Nacional Autónoma de México (UNAM)
 

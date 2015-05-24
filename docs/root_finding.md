@@ -1,18 +1,41 @@
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    TeX: { equationNumbers: { autoNumber: "AMS" } }
+  });
+  MathJax.Hub.Config({
+    TeX: { extensions: ["AMSmath.js", "AMSsymbols.js", "autobold.js", "autoload-all.js"] }
+  });
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      processEscapes: true
+    }
+  });
+</script>
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML">
+</script>
+
 # Root finding
 
-Interval arithmetic not only provides guaranteed numerical calculations; it also makes possible fundamentally new algorithms.
+Interval arithmetic not only provides guaranteed numerical calculations; it also
+makes possible fundamentally new algorithms.
 
-One such algorithm is the **interval Newton method**. This is a version of the standard Newton (or Newton--Raphson) algorithm for finding roots of equations. The interval version, however, is fundamentally different from its standard counterpart, in that it can (under the best circumstances) provide rigorous *guarantees* about the presence or absence and uniqueness of roots of a given function in a given interval.
+One such algorithm is the **interval Newton method**. This is a version of the
+standard Newton (or Newton-Raphson) algorithm for finding roots of equations.
+The interval version, however, is fundamentally different from its standard
+counterpart, in that it can (under the best circumstances) provide rigorous
+*guarantees* about the presence or absence and uniqueness of roots of a given
+function in a given interval.
 
-The idea of the Newton method is to calculate a root $x^*$ of a function $f$ [i.e., a value such that $f(x^*) = 0$] from an initial guess $x$ using
+The idea of the Newton method is to calculate a root $x^\ast$ of a function $f$ [i.e., a value such that $f(x^*) = 0$] from an initial guess $x$ using
 
 $$x^* = x - \frac{f(x)}{f'(\xi)},$$
 
-for some $\xi$ between $x$ and $xˆ*$. Since $\xi$ is unknown, we can bound it as
+for some $\xi$ between $x$ and $x^*$. Since $\xi$ is unknown, we can bound it as
 
 $$f'(\xi) \in F'(X),$$
 
-where $X$ is a containing interval and $F'(X)$ denotes the **interval extension** of the function $f$, consisting of applying the same operations as the function $f$ to the interval $X$. 
+where $X$ is a containing interval and $F'(X)$ denotes the **interval extension** of the function $f$, consisting of applying the same operations as the function $f$ to the interval $X$.
 
 This allows us to create an interval Newton operator that acts on an interval and tells us *rigorously*  if there is a unique root or no root in the interval. There is also an extension to intervals in which the derivative $F'(X)$ contains $0$.
 
@@ -56,7 +79,7 @@ An interface `find_roots` is provided, which does not require an interval to be 
 julia> find_roots(g, -5, 5)
 8-element Array{Tuple{ValidatedNumerics.Interval{Float64},Symbol},1}:
  ([-1.4142135623730951, -1.414213562373095],:unique)
- ([1.4142135623730947, 1.4142135623730954],:unique) 
+ ([1.4142135623730947, 1.4142135623730954],:unique)
  ([1.9999999953782792, 1.9999999967603888],:unknown)
  ([1.9999999967603888, 1.9999999981424985],:unknown)
  ([1.9999999981806982, 1.9999999987913273],:unknown)
@@ -64,5 +87,3 @@ julia> find_roots(g, -5, 5)
  ([1.999999999589721, 2.000000000202166],:unknown)  
  ([2.000000000299439, 2.000000000876634],:unknown)  
 ```
-
- 

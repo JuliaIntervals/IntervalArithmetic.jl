@@ -1,5 +1,8 @@
 # ValidatedNumerics.jl #
 
+![Build status](https://travis-ci.org/dpsanders/ValidatedNumerics.jl.svg?branch=master)
+[![Coverage Status](https://coveralls.io/repos/dpsanders/ValidatedNumerics.jl/badge.svg?branch=master)](https://coveralls.io/r/dpsanders/ValidatedNumerics.jl?branch=master)
+
 `ValidatedNumerics.jl` is a Julia package for performing *Validated Numerics* in Julia, i.e. *rigorous* computations with finite-precision floating-point arithmetic.
 
 ![Build status](https://travis-ci.org/dpsanders/ValidatedNumerics.jl.svg?branch=master)
@@ -30,7 +33,8 @@ Documentation is available [**here**](http://dpsanders.github.io/ValidatedNumeri
 - [Intervals.jl](https://github.com/andrioni/Intervals.jl), an alternative implementation of basic interval functions.
 
 ## Authors
-- Luis Benet, Instituto de Ciencias Físicas, Universidad Nacional Autónoma de México (UNAM)
+- [Luis Benet](http://www.cicc.unam.mx/~benet/), Instituto de Ciencias Físicas,
+Universidad Nacional Autónoma de México (UNAM)
 - [David P. Sanders](http://sistemas.fciencias.unam.mx/~dsanders),
 Departamento de Física, Facultad de Ciencias, Universidad Nacional Autónoma de México (UNAM)
 

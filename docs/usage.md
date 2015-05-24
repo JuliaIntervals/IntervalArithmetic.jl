@@ -1,12 +1,29 @@
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    TeX: { equationNumbers: { autoNumber: "AMS" } }
+  });
+  MathJax.Hub.Config({
+    TeX: { extensions: ["AMSmath.js", "AMSsymbols.js", "autobold.js", "autoload-all.js"] }
+  });
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      processEscapes: true
+    }
+  });
+</script>
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML">
+</script>
+
 # Basic usage
 
-The basic elements of the package are **intervals**, i.e. sets of real numbers (possibly including $\pm \infty$) of the form 
+The basic elements of the package are **intervals**, i.e. sets of real numbers (possibly including $\pm \infty$) of the form
 
 $$[a, b] := \{ a \le x \le b \} \subseteq \mathbb{R}.$$
 
 ## Creating intervals
 Intervals are created using the `@interval` macro, which takes one or two expressions:
-```julia 
+```julia
 julia> using ValidatedNumerics
 
 julia> a = @interval(1)
@@ -61,7 +78,7 @@ julia> f(@interval(0.1))
 ```
 
 ### $\pi$
-You can create correctly-rounded intervals containing $\pi$: 
+You can create correctly-rounded intervals containing $\pi$:
 ```julia
 julia> @interval(pi)
 [3.141592653589793, 3.1415926535897936]
