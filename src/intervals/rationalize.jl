@@ -1,12 +1,12 @@
-
 #=
-Version of `rationalize` taken from v0.3 of Julia, since it works correctly with rounding modes
-other than RoundNearest (which version v0.4 does not:
-https://github.com/JuliaLang/julia/issues/10872)
-
-Slightly adapted for v0.4 by replacing itrunc(x) with @compat trunc(Int, x))
+This provides a version of `rationalize` (renamed `old_rationalize`
+so as not to interfere with the version from `Base`) taken from v0.3 of Julia, since
+that version works correctly with rounding modes other than RoundNearest
+(which version v0.4 does not: https://github.com/JuliaLang/julia/issues/10872)
 
 According to `git blame`, this version is due to Stefan Karpinski and Mike Nolta
+
+Slightly adapted for v0.4 by replacing itrunc(x) with @compat trunc(Int, x))
 =#
 
 # Subject to the standard Julia MIT license:

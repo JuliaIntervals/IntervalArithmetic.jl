@@ -1,13 +1,16 @@
 using ValidatedNumerics
 using FactCheck
 
-set_bigfloat_precision(53)
+set_interval_precision(Float64)
+set_interval_rounding(:narrow)
 
-a = @interval(1.1, 0.1)
-b = @interval(0.9, 2.0)
-c = @interval(0.25, 4.0)
 
 facts("Numeric tests") do
+
+    a = @interval(1.1, 0.1)
+    b = @interval(0.9, 2.0)
+    c = @interval(0.25, 4.0)
+
 
     ## Basic arithmetic
     @fact @interval(0.1) => Interval(9.9999999999999992e-02, 1.0000000000000001e-01)
@@ -21,19 +24,29 @@ facts("Numeric tests") do
     @fact c/4.0 => Interval(6.25e-02, 1e+00)
 
     # Powers
-    @fact @interval(-3,2)^2 => @interval(0,9)
-    @fact @interval(-3,2)^3 => @interval(-27,8)
-    @fact @interval(-3,4)^0.5 => @interval(0,2)
-    @fact @interval(-3,4)^0.5 => @interval(-3,4)^(1//2)
-    @fact @interval(1,27)^@interval(1/3) => Interval(1., 3.0000000000000004e+00)  # @interval(1, 3)
-    @fact @interval(-3,2)^@interval(2) => Interval(0, 9)
-    @fact @interval(-3,4)^@interval(0.5) => Interval(0, 2)
+    set_interval_precision(256) # There is a strange problem in Travis when using floating point here
+    @fact @interval(-3,2) ^ 2 => roughly(Interval(0., 9.))
+    @fact @interval(-3,2) ^ 3 => @interval(-27, 8)
+    @fact @interval(-3,2) ^ (3//1) => @interval(-27, 8)
 
-    @fact @interval(0.1,0.7)^(1//3) => Interval(4.6415888336127781e-01, 8.8790400174260076e-01)
-    @fact @interval(0.1,0.7)^(1/3)  => Interval(4.6415888336127781e-01, 8.8790400174260076e-01)
+    x = @interval(-3,2)
+    @fact x^3 => @interval(-27, 8)
+
+    @fact @interval(-3,4) ^ 0.5 => @interval(0, 2)
+    @fact @interval(-3,4) ^ 0.5 => @interval(-3,4)^(1//2)
+    @fact @interval(-3,2) ^ @interval(2) => Interval(0, 9.)
+    @fact @interval(-3,4) ^ @interval(0.5) => Interval(0, 2)
+
+    @fact @interval(1,27)^@interval(1/3) => roughly(Interval(1., 3.))
+    @fact @interval(1,27)^(1/3) => roughly(Interval(1., 3.))
+    @fact @interval(1,27)^(1//3) => roughly(Interval(1., 3.))
+    @fact @interval(0.1,0.7)^(1//3) => roughly(Interval(0.46415888336127786, 0.8879040017426008))
+    @fact @interval(0.1,0.7)^(1/3)  => roughly(Interval(0.46415888336127786, 0.8879040017426008))
+
+    set_interval_precision(Float64)
 
     # exp and log
-    @fact exp(@interval(1//2)) => Interval(1.648721270700128e+00, 1.6487212707001282e+00)
+    @fact exp(@interval(1//2)) => Interval(1.6487212707001282, 1.6487212707001282)
     @fact exp(@interval(0.1)) => Interval(1.1051709180756475e+00, 1.1051709180756477e+00)
     @fact diam(exp(@interval(0.1))) => eps(exp(0.1))
     @fact log(@interval(1//2)) => Interval(-6.931471805599454e-01, -6.9314718055994529e-01)
@@ -41,9 +54,11 @@ facts("Numeric tests") do
     @fact diam(log(@interval(0.1))) => eps(log(0.1))
 
     # comparison
-    d = @interval(0.1, 0.2)
+    d = @interval(0.1, 2)
 
     @fact d < 3 => true
+    #@fact d <= 2 => true
+    @fact d < 2 => false
     @fact -1 < d => true
     @fact !(d < 0.15) => true
 
@@ -71,6 +86,26 @@ facts("Numeric tests") do
     @fact big(1.)/9 ∈ @interval(h*i) => true
 
     @fact @interval(h*i) == @interval(f*g) => true
+
+    # :wide tests
+
+    set_interval_rounding(:wide)
+    set_interval_precision(Float64)
+
+    a = @interval(-3, 2)
+    @fact a^3 => Interval(-27.000000000000004, 8.000000000000002)
+
+    @fact a^(1//3) => Interval(-1.4422495703074085, 1.2599210498948734)
+
+    set_interval_rounding(:narrow)
+    set_interval_precision(Float64)
+
+    a = @interval(0.1)
+    b = Interval(0.1, 0.1)
+    @fact dist(a,b) <= eps(a) => true
+
+    @fact floor(@interval(0.1, 1.1)) => @interval(0, 1)
+    @fact ceil(@interval(0.1, 1.1)) => @interval(1, 2)
 
 
 end

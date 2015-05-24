@@ -1,18 +1,19 @@
 ## Automatic differentiation
-## Adapted from original version by Nikolay Kryukov
-
 ## Represents the jet of a function u at the point a by (u(a), u'(a))
 
-immutable Jet <: Number  # is this really a Number?  Then promotion rules work
-    val   # value u(a)
-    der   # derative u'(a)
+immutable Jet{T} <: Number  # is this really a Number?  Then promotion rules work
+    val::T   # value u(a)
+    der::T   # derative u'(a)
 end
+
+Jet{T}(a::T, b::T) = Jet{T}(a, b)
+#Jet(a, b) = Jet{T}(a,b)
 
 import Base:
     convert, promote_rule, zero, one
 
 convert(::Type{Jet}, c::Real) = Jet(c)
-promote_rule{T <: Real}(::Type{Jet}, ::Type{T}) = Jet
+promote_rule{T<:Real, S<:Real}(::Type{Jet{T}}, ::Type{S}) = Jet
 
 # Constants:
 Jet(c::Real) = Jet(c, zero(c))
@@ -21,7 +22,7 @@ zero(x::Jet) = Jet(zero(x.val), zero(x.der))
 one(x::Jet) = Jet(one(x.val), zero(x.der))
 
 
-# Arithmetic between two Jet
+# Arithmetic between two Jets
 +(x::Jet, y::Jet) = Jet(x.val + y.val, x.der + y.der)
 -(x::Jet, y::Jet) = Jet(x.val - y.val, x.der - y.der)
 *(x::Jet, y::Jet) = Jet(x.val*y.val, x.val*y.der + y.val*x.der)
@@ -41,6 +42,11 @@ end
 sin(x::Jet) = Jet(sin(x.val), x.der*cos(x.val))
 cos(x::Jet) = Jet(cos(x.val), -x.der*sin(x.val))
 tan(x::Jet) = Jet(tan(x.val), x.der / cos(x.val)^2 )
+
+asin(x::Jet) = Jet(asin(x.val), x.der / sqrt(1-x.val^2))
+acos(x::Jet) = Jet(acos(x.val), -x.der / sqrt(1-x.val^2))
+atan(x::Jet) = Jet(atan(x.val), x.der / (1+x.val^2))
+
 
 exp(x::Jet) = Jet(exp(x.val), x.der * exp(x.val))
 log(x::Jet) = Jet(log(x.val), x.der / x.val)
