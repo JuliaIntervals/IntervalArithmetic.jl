@@ -21,13 +21,16 @@ Interval arithmetic not only provides guaranteed numerical calculations; it also
 makes possible fundamentally new algorithms.
 
 One such algorithm is the **interval Newton method**. This is a version of the
-standard Newton (or Newton-Raphson) algorithm for finding roots of equations.
+standard Newton (or Newton-Raphson) algorithm, an iterative method for finding
+roots (zeros) of functions.
 The interval version, however, is fundamentally different from its standard
 counterpart, in that it can (under the best circumstances) provide rigorous
 *guarantees* about the presence or absence and uniqueness of roots of a given
-function in a given interval.
+function in a given interval, and tells us explicitly when it is unable to
+provide such a guarantee.
 
-The idea of the Newton method is to calculate a root $x^\ast$ of a function $f$ [i.e., a value such that $f(x^*) = 0$] from an initial guess $x$ using
+The idea of the Newton method is to calculate a root $x^\ast$ of a function
+$f$ [i.e., a value such that $f(x^*) = 0$] from an initial guess $x$ using
 
 $$x^* = x - \frac{f(x)}{f'(\xi)},$$
 
@@ -35,15 +38,31 @@ for some $\xi$ between $x$ and $x^*$. Since $\xi$ is unknown, we can bound it as
 
 $$f'(\xi) \in F'(X),$$
 
-where $X$ is a containing interval and $F'(X)$ denotes the **interval extension** of the function $f$, consisting of applying the same operations as the function $f$ to the interval $X$.
+where $X$ is a containing interval and $F'(X)$ denotes the **interval extension**
+of the function $f$, consisting of applying the same operations as the function
+$f$ to the interval $X$.
 
-This allows us to create an interval Newton operator that acts on an interval and tells us *rigorously*  if there is a unique root or no root in the interval. There is also an extension to intervals in which the derivative $F'(X)$ contains $0$.
+We define an *interval Newton operator* $\mathcal{N}$ as follows:
 
-The upshot is a rigorous algorithm that is *guaranteed to find all roots* of a real function in a given interval (or to inform us if it is unable to do so, for example at a multiple root); see the book of Tucker for more details.
+$$\mathcal{N}(X) := m(X) - \frac{F(m(X))}{F'(X)},$$
+
+where $m(X)$  is the midpoint of $X$ converted into an interval.
+
+It turns out that $\mathcal{N}$ tells us precisely whether there is a root of $f$ in
+the interval $X$: there is no root if $\mathcal{N}(X) \cap X = \emptyset$, and there is
+a unique root if $\mathcal{N}(X) \subseteq X$.
+There is also an extension to intervals in which the derivative $F'(X)$ contains $0$,
+in which case the Newton operator returns a union of two intervals.
+
+Iterating the Newton operator on the resulting sets gives a rigorous algorithm
+that is *guaranteed to find all roots* of a
+real function in a given interval (or to inform us if it is unable to do so,
+for example at a multiple root); see Tucker's book for more details.
 
 ## Interval Newton method
 
-The interval Newton method is implemented for real functions of a single variable as the function `newton`. For example, we can calculate rigorously the square roots of 2:
+The interval Newton method is implemented for real functions of a single
+variable as the function `newton`. For example, we can calculate rigorously the square roots of 2:
 
 ```julia
 julia> f(x) = x^2 - 2
@@ -52,7 +71,7 @@ f (generic function with 1 method)
 julia> newton(f, @interval(-5, 5))
 2-element Array{Tuple{ValidatedNumerics.Interval{Float64},Symbol},1}:
  ([-1.4142135623730951, -1.414213562373095],:unique)
- ([1.414213562373095, 1.4142135623730951],:unique)  
+ ([1.414213562373095, 1.4142135623730951],:unique)
 ```
 The function `newton`  is passed the function and the interval in which to search for roots; it returns an array of tuples, giving the interval and a symbol that tells us if the root is unique.  Automatic differentiation is used if no explicit derivative function is given.
 
@@ -64,13 +83,13 @@ g (generic function with 1 method)
 julia> newton(g, @interval(-5, 5))
 8-element Array{Tuple{ValidatedNumerics.Interval{Float64},Symbol},1}:
  ([-1.4142135623730951, -1.414213562373095],:unique)
- ([1.414213562373095, 1.4142135623730951],:unique)  
+ ([1.414213562373095, 1.4142135623730951],:unique)
  ([1.9999999953782792, 1.9999999967603888],:unknown)
  ([1.9999999967603888, 1.9999999981424985],:unknown)
  ([1.9999999981806982, 1.9999999987913273],:unknown)
  ([1.9999999987913273, 1.9999999994019564],:unknown)
- ([1.999999999589721, 2.000000000202166],:unknown)  
- ([2.000000000299439, 2.000000000876634],:unknown)  
+ ([1.999999999589721, 2.000000000202166],:unknown)
+ ([2.000000000299439, 2.000000000876634],:unknown)
 ```
 
 An interface `find_roots` is provided, which does not require an interval to be passed:
@@ -84,6 +103,6 @@ julia> find_roots(g, -5, 5)
  ([1.9999999967603888, 1.9999999981424985],:unknown)
  ([1.9999999981806982, 1.9999999987913273],:unknown)
  ([1.9999999987913273, 1.9999999994019564],:unknown)
- ([1.999999999589721, 2.000000000202166],:unknown)  
- ([2.000000000299439, 2.000000000876634],:unknown)  
+ ([1.999999999589721, 2.000000000202166],:unknown)
+ ([2.000000000299439, 2.000000000876634],:unknown)
 ```
