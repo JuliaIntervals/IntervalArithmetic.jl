@@ -1,11 +1,14 @@
 # What's new in ValidatedNumerics.jl
 
-### 0.0.4:
-- Macros for interval creation completely revamped
-- Newton method modified and tests added
+### 0.1:
+- A new `interval_parameters` object stores information about the current interval precision and rounding mode
+- Macros for interval creation completely reworked: `@interval` generates intervals based on the current type
+  stored in `interval_parameters`
+- Newton and Krawczyk methods improved and stringent tests added
 - Two types of interal rounding methods are now available:
-  - narrow / slow;  wide / fast
-  (Though they are not really very wide at all)
+  - narrow / slow;  wide / fast   (Though they are not really very wide at all)
+- Trigonometric functions are now "nearly" rigorous (for `Float64` intervals correct rounding is not guaranteed)
+- Inverse trigonometric functions added
 
 ### 0.0.3: April 4, 2015
 - Intervals are now parametrised by type, allowing intervals of `BigFloat`, `Float64`, `Rational`, etc.
