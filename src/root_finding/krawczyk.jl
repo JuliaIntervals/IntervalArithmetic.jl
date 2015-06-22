@@ -49,14 +49,11 @@ function krawczyk_refine{T}(f::Function, f_prime::Function, x::Interval{T};
         x = Kx
     end
 
-    return [(x, :unique)]
+    return [Root(x, :unique)]
 end
 
 
-# use automatic differentiation if no derivative function given
-krawczyk{T}(f::Function,x::Interval{T}; tolerance=eps(one(T)),
-    debug=false, maxlevel=30) =
-    krawczyk(f, D(f), x, 0, tolerance=tolerance, debug=debug, maxlevel=maxlevel)
+
 
 function krawczyk{T}(f::Function, f_prime::Function, x::Interval{T}, level::Int=0;
     tolerance=eps(one(T)), debug=false, maxlevel=30)
@@ -66,10 +63,10 @@ function krawczyk{T}(f::Function, f_prime::Function, x::Interval{T}, level::Int=
     # Maximum level of bisection
     level >= maxlevel && return [(x, :unknown)]
 
-    isempty(x) && return [(x, :none)]
+    isempty(x) && return Root{T}[]  # [(x, :none)]
     Kx = K(f, f_prime, x) ∩ x
 
-    isempty(Kx ∩ x) && return [(x, :none)]
+    isempty(Kx ∩ x) && return Root{T}[]  # [(x, :none)]
 
     if Kx ⊊ x
         debug && (print("Refining "); @show(x))
@@ -84,14 +81,30 @@ function krawczyk{T}(f::Function, f_prime::Function, x::Interval{T}, level::Int=
 
     # bisecting
     roots = vcat(
-        krawczyk(f, f_prime, Interval(x.lo, m), level+1, tolerance=tolerance,
-            debug=debug, maxlevel=maxlevel),
-        krawczyk(f, f_prime, Interval(m, x.hi), level+1, tolerance=tolerance,
-            debug=debug, maxlevel=maxlevel)
+        krawczyk(f, f_prime, Interval(x.lo, m), level+1,
+                 tolerance=tolerance, debug=debug, maxlevel=maxlevel),
+        krawczyk(f, f_prime, Interval(nextfloat(m), x.hi), level+1,
+                 tolerance=tolerance, debug=debug, maxlevel=maxlevel)
         )
 
-    # This cleans-up the tuples with `:none` from the roots vector
-    debug && @show(roots)
-
-    clean_roots(roots)
+    #sort!(roots, lt=lexless)
+    roots
 end
+
+
+# use automatic differentiation if no derivative function given
+krawczyk{T}(f::Function,x::Interval{T}; args...) =
+    krawczyk(f, D(f), x; args...)
+
+# krawczyk for vector of intervals:
+krawczyk{T}(f::Function, f_prime::Function, xx::Vector{Interval{T}}; args...) =
+
+    vcat([krawczyk(f, f_prime, @interval(x); args...) for x in xx]...)
+
+krawczyk{T}(f::Function,  xx::Vector{Interval{T}}, level; args...) =
+
+    krawczyk(f, D(f), xx; args...)
+
+krawczyk{T}(f::Function,  xx::Vector{Root{T}}; args...) =
+
+    krawczyk(f, D(f), [x.interval for x in xx]; args...)

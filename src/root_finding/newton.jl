@@ -24,10 +24,10 @@ function N{T}(f::Function, x::Interval{T}, deriv::Interval{T})
 end
 
 
-@doc doc"""If a root is known to be inside an interval, `newton_refine`
-just iterates the interval Newton method until that root is found.""" ->
+@doc doc"""If a root is known to be inside an interval,
+`newton_refine` iterates the interval Newton method until that root is found.""" ->
 function newton_refine{T}(f::Function, f_prime::Function, x::Interval{T};
-                          tolerance = 10*eps(T), debug = false)
+                          tolerance=eps(T), debug=false)
 
     debug && (print("Entering newton_refine:"); @show x)
 
@@ -45,34 +45,34 @@ function newton_refine{T}(f::Function, f_prime::Function, x::Interval{T};
 
     debug && @show "Refined root", x
 
-    return [(x, :unique)]
+    return [Root(x, :unique)]
 end
 
 
-# use automatic differentiation if no derivative function given:
-newton{T}(f::Function, x::Interval{T};
-          tolerance = eps(T), debug = false, maxlevel=30) =
-    newton(f, D(f), x, 0, tolerance=tolerance, debug=debug, maxlevel=maxlevel)
 
+
+@doc doc"""`newton` performs the interval Newton method on the given function `f`
+with its optional derivative `f_prime` and initial interval `x`.
+Optional keyword arguments give the `tolerance`, `maxlevel` at which to stop
+subdividing, and a `debug` boolean argument that prints out diagnostic information.""" ->
 
 function newton{T}(f::Function, f_prime::Function, x::Interval{T}, level::Int=0;
                    tolerance=eps(T), debug=false, maxlevel=30)
 
     debug && (print("Entering newton:"); @show(level); @show(x))
 
+    isempty(x) && return Root{T}[]  #[(x, :none)]
+
+
     # Maximum level of bisection
-    level >= maxlevel && return [(x, :unknown)]
+    level >= maxlevel && return [Root(x, :unknown)]
 
-    isempty(x) && return [(x, :none)]
 
-    # Shall we make sure tolerance>=eps(1.0) ?
     z = zero(x.lo)
     tolerance = abs(tolerance)
 
     if diam(x) < tolerance
-        z in f(x) && newton(f, f_prime, x, level+1, tolerance=tolerance, debug=debug, maxlevel=maxlevel)
-        println("Error: ", z in f(x), " ", x, " ", f(x))
-        return [(x, :error)]
+        return [(x, :unknown)]
     end
 
     deriv = f_prime(x)
@@ -80,21 +80,25 @@ function newton{T}(f::Function, f_prime::Function, x::Interval{T}, level::Int=0;
     if !(z in deriv)
         Nx = N(f, x, deriv)
 
-        isempty(Nx ∩ x) && return [(x, :none)]
+        isempty(Nx ∩ x) && return Root{T}[]
 
         if Nx ⊆ x
             debug && (print("Refining "); @show(x))
             return newton_refine(f, f_prime, Nx, tolerance=tolerance, debug=debug)
         end
 
-        m = guarded_mid(x)  # must be careful with rounding of m ?
+        m = guarded_mid(x)
 
         debug && @show(x,m)
 
-        # bisecting
+        # bisect:
         roots = vcat(
-            newton(f, f_prime, Interval(x.lo, m), level+1, tolerance=tolerance, debug=debug, maxlevel=maxlevel),
-            newton(f, f_prime, Interval(m, x.hi), level+1, tolerance=tolerance, debug=debug, maxlevel=maxlevel)
+            newton(f, f_prime, Interval(x.lo, m), level+1,
+                   tolerance=tolerance, debug=debug, maxlevel=maxlevel),
+
+            newton(f, f_prime, Interval(nextfloat(m), x.hi), level+1,
+                   tolerance=tolerance, debug=debug, maxlevel=maxlevel)
+            # note the nextfloat here to prevent repetition
             )
 
         debug && @show(roots)
@@ -117,22 +121,37 @@ function newton{T}(f::Function, f_prime::Function, x::Interval{T}, level::Int=0;
         debug && @show(y1, y2)
 
         roots = vcat(
-            newton(f, f_prime, y1, level+1, tolerance=tolerance, debug=debug, maxlevel=maxlevel),
-            newton(f, f_prime, y2, level+1, tolerance=tolerance, debug=debug, maxlevel=maxlevel)
+            newton(f, f_prime, y1, level+1,
+                   tolerance=tolerance, debug=debug, maxlevel=maxlevel),
+
+            newton(f, f_prime, y2, level+1,
+                   tolerance=tolerance, debug=debug, maxlevel=maxlevel)
             )
 
         debug && @show(roots)
 
     end
 
-    # This cleans-up the tuples with `:none` from the roots vector
-    debug && (println("Entering clean_roots"); @show(roots))
 
-    new_roots = clean_roots(roots)
-    debug && @show(new_roots)
-
-    new_roots
+    sort!(roots, lt=lexless)
+    roots
 end
 
-#is_possibly_root(root::Root) = root[2] != :none  # :unknown or :unique
 
+# use automatic differentiation if no derivative function given:
+newton{T}(f::Function, x::Interval{T};  args...) = newton(f, D(f), x; args...)
+
+
+
+# newton for vector of intervals:
+newton{T}(f::Function, f_prime::Function, xx::Vector{Interval{T}}; args...) =
+
+    vcat([newton(f, f_prime, @interval(x); args...) for x in xx]...)
+
+newton{T}(f::Function,  xx::Vector{Interval{T}}, level; args...) =
+
+    newton(f, D(f), xx, 0, args...)
+
+newton{T}(f::Function,  xx::Vector{Root{T}}; args...) =
+
+    newton(f, D(f), [x.interval for x in xx], args...)

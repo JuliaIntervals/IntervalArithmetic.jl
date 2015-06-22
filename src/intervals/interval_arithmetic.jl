@@ -54,7 +54,7 @@ one{T}(a::Interval{T}) = Interval(one(T))
 
 -{T}(a::Interval{T}) = @round(T, -a.hi, -a.lo)
 -(a::Interval, b::Interval) = a + (-b)  # @round(a.lo - b.hi, a.hi - b.lo)
-(((())))
+
 
 ## Multiplication
 
@@ -128,3 +128,9 @@ eps(a::Interval) = max(eps(a.lo), eps(a.hi))
 
 floor(a::Interval) = Interval(floor(a.lo), floor(a.hi))
 ceil(a::Interval) = Interval(ceil(a.lo), ceil(a.hi))
+
+radius(a::Interval) = (m = mid(a); max(abs(a.lo-m), abs(a.hi-m)))
+
+midpoint_radius(a::Interval) = (mid(a), radius(a))
+
+interval_from_midpoint_radius(midpoint, radius) = Interval(midpoint-radius, midpoint+radius)

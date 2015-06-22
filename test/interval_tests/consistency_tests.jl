@@ -4,11 +4,13 @@ using FactCheck
 
 set_bigfloat_precision(53)
 
-a = @interval(1.1, 0.1)
-b = @interval(0.9, 2.0)
-c = @interval(0.25, 4.0)
+
 
 facts("Consistency tests") do
+
+    a = @interval(1.1, 0.1)
+    b = @interval(0.9, 2.0)
+    c = @interval(0.25, 4.0)
 
 
     @fact isa( @interval(1,2), Interval ) => true
@@ -55,5 +57,11 @@ facts("Consistency tests") do
 
     f(x) = 2x
     @fact @interval(f(0.1)) => f(@interval(0.1))
+
+    # midpoint-radius representation
+    a = @interval(0.1)
+    midpoint, radius = midpoint_radius(a)
+
+    @fact interval_from_midpoint_radius(midpoint, radius) => Interval(0.09999999999999999, 0.10000000000000002)
 
 end
