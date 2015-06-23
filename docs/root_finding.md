@@ -66,13 +66,15 @@ The interval Newton method is implemented for real functions of a single
 variable as the function `newton`. For example, we can calculate rigorously the square roots of 2:
 
 ```julia
+julia> using ValidatedNumerics
+
 julia> f(x) = x^2 - 2
 f (generic function with 1 method)
 
 julia> newton(f, @interval(-5, 5))
-2-element Array{Tuple{ValidatedNumerics.Interval{Float64},Symbol},1}:
- ([-1.4142135623730951, -1.414213562373095],:unique)
- ([1.414213562373095, 1.4142135623730951],:unique)
+2-element Array{ValidatedNumerics.Root{Float64},1}:
+ Root([-1.4142135623730951, -1.414213562373095], :unique)
+ Root([1.414213562373095, 1.4142135623730951], :unique)
 ```
 The function `newton`  is passed the function and the interval in which to search for roots;
 it returns an array of `Root` objects, that contain the interval where a root is found,
