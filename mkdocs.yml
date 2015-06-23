@@ -1,17 +1,17 @@
-site_name: ValidatedNumerics.jl
+site_name: 'ValidatedNumerics.jl'
 
-site_description: [ValidatedNumerics.jl: A Julia package for rigorous numerics]
+site_description: 'ValidatedNumerics.jl: A Julia package for rigorous numerics'
 
 repo_url: https://github.com/dpsanders/ValidatedNumerics.jl
 
 pages:
-    - [index.md, Validated Numerics package]
-    - [usage.md, Basic usage]
-    - [root_finding.md, Root finding]
-    - [rounding.md, Rounding]
+    - 'Validated Numerics package': 'index.md'
+    - 'Basic usage': 'usage.md'
+    - 'Root finding': 'root_finding.md'
+    - 'Rounding': 'rounding.md'
 
-theme: readthedocs
+#theme: readthedocs
 
 #markdown_extensions: [math]
 
-copyright: Copyright &copy; 2014, 2015, Luis Benet and David P. Sanders
+copyright: Copyright &copy; 2014, 2015, Luis Benet & David P. Sanders

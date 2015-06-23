@@ -20,14 +20,18 @@
 Interval arithmetic not only provides guaranteed numerical calculations; it also
 makes possible fundamentally new algorithms.
 
+## Interval Newton method
 One such algorithm is the **interval Newton method**. This is a version of the
-standard Newton (or Newton-Raphson) algorithm for finding roots of equations.
+standard Newton (or Newton-Raphson) algorithm, an iterative method for finding
+roots (zeros) of functions.
 The interval version, however, is fundamentally different from its standard
 counterpart, in that it can (under the best circumstances) provide rigorous
 *guarantees* about the presence or absence and uniqueness of roots of a given
-function in a given interval.
+function in a given interval, and tells us explicitly when it is unable to
+provide such a guarantee.
 
-The idea of the Newton method is to calculate a root $x^\ast$ of a function $f$ [i.e., a value such that $f(x^*) = 0$] from an initial guess $x$ using
+The idea of the Newton method is to calculate a root $x^\ast$ of a function
+$f$ [i.e., a value such that $f(x^*) = 0$] from an initial guess $x$ using
 
 $$x^* = x - \frac{f(x)}{f'(\xi)},$$
 
@@ -35,15 +39,31 @@ for some $\xi$ between $x$ and $x^*$. Since $\xi$ is unknown, we can bound it as
 
 $$f'(\xi) \in F'(X),$$
 
-where $X$ is a containing interval and $F'(X)$ denotes the **interval extension** of the function $f$, consisting of applying the same operations as the function $f$ to the interval $X$.
+where $X$ is a containing interval and $F'(X)$ denotes the **interval extension**
+of the function $f$, consisting of applying the same operations as the function
+$f$ to the interval $X$.
 
-This allows us to create an interval Newton operator that acts on an interval and tells us *rigorously*  if there is a unique root or no root in the interval. There is also an extension to intervals in which the derivative $F'(X)$ contains $0$.
+We define an *interval Newton operator* $\mathcal{N}$ as follows:
 
-The upshot is a rigorous algorithm that is *guaranteed to find all roots* of a real function in a given interval (or to inform us if it is unable to do so, for example at a multiple root); see the book of Tucker for more details.
+$$\mathcal{N}(X) := m(X) - \frac{F(m(X))}{F'(X)},$$
 
-## Interval Newton method
+where $m(X)$  is the midpoint of $X$ converted into an interval.
 
-The interval Newton method is implemented for real functions of a single variable as the function `newton`. For example, we can calculate rigorously the square roots of 2:
+It turns out that $\mathcal{N}$ tells us precisely whether there is a root of $f$ in
+the interval $X$: there is no root if $\mathcal{N}(X) \cap X = \emptyset$, and there is
+a unique root if $\mathcal{N}(X) \subseteq X$.
+There is also an extension to intervals in which the derivative $F'(X)$ contains $0$,
+in which case the Newton operator returns a union of two intervals.
+
+Iterating the Newton operator on the resulting sets gives a rigorous algorithm
+that is *guaranteed to find all roots* of a
+real function in a given interval (or to inform us if it is unable to do so,
+for example at a multiple root); see Tucker's book for more details.
+
+## Implementation of the interval Newton method
+
+The interval Newton method is implemented for real functions of a single
+variable as the function `newton`. For example, we can calculate rigorously the square roots of 2:
 
 ```julia
 julia> f(x) = x^2 - 2
@@ -52,38 +72,105 @@ f (generic function with 1 method)
 julia> newton(f, @interval(-5, 5))
 2-element Array{Tuple{ValidatedNumerics.Interval{Float64},Symbol},1}:
  ([-1.4142135623730951, -1.414213562373095],:unique)
- ([1.414213562373095, 1.4142135623730951],:unique)  
+ ([1.414213562373095, 1.4142135623730951],:unique)
 ```
-The function `newton`  is passed the function and the interval in which to search for roots; it returns an array of tuples, giving the interval and a symbol that tells us if the root is unique.  Automatic differentiation is used if no explicit derivative function is given.
+The function `newton`  is passed the function and the interval in which to search for roots;
+it returns an array of `Root` objects, that contain the interval where a root is found,
+together with a symbol `:unique` if there is guaranteed to be a unique root in that
+interval, or `:unknown` if the Newton method is unable to make a guarantee, for example,
+when there is a double root:
 
-For example, the basic Newton method fails to guarantee the presence or absence of a double root, although the single roots are found without difficulty:
 ```julia
-julia> g(x) = (x^2-2)*(x-2)^2
-g (generic function with 1 method)
-
-julia> newton(g, @interval(-5, 5))
-8-element Array{Tuple{ValidatedNumerics.Interval{Float64},Symbol},1}:
- ([-1.4142135623730951, -1.414213562373095],:unique)
- ([1.414213562373095, 1.4142135623730951],:unique)  
- ([1.9999999953782792, 1.9999999967603888],:unknown)
- ([1.9999999967603888, 1.9999999981424985],:unknown)
- ([1.9999999981806982, 1.9999999987913273],:unknown)
- ([1.9999999987913273, 1.9999999994019564],:unknown)
- ([1.999999999589721, 2.000000000202166],:unknown)  
- ([2.000000000299439, 2.000000000876634],:unknown)  
+julia> newton(f, @interval(-5,5))
+6-element Array{ValidatedNumerics.Root{Float64},1}:
+ Root([0.9999999968789343, 0.999999997726216], :unknown)
+ Root([0.9999999977262161, 0.9999999985734976], :unknown)
+ Root([0.9999999987089422, 0.9999999993384274], :unknown)
+ Root([0.9999999993384275, 0.9999999999679127], :unknown)
+ Root([0.9999999999687099, 1.0000000004524654], :unknown)
+ Root([2.0, 2.0], :unique)
 ```
+
+The Newton method may be applied directly to a vector of known roots,
+for example to refine them with higher precision:
+```julia
+julia> f(x) = x^2 - 2
+f (generic function with 1 method)
+
+julia> roots = newton(f, @interval(-5, 5))
+2-element Array{ValidatedNumerics.Root{Float64},1}:
+ Root([-1.4142135623730951, -1.414213562373095], :unique)
+ Root([1.414213562373095, 1.4142135623730951], :unique)
+
+julia> set_interval_precision(256)
+256
+
+julia> newton(f, roots)
+2-element Array{ValidatedNumerics.Root{Base.MPFR.BigFloat},1}:
+ Root([-1.414213562373095048801688724209698078569671875376948073176679737990732478462119, -1.414213562373095048801688724209698078569671875376948073176679737990732478462102]₂₅₆, :unique)
+ Root([1.414213562373095048801688724209698078569671875376948073176679737990732478462102, 1.414213562373095048801688724209698078569671875376948073176679737990732478462119]₂₅₆, :unique)
+
+julia> abs(roots2[2].interval.lo - sqrt(big(2)))
+0.000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+```
+
+## Krawczyk method
+
+An alternative method is the *Krawczyk method*, implemented in the function
+`krawczyk`, with the same interface as the Newton method:
+```julia
+julia> f(x) = x^2 - 2
+f (generic function with 1 method)
+
+julia> krawczyk(f, @interval(-5, 5))
+2-element Array{Root{Float64},1}:
+ Root([-1.4142135623730954, -1.4142135623730947], :unique)
+ Root([1.4142135623730947, 1.4142135623730954], :unique)
+
+julia> newton(f, @interval(-5, 5))
+2-element Array{Root{Float64},1}:
+ Root([-1.4142135623730951, -1.414213562373095], :unique)
+ Root([1.414213562373095, 1.4142135623730951], :unique)
+```
+
+The Krawczyk method really comes into its own for higher-dimensional functions;
+this is planned to be implemented in the future.
+
+
+## `find_roots` interface
+Automatic differentiation is used to calculate the derivative used in the Newton method
+if the derivative function is not given explicitly as the second argument to `newton`.
 
 An interface `find_roots` is provided, which does not require an interval to be passed:
-
-```julia
-julia> find_roots(g, -5, 5)
-8-element Array{Tuple{ValidatedNumerics.Interval{Float64},Symbol},1}:
- ([-1.4142135623730951, -1.414213562373095],:unique)
- ([1.4142135623730947, 1.4142135623730954],:unique)
- ([1.9999999953782792, 1.9999999967603888],:unknown)
- ([1.9999999967603888, 1.9999999981424985],:unknown)
- ([1.9999999981806982, 1.9999999987913273],:unknown)
- ([1.9999999987913273, 1.9999999994019564],:unknown)
- ([1.999999999589721, 2.000000000202166],:unknown)  
- ([2.000000000299439, 2.000000000876634],:unknown)  
 ```
+julia> find_roots(f, -5, 5)
+6-element Array{ValidatedNumerics.Root{Float64},1}:
+ Root([0.9999999968789343, 0.999999997726216], :unknown)
+ Root([0.9999999977262161, 0.9999999985734976], :unknown)
+ Root([0.9999999987089422, 0.9999999993384274], :unknown)
+ Root([0.9999999993384275, 0.9999999999679127], :unknown)
+ Root([0.9999999999687099, 1.0000000004524654], :unknown)
+ Root([1.9999999999999998, 2.0000000000000004], :unique)
+```
+
+
+There is also a version `find_roots_midpoint` that returns three vectors:
+the midpoint of each interval; the radius of the interval; and the symbol.
+This may be useful for someone who just wishes to find roots of a function,
+without wanting to understand how to manipulate interval objects:
+```julia
+julia> find_roots_midpoint(f, -5, 5)
+([-1.4142135623730951,1.414213562373095],[2.220446049250313e-16,4.440892098500626e-16],[:unique,:unique])
+```
+
+This uses the function `midpoint_radius`, that returns the midpoint and radius
+of a given interval:
+```julia
+julia> a = @interval(0.1, 0.2)
+[0.09999999999999999, 0.2]
+
+julia> midpoint_radius(a)
+(0.15,0.05000000000000002)
+```
+
