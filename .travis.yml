@@ -1,9 +1,17 @@
 language: julia
 
 os:
-  - linux
-  - osx 
-
+    - linux
+    - osx
+        
+env:
+    - ARCH="i686"
+    - ARCH="x86_64"
+                
+matrix:
+    exclude:
+        - os: osx
+          env: ARCH="i686"
 julia:
   - release
   - nightly
