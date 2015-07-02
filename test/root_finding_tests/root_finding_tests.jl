@@ -57,7 +57,7 @@ facts("Testing root finding") do
     for interval_precision in (:wide, :narrow)
         context("Interval precision: $interval_precision") do
 
-            for precision_type in ( (BigFloat,53), (BigFloat,256) ) #, (BigFloat,1024) )#, (Float64, -1)
+            for precision_type in ( (BigFloat,53), (BigFloat,256), (Float64, -1) ) #, (BigFloat,1024) )#, (Float64, -1)
                 context("Precision: $precision_type") do
                     set_interval_precision(precision_type)
 
