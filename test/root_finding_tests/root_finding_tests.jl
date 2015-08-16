@@ -73,14 +73,14 @@ facts("Testing root finding") do
 
                                     roots = method(f, f_prime, a)
 
-                                    @fact length(roots) => length(true_roots)
+                                    @fact length(roots) --> length(true_roots)
 
                                     for i in 1:length(roots)
                                         root = roots[i]
 
-                                        @fact isa(root, Root{precision_type[1]}) => true
-                                        @fact is_unique(root) => true
-                                        @fact true_roots[i] ⊆ root.interval => true
+                                        @fact isa(root, Root{precision_type[1]}) --> true
+                                        @fact is_unique(root) --> true
+                                        @fact true_roots[i] ⊆ root.interval --> true
                                     end
                                 end
                             end
