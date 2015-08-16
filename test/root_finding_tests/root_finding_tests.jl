@@ -30,7 +30,7 @@ big_pi = @interval(pi)
 set_interval_precision(Float64)
 float_pi = @interval(pi)
 
-⊆(a::Interval, b::Root) = a ⊆ b[1]   # the Root object has the interval in the first entry
+Base.⊆(a::Interval, b::Root) = a ⊆ b[1]   # the Root object has the interval in the first entry
 
 # Using precision "only" 256 leads to overestimation of the true roots for `cos`
 # i.e the Newton method gives more accurate results!
@@ -92,12 +92,14 @@ facts("Testing root finding") do
     end
 end
 
+
+
 f(x) = x^2 - 2
 
 roots = newton(f, @interval(10, 11))
 
 facts() do
-    @fact length(roots) => 0
+    @fact length(roots) --> 0
 end
 
 set_interval_precision(Float64)
@@ -106,18 +108,18 @@ facts("find_roots tests") do
     f(x) = x^2 - 2
 
     roots = find_roots(f, -5, 5)
-    @fact length(roots) => 2
+    @fact length(roots) --> 2
 
     roots = find_roots_midpoint(f, -5, 5)
-    @fact length(roots) => 3
-    @fact length(roots[1]) => 2
+    @fact length(roots) --> 3
+    @fact length(roots[1]) --> 2
 
 
     set_interval_precision(256)
 
     roots = find_roots(f, -5, 5)
     new_roots = newton(f, roots)
-    @fact length(new_roots) == length(roots) => true
+    @fact length(new_roots) == length(roots) --> true
 
 end
 
