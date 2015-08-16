@@ -41,17 +41,10 @@ export
 
 
 
-## Fix some issues with MathConst:
-import Base.MPFR.BigFloat
-BigFloat(a::MathConst) = big(a)
-
-<(a::MathConst, b::MathConst) = float(a) < float(b)
-
-
 
 ## Includes
 
-
+include("misc.jl")
 include("intervals/intervals.jl")
 include("root_finding/root_finding.jl")
 
