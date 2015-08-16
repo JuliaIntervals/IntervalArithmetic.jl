@@ -1,6 +1,10 @@
 # What's new in ValidatedNumerics.jl
 
-## v0.1
+## 0.1.1
+
+- Re-enable tests for `Interval{Float64}`
+
+# v0.1
 
 v0.1 is the first public release of the package.
 
@@ -14,5 +18,5 @@ v0.1 is the first public release of the package.
 - Intervals of `BigFloat`s are displayed with the precision as a subscript numeral
 
 ### Root finding
-- Newton and Krawczyk methods for rigorous root finding of 1D real functions are available
-- Stringent tests are in place. (Due to an issue with Travis, tests with `Float64` intervals are currently not enabled.)
+- Newton and Krawczyk methods are implemented for rigorously finding simple roots of 1D real functions
+- Stringent tests are performed, with various precision settings ( Float64` and `BigFloat )
