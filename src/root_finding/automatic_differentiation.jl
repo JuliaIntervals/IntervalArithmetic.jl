@@ -51,7 +51,7 @@ exp(x::Jet) = Jet(exp(x.val), x.der * exp(x.val))
 log(x::Jet) = Jet(log(x.val), x.der / x.val)
 
 function ^(x::Jet, n::Integer)
-    n == 0 && return zero(x)
+    n == 0 && return one(x)
     n == 1 && return x
     Jet( (x.val)^n, n * (x.val)^(n-1) * x.der )
 end
