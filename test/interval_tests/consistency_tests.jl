@@ -141,6 +141,8 @@ facts("Interval power of an interval") do
     @fact a^@interval(0.5, 1) == a --> true
     @fact a^@interval(0.3, 0.5) == @interval(1, sqrt(2)) --> true
 
+    @fact b^@interval(0.3) == Interval(1.3903891703159093, 1.5157165665103982) --> true
+
 end
 
 facts("Rational infinity") do
