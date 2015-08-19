@@ -103,6 +103,29 @@ facts("Constructing intervals") do
     @fact a == Interval(0.09999999999999998, 0.20000000000000007) --> true
 
     b = @interval(0.1)
-    @fact b == Interval(0.09999999999999998, 0.10000000000000003)
+    @fact b == Interval(0.09999999999999998, 0.10000000000000003) --> true
+
+    c = @interval("0.1", "0.2")
+    @fact c ⊆ a --> true  # c is narrower than a
+
+    for precision in (64, Float64)
+        set_interval_precision(precision)
+        d = big(3)
+        f = @interval(d, 2d)
+        @fact @interval(3, 6) ⊆ f --> true
+    end
+
+
+    for rounding in (:wide, :narrow)
+
+        set_interval_precision(Float64)
+
+        a = @interval(0.1, 0.2)
+        b = with_interval_precision(128) do
+            @interval(0.1, 0.2)
+        end
+
+        @fact float(b) ⊆ a --> true
+    end
 
 end
