@@ -129,3 +129,20 @@ facts("Constructing intervals") do
     end
 
 end
+
+set_interval_rounding(:narrow)
+set_interval_precision(Float64)
+
+facts("Interval power of an interval") do
+    a = @interval(1, 2)
+    b = @interval(3, 4)
+
+    @fact a^b == @interval(1, 16) --> true
+    @fact a^@interval(0.5, 1) == a --> true
+    @fact a^@interval(0.3, 0.5) == @interval(1, sqrt(2)) --> true
+
+end
+
+facts("Rational infinity") do
+    @fact inf(3//4) == 1//0 --> true
+end
