@@ -9,13 +9,16 @@ end
 
 facts("Rationalize tests") do
     for rounding_mode in (RoundNearest, RoundDown, RoundUp)
-        with_rounding(Float64, rounding_mode) do
-           a = parse(Float64, "0.1")
-           println("Rationalizing a=$a")
-           @fact ValidatedNumerics.old_rationalize(a) == 1//10 --> true
+        a = with_rounding(Float64, rounding_mode) do
+            # @compat a = parse(Float64, "0.1")
+            1 / 10
         end
+
+        println("Rationalizing a=$a")
+        @fact ValidatedNumerics.old_rationalize(a) == 1//10 --> true
+
     end
 end
 
-    
-	
+
+

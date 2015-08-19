@@ -67,7 +67,7 @@ function split_interval_string(T, x::String)
     m = match(r"\[(.*),(.*)\]", x)
 
     if m == nothing
-        error("Unable to process string $x as interval")
+        throw(ArgumentError("Unable to process string $x as interval"))
     end
 
     @round(T, parse(T, m.captures[1]), parse(T, m.captures[2]))
