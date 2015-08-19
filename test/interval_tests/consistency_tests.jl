@@ -65,3 +65,20 @@ facts("Consistency tests") do
     @fact interval_from_midpoint_radius(midpoint, radius) --> Interval(0.09999999999999999, 0.10000000000000002)
 
 end
+
+facts("Precision tests") do
+    set_interval_precision(64)
+    a = @interval(0.1, 0.3)
+
+    @fact get_interval_precision() == (BigFloat, 64) --> true
+
+    set_interval_precision(Float64)
+
+    @fact get_interval_precision() == (Float64, -1) --> true
+
+    b = with_interval_precision(64) do
+        @interval(0.1, 0.3)
+    end
+
+    @fact a == b --> true
+end
