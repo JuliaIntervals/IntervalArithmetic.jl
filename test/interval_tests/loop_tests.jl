@@ -6,13 +6,13 @@ using FactCheck
 facts("Interval loop tests") do
     i = 1
 
-    @fact Interval(i,i).lo => 1
-    @fact @interval(i).lo => 1
+    @fact Interval(i,i).lo --> 1
+    @fact @interval(i).lo --> 1
 
 
     for i in 1:10
         a = @interval(i)
-        @fact a.lo => i
+        @fact a.lo --> i
     end
 
 end
@@ -96,13 +96,13 @@ facts("Pi tests") do
     pi5 = calc_pi5(N)
 
 
-    @fact big_pi ∈ pi1 => true
-    @fact big_pi ∈ pi2 => true
-    @fact big_pi ∈ pi3 => true
-    @fact big_pi ∈ pi4 => true
-    @fact big_pi ∈ pi5 => true
+    @fact big_pi ∈ pi1 --> true
+    @fact big_pi ∈ pi2 --> true
+    @fact big_pi ∈ pi3 --> true
+    @fact big_pi ∈ pi4 --> true
+    @fact big_pi ∈ pi5 --> true
 
-    @fact pi1 == pi2 => true
-    @fact pi2 == pi3 => true
+    @fact pi1 == pi2 --> true
+    @fact pi2 == pi3 --> true
 
 end

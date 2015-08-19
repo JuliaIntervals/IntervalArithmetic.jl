@@ -7,6 +7,8 @@ using Compat
 #using FactCheck
 
 import Base:
+    +, -, *, /, //,
+    <, >, ==, !=, ⊊, ⊆, ^,
     in, zero, one, abs, real, show,
     sqrt, exp, log, sin, cos, tan, inv,
     asin, acos, atan,
@@ -41,17 +43,10 @@ export
 
 
 
-## Fix some issues with MathConst:
-import Base.MPFR.BigFloat
-BigFloat(a::MathConst) = big(a)
-
-<(a::MathConst, b::MathConst) = float(a) < float(b)
-
-
 
 ## Includes
 
-
+include("misc.jl")
 include("intervals/intervals.jl")
 include("root_finding/root_finding.jl")
 

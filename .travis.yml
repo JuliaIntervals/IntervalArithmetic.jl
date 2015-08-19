@@ -1,17 +1,5 @@
 language: julia
 
-os:
-    - linux
-    - osx
-        
-env:
-    - ARCH="i686"
-    - ARCH="x86_64"
-                
-matrix:
-    exclude:
-        - os: osx
-          env: ARCH="i686"
 julia:
   - release
   - nightly
@@ -21,4 +9,6 @@ notifications:
 
 after_success:
 - julia -e 'cd(Pkg.dir("ValidatedNumerics")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
+
+sudo: false
 
