@@ -65,3 +65,86 @@ facts("Consistency tests") do
     @fact interval_from_midpoint_radius(midpoint, radius) --> Interval(0.09999999999999999, 0.10000000000000002)
 
 end
+
+facts("Precision tests") do
+    set_interval_precision(64)
+    a = @interval(0.1, 0.3)
+
+    @fact get_interval_precision() == (BigFloat, 64) --> true
+
+    set_interval_precision(Float64)
+
+    @fact get_interval_precision() == (Float64, -1) --> true
+
+    b = with_interval_precision(64) do
+        @interval(0.1, 0.3)
+    end
+
+    @fact a == b --> true
+end
+
+facts("Constructing intervals") do
+
+    set_interval_precision(64)
+    a = @interval("[0.1, 0.2]")
+    b = @interval(0.1, 0.2)
+    #@show a,b
+    @fact a == b --> true
+
+    @fact_throws ArgumentError @interval("[0.1, 0.2")
+
+    @fact Interval( (0.1, 0.2) ) == Interval(0.1, 0.2) --> true
+
+
+    set_interval_rounding(:wide)
+    set_interval_precision(Float64)
+    a = @interval(0.1, 0.2)
+    #@show a
+    @fact a == Interval(0.09999999999999998, 0.20000000000000007) --> true
+
+    b = @interval(0.1)
+    @fact b == Interval(0.09999999999999998, 0.10000000000000003) --> true
+
+    c = @interval("0.1", "0.2")
+    @fact c ⊆ a --> true  # c is narrower than a
+
+    for precision in (64, Float64)
+        set_interval_precision(precision)
+        d = big(3)
+        f = @interval(d, 2d)
+        @fact @interval(3, 6) ⊆ f --> true
+    end
+
+
+    for rounding in (:wide, :narrow)
+
+        set_interval_precision(Float64)
+
+        a = @interval(0.1, 0.2)
+        b = with_interval_precision(128) do
+            @interval(0.1, 0.2)
+        end
+
+        @fact float(b) ⊆ a --> true
+    end
+
+end
+
+set_interval_rounding(:narrow)
+set_interval_precision(Float64)
+
+facts("Interval power of an interval") do
+    a = @interval(1, 2)
+    b = @interval(3, 4)
+
+    @fact a^b == @interval(1, 16) --> true
+    @fact a^@interval(0.5, 1) == a --> true
+    @fact a^@interval(0.3, 0.5) == @interval(1, sqrt(2)) --> true
+
+    @fact b^@interval(0.3) == Interval(1.3903891703159093, 1.5157165665103982) --> true
+
+end
+
+facts("Rational infinity") do
+    @fact inf(3//4) == 1//0 --> true
+end

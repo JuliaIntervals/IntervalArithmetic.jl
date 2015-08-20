@@ -50,8 +50,13 @@ atan(x::Jet) = Jet(atan(x.val), x.der / (1+x.val^2))
 exp(x::Jet) = Jet(exp(x.val), x.der * exp(x.val))
 log(x::Jet) = Jet(log(x.val), x.der / x.val)
 
-^(x::Jet, n::Integer) = n==0 ? zero(x) : Jet( (x.val)^n, n * (x.val)^(n-1) * x.der )
-^(x::Jet, r::Rational) = x^(r.num)^(1/r.den)
+function ^(x::Jet, n::Integer)
+    n == 0 && return one(x)
+    n == 1 && return x
+    Jet( (x.val)^n, n * (x.val)^(n-1) * x.der )
+end
+
+^(x::Jet, r::Rational) = (x^(r.num))^(1/r.den)
 ^(x::Jet, y::Real) = Jet( (x.val)^y, y * (x.val)^(y-1) * x.der )
 
 differentiate(f::Function, a::Number) = f( Jet(a, one(a)) ).der

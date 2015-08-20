@@ -77,7 +77,7 @@ function ^{T}(a::Interval{T}, x::Interval)
 end
 
 
-inf(x::Rational) = 1//0  # to allow sqrt()
+Base.inf(x::Rational) = 1//0  # to allow sqrt()
 
 
 function sqrt{T}(a::Interval{T})

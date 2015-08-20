@@ -2,7 +2,7 @@
 
 ## 0.1.1
 
-- Re-enable tests for `Interval{Float64}`
+- Re-enable tests for `Interval{Float64}` (`e0f3c1506f`)
 
 # v0.1
 
