@@ -1,6 +1,6 @@
 # ValidatedNumerics.jl #
 
-![Build status](https://travis-ci.org/dpsanders/ValidatedNumerics.jl.svg?branch=master)
+[![Build Status](https://travis-ci.org/dpsanders/ValidatedNumerics.jl.svg?branch=master)](https://travis-ci.org/dpsanders/ValidatedNumerics.jl)
 [![Coverage Status](https://coveralls.io/repos/dpsanders/ValidatedNumerics.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/dpsanders/ValidatedNumerics.jl?branch=master)
 
 `ValidatedNumerics.jl` is a Julia package for performing *Validated Numerics* in Julia, i.e. *rigorous* computations with finite-precision floating-point arithmetic.
