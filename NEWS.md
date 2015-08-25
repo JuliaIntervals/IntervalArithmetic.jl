@@ -1,5 +1,10 @@
 # What's new in ValidatedNumerics.jl
 
+## 0.1.2
+
+- Increase test coverage and corresponding bug fixes
+- Enable pre-compilation for Julia v0.4
+
 ## 0.1.1
 
 - Re-enable tests for `Interval{Float64}` (`e0f3c1506f`)
