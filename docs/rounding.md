@@ -20,7 +20,7 @@ Suppose now that we created an interval as
     julia> II = Interval(0.1)
     [0.1, 0.1]
 
-It looks like the interval contains the true value 0.1, but from the above discussion we see that, in fact, *it does not*. In order to contain the true value 0.1, the end-points of the interval must be rounded outwards ("directed rounding"): the lower bound is rounded down, and the upper bound is rounded up. 
+It looks like the interval contains the true value 0.1, but from the above discussion we see that, in fact, *it does not*. In order to contain the true value 0.1, the end-points of the interval must be rounded outwards ("directed rounding"): the lower bound is rounded down, and the upper bound is rounded up.
 
 This rounding is handled by the `@interval`  macro, which generates correctly-rounded intervals:
 
@@ -62,4 +62,4 @@ julia> @compat parse(BigFloat, "0.1")
 ```
 But the 2 and the end of the decimal expansion is the giveaway that this number is still not exactly 0.1
 
-The true value must be approximated by a floating-point number with fixed precision -- this procedure is called **rounding**. Rounding down may be accomplished simply by truncating the expansion; rounding up is accomplished by incrementing the final binary digit and propagating any resulting changes.
+The true value must be approximated by a floating-point number with fixed precision -- this procedure is called **rounding**. For positive numbers, rounding down may be accomplished simply by truncating the expansion; rounding up is accomplished by incrementing the final binary digit and propagating any resulting changes.

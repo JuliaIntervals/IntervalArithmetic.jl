@@ -60,7 +60,7 @@ that is *guaranteed to find all roots* of a
 real function in a given interval (or to inform us if it is unable to do so,
 for example at a multiple root); see Tucker's book for more details.
 
-## Implementation of the interval Newton method
+## Usage of the interval Newton method
 
 The interval Newton method is implemented for real functions of a single
 variable as the function `newton`. For example, we can calculate rigorously the square roots of 2:

@@ -75,6 +75,9 @@ f (generic function with 1 method)
 
 julia> f(@interval(0.1))
 [0.19999999999999998, 0.2]
+
+julia> @interval f(0.1)
+[0.19999999999999998, 0.2]
 ```
 
 ### $\pi$
@@ -86,6 +89,9 @@ julia> @interval(pi)
 and embed it in expressions:
 ```julia
 julia> @interval(3*pi/2 + 1)
+[5.71238898038469, 5.712388980384691]
+
+julia> @interval 3π/2 + 1
 [5.71238898038469, 5.712388980384691]
 ```
 
@@ -123,7 +129,7 @@ julia> b = @interval(a)
 [3.5999999999999996, 3.6000000000000005]
 ```
 
-The upper and lower bounds of the interval may be accessed as the fields
+The upper and lower bounds of the interval may be accessed using the fields
 `lo` and `hi`:
 ```julia
 julia> b.lo
@@ -134,9 +140,9 @@ julia> b.hi
 ```
 
 The diameter (length) of an interval is obtained using `diam(b)`;
-note that for non-exactly representable numbers in base 2
-(i.e., whose *binary* expansion is infinite or exceeds the current precision)
- the diameter of newly-created thin intervals corresponds to the local machine epsilon (`eps`):
+for numbers that cannot be represented in base 2
+(i.e., whose *binary* expansion is infinite or exceeds the current precision),
+ the diameter of newly-created thin intervals corresponds to the local machine epsilon (`eps`) in the `:narrow` interval rounding mode:
 
 ```julia
 julia> diam(b)
@@ -146,7 +152,7 @@ julia> diam(b)
 
 ## Arithmetic
 
-Basic arithmetic operations (`+`, `-`, `*`, `/`, `^`) are defined for pairs of intervals in the standard way (see, e.g., the book by Tucker): the smallest interval containing the result of operating with each element of each interval. That is, for two intervals $X$ and $Y$ and an operation $\circ$, we define the operation on the two intervals by
+Basic arithmetic operations (`+`, `-`, `*`, `/`, `^`) are defined for pairs of intervals in a standard way (see, e.g., the book by Tucker): the result is the smallest interval containing the result of operating with each element of each interval. That is, for two intervals $X$ and $Y$ and an operation $\circ$, we define the operation on the two intervals by
 $$X \circ Y := \{ x \circ y: x \in X \text{ and } y \in Y \}.$$  Again, directed rounding is used if necessary.
 
 For example:
@@ -179,7 +185,7 @@ This may be changed using the `set_interval_precision` function:
 julia> set_interval_precision(256)
 256
 
-julia> @interval(3*pi/2 + 1)
+julia> @interval 3π/2 + 1
 [5.712388980384689857693965074919254326295754099062658731462416888461724609429262e+00, 5.712388980384689857693965074919254326295754099062658731462416888461724609429401e+00]₂₅₆
 ```
 The subscript `256` at the end denotes the precision.
@@ -198,9 +204,9 @@ To check which mode is currently set, use
 julia> get_interval_precision()
 (Float64,-1)
 ```
-The number indicates the precision (relevant only for `BigFloat`s).
+The result is a tuple of the type (currently `Float64` or `BigFloat`) and the precision (relevant only for `BigFloat`s).
 
-NB: The standard Julia function `set_bigfloat_precision` is used internally by `set_interval_precision`, but it should not be used directly.
+NB: The standard Julia function `set_bigfloat_precision` is used internally by `set_interval_precision`, but it should not be used directly, since `set_interval_precision` carries out additional steps to ensure internal consistency of certain interval operations.
 
 ## Elementary functions
 
