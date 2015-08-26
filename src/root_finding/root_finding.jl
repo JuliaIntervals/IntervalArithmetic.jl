@@ -102,26 +102,3 @@ function Base.lexcmp{T}(a::Interval{T}, b::Interval{T})
 end
 
 Base.lexcmp{T}(a::Root{T}, b::Root{T}) = lexcmp(a.interval, b.interval)
-
-
-function clean_roots{T}(roots::Vector{Root{T}})
-    sort!(roots, lt=lexless)
-
-    new_roots = [roots[1]]
-    good_root = roots[1]
-
-    for i in 2:length(roots)
-        current_root = roots[i]
-        if current_root == good_root
-            continue
-        end
-
-        push!(new_roots, current_root)
-        good_root = current_root
-    end
-
-    new_roots
-
-end
-
-
