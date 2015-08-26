@@ -63,15 +63,17 @@ function find_roots_midpoint(f::Function, a::Real, b::Real, method::Function=new
 
     roots = find_roots(f, a, b, method; tolerance=tolerance, debug=debug, maxlevel=maxlevel, precision=precision)
 
+    midpoints = T[]
+    radii = T[]
+    root_symbols = Symbol[]  # :unique or :unknown
+
     if length(roots) == 0
-        return ([], [], [])
+        return (midpoints, radii, root_symbols)  # still empty
     end
 
     T = eltype(roots[1].interval)
 
-    midpoints = T[]
-    radii = T[]
-    root_symbols = Symbol[]  # :unique or :unknown
+
 
     for root in roots
         midpoint, radius = midpoint_radius(root.interval)
