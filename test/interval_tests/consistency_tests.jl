@@ -83,13 +83,20 @@ facts("Precision tests") do
     @fact a == b --> true
 end
 
+facts("Interval rounding tests") do
+    set_interval_rounding(:wide)
+    @fact get_interval_rounding() == :wide --> true
+
+    @fact_throws ArgumentError set_interval_rounding(:hello)
+end
+
 facts("Constructing intervals") do
 
-    set_interval_precision(64)
+    set_interval_precision(Float64)
     a = @interval("[0.1, 0.2]")
     b = @interval(0.1, 0.2)
-    #@show a,b
-    @fact a == b --> true
+    @show a,b
+    @fact a ⊆ b --> true
 
     @fact_throws ArgumentError @interval("[0.1, 0.2")
 

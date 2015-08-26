@@ -30,7 +30,8 @@ big_pi = @interval(pi)
 set_interval_precision(Float64)
 float_pi = @interval(pi)
 
-Base.⊆(a::Interval, b::Root) = a ⊆ b[1]   # the Root object has the interval in the first entry
+Base.⊆(a::Interval, b::Root) = a ⊆ b.interval   # the Root object has the interval in the first entry
+Base.⊆(a::Root, b::Root) = a.interval ⊆ b.interval
 
 # Using precision "only" 256 leads to overestimation of the true roots for `cos`
 # i.e the Newton method gives more accurate results!
@@ -71,16 +72,26 @@ facts("Testing root finding") do
 
                                 context("Function $f; interval $a") do
 
-                                    roots = method(f, f_prime, a)
+                                    for autodiff in (false, true)
 
-                                    @fact length(roots) --> length(true_roots)
+                                        context("With autodiff=$autodiff") do
 
-                                    for i in 1:length(roots)
-                                        root = roots[i]
+                                            if autodiff
+                                                roots = method(f, a)
+                                            else
+                                                roots = method(f, f_prime, a)
+                                            end
 
-                                        @fact isa(root, Root{precision_type[1]}) --> true
-                                        @fact is_unique(root) --> true
-                                        @fact true_roots[i] ⊆ root.interval --> true
+                                            @fact length(roots) --> length(true_roots)
+
+                                            for i in 1:length(roots)
+                                                root = roots[i]
+
+                                                @fact isa(root, Root{precision_type[1]}) --> true
+                                                @fact is_unique(root) --> true
+                                                @fact true_roots[i] ⊆ root.interval --> true
+                                            end
+                                        end
                                     end
                                 end
                             end
@@ -107,19 +118,24 @@ set_interval_precision(Float64)
 facts("find_roots tests") do
     f(x) = x^2 - 2
 
-    roots = find_roots(f, -5, 5)
-    @fact length(roots) --> 2
 
     roots = find_roots_midpoint(f, -5, 5)
     @fact length(roots) --> 3
     @fact length(roots[1]) --> 2
 
+    roots = find_roots(f, -5, 5)
+    @fact length(roots) --> 2
 
     set_interval_precision(256)
 
-    roots = find_roots(f, -5, 5)
-    new_roots = newton(f, roots)
-    @fact length(new_roots) == length(roots) --> true
+    for method in (newton, krawczyk)
+        new_roots = method(f, roots)
+        @fact length(new_roots) == length(roots) --> true
+
+        for (root1, root2) in zip(new_roots, roots)
+            @fact root1 ⊆ root2 --> true
+        end
+    end
 
 end
 
