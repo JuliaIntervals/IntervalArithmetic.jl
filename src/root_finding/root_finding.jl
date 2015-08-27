@@ -1,16 +1,4 @@
 
-# immutable Root{T<:Real}
-#     interval::Interval{T}
-#     existence::Symbol    # :unique or :unknown
-# end
-
-
-
-# Base.getindex(r::Root, i::Integer) = getfield(r, i)
-
-@which sort!([3, 5, 4])
-
-#typealias Root{T<:Real} @compat Tuple{Interval{T}, Symbol}
 immutable Root{T<:Real}
     interval::Interval{T}
     root_type::Symbol
@@ -20,12 +8,13 @@ show(io::IO, root::Root) = print(io, "Root($(root.interval), :$(root.root_type))
 
 is_unique{T}(root::Root{T}) = root.root_type == :unique
 
+⊆(a::Interval, b::Root) = a ⊆ b.interval   # the Root object has the interval in the first entry
+⊆(a::Root, b::Root) = a.interval ⊆ b.interval
+
 
 include("automatic_differentiation.jl")
 include("newton.jl")
 include("krawczyk.jl")
-
-
 
 
 function find_roots{T}(f::Function, a::Interval{T}, method::Function = newton;
@@ -63,15 +52,15 @@ function find_roots_midpoint(f::Function, a::Real, b::Real, method::Function=new
 
     roots = find_roots(f, a, b, method; tolerance=tolerance, debug=debug, maxlevel=maxlevel, precision=precision)
 
-    if length(roots) == 0
-        return ([], [], [])
-    end
-
     T = eltype(roots[1].interval)
 
     midpoints = T[]
     radii = T[]
     root_symbols = Symbol[]  # :unique or :unknown
+
+    if length(roots) == 0
+        return (midpoints, radii, root_symbols)  # still empty
+    end
 
     for root in roots
         midpoint, radius = midpoint_radius(root.interval)
@@ -102,26 +91,3 @@ function Base.lexcmp{T}(a::Interval{T}, b::Interval{T})
 end
 
 Base.lexcmp{T}(a::Root{T}, b::Root{T}) = lexcmp(a.interval, b.interval)
-
-
-function clean_roots{T}(roots::Vector{Root{T}})
-    sort!(roots, lt=lexless)
-
-    new_roots = [roots[1]]
-    good_root = roots[1]
-
-    for i in 2:length(roots)
-        current_root = roots[i]
-        if current_root == good_root
-            continue
-        end
-
-        push!(new_roots, current_root)
-        good_root = current_root
-    end
-
-    new_roots
-
-end
-
-

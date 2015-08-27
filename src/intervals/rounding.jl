@@ -177,7 +177,7 @@ get_interval_rounding() = interval_parameters.rounding
 
 function set_interval_rounding(mode)
     if mode ∉ [:wide, :narrow]
-        error("Only possible interval rounding modes are `:wide` and `:narrow`")
+        throw(ArgumentError("Only possible interval rounding modes are `:wide` and `:narrow`"))
     end
 
     interval_parameters.rounding = mode  # a symbol

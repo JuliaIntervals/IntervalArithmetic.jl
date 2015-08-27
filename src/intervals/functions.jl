@@ -59,20 +59,10 @@ function ^{T}(a::Interval{T}, x::Interval)
     diam(x) < eps(mid(x)) && return a^(mid(x))  # thin interval
 
     domain = Interval{T}(0, Inf)
-    a_restricted = a ∩ domain
+    restricted = a ∩ domain
 
-
-    @round(T,
-           begin
-               lolo = a_restricted.lo^(x.lo)
-               lohi = a_restricted.lo^(x.hi)
-               min( lolo, lohi )
-           end,
-           begin
-               hilo = a_restricted.hi^(x.lo)
-               hihi = a_restricted.hi^(x.hi)
-               max( hilo, hihi)
-           end
+    @round(T, min(restricted.lo^(x.lo), restricted.lo^(x.hi)),
+               max(restricted.hi^(x.lo), restricted.hi^(x.hi))
            )
 end
 
