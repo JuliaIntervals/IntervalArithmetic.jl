@@ -1,16 +1,4 @@
 
-# immutable Root{T<:Real}
-#     interval::Interval{T}
-#     existence::Symbol    # :unique or :unknown
-# end
-
-
-
-# Base.getindex(r::Root, i::Integer) = getfield(r, i)
-
-@which sort!([3, 5, 4])
-
-#typealias Root{T<:Real} @compat Tuple{Interval{T}, Symbol}
 immutable Root{T<:Real}
     interval::Interval{T}
     root_type::Symbol
@@ -20,12 +8,13 @@ show(io::IO, root::Root) = print(io, "Root($(root.interval), :$(root.root_type))
 
 is_unique{T}(root::Root{T}) = root.root_type == :unique
 
+⊆(a::Interval, b::Root) = a ⊆ b.interval   # the Root object has the interval in the first entry
+⊆(a::Root, b::Root) = a.interval ⊆ b.interval
+
 
 include("automatic_differentiation.jl")
 include("newton.jl")
 include("krawczyk.jl")
-
-
 
 
 function find_roots{T}(f::Function, a::Interval{T}, method::Function = newton;

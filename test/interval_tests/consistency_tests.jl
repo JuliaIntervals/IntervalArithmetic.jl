@@ -1,17 +1,13 @@
-
 using ValidatedNumerics
 using FactCheck
 
 set_bigfloat_precision(53)
-
-
 
 facts("Consistency tests") do
 
     a = @interval(1.1, 0.1)
     b = @interval(0.9, 2.0)
     c = @interval(0.25, 4.0)
-
 
     @fact isa( @interval(1,2), Interval ) --> true
     @fact isa( @interval(0.1), Interval ) --> true
@@ -95,7 +91,7 @@ facts("Constructing intervals") do
     set_interval_precision(Float64)
     a = @interval("[0.1, 0.2]")
     b = @interval(0.1, 0.2)
-    @show a,b
+
     @fact a ⊆ b --> true
 
     @fact_throws ArgumentError @interval("[0.1, 0.2")
@@ -106,7 +102,7 @@ facts("Constructing intervals") do
     set_interval_rounding(:wide)
     set_interval_precision(Float64)
     a = @interval(0.1, 0.2)
-    #@show a
+
     @fact a == Interval(0.09999999999999998, 0.20000000000000007) --> true
 
     b = @interval(0.1)
