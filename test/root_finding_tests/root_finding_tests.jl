@@ -30,8 +30,6 @@ big_pi = @interval(pi)
 set_interval_precision(Float64)
 float_pi = @interval(pi)
 
-Base.⊆(a::Interval, b::Root) = a ⊆ b.interval   # the Root object has the interval in the first entry
-Base.⊆(a::Root, b::Root) = a.interval ⊆ b.interval
 
 # Using precision "only" 256 leads to overestimation of the true roots for `cos`
 # i.e the Newton method gives more accurate results!
