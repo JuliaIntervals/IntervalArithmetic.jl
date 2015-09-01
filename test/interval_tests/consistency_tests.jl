@@ -14,7 +14,9 @@ facts("Consistency tests") do
     @fact isa( zero(b), Interval ) --> true
 
     @fact zero(b) --> 0.0
+    @fact zero(b) == zero(typeof(b)) --> true
     @fact one(a) --> 1.0
+    @fact one(a) == one(typeof(a)) --> true
     @fact one(a) --> big(1.0)
     @fact a == b --> false
     @fact a != b --> true

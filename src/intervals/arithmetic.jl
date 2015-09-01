@@ -44,7 +44,9 @@ in(x::Real, a::Interval) = a.lo <= x <= a.hi
 ## zero and one functions
 
 zero{T}(a::Interval{T}) = Interval(zero(T))
+zero{T}(::Type{Interval{T}}) = Interval(zero(T))
 one{T}(a::Interval{T}) = Interval(one(T))
+one{T}(::Type{Interval{T}}) = Interval(one(T))
 
 
 ## Addition and subtraction
