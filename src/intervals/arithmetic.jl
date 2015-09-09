@@ -15,6 +15,7 @@ emptyinterval() = ∅
 # isempty(x::Interval) = isnan(x.lo) || isnan(x.hi)
 isempty(x::Interval) = x.lo == Inf && x.hi == -Inf
 
+
 @doc doc"""`entireinterval`s represent the whole Real line: [-∞, ∞].""" ->
 entireinterval(T::Type) = Interval(convert(T, -Inf), convert(T, Inf))
 entireinterval(x::Interval) =
@@ -22,11 +23,13 @@ entireinterval(x::Interval) =
 
 isentire(x::Interval) = x.lo == -Inf && x.hi == Inf
 
-# Do we need the following? Seems to be more julian...
-# inf{T<:Real}(::Type{Interval{T}}) = entireinterval(T::Type)
-# inf{T<:Real}(x::Interval) = entireinterval(x)
-#
-#isinf(x::Interval) = isentire(x)
+
+@doc doc"""`NaI` not-an-interval: [NaN, NaN].""" ->
+nai(T::Type) = Interval(convert(T, NaN), convert(T, NaN))
+nai(x::Interval) = Interval(convert(eltype(x), NaN), convert(eltype(x), NaN))
+
+isnai(x::Interval) = isnan(x.lo) || isnan(x.hi)
+
 
 eps(x::Interval) = max(eps(x.lo), eps(x.hi))
 
