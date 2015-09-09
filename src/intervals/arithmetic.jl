@@ -1,52 +1,10 @@
-
-## Empty interval:
-
-@doc doc"""`emptyinterval`s are represented as the interval [∞, -∞]; note
-that this interval is an exception to the fact that the lower bound is
-larger than the upper one.""" ->
-
-emptyinterval(T::Type) = Interval(convert(T, Inf), convert(T, -Inf))
-emptyinterval(x::Interval) =
-    Interval(convert(eltype(x), Inf), convert(eltype(x), -Inf))
-
-∅ = emptyinterval(Float64)
-emptyinterval() = ∅
-
-# isempty(x::Interval) = isnan(x.lo) || isnan(x.hi)
-isempty(x::Interval) = x.lo == Inf && x.hi == -Inf
-
-
-@doc doc"""`entireinterval`s represent the whole Real line: [-∞, ∞].""" ->
-entireinterval(T::Type) = Interval(convert(T, -Inf), convert(T, Inf))
-entireinterval(x::Interval) =
-    Interval(convert(eltype(x), -Inf), convert(eltype(x), Inf))
-
-isentire(x::Interval) = x.lo == -Inf && x.hi == Inf
-
-
-@doc doc"""`NaI` not-an-interval: [NaN, NaN].""" ->
-nai(T::Type) = Interval(convert(T, NaN), convert(T, NaN))
-nai(x::Interval) = Interval(convert(eltype(x), NaN), convert(eltype(x), NaN))
-
-isnai(x::Interval) = isnan(x.lo) || isnan(x.hi)
-
-
-eps(x::Interval) = max(eps(x.lo), eps(x.hi))
-
-## "Thin" interval (one for which there is "no more precision")
-# Note that this is not the standard usage of "thin interval", which is one for
-# which the two endpoints are *strictly* equal
-
-isthin(x::Interval) = (m = mid(x); m == x.lo || m == x.hi)
-
-## Widen:
-widen{T<:FloatingPoint}(x::Interval{T}) = Interval(prevfloat(x.lo), nextfloat(x.hi))
-
+# This file is part of the ValidatedNumerics.jl package; MIT licensed
 
 ## Equalities and neg-equalities
 
-==(a::Interval, b::Interval) =
-    (isempty(a) || isempty(b)) ? (isempty(a) && isempty(b)) : a.lo == b.lo && a.hi == b.hi
+==(a::Interval, b::Interval) = ifelse(isempty(a) || isempty(b),
+                                    (isempty(a) && isempty(b)),
+                                    a.lo == b.lo && a.hi == b.hi )
 !=(a::Interval, b::Interval) = !(a==b)
 
 
@@ -106,6 +64,11 @@ mag(a::Interval) = max( abs(a.lo), abs(a.hi) )
 mig(a::Interval) = ( zero(a.lo) ∈ a ) ? zero(a.lo) : min( abs(a.lo), abs(a.hi) )
 
 
+# Infimum and supremum of an interval
+infimum(a::Interval) = a.lo
+supremum(a::Interval) = a.hi
+
+
 ## Functions needed for generic linear algebra routines to work
 
 <(a::Interval, b::Interval) = a.hi < b.lo
@@ -117,18 +80,14 @@ abs(a::Interval) = Interval(mig(a), mag(a))
 
 # Don't define isless since that's for total orders
 
+
 ## Set operations
 
 function intersect{T}(a::Interval{T}, b::Interval{T})
 
-    if isempty(a) || isempty(b)
-        return emptyinterval(T)
-    end
+    isempty(a) || isempty(b) && return emptyinterval(T)
 
-    if a.hi < b.lo || b.hi < a.lo
-        # warn("Intersection is empty")
-        return emptyinterval(T)
-    end
+    (a.hi < b.lo || b.hi < a.lo) && return emptyinterval(T)
 
     #@round(T, max(a.lo, b.lo), min(a.hi, b.hi))
     Interval(max(a.lo, b.lo), min(a.hi, b.hi))

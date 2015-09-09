@@ -53,6 +53,14 @@ facts("Consistency tests") do
     @fact isnai(nai(a)) --> true
     @fact isnai(a) --> false
 
+    @fact infimum(a) == a.lo --> true
+    @fact supremum(a) == a.hi --> true
+    @fact infimum(emptyinterval(a)) --> Inf
+    @fact supremum(emptyinterval(a)) --> -Inf
+    @fact infimum(entireinterval(a)) --> -Inf
+    @fact supremum(entireinterval(a)) --> Inf
+    @fact isnan(supremum(nai(BigFloat))) --> true
+
     @fact diam( @interval(1//2) ) --> zero(BigFloat)
     @fact diam( @interval(0.1) ) --> eps(0.1)
     @fact mig(@interval(-2,2)) --> BigFloat(0.0)

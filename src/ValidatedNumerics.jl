@@ -29,7 +29,7 @@ export
     diam, mid, mag, mig, hull, isinside,
     emptyinterval, ∅, isempty, ⊊,
     entireinterval, isentire, nai, isnai,
-    widen,
+    widen, infimum, supremum,
     set_interval_precision, get_interval_precision,
     with_interval_precision,
     interval_parameters, eps, dist, roughly,
