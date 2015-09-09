@@ -139,6 +139,8 @@ function asin{T<:Real}(a::Interval{T})
 
     a = a ∩ domain
 
+    isempty(a) && return a
+
     @round(T, asin(a.lo), asin(a.hi))
 end
 
@@ -146,6 +148,8 @@ function acos{T<:Real}(a::Interval{T})
     domain = Interval{T}(-one(T), one(T))
 
     a = a ∩ domain
+
+    isempty(a) && return a
 
     @round(T, acos(a.lo), acos(a.hi))
 end
