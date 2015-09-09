@@ -41,6 +41,7 @@ facts("Consistency tests") do
     @fact a ∩ @interval(-1) --> emptyinterval(a)
     @fact isempty(a ∩ @interval(-1) ) --> true
     @fact isempty(a) --> false
+
     @fact intersect(a, hull(a,b)) --> a
     @fact union(a,b) --> @interval(a.lo, b.hi)
 
@@ -50,7 +51,7 @@ facts("Consistency tests") do
 
     @fact nai(Float64) === Interval(NaN) --> true
     @fact isnan(nai(BigFloat).lo) --> true
-    @fact isnai(nai(a)) --> true
+    @fact isnai(nai()) --> true
     @fact isnai(a) --> false
 
     @fact infimum(a) == a.lo --> true
@@ -66,6 +67,10 @@ facts("Consistency tests") do
     @fact mig(@interval(-2,2)) --> BigFloat(0.0)
     @fact mag(-b) --> b.hi
     @fact diam(a) == a.hi - a.lo --> true
+    @fact mid(c) == 2.125 --> true
+    @fact isnan(mid(emptyinterval())) --> true
+    @fact mid(entireinterval()) == 0.0 --> true
+    @fact isnan(mid(nai())) --> true
 
     @fact log(@interval(-2,5)) --> @interval(-Inf,log(5.0))
 

@@ -57,11 +57,11 @@ end
 
 ## Scalar functions on intervals (no directed rounding used)
 
-mid(a::Interval) = (a.lo + a.hi) / 2
+mid(a::Interval) = ifelse(isentire(a), zero(a.lo), (a.lo + a.hi) / 2)
 
 diam(a::Interval) = a.hi - a.lo
 mag(a::Interval) = max( abs(a.lo), abs(a.hi) )
-mig(a::Interval) = ( zero(a.lo) ∈ a ) ? zero(a.lo) : min( abs(a.lo), abs(a.hi) )
+mig(a::Interval) = ifelse(zero(a.lo) ∈ a, zero(a.lo), min(abs(a.lo), abs(a.hi)))
 
 
 # Infimum and supremum of an interval

@@ -50,6 +50,7 @@ isempty(x::Interval) = x.lo == Inf && x.hi == -Inf
 entireinterval(T::Type) = Interval(convert(T, -Inf), convert(T, Inf))
 entireinterval(x::Interval) =
     Interval(convert(eltype(x), -Inf), convert(eltype(x), Inf))
+entireinterval() = entireinterval(Float64)
 
 isentire(x::Interval) = x.lo == -Inf && x.hi == Inf
 
@@ -58,6 +59,7 @@ isentire(x::Interval) = x.lo == -Inf && x.hi == Inf
 @doc doc"""`NaI` not-an-interval: [NaN, NaN].""" ->
 nai(T::Type) = Interval(convert(T, NaN), convert(T, NaN))
 nai(x::Interval) = Interval(convert(eltype(x), NaN), convert(eltype(x), NaN))
+nai() = nai(Float64)
 
 isnai(x::Interval) = isnan(x.lo) || isnan(x.hi)
 
