@@ -37,10 +37,14 @@ facts("Consistency tests") do
     @fact 0.1 ∈ @interval(0.1) --> true
     @fact 0.1 in @interval(0.1) --> true
 
+    @fact emptyinterval() --> Interval(Inf, -Inf)
     @fact a ∩ @interval(-1) --> emptyinterval(a)
     @fact isempty(a ∩ @interval(-1) ) --> true
     @fact intersect(a, hull(a,b)) --> a
     @fact union(a,b) --> @interval(a.lo, b.hi)
+
+    @fact entireinterval(Float64) --> Interval(-Inf, Inf)
+    @fact isentire(entireinterval(a)) --> true
 
     @fact diam( @interval(1//2) ) --> zero(BigFloat)
     @fact diam( @interval(0.1) ) --> eps(0.1)

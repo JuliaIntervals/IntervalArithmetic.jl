@@ -28,6 +28,7 @@ export
     get_interval_rounding, set_interval_rounding,
     diam, mid, mag, mig, hull, isinside,
     emptyinterval, ∅, isempty, ⊊,
+    entireinterval, isentire,
     widen,
     set_interval_precision, get_interval_precision,
     with_interval_precision,

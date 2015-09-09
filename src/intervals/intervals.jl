@@ -10,6 +10,7 @@ immutable Interval{T<:Real} <: Real
     hi :: T
 
     function Interval(a::Real, b::Real)
+        (isinf(a) && isinf(b)) && return new(a,b)
         if a > b
             a, b = b, a
         end

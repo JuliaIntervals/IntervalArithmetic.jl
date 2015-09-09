@@ -1,17 +1,32 @@
 
 ## Empty interval:
 
-@doc doc"""Empty intervals are represented as intervals of `NaN`s.
-The automatic propagation of `NaN`s means that any operation with an empty interval gives back
-an empty interval.""" ->
+@doc doc"""`emptyinterval`s are represented as the interval [∞, -∞]; note
+that this interval is an exception to the fact that the lower bound is
+larger than the upper one.""" ->
 
-emptyinterval(T::Type) = Interval(convert(T, NaN))
-emptyinterval(x::Interval) = Interval(convert(eltype(x), NaN))
+emptyinterval(T::Type) = Interval(convert(T, Inf), convert(T, -Inf))
+emptyinterval(x::Interval) =
+    Interval(convert(eltype(x), Inf), convert(eltype(x), -Inf))
 
 ∅ = emptyinterval(Float64)
 emptyinterval() = ∅
 
-isempty(x::Interval) = isnan(x.lo) || isnan(x.hi)
+# isempty(x::Interval) = isnan(x.lo) || isnan(x.hi)
+isempty(x::Interval) = x.lo == Inf && x.hi == -Inf
+
+@doc doc"""`entireinterval`s represent the whole Real line: [-∞, ∞].""" ->
+entireinterval(T::Type) = Interval(convert(T, -Inf), convert(T, Inf))
+entireinterval(x::Interval) =
+    Interval(convert(eltype(x), -Inf), convert(eltype(x), Inf))
+
+isentire(x::Interval) = x.lo == -Inf && x.hi == Inf
+
+# Do we need the following? Seems to be more julian...
+# inf{T<:Real}(::Type{Interval{T}}) = entireinterval(T::Type)
+# inf{T<:Real}(x::Interval) = entireinterval(x)
+#
+#isinf(x::Interval) = isentire(x)
 
 eps(x::Interval) = max(eps(x.lo), eps(x.hi))
 
