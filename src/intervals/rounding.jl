@@ -56,7 +56,7 @@ macro thin_round(T, expr)
     end
 end
 
-@doc doc"""`split_interval_string deals with strings of the form `[3.5, 7.2]`""" ->
+@doc doc"""`split_interval_string` deals with strings of the form `[3.5, 7.2]`""" ->
 
 function split_interval_string(T, x::String)
     if !(contains(x, "["))

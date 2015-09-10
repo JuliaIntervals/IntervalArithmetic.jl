@@ -10,7 +10,7 @@ using Compat
 
 import Base:
     +, -, *, /, //,
-    <, >, ==, !=, ⊊, ⊆, ^,
+    <, >, ==, !=, ⊆, ^, ⊊,
     in, zero, one, abs, real, show,
     sqrt, exp, log, sin, cos, tan, inv,
     asin, acos, atan,
@@ -27,8 +27,8 @@ export
     @interval, @biginterval, @floatinterval, @make_interval,
     get_interval_rounding, set_interval_rounding,
     diam, mid, mag, mig, hull, isinside,
-    emptyinterval, ∅, isempty, ⊊,
-    entireinterval, isentire, nai, isnai,
+    emptyinterval, ∅, isempty, interior, isdisjoint, ⪽,
+    entireinterval, isentire, nai, isnai, isthin, 
     widen, infimum, supremum,
     set_interval_precision, get_interval_precision,
     with_interval_precision,

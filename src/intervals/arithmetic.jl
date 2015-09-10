@@ -12,9 +12,21 @@
 
 in(x::Real, a::Interval) = a.lo <= x <= a.hi
 
-⊊(a::Interval, b::Interval) = b.lo < a.lo && a.hi < b.hi
+# issubset
 ⊆(a::Interval, b::Interval) = b.lo ≤ a.lo && a.hi ≤ b.hi
-⊂ = ⊊  # do we really want this?
+
+function interior(a::Interval, b::Interval)
+    (isempty(a) && isempty(b)) && return true
+    b.lo < a.lo && a.hi < b.hi
+end
+const ⪽ = interior  # \subsetdot
+# Using the following to check itl1788; love to deprecate it in favor of \subsetdot (above)
+⊊(a::Interval, b::Interval) = interior(a,b)
+
+function isdisjoint(a::Interval, b::Interval)
+    (isempty(a) || isempty(b)) && return true
+    b.hi < a.lo || a.hi < b.lo
+end
 
 
 ## zero and one functions
@@ -27,31 +39,43 @@ one{T}(::Type{Interval{T}}) = Interval(one(T))
 
 ## Addition and subtraction
 
-+{T}(a::Interval{T}, b::Interval{T}) = @round(T, a.lo + b.lo, a.hi + b.hi)
+function +{T}(a::Interval{T}, b::Interval{T})
+    (isempty(a) || isempty(b)) && return emptyinterval(T)
+    @round(T, a.lo + b.lo, a.hi + b.hi)
+end
 +(a::Interval) = a
 
 -{T}(a::Interval{T}) = @round(T, -a.hi, -a.lo)
--(a::Interval, b::Interval) = a + (-b)  # @round(a.lo - b.hi, a.hi - b.lo)
+function -(a::Interval, b::Interval)
+    (isempty(a) || isempty(b)) && return emptyinterval(a)
+    a + (-b)  # @round(a.lo - b.hi, a.hi - b.lo)
+end
 
 
 ## Multiplication
 
-*{T}(a::Interval{T}, b::Interval{T}) = @round(T,
-                                     min( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi ),
-                                     max( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi )
-                                     )
+function *{T}(a::Interval{T}, b::Interval{T})
+    (isempty(a) || isempty(b)) && return emptyinterval(T)
+    @round(T, min( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi ),
+            max( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi ) )
+end
 
 ## Division
 
 function inv{T}(a::Interval{T})
-    if a.lo < zero(T) < a.hi  # strict inclusion
-        return Interval(-convert(T, Inf), convert(T, Inf))  # inf(z) returns inf of type of z
+    if zero(T) ∈ a
+        a.lo < zero(T) == a.hi && return Interval(-convert(T, Inf), inv(a.lo))
+        a.lo == zero(T) < a.hi && return Interval(inv(a.hi), convert(T, Inf))
+        a.lo < zero(T) < a.hi && return Interval(-convert(T, Inf), convert(T, Inf))
     end
 
     @round(T, inv(a.hi), inv(a.lo))
 end
 
-/(a::Interval, b::Interval) = a * inv(b)
+function /(a::Interval, b::Interval)
+    (isempty(a) || isempty(b)) && return emptyinterval(a)
+    a * inv(b)
+end
 //(a::Interval, b::Interval) = a / b    # to deal with rationals
 
 
