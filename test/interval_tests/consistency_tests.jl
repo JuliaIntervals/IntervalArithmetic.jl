@@ -23,15 +23,20 @@ facts("Consistency tests") do
 
     @fact a --> Interval(a.lo, a.hi)
     @fact a --> @interval(a.lo, a.hi)
+    @fact @interval(1, Inf) --> Interval(1.0, Inf)
+    # @fact @interval(Inf, -Inf) --> emptyinterval()
+    # @fact @interval(-Inf, Inf) --> emptyinterval()
 
     @fact 1 == zero(a)+one(b) --> true
-    @fact a + emptyinterval(a) --> emptyinterval(a)
+    @fact Interval(0,1) + emptyinterval(a) --> emptyinterval(a)
     @fact @interval(0.25) - one(c)/4 --> zero(c)
-    @fact emptyinterval(a) - a --> emptyinterval(a)
+    @fact emptyinterval(a) - Interval(0,1) --> emptyinterval(a)
+    @fact Interval(0,1) - emptyinterval(a) --> emptyinterval(a)
     @fact a*b --> @interval(a.lo*b.lo, a.hi*b.hi)
-    @fact a * emptyinterval(a) --> emptyinterval(a)
+    @fact Interval(0,1) * emptyinterval(a) --> emptyinterval(a)
+    @fact a * Interval(0) --> zero(a)
 
-    @fact inv( zero(a) ) --> Interval(Inf, Inf)
+    @fact inv( zero(a) ) --> emptyinterval()
     @fact inv( @interval(0, 1) ) --> Interval(1, Inf)
     @fact inv( @interval(1, Inf) ) --> Interval(0, 1)
     @fact inv(c) --> c
@@ -41,6 +46,8 @@ facts("Consistency tests") do
     @fact inv(@interval(-4.0,0.0)) --> @interval(-Inf, -0.25)
     @fact inv(@interval(0.0,4.0)) --> @interval(0.25, Inf)
     @fact inv(@interval(-4.0,4.0)) --> entireinterval(Float64)
+    @fact @interval(0)/@interval(0) --> emptyinterval()
+    @fact typeof(emptyinterval()) --> Interval{Float64}
 
     @fact 0.1 ∈ @interval(0.1) --> true
     @fact 0.1 in @interval(0.1) --> true

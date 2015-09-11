@@ -35,7 +35,7 @@ eltype{T<:Real}(x::Interval{T}) = T
 that this interval is an exception to the fact that the lower bound is
 larger than the upper one.""" ->
 
-emptyinterval(T::Type) = Interval(convert(T, Inf), convert(T, -Inf))
+emptyinterval{T<:Real}(::Type{T}) = Interval(convert(T, Inf), convert(T, -Inf))
 emptyinterval(x::Interval) =
     Interval(convert(eltype(x), Inf), convert(eltype(x), -Inf))
 
@@ -47,7 +47,7 @@ isempty(x::Interval) = x.lo == Inf && x.hi == -Inf
 
 ## Entire interval:
 @doc doc"""`entireinterval`s represent the whole Real line: [-∞, ∞].""" ->
-entireinterval(T::Type) = Interval(convert(T, -Inf), convert(T, Inf))
+entireinterval{T<:Real}(::Type{T}) = Interval(convert(T, -Inf), convert(T, Inf))
 entireinterval(x::Interval) =
     Interval(convert(eltype(x), -Inf), convert(eltype(x), Inf))
 entireinterval() = entireinterval(Float64)
@@ -57,7 +57,7 @@ isentire(x::Interval) = x.lo == -Inf && x.hi == Inf
 
 # NaI: not-an-interval
 @doc doc"""`NaI` not-an-interval: [NaN, NaN].""" ->
-nai(T::Type) = Interval(convert(T, NaN), convert(T, NaN))
+nai{T<:Real}(::Type{T}) = Interval(convert(T, NaN), convert(T, NaN))
 nai(x::Interval) = Interval(convert(eltype(x), NaN), convert(eltype(x), NaN))
 nai() = nai(Float64)
 

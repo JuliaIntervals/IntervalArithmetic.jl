@@ -10,7 +10,7 @@
 
 ## Inclusion/containment functions
 
-in(x::Real, a::Interval) = a.lo <= x <= a.hi
+in{T<:Real}(x::T, a::Interval) = a.lo <= x <= a.hi
 
 # issubset
 ⊆(a::Interval, b::Interval) = b.lo ≤ a.lo && a.hi ≤ b.hi
@@ -31,49 +31,57 @@ end
 
 ## zero and one functions
 
-zero{T}(a::Interval{T}) = Interval(zero(T))
-zero{T}(::Type{Interval{T}}) = Interval(zero(T))
-one{T}(a::Interval{T}) = Interval(one(T))
-one{T}(::Type{Interval{T}}) = Interval(one(T))
+zero{T<:Real}(a::Interval{T}) = Interval(zero(T))
+zero{T<:Real}(::Type{Interval{T}}) = Interval(zero(T))
+one{T<:Real}(a::Interval{T}) = Interval(one(T))
+one{T<:Real}(::Type{Interval{T}}) = Interval(one(T))
 
 
 ## Addition and subtraction
 
-function +{T}(a::Interval{T}, b::Interval{T})
+function +{T<:Real}(a::Interval{T}, b::Interval{T})
     (isempty(a) || isempty(b)) && return emptyinterval(T)
     @round(T, a.lo + b.lo, a.hi + b.hi)
 end
 +(a::Interval) = a
 
--{T}(a::Interval{T}) = @round(T, -a.hi, -a.lo)
-function -(a::Interval, b::Interval)
-    (isempty(a) || isempty(b)) && return emptyinterval(a)
+-{T<:Real}(a::Interval{T}) = @round(T, -a.hi, -a.lo)
+function -{T<:Real}(a::Interval{T}, b::Interval{T})
+    (isempty(a) || isempty(b)) && return emptyinterval(T)
     a + (-b)  # @round(a.lo - b.hi, a.hi - b.lo)
 end
 
 
 ## Multiplication
 
-function *{T}(a::Interval{T}, b::Interval{T})
+function *{T<:Real}(a::Interval{T}, b::Interval{T})
     (isempty(a) || isempty(b)) && return emptyinterval(T)
+
+    (zero(a) == a || zero(b) == b) && return zero(Interval{T})
+
     @round(T, min( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi ),
             max( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi ) )
 end
 
 ## Division
 
-function inv{T}(a::Interval{T})
-    if zero(T) ∈ a
-        a.lo < zero(T) == a.hi && return Interval(-convert(T, Inf), inv(a.lo))
-        a.lo == zero(T) < a.hi && return Interval(inv(a.hi), convert(T, Inf))
-        a.lo < zero(T) < a.hi && return Interval(-convert(T, Inf), convert(T, Inf))
+function inv(a::Interval)
+    isempty(a) && return emptyinterval(a)
+
+    T = eltype(a)
+    S = typeof(inv(a.lo))
+    if in(zero(T), a)
+        a.lo < zero(T) == a.hi && return Interval(-convert(S, Inf), inv(a.lo))
+        a.lo == zero(T) < a.hi && return Interval(inv(a.hi), convert(S, Inf))
+        a.lo < zero(T) < a.hi && return Interval(-convert(S, Inf), convert(S, Inf))
+        a.lo == a.hi == zero(T) && return emptyinterval(S)
     end
 
     @round(T, inv(a.hi), inv(a.lo))
 end
 
 function /(a::Interval, b::Interval)
-    (isempty(a) || isempty(b)) && return emptyinterval(a)
+    isempty(a) && return emptyinterval(a)
     a * inv(b)
 end
 //(a::Interval, b::Interval) = a / b    # to deal with rationals
