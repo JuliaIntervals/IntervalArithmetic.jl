@@ -1,3 +1,5 @@
+# This file is part of the ValidatedNumerics.jl package; MIT licensed
+
 ## Automatic differentiation
 ## Represents the jet of a function u at the point a by (u(a), u'(a))
 

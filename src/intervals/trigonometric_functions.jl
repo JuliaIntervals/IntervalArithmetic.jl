@@ -1,3 +1,4 @@
+# This file is part of the ValidatedNumerics.jl package; MIT licensed
 
 half_pi{T}(::Type{T}) = get_pi(T) / 2
 two_pi{T}(::Type{T})  = get_pi(T) * 2
@@ -12,7 +13,7 @@ is returned. The minimum or maximum must then be chosen appropriately.
 
 This is a rather indirect way to determine if π/2 and 3π/2 are contained
 in the interval; cf. the formula for sine of an interval in
-Tucker, *Validated Numerics*."""->
+Tucker, *Validated Numerics*.""" ->
 
 function find_quadrants(x::FloatingPoint)
     temp = x / half_pi(x)

@@ -1,3 +1,5 @@
+# This file is part of the ValidatedNumerics.jl package; MIT licensed
+
 using ValidatedNumerics
 using FactCheck
 
@@ -24,6 +26,9 @@ facts("Consistency tests") do
     @fact a --> Interval(a.lo, a.hi)
     @fact a --> @interval(a.lo, a.hi)
     @fact @interval(1, Inf) --> Interval(1.0, Inf)
+    @fact @interval(-Inf, 1) --> Interval(-Inf, 1.0)
+    @fact @biginterval(1, Inf) --> Interval{BigFloat}(1.0, Inf)
+    @fact @biginterval(-Inf, 1) --> Interval{BigFloat}(-Inf, 1.0)
     # @fact @interval(Inf, -Inf) --> emptyinterval()
     # @fact @interval(-Inf, Inf) --> emptyinterval()
 
@@ -40,7 +45,7 @@ facts("Consistency tests") do
     @fact inv( @interval(0, 1) ) --> Interval(1, Inf)
     @fact inv( @interval(1, Inf) ) --> Interval(0, 1)
     @fact inv(c) --> c
-    @fact one(a)/b --> inv(b)
+    @fact one(b)/b --> inv(b)
     @fact a/emptyinterval(a) --> emptyinterval(a)
     @fact emptyinterval(a)/a --> emptyinterval(a)
     @fact inv(@interval(-4.0,0.0)) --> @interval(-Inf, -0.25)
@@ -51,13 +56,15 @@ facts("Consistency tests") do
 
     @fact 0.1 ∈ @interval(0.1) --> true
     @fact 0.1 in @interval(0.1) --> true
+    @fact -Inf ∈ entireinterval() --> true
+    @fact Inf ∈ entireinterval() --> true
 
     @fact b ⊆ c --> true
     @fact emptyinterval(c) ⊆ c --> true
     @fact c ⊆ emptyinterval(c) --> false
     @fact interior(b,c) --> true
     @fact b ⪽ emptyinterval(b) --> false
-    @fact emptyinterval(c) ⊊ c --> true
+    @fact emptyinterval(c) ⪽ c --> true
     @fact emptyinterval(c) ⪽ emptyinterval(c) --> true
     @fact isdisjoint(a, @interval(2.1)) --> true
     @fact isdisjoint(a, b) --> false
@@ -76,7 +83,10 @@ facts("Consistency tests") do
 
     @fact entireinterval(Float64) --> Interval(-Inf, Inf)
     @fact isentire(entireinterval(a)) --> true
+    @fact isentire(Interval(-Inf, Inf)) --> true
     @fact isentire(a) --> false
+    @fact Interval(-Inf, Inf) ⪽ Interval(-Inf, Inf) --> true
+    @fact Interval(-Inf, Inf) ⊊ Interval(-Inf, Inf) --> true
 
     @fact nai(a) == nai(a) --> false
     @fact nai(a) === nai(a) --> true
@@ -160,10 +170,10 @@ facts("Constructing intervals") do
     set_interval_precision(Float64)
     a = @interval(0.1, 0.2)
 
-    @fact a == Interval(0.09999999999999998, 0.20000000000000007) --> true
+    @fact a --> Interval(0.09999999999999999, 0.20000000000000004)# --> true
 
     b = @interval(0.1)
-    @fact b == Interval(0.09999999999999998, 0.10000000000000003) --> true
+    @fact b --> Interval(0.09999999999999999, 0.10000000000000002)# --> true
 
     c = @interval("0.1", "0.2")
     @fact c ⊆ a --> true  # c is narrower than a

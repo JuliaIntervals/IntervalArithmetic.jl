@@ -1,3 +1,4 @@
+# This file is part of the ValidatedNumerics.jl package; MIT licensed
 
 ## Macros for directed rounding:
 
@@ -20,9 +21,10 @@ macro with_rounding(T, expr, rounding_mode)
 end
 
 
-@doc doc"""The `@round` macro creates a rounded interval according to the current interval rounding mode.
-It is the main function used to create intervals in the library (e.g. when adding two intervals, etc.).
-It uses the interval rounding mode (see get_interval_rounding())""" ->
+@doc doc"""The `@round` macro creates a rounded interval according to the current
+interval rounding mode. It is the main function used to create intervals in the
+library (e.g. when adding two intervals, etc.). It uses the interval rounding mode
+(see get_interval_rounding())""" ->
 macro round(T, expr1, expr2)
     #@show "round", expr1, expr2
     quote
@@ -56,7 +58,8 @@ macro thin_round(T, expr)
     end
 end
 
-@doc doc"""`split_interval_string` deals with strings of the form `[3.5, 7.2]`""" ->
+@doc doc"""`split_interval_string` deals with strings of the form
+\"[3.5, 7.2]\"""" ->
 
 function split_interval_string(T, x::String)
     if !(contains(x, "["))
@@ -84,7 +87,10 @@ make_interval(::Type{BigFloat}, x::Integer)   =  Interval(BigFloat(x))  # no rou
 # but conversion from BigInt to BigFloat with correct rounding seems to be broken anyway # @thin_interval(BigFloat("$x"))
 
 make_interval(::Type{BigFloat}, x::Rational)  =  make_interval(BigFloat, x.num) / make_interval(BigFloat, x.den)
-make_interval(::Type{BigFloat}, x::Float64)   =  make_interval(BigFloat, rationalize(x))  # NB: converts a float to a rational -- this could be slow
+function make_interval(::Type{BigFloat}, x::Float64)
+    isinf(x) && return Interval(convert(BigFloat,x))
+    make_interval(BigFloat, rationalize(x))  # NB: converts a float to a rational -- this could be slow
+end
 
 make_interval(::Type{BigFloat}, x::BigInt)    =  @thin_round(BigFloat, convert(BigFloat, x))
 
@@ -98,7 +104,7 @@ make_interval(::Type{Float64}, x::MathConst) =  make_interval(Float64, make_inte
 make_interval(::Type{Float64}, x::Integer)   =  Interval(float(x))    # assumes the int is representable
 make_interval(::Type{Float64}, x::Rational)  =  make_interval(Float64, x.num) / make_interval(Float64, x.den)
 function make_interval(::Type{Float64}, x::Float64)
-    isinf(x) && return Interval(Inf)
+    isinf(x) && return Interval(x)
     make_interval(Float64, rationalize(x))  # NB: converts a float to a rational -- could be slow
 end
 

@@ -1,3 +1,5 @@
+# This file is part of the ValidatedNumerics.jl package; MIT licensed
+
 using ValidatedNumerics
 using FactCheck
 
@@ -19,7 +21,9 @@ facts("Numeric tests") do
     @fact a-b --> Interval(-1.9000000000000001e+00, 2.0000000000000018e-01)
 
     @fact 10a --> Interval(9.9999999999999989e-01, 1.1000000000000002e+01)
-    @fact b/a --> Interval(8.181818181818179e-01, 2.0000000000000004e+01)
+    @fact Interval(-30.0,-15.0) / Interval(-5.0,-3.0) --> Interval(3.0, 10.0)
+    @fact @interval(-30,-15) / @interval(-5,-3) --> Interval(3.0, 10.0)
+    @fact b/a --> Interval(8.18181818181818e-01, 2.0000000000000004e+01)
     @fact a/c --> Interval(2.4999999999999998e-02, 4.4000000000000004e+00)
     @fact c/4.0 --> Interval(6.25e-02, 1e+00)
 

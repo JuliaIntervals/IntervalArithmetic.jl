@@ -1,3 +1,5 @@
+# This file is part of the ValidatedNumerics.jl package; MIT licensed
+
 # Krawczyk method, following Tucker
 
 # const D = differentiate

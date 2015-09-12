@@ -1,3 +1,5 @@
+# This file is part of the ValidatedNumerics.jl package; MIT licensed
+
 ## Powers
 # Integer power:
 function ^{T}(a::Interval{T}, n::Integer)

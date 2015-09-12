@@ -1,3 +1,5 @@
+# This file is part of the ValidatedNumerics.jl package; MIT licensed
+
 VERSION >= v"0.4.0-dev+6521" && __precompile__(true)
 
 module ValidatedNumerics
@@ -28,7 +30,7 @@ export
     get_interval_rounding, set_interval_rounding,
     diam, mid, mag, mig, hull, isinside,
     emptyinterval, ∅, isempty, interior, isdisjoint, ⪽,
-    entireinterval, isentire, nai, isnai, isthin, 
+    entireinterval, isentire, nai, isnai, isthin,
     widen, infimum, supremum,
     set_interval_precision, get_interval_precision,
     with_interval_precision,

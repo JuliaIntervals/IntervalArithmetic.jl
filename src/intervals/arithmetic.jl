@@ -10,13 +10,17 @@
 
 ## Inclusion/containment functions
 
-in{T<:Real}(x::T, a::Interval) = a.lo <= x <= a.hi
+function in{T<:Real}(x::T, a::Interval)
+    isentire(a) && return true
+    a.lo <= x <= a.hi
+end
 
 # issubset
 ⊆(a::Interval, b::Interval) = b.lo ≤ a.lo && a.hi ≤ b.hi
 
 function interior(a::Interval, b::Interval)
     (isempty(a) && isempty(b)) && return true
+    (isentire(a) && isentire(b)) && return true
     b.lo < a.lo && a.hi < b.hi
 end
 const ⪽ = interior  # \subsetdot
@@ -57,11 +61,25 @@ end
 function *{T<:Real}(a::Interval{T}, b::Interval{T})
     (isempty(a) || isempty(b)) && return emptyinterval(T)
 
-    (zero(a) == a || zero(b) == b) && return zero(Interval{T})
+    (a == zero(a) || b == zero(b)) && return zero(a)
 
-    @round(T, min( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi ),
-            max( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi ) )
+    if b.lo >= zero(T)
+        a.lo >= zero(T) && return @round(T, a.lo*b.lo, a.hi*b.hi)
+        a.hi <= zero(T) && return @round(T, a.lo*b.hi, a.hi*b.lo)
+        return @round(T, a.lo*b.hi, a.hi*b.hi) # in(zero(T), a)
+    elseif b.hi <= zero(T)
+        a.lo >= zero(T) && return @round(T, a.hi*b.lo, a.lo*b.hi)
+        a.hi <= zero(T) && return @round(T, a.hi*b.hi, a.lo*b.lo)
+        return @round(T, a.hi*b.lo, a.lo*b.lo) # in(zero(T), a)
+    else
+        a.lo > zero(T) && return @round(T, a.hi*b.lo, a.hi*b.hi)
+        a.hi < zero(T) && return @round(T, a.lo*b.hi, a.lo*b.lo)
+        return @round(T, min(a.lo*b.hi, a.hi*b.lo), max(a.lo*b.lo, a.hi*b.hi))
+    end
+    # @round(T, min( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi ),
+    #         max( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi ) )
 end
+
 
 ## Division
 
@@ -71,19 +89,60 @@ function inv(a::Interval)
     T = eltype(a)
     S = typeof(inv(a.lo))
     if in(zero(T), a)
-        a.lo < zero(T) == a.hi && return Interval(-convert(S, Inf), inv(a.lo))
-        a.lo == zero(T) < a.hi && return Interval(inv(a.hi), convert(S, Inf))
-        a.lo < zero(T) < a.hi && return Interval(-convert(S, Inf), convert(S, Inf))
-        a.lo == a.hi == zero(T) && return emptyinterval(S)
+        a.lo < zero(T) == a.hi && return Interval{S}(-Inf, inv(a.lo))
+        a.lo == zero(T) < a.hi && return Interval{S}(inv(a.hi), Inf)
+        a.lo < zero(T) < a.hi && return entireinterval(S)
+        a == zero(a) && return emptyinterval(S)
     end
 
     @round(T, inv(a.hi), inv(a.lo))
 end
 
-function /(a::Interval, b::Interval)
-    isempty(a) && return emptyinterval(a)
-    a * inv(b)
+function /{T<:Real}(a::Interval{T}, b::Interval{T})
+
+    S = typeof(a.lo/b.lo)
+    (isempty(a) || isempty(b)) && return emptyinterval(S)
+    b == zero(b) && return emptyinterval(S)
+
+    if b.lo > zero(T) # b strictly positive
+
+        a.lo >= zero(T) && return @round(S, a.lo/b.hi, a.hi/b.lo)
+        a.hi <= zero(T) && return @round(S, a.lo/b.lo, a.hi/b.hi)
+        return @round(S, a.lo/b.lo, a.hi/b.lo) # in(zero(T), a)
+
+    elseif b.hi < zero(T) # b strictly negative
+
+        a.lo >= zero(T) && return @round(S, a.hi/b.hi, a.lo/b.lo)
+        a.hi <= zero(T) && return @round(S, a.hi/b.lo, a.lo/b.hi)
+        return @round(S, a.hi/b.hi, a.lo/b.hi) # in(zero(T), a)
+
+    else   # b contains zero, but is not zero(b)
+
+        a == zero(a) && return zero(Interval{S})
+
+        if b.lo == zero(T)
+
+            a.lo >= zero(T) && return @round(S, a.lo/b.hi, Inf)
+            a.hi <= zero(T) && return @round(S, -Inf, a.hi/b.hi)
+            return entireinterval(S)
+
+        elseif b.hi == zero(T)
+
+            a.lo >= zero(T) && return @round(S, -Inf, a.lo/b.lo)
+            a.hi <= zero(T) && return @round(S, a.hi/b.lo, Inf)
+            return entireinterval(S)
+
+        else
+
+            return entireinterval(S)
+
+        end
+    end
+    # a * inv(b)
+    # @round(S, min( a.lo/b.lo, a.lo/b.hi, a.hi/b.lo, a.hi/b.hi ),
+    #           max( a.lo/b.lo, a.lo/b.hi, a.hi/b.lo, a.hi/b.hi ) )
 end
+
 //(a::Interval, b::Interval) = a / b    # to deal with rationals
 
 
@@ -105,7 +164,10 @@ supremum(a::Interval) = a.hi
 
 <(a::Interval, b::Interval) = a.hi < b.lo
 real(a::Interval) = a
-abs(a::Interval) = Interval(mig(a), mag(a))
+function abs(a::Interval)
+    isempty(a) && return emptyinterval(a)
+    Interval(mig(a), mag(a))
+end
 
 # <=(a::Interval, b::Interval) = a < b || a == b
 # Not clear how to define <= in a sensible way?
@@ -116,14 +178,10 @@ abs(a::Interval) = Interval(mig(a), mag(a))
 ## Set operations
 
 function intersect{T}(a::Interval{T}, b::Interval{T})
-
-    isempty(a) || isempty(b) && return emptyinterval(T)
-
-    (a.hi < b.lo || b.hi < a.lo) && return emptyinterval(T)
+    isdisjoint(a,b) && return emptyinterval(T)
 
     #@round(T, max(a.lo, b.lo), min(a.hi, b.hi))
     Interval(max(a.lo, b.lo), min(a.hi, b.hi))
-
 end
 
 # Specific promotion rule for intersect:
