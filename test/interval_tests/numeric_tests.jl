@@ -16,6 +16,7 @@ facts("Numeric tests") do
 
     ## Basic arithmetic
     @fact @interval(0.1) --> Interval(9.9999999999999992e-02, 1.0000000000000001e-01)
+    @fact +a == a --> true
     @fact a+b --> Interval(9.9999999999999989e-01, 3.1000000000000001e+00)
     @fact -a --> Interval(-1.1000000000000001e+00, -9.9999999999999992e-02)
     @fact a-b --> Interval(-1.9000000000000001e+00, 2.0000000000000018e-01)

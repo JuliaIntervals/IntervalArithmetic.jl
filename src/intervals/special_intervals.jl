@@ -33,11 +33,21 @@ nai() = nai(get_interval_precision()[1])
 isnai(x::Interval) = isnan(x.lo) || isnan(x.hi)
 
 
-## A "thin" interval (one for which there is "no more precision")
-# Note that this is not the standard usage of "thin interval", which is one for
-# which the two endpoints are *strictly* equal
+## isthin corresponds to isSingleton; note that an interval corresponding
+# to any float which is not exactly representable in a binary expansion
+# does not yield a thin interval
+function isthin(x::Interval)
+    # (m = mid(x); m == x.lo || m == x.hi)
+    x.lo == x.hi
+end
 
-isthin(x::Interval) = (m = mid(x); m == x.lo || m == x.hi)
+
+# A common is a nonempty bounded real interval
+function iscommon(a::Interval)
+    (isentire(a) || isempty(a) || isnai(a)) && return false
+    (isinf(a.lo) || isinf(a.hi)) && return false
+    true
+end
 
 ## Widen:
 widen{T<:AbstractFloat}(x::Interval{T}) = Interval(prevfloat(x.lo), nextfloat(x.hi))

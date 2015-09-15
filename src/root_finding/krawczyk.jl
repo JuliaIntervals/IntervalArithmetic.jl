@@ -70,7 +70,7 @@ function krawczyk{T}(f::Function, f_prime::Function, x::Interval{T}, level::Int=
 
     isempty(Kx ∩ x) && return Root{T}[]  # [(x, :none)]
 
-    if Kx ⊊ x
+    if Kx ⪽ x
         debug && (print("Refining "); @show(x))
         return krawczyk_refine(f, f_prime, Kx, tolerance=tolerance, debug=debug)
     end

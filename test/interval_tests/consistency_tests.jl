@@ -54,10 +54,11 @@ facts("Consistency tests") do
     @fact @interval(0)/@interval(0) --> emptyinterval()
     @fact typeof(emptyinterval()) --> Interval{Float64}
 
+    @fact Inf ∈ entireinterval() --> false
     @fact 0.1 ∈ @interval(0.1) --> true
     @fact 0.1 in @interval(0.1) --> true
-    @fact -Inf ∈ entireinterval() --> true
-    @fact Inf ∈ entireinterval() --> true
+    @fact -Inf ∈ entireinterval() --> false
+    @fact Inf ∈ entireinterval() --> false
 
     @fact b ⊆ c --> true
     @fact emptyinterval(c) ⊆ c --> true
@@ -70,6 +71,20 @@ facts("Consistency tests") do
     @fact isdisjoint(a, b) --> false
     @fact isdisjoint(emptyinterval(a), a) --> true
     @fact isdisjoint(emptyinterval(), emptyinterval()) --> true
+    @fact ValidatedNumerics.islessprime(Inf,Inf) --> true
+    @fact ∅ <= ∅ --> true
+    @fact Interval(1.0,2.0) <= ∅ --> false
+    @fact Interval(-Inf,Inf) <= Interval(-Inf,Inf) --> true
+    @fact Interval(-0.0,2.0) ≤ Interval(-Inf,Inf) --> false
+    @fact precedes(∅,∅) --> true
+    @fact precedes(Interval(3.0,4.0),∅) --> true
+    @fact precedes(Interval(0.0,2.0),Interval(-Inf,Inf)) --> false
+    @fact precedes(Interval(1.0,3.0),Interval(3.0,4.0)) --> true
+    @fact strictprecedes(Interval(3.0,4.0),∅) --> true
+    @fact strictprecedes(Interval(-3.0,-1.0),Interval(-1.0,0.0)) --> false
+    @fact iscommon(emptyinterval()) --> false
+    @fact iscommon(entireinterval()) --> false
+    @fact iscommon(a) --> true
 
     @fact emptyinterval() --> Interval(Inf, -Inf)
     @fact a ∩ @interval(-1) --> emptyinterval(a)
@@ -86,7 +101,6 @@ facts("Consistency tests") do
     @fact isentire(Interval(-Inf, Inf)) --> true
     @fact isentire(a) --> false
     @fact Interval(-Inf, Inf) ⪽ Interval(-Inf, Inf) --> true
-    @fact Interval(-Inf, Inf) ⊊ Interval(-Inf, Inf) --> true
 
     @fact nai(a) == nai(a) --> false
     @fact nai(a) === nai(a) --> true
@@ -105,9 +119,15 @@ facts("Consistency tests") do
 
     @fact diam( @interval(1//2) ) --> zero(BigFloat)
     @fact diam( @interval(0.1) ) --> eps(0.1)
+    @fact isnan(diam(emptyinterval())) --> true
     @fact mig(@interval(-2,2)) --> BigFloat(0.0)
+    @fact isnan(mig(emptyinterval())) --> true
     @fact mag(-b) --> b.hi
+    @fact isnan(mag(emptyinterval())) --> true
     @fact diam(a) == a.hi - a.lo --> true
+    # NOTE: By some strange reason radius is not recognized here
+    # @fact ValidatedNumerics.radius(a) == diam(a)/2 --> true
+    @fact isnan(ValidatedNumerics.radius(emptyinterval())) --> true
     @fact mid(c) == 2.125 --> true
     @fact isnan(mid(emptyinterval())) --> true
     @fact mid(entireinterval()) == 0.0 --> true

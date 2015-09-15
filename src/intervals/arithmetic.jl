@@ -1,40 +1,76 @@
 # This file is part of the ValidatedNumerics.jl package; MIT licensed
 
-## Equalities and neg-equalities
-
-==(a::Interval, b::Interval) = ifelse(isempty(a) || isempty(b),
-                                    (isempty(a) && isempty(b)),
-                                    a.lo == b.lo && a.hi == b.hi )
-!=(a::Interval, b::Interval) = !(a==b)
-
-
-## Inclusion/containment functions
-
+## in, \in, corresponds to isMember
 function in{T<:Real}(x::T, a::Interval)
-    isentire(a) && return true
+    isinf(x) && return false
+    # isentire(a) && return true
     a.lo <= x <= a.hi
 end
 
-# issubset
-⊆(a::Interval, b::Interval) = b.lo ≤ a.lo && a.hi ≤ b.hi
 
+## Comparison of interval_parameters
+## Equalities and neg-equalities
+function ==(a::Interval, b::Interval)
+    isempty(a) && isempty(b) && return true
+    a.lo == b.lo && a.hi == b.hi
+end
+!=(a::Interval, b::Interval) = !(a==b)
+
+# issubset
+function ⊆(a::Interval, b::Interval)
+    isempty(a) && return true
+    b.lo ≤ a.lo && a.hi ≤ b.hi
+end
+
+# Auxiliary functions: equivalent to </<=, but Inf <,<= Inf returning true
+function islessprime{T<:Real}(a::T, b::T)
+    (isinf(a) || isinf(b)) && a==b && return true
+    a < b
+end
+
+# Interior
 function interior(a::Interval, b::Interval)
-    (isempty(a) && isempty(b)) && return true
-    (isentire(a) && isentire(b)) && return true
-    b.lo < a.lo && a.hi < b.hi
+    isempty(a) && return true
+    islessprime(b.lo, a.lo) && islessprime(a.hi, b.hi)
 end
 const ⪽ = interior  # \subsetdot
-# Using the following to check itl1788; love to deprecate it in favor of \subsetdot (above)
-⊊(a::Interval, b::Interval) = interior(a,b)
 
+# Disjoint:
 function isdisjoint(a::Interval, b::Interval)
     (isempty(a) || isempty(b)) && return true
-    b.hi < a.lo || a.hi < b.lo
+    islessprime(b.hi, a.lo) || islessprime(a.hi, b.lo)
 end
 
+# Weakly less, \le, <=
+function <=(a::Interval, b::Interval)
+    isempty(a) && isempty(b) && return true
+    (isempty(a) || isempty(b)) && return false
+    (a.lo ≤ b.lo) && (a.hi ≤ b.hi)
+end
 
-## zero and one functions
+# Strict less: <
+function <(a::Interval, b::Interval)
+    isempty(a) && isempty(b) && return true
+    (isempty(a) || isempty(b)) && return false
+    islessprime(a.lo, b.lo) && islessprime(a.hi, b.hi)
+end
 
+# precedes
+function precedes(a::Interval, b::Interval)
+    (isempty(a) || isempty(b)) && return true
+    a.hi ≤ b.lo
+end
+
+# strictpreceds
+function strictprecedes(a::Interval, b::Interval)
+    (isempty(a) || isempty(b)) && return true
+    # islessprime(a.hi, b.lo)
+    a.hi < b.lo
+end
+const ≺ = strictprecedes # \prec
+
+
+# zero, one
 zero{T<:Real}(a::Interval{T}) = Interval(zero(T))
 zero{T<:Real}(::Type{Interval{T}}) = Interval(zero(T))
 one{T<:Real}(a::Interval{T}) = Interval(one(T))
@@ -148,11 +184,10 @@ end
 
 ## Scalar functions on intervals (no directed rounding used)
 
-mid(a::Interval) = ifelse(isentire(a), zero(a.lo), (a.lo + a.hi) / 2)
-
-diam(a::Interval) = a.hi - a.lo
-mag(a::Interval) = max( abs(a.lo), abs(a.hi) )
-mig(a::Interval) = ifelse(zero(a.lo) ∈ a, zero(a.lo), min(abs(a.lo), abs(a.hi)))
+mag(a::Interval) = ifelse(isempty(a), convert(eltype(a), NaN),
+    max( abs(a.lo), abs(a.hi) ))
+mig(a::Interval) = ifelse(isempty(a), convert(eltype(a), NaN),
+    ifelse(zero(a.lo) ∈ a, zero(a.lo), min(abs(a.lo), abs(a.hi))))
 
 
 # Infimum and supremum of an interval
@@ -161,18 +196,11 @@ supremum(a::Interval) = a.hi
 
 
 ## Functions needed for generic linear algebra routines to work
-
-<(a::Interval, b::Interval) = a.hi < b.lo
 real(a::Interval) = a
 function abs(a::Interval)
     isempty(a) && return emptyinterval(a)
     Interval(mig(a), mag(a))
 end
-
-# <=(a::Interval, b::Interval) = a < b || a == b
-# Not clear how to define <= in a sensible way?
-
-# Don't define isless since that's for total orders
 
 
 ## Set operations
@@ -198,7 +226,12 @@ eps(a::Interval) = max(eps(a.lo), eps(a.hi))
 floor(a::Interval) = Interval(floor(a.lo), floor(a.hi))
 ceil(a::Interval) = Interval(ceil(a.lo), ceil(a.hi))
 
-radius(a::Interval) = (m = mid(a); max(abs(a.lo-m), abs(a.hi-m)))
+mid(a::Interval) = ifelse(isentire(a), zero(a.lo), (a.lo + a.hi) / 2)
+diam(a::Interval) = ifelse(isempty(a), convert(eltype(a), NaN), a.hi - a.lo)
+
+# Should `radius` this yield diam(a)/2? This affects other functions!
+radius(a::Interval) = ifelse(isempty(a), convert(eltype(a), NaN),
+    (m = mid(a); max(m-a.lo, a.hi-m)))
 
 midpoint_radius(a::Interval) = (mid(a), radius(a))
 
