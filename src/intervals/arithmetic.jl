@@ -16,7 +16,7 @@ function ==(a::Interval, b::Interval)
 end
 !=(a::Interval, b::Interval) = !(a==b)
 
-# issubset
+# issubset, \subseteq
 function ⊆(a::Interval, b::Interval)
     isempty(a) && return true
     b.lo ≤ a.lo && a.hi ≤ b.hi
@@ -184,10 +184,15 @@ end
 
 ## Scalar functions on intervals (no directed rounding used)
 
-mag(a::Interval) = ifelse(isempty(a), convert(eltype(a), NaN),
-    max( abs(a.lo), abs(a.hi) ))
-mig(a::Interval) = ifelse(isempty(a), convert(eltype(a), NaN),
-    ifelse(zero(a.lo) ∈ a, zero(a.lo), min(abs(a.lo), abs(a.hi))))
+function mag(a::Interval)
+    isempty(a) && return convert(eltype(a), NaN)
+    max( abs(a.lo), abs(a.hi) )
+end
+function mig(a::Interval)
+    isempty(a) && return convert(eltype(a), NaN)
+    zero(a.lo) ∈ a && return zero(a.lo)
+    min(abs(a.lo), abs(a.hi))
+end
 
 
 # Infimum and supremum of an interval
@@ -226,12 +231,21 @@ eps(a::Interval) = max(eps(a.lo), eps(a.hi))
 floor(a::Interval) = Interval(floor(a.lo), floor(a.hi))
 ceil(a::Interval) = Interval(ceil(a.lo), ceil(a.hi))
 
-mid(a::Interval) = ifelse(isentire(a), zero(a.lo), (a.lo + a.hi) / 2)
-diam(a::Interval) = ifelse(isempty(a), convert(eltype(a), NaN), a.hi - a.lo)
+function mid(a::Interval)
+    isentire(a) && return zero(a.lo)
+    (a.lo + a.hi) / 2
+end
+function diam(a::Interval)
+    isempty(a) && return convert(eltype(a), NaN)
+    a.hi - a.lo
+end
 
 # Should `radius` this yield diam(a)/2? This affects other functions!
-radius(a::Interval) = ifelse(isempty(a), convert(eltype(a), NaN),
-    (m = mid(a); max(m-a.lo, a.hi-m)))
+function radius(a::Interval)
+    isempty(a) && return convert(eltype(a), NaN)
+    m = mid(a)
+    max(m-a.lo, a.hi-m)
+end
 
 midpoint_radius(a::Interval) = (mid(a), radius(a))
 

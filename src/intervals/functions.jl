@@ -3,6 +3,7 @@
 ## Powers
 # Integer power:
 function ^{T}(a::Interval{T}, n::Integer)
+    isempty(a) && return emptyinterval(a)
     n < 0  && return inv(a^(-n))
     n == 0 && return one(a)
     n == 1 && return a
@@ -13,6 +14,7 @@ function ^{T}(a::Interval{T}, n::Integer)
 end
 
 function ^{T}(a::Interval{T}, r::Rational)
+    isempty(a) && return emptyinterval(a)
     root = one(T)/r.den
 
     if a.lo > zero(a.lo)
@@ -30,6 +32,7 @@ end
 
 # Real power of an interval:
 function ^{T}(a::Interval{T}, x::FloatingPoint)
+    isempty(a) && return emptyinterval(a)
     isinteger(x)  && return a^(round(Int,x))
     x < zero(x)  && return inv(a^(-x))
     x == 0.5  && return sqrt(a)
@@ -43,12 +46,12 @@ end
 
 # Interval power of an interval:
 function ^{T}(a::Interval{T}, x::Interval)
+    isempty(a) && return a
     diam(x) < eps(mid(x)) && return a^(mid(x))  # thin interval
 
     domain = Interval{T}(0, Inf)
 
     a = a ∩ domain
-
     isempty(a) && return a
 
     @round(T, min(a.lo^(x.lo), a.lo^(x.hi)), max(a.hi^(x.lo), a.hi^(x.hi)) )

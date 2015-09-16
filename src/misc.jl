@@ -2,6 +2,6 @@
 
 ## Fix some issues with MathConst:
 import Base.MPFR.BigFloat
-BigFloat(a::MathConst) = big(a)
+BigFloat(a::Irrational) = big(a)
 
-<(a::MathConst, b::MathConst) = float(a) < float(b)
+<(a::Irrational, b::Irrational) = float(a) < float(b)

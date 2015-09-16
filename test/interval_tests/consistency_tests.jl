@@ -29,8 +29,8 @@ facts("Consistency tests") do
     @fact @interval(-Inf, 1) --> Interval(-Inf, 1.0)
     @fact @biginterval(1, Inf) --> Interval{BigFloat}(1.0, Inf)
     @fact @biginterval(-Inf, 1) --> Interval{BigFloat}(-Inf, 1.0)
-    # @fact @interval(Inf, -Inf) --> emptyinterval()
-    # @fact @interval(-Inf, Inf) --> emptyinterval()
+    @fact @interval(-Inf, Inf) --> entireinterval(Float64)
+    @fact emptyinterval(Rational{Int}) --> ∅
 
     @fact 1 == zero(a)+one(b) --> true
     @fact Interval(0,1) + emptyinterval(a) --> emptyinterval(a)
@@ -117,21 +117,28 @@ facts("Consistency tests") do
     @fact supremum(entireinterval(a)) --> Inf
     @fact isnan(supremum(nai(BigFloat))) --> true
 
-    @fact diam( @interval(1//2) ) --> zero(BigFloat)
+    @fact mid( Interval(1//2) ) --> 1//2
+    @fact diam( Interval(1//2) ) --> 0//1
+    @fact diam( @interval(1//10) ) --> eps(0.1)
     @fact diam( @interval(0.1) ) --> eps(0.1)
     @fact isnan(diam(emptyinterval())) --> true
     @fact mig(@interval(-2,2)) --> BigFloat(0.0)
+    @fact mig( Interval(1//2) ) --> 1//2
     @fact isnan(mig(emptyinterval())) --> true
     @fact mag(-b) --> b.hi
+    @fact mag( Interval(1//2) ) --> 1//2
     @fact isnan(mag(emptyinterval())) --> true
     @fact diam(a) == a.hi - a.lo --> true
     # NOTE: By some strange reason radius is not recognized here
-    # @fact ValidatedNumerics.radius(a) == diam(a)/2 --> true
+    @fact ValidatedNumerics.radius(Interval(-1//10,1//10)) -->
+        diam(Interval(-1//10,1//10))/2
     @fact isnan(ValidatedNumerics.radius(emptyinterval())) --> true
     @fact mid(c) == 2.125 --> true
     @fact isnan(mid(emptyinterval())) --> true
     @fact mid(entireinterval()) == 0.0 --> true
     @fact isnan(mid(nai())) --> true
+    # In v0.3 it corresponds to AssertionError
+    # @fact_throws ArgumentError nai(Interval(1//2))
 
     @fact log(@interval(-2,5)) --> @interval(-Inf,log(5.0))
 
@@ -172,6 +179,10 @@ facts("Interval rounding tests") do
     @fact get_interval_rounding() == :wide --> true
 
     @fact_throws ArgumentError set_interval_rounding(:hello)
+
+    set_interval_rounding(:narrow)
+    @fact get_interval_rounding() == :narrow --> true
+
 end
 
 facts("Constructing intervals") do
@@ -181,9 +192,19 @@ facts("Constructing intervals") do
 
     @fact a ⊆ b --> true
 
+    @fact_throws ArgumentError @interval("[0.1]")
     @fact_throws ArgumentError @interval("[0.1, 0.2")
 
     @fact Interval( (0.1, 0.2) ) == Interval(0.1, 0.2) --> true
+
+    @fact convert(Interval, pi) -->
+        convert(Interval{get_interval_precision()[1]}, pi)
+    @fact convert(Interval, 1) --> @interval(1)
+    @fact convert(Interval, BigInt(1)) --> @interval(1)
+    @fact convert(Interval, 1//10) --> Interval(1//10)
+    @fact convert(Interval, BigFloat(0.1)) -->
+        convert(Interval{BigFloat}, BigFloat(0.1))
+    # @fact convert(Interval, 0.1) --> @interval("0.1")
 
 
     set_interval_rounding(:wide)
@@ -197,6 +218,9 @@ facts("Constructing intervals") do
 
     c = @interval("0.1", "0.2")
     @fact c ⊆ a --> true  # c is narrower than a
+
+    @fact Interval(1//2) == Interval(0.5) --> true
+    @fact Interval(1//10).lo == rationalize(0.1) --> true
 
     for precision in (64, Float64)
         set_interval_precision(precision)
