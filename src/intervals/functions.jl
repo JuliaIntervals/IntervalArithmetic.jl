@@ -2,8 +2,8 @@
 
 ## Powers
 # Integer power:
-function ^{T}(a::Interval{T}, n::Integer)
-    isempty(a) && return emptyinterval(a)
+function ^{T<:Real}(a::Interval{T}, n::Integer)
+    isempty(a) && return a
     n < 0  && return inv(a^(-n))
     n == 0 && return one(a)
     n == 1 && return a
@@ -13,8 +13,13 @@ function ^{T}(a::Interval{T}, n::Integer)
     @round(T, a.lo^n, a.hi^n)  # odd power
 end
 
-function ^{T}(a::Interval{T}, r::Rational)
-    isempty(a) && return emptyinterval(a)
+function ^{T<:Real}(a::Interval{T}, r::Rational)
+    isempty(a) && return a
+    r < zero(r)  && return inv(a^(-r))
+    r == zero(r) && return one(a)
+    r == one(r)  && return a
+    isinteger(r) && return a^(round(Int,r))
+
     root = one(T)/r.den
 
     if a.lo > zero(a.lo)
@@ -31,8 +36,7 @@ function ^{T}(a::Interval{T}, r::Rational)
 end
 
 # Real power of an interval:
-function ^{T}(a::Interval{T}, x::FloatingPoint)
-    isempty(a) && return emptyinterval(a)
+function ^{T<:Real}(a::Interval{T}, x::AbstractFloat)
     isinteger(x)  && return a^(round(Int,x))
     x < zero(x)  && return inv(a^(-x))
     x == 0.5  && return sqrt(a)
@@ -45,7 +49,7 @@ function ^{T}(a::Interval{T}, x::FloatingPoint)
 end
 
 # Interval power of an interval:
-function ^{T}(a::Interval{T}, x::Interval)
+function ^{T<:Real}(a::Interval{T}, x::Interval)
     isempty(a) && return a
     diam(x) < eps(mid(x)) && return a^(mid(x))  # thin interval
 
