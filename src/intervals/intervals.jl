@@ -30,11 +30,8 @@ Interval{T<:Real, S<:Real}(a::T, b::S) = Interval(promote(a,b)...)
 
 ## Concrete constructors for Interval, to effectively deal only with Float64,
 # BigFloat or Rational{Integer} intervals.
-Interval{T<:Integer}(a::T, b::T) = Interval{Float64}(a,b)
-Interval{T<:Irrational}(a::T, b::T) = Interval{Float64}(a,b)
-## The following is type unstable
-# Interval{T<:Integer}(a::T, b::T) = Interval{get_interval_precision()[1]}(a,b)
-# Interval{T<:Irrational}(a::T, b::T) = Interval{get_interval_precision()[1]}(a,b)
+Interval{T<:Integer}(a::T, b::T) = Interval(float(a), float(b))
+Interval{T<:Irrational}(a::T, b::T) = Interval(float(a), float(b))
 
 eltype{T<:Real}(x::Interval{T}) = T
 
