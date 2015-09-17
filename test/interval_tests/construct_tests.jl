@@ -67,7 +67,7 @@ facts("Constructing intervals") do
     end
 
 
-    # Old stuff moved here
+    # Some Old stuff moved here, slightly adapted
     a = @interval("[0.1, 0.2]")
     b = @interval(0.1, 0.2)
 
@@ -76,22 +76,6 @@ facts("Constructing intervals") do
     @fact_throws ArgumentError @interval("[0.1]")
     @fact_throws ArgumentError @interval("[0.1, 0.2")
 
-    @fact Interval( (0.1, 0.2) ) == Interval(0.1, 0.2) --> true
-
-    set_interval_rounding(:wide)
-    set_interval_precision(Float64)
-    a = @interval(0.1, 0.2)
-
-    @fact a --> Interval(0.09999999999999999, 0.20000000000000004)# --> true
-
-    b = @interval(0.1)
-    @fact b --> Interval(0.09999999999999999, 0.10000000000000002)# --> true
-
-    c = @interval("0.1", "0.2")
-    @fact c ⊆ a --> true  # c is narrower than a
-
-    @fact Interval(1//2) == Interval(0.5) --> true
-    @fact Interval(1//10).lo == rationalize(0.1) --> true
 
     for precision in (64, Float64)
         set_interval_precision(precision)
@@ -106,10 +90,22 @@ facts("Constructing intervals") do
         set_interval_precision(Float64)
 
         a = @interval(0.1, 0.2)
+        @fact a ⊆ Interval(0.09999999999999999, 0.20000000000000004) --> true
+
+        b = @interval(0.1)
+        @fact b ⊆ Interval(0.09999999999999999, 0.10000000000000002) --> true
+
         b = with_interval_precision(128) do
             @interval(0.1, 0.2)
         end
+        @fact b ⊆ Interval(0.09999999999999999, 0.20000000000000004) --> true
 
         @fact float(b) ⊆ a --> true
+
+        c = @interval("0.1", "0.2")
+        @fact c ⊆ a --> true  # c is narrower than a
+        @fact Interval(1//2) == Interval(0.5) --> true
+        @fact Interval(1//10).lo == rationalize(0.1) --> true
     end
+
 end

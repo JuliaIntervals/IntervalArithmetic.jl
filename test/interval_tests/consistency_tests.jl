@@ -3,7 +3,7 @@
 using ValidatedNumerics
 using FactCheck
 
-set_bigfloat_precision(53)
+# set_bigfloat_precision(53)
 
 facts("Consistency tests") do
 
@@ -184,9 +184,6 @@ facts("Interval rounding tests") do
     @fact get_interval_rounding() == :narrow --> true
 
 end
-
-set_interval_rounding(:narrow)
-set_interval_precision(Float64)
 
 facts("Interval power of an interval") do
     a = @interval(1, 2)

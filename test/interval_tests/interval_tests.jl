@@ -1,7 +1,7 @@
 # This file is part of the ValidatedNumerics.jl package; MIT licensed
 
-include("consistency_tests.jl")
 include("construct_tests.jl")
+include("consistency_tests.jl")
 include("numeric_tests.jl")
 include("trig_tests.jl")
 include("non_BigFloat_tests.jl")
