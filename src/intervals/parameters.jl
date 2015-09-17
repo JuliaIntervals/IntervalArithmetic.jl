@@ -1,3 +1,4 @@
+# This file is part of the ValidatedNumerics.jl package; MIT licensed
 
 type IntervalParameters
 
@@ -11,8 +12,3 @@ end
 
 
 const interval_parameters = IntervalParameters()
-
-
-
-
-

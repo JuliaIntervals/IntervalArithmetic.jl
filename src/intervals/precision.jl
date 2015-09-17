@@ -1,3 +1,5 @@
+# This file is part of the ValidatedNumerics.jl package; MIT licensed
+
 ## Precision:
 
 set_interval_precision(::Type{Float64}, prec=-1) =  interval_parameters.precision_type = Float64

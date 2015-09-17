@@ -1,21 +1,24 @@
+# This file is part of the ValidatedNumerics.jl package; MIT licensed
+
 ## Powers
 # Integer power:
-function ^{T}(a::Interval{T}, n::Integer)
+function ^{T<:Real}(a::Interval{T}, n::Integer)
+    isempty(a) && return a
     n < 0  && return inv(a^(-n))
     n == 0 && return one(a)
     n == 1 && return a
 
     iseven(n) && return @round(T, mig(a)^n, mag(a)^n)  # even power
 
-#     @show a.lo, a.hi
-#     @show a.lo^n, a.hi^n
-#     @show @round(T, a.lo^n, a.hi^n)
-
-
     @round(T, a.lo^n, a.hi^n)  # odd power
 end
 
-function ^{T}(a::Interval{T}, r::Rational)
+function ^{T<:Real}(a::Interval{T}, r::Rational)
+    isempty(a) && return a
+    r < zero(r)  && return inv(a^(-r))
+    r == zero(r) && return one(a)
+    r == one(r)  && return a
+    isinteger(r) && return a^(round(Int,r))
 
     root = one(T)/r.den
 
@@ -33,37 +36,29 @@ function ^{T}(a::Interval{T}, r::Rational)
 end
 
 # Real power of an interval:
-function ^{T}(a::Interval{T}, x::FloatingPoint)
+function ^{T<:Real}(a::Interval{T}, x::AbstractFloat)
     isinteger(x)  && return a^(round(Int,x))
     x < zero(x)  && return inv(a^(-x))
     x == 0.5  && return sqrt(a)
 
-    zero(a.hi) > a.hi && error("Undefined: interval is strictly negative and power is non-integer")
-
-#     xInterv = @interval(x)
-#     diam( xInterv ) >= eps(x) && return a^xInterv
-
-    # if x is FloatingPoint then
-
-    # xInterv is a thin interval
     domain = Interval{T}(0, Inf)
-    a_restricted = a ∩ domain
+    a = a ∩ domain
+    isempty(a) && return a
 
-    @round(T, a_restricted.lo^x, a_restricted.hi^x)
+    @round(T, a.lo^x, a.hi^x)
 end
 
 # Interval power of an interval:
-function ^{T}(a::Interval{T}, x::Interval)
-    zero(a.hi) > a.hi && error("Undefined: interval is strictly negative and power is non-integer")
-
+function ^{T<:Real}(a::Interval{T}, x::Interval)
+    isempty(a) && return a
     diam(x) < eps(mid(x)) && return a^(mid(x))  # thin interval
 
     domain = Interval{T}(0, Inf)
-    restricted = a ∩ domain
 
-    @round(T, min(restricted.lo^(x.lo), restricted.lo^(x.hi)),
-               max(restricted.hi^(x.lo), restricted.hi^(x.hi))
-           )
+    a = a ∩ domain
+    isempty(a) && return a
+
+    @round(T, min(a.lo^(x.lo), a.lo^(x.hi)), max(a.hi^(x.lo), a.hi^(x.hi)) )
 end
 
 
@@ -71,25 +66,24 @@ Base.inf(x::Rational) = 1//0  # to allow sqrt()
 
 
 function sqrt{T}(a::Interval{T})
-
-    zero(a.hi) > a.hi && error("Undefined: interval is strictly negative and power is non-integer")
-
     domain = Interval{T}(0, Inf)
-    a_restricted = a ∩ domain
 
-    @round(T, sqrt(a_restricted.lo), sqrt(a_restricted.hi))
+    a = a ∩ domain
 
+    isempty(a) && return a
+
+    @round(T, sqrt(a.lo), sqrt(a.hi))
 end
 
 
 exp{T}(a::Interval{T}) = @round(T, exp(a.lo), exp(a.hi))
 
 function log{T}(a::Interval{T})
-
     domain = Interval{T}(0, Inf)
-    zero(a.hi) > a.hi && error("Undefined log; Interval is strictly negative")
 
-    a_restricted = a ∩ domain
+    a = a ∩ domain
 
-    @round(T, log(a_restricted.lo), log(a_restricted.hi))
+    isempty(a) && return a
+
+    @round(T, log(a.lo), log(a.hi))
 end

@@ -10,6 +10,9 @@ immutable Interval{T<:Real} <: Real
     hi :: T
 
     function Interval(a::Real, b::Real)
+        # The following exception is needed to define emptyintervals as [∞,-∞]
+        (isinf(a) && isinf(b)) && return new(a,b)
+
         if a > b
             a, b = b, a
         end
@@ -25,9 +28,16 @@ Interval{T<:Real}(a::T) = Interval(a, a)
 Interval(a::Tuple) = Interval(a...)
 Interval{T<:Real, S<:Real}(a::T, b::S) = Interval(promote(a,b)...)
 
+## Concrete constructors for Interval, to effectively deal only with Float64,
+# BigFloat or Rational{Integer} intervals.
+Interval{T<:Integer}(a::T, b::T) = Interval(float(a), float(b))
+Interval{T<:Irrational}(a::T, b::T) = Interval(float(a), float(b))
+
 eltype{T<:Real}(x::Interval{T}) = T
 
 
+## Include files
+include("special_intervals.jl")
 include("printing.jl")
 include("rationalize.jl")
 include("parameters.jl")

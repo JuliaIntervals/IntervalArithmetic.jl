@@ -1,3 +1,5 @@
+# This file is part of the ValidatedNumerics.jl package; MIT licensed
+
 @doc doc"""The `@interval` macro is the main way to create an interval of `BigFloat`s.
 It converts each expression into a thin interval that is guaranteed to contain the true value passed
 by the user in the one or two expressions passed to it.
@@ -14,7 +16,7 @@ Examples:
 
     @interval(1/3^2)
 ```
-"""->
+""" ->
 
 macro interval(expr1, expr2...)
     make_interval(:(interval_parameters.precision_type), expr1, expr2)

@@ -1,3 +1,5 @@
+# This file is part of the ValidatedNumerics.jl package; MIT licensed
+
 using ValidatedNumerics
 using FactCheck
 
@@ -14,20 +16,28 @@ facts("Numeric tests") do
 
     ## Basic arithmetic
     @fact @interval(0.1) --> Interval(9.9999999999999992e-02, 1.0000000000000001e-01)
+    @fact +a == a --> true
     @fact a+b --> Interval(9.9999999999999989e-01, 3.1000000000000001e+00)
     @fact -a --> Interval(-1.1000000000000001e+00, -9.9999999999999992e-02)
     @fact a-b --> Interval(-1.9000000000000001e+00, 2.0000000000000018e-01)
+    @fact Interval(1//4,1//2) + Interval(2//3) --> Interval(11//12, 7//6)
+    @fact Interval(1//4,1//2) - Interval(2//3) --> Interval(-5//12, -1//6)
 
     @fact 10a --> Interval(9.9999999999999989e-01, 1.1000000000000002e+01)
-    @fact b/a --> Interval(8.181818181818179e-01, 2.0000000000000004e+01)
+    @fact 10Interval(1//10) --> one(@interval(1//10))
+    @fact Interval(-30.0,-15.0) / Interval(-5.0,-3.0) --> Interval(3.0, 10.0)
+    @fact @interval(-30,-15) / @interval(-5,-3) --> Interval(3.0, 10.0)
+    @fact b/a --> Interval(8.18181818181818e-01, 2.0000000000000004e+01)
     @fact a/c --> Interval(2.4999999999999998e-02, 4.4000000000000004e+00)
     @fact c/4.0 --> Interval(6.25e-02, 1e+00)
 
     # Powers
     set_interval_precision(256) # There is a strange problem in Travis when using floating point here
-    @fact @interval(-3,2) ^ 2 --> roughly(Interval(0., 9.))
+    @fact @interval(-3,2) ^ 2 --> Interval(0., 9.)#roughly(Interval(0., 9.))
     @fact @interval(-3,2) ^ 3 --> @interval(-27, 8)
     @fact @interval(-3,2) ^ (3//1) --> @interval(-27, 8)
+    @fact ∅ ^ 0 --> ∅
+    # @fact Interval(2.5)^3 --> Interval(15.625, 15.625)
 
     x = @interval(-3,2)
     @fact x^3 --> @interval(-27, 8)
@@ -57,7 +67,7 @@ facts("Numeric tests") do
     d = @interval(0.1, 2)
 
     @fact d < 3 --> true
-    #@fact d <= 2 --> true
+    @fact d <= 2 --> true
     @fact d < 2 --> false
     @fact -1 < d --> true
     @fact !(d < 0.15) --> true

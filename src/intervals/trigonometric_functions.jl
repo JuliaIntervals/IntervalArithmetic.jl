@@ -1,8 +1,9 @@
+# This file is part of the ValidatedNumerics.jl package; MIT licensed
 
 half_pi{T}(::Type{T}) = get_pi(T) / 2
 two_pi{T}(::Type{T})  = get_pi(T) * 2
 
-half_pi{T<:FloatingPoint}(x::T) = half_pi(T)
+half_pi{T<:AbstractFloat}(x::T) = half_pi(T)
 
 
 @doc doc"""Finds the quadrant(s) corresponding to a given floating-point
@@ -12,9 +13,9 @@ is returned. The minimum or maximum must then be chosen appropriately.
 
 This is a rather indirect way to determine if π/2 and 3π/2 are contained
 in the interval; cf. the formula for sine of an interval in
-Tucker, *Validated Numerics*."""->
+Tucker, *Validated Numerics*.""" ->
 
-function find_quadrants(x::FloatingPoint)
+function find_quadrants(x::AbstractFloat)
     temp = x / half_pi(x)
     @compat (floor(Int, temp.lo), floor(Int, temp.hi))
 end
@@ -139,6 +140,8 @@ function asin{T<:Real}(a::Interval{T})
 
     a = a ∩ domain
 
+    isempty(a) && return a
+
     @round(T, asin(a.lo), asin(a.hi))
 end
 
@@ -146,6 +149,8 @@ function acos{T<:Real}(a::Interval{T})
     domain = Interval{T}(-one(T), one(T))
 
     a = a ∩ domain
+
+    isempty(a) && return a
 
     @round(T, acos(a.lo), acos(a.hi))
 end

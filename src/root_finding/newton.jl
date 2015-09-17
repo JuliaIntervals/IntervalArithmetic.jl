@@ -1,3 +1,5 @@
+# This file is part of the ValidatedNumerics.jl package; MIT licensed
+
 # Newton method
 
 # What is this guarded_mid for? Shouldn't it be checking if f(m)==0?
@@ -63,22 +65,18 @@ function newton{T}(f::Function, f_prime::Function, x::Interval{T}, level::Int=0;
 
     isempty(x) && return Root{T}[]  #[(x, :none)]
 
-
-    # Maximum level of bisection
-    level >= maxlevel && return [Root(x, :unknown)]
-
-
     z = zero(x.lo)
     tolerance = abs(tolerance)
 
-    if diam(x) < tolerance
-        return [(x, :unknown)]
-    end
+    # Tolerance reached or maximum level of bisection
+    (diam(x) < tolerance || level >= maxlevel) && return [Root(x, :unknown)]
 
     deriv = f_prime(x)
+    debug && @show(deriv)
 
     if !(z in deriv)
         Nx = N(f, x, deriv)
+        debug && @show(Nx, Nx ⊆ x, Nx ∩ x)
 
         isempty(Nx ∩ x) && return Root{T}[]
 
@@ -95,7 +93,6 @@ function newton{T}(f::Function, f_prime::Function, x::Interval{T}, level::Int=0;
         roots = vcat(
             newton(f, f_prime, Interval(x.lo, m), level+1,
                    tolerance=tolerance, debug=debug, maxlevel=maxlevel),
-
             newton(f, f_prime, Interval(nextfloat(m), x.hi), level+1,
                    tolerance=tolerance, debug=debug, maxlevel=maxlevel)
             # note the nextfloat here to prevent repetition
@@ -109,7 +106,6 @@ function newton{T}(f::Function, f_prime::Function, x::Interval{T}, level::Int=0;
         y2 = Interval(z, deriv.hi)
 
         if debug
-            @show (z in deriv, deriv)
             @show (y1, y2)
             @show N(f, x, y1)
             @show N(f, x, y2)
@@ -123,7 +119,6 @@ function newton{T}(f::Function, f_prime::Function, x::Interval{T}, level::Int=0;
         roots = vcat(
             newton(f, f_prime, y1, level+1,
                    tolerance=tolerance, debug=debug, maxlevel=maxlevel),
-
             newton(f, f_prime, y2, level+1,
                    tolerance=tolerance, debug=debug, maxlevel=maxlevel)
             )

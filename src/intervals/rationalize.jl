@@ -6,7 +6,8 @@ that version works correctly with rounding modes other than RoundNearest
 
 According to `git blame`, this version is due to Stefan Karpinski and Mike Nolta
 
-Slightly adapted for v0.4 by replacing itrunc(x) with @compat trunc(Int, x))
+Slightly adapted for v0.4 by replacing itrunc(x) by trunc(Int, x)), FloatingPoint
+by AbstractFloat
 =#
 
 # Subject to the standard Julia MIT license:
@@ -23,7 +24,7 @@ for exceptions.
 > https://github.com/JuliaLang/julia/contributors
 =#
 
-function old_rationalize{T<:Integer}(::Type{T}, x::FloatingPoint; tol::Real=eps(x))
+function old_rationalize{T<:Integer}(::Type{T}, x::AbstractFloat; tol::Real=eps(x))
     if isnan(x);       return zero(T)//zero(T); end
     if x < typemin(T); return -one(T)//zero(T); end
     if typemax(T) < x; return  one(T)//zero(T); end
@@ -35,7 +36,7 @@ function old_rationalize{T<:Integer}(::Type{T}, x::FloatingPoint; tol::Real=eps(
     a = d = 1
     b = c = 0
     while true
-        f = @compat trunc(Int, y); y -= f
+        f = trunc(Int, y); y -= f
         p, q = f*a+c, f*b+d
         typemin(T) <= p <= typemax(T) &&
         typemin(T) <= q <= typemax(T) || break

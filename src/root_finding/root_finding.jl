@@ -1,3 +1,4 @@
+# This file is part of the ValidatedNumerics.jl package; MIT licensed
 
 immutable Root{T<:Real}
     interval::Interval{T}
