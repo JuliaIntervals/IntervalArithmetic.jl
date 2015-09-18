@@ -39,6 +39,7 @@ Departamento de Física, Facultad de Ciencias, Universidad Nacional Autónoma de
 ## Contributors
 - Nikolay Kryukov
 - John Verzani
+- Oliver Heimlich
 
 
 ## Acknowledgements ##
