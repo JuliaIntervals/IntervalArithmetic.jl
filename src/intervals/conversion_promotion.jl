@@ -2,14 +2,12 @@
 
 ## Conversion and promotion
 
-## Default conversion is to Interval{Float64}
+## Default conversion to Interval, corresponds to Interval{Float64}
 convert{T<:Real}(::Type{Interval}, x::T) = make_interval(Float64, x)
-@compat convert{T<:Union{Float64,BigFloat,Rational}}(::Type{Interval}, x::T) =
-    make_interval(T, x)
 
-## Conversion to intervals (with rounding) from Integer or Irrational
+## Conversion to specific type intervals
 @compat convert{T<:Union{Float64,BigFloat}, S<:Real}(::Type{Interval{T}}, x::S) =
-    make_interval(T, x)
+    make_interval(T,x)
 convert{T<:Integer, S<:Real}(::Type{Interval{Rational{T}}}, x::S) =
     make_interval(Rational{T}, x)
 

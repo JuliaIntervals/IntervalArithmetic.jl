@@ -35,7 +35,8 @@ macro round(T, expr1, expr2)
             Interval(prevfloat($expr1), nextfloat($expr2))
 
         else # mode == :narrow
-            Interval(@with_rounding($T, $expr1, RoundDown), @with_rounding($T, $expr2, RoundUp))
+            Interval(@with_rounding($T, $expr1, RoundDown),
+                     @with_rounding($T, $expr2, RoundUp))
         end
 
     end
@@ -44,17 +45,7 @@ end
 @doc doc"""`@thin_round` possibly saves one operation compared to `@round`.""" ->
 macro thin_round(T, expr)
     quote
-        mode = get_interval_rounding()
-
-        if mode == :wide  #works with any rounding mode set, but the result will depend on the rounding mode
-            # we assume RoundNearest
-            temp = $expr  # evaluate the expression
-            Interval(prevfloat(temp), nextfloat(temp))
-
-        else # mode == :narrow
-            Interval(@with_rounding($T, $expr, RoundDown), @with_rounding($T, $expr, RoundUp))
-
-        end
+        @round($T, $expr, $expr)
     end
 end
 
@@ -66,7 +57,6 @@ function split_interval_string(T, x::AbstractString)
         return @thin_round(T, parse(T,x))
     end
 
-
     m = match(r"\[(.*),(.*)\]", x)
 
     if m == nothing
@@ -74,67 +64,87 @@ function split_interval_string(T, x::AbstractString)
     end
 
     @round(T, parse(T, m.captures[1]), parse(T, m.captures[2]))
-
-
 end
 
 
 @doc doc"""`make_interval` is used by `@interval` to create intervals from
 individual elements of different types""" ->
-make_interval(::Type{BigFloat}, x::AbstractString)    =  split_interval_string(BigFloat, x) #@thin_round(BigFloat, parse(BigFloat,x))
-make_interval(::Type{BigFloat}, x::Irrational) =  @thin_round(BigFloat, big(x))
-make_interval(::Type{BigFloat}, x::Integer)   =  Interval(BigFloat(x))  # no rounding -- dangerous if very big integer
-# but conversion from BigInt to BigFloat with correct rounding seems to be broken anyway # @thin_interval(BigFloat("$x"))
 
-make_interval(::Type{BigFloat}, x::Rational)  =  make_interval(BigFloat, x.num) / make_interval(BigFloat, x.den)
+# make_interval for BigFloat intervals
+make_interval(::Type{BigFloat}, x::AbstractString) =
+    split_interval_string(BigFloat, x)
+make_interval(::Type{BigFloat}, x::Irrational) = @thin_round(BigFloat, big(x))
+function make_interval(::Type{BigFloat}, x::Rational)
+    isinf(x) && return Interval(convert(BigFloat,x))
+    make_interval(BigFloat, x.num) / make_interval(BigFloat, x.den)
+end
 function make_interval(::Type{BigFloat}, x::Float64)
     isinf(x) && return Interval(convert(BigFloat,x))
-    make_interval(BigFloat, rationalize(x))  # NB: converts a float to a rational -- this could be slow
+    split_interval_string(BigFloat, string(x))
+end
+make_interval(::Type{BigFloat}, x::Integer) =
+    @thin_round(BigFloat, convert(BigFloat, x))
+make_interval(::Type{BigFloat}, x::BigFloat) = @thin_round(BigFloat, x)  # convert to possibly different BigFloat precision
+function make_interval(::Type{BigFloat}, x::Interval)
+    a = make_interval(BigFloat, x.lo)
+    b = make_interval(BigFloat, x.hi)
+    Interval(a.lo, b.hi)
 end
 
-make_interval(::Type{BigFloat}, x::BigInt)    =  @thin_round(BigFloat, convert(BigFloat, x))
 
-make_interval(::Type{BigFloat}, x::BigFloat)  =  @thin_round(BigFloat, 1.*x)  # convert to possibly different BigFloat precision
-make_interval(::Type{BigFloat}, x::Interval)  =  @round(BigFloat, big(1.*x.lo), big(1.*x.hi))
-
-
-make_interval(::Type{Float64}, x::AbstractString)    =  split_interval_string(Float64, x) #@thin_round(Float64, parse(Float64, x))
-make_interval(::Type{Float64}, x::Irrational) =  make_interval(Float64, make_interval(BigFloat, x))
-
-make_interval(::Type{Float64}, x::Integer)   =  Interval(float(x))    # assumes the int is representable
-make_interval(::Type{Float64}, x::Rational)  =  make_interval(Float64, x.num) / make_interval(Float64, x.den)
+# make_interval for Float64 intervals
+make_interval(::Type{Float64}, x::AbstractString) = split_interval_string(Float64, x)
+function make_interval(::Type{Float64}, x::Irrational)
+    a = with_interval_precision(53) do
+        make_interval(BigFloat,x)
+    end
+    float(a)
+end
+function make_interval(::Type{Float64}, x::Rational)
+    isinf(x) && return Interval(convert(Float64,x))
+    Interval(float(x.num)) / Interval(float(x.den))
+end
 function make_interval(::Type{Float64}, x::Float64)
     isinf(x) && return Interval(x)
-    make_interval(Float64, rationalize(x))  # NB: converts a float to a rational -- could be slow
+    split_interval_string(Float64, string(x))
+end
+make_interval(::Type{Float64}, x::Integer) =
+    @thin_round(Float64, convert(Float64, x))
+make_interval(::Type{Float64}, x::BigFloat) = @thin_round(Float64, convert(Float64, x))
+function make_interval(::Type{Float64}, x::Interval)
+    a = make_interval(Float64, x.lo)
+    b = make_interval(Float64, x.hi)
+    Interval(a.lo, b.hi)
 end
 
-make_interval(::Type{Float64}, x::BigInt)    =  @thin_round(BigFloat, convert(Float64, x))
-make_interval(::Type{Float64}, x::BigFloat)  =  @thin_round(BigFloat, convert(Float64, x))
-make_interval(::Type{Float64}, x::Interval)  =  @round(BigFloat, convert(Float64, x.lo), convert(Float64, x.hi)) # NB: BigFloat to Float64 conversion uses *BigFloat* rounding mode
 
 
+# make_interval for Rational intervals
 function make_interval(::Type{Rational{Int}}, x::Irrational)
-    a = make_interval(Float64, make_interval(BigFloat, x))
+    a = float(make_interval(BigFloat, x))
     make_interval(Rational{Int}, a)
 end
 function make_interval(::Type{Rational{BigInt}}, x::Irrational)
-    a = @thin_round(BigFloat, big(x))
+    a = make_interval(BigFloat, x)
     make_interval(Rational{BigInt}, a)
 end
-make_interval{T<:Integer, S<:Integer}(::Type{Rational{T}}, x::S)   =
-    Interval(one(Rational{T})*x)
-make_interval{T<:Integer, S<:Integer}(::Type{Rational{T}}, x::Rational{S})  =
-    Interval(one(Rational{T})*x)
-make_interval{T<:Integer}(::Type{Rational{T}}, x::Float64)   =
-    Interval(rationalize(x))  # NB: converts a float to a rational -- this could be slow
-make_interval{T<:Integer}(::Type{Rational{T}}, x::BigFloat)  =
-    Interval(convert(Rational{BigInt}, rationalize(x)))  # NB: converts a float to a rational -- this could be slow
-make_interval{T<:Integer}(::Type{Rational{T}}, x::Interval)  =
-    Interval(convert(Rational{T}, rationalize(x.lo)), convert(Rational{T}, rationalize(x.hi)))
+make_interval{T<:Integer, S<:Integer}(::Type{Rational{T}}, x::S) =
+    Interval(x*one(Rational{T}))
+make_interval{T<:Integer, S<:Integer}(::Type{Rational{T}}, x::Rational{S}) =
+    Interval(x*one(Rational{T}))
+make_interval{T<:Integer, S<:Float64}(::Type{Rational{T}}, x::S) =
+    Interval(rationalize(T, x))
+make_interval{T<:Integer, S<:BigFloat}(::Type{Rational{T}}, x::S) =
+    Interval(rationalize(T, x))
+function make_interval{T<:Integer}(::Type{Rational{T}}, x::Interval)
+    a = make_interval(Rational{T}, x.lo)
+    b = make_interval(Rational{T}, x.hi)
+    Interval(a.lo, b.hi)
+end
 
 
-@doc doc"""`transform` transforms a string by applying the function `f` and type `T` to each argument, i.e.
-`:(x+y)` is transformed to `:(f(T, x) + f(T, y))`
+@doc doc"""`transform` transforms a string by applying the function `f` and type
+`T` to each argument, i.e. `:(x+y)` is transformed to `:(f(T, x) + f(T, y))`
 """ ->
 transform(x, f, T) = :($f($(esc(T)), $(esc(x))))   # use if x is not an expression
 
@@ -187,7 +197,8 @@ function make_interval(T, expr1, expr2)
 end
 
 
-float(x::Interval) = make_interval(Float64, x)
+# float(x::Interval) = make_interval(Float64, x)
+float(x::Interval) = Interval(convert(Float64,x.lo),convert(Float64,x.hi))
 
 ## Change type of interval rounding:
 
