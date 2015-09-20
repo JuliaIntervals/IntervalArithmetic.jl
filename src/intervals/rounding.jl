@@ -12,6 +12,18 @@ if VERSION > v"0.4-"
 end
 
 
+macro show_rounding(T, expr)
+   quote
+       ee = @with_rounding($T, $expr, RoundNearest)
+       @show "NEA", ee
+       ee = @with_rounding($T, $expr, RoundDown)
+       @show "Down", ee
+       ee = @with_rounding($T, $expr, RoundUp)
+       @show "Up", ee
+   end
+end
+
+
 macro with_rounding(T, expr, rounding_mode)
     quote
         with_rounding($T, $rounding_mode) do
@@ -35,8 +47,26 @@ macro round(T, expr1, expr2)
             Interval(prevfloat($expr1), nextfloat($expr2))
 
         else # mode == :narrow
-            Interval(@with_rounding($T, $expr1, RoundDown),
-                     @with_rounding($T, $expr2, RoundUp))
+
+            # The idea here is, if RoundNearest is not equal to
+            # RoundDown or RoundUp, then the (Float64) operation does
+            # not round too sharply
+            lnea = @with_rounding($T, $expr1, RoundNearest)
+            ldow = @with_rounding($T, $expr1, RoundDown)
+            lup = @with_rounding($T, $expr1, RoundUp)
+            lo = ifelse(lnea != ldow && lnea != lup, lnea, ldow)
+            # @show(lnea,ldow,lup)
+
+            hnea = @with_rounding($T, $expr2, RoundNearest)
+            hdow = @with_rounding($T, $expr2, RoundDown)
+            hup = @with_rounding($T, $expr2, RoundUp)
+            hi = ifelse(hnea != hdow && hnea != hup, hnea, hup)
+            # @show(hnea,hdow,hup)
+
+            Interval(lo, hi)
+
+            # Interval(@with_rounding($T, $expr1, RoundDown),
+            #          @with_rounding($T, $expr2, RoundUp))
         end
 
     end

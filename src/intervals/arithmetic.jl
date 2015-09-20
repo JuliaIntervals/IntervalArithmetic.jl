@@ -88,7 +88,7 @@ end
 -{T<:Real}(a::Interval{T}) = @round(T, -a.hi, -a.lo)
 function -{T<:Real}(a::Interval{T}, b::Interval{T})
     (isempty(a) || isempty(b)) && return emptyinterval(T)
-    a + (-b)  # @round(a.lo - b.hi, a.hi - b.lo)
+    @round(T, a.lo - b.hi, a.hi - b.lo)
 end
 
 
@@ -112,8 +112,6 @@ function *{T<:Real}(a::Interval{T}, b::Interval{T})
         a.hi < zero(T) && return @round(T, a.lo*b.hi, a.lo*b.lo)
         return @round(T, min(a.lo*b.hi, a.hi*b.lo), max(a.lo*b.lo, a.hi*b.hi))
     end
-    # @round(T, min( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi ),
-    #         max( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi ) )
 end
 
 
@@ -174,9 +172,6 @@ function /{T<:Real}(a::Interval{T}, b::Interval{T})
 
         end
     end
-    # a * inv(b)
-    # @round(S, min( a.lo/b.lo, a.lo/b.hi, a.hi/b.lo, a.hi/b.hi ),
-    #           max( a.lo/b.lo, a.lo/b.hi, a.hi/b.lo, a.hi/b.hi ) )
 end
 
 //(a::Interval, b::Interval) = a / b    # to deal with rationals
@@ -213,7 +208,6 @@ end
 function intersect{T}(a::Interval{T}, b::Interval{T})
     isdisjoint(a,b) && return emptyinterval(T)
 
-    #@round(T, max(a.lo, b.lo), min(a.hi, b.hi))
     Interval(max(a.lo, b.lo), min(a.hi, b.hi))
 end
 

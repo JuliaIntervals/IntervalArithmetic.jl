@@ -4,13 +4,51 @@
 # Integer power:
 function ^{T<:Real}(a::Interval{T}, n::Integer)
     isempty(a) && return a
-    n < 0  && return inv(a^(-n))
     n == 0 && return one(a)
     n == 1 && return a
+    n < 0 && a == zero(a) && return emptyinterval(a)
 
-    iseven(n) && return @round(T, mig(a)^n, mag(a)^n)  # even power
+    # odd power
+    if isodd(n)
+        isentire(a) && return a
+        if n > 0
+            if a.hi ≤ zero(T)
+                return @round(T, -(abs(a.hi))^n, -(abs(a.lo))^n)
+            elseif a.lo ≥ zero(T)
+                return @round(T, (abs(a.lo))^n, a.hi^n)
+            else
+                return @round(T, -(abs(a.lo))^n, a.hi^n)
+            end
+        elseif n < 0
+            if a.hi ≤ zero(T)
+                return @round(T, -(abs(a.lo))^n, -(abs(a.hi))^n)
+            elseif a.lo ≥ zero(T)
+                return @round(T, a.hi^n, (abs(a.lo))^n)
+            else
+                return entireinterval(a)
+            end
+        end
+    end
 
-    @round(T, a.lo^n, a.hi^n)  # odd power
+    # even power
+    if n > 0
+        if a.lo ≥ zero(T)
+            return @round(T, a.lo^n, a.hi^n)
+        elseif a.hi ≤ zero(T)
+            return @round(T, a.hi^n, a.lo^n)
+        else
+            return @round(T, mig(a)^n, mag(a)^n)
+        end
+    else
+        if a.lo ≥ zero(T)
+            return @round(T, a.hi^n, a.lo^n)
+        elseif a.hi ≤ zero(T)
+            return @round(T, a.lo^n, a.hi^n)
+        else
+            return @round(T, mag(a)^n, mig(a)^n)
+        end
+    end
+
 end
 
 function ^{T<:Real}(a::Interval{T}, r::Rational)

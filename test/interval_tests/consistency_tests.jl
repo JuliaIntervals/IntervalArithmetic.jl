@@ -6,7 +6,6 @@ using FactCheck
 # set_bigfloat_precision(53)
 
 facts("Consistency tests") do
-
     a = @interval(1.1, 0.1)
     b = @interval(0.9, 2.0)
     c = @interval(0.25, 4.0)
@@ -24,7 +23,6 @@ facts("Consistency tests") do
     @fact a != b --> true
 
     @fact a --> Interval(a.lo, a.hi)
-    @fact a --> @interval(a.lo, a.hi)
     @fact @interval(1, Inf) --> Interval(1.0, Inf)
     @fact @interval(-Inf, 1) --> Interval(-Inf, 1.0)
     @fact @biginterval(1, Inf) --> Interval{BigFloat}(1.0, Inf)
@@ -37,7 +35,7 @@ facts("Consistency tests") do
     @fact @interval(0.25) - one(c)/4 --> zero(c)
     @fact emptyinterval(a) - Interval(0,1) --> emptyinterval(a)
     @fact Interval(0,1) - emptyinterval(a) --> emptyinterval(a)
-    @fact a*b --> @interval(a.lo*b.lo, a.hi*b.hi)
+    @fact a*b --> Interval(a.lo*b.lo, a.hi*b.hi)
     @fact Interval(0,1) * emptyinterval(a) --> emptyinterval(a)
     @fact a * Interval(0) --> zero(a)
 
