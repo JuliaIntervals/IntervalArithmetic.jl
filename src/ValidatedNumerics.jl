@@ -10,6 +10,10 @@ module ValidatedNumerics
 using Compat
 #using FactCheck
 
+using CRlibm
+set_rounding(BigFloat, RoundNearest)
+set_rounding(Float64, RoundNearest)
+
 import Base:
     +, -, *, /, //,
     <, >, ==, !=, ⊆, ^, <=,

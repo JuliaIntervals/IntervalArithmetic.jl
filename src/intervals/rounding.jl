@@ -15,11 +15,11 @@ end
 macro show_rounding(T, expr)
    quote
        ee = @with_rounding($T, $expr, RoundNearest)
-       @show "NEA", ee
+       @show "Nearest", ee
        ee = @with_rounding($T, $expr, RoundDown)
-       @show "Down", ee
+       @show "Down   ", ee
        ee = @with_rounding($T, $expr, RoundUp)
-       @show "Up", ee
+       @show "Up     ", ee
    end
 end
 
@@ -47,6 +47,23 @@ macro round(T, expr1, expr2)
             Interval(prevfloat($expr1), nextfloat($expr2))
 
         else # mode == :narrow
+            lo = @with_rounding($T, $expr1, RoundDown)
+            hi = @with_rounding($T, $expr2, RoundUp)
+            Interval(lo, hi)
+        end
+    end
+end
+
+macro controlled_round(T, expr1, expr2)
+    #@show "round", expr1, expr2
+    quote
+        mode = get_interval_rounding()
+
+        if mode == :wide  #works with any rounding mode set, but the result will depend on the rounding mode
+            # we assume RoundNearest
+            Interval(prevfloat($expr1), nextfloat($expr2))
+
+        else # mode == :narrow
 
             # The idea here is, if RoundNearest is not equal to
             # RoundDown or RoundUp, then the (Float64) operation does
@@ -64,9 +81,8 @@ macro round(T, expr1, expr2)
             # @show(hnea,hdow,hup)
 
             Interval(lo, hi)
+            # Interval(@with_rounding($T, $expr1, RoundDown), hi)
 
-            # Interval(@with_rounding($T, $expr1, RoundDown),
-            #          @with_rounding($T, $expr2, RoundUp))
         end
 
     end
@@ -93,7 +109,7 @@ function split_interval_string(T, x::AbstractString)
         throw(ArgumentError("Unable to process string $x as interval"))
     end
 
-    @round(T, parse(T, m.captures[1]), parse(T, m.captures[2]))
+    @controlled_round(T, parse(T, m.captures[1]), parse(T, m.captures[2]))
 end
 
 
@@ -125,21 +141,26 @@ end
 # make_interval for Float64 intervals
 make_interval(::Type{Float64}, x::AbstractString) = split_interval_string(Float64, x)
 function make_interval(::Type{Float64}, x::Irrational)
-    a = with_interval_precision(53) do
+    a = with_bigfloat_precision(53) do
         make_interval(BigFloat,x)
     end
     float(a)
 end
 function make_interval(::Type{Float64}, x::Rational)
     isinf(x) && return Interval(convert(Float64,x))
-    Interval(float(x.num)) / Interval(float(x.den))
+    # Interval(float(x.num)) / Interval(float(x.den))
+    @controlled_round(Float64, x.num/x.den, x.num/x.den)
 end
 function make_interval(::Type{Float64}, x::Float64)
     isinf(x) && return Interval(x)
     split_interval_string(Float64, string(x))
 end
-make_interval(::Type{Float64}, x::Integer) =
-    @thin_round(Float64, convert(Float64, x))
+function make_interval(::Type{Float64}, x::Integer)
+    a = with_bigfloat_precision(53) do
+        make_interval(BigFloat, x)
+    end
+    float(a)
+end
 make_interval(::Type{Float64}, x::BigFloat) = @thin_round(Float64, convert(Float64, x))
 function make_interval(::Type{Float64}, x::Interval)
     a = make_interval(Float64, x.lo)
@@ -227,8 +248,9 @@ function make_interval(T, expr1, expr2)
 end
 
 
-# float(x::Interval) = make_interval(Float64, x)
 float(x::Interval) = Interval(convert(Float64,x.lo),convert(Float64,x.hi))
+# float(x::Interval) =
+#     @controlled_round(Float64, convert(Float64, x.lo), convert(Float64, x.hi))
 
 ## Change type of interval rounding:
 

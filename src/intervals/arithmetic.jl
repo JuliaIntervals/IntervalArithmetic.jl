@@ -85,7 +85,7 @@ function +{T<:Real}(a::Interval{T}, b::Interval{T})
 end
 +(a::Interval) = a
 
--{T<:Real}(a::Interval{T}) = @round(T, -a.hi, -a.lo)
+-(a::Interval) = Interval(-a.hi, -a.lo)
 function -{T<:Real}(a::Interval{T}, b::Interval{T})
     (isempty(a) || isempty(b)) && return emptyinterval(T)
     @round(T, a.lo - b.hi, a.hi - b.lo)
@@ -181,12 +181,20 @@ end
 
 function mag(a::Interval)
     isempty(a) && return convert(eltype(a), NaN)
-    max( abs(a.lo), abs(a.hi) )
+    T = eltype(a)
+    r1, r2 = with_rounding(T, RoundUp) do
+        abs(a.lo), abs(a.hi)
+    end
+    max( r1, r2 )
 end
 function mig(a::Interval)
     isempty(a) && return convert(eltype(a), NaN)
     zero(a.lo) ∈ a && return zero(a.lo)
-    min(abs(a.lo), abs(a.hi))
+    T = eltype(a)
+    r1, r2 = with_rounding(T, RoundDown) do
+        abs(a.lo), abs(a.hi)
+    end
+    min( r1, r2 )
 end
 
 

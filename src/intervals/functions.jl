@@ -8,95 +8,123 @@ function ^{T<:Real}(a::Interval{T}, n::Integer)
     n == 1 && return a
     n < 0 && a == zero(a) && return emptyinterval(a)
 
-    # odd power
-    if isodd(n)
+    if isodd(n) # odd power
         isentire(a) && return a
         if n > 0
-            if a.hi ≤ zero(T)
-                return @round(T, -(abs(a.hi))^n, -(abs(a.lo))^n)
-            elseif a.lo ≥ zero(T)
-                return @round(T, (abs(a.lo))^n, a.hi^n)
-            else
-                return @round(T, -(abs(a.lo))^n, a.hi^n)
-            end
-        elseif n < 0
-            if a.hi ≤ zero(T)
-                return @round(T, -(abs(a.lo))^n, -(abs(a.hi))^n)
-            elseif a.lo ≥ zero(T)
-                return @round(T, a.hi^n, (abs(a.lo))^n)
+            a.lo == zero(T) && return @controlled_round(T, zero(T), a.hi^n)
+            a.hi == zero(T) && return @controlled_round(T, a.lo^n, zero(T))
+            return @controlled_round(T, a.lo^n, a.hi^n)
+        else
+            if a.lo ≥ zero(T)
+                a.lo == zero(T) && return @round(T, a.hi^n, convert(T,Inf))
+                return @round(T, a.hi^n, a.lo^n)
+            elseif a.hi ≤ zero(T)
+                a.hi == zero(T) && return @round(T, convert(T,-Inf), a.lo^n)
+                return @round(T, a.hi^n, a.lo^n)
             else
                 return entireinterval(a)
             end
         end
-    end
-
-    # even power
-    if n > 0
-        if a.lo ≥ zero(T)
-            return @round(T, a.lo^n, a.hi^n)
-        elseif a.hi ≤ zero(T)
-            return @round(T, a.hi^n, a.lo^n)
+    else # even power
+        if n > 0
+            if a.lo ≥ zero(T)
+                return @controlled_round(T, a.lo^n, a.hi^n)
+            elseif a.hi ≤ zero(T)
+                return @round(T, a.hi^n, a.lo^n)
+            else
+                return @controlled_round(T, mig(a)^n, mag(a)^n)
+            end
         else
-            return @round(T, mig(a)^n, mag(a)^n)
-        end
-    else
-        if a.lo ≥ zero(T)
-            return @round(T, a.hi^n, a.lo^n)
-        elseif a.hi ≤ zero(T)
-            return @round(T, a.lo^n, a.hi^n)
-        else
-            return @round(T, mag(a)^n, mig(a)^n)
+            if a.lo ≥ zero(T)
+                return @round(T, a.hi^n, a.lo^n)
+            elseif a.hi ≤ zero(T)
+                return @round(T, a.lo^n, a.hi^n)
+            else
+                return @round(T, mag(a)^n, mig(a)^n)
+            end
         end
     end
-
 end
 
-function ^{T<:Real}(a::Interval{T}, r::Rational)
-    isempty(a) && return a
-    r < zero(r)  && return inv(a^(-r))
-    r == zero(r) && return one(a)
-    r == one(r)  && return a
-    isinteger(r) && return a^(round(Int,r))
+# Floatingpoint power of a Float64/BigFloat interval:
+@compat function ^{T<:Union{Float64,BigFloat}}(a::Interval{T}, x::AbstractFloat)
+    domain = Interval(zero(T), Inf)
 
-    root = one(T)/r.den
-
-    if a.lo > zero(a.lo)
-        nth_root = @round(T, a.lo^root, a.hi^root)
-    else
-        if iseven(r.den)
-            nth_root = @round(T, mig(a)^root, mag(a)^root)
-        else
-            nth_root = @round(T, sign(a.lo)*abs(a.lo)^root, sign(a.hi)*abs(a.hi)^root)
-        end
+    if a == zero(a)
+        a = a ∩ domain
+        x > zero(x) && return zero(a)
+        return emptyinterval(a)
     end
+    isinteger(x) && return a^(round(Int,x))
+    x == one(T)/2 && return sqrt(a)
 
-    nth_root^r.num
-end
-
-# Real power of an interval:
-function ^{T<:Real}(a::Interval{T}, x::AbstractFloat)
-    isinteger(x)  && return a^(round(Int,x))
-    x < zero(x)  && return inv(a^(-x))
-    x == 0.5  && return sqrt(a)
-
-    domain = Interval{T}(0, Inf)
     a = a ∩ domain
-    isempty(a) && return a
+    (isempty(x) || isempty(a)) && return emptyinterval(a)
 
-    @round(T, a.lo^x, a.hi^x)
+    if T == BigFloat
+        xx  = @biginterval(x)
+        lo = @controlled_round(T, a.lo^xx.lo, a.lo^xx.lo)
+        lo1 = @controlled_round(T, a.lo^xx.hi, a.lo^xx.hi)
+        hi = @controlled_round(T, a.hi^xx.lo, a.hi^xx.lo)
+        hi1 = @controlled_round(T, a.hi^xx.hi, a.hi^xx.hi)
+        lo = hull(lo, lo1)
+        hi = hull(hi, hi1)
+    else
+        lo, hi = with_bigfloat_precision(53) do
+            aa = @biginterval(a)
+            xx = @biginterval(x)
+            lo = @controlled_round(BigFloat, a.lo^xx.lo, a.lo^xx.lo)
+            lo1 = @controlled_round(BigFloat, a.lo^xx.hi, a.lo^xx.hi)
+            hi = @controlled_round(BigFloat, a.hi^xx.lo, a.hi^xx.lo)
+            hi1 = @controlled_round(BigFloat, a.hi^xx.hi, a.hi^xx.hi)
+            float(hull(lo, lo1)), float(hull(hi, hi1))
+        end
+    end
+    return hull(lo, hi)
+end
+function ^{T<:Integer,}(a::Interval{Rational{T}}, x::AbstractFloat)
+    a = Interval(a.lo.num/a.lo.den, a.hi.num/a.hi.den)
+    a = a^x
+    make_interval(Rational{T}, a)
+end
+
+# Rational power
+function ^{T<:Real, S<:Integer}(a::Interval{T}, r::Rational{S})
+    domain = Interval(zero(a.lo), Inf)
+
+    if a == zero(a)
+        a = a ∩ domain
+        r > zero(x) && return zero(a)
+        return emptyinterval(a)
+    end
+    isinteger(r) && return make_interval(T, a^(round(S,r)))
+    r == one(S)//2 && return make_interval(T, sqrt(a))
+
+    a = a ∩ domain
+    (isempty(r) || isempty(a)) && return emptyinterval(a)
+
+    r = r.num / r.den
+    a = a^r
+    make_interval(T, a)
 end
 
 # Interval power of an interval:
 function ^{T<:Real}(a::Interval{T}, x::Interval)
-    isempty(a) && return a
-    diam(x) < eps(mid(x)) && return a^(mid(x))  # thin interval
-
-    domain = Interval{T}(0, Inf)
+    domain = Interval(zero(T), Inf)
 
     a = a ∩ domain
-    isempty(a) && return a
 
-    @round(T, min(a.lo^(x.lo), a.lo^(x.hi)), max(a.hi^(x.lo), a.hi^(x.hi)) )
+    (isempty(x) || isempty(a)) && return emptyinterval(a)
+
+    lo1 = a^x.lo
+    lo2 = a^x.hi
+    lo1 = hull( lo1, lo2 )
+
+    hi1 = a^x.lo
+    hi2 = a^x.hi
+    hi1 = hull( hi1, hi2 )
+
+    hull(lo1, hi1)
 end
 
 
@@ -104,24 +132,40 @@ Base.inf(x::Rational) = 1//0  # to allow sqrt()
 
 
 function sqrt{T}(a::Interval{T})
-    domain = Interval{T}(0, Inf)
-
+    domain = Interval(zero(T), Inf)
     a = a ∩ domain
 
     isempty(a) && return a
 
-    @round(T, sqrt(a.lo), sqrt(a.hi))
+    @controlled_round(T, sqrt(a.lo), sqrt(a.hi))
 end
 
 
-exp{T}(a::Interval{T}) = @round(T, exp(a.lo), exp(a.hi))
+function exp(a::Interval{Float64})
+    isempty(a) && return a
+    Interval(exp(a.lo, RoundDown), exp(a.hi, RoundUp))
+end
 
-function log{T}(a::Interval{T})
-    domain = Interval{T}(0, Inf)
+function exp(a::Interval{BigFloat})
+    isempty(a) && return a
+    @controlled_round(BigFloat, exp(a.lo), exp(a.hi))
+end
 
+
+function log(a::Interval{Float64})
+    domain = Interval(0.0, Inf)
     a = a ∩ domain
 
-    isempty(a) && return a
+    (isempty(a) || a.hi ≤ 0.0) && return emptyinterval(a)
 
-    @round(T, log(a.lo), log(a.hi))
+    Interval(log(a.lo, RoundDown), log(a.hi, RoundUp))
+end
+
+function log(a::Interval{BigFloat})
+    domain = Interval(big(0.0), Inf)
+    a = a ∩ domain
+
+    (isempty(a) || a.hi ≤ big(0.0)) && return emptyinterval(a)
+
+    @controlled_round(BigFloat, log(a.lo), log(a.hi))
 end

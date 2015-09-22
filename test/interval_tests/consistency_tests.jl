@@ -187,9 +187,9 @@ facts("Interval power of an interval") do
     a = @interval(1, 2)
     b = @interval(3, 4)
 
-    @fact a^b == @interval(1, 16) --> true
-    @fact a^@interval(0.5, 1) == a --> true
-    @fact a^@interval(0.3, 0.5) == @interval(1, sqrt(2)) --> true
+    @fact a^b --> @interval(1, 16)
+    @fact a^@interval(0.5, 1) --> a
+    @fact a^@interval(0.3, 0.5) --> @interval(1, sqrt(2))
 
     @fact b^@interval(0.3) == Interval(1.3903891703159093, 1.5157165665103982) --> true
 

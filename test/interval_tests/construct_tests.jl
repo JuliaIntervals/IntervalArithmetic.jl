@@ -54,8 +54,8 @@ facts("Constructing intervals") do
     @fact typeof(a) --> Interval{BigFloat}
     @fact a --> @biginterval("0.1")
     @fact float(a) --> @floatinterval(0.1)
-    @fact b --> @biginterval(pi)
     @fact nextfloat(b.lo) --> b.hi
+    @fact b --> @biginterval(pi)
     x = 10238971209348170283710298347019823749182374098172309487120398471029837409182374098127304987123049817032984712039487
     @fact @interval(x) --> @biginterval(x)
     @fact isthin(@interval(x)) --> false
@@ -69,9 +69,9 @@ facts("Constructing intervals") do
     @fact a --> @floatinterval("0.1")
     @fact typeof(a) --> Interval{Float64}
     @fact nextfloat(a.lo) --> a.hi
-    @fact float(@biginterval(0.1)) --> a
     @fact b --> @floatinterval(pi)
     @fact nextfloat(b.lo) --> b.hi
+    @fact float(@biginterval(0.1)) --> a
     x = typemax(Int)
     @fact @interval(x) --> @floatinterval(x)
     @fact isthin(@interval(x)) --> false
