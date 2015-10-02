@@ -177,6 +177,38 @@ end
 //(a::Interval, b::Interval) = a / b    # to deal with rationals
 
 
+## fma: fused multiply-add
+function fma(a::Interval, b::Interval, c::Interval)
+    T = promote_type(eltype(a), eltype(b), eltype(c))
+
+    (isempty(a) || isempty(b) || isempty(c)) && return emptyinterval(T)
+
+    if isentire(a)
+        b == zero(b) && return c
+        return entireinterval(T)
+    elseif isentire(b)
+        a == zero(a) && return c
+        return entireinterval(T)
+    end
+
+    lo = with_rounding(T, RoundDown) do
+        lo1 = fma(a.lo, b.lo, c.lo)
+        lo2 = fma(a.lo, b.hi, c.lo)
+        lo3 = fma(a.hi, b.lo, c.lo)
+        lo4 = fma(a.hi, b.hi, c.lo)
+        min(lo1, lo2, lo3, lo4)
+    end
+    hi = with_rounding(T, RoundUp) do
+        hi1 = fma(a.lo, b.lo, c.hi)
+        hi2 = fma(a.lo, b.hi, c.hi)
+        hi3 = fma(a.hi, b.lo, c.hi)
+        hi4 = fma(a.hi, b.hi, c.hi)
+        max(hi1, hi2, hi3, hi4)
+    end
+    Interval(lo, hi)
+end
+
+
 ## Scalar functions on intervals (no directed rounding used)
 
 function mag(a::Interval)
@@ -187,6 +219,7 @@ function mag(a::Interval)
     end
     max( r1, r2 )
 end
+
 function mig(a::Interval)
     isempty(a) && return convert(eltype(a), NaN)
     zero(a.lo) ∈ a && return zero(a.lo)
@@ -205,9 +238,20 @@ supremum(a::Interval) = a.hi
 
 ## Functions needed for generic linear algebra routines to work
 real(a::Interval) = a
+
 function abs(a::Interval)
     isempty(a) && return emptyinterval(a)
     Interval(mig(a), mag(a))
+end
+
+function min(a::Interval, b::Interval)
+    (isempty(a) || isempty(b)) && return emptyinterval(a)
+    Interval( min(a.lo, b.lo), min(a.hi, b.hi))
+end
+
+function max(a::Interval, b::Interval)
+    (isempty(a) || isempty(b)) && return emptyinterval(a)
+    Interval( max(a.lo, b.lo), max(a.hi, b.hi))
 end
 
 
@@ -229,17 +273,46 @@ union(a::Interval, b::Interval) = hull(a, b)
 dist(a::Interval, b::Interval) = max(abs(a.lo-b.lo), abs(a.hi-b.hi))
 eps(a::Interval) = max(eps(a.lo), eps(a.hi))
 
+## floor, ceil, trunc and sign
 
-floor(a::Interval) = Interval(floor(a.lo), floor(a.hi))
-ceil(a::Interval) = Interval(ceil(a.lo), ceil(a.hi))
+function floor(a::Interval)
+    isempty(a) && return emptyinterval(a)
+    Interval(floor(a.lo), floor(a.hi))
+end
+
+function ceil(a::Interval)
+    isempty(a) && return emptyinterval(a)
+    Interval(ceil(a.lo), ceil(a.hi))
+end
+
+function trunc(a::Interval)
+    isempty(a) && return emptyinterval(a)
+    Interval(trunc(a.lo), trunc(a.hi))
+end
+
+function sign{T<:Real}(a::Interval{T})
+    isempty(a) && return emptyinterval(a)
+
+    a == zero(a) && return a
+    if a ≤ zero(a)
+        zero(T) ∈ a && return Interval(-one(T), zero(T))
+        return Interval(-one(T))
+    elseif a ≥ zero(a)
+        zero(T) ∈ a && return Interval(zero(T), one(T))
+        return Interval(one(T))
+    end
+    return Interval(-one(T), one(T))
+end
+
 
 function mid(a::Interval)
     isentire(a) && return zero(a.lo)
     (a.lo + a.hi) / 2
 end
+
 function diam(a::Interval)
     isempty(a) && return convert(eltype(a), NaN)
-    a.hi - a.lo
+    @with_rounding(eltype(a), a.hi - a.lo, RoundUp) #cf page 64 of IEEE1788
 end
 
 # Should `radius` this yield diam(a)/2? This affects other functions!

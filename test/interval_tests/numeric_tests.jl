@@ -117,6 +117,8 @@ facts("Numeric tests") do
 
     @fact floor(@interval(0.1, 1.1)) --> @interval(0, 1)
     @fact ceil(@interval(0.1, 1.1)) --> @interval(1, 2)
+    @fact sign(@interval(0.1, 1.1)) --> Interval(1.0)
+    @fact trunc(@interval(0.1, 1.1)) --> Interval(0.0, 1.0)
 
 
 end
