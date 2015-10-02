@@ -102,9 +102,11 @@ facts("Numeric tests") do
     set_interval_precision(Float64)
 
     a = @interval(-3, 2)
-    @fact a^3 --> Interval(-27.0, 8.0)
+    @fact a --> Interval(prevfloat(-3.0), nextfloat(2.0))
+    @fact a^3 --> Interval(prevfloat(a.lo^3), nextfloat(a.hi^3))
+    @fact Interval(-3,2)^3 --> Interval(prevfloat(-27.0), nextfloat(8.0))
 
-    @fact Interval(-27.0, 8.0)^(1//3) --> Interval(0.0, 2.0)
+    @fact Interval(-27.0, 8.0)^(1//3) --> Interval(-5.0e-324, 2.000000000000001)
 
     set_interval_rounding(:narrow)
     set_interval_precision(Float64)
