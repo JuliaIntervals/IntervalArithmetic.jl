@@ -6,6 +6,7 @@ function ^{T<:Real}(a::Interval{T}, n::Integer)
     isempty(a) && return a
     n == 0 && return one(a)
     n == 1 && return a
+    n == 2 && return sqr(a)
     n < 0 && a == zero(a) && return emptyinterval(a)
 
     if isodd(n) # odd power
@@ -30,7 +31,7 @@ function ^{T<:Real}(a::Interval{T}, n::Integer)
             if a.lo ≥ zero(T)
                 return @controlled_round(T, a.lo^n, a.hi^n)
             elseif a.hi ≤ zero(T)
-                return @round(T, a.hi^n, a.lo^n)
+                return @controlled_round(T, a.hi^n, a.lo^n)
             else
                 return @controlled_round(T, mig(a)^n, mag(a)^n)
             end
@@ -43,6 +44,18 @@ function ^{T<:Real}(a::Interval{T}, n::Integer)
                 return @round(T, mag(a)^n, mig(a)^n)
             end
         end
+    end
+end
+function sqr{T<:Real}(a::Interval{T})
+    isempty(a) && return a
+    if a.lo ≥ zero(T)
+        !isthin(a) && return @controlled_round(T, a.lo^2, a.hi^2)
+        return a*a
+    elseif a.hi ≤ zero(T)
+        !isthin(a) && return @controlled_round(T, a.hi^2, a.lo^2)
+        return a*a
+    else
+        return @controlled_round(T, mig(a)^2, mag(a)*mag(a))
     end
 end
 

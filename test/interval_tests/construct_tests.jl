@@ -39,7 +39,7 @@ facts("Constructing intervals") do
     @fact convert(Interval, eu) --> @interval(eu)
     @fact convert(Interval, BigInt(1)) --> Interval(BigInt(1))
     @fact convert(Interval, 1//10) --> @interval(1//10)
-    @pending convert(Interval, 0.1) --> Interval(0.09999999999999999, 0.1)
+    @fact convert(Interval, 0.1) --> Interval(0.09999999999999999, 0.1)
     @fact convert(Interval, BigFloat(0.1)) --> Interval(big(0.1))
     a = @interval(0.1)
     @fact convert(Interval{Rational{Int}},a) --> Interval(1//10)
