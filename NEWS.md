@@ -1,5 +1,11 @@
 # What's new in ValidatedNumerics.jl
 
+# 0.2
+
+# 0.2.0
+
+- The [CRlibm.jl](https://github.com/dpsanders/CRlibm.jl) (correct rounding libm) is now used to get correct rounding for the usual functions for `Float64`. `^` has also been coded separately to yield correct rounding for `Float64`. All elemental function currently implemented are consistent with the corresponding tests of the [ITF1788](https://github.com/oheim/ITF1788) test suite.
+
 ## 0.1.3
 
 - Improvements to (eventually) get conformance with the [IEEE-1788](https://standards.ieee.org/findstds/standard/1788-2015.html) standard for Interval Arithmetic:
