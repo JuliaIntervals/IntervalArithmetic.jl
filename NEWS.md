@@ -2,11 +2,15 @@
 
 ## 0.1.3
 
-- Improvements to (eventually) get conformance with the [IEEE-1788](https://standards.ieee.org/findstds/standard/1788-2015.html) standard for Interval Arithmetic:
- - New `special_intervals.jl` file, with the definitions of `emptyinterval`, `entireinterval` and `nai` and some related functions. Add new interval functions (`<=`, `radius`, `precedes`, `strictprecedes`, `≺`, etc). All these include tests.
- - Control rounding tighter for the arithmetic operations; `*`, `inv` and `/` have been rewritten; this includes changes in `make_interval` and `convert` to get consistent behavior. Now, all these functions pass the corresponding tests in the [ITF1788](https://github.com/oheim/ITF1788) test suite.
+- Improvements towards conformance with the [IEEE-1788](https://standards.ieee.org/findstds/standard/1788-2015.html) standard for Interval Arithmetic:
+
+ - New `special_intervals.jl` file, with definitions of `emptyinterval`, `entireinterval`, `nai` and related functions. Add new interval functions (`<=`, `radius`, `precedes`, `strictprecedes`, `≺`, etc).
+
+ - Control rounding tighter for arithmetic operations; `*`, `inv` and `/` have been rewritten; this includes changes in `make_interval` and `convert` to get consistent behavior. These functions pass the corresponding tests in the [ITF1788](https://github.com/oheim/ITF1788) test suite.
 - Deprecate the use of `⊊` in favor of `interior` (`⪽`).
-- **Important notice:** Once this version is tagged, this will be the **last version** compatible with Julia v0.3.
+
+**Important notice:** This is the **last version** of the package that 
+supports Julia v0.3.
 
 ## 0.1.2
 
