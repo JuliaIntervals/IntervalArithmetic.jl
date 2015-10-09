@@ -53,6 +53,7 @@ facts("Consistency tests") do
     @fact typeof(emptyinterval()) --> Interval{Float64}
 
     @fact fma(emptyinterval(), a, b) --> emptyinterval()
+    @fact fma(entireinterval(), zero(a), b) --> b
     @fact fma(zero(a), entireinterval(), b) --> b
     @fact fma(a, zero(a), c) --> c
     @fact fma(Interval(1//2), Interval(1//3), Interval(1//12)) --> Interval(3//12)
@@ -156,6 +157,10 @@ facts("Consistency tests") do
     @fact max(emptyinterval(), Interval(3.0,4.0)) --> emptyinterval()
     @fact max(Interval(-3.0,1.0), Interval(3.0,4.0)) --> Interval(3.0, 4.0)
     @fact max(Interval(-3.0,-1.0), Interval(3.0,4.0)) --> Interval(3.0, 4.0)
+    @fact sign(entireinterval()) --> Interval(-1.0, 1.0)
+    @fact sign(emptyinterval()) --> emptyinterval()
+    @fact sign(Interval(-3.0,1.0)) --> Interval(-1.0, 1.0)
+    @fact sign(Interval(-3.0,-1.0)) --> Interval(-1.0, -1.0)
 
     @fact log(@interval(-2,5)) --> @interval(-Inf,log(5.0))
 

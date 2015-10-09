@@ -11,6 +11,12 @@ facts("Constructing intervals") do
     set_interval_precision(Float64)
     @fact get_interval_precision() == (Float64,-1) --> true
 
+    # Checks for interval_parameters
+    @fact ValidatedNumerics.interval_parameters.precision_type --> Float64
+    @fact ValidatedNumerics.interval_parameters.precision --> 53
+    @fact ValidatedNumerics.interval_parameters.rounding --> :narrow
+    @fact ValidatedNumerics.interval_parameters.pi --> @biginterval(pi)
+
     # Naive constructors, with no conversion involved
     @fact Interval(1) --> Interval(1.0, 1.0)
     @fact Interval(big(1)) --> Interval(1.0, 1.0)
