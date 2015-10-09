@@ -1,5 +1,10 @@
 language: julia
 
+sudo: required
+
+services:
+  - docker
+
 os:
   - linux
   - osx
@@ -13,4 +18,3 @@ notifications:
 
 after_success:
 - julia -e 'cd(Pkg.dir("ValidatedNumerics")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder()); Codecov.submit(process_folder())'
-
