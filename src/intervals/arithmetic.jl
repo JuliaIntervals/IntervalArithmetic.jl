@@ -117,16 +117,14 @@ end
 
 ## Division
 
-function inv(a::Interval)
+function inv{T<:Real}(a::Interval{T})
     isempty(a) && return emptyinterval(a)
 
-    T = eltype(a)
-    S = typeof(inv(a.lo))
     if in(zero(T), a)
-        a.lo < zero(T) == a.hi && return Interval{S}(-Inf, inv(a.lo))
-        a.lo == zero(T) < a.hi && return Interval{S}(inv(a.hi), Inf)
-        a.lo < zero(T) < a.hi && return entireinterval(S)
-        a == zero(a) && return emptyinterval(S)
+        a.lo < zero(T) == a.hi && return @round(T, -Inf, inv(a.lo))
+        a.lo == zero(T) < a.hi && return @round(T, inv(a.hi), Inf)
+        a.lo < zero(T) < a.hi && return entireinterval(T)
+        a == zero(a) && return emptyinterval(T)
     end
 
     @round(T, inv(a.hi), inv(a.lo))
