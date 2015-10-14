@@ -10,10 +10,14 @@ module ValidatedNumerics
 using Compat
 #using FactCheck
 
+using CRlibm
+set_rounding(BigFloat, RoundNearest)
+set_rounding(Float64, RoundNearest)
+
 import Base:
-    +, -, *, /, //,
+    +, -, *, /, //, fma,
     <, >, ==, !=, ⊆, ^, <=,
-    in, zero, one, abs, real, show,
+    in, zero, one, abs, real, show, min, max,
     sqrt, exp, log, sin, cos, tan, inv,
     asin, acos, atan,
     union, intersect, isempty,
@@ -21,7 +25,7 @@ import Base:
     BigFloat, float,
     set_rounding, widen,
     ⊆, eps,
-    floor, ceil
+    floor, ceil, trunc, sign
 
 
 export

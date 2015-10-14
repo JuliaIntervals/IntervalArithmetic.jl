@@ -23,40 +23,55 @@ facts("Numeric tests") do
     @fact Interval(1//4,1//2) + Interval(2//3) --> Interval(11//12, 7//6)
     @fact Interval(1//4,1//2) - Interval(2//3) --> Interval(-5//12, -1//6)
 
-    @fact 10a --> Interval(9.9999999999999989e-01, 1.1000000000000002e+01)
+    @fact 10a --> @interval(10a)
     @fact 10Interval(1//10) --> one(@interval(1//10))
     @fact Interval(-30.0,-15.0) / Interval(-5.0,-3.0) --> Interval(3.0, 10.0)
     @fact @interval(-30,-15) / @interval(-5,-3) --> Interval(3.0, 10.0)
     @fact b/a --> Interval(8.18181818181818e-01, 2.0000000000000004e+01)
     @fact a/c --> Interval(2.4999999999999998e-02, 4.4000000000000004e+00)
     @fact c/4.0 --> Interval(6.25e-02, 1e+00)
+    @fact c/zero(c) --> emptyinterval(c)
+    @fact Interval(0.0, 1.0)/Interval(0.0,1.0) --> Interval(0.0, Inf)
+    @fact Interval(-1.0, 1.0)/Interval(0.0,1.0) --> entireinterval(c)
 
     # Powers
-    set_interval_precision(256) # There is a strange problem in Travis when using floating point here
-    @fact @interval(-3,2) ^ 2 --> Interval(0., 9.)#roughly(Interval(0., 9.))
+    @fact @interval(-3,2) ^ 2 --> Interval(0, 9)
     @fact @interval(-3,2) ^ 3 --> @interval(-27, 8)
-    @fact @interval(-3,2) ^ (3//1) --> @interval(-27, 8)
+    @fact @interval(2,3) ^ 2 --> Interval(4., 9.)
+    @fact @interval(-3,0) ^ 3 --> @interval(-27., 0.)
+    @fact @interval(-3,2) ^ 3 --> @interval(-27., 8.)
+    @fact Interval(0,3) ^ -2 --> Interval(1/9, Inf)
+    @fact Interval(-3,0) ^ -2 --> Interval(1/9, Inf)
+    @fact Interval(-3,2) ^ -2 --> Interval(1/9, Inf)
+    @pending Interval(2,3) ^ -2 --> Interval(1/9, 1/4)
+    @pending Interval(1,2) ^ -3 --> Interval(1/8, 1.0)
+    @fact Interval(-1,2) ^ -3 --> entireinterval()
+    @fact Interval(-1,-2) ^ -3 --> Interval(-1.0, -1/8)
+    @fact Interval(-3,2) ^ (3//1) --> Interval(-27, 8)
+    @fact Interval(0.0) ^ 1.1 --> Interval(0, 0)
+    @fact Interval(0.0) ^ 0.0 --> emptyinterval()
     @fact ∅ ^ 0 --> ∅
-    # @fact Interval(2.5)^3 --> Interval(15.625, 15.625)
+    @fact Interval(2.5)^3 --> Interval(15.625, 15.625)
+    @fact Interval(5//2)^3.0 --> Interval(125//8)
 
     x = @interval(-3,2)
     @fact x^3 --> @interval(-27, 8)
 
     @fact @interval(-3,4) ^ 0.5 --> @interval(0, 2)
     @fact @interval(-3,4) ^ 0.5 --> @interval(-3,4)^(1//2)
-    @fact @interval(-3,2) ^ @interval(2) --> Interval(0, 9.)
+    @fact @interval(-3,2) ^ @interval(2) --> Interval(0.0, 4.0)
     @fact @interval(-3,4) ^ @interval(0.5) --> Interval(0, 2)
 
     @fact @interval(1,27)^@interval(1/3) --> roughly(Interval(1., 3.))
-    @fact @interval(1,27)^(1/3) --> roughly(Interval(1., 3.))
-    @fact @interval(1,27)^(1//3) --> roughly(Interval(1., 3.))
-    @fact @interval(0.1,0.7)^(1//3) --> roughly(Interval(0.46415888336127786, 0.8879040017426008))
+    @fact @interval(1,27)^(1/3) --> Interval(1., 3.)
+    @fact @interval(1,27)^(1//3) --> Interval(1., 3.)
+    @fact @interval(0.1,0.7)^(1//3) --> Interval(0.4641588833612778, 0.887904001742601)
     @fact @interval(0.1,0.7)^(1/3)  --> roughly(Interval(0.46415888336127786, 0.8879040017426008))
 
     set_interval_precision(Float64)
 
     # exp and log
-    @fact exp(@interval(1//2)) --> Interval(1.6487212707001282, 1.6487212707001282)
+    @fact exp(@interval(1//2)) --> Interval(1.648721270700128, 1.6487212707001282)
     @fact exp(@interval(0.1)) --> Interval(1.1051709180756475e+00, 1.1051709180756477e+00)
     @fact diam(exp(@interval(0.1))) --> eps(exp(0.1))
     @fact log(@interval(1//2)) --> Interval(-6.931471805599454e-01, -6.9314718055994529e-01)
@@ -92,10 +107,10 @@ facts("Numeric tests") do
     h = 1/3
     i = 1/3
 
-    @fact @interval(h*i) --> Interval(1.1111111111111109e-01, 1.1111111111111115e-01)
-    @fact big(1.)/9 ∈ @interval(h*i) --> true
+    @fact @interval(h*i) --> Interval(1.1111111111111105e-01, 1.111111111111111e-01)
+    @fact big(1.)/9 ∈ @interval(1/9) --> true
 
-    @fact @interval(h*i) == @interval(f*g) --> true
+    @fact @interval(1/9) == @interval(1//9) --> true
 
     # :wide tests
 
@@ -103,9 +118,11 @@ facts("Numeric tests") do
     set_interval_precision(Float64)
 
     a = @interval(-3, 2)
-    @fact a^3 --> Interval(-27.000000000000004, 8.000000000000002)
+    @fact a --> Interval(prevfloat(-3.0), nextfloat(2.0))
+    @fact a^3 --> Interval(prevfloat(a.lo^3), nextfloat(a.hi^3))
+    @fact Interval(-3,2)^3 --> Interval(prevfloat(-27.0), nextfloat(8.0))
 
-    @fact a^(1//3) --> Interval(-1.4422495703074085, 1.2599210498948734)
+    @fact Interval(-27.0, 8.0)^(1//3) --> Interval(-5.0e-324, 2.000000000000001)
 
     set_interval_rounding(:narrow)
     set_interval_precision(Float64)
@@ -116,6 +133,8 @@ facts("Numeric tests") do
 
     @fact floor(@interval(0.1, 1.1)) --> @interval(0, 1)
     @fact ceil(@interval(0.1, 1.1)) --> @interval(1, 2)
+    @fact sign(@interval(0.1, 1.1)) --> Interval(1.0)
+    @fact trunc(@interval(0.1, 1.1)) --> Interval(0.0, 1.0)
 
 
 end

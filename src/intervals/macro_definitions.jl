@@ -32,7 +32,3 @@ end
 macro biginterval(expr1, expr2...)
     make_interval(BigFloat, expr1, expr2)
 end
-
-macro make_interval(T, expr1, expr2...)
-    make_interval(T, expr1, expr2)
-end

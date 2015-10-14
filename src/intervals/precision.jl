@@ -42,5 +42,6 @@ get_pi(::Type{Float64}) = float_pi
 
 ## Setup default parameters
 
+set_interval_precision(256)
 interval_parameters.pi = make_interval(BigFloat, pi)
 set_interval_precision(Float64)

@@ -6,7 +6,6 @@ using FactCheck
 # set_bigfloat_precision(53)
 
 facts("Consistency tests") do
-
     a = @interval(1.1, 0.1)
     b = @interval(0.9, 2.0)
     c = @interval(0.25, 4.0)
@@ -24,7 +23,6 @@ facts("Consistency tests") do
     @fact a != b --> true
 
     @fact a --> Interval(a.lo, a.hi)
-    @fact a --> @interval(a.lo, a.hi)
     @fact @interval(1, Inf) --> Interval(1.0, Inf)
     @fact @interval(-Inf, 1) --> Interval(-Inf, 1.0)
     @fact @biginterval(1, Inf) --> Interval{BigFloat}(1.0, Inf)
@@ -37,7 +35,7 @@ facts("Consistency tests") do
     @fact @interval(0.25) - one(c)/4 --> zero(c)
     @fact emptyinterval(a) - Interval(0,1) --> emptyinterval(a)
     @fact Interval(0,1) - emptyinterval(a) --> emptyinterval(a)
-    @fact a*b --> @interval(a.lo*b.lo, a.hi*b.hi)
+    @fact a*b --> Interval(a.lo*b.lo, a.hi*b.hi)
     @fact Interval(0,1) * emptyinterval(a) --> emptyinterval(a)
     @fact a * Interval(0) --> zero(a)
 
@@ -53,6 +51,12 @@ facts("Consistency tests") do
     @fact inv(@interval(-4.0,4.0)) --> entireinterval(Float64)
     @fact @interval(0)/@interval(0) --> emptyinterval()
     @fact typeof(emptyinterval()) --> Interval{Float64}
+
+    @fact fma(emptyinterval(), a, b) --> emptyinterval()
+    @fact fma(entireinterval(), zero(a), b) --> b
+    @fact fma(zero(a), entireinterval(), b) --> b
+    @fact fma(a, zero(a), c) --> c
+    @fact fma(Interval(1//2), Interval(1//3), Interval(1//12)) --> Interval(3//12)
 
     @fact Inf ∈ entireinterval() --> false
     @fact 0.1 ∈ @interval(0.1) --> true
@@ -128,7 +132,8 @@ facts("Consistency tests") do
     @fact mag(-b) --> b.hi
     @fact mag( Interval(1//2) ) --> 1//2
     @fact isnan(mag(emptyinterval())) --> true
-    @fact diam(a) == a.hi - a.lo --> true
+    @fact diam(a) --> 1.0000000000000002
+
     # NOTE: By some strange reason radius is not recognized here
     @fact ValidatedNumerics.radius(Interval(-1//10,1//10)) -->
         diam(Interval(-1//10,1//10))/2
@@ -138,7 +143,24 @@ facts("Consistency tests") do
     @fact mid(entireinterval()) == 0.0 --> true
     @fact isnan(mid(nai())) --> true
     # In v0.3 it corresponds to AssertionError
-    # @fact_throws ArgumentError nai(Interval(1//2))
+    @fact_throws ArgumentError nai(Interval(1//2))
+
+    @fact abs(entireinterval()) --> Interval(0.0, Inf)
+    @fact abs(emptyinterval()) --> emptyinterval()
+    @fact abs(Interval(-3.0,1.0)) --> Interval(0.0, 3.0)
+    @fact abs(Interval(-3.0,-1.0)) --> Interval(1.0, 3.0)
+    @fact min(entireinterval(), Interval(3.0,4.0)) --> Interval(-Inf, 4.0)
+    @fact min(emptyinterval(), Interval(3.0,4.0)) --> emptyinterval()
+    @fact min(Interval(-3.0,1.0), Interval(3.0,4.0)) --> Interval(-3.0, 1.0)
+    @fact min(Interval(-3.0,-1.0), Interval(3.0,4.0)) --> Interval(-3.0, -1.0)
+    @fact max(entireinterval(), Interval(3.0,4.0)) --> Interval(3.0, Inf)
+    @fact max(emptyinterval(), Interval(3.0,4.0)) --> emptyinterval()
+    @fact max(Interval(-3.0,1.0), Interval(3.0,4.0)) --> Interval(3.0, 4.0)
+    @fact max(Interval(-3.0,-1.0), Interval(3.0,4.0)) --> Interval(3.0, 4.0)
+    @fact sign(entireinterval()) --> Interval(-1.0, 1.0)
+    @fact sign(emptyinterval()) --> emptyinterval()
+    @fact sign(Interval(-3.0,1.0)) --> Interval(-1.0, 1.0)
+    @fact sign(Interval(-3.0,-1.0)) --> Interval(-1.0, -1.0)
 
     @fact log(@interval(-2,5)) --> @interval(-Inf,log(5.0))
 
@@ -189,9 +211,9 @@ facts("Interval power of an interval") do
     a = @interval(1, 2)
     b = @interval(3, 4)
 
-    @fact a^b == @interval(1, 16) --> true
-    @fact a^@interval(0.5, 1) == a --> true
-    @fact a^@interval(0.3, 0.5) == @interval(1, sqrt(2)) --> true
+    @fact a^b --> @interval(1, 16)
+    @fact a^@interval(0.5, 1) --> a
+    @fact a^@interval(0.3, 0.5) --> @interval(1, sqrt(2))
 
     @fact b^@interval(0.3) == Interval(1.3903891703159093, 1.5157165665103982) --> true
 

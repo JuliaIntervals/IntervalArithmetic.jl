@@ -85,10 +85,10 @@ function +{T<:Real}(a::Interval{T}, b::Interval{T})
 end
 +(a::Interval) = a
 
--{T<:Real}(a::Interval{T}) = @round(T, -a.hi, -a.lo)
+-(a::Interval) = Interval(-a.hi, -a.lo)
 function -{T<:Real}(a::Interval{T}, b::Interval{T})
     (isempty(a) || isempty(b)) && return emptyinterval(T)
-    a + (-b)  # @round(a.lo - b.hi, a.hi - b.lo)
+    @round(T, a.lo - b.hi, a.hi - b.lo)
 end
 
 
@@ -112,23 +112,19 @@ function *{T<:Real}(a::Interval{T}, b::Interval{T})
         a.hi < zero(T) && return @round(T, a.lo*b.hi, a.lo*b.lo)
         return @round(T, min(a.lo*b.hi, a.hi*b.lo), max(a.lo*b.lo, a.hi*b.hi))
     end
-    # @round(T, min( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi ),
-    #         max( a.lo*b.lo, a.lo*b.hi, a.hi*b.lo, a.hi*b.hi ) )
 end
 
 
 ## Division
 
-function inv(a::Interval)
+function inv{T<:Real}(a::Interval{T})
     isempty(a) && return emptyinterval(a)
 
-    T = eltype(a)
-    S = typeof(inv(a.lo))
     if in(zero(T), a)
-        a.lo < zero(T) == a.hi && return Interval{S}(-Inf, inv(a.lo))
-        a.lo == zero(T) < a.hi && return Interval{S}(inv(a.hi), Inf)
-        a.lo < zero(T) < a.hi && return entireinterval(S)
-        a == zero(a) && return emptyinterval(S)
+        a.lo < zero(T) == a.hi && return @round(T, -Inf, inv(a.lo))
+        a.lo == zero(T) < a.hi && return @round(T, inv(a.hi), Inf)
+        a.lo < zero(T) < a.hi && return entireinterval(T)
+        a == zero(a) && return emptyinterval(T)
     end
 
     @round(T, inv(a.hi), inv(a.lo))
@@ -174,24 +170,60 @@ function /{T<:Real}(a::Interval{T}, b::Interval{T})
 
         end
     end
-    # a * inv(b)
-    # @round(S, min( a.lo/b.lo, a.lo/b.hi, a.hi/b.lo, a.hi/b.hi ),
-    #           max( a.lo/b.lo, a.lo/b.hi, a.hi/b.lo, a.hi/b.hi ) )
 end
 
 //(a::Interval, b::Interval) = a / b    # to deal with rationals
 
 
+## fma: fused multiply-add
+function fma(a::Interval, b::Interval, c::Interval)
+    T = promote_type(eltype(a), eltype(b), eltype(c))
+
+    (isempty(a) || isempty(b) || isempty(c)) && return emptyinterval(T)
+
+    if isentire(a)
+        b == zero(b) && return c
+        return entireinterval(T)
+    elseif isentire(b)
+        a == zero(a) && return c
+        return entireinterval(T)
+    end
+
+    lo = with_rounding(T, RoundDown) do
+        lo1 = fma(a.lo, b.lo, c.lo)
+        lo2 = fma(a.lo, b.hi, c.lo)
+        lo3 = fma(a.hi, b.lo, c.lo)
+        lo4 = fma(a.hi, b.hi, c.lo)
+        min(lo1, lo2, lo3, lo4)
+    end
+    hi = with_rounding(T, RoundUp) do
+        hi1 = fma(a.lo, b.lo, c.hi)
+        hi2 = fma(a.lo, b.hi, c.hi)
+        hi3 = fma(a.hi, b.lo, c.hi)
+        hi4 = fma(a.hi, b.hi, c.hi)
+        max(hi1, hi2, hi3, hi4)
+    end
+    Interval(lo, hi)
+end
+
+
 ## Scalar functions on intervals (no directed rounding used)
 
-function mag(a::Interval)
+function mag{T<:Real}(a::Interval{T})
     isempty(a) && return convert(eltype(a), NaN)
+    # r1, r2 = with_rounding(T, RoundUp) do
+    #     abs(a.lo), abs(a.hi)
+    # end
     max( abs(a.lo), abs(a.hi) )
 end
-function mig(a::Interval)
+
+function mig{T<:Real}(a::Interval{T})
     isempty(a) && return convert(eltype(a), NaN)
     zero(a.lo) ∈ a && return zero(a.lo)
-    min(abs(a.lo), abs(a.hi))
+    r1, r2 = with_rounding(T, RoundDown) do
+        abs(a.lo), abs(a.hi)
+    end
+    min( r1, r2 )
 end
 
 
@@ -202,9 +234,20 @@ supremum(a::Interval) = a.hi
 
 ## Functions needed for generic linear algebra routines to work
 real(a::Interval) = a
+
 function abs(a::Interval)
     isempty(a) && return emptyinterval(a)
     Interval(mig(a), mag(a))
+end
+
+function min(a::Interval, b::Interval)
+    (isempty(a) || isempty(b)) && return emptyinterval(a)
+    Interval( min(a.lo, b.lo), min(a.hi, b.hi))
+end
+
+function max(a::Interval, b::Interval)
+    (isempty(a) || isempty(b)) && return emptyinterval(a)
+    Interval( max(a.lo, b.lo), max(a.hi, b.hi))
 end
 
 
@@ -213,7 +256,6 @@ end
 function intersect{T}(a::Interval{T}, b::Interval{T})
     isdisjoint(a,b) && return emptyinterval(T)
 
-    #@round(T, max(a.lo, b.lo), min(a.hi, b.hi))
     Interval(max(a.lo, b.lo), min(a.hi, b.hi))
 end
 
@@ -227,17 +269,46 @@ union(a::Interval, b::Interval) = hull(a, b)
 dist(a::Interval, b::Interval) = max(abs(a.lo-b.lo), abs(a.hi-b.hi))
 eps(a::Interval) = max(eps(a.lo), eps(a.hi))
 
+## floor, ceil, trunc and sign
 
-floor(a::Interval) = Interval(floor(a.lo), floor(a.hi))
-ceil(a::Interval) = Interval(ceil(a.lo), ceil(a.hi))
+function floor(a::Interval)
+    isempty(a) && return emptyinterval(a)
+    Interval(floor(a.lo), floor(a.hi))
+end
+
+function ceil(a::Interval)
+    isempty(a) && return emptyinterval(a)
+    Interval(ceil(a.lo), ceil(a.hi))
+end
+
+function trunc(a::Interval)
+    isempty(a) && return emptyinterval(a)
+    Interval(trunc(a.lo), trunc(a.hi))
+end
+
+function sign{T<:Real}(a::Interval{T})
+    isempty(a) && return emptyinterval(a)
+
+    a == zero(a) && return a
+    if a ≤ zero(a)
+        zero(T) ∈ a && return Interval(-one(T), zero(T))
+        return Interval(-one(T))
+    elseif a ≥ zero(a)
+        zero(T) ∈ a && return Interval(zero(T), one(T))
+        return Interval(one(T))
+    end
+    return Interval(-one(T), one(T))
+end
+
 
 function mid(a::Interval)
     isentire(a) && return zero(a.lo)
     (a.lo + a.hi) / 2
 end
-function diam(a::Interval)
-    isempty(a) && return convert(eltype(a), NaN)
-    a.hi - a.lo
+
+function diam{T<:Real}(a::Interval{T})
+    isempty(a) && return convert(T, NaN)
+    @with_rounding(T, a.hi - a.lo, RoundUp) #cf page 64 of IEEE1788
 end
 
 # Should `radius` this yield diam(a)/2? This affects other functions!
