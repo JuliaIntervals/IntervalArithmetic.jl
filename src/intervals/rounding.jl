@@ -120,10 +120,7 @@ individual elements of different types""" ->
 make_interval(::Type{BigFloat}, x::AbstractString) =
     split_interval_string(BigFloat, x)
 make_interval(::Type{BigFloat}, x::Irrational) = @thin_round(BigFloat, big(x))
-function make_interval(::Type{BigFloat}, x::Rational)
-    isinf(x) && return Interval(convert(BigFloat,x))
-    make_interval(BigFloat, x.num) / make_interval(BigFloat, x.den)
-end
+make_interval(::Type{BigFloat}, x::Rational) = @thin_round(BigFloat, BigFloat(x))
 function make_interval(::Type{BigFloat}, x::Float64)
     isinf(x) && return Interval(convert(BigFloat,x))
     split_interval_string(BigFloat, string(x))
@@ -146,11 +143,7 @@ function make_interval(::Type{Float64}, x::Irrational)
     end
     float(a)
 end
-function make_interval(::Type{Float64}, x::Rational)
-    isinf(x) && return Interval(convert(Float64,x))
-    # Interval(float(x.num)) / Interval(float(x.den))
-    @controlled_round(Float64, x.num/x.den, x.num/x.den)
-end
+make_interval(::Type{Float64}, x::Rational) = @thin_round(Float64, Float64(x))
 function make_interval(::Type{Float64}, x::Float64)
     isinf(x) && return Interval(x)
     split_interval_string(Float64, string(x))

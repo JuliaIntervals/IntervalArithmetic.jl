@@ -6,9 +6,9 @@
 convert{T<:Real}(::Type{Interval}, x::T) = make_interval(Float64, x)
 
 ## Conversion to specific type intervals
-@compat convert{T<:Union{Float64,BigFloat}, S<:Real}(::Type{Interval{T}}, x::S) =
+@compat convert{T<:Union{Float64,BigFloat}}(::Type{Interval{T}}, x::Real) =
     make_interval(T,x)
-convert{T<:Integer, S<:Real}(::Type{Interval{Rational{T}}}, x::S) =
+convert{T<:Integer}(::Type{Interval{Rational{T}}}, x::Real) =
     make_interval(Rational{T}, x)
 
 ## Promotion rules

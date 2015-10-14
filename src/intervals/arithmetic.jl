@@ -209,19 +209,17 @@ end
 
 ## Scalar functions on intervals (no directed rounding used)
 
-function mag(a::Interval)
+function mag{T<:Real}(a::Interval{T})
     isempty(a) && return convert(eltype(a), NaN)
-    T = eltype(a)
-    r1, r2 = with_rounding(T, RoundUp) do
-        abs(a.lo), abs(a.hi)
-    end
-    max( r1, r2 )
+    # r1, r2 = with_rounding(T, RoundUp) do
+    #     abs(a.lo), abs(a.hi)
+    # end
+    max( abs(a.lo), abs(a.hi) )
 end
 
-function mig(a::Interval)
+function mig{T<:Real}(a::Interval{T})
     isempty(a) && return convert(eltype(a), NaN)
     zero(a.lo) ∈ a && return zero(a.lo)
-    T = eltype(a)
     r1, r2 = with_rounding(T, RoundDown) do
         abs(a.lo), abs(a.hi)
     end
@@ -308,9 +306,9 @@ function mid(a::Interval)
     (a.lo + a.hi) / 2
 end
 
-function diam(a::Interval)
-    isempty(a) && return convert(eltype(a), NaN)
-    @with_rounding(eltype(a), a.hi - a.lo, RoundUp) #cf page 64 of IEEE1788
+function diam{T<:Real}(a::Interval{T})
+    isempty(a) && return convert(T, NaN)
+    @with_rounding(T, a.hi - a.lo, RoundUp) #cf page 64 of IEEE1788
 end
 
 # Should `radius` this yield diam(a)/2? This affects other functions!
