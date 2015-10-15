@@ -84,7 +84,7 @@ end
         hi = hull(hi, hi1)
     else
         lo, hi = with_bigfloat_precision(53) do
-            aa = @biginterval(a)
+            aa = Interval(big(a.lo), big(a.hi))
             xx = @biginterval(x)
             lo = @controlled_round(BigFloat, a.lo^xx.lo, a.lo^xx.lo)
             lo1 = @controlled_round(BigFloat, a.lo^xx.hi, a.lo^xx.hi)

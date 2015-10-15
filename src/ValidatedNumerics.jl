@@ -19,7 +19,7 @@ import Base:
     <, >, ==, !=, ⊆, ^, <=,
     in, zero, one, abs, real, show, min, max,
     sqrt, exp, log, sin, cos, tan, inv,
-    asin, acos, atan,
+    asin, acos, atan, atan2,
     sinh, cosh, tanh, asinh, acosh, atanh,
     union, intersect, isempty,
     convert, promote_rule, eltype,
