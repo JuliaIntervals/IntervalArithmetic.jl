@@ -6,7 +6,7 @@
 convert{T<:Real}(::Type{Interval}, x::T) = make_interval(Float64, x)
 
 ## Conversion to specific type intervals
-@compat convert{T<:Union{Float64,BigFloat}}(::Type{Interval{T}}, x::Real) =
+convert{T<:Union{Float64,BigFloat}}(::Type{Interval{T}}, x::Real) =
     make_interval(T,x)
 convert{T<:Integer}(::Type{Interval{Rational{T}}}, x::Real) =
     make_interval(Rational{T}, x)

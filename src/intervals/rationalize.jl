@@ -50,4 +50,4 @@ function old_rationalize{T<:Integer}(::Type{T}, x::AbstractFloat; tol::Real=eps(
     return convert(T,a)//convert(T,b)
 end
 
-@compat old_rationalize(x::Union{Float64,Float32}; tol::Real=eps(x)) = old_rationalize(Int, x, tol=tol)
+old_rationalize(x::Union{Float64,Float32}; tol::Real=eps(x)) = old_rationalize(Int, x, tol=tol)
