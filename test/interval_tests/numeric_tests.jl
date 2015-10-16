@@ -131,10 +131,21 @@ facts("Numeric tests") do
     b = Interval(0.1, 0.1)
     @fact dist(a,b) <= eps(a) --> true
 
-    @fact floor(@interval(0.1, 1.1)) --> @interval(0, 1)
-    @fact ceil(@interval(0.1, 1.1)) --> @interval(1, 2)
+    @fact floor(@interval(0.1, 1.1)) --> Interval(0, 1)
+    @fact ceil(@interval(0.1, 1.1)) --> Interval(1, 2)
     @fact sign(@interval(0.1, 1.1)) --> Interval(1.0)
     @fact trunc(@interval(0.1, 1.1)) --> Interval(0.0, 1.0)
-
+    @fact round(@interval(0.1, 1.1)) --> Interval(0.0, 1.0)
+    @fact round(@interval(0.1, 1.5)) --> Interval(0.0, 2.0)
+    @fact round(@interval(0.1, -1.5)) --> Interval(0.0, -2.0)
+    @fact round(@interval(0.1, -2.5)) --> Interval(0.0, -2.0)
+    @fact round(@interval(0.1, 1.1), RoundTiesToEven) --> Interval(0.0, 1.0)
+    @fact round(@interval(0.1, 1.5), RoundTiesToEven) --> Interval(0.0, 2.0)
+    @fact round(@interval(0.1, -1.5), RoundTiesToEven) --> Interval(0.0, -2.0)
+    @fact round(@interval(0.1, -2.5), RoundTiesToEven) --> Interval(0.0, -2.0)
+    @fact round(@interval(0.1, 1.1), RoundTiesToAway) --> Interval(0.0, 1.0)
+    @fact round(@interval(0.1, 1.5), RoundTiesToAway) --> Interval(0.0, 2.0)
+    @fact round(@interval(0.1, -1.5), RoundTiesToAway) --> Interval(0.0, -2.0)
+    @fact round(@interval(0.1, -2.5), RoundTiesToAway) --> Interval(0.0, -3.0)
 
 end

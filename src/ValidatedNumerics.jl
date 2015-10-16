@@ -26,7 +26,7 @@ import Base:
     BigFloat, float,
     set_rounding, widen,
     ⊆, eps,
-    floor, ceil, trunc, sign
+    floor, ceil, trunc, sign, round
 
 
 export
@@ -42,7 +42,8 @@ export
     with_interval_precision,
     interval_parameters, eps, dist, roughly,
     get_pi,
-    midpoint_radius, interval_from_midpoint_radius
+    midpoint_radius, interval_from_midpoint_radius,
+    RoundTiesToEven, RoundTiesToAway
 
 ## Root finding
 export
