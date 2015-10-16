@@ -19,6 +19,7 @@ import Base:
     <, >, ==, !=, ⊆, ^, <=,
     in, zero, one, abs, real, show, min, max,
     sqrt, exp, log, sin, cos, tan, inv,
+    exp2, exp10, log2, log10,
     asin, acos, atan, atan2,
     sinh, cosh, tanh, asinh, acosh, atanh,
     union, intersect, isempty,

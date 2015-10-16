@@ -60,7 +60,7 @@ function sqr{T<:Real}(a::Interval{T})
 end
 
 # Floatingpoint power of a Float64/BigFloat interval:
-@compat function ^{T<:Union{Float64,BigFloat}}(a::Interval{T}, x::AbstractFloat)
+function ^{T<:Union{Float64,BigFloat}}(a::Interval{T}, x::AbstractFloat)
     domain = Interval(zero(T), Inf)
 
     if a == zero(a)
@@ -84,7 +84,7 @@ end
         hi = hull(hi, hi1)
     else
         lo, hi = with_bigfloat_precision(53) do
-            aa = Interval(big(a.lo), big(a.hi))
+            aa = Interval(big(a.lo), big(a.hi)) # before: @biginterval(a)
             xx = @biginterval(x)
             lo = @controlled_round(BigFloat, a.lo^xx.lo, a.lo^xx.lo)
             lo1 = @controlled_round(BigFloat, a.lo^xx.hi, a.lo^xx.hi)
@@ -159,26 +159,44 @@ function exp(a::Interval{Float64})
     Interval(exp(a.lo, RoundDown), exp(a.hi, RoundUp))
 end
 
-function exp(a::Interval{BigFloat})
-    isempty(a) && return a
-    @controlled_round(BigFloat, exp(a.lo), exp(a.hi))
+for fn in (:exp2, :exp10)
+    @eval begin
+        function ($fn)(a::Interval{Float64})
+            isempty(a) && return a
+            res = with_bigfloat_precision(53) do
+                res = ($fn)(Interval(big(a.lo), big(a.hi)))
+            end
+            float(res)
+        end
+    end
 end
 
-
-function log(a::Interval{Float64})
-    domain = Interval(0.0, Inf)
-    a = a ∩ domain
-
-    (isempty(a) || a.hi ≤ 0.0) && return emptyinterval(a)
-
-    Interval(log(a.lo, RoundDown), log(a.hi, RoundUp))
+for fn in (:exp, :exp2, :exp10)
+    @eval begin
+        function ($fn)(a::Interval{BigFloat})
+            isempty(a) && return a
+            @round(BigFloat, ($fn)(a.lo), ($fn)(a.hi))
+        end
+    end
 end
 
-function log(a::Interval{BigFloat})
-    domain = Interval(big(0.0), Inf)
-    a = a ∩ domain
+for fn in (:log, :log2, :log10)
+    @eval begin
+        function ($fn)(a::Interval{Float64})
+            domain = Interval(0.0, Inf)
+            a = a ∩ domain
 
-    (isempty(a) || a.hi ≤ big(0.0)) && return emptyinterval(a)
+            (isempty(a) || a.hi ≤ 0.0) && return emptyinterval(a)
 
-    @controlled_round(BigFloat, log(a.lo), log(a.hi))
+            Interval(($fn)(a.lo, RoundDown), ($fn)(a.hi, RoundUp))
+        end
+        function ($fn)(a::Interval{BigFloat})
+            domain = Interval(big(0.0), Inf)
+            a = a ∩ domain
+
+            (isempty(a) || a.hi ≤ big(0.0)) && return emptyinterval(a)
+
+            @round(BigFloat, ($fn)(a.lo), ($fn)(a.hi))
+        end
+    end
 end
