@@ -75,7 +75,8 @@ facts("Consistency tests") do
     @fact isdisjoint(a, b) --> false
     @fact isdisjoint(emptyinterval(a), a) --> true
     @fact isdisjoint(emptyinterval(), emptyinterval()) --> true
-    @fact ValidatedNumerics.islessprime(Inf,Inf) --> true
+    @fact ValidatedNumerics.islessprime(a.lo, b.lo) --> a.lo < b.lo
+    @fact ValidatedNumerics.islessprime(Inf, Inf) --> true
     @fact ∅ <= ∅ --> true
     @fact Interval(1.0,2.0) <= ∅ --> false
     @fact Interval(-Inf,Inf) <= Interval(-Inf,Inf) --> true
@@ -89,6 +90,11 @@ facts("Consistency tests") do
     @fact iscommon(emptyinterval()) --> false
     @fact iscommon(entireinterval()) --> false
     @fact iscommon(a) --> true
+    @fact isunbounded(emptyinterval()) --> false
+    @fact isunbounded(entireinterval()) --> true
+    @fact isunbounded(Interval(-Inf, 0.0)) --> true
+    @fact isunbounded(Interval(0.0, Inf)) --> true
+    @fact isunbounded(a) --> false
 
     @fact emptyinterval() --> Interval(Inf, -Inf)
     @fact a ∩ @interval(-1) --> emptyinterval(a)
@@ -133,6 +139,27 @@ facts("Consistency tests") do
     @fact mag( Interval(1//2) ) --> 1//2
     @fact isnan(mag(emptyinterval())) --> true
     @fact diam(a) --> 1.0000000000000002
+
+    x = Interval(-2.0, 4.440892098500622e-16)
+    y = Interval(-4.440892098500624e-16, 2.0)
+    @fact cancelminus(x, y) --> entireinterval(Float64)
+    @fact cancelplus(x, y) --> entireinterval(Float64)
+    @fact cancelminus(emptyinterval(), emptyinterval()) --> emptyinterval()
+    @fact cancelplus(emptyinterval(), emptyinterval()) --> emptyinterval()
+    @fact cancelminus(emptyinterval(), Interval(0.0, 5.0)) --> emptyinterval()
+    @fact cancelplus(emptyinterval(), Interval(0.0, 5.0)) --> emptyinterval()
+    @fact cancelminus(entireinterval(), Interval(0.0, 5.0)) --> entireinterval()
+    @fact cancelplus(entireinterval(), Interval(0.0, 5.0)) --> entireinterval()
+    @fact cancelminus(Interval(5.0), Interval(-Inf, 0.0)) --> entireinterval()
+    @fact cancelplus(Interval(5.0), Interval(-Inf, 0.0)) --> entireinterval()
+    @fact cancelminus(Interval(0.0, 5.0), emptyinterval()) --> entireinterval()
+    @fact cancelplus(Interval(0.0, 5.0), emptyinterval()) --> entireinterval()
+    @fact cancelminus(Interval(0.0), Interval(0.0, 1.0)) --> entireinterval()
+    @fact cancelplus(Interval(0.0), Interval(0.0, 1.0)) --> entireinterval()
+    @fact cancelminus(Interval(0.0), Interval(1.0)) --> Interval(-1.0)
+    @fact cancelplus(Interval(0.0), Interval(1.0)) --> Interval(1.0)
+    @fact cancelminus(Interval(-5.0, 0.0), Interval(0.0, 5.0)) --> Interval(-5.0)
+    @fact cancelplus(Interval(-5.0, 0.0), Interval(0.0, 5.0)) --> Interval(0.0)
 
     # NOTE: By some strange reason radius is not recognized here
     @fact ValidatedNumerics.radius(Interval(-1//10,1//10)) -->

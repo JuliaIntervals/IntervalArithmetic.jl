@@ -44,7 +44,8 @@ export
     interval_parameters, eps, dist, roughly,
     get_pi,
     midpoint_radius, interval_from_midpoint_radius,
-    RoundTiesToEven, RoundTiesToAway
+    RoundTiesToEven, RoundTiesToAway,
+    cancelminus, cancelplus, isunbounded
 
 ## Root finding
 export
