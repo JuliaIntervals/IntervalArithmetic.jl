@@ -54,7 +54,9 @@ facts("Consistency tests") do
 
     @fact fma(emptyinterval(), a, b) --> emptyinterval()
     @fact fma(entireinterval(), zero(a), b) --> b
+    @fact fma(entireinterval(), one(a), b) --> entireinterval()
     @fact fma(zero(a), entireinterval(), b) --> b
+    @fact fma(one(a), entireinterval(), b) --> entireinterval()
     @fact fma(a, zero(a), c) --> c
     @fact fma(Interval(1//2), Interval(1//3), Interval(1//12)) --> Interval(3//12)
 
@@ -144,6 +146,14 @@ facts("Consistency tests") do
     y = Interval(-4.440892098500624e-16, 2.0)
     @fact cancelminus(x, y) --> entireinterval(Float64)
     @fact cancelplus(x, y) --> entireinterval(Float64)
+    x = Interval(-big(1.0), eps(big(1.0))/4)
+    y = Interval(-eps(big(1.0))/2, big(1.0))
+    @fact cancelminus(x, y) --> entireinterval(BigFloat)
+    @fact cancelplus(x, y) --> entireinterval(BigFloat)
+    x = Interval(-big(1.0), eps(big(1.0))/2)
+    y = Interval(-eps(big(1.0))/2, big(1.0))
+    @fact cancelminus(x, y) ⊆ Interval(-one(BigFloat), one(BigFloat)) --> true
+    @fact cancelplus(x, y) --> Interval(zero(BigFloat), zero(BigFloat))
     @fact cancelminus(emptyinterval(), emptyinterval()) --> emptyinterval()
     @fact cancelplus(emptyinterval(), emptyinterval()) --> emptyinterval()
     @fact cancelminus(emptyinterval(), Interval(0.0, 5.0)) --> emptyinterval()

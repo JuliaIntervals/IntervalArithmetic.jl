@@ -59,11 +59,8 @@ function sin(a::Interval{Float64})
     elseif ( lo_quadrant == 1 || lo_quadrant==2 ) && ( hi_quadrant==3 || hi_quadrant==0 )
         return Interval(-one(T), max(sin(a.lo, RoundUp), sin(a.hi, RoundUp)))
 
-    elseif ( lo_quadrant == 0 && hi_quadrant==3 ) || ( lo_quadrant == 2 && hi_quadrant==1 )
+    else#if( lo_quadrant == 0 && hi_quadrant==3 ) || ( lo_quadrant == 2 && hi_quadrant==1 )
         return whole_range
-    else
-        # This should be never reached!
-        error(string("SOMETHING WENT WRONG in sin with argument $a; this should have never been reached.") )
     end
 end
 
@@ -100,11 +97,8 @@ function sin(a::Interval{BigFloat})
     elseif ( lo_quadrant == 1 || lo_quadrant==2 ) && ( hi_quadrant==3 || hi_quadrant==0 )
         return @controlled_round(T, -one(T), max(sin(a.lo), sin(a.hi)))
 
-    elseif ( lo_quadrant == 0 && hi_quadrant==3 ) || ( lo_quadrant == 2 && hi_quadrant==1 )
+    else#if ( lo_quadrant == 0 && hi_quadrant==3 ) || ( lo_quadrant == 2 && hi_quadrant==1 )
         return whole_range
-    else
-        # This should be never reached!
-        error(string("SOMETHING WENT WRONG in sin with argument $a; this should have never been reached.") )
     end
 end
 
@@ -142,11 +136,8 @@ function cos(a::Interval{Float64})
     elseif ( lo_quadrant == 0 || lo_quadrant==1 ) && ( hi_quadrant==2 || hi_quadrant==3 )
         return Interval(-one(T), max(cos(a.lo, RoundUp), cos(a.hi, RoundUp)))
 
-    elseif ( lo_quadrant == 3 && hi_quadrant==2 ) || ( lo_quadrant == 1 && hi_quadrant==0 )
+    else#if ( lo_quadrant == 3 && hi_quadrant==2 ) || ( lo_quadrant == 1 && hi_quadrant==0 )
         return whole_range
-    else
-        # This should be never reached!
-        error(string("SOMETHING WENT WRONG in cos with argument $a; this should have never been reached.") )
     end
 end
 
@@ -183,11 +174,8 @@ function cos(a::Interval{BigFloat})
     elseif ( lo_quadrant == 0 || lo_quadrant==1 ) && ( hi_quadrant==2 || hi_quadrant==3 )
         return @controlled_round(T, -one(T), max(cos(a.lo), cos(a.hi)))
 
-    elseif ( lo_quadrant == 3 && hi_quadrant==2 ) || ( lo_quadrant == 1 && hi_quadrant==0 )
+    else#if ( lo_quadrant == 3 && hi_quadrant==2 ) || ( lo_quadrant == 1 && hi_quadrant==0 )
         return whole_range
-    else
-        # This should be never reached!
-        error(string("SOMETHING WENT WRONG in cos with argument $a; this should have never been reached.") )
     end
 end
 

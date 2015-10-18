@@ -107,7 +107,7 @@ function ^{T<:Real, S<:Integer}(a::Interval{T}, r::Rational{S})
 
     if a == zero(a)
         a = a ∩ domain
-        r > zero(x) && return zero(a)
+        r > zero(r) && return zero(a)
         return emptyinterval(a)
     end
     isinteger(r) && return make_interval(T, a^(round(S,r)))
