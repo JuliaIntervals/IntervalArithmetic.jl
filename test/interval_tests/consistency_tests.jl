@@ -3,7 +3,7 @@
 using ValidatedNumerics
 using FactCheck
 
-# set_bigfloat_precision(53)
+set_interval_precision(Float64)
 
 facts("Consistency tests") do
     a = @interval(1.1, 0.1)

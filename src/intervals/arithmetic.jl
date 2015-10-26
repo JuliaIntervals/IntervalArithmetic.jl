@@ -176,8 +176,8 @@ end
 
 
 ## fma: fused multiply-add
-function fma(a::Interval, b::Interval, c::Interval)
-    T = promote_type(eltype(a), eltype(b), eltype(c))
+function fma{T}(a::Interval{T}, b::Interval{T}, c::Interval{T})
+    #T = promote_type(eltype(a), eltype(b), eltype(c))
 
     (isempty(a) || isempty(b) || isempty(c)) && return emptyinterval(T)
 

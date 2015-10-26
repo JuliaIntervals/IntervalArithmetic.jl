@@ -3,6 +3,10 @@
 using ValidatedNumerics
 using FactCheck
 
+#set_interval_precision(53)
+set_interval_precision(53)
+
+
 facts("Trig tests") do
     @fact sin(@interval(0.5)) --> Interval(0.47942553860420295, 0.47942553860420301)
     @fact sin(@interval(0.5, 1.67)) --> Interval(4.7942553860420295e-01, 1.0)
@@ -48,7 +52,7 @@ facts("Trig tests") do
     @fact tan(@biginterval(1.3, 6.3)) ⊆ tan(@interval(1.3, 6.3)) --> true
 
 
-    @fact asin(@interval(1)) --> @interval(pi/2)#get_pi(Float64)/2
+    @fact asin(@interval(1)) --> @interval(pi/2)#pi_interval(Float64)/2
     @fact asin(@interval(0.9, 2)) --> asin(@interval(0.9, 1))
     @fact asin(@interval(3, 4)) --> ∅
 
@@ -65,7 +69,7 @@ facts("Trig tests") do
     @fact acos(@biginterval(3, 4)) ⊆ acos(@interval(3, 4)) --> true
 
     @fact atan(@interval(-1,1)) -->
-        Interval(-get_pi(Float64).hi/4, get_pi(Float64).hi/4)
+        Interval(-pi_interval(Float64).hi/4, pi_interval(Float64).hi/4)
     @fact atan(@interval(0)) --> Interval(0.0, 0.0)
     @fact atan(@biginterval(-1, 1)) ⊆ atan(@interval(-1, 1)) --> true
 

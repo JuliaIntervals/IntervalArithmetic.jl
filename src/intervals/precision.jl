@@ -35,13 +35,12 @@ get_interval_precision() =
 
 
 
-const float_pi = make_interval(Float64, pi)  # does not change
+const float_interval_pi = make_interval(Float64, pi)  # does not change
 
-get_pi(::Type{BigFloat}) = interval_parameters.pi
-get_pi(::Type{Float64}) = float_pi
+pi_interval(::Type{BigFloat}) = interval_parameters.pi
+pi_interval(::Type{Float64}) = float_interval_pi
 
 ## Setup default parameters
 
-set_interval_precision(256)
-interval_parameters.pi = make_interval(BigFloat, pi)
+set_interval_precision(256)  # to define interval_parameters.pi
 set_interval_precision(Float64)

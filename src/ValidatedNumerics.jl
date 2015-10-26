@@ -42,7 +42,7 @@ export
     set_interval_precision, get_interval_precision,
     with_interval_precision,
     interval_parameters, eps, dist, roughly,
-    get_pi,
+    pi_interval,
     midpoint_radius, interval_from_midpoint_radius,
     RoundTiesToEven, RoundTiesToAway,
     cancelminus, cancelplus, isunbounded
@@ -55,7 +55,10 @@ export
     find_roots,
     find_roots_midpoint
 
-
+function __init__()
+    set_interval_precision(256)  # set up pi
+    set_interval_precision(Float64)
+end
 
 
 ## Includes
