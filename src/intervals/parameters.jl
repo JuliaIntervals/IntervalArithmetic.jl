@@ -7,7 +7,7 @@ type IntervalParameters
     rounding::Symbol
     pi::Interval{BigFloat}
 
-    IntervalParameters() = new(Float64, 256, :narrow)  # leave out pi
+    IntervalParameters() = new(BigFloat, 256, :narrow)  # leave out pi
 end
 
 

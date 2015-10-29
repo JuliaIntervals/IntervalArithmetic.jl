@@ -1,16 +1,14 @@
 # This file is part of the ValidatedNumerics.jl package; MIT licensed
 
-half_pi(::Type{Float64})  = @floatinterval(pi/2)
-two_pi(::Type{Float64})   = @floatinterval(2pi)
-half_pi(::Type{BigFloat}) = @biginterval(pi/2)
-two_pi(::Type{BigFloat})  = @biginterval(2pi)
+half_pi{T}(::Type{T}) = pi_interval(T) / 2
 half_pi{T<:AbstractFloat}(x::T) = half_pi(T)
 
-pi_interval{T<:Real}(::Type{T}) = get_pi(Float64)
-range_atan2{T<:Real}(::Type{T}) = Interval(-pi_interval(T).hi, pi_interval(T).hi)
-half_range_atan2(::Type{Float64}) = @floatinterval(-pi/2, pi/2)
-half_range_atan2(::Type{BigFloat}) = @biginterval(-pi/2, pi/2)
+two_pi{T}(::Type{T})  = pi_interval(T) * 2
+
+range_atan2{T<:Real}(::Type{T}) = Interval(-(pi_interval(T).hi), pi_interval(T).hi)
+half_range_atan2{T}(::Type{T}) = (temp = half_pi(T); Interval(-(temp.hi), temp.hi) )
 pos_range_atan2{T<:Real}(::Type{T}) = Interval(zero(T), pi_interval(T).hi)
+
 
 @doc doc"""Finds the quadrant(s) corresponding to a given floating-point
 number. The quadrants are labelled as 0 for x ∈ [0, π/2], etc.
@@ -42,7 +40,7 @@ function sin(a::Interval{Float64})
 
     # Different cases depending on the two quadrants:
     if lo_quadrant == hi_quadrant
-        a.hi - a.lo > get_pi(T).lo && return whole_range  # in same quadrant but separated by almost 2pi
+        a.hi - a.lo > pi_interval(T).lo && return whole_range  # in same quadrant but separated by almost 2pi
         lo = Interval(sin(a.lo, RoundDown), sin(a.lo, RoundUp))
         hi = Interval(sin(a.hi, RoundDown), sin(a.hi, RoundUp))
         return hull(lo, hi)
@@ -80,7 +78,7 @@ function sin(a::Interval{BigFloat})
 
     # Different cases depending on the two quadrants:
     if lo_quadrant == hi_quadrant
-        a.hi - a.lo > get_pi(T).lo && return whole_range  # in same quadrant but separated by almost 2pi
+        a.hi - a.lo > pi_interval(T).lo && return whole_range  # in same quadrant but separated by almost 2pi
         lo = @controlled_round(T, sin(a.lo), sin(a.lo))
         hi = @controlled_round(T, sin(a.hi), sin(a.hi))
         return hull(lo, hi)
@@ -119,7 +117,7 @@ function cos(a::Interval{Float64})
 
     # Different cases depending on the two quadrants:
     if lo_quadrant == hi_quadrant # Interval limits in the same quadrant
-        a.hi - a.lo > get_pi(T).lo && return whole_range
+        a.hi - a.lo > pi_interval(T).lo && return whole_range
         lo = Interval(cos(a.lo, RoundDown), cos(a.lo, RoundUp))
         hi = Interval(cos(a.hi, RoundDown), cos(a.hi, RoundUp))
         return hull(lo, hi)
@@ -157,7 +155,7 @@ function cos(a::Interval{BigFloat})
 
     # Different cases depending on the two quadrants:
     if lo_quadrant == hi_quadrant # Interval limits in the same quadrant
-        a.hi - a.lo > get_pi(T).lo && return whole_range
+        a.hi - a.lo > pi_interval(T).lo && return whole_range
         lo = @controlled_round(T, cos(a.lo), cos(a.lo))
         hi = @controlled_round(T, cos(a.hi), cos(a.hi))
         return hull(lo, hi)
@@ -184,7 +182,7 @@ function tan(a::Interval{Float64})
     isempty(a) && return a
     T = Float64
 
-    diam(a) > get_pi(T).lo && return entireinterval(a)
+    diam(a) > pi_interval(T).lo && return entireinterval(a)
 
     lo_quadrant = minimum(find_quadrants(a.lo))
     hi_quadrant = maximum(find_quadrants(a.hi))
@@ -205,7 +203,7 @@ function tan(a::Interval{BigFloat})
     isempty(a) && return a
     T = BigFloat
 
-    diam(a) > get_pi(T).lo && return entireinterval(a)
+    diam(a) > pi_interval(T).lo && return entireinterval(a)
 
     lo_quadrant = minimum(find_quadrants(a.lo))
     hi_quadrant = maximum(find_quadrants(a.hi))
