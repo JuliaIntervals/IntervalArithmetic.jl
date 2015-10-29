@@ -19,14 +19,15 @@ import Base:
     <, >, ==, !=, ⊆, ^, <=,
     in, zero, one, abs, real, show, min, max,
     sqrt, exp, log, sin, cos, tan, inv,
-    asin, acos, atan,
+    exp2, exp10, log2, log10,
+    asin, acos, atan, atan2,
     sinh, cosh, tanh, asinh, acosh, atanh,
     union, intersect, isempty,
     convert, promote_rule, eltype,
     BigFloat, float,
     set_rounding, widen,
     ⊆, eps,
-    floor, ceil, trunc, sign
+    floor, ceil, trunc, sign, round
 
 
 export
@@ -42,7 +43,9 @@ export
     with_interval_precision,
     interval_parameters, eps, dist, roughly,
     get_pi,
-    midpoint_radius, interval_from_midpoint_radius
+    midpoint_radius, interval_from_midpoint_radius,
+    RoundTiesToEven, RoundTiesToAway,
+    cancelminus, cancelplus, isunbounded
 
 ## Root finding
 export

@@ -28,7 +28,7 @@ facts("Constructing intervals") do
     @fact Interval(BigInt(1),1//10) --> Interval{Rational{BigInt}}(1//10, 1//1)
     @fact Interval(1,0.1) --> Interval{Float64}(0.1, 1)
     @fact Interval(big(1),big(0.1)) --> Interval{BigFloat}(0.1, 1)
-
+    @fact Interval( (1.0, 2.0) ) --> Interval(1.0, 2.0)
     # Constructors that involve convert methods; does not work in v0.3
     if VERSION > v"0.4-"
         @fact Interval{Rational{Int}}(1) --> Interval(1//1)

@@ -35,10 +35,11 @@ facts("Trig tests") do
     @fact cos(@biginterval(1.3, 6.3)) ⊆ cos(@interval(1.3, 6.3)) --> true
 
     @fact tan(@interval(0.5)) --> Interval(0.54630248984379048, 0.5463024898437906)
-    @fact tan(@interval(0.5, 1.67)) --> Interval(-Inf, Inf)
+    @fact tan(@interval(0.5, 1.67)) --> entireinterval()
     @fact tan(@interval(1.67, 3.2)) --> Interval(-10.047182299210307, 0.05847385445957865)
 
     @fact tan(@biginterval(0.5)) ⊆ tan(@interval(0.5)) --> true
+    @fact tan(@biginterval(0.5, 1.67)) --> entireinterval(BigFloat)
     @fact tan(@biginterval(0.5, 1.67)) ⊆ tan(@interval(0.5, 1.67)) --> true
     @fact tan(@biginterval(1.67, 3.2)) ⊆ tan(@interval(1.67, 3.2)) --> true
     @fact tan(@biginterval(2.1, 5.6)) ⊆ tan(@interval(2.1, 5.6)) --> true
@@ -63,9 +64,102 @@ facts("Trig tests") do
     @fact acos(@biginterval(-2, -0.9)) ⊆ acos(@interval(-2, -0.9)) --> true
     @fact acos(@biginterval(3, 4)) ⊆ acos(@interval(3, 4)) --> true
 
-    @fact atan(@interval(-1,1)) --> Interval(-get_pi(Float64).hi/4, get_pi(Float64).hi/4)
+    @fact atan(@interval(-1,1)) -->
+        Interval(-get_pi(Float64).hi/4, get_pi(Float64).hi/4)
     @fact atan(@interval(0)) --> Interval(0.0, 0.0)
     @fact atan(@biginterval(-1, 1)) ⊆ atan(@interval(-1, 1)) --> true
+
+    @fact atan2(∅, entireinterval()) --> ∅
+    @fact atan2(entireinterval(), ∅) --> ∅
+    @fact atan2(@interval(0.0, 1.0), @biginterval(0.0)) --> @biginterval(pi/2)
+    @fact atan2(@interval(0.0, 1.0), @interval(0.0)) --> @interval(pi/2)
+    @fact atan2(@interval(-1.0, -0.1), @interval(0.0)) --> @interval(-pi/2)
+    @fact atan2(@interval(-1.0, 1.0), @interval(0.0)) --> @interval(-pi/2, pi/2)
+    @fact atan2(@interval(0.0), @interval(0.1, 1.0)) --> @interval(0.0)
+    @fact atan2(@biginterval(0.0, 0.1), @biginterval(0.1, 1.0)) ⊆
+        atan2(@interval(0.0, 0.1), @interval(0.1, 1.0)) --> true
+    @fact atan2(@interval(0.0, 0.1), @interval(0.1, 1.0)) -->
+        Interval(0.0, 0.7853981633974484)
+    @fact atan2(@biginterval(-0.1, 0.0), @biginterval(0.1, 1.0)) ⊆
+        atan2(@interval(-0.1, 0.0), @interval(0.1, 1.0)) --> true
+    @fact atan2(@interval(-0.1, 0.0), @interval(0.1, 1.0)) -->
+        Interval(-0.7853981633974484, 0.0)
+    @fact atan2(@biginterval(-0.1, -0.1), @biginterval(0.1, Inf)) ⊆
+        atan2(@interval(-0.1, -0.1), @interval(0.1, Inf)) --> true
+    @fact atan2(@interval(-0.1, 0.0), @interval(0.1, Inf)) -->
+        Interval(-0.7853981633974484, 0.0)
+    @fact atan2(@biginterval(0.0, 0.1), @biginterval(-2.0, -0.1)) ⊆
+        atan2(@interval(0.0, 0.1), @interval(-2.0, -0.1)) --> true
+    @fact atan2(@interval(0.0, 0.1), @interval(-2.0, -0.1)) -->
+        Interval(2.356194490192345, 3.1415926535897936)
+    @fact atan2(@biginterval(-0.1, 0.0), @biginterval(-2.0, -0.1)) ⊆
+        atan2(@interval(-0.1, 0.0), @interval(-2.0, -0.1)) --> true
+    @fact atan2(@interval(-0.1, 0.0), @interval(-2.0, -0.1)) -->
+        @interval(-pi, pi)
+    @fact atan2(@biginterval(-0.1, 0.1), @biginterval(-Inf, -0.1)) ⊆
+        atan2(@interval(-0.1, 0.1), @interval(-Inf, -0.1)) --> true
+    @fact atan2(@interval(-0.1, 0.1), @interval(-Inf, -0.1)) -->
+        @interval(-pi, pi)
+
+    @fact atan2(@biginterval(0.0, 0.0), @biginterval(-2.0, 0.0)) ⊆
+        atan2(@interval(0.0, 0.0), @interval(-2.0, 0.0)) --> true
+    @fact atan2(@interval(-0.0, 0.0), @interval(-2.0, 0.0)) -->
+        Interval(3.141592653589793, 3.1415926535897936)
+    @fact atan2(@biginterval(0.0, 0.1), @biginterval(-0.1, 0.0)) ⊆
+        atan2(@interval(0.0, 0.1), @interval(-0.1, 0.0)) --> true
+    @fact atan2(@interval(-0.0, 0.1), @interval(-0.1, 0.0)) -->
+        Interval(1.5707963267948966, 3.1415926535897936)
+    @fact atan2(@biginterval(-0.1, -0.1), @biginterval(-0.1, 0.0)) ⊆
+        atan2(@interval(-0.1, -0.1), @interval(-0.1, 0.0)) --> true
+    @fact atan2(@interval(-0.1, -0.1), @interval(-0.1, 0.0)) -->
+        Interval(-2.3561944901923453, -1.5707963267948966)
+    @fact atan2(@biginterval(-0.1, 0.1), @biginterval(-2.0, 0.0)) ⊆
+        atan2(@interval(-0.1, 0.1), @interval(-2.0, 0.0)) --> true
+    @fact atan2(@interval(-0.1, 0.1), @interval(-2.0, 0.0)) -->
+        @interval(-pi, pi)
+
+    @fact atan2(@biginterval(0.0, 0.0), @biginterval(-2.0, 0.0)) ⊆
+        atan2(@interval(0.0, 0.0), @interval(-2.0, 0.0)) --> true
+    @fact atan2(@interval(-0.0, 0.0), @interval(-2.0, 0.0)) -->
+        Interval(3.141592653589793, 3.1415926535897936)
+    @fact atan2(@biginterval(0.0, 0.1), @biginterval(-0.1, 0.0)) ⊆
+        atan2(@interval(0.0, 0.1), @interval(-0.1, 0.0)) --> true
+    @fact atan2(@interval(-0.0, 0.1), @interval(-0.1, 0.0)) -->
+        Interval(1.5707963267948966, 3.1415926535897936)
+    @fact atan2(@biginterval(-0.1, -0.1), @biginterval(-0.1, 0.0)) ⊆
+        atan2(@interval(-0.1, -0.1), @interval(-0.1, 0.0)) --> true
+    @fact atan2(@interval(-0.1, -0.1), @interval(-0.1, 0.0)) -->
+        Interval(-2.3561944901923453, -1.5707963267948966)
+    @fact atan2(@biginterval(-0.1, 0.1), @biginterval(-2.0, 0.0)) ⊆
+        atan2(@interval(-0.1, 0.1), @interval(-2.0, 0.0)) --> true
+    @fact atan2(@interval(-0.1, 0.1), @interval(-2.0, 0.0)) -->
+        @interval(-pi, pi)
+    @fact atan2(@biginterval(0.0, 0.1), @biginterval(-2.0, 0.1)) ⊆
+        atan2(@interval(0.0, 0.1), @interval(-2.0, 0.1)) --> true
+    @fact atan2(@interval(-0.0, 0.1), @interval(-2.0, 0.1)) -->
+        Interval(0.0, 3.1415926535897936)
+    @fact atan2(@biginterval(-0.1, -0.1), @biginterval(-0.1, 0.1)) ⊆
+        atan2(@interval(-0.1, -0.1), @interval(-0.1, 0.1)) --> true
+    @fact atan2(@interval(-0.1, -0.1), @interval(-0.1, 0.1)) -->
+        Interval(-2.3561944901923453, -0.7853981633974482)
+    @fact atan2(@biginterval(-0.1, 0.1), @biginterval(-2.0, 0.1)) ⊆
+        atan2(@interval(-0.1, 0.1), @interval(-2.0, 0.1)) --> true
+    @fact atan2(@interval(-0.1, 0.1), @interval(-2.0, 0.1)) -->
+        @interval(-pi, pi)
+
+    @fact atan2(@interval(-0.1, 0.1), @interval(0.1, 0.1)) -->
+        Interval(-0.7853981633974484, 0.7853981633974484)
+    @fact atan2(@biginterval(-0.1, 0.1), @biginterval(0.1, 0.1)) ⊆
+        atan2(@interval(-0.1, 0.1), @interval(0.1, 0.1)) --> true
+    @fact atan2(@interval(0.0), @interval(-0.0, 0.1)) --> @interval(0.0)
+    @fact atan2(@interval(0.0, 0.1), @interval(-0.0, 0.1)) -->
+        Interval(0.0, 1.5707963267948968)
+    @fact atan2(@interval(-0.1, 0.0), @interval(0.0, 0.1)) -->
+        Interval(-1.5707963267948968, 0.0)
+    @fact atan2(@interval(-0.1, 0.1), @interval(-0.0, 0.1)) -->
+        Interval(-1.5707963267948968, 1.5707963267948968)
+    @fact atan2(@biginterval(-0.1, 0.1), @biginterval(-0.0, 0.1)) ⊆
+        atan2(@interval(-0.1, 0.1), @interval(0.0, 0.1)) --> true
 
     for a in ( @interval(17, 19), @interval(0.5, 1.2) )
         @fact tan(a) ⊆ sin(a)/cos(a) --> true

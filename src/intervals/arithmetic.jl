@@ -269,8 +269,8 @@ union(a::Interval, b::Interval) = hull(a, b)
 dist(a::Interval, b::Interval) = max(abs(a.lo-b.lo), abs(a.hi-b.hi))
 eps(a::Interval) = max(eps(a.lo), eps(a.hi))
 
-## floor, ceil, trunc and sign
 
+## floor, ceil, trunc, sign, roundTiesToEven, roundTiesToAway
 function floor(a::Interval)
     isempty(a) && return emptyinterval(a)
     Interval(floor(a.lo), floor(a.hi))
@@ -300,7 +300,35 @@ function sign{T<:Real}(a::Interval{T})
     return Interval(-one(T), one(T))
 end
 
+# RoundTiesToEven is an alias of `RoundNearest`
+const RoundTiesToEven = RoundNearest
+# RoundTiesToAway is an alias of `RoundNearestTiesAway`
+const RoundTiesToAway = RoundNearestTiesAway
 
+@doc """
+.. round(a::Interval, ::RoundingMode)
+
+Returns the interval with rounded limits. It is implemented using Julia's
+capabilities for controlling the rounding mode.
+
+For compliance with the standard IEEE-1788, "roundTiesToEven" corresponds
+to `round(a)` or `round(a, RoundTiesToEven)`, and "roundTiesToAway"
+to `round(a, RoundTiesToAway)`.
+""" ->
+round(a::Interval) = round(a, RoundNearest)
+round(a::Interval, ::RoundingMode{:ToZero}) = trunc(a)
+round(a::Interval, ::RoundingMode{:Up}) = ceil(a)
+round(a::Interval, ::RoundingMode{:Down}) = floor(a)
+function round(a::Interval, ::RoundingMode{:Nearest})
+    isempty(a) && return emptyinterval(a)
+    Interval(round(a.lo), round(a.hi))
+end
+function round(a::Interval, ::RoundingMode{:NearestTiesAway})
+    isempty(a) && return emptyinterval(a)
+    Interval(round(a.lo, RoundNearestTiesAway), round(a.hi, RoundNearestTiesAway))
+end
+
+# mid, diam, radius
 function mid(a::Interval)
     isentire(a) && return zero(a.lo)
     (a.lo + a.hi) / 2
@@ -318,6 +346,38 @@ function radius(a::Interval)
     max(m-a.lo, a.hi-m)
 end
 
+# cancelplus and cancelminus
+@doc doc"""
+`cancelminus(a, b)` returns the unique interval `c` such that `b+c=a`.""" ->
+function cancelminus(a::Interval, b::Interval)
+    T = promote_type(eltype(a), eltype(b))
+
+    (isempty(a) && (isempty(b) || !isunbounded(b))) && return emptyinterval(T)
+
+    (isunbounded(a) || isunbounded(b) || isempty(b)) && return entireinterval(T)
+
+    a.lo - b.lo > a.hi - b.hi && return entireinterval(T)
+
+    # The following is needed to avoid finite precision problems
+    ans = false
+    if diam(a) == diam(b)
+        prec = T == Float64 ? 128 : 128+get_bigfloat_precision()
+        ans = with_bigfloat_precision(prec) do
+            diam(@biginterval(a)) < diam(@biginterval(b))
+        end
+    end
+    ans && return entireinterval(T)
+
+    @round(T, a.lo - b.lo, a.hi - b.hi)
+end
+
+@doc doc"""
+`cancelplus(a, b)` returns the unique interval `c` such that `b-c=a`;
+it is equivalent to `cancelminus(a, −b)`.""" ->
+cancelplus(a::Interval, b::Interval) = cancelminus(a, -b)
+
+
+# midpoint-radius forms
 midpoint_radius(a::Interval) = (mid(a), radius(a))
 
 interval_from_midpoint_radius(midpoint, radius) = Interval(midpoint-radius, midpoint+radius)

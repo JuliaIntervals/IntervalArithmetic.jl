@@ -22,6 +22,7 @@ entireinterval{T<:Real}(x::Interval{T}) = entireinterval(T)
 entireinterval() = entireinterval(get_interval_precision()[1])
 
 isentire(x::Interval) = x.lo == -Inf && x.hi == Inf
+isunbounded(x::Interval) = x.lo == -Inf || x.hi == Inf
 
 
 # NaI: not-an-interval
@@ -44,8 +45,7 @@ end
 
 # A common is a nonempty bounded real interval
 function iscommon(a::Interval)
-    (isentire(a) || isempty(a) || isnai(a)) && return false
-    (isinf(a.lo) || isinf(a.hi)) && return false
+    (isentire(a) || isempty(a) || isnai(a) || isunbounded(a)) && return false
     true
 end
 
