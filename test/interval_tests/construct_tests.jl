@@ -20,23 +20,27 @@ facts("Constructing intervals") do
     # Naive constructors, with no conversion involved
     @fact Interval(1) --> Interval(1.0, 1.0)
     @fact Interval(big(1)) --> Interval(1.0, 1.0)
-    @fact Interval(2,1) --> Interval(1.0, 2.0)
-    @fact Interval(big(2),big(1)) --> Interval(1.0, 2.0)
     @fact Interval(eu) --> Interval(1.0*eu)
     @fact Interval(1//10) --> Interval{Rational{Int}}(1//10, 1//10)
     @fact Interval(BigInt(1)//10) --> Interval{Rational{BigInt}}(1//10, 1//10)
-    @fact Interval(BigInt(1),1//10) --> Interval{Rational{BigInt}}(1//10, 1//1)
-    @fact Interval(1,0.1) --> Interval{Float64}(0.1, 1)
-    @fact Interval(big(1),big(0.1)) --> Interval{BigFloat}(0.1, 1)
     @fact Interval( (1.0, 2.0) ) --> Interval(1.0, 2.0)
-    # Constructors that involve convert methods; does not work in v0.3
-    if VERSION > v"0.4-"
-        @fact Interval{Rational{Int}}(1) --> Interval(1//1)
-        @fact Interval{Rational{Int}}(pi) --> Interval(rationalize(1.0*pi))
-        @fact Interval{BigFloat}(1) --> Interval{BigFloat}(big(1.0),big(1.0))
-        @fact Interval{BigFloat}(pi) -->
-            Interval{BigFloat}(big(3.1415926535897931), big(3.1415926535897936))
-    end
+
+    @fact Interval{Rational{Int}}(1) --> Interval(1//1)
+    @fact Interval{Rational{Int}}(pi) --> Interval(rationalize(1.0*pi))
+    @fact Interval{BigFloat}(1) --> Interval{BigFloat}(big(1.0),big(1.0))
+    @fact Interval{BigFloat}(pi) -->
+        Interval{BigFloat}(big(3.1415926535897931), big(3.1415926535897936))
+
+    # Disallowed conversions with a > b
+
+    @fact_throws ArgumentError Interval(2, 1)
+    @fact_throws ArgumentError Interval(big(2), big(1))
+    @fact_throws ArgumentError Interval(BigInt(1), 1//10)
+    @fact_throws ArgumentError Interval(1, 0.1)
+    @fact_throws ArgumentError Interval(big(1), big(0.1))
+
+
+
 
 
     # Conversions; may involve rounding

@@ -53,7 +53,7 @@ facts("Numeric tests") do
     @fact Interval(1,2) ^ -3 --> Interval(1/8, 1.0)
     @fact Interval(0,3) ^ -3 --> @interval(1/27, Inf)
     @fact Interval(-1,2) ^ -3 --> entireinterval()
-    @fact Interval(-1,-2) ^ -3 --> Interval(-1.0, -1/8)
+    @fact_throws ArgumentError Interval(-1, -2) ^ -3  # wrong way round
     @fact Interval(-3,2) ^ (3//1) --> Interval(-27, 8)
     @fact Interval(0.0) ^ 1.1 --> Interval(0, 0)
     @fact Interval(0.0) ^ 0.0 --> emptyinterval()
@@ -147,16 +147,18 @@ facts("Numeric tests") do
     @fact round(@interval(0.1, 1.1), RoundToZero) --> Interval(0.0, 1.0)
     @fact round(@interval(0.1, 1.1)) --> Interval(0.0, 1.0)
     @fact round(@interval(0.1, 1.5)) --> Interval(0.0, 2.0)
-    @fact round(@interval(0.1, -1.5)) --> Interval(0.0, -2.0)
-    @fact round(@interval(0.1, -2.5)) --> Interval(0.0, -2.0)
+    @fact round(@interval(-1.5, 0.1)) --> Interval(-2.0, 0.0)
+    @fact round(@interval(-2.5, 0.1)) --> Interval(-2.0, 0.0)
     @fact round(@interval(0.1, 1.1), RoundTiesToEven) --> Interval(0.0, 1.0)
     @fact round(@interval(0.1, 1.5), RoundTiesToEven) --> Interval(0.0, 2.0)
-    @fact round(@interval(0.1, -1.5), RoundTiesToEven) --> Interval(0.0, -2.0)
-    @fact round(@interval(0.1, -2.5), RoundTiesToEven) --> Interval(0.0, -2.0)
+    @fact round(@interval(-1.5, 0.1), RoundTiesToEven) --> Interval(-2.0, 0.0)
+    @fact round(@interval(-2.5, 0.1), RoundTiesToEven) --> Interval(-2.0, 0.0)
     @fact round(@interval(0.1, 1.1), RoundTiesToAway) --> Interval(0.0, 1.0)
     @fact round(@interval(0.1, 1.5), RoundTiesToAway) --> Interval(0.0, 2.0)
-    @fact round(@interval(0.1, -1.5), RoundTiesToAway) --> Interval(0.0, -2.0)
-    @fact round(@interval(0.1, -2.5), RoundTiesToAway) --> Interval(0.0, -3.0)
+    @fact round(@interval(-1.5, 0.1), RoundTiesToAway) --> Interval(-2.0, 0.0)
+    @fact round(@interval(-2.5, 0.1), RoundTiesToAway) --> Interval(-3.0, 0.0)
+
+    @fact_throws ArgumentError round(@interval(0.1, -2.5))
 
     # :wide tests
     set_interval_rounding(:wide)
