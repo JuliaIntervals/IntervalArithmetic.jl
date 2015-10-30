@@ -10,14 +10,14 @@ half_range_atan2{T}(::Type{T}) = (temp = half_pi(T); Interval(-(temp.hi), temp.h
 pos_range_atan2{T<:Real}(::Type{T}) = Interval(zero(T), pi_interval(T).hi)
 
 
-@doc doc"""Finds the quadrant(s) corresponding to a given floating-point
+ doc"""Finds the quadrant(s) corresponding to a given floating-point
 number. The quadrants are labelled as 0 for x ∈ [0, π/2], etc.
 For numbers very near a boundary of the quadrant, a tuple of two quadrants
 is returned. The minimum or maximum must then be chosen appropriately.
 
 This is a rather indirect way to determine if π/2 and 3π/2 are contained
 in the interval; cf. the formula for sine of an interval in
-Tucker, *Validated Numerics*.""" ->
+Tucker, *Validated Numerics*."""
 
 function find_quadrants(x::AbstractFloat)
     temp = x / half_pi(x)

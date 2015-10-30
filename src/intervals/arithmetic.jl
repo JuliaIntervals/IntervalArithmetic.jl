@@ -1,22 +1,23 @@
 # This file is part of the ValidatedNumerics.jl package; MIT licensed
 
-## in, \in, corresponds to isMember
+doc"""`in(x, a::Interval)` (also written ∈, obtained with `\in<TAB>`). [corresponds to `isMember`] checks if the number `x` is a member of the interval `a`, treated as a set."""
 function in{T<:Real}(x::T, a::Interval)
     isinf(x) && return false
-    # isentire(a) && return true
     a.lo <= x <= a.hi
 end
 
 
-## Comparison of parameters
-## Equalities and neg-equalities
+## Comparisons
+
+doc"`a == b` checks if the intervals `a` and `b` are equal."
 function ==(a::Interval, b::Interval)
     isempty(a) && isempty(b) && return true
     a.lo == b.lo && a.hi == b.hi
 end
 !=(a::Interval, b::Interval) = !(a==b)
 
-# issubset, \subseteq
+doc"`a ⊆ b` (written `\subseteq<TAB>`) checks if the interval `a` is a subset
+of the interval `b`."
 function ⊆(a::Interval, b::Interval)
     isempty(a) && return true
     b.lo ≤ a.lo && a.hi ≤ b.hi
@@ -79,13 +80,14 @@ one{T<:Real}(::Type{Interval{T}}) = Interval(one(T))
 
 ## Addition and subtraction
 
++(a::Interval) = a
+-(a::Interval) = Interval(-a.hi, -a.lo)
+
 function +{T<:Real}(a::Interval{T}, b::Interval{T})
     (isempty(a) || isempty(b)) && return emptyinterval(T)
     @round(T, a.lo + b.lo, a.hi + b.hi)
 end
-+(a::Interval) = a
 
--(a::Interval) = Interval(-a.hi, -a.lo)
 function -{T<:Real}(a::Interval{T}, b::Interval{T})
     (isempty(a) || isempty(b)) && return emptyinterval(T)
     @round(T, a.lo - b.hi, a.hi - b.lo)
@@ -102,11 +104,11 @@ function *{T<:Real}(a::Interval{T}, b::Interval{T})
     if b.lo >= zero(T)
         a.lo >= zero(T) && return @round(T, a.lo*b.lo, a.hi*b.hi)
         a.hi <= zero(T) && return @round(T, a.lo*b.hi, a.hi*b.lo)
-        return @round(T, a.lo*b.hi, a.hi*b.hi) # in(zero(T), a)
+        return @round(T, a.lo*b.hi, a.hi*b.hi)   # zero(T) ∈ a
     elseif b.hi <= zero(T)
         a.lo >= zero(T) && return @round(T, a.hi*b.lo, a.lo*b.hi)
         a.hi <= zero(T) && return @round(T, a.hi*b.hi, a.lo*b.lo)
-        return @round(T, a.hi*b.lo, a.lo*b.lo) # in(zero(T), a)
+        return @round(T, a.hi*b.lo, a.lo*b.lo)   # zero(T) ∈ a
     else
         a.lo > zero(T) && return @round(T, a.hi*b.lo, a.hi*b.hi)
         a.hi < zero(T) && return @round(T, a.lo*b.hi, a.lo*b.lo)
@@ -120,7 +122,7 @@ end
 function inv{T<:Real}(a::Interval{T})
     isempty(a) && return emptyinterval(a)
 
-    if in(zero(T), a)
+    if zero(T) ∈ a
         a.lo < zero(T) == a.hi && return @round(T, -Inf, inv(a.lo))
         a.lo == zero(T) < a.hi && return @round(T, inv(a.hi), Inf)
         a.lo < zero(T) < a.hi && return entireinterval(T)
@@ -132,7 +134,7 @@ end
 
 function /{T<:Real}(a::Interval{T}, b::Interval{T})
 
-    S = typeof(a.lo/b.lo)
+    S = typeof(a.lo / b.lo)
     (isempty(a) || isempty(b)) && return emptyinterval(S)
     b == zero(b) && return emptyinterval(S)
 
@@ -140,13 +142,13 @@ function /{T<:Real}(a::Interval{T}, b::Interval{T})
 
         a.lo >= zero(T) && return @round(S, a.lo/b.hi, a.hi/b.lo)
         a.hi <= zero(T) && return @round(S, a.lo/b.lo, a.hi/b.hi)
-        return @round(S, a.lo/b.lo, a.hi/b.lo) # in(zero(T), a)
+        return @round(S, a.lo/b.lo, a.hi/b.lo)  # zero(T) ∈ a
 
     elseif b.hi < zero(T) # b strictly negative
 
         a.lo >= zero(T) && return @round(S, a.hi/b.hi, a.lo/b.lo)
         a.hi <= zero(T) && return @round(S, a.hi/b.lo, a.lo/b.hi)
-        return @round(S, a.hi/b.hi, a.lo/b.hi) # in(zero(T), a)
+        return @round(S, a.hi/b.hi, a.lo/b.hi)  # zero(T) ∈ a
 
     else   # b contains zero, but is not zero(b)
 
@@ -305,24 +307,25 @@ const RoundTiesToEven = RoundNearest
 # RoundTiesToAway is an alias of `RoundNearestTiesAway`
 const RoundTiesToAway = RoundNearestTiesAway
 
-@doc """
-.. round(a::Interval, ::RoundingMode)
+doc"""
+    round(a::Interval, RoundingMode)
 
-Returns the interval with rounded limits. It is implemented using Julia's
-capabilities for controlling the rounding mode.
+Returns the interval with rounded limits.
 
-For compliance with the standard IEEE-1788, "roundTiesToEven" corresponds
+For compliance with the IEEE Std 1788-2015, "roundTiesToEven" corresponds
 to `round(a)` or `round(a, RoundTiesToEven)`, and "roundTiesToAway"
 to `round(a, RoundTiesToAway)`.
-""" ->
+"""
 round(a::Interval) = round(a, RoundNearest)
 round(a::Interval, ::RoundingMode{:ToZero}) = trunc(a)
 round(a::Interval, ::RoundingMode{:Up}) = ceil(a)
 round(a::Interval, ::RoundingMode{:Down}) = floor(a)
+
 function round(a::Interval, ::RoundingMode{:Nearest})
     isempty(a) && return emptyinterval(a)
     Interval(round(a.lo), round(a.hi))
 end
+
 function round(a::Interval, ::RoundingMode{:NearestTiesAway})
     isempty(a) && return emptyinterval(a)
     Interval(round(a.lo, RoundNearestTiesAway), round(a.hi, RoundNearestTiesAway))
@@ -343,12 +346,11 @@ end
 function radius(a::Interval)
     isempty(a) && return convert(eltype(a), NaN)
     m = mid(a)
-    max(m-a.lo, a.hi-m)
+    max(m - a.lo, a.hi - m)
 end
 
 # cancelplus and cancelminus
-@doc doc"""
-`cancelminus(a, b)` returns the unique interval `c` such that `b+c=a`.""" ->
+doc"`cancelminus(a, b)` returns the unique interval `c` such that `b+c=a`."
 function cancelminus(a::Interval, b::Interval)
     T = promote_type(eltype(a), eltype(b))
 
@@ -371,9 +373,8 @@ function cancelminus(a::Interval, b::Interval)
     @round(T, a.lo - b.lo, a.hi - b.hi)
 end
 
-@doc doc"""
-`cancelplus(a, b)` returns the unique interval `c` such that `b-c=a`;
-it is equivalent to `cancelminus(a, −b)`.""" ->
+ doc"`cancelplus(a, b)` returns the unique interval `c` such that `b-c=a`;
+it is equivalent to `cancelminus(a, −b)`."
 cancelplus(a::Interval, b::Interval) = cancelminus(a, -b)
 
 

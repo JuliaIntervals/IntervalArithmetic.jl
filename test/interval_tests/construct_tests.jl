@@ -128,11 +128,11 @@ facts("Constructing intervals") do
         @fact Interval(1//10).lo == rationalize(0.1) --> true
     end
 
-    @test string(@interval(Inf)) == "∅"
+    @fact string(emptyinterval()) == "∅" --> true
 
-    params = IntervalParameters()
-    @test params.precision_type == BigFloat
-    @test params.precision == 256
-    @test params.rounding == :narrow
+    params = ValidatedNumerics.IntervalParameters()
+    @fact params.precision_type == BigFloat --> true
+    @fact params.precision == 256 --> true
+    @fact params.rounding == :narrow --> true
 
 end

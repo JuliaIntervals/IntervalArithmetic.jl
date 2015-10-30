@@ -1,11 +1,8 @@
 # This file is part of the ValidatedNumerics.jl package; MIT licensed
 
-VERSION >= v"0.4.0-dev+6521" && __precompile__(true)
+#__precompile__(true)
 
 module ValidatedNumerics
-
-
-(VERSION < v"0.4-") && using Docile
 
 using Compat
 #using FactCheck
