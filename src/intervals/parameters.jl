@@ -11,4 +11,4 @@ type IntervalParameters
 end
 
 
-const interval_parameters = IntervalParameters()
+const parameters = IntervalParameters()

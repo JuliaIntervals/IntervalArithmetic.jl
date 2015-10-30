@@ -2,16 +2,16 @@
 
 ## Precision:
 
-set_interval_precision(::Type{Float64}, prec=-1) =  interval_parameters.precision_type = Float64
+set_interval_precision(::Type{Float64}, prec=-1) =  parameters.precision_type = Float64
 # don't change precision, which is just for BigFloat
 
 
 function set_interval_precision(::Type{BigFloat}, prec::Int=256)
     set_bigfloat_precision(prec)
 
-    interval_parameters.precision_type = BigFloat
-    interval_parameters.precision = prec
-    interval_parameters.pi = make_interval(BigFloat, pi)
+    parameters.precision_type = BigFloat
+    parameters.precision = prec
+    parameters.pi = make_interval(BigFloat, pi)
 
     prec
 end
@@ -30,17 +30,17 @@ set_interval_precision(prec) = set_interval_precision(BigFloat, prec)
 set_interval_precision(t::Tuple) = set_interval_precision(t...)
 
 get_interval_precision() =
-    interval_parameters.precision_type == Float64 ? (Float64, -1) : (BigFloat, interval_parameters.precision)
+    parameters.precision_type == Float64 ? (Float64, -1) : (BigFloat, parameters.precision)
 
 
 
 
 const float_interval_pi = make_interval(Float64, pi)  # does not change
 
-pi_interval(::Type{BigFloat}) = interval_parameters.pi
+pi_interval(::Type{BigFloat}) = parameters.pi
 pi_interval(::Type{Float64}) = float_interval_pi
 
 ## Setup default parameters
 
-set_interval_precision(256)  # to define interval_parameters.pi
+set_interval_precision(256)  # to define parameters.pi
 set_interval_precision(Float64)

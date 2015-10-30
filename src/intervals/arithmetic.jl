@@ -8,7 +8,7 @@ function in{T<:Real}(x::T, a::Interval)
 end
 
 
-## Comparison of interval_parameters
+## Comparison of parameters
 ## Equalities and neg-equalities
 function ==(a::Interval, b::Interval)
     isempty(a) && isempty(b) && return true

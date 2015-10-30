@@ -41,7 +41,7 @@ export
     widen, infimum, supremum,
     set_interval_precision, get_interval_precision,
     with_interval_precision,
-    interval_parameters, eps, dist, roughly,
+    parameters, eps, dist, roughly,
     pi_interval,
     midpoint_radius, interval_from_midpoint_radius,
     RoundTiesToEven, RoundTiesToAway,

@@ -35,7 +35,7 @@ v0.1 is the first public release of the package.
 ### Interval arithmetic
 - Two methods for interval rounding are available:
  (i) narrow/slow (which uses hardward rounding mode changes for `Float64` intervals, and (ii) wide/fast (which does not change the rounding mode)
-- The current interval precision and rounding mode are stored in the `interval_parameters` object
+- The current interval precision and rounding mode are stored in the `parameters` object
 - The macro `@interval` generates intervals based on the current interval precision
 - Trigonometric functions are "nearly" rigorous (for `Float64` intervals, correct rounding is not currently guaranteed)
 - Inverse trigonometric functions are available

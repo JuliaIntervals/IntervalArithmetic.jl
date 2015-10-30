@@ -19,7 +19,7 @@ Examples:
 """ ->
 
 macro interval(expr1, expr2...)
-    make_interval(:(interval_parameters.precision_type), expr1, expr2)
+    make_interval(:(parameters.precision_type), expr1, expr2)
 end
 
 @doc doc"""The `floatinterval` macro constructs an interval with `Float64` entries,
