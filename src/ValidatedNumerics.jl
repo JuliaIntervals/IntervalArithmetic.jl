@@ -32,7 +32,7 @@ export
     @interval, @biginterval, @floatinterval, @make_interval,
     get_interval_rounding, set_interval_rounding,
     diam, radius, mid, mag, mig, hull, isinside,
-    emptyinterval, ∅, isempty, interior, isdisjoint, ⪽,
+    emptyinterval, ∅, ∞, isempty, interior, isdisjoint, ⪽,
     precedes, strictprecedes, ≺,
     entireinterval, isentire, nai, isnai, isthin, iscommon,
     widen, infimum, supremum,

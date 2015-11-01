@@ -6,22 +6,13 @@
 # We do not have a correctly-rounded ^ function for Float64, so use the BigFloat
 # version which is correctly-rounded
 
-function big53(a::Interval{Float64})
-    x = with_interval_precision(53) do  # precision of Float64
-        Interval{BigFloat}(a)
-    end
-end
 
-function to_float(a::Interval{BigFloat})
-    #Interval(Float64(a.lo), Float64(a.hi))  # convert without further rounding
-    float(a)
-end
 
-^(a::Interval{Float64}, x::Integer) = to_float(big53(a)^x)
-^(a::Interval{Float64}, x::Rational) = to_float(big53(a)^x)
-^(a::Interval{Float64}, x::Float64) = to_float(big53(a)^x)
-^(a::Interval{Float64}, x::BigFloat) = to_float(big53(a)^x)
-^(a::Interval{Float64}, x::Interval) = to_float((big53(a)^x))
+^(a::Interval{Float64}, x::Integer) = float(big53(a)^x)
+^(a::Interval{Float64}, x::Rational) = float(big53(a)^x)
+^(a::Interval{Float64}, x::Float64) = float(big53(a)^x)
+^(a::Interval{Float64}, x::BigFloat) = float(big53(a)^x)
+^(a::Interval{Float64}, x::Interval) = float((big53(a)^x))
 
 
 function ^(a::Interval{BigFloat}, n::Integer)
@@ -222,5 +213,5 @@ end
 
 
 # float versions:
-exp2(a::Interval{Float64}) = to_float(exp2(big53(a)))
-exp10(a::Interval{Float64}) = to_float(exp10(big53(a)))
+exp2(a::Interval{Float64}) = float(exp2(big53(a)))
+exp10(a::Interval{Float64}) = float(exp10(big53(a)))

@@ -14,7 +14,7 @@ end
 function tanh(a::Interval{Float64})
     isempty(a) && return a
 
-    to_float(tanh(big53(a)))
+    float(tanh(big53(a)))
 end
 
 function tanh(a::Interval{BigFloat})
@@ -40,8 +40,14 @@ end
 function atanh(a::Interval{BigFloat})
     domain = Interval(-one(eltype(a)), one(eltype(a)))
     a = a ∩ domain
+
     isempty(a) && return a
-    @round(BigFloat, atanh(a.lo), atanh(a.hi))
+
+    result = @round(BigFloat, atanh(a.lo), atanh(a.hi))
+
+    (isinf(result.lo) && isinf(result.hi) && isnan(diam(result))) && return emptyinterval(a)  # IEEE 1788-2015 does not allow intervals consisting only of ∞, i.e. Interval(∞,∞) and Interval(-∞,-∞)
+
+    result
 end
 
 # Float64 versions of functions missing from CRlibm:
@@ -50,6 +56,6 @@ for f in (:tanh, :asinh, :acosh, :atanh)
     @eval function ($f)(a::Interval{Float64})
         isempty(a) && return a
 
-        to_float(($f)(big53(a)))
+        float(($f)(big53(a)))
     end
 end

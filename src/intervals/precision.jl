@@ -2,6 +2,14 @@
 
 ## Precision:
 
+doc"`big53` creates an equivalent `BigFloat` interval to a given `Float64` interval."
+function big53(a::Interval{Float64})
+    x = with_interval_precision(53) do  # precision of Float64
+        Interval{BigFloat}(a)
+    end
+end
+
+
 set_interval_precision(::Type{Float64}, prec=-1) = parameters.precision_type = Float64
 
 

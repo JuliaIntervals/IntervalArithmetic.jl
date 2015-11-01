@@ -79,49 +79,54 @@ individual elements of different types"""
 # make_interval for BigFloat intervals
 make_interval(::Type{BigFloat}, x::AbstractString) =
     split_interval_string(BigFloat, x)
+
 make_interval(::Type{BigFloat}, x::Irrational) = @thin_round(BigFloat, big(x))
 make_interval(::Type{BigFloat}, x::Rational) = @thin_round(BigFloat, BigFloat(x))
+
 function make_interval(::Type{BigFloat}, x::Float64)
     isinf(x) && return Interval(convert(BigFloat,x))
     split_interval_string(BigFloat, string(x))
 end
+
 make_interval(::Type{BigFloat}, x::Integer) =
     @thin_round(BigFloat, convert(BigFloat, x))
 make_interval(::Type{BigFloat}, x::BigFloat) = @thin_round(BigFloat, x)  # convert to possibly different BigFloat precision
+
 function make_interval(::Type{BigFloat}, x::Interval)
     # a = make_interval(BigFloat, x.lo)
     # b = make_interval(BigFloat, x.hi)
     # Interval(a.lo, b.hi)
-    Interval(big(x.lo), big(x.hi))
+    @round(BigFloat, big(x.lo), big(x.hi))
 end
 
 
 # make_interval for Float64 intervals
 make_interval(::Type{Float64}, x::AbstractString) = split_interval_string(Float64, x)
-function make_interval(::Type{Float64}, x::Irrational)
-    a = with_bigfloat_precision(53) do
-        make_interval(BigFloat,x)
-    end
-    float(a)
-end
+
+make_interval(::Type{Float64}, x::Irrational) = float(make_interval(BigFloat, x))
 make_interval(::Type{Float64}, x::Rational) = @thin_round(Float64, Float64(x))
+
 function make_interval(::Type{Float64}, x::Float64)
     isinf(x) && return Interval(x)
     split_interval_string(Float64, string(x))
 end
+
 function make_interval(::Type{Float64}, x::Integer)
     a = with_bigfloat_precision(53) do
         make_interval(BigFloat, x)
     end
     float(a)
 end
-make_interval(::Type{Float64}, x::BigFloat) = @thin_round(Float64, convert(Float64, x))
-function make_interval(::Type{Float64}, x::Interval)
-    a = make_interval(Float64, x.lo)
-    b = make_interval(Float64, x.hi)
-    Interval(a.lo, b.hi)
-end
 
+make_interval(::Type{Float64}, x::BigFloat) = @thin_round(Float64, convert(Float64, x))
+
+function make_interval(::Type{Float64}, x::Interval)
+    # a = make_interval(Float64, x.lo)
+    # b = make_interval(Float64, x.hi)
+
+    Interval( Float64(x.lo, RoundDown), Float64(x.hi, RoundUp) )
+
+end
 
 
 # make_interval for Rational intervals

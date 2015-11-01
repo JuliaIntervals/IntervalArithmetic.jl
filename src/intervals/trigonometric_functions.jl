@@ -117,7 +117,7 @@ function tan{T}(a::Interval{T})
         hi_quadrant == lo_quadrant+2 && return entireinterval(a)
     end
 
-    return Interval(tan(a.lo, RoundDown), tan(a.hi, RoundUp))
+    Interval(tan(a.lo, RoundDown), tan(a.hi, RoundUp))
 end
 
 function asin{T}(a::Interval{T})
@@ -153,7 +153,7 @@ end
 function atan2(y::Interval{Float64}, x::Interval{Float64})
     (isempty(y) || isempty(x)) && return emptyinterval(Float64)
 
-    to_float(atan2(big53(y), big53(x)))
+    float(atan2(big53(y), big53(x)))
 end
 
 function atan2(y::Interval{BigFloat}, x::Interval{BigFloat})
