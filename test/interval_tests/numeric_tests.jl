@@ -80,7 +80,6 @@ facts("Numeric tests") do
 
 
     # exp and log
-    x = prevfloat(Inf)
     @fact exp(@biginterval(1//2)) ⊆ exp(@interval(1//2)) --> true
     @fact exp(@interval(1//2)) --> Interval(1.648721270700128, 1.6487212707001282)
     @fact exp(@biginterval(0.1)) ⊆ exp(@interval(0.1)) --> true
@@ -92,9 +91,9 @@ facts("Numeric tests") do
     @fact log(@interval(0.1)) --> Interval(-2.3025850929940459e+00, -2.3025850929940455e+00)
     @fact diam(log(@interval(0.1))) --> eps(log(0.1))
     @fact exp2(@biginterval(1//2)) ⊆ exp2(@interval(1//2)) --> true
-    @fact exp2(Interval(1024.0)) --> Interval(x, Inf)
+    @fact exp2(Interval(1024.0)) --> Interval(Inf, Inf)
     @fact exp10(@biginterval(1//2)) ⊆ exp10(@interval(1//2)) --> true
-    @fact exp10(Interval(308.5)) --> Interval(x, Inf)
+    @fact exp10(Interval(308.5)) --> Interval(Inf, Inf)
     @fact log2(@biginterval(1//2)) ⊆ log2(@interval(1//2)) --> true
     @fact log2(@interval(0.25, 0.5)) --> Interval(-2.0, -1.0)
     @fact log10(@biginterval(1//10)) ⊆ log10(@interval(1//10)) --> true
