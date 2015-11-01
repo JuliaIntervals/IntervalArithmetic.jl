@@ -1,6 +1,6 @@
 # This file is part of the ValidatedNumerics.jl package; MIT licensed
 
-#__precompile__(true)
+__precompile__(true)
 
 module ValidatedNumerics
 
