@@ -75,7 +75,7 @@ facts("Numeric tests") do
     @fact @interval(1,27)^@interval(1/3) --> roughly(Interval(1., 3.))
     @fact @interval(1,27)^(1/3) --> Interval(1., 3.)
     @fact @interval(1,27)^(1//3) --> Interval(1., 3.)
-    @fact @interval(0.1,0.7)^(1//3) --> Interval(0.4641588833612778, 0.887904001742601)
+    @fact @interval(0.1,0.7)^(1//3) --> Interval(0.46415888336127786, 0.8879040017426009)
     @fact @interval(0.1,0.7)^(1/3)  --> roughly(Interval(0.46415888336127786, 0.8879040017426008))
 
 
@@ -158,18 +158,16 @@ facts("Numeric tests") do
     @fact round(@interval(-1.5, 0.1), RoundTiesToAway) --> Interval(-2.0, 0.0)
     @fact round(@interval(-2.5, 0.1), RoundTiesToAway) --> Interval(-3.0, 0.0)
 
-    @fact_throws ArgumentError round(@interval(0.1, -2.5))
-
     # :wide tests
     set_interval_rounding(:wide)
     set_interval_precision(Float64)
 
     a = @interval(-3.0, 2.0)
     @fact a --> Interval(prevfloat(-3.0), nextfloat(2.0))
-    @fact a^3 --> Interval(prevfloat(a.lo^3), nextfloat(a.hi^3))
-    @fact Interval(-3,2)^3 --> Interval(prevfloat(-27.0), nextfloat(8.0))
+    @fact a^3 --> Interval(-27.00000000000003, 8.000000000000012)
+    @fact Interval(-3,2)^3 --> Interval(-27.000000000000014, 8.000000000000007)
 
-    @fact Interval(-27.0, 8.0)^(1//3) --> Interval(-1.0e-323, 2.0000000000000013)
+    @fact Interval(-27.0, 8.0)^(1//3) --> Interval(-0.0, 2.0000000000000013)
 
     set_interval_rounding(:narrow)
 end
