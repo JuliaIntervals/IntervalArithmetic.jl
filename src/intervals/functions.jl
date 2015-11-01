@@ -13,7 +13,8 @@ function big53(a::Interval{Float64})
 end
 
 function to_float(a::Interval{BigFloat})
-    Interval(Float64(a.lo), Float64(a.hi))  # convert without further rounding
+    #Interval(Float64(a.lo), Float64(a.hi))  # convert without further rounding
+    float(a)
 end
 
 ^(a::Interval{Float64}, x::Integer) = to_float(big53(a)^x)
@@ -74,11 +75,11 @@ end
 function sqr{T<:Real}(a::Interval{T})
     isempty(a) && return a
     if a.lo ≥ zero(T)
-        isthin(a) && return Interval(a.lo^2)  # a*a
+        #isthin(a) && a*a
         return @round(T, a.lo^2, a.hi^2)
 
     elseif a.hi ≤ zero(T)
-        isthin(a) && return Interval(a.lo^2)  # a*a
+        #isthin(a) && return a*a
         return @round(T, a.hi^2, a.lo^2)
     end
 
