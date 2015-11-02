@@ -373,7 +373,7 @@ function cancelminus(a::Interval, b::Interval)
     @round(T, a.lo - b.lo, a.hi - b.hi)
 end
 
- doc"`cancelplus(a, b)` returns the unique interval `c` such that `b-c=a`;
+doc"`cancelplus(a, b)` returns the unique interval `c` such that `b-c=a`;
 it is equivalent to `cancelminus(a, −b)`."
 cancelplus(a::Interval, b::Interval) = cancelminus(a, -b)
 

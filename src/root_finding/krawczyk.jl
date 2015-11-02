@@ -4,7 +4,7 @@
 
 # const D = differentiate
 
- doc"""Returns two intervals, the first being a point within the
+doc"""Returns two intervals, the first being a point within the
 interval x such that the interval corresponding to the derivative of f there
 does not contain zero, and the second is the inverse of its derivative"""
 function guarded_derivative_midpoint{T}(f::Function, f_prime::Function, x::Interval{T})

@@ -3,7 +3,7 @@
 # Newton method
 
 # What is this guarded_mid for? Shouldn't it be checking if f(m)==0?
- doc"""Returns the midpoint of the interval x, slightly shifted in case
+doc"""Returns the midpoint of the interval x, slightly shifted in case
 it is zero"""
 function guarded_mid{T}(x::Interval{T})
     m = mid(x)
@@ -26,7 +26,7 @@ function N{T}(f::Function, x::Interval{T}, deriv::Interval{T})
 end
 
 
- doc"""If a root is known to be inside an interval,
+doc"""If a root is known to be inside an interval,
 `newton_refine` iterates the interval Newton method until that root is found."""
 function newton_refine{T}(f::Function, f_prime::Function, x::Interval{T};
                           tolerance=eps(T), debug=false)
@@ -53,7 +53,7 @@ end
 
 
 
- doc"""`newton` performs the interval Newton method on the given function `f`
+doc"""`newton` performs the interval Newton method on the given function `f`
 with its optional derivative `f_prime` and initial interval `x`.
 Optional keyword arguments give the `tolerance`, `maxlevel` at which to stop
 subdividing, and a `debug` boolean argument that prints out diagnostic information."""
