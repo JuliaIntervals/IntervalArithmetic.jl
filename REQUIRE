@@ -1,4 +1,5 @@
 julia 0.4
 FactCheck 0.3
 Polynomials
-CRlibm
+CRlibm 0.2.1
+

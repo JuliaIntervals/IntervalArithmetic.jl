@@ -1,11 +1,8 @@
 # This file is part of the ValidatedNumerics.jl package; MIT licensed
 
-VERSION >= v"0.4.0-dev+6521" && __precompile__(true)
+__precompile__(true)
 
 module ValidatedNumerics
-
-
-(VERSION < v"0.4-") && using Docile
 
 using Compat
 #using FactCheck
@@ -35,13 +32,13 @@ export
     @interval, @biginterval, @floatinterval, @make_interval,
     get_interval_rounding, set_interval_rounding,
     diam, radius, mid, mag, mig, hull, isinside,
-    emptyinterval, ∅, isempty, interior, isdisjoint, ⪽,
+    emptyinterval, ∅, ∞, isempty, interior, isdisjoint, ⪽,
     precedes, strictprecedes, ≺,
     entireinterval, isentire, nai, isnai, isthin, iscommon,
     widen, infimum, supremum,
     set_interval_precision, get_interval_precision,
     with_interval_precision,
-    interval_parameters, eps, dist, roughly,
+    parameters, eps, dist, roughly,
     pi_interval,
     midpoint_radius, interval_from_midpoint_radius,
     RoundTiesToEven, RoundTiesToAway,

@@ -14,11 +14,8 @@ facts("Rationalize tests") do
             1 / 10
         end
 
-        println("Rationalizing a=$a")
+        #println("Rationalizing a=$a")
         @fact ValidatedNumerics.old_rationalize(a) == 1//10 --> true
 
     end
 end
-
-
-

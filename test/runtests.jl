@@ -20,6 +20,10 @@ include("interval_tests/interval_tests.jl")
 include("root_finding_tests/auto_diff_tests.jl")
 include("root_finding_tests/root_finding_tests.jl")
 
+# ITF1788 tests
+
+include("ITF1788_tests/ITF1788_tests.jl")
+
 FactCheck.exitstatus()
 
 #end
