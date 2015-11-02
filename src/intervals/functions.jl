@@ -183,8 +183,9 @@ end
 for T in (Float64, BigFloat),
     f in (:exp, :expm1, :exp2, :exp10)
 
-    if T==Float64 && (f==:exp2 || f==:exp10)
-        continue  # not defined in CRlibm
+    if T==Float64 && (f==:exp2 || f==:exp10)  # not defined in CRlibm
+        @eval $f{T}(a::Interval{T}) = float($f(big53(a)))
+        continue
     end
 
     @eval begin
@@ -209,9 +210,3 @@ for T in (Float64, BigFloat),
         end
     end
 end
-
-
-
-# float versions:
-exp2(a::Interval{Float64}) = float(exp2(big53(a)))
-exp10(a::Interval{Float64}) = float(exp10(big53(a)))
