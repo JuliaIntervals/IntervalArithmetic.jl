@@ -1,19 +1,15 @@
 # This file is part of the ValidatedNumerics.jl package; MIT licensed
 
 ## Powers
+
+# CRlibm does not contain a correctly-rounded ^ function for Float64
+# Use the BigFloat version from MPFR instead, which is correctly-rounded:
+
+for T in (:Integer, :Rational, :Float64, :BigFloat, :Interval)
+    @eval ^(a::Interval{Float64}, x::$T) = float(big53(a)^x)
+end
+
 # Integer power:
-
-# We do not have a correctly-rounded ^ function for Float64, so use the BigFloat
-# version which is correctly-rounded
-
-
-
-^(a::Interval{Float64}, x::Integer) = float(big53(a)^x)
-^(a::Interval{Float64}, x::Rational) = float(big53(a)^x)
-^(a::Interval{Float64}, x::Float64) = float(big53(a)^x)
-^(a::Interval{Float64}, x::BigFloat) = float(big53(a)^x)
-^(a::Interval{Float64}, x::Interval) = float((big53(a)^x))
-
 
 function ^(a::Interval{BigFloat}, n::Integer)
     isempty(a) && return a
@@ -42,6 +38,7 @@ function ^(a::Interval{BigFloat}, n::Integer)
                 return entireinterval(a)
             end
         end
+
     else # even power
         if n > 0
             if a.lo ≥ zero(T)
@@ -51,6 +48,7 @@ function ^(a::Interval{BigFloat}, n::Integer)
             else
                 return @round(T, mig(a)^n, mag(a)^n)
             end
+
         else
             if a.lo ≥ zero(T)
                 return @round(T, a.hi^n, a.lo^n)
@@ -66,16 +64,13 @@ end
 function sqr{T<:Real}(a::Interval{T})
     isempty(a) && return a
     if a.lo ≥ zero(T)
-        #isthin(a) && a*a
         return @round(T, a.lo^2, a.hi^2)
 
     elseif a.hi ≤ zero(T)
-        #isthin(a) && return a*a
         return @round(T, a.hi^2, a.lo^2)
     end
 
-    return @round(T, mig(a)^2, mag(a)^2)  # mag(a)*mag(a))
-
+    return @round(T, mig(a)^2, mag(a)^2)
 end
 
 # Floating-point power of a BigFloat interval:
@@ -171,23 +166,7 @@ function sqrt{T}(a::Interval{T})
 end
 
 
-# add BigFloat functions with rounding:
-for f in (:exp2, :exp10)
-    @eval function ($f)(x::BigFloat, r::RoundingMode)
-        with_rounding(BigFloat, r) do
-            ($f)(x)
-        end
-    end
-end
-
-for T in (Float64, BigFloat),
-    f in (:exp, :expm1, :exp2, :exp10)
-
-    if T==Float64 && (f==:exp2 || f==:exp10)  # not defined in CRlibm
-        @eval $f{T}(a::Interval{T}) = float($f(big53(a)))
-        continue
-    end
-
+for f in (:exp, :expm1)
     @eval begin
         function ($f){T}(a::Interval{T})
             isempty(a) && return a
@@ -196,11 +175,26 @@ for T in (Float64, BigFloat),
     end
 end
 
-for T in (Float64, BigFloat),
-    f in (:log, :log2, :log10, :log1p)
+for f in (:exp2, :exp10)
 
-    @eval begin
-        function ($f){T}(a::Interval{T})
+    @eval function ($f)(x::BigFloat, r::RoundingMode)  # add BigFloat functions with rounding:
+            with_rounding(BigFloat, r) do
+                ($f)(x)
+            end
+        end
+
+    @eval ($f)(a::Interval{Float64}) = float($f(big53(a)))  # no CRlibm version
+
+    @eval function ($f)(a::Interval{BigFloat})
+            isempty(a) && return a
+            Interval( ($f)(a.lo, RoundDown), ($f)(a.hi, RoundUp) )
+        end
+end
+
+
+for f in (:log, :log2, :log10, :log1p)
+
+    @eval function ($f){T}(a::Interval{T})
             domain = Interval(zero(T), convert(T, Inf))
             a = a ∩ domain
 
@@ -208,5 +202,4 @@ for T in (Float64, BigFloat),
 
             Interval( ($f)(a.lo, RoundDown), ($f)(a.hi, RoundUp) )
         end
-    end
 end
