@@ -21,6 +21,11 @@ The aim of the package is correctness over speed, although performance considera
 ## Documentation
 Documentation is available [**here**](http://dpsanders.github.io/ValidatedNumerics.jl/).
 
+## IEEE Standard 1788-2015 - IEEE Standard for Interval Arithmetic
+The IEEE Std 1788-2015 - IEEE Standard for Interval Arithmetic was [published] in June 2015. We are working towards having `ValidatedNumerics` be conformant with this standard.
+
+To do so, we have incorporated tests from the excellent [ITF1788 test suite](https://github.com/oheim/ITF1788), originally written by Marco Nehmeier and Maximilian Kiesner, and converted to a common format and to output tests for Julia by Oliver Heimlich.
+
 ## Bibliography
 
 - *Validated Numerics: A Short Introduction to Rigorous Computations*, W. Tucker, Princeton University Press (2010)
