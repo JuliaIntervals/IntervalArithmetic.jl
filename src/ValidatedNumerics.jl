@@ -27,7 +27,7 @@ import Base:
 
 
 export
-    Interval,
+    Interval, AbstractInterval,
     @interval, @biginterval, @floatinterval, @make_interval,
     diam, radius, mid, mag, mig, hull, isinside,
     emptyinterval, ∅, ∞, isempty, interior, isdisjoint, ⪽,
