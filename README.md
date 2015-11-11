@@ -42,12 +42,15 @@ Universidad Nacional Autónoma de México (UNAM)
 Departamento de Física, Facultad de Ciencias, Universidad Nacional Autónoma de México (UNAM)
 
 ## Contributors
+- Oliver Heimlich
 - Nikolay Kryukov
 - John Verzani
-- Oliver Heimlich
+
+
+## History ##
+This project was begun during a masters' course in the postgraduate programs in Physics and in Mathematics at UNAM during the second semester of 2013 (in Python -- the [`ValidiPy` package](https://github.com/computo-fc/ValidiPy)), and was reinitiated -- now in Julia -- in the first semester of 2015. We thank the participants of the courses for putting up with the half-baked material and contributing energy and ideas.
 
 
 ## Acknowledgements ##
-This project was developed in a masters' course in the postgraduate programs in Physics and in Mathematics at UNAM during the second semester of 2013 and the first semester of 2015. We thank the participants of the courses for putting up with the half-baked material and contributing energy and ideas.
 
 Financial support is acknowledged from DGAPA-UNAM PAPIME grants PE-105911 and PE-107114, and DGAPA-UNAM PAPIIT grant IN-117214. LB acknowledges support through a *Cátedra Moshinsky* (2013).
