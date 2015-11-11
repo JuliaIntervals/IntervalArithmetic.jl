@@ -10,6 +10,8 @@
 
 - Documentation has been enhanced.
 
+- v0.2 **supports only Julia v0.4 and later**.
+
 
 ## 0.1.3
 
