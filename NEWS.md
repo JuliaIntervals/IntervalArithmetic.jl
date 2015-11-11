@@ -1,10 +1,14 @@
 # What's new in ValidatedNumerics.jl
 
-# 0.2
+# v0.2
 
-# 0.2.0
+- Significant progress has been made towards conformance with the [IEEE 1788-2015 - IEEE Standard for Interval Arithmetic] (https://standards.ieee.org/findstds/standard/1788-2015.html), with many functions added, including hyperbolic functions (`cosh`, etc.)
 
-- The [CRlibm.jl](https://github.com/dpsanders/CRlibm.jl) (correct rounding libm) is now used to get correct rounding for the usual functions for `Float64`. `^` has also been coded separately to yield correct rounding for `Float64`. All elemental function currently implemented are consistent with the corresponding tests of the [ITF1788](https://github.com/oheim/ITF1788) test suite.
+- The [CRlibm.jl](https://github.com/dpsanders/CRlibm.jl) (Correctly-Rounded mathematics library) is now used to obtain correctly-rounded elementary functions (`sin`, `exp`, etc.) for `Float64` arguments. Functions that are not available in `CRlibm.jl` are taken from MPFR, and are hence slower; note that this includes the `^` function.
+
+- Julia versions of files from the comprehensive [ITF1788 test suite](https://github.com/oheim/ITF1788) by Marco Nehmeier and Maximilian Kiesner have been included in our own test suite, thanks to the efforts of Oliver Heimlich. All relevant tests pass.
+
+- Documentation has been enhanced.
 
 
 ## 0.1.3
