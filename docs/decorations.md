@@ -33,7 +33,7 @@ A decoration is the combination of an interval together with the sequence of fun
 
 As an example, consider the `sqrt` function acting on an interval `x`.
 
-If `x` is empty, then `sqrt` will return the trivial empty interval.
+If `x` is empty, then `sqrt` will return the, empty interval, together with the trivial decoration.
 
 If `x` is [a, Inf] with a > 0 (`dac`), then `sqrt(x)` will return `[sqrt(a), Inf]`, so is also unbounded, and so will return (`[sqrt(a), Inf], dac`).
 
