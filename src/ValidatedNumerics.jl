@@ -65,6 +65,7 @@ include("misc.jl")
 include("intervals/intervals.jl")
 include("root_finding/root_finding.jl")
 
-
+a..b = @interval(a, b)  # define a..b notation to create interval
+export ..
 
 end # module ValidatedNumerics
