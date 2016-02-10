@@ -4,10 +4,10 @@ __precompile__(true)
 
 module ValidatedNumerics
 
-using Compat
-#using FactCheck
-
 using CRlibm
+using Compat
+using FixedSizeArrays
+
 
 setrounding(BigFloat, RoundNearest)
 setrounding(Float64, RoundNearest)
@@ -67,5 +67,7 @@ include("root_finding/root_finding.jl")
 
 a..b = @interval(a, b)  # define a..b notation to create interval
 export ..
+
+
 
 end # module ValidatedNumerics
