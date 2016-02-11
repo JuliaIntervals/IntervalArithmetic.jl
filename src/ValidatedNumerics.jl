@@ -43,8 +43,14 @@ export
     pi_interval,
     midpoint_radius, interval_from_midpoint_radius,
     RoundTiesToEven, RoundTiesToAway,
-    cancelminus, cancelplus, isunbounded,
+    cancelminus, cancelplus, isunbounded
+
+export
     ..
+
+## Multidimensional
+export
+    IntervalBox, @box
 
 ## Root finding
 export
@@ -67,7 +73,7 @@ include("intervals/intervals.jl")
 
 a..b = @interval(a, b)
 
-include("multidim/box.jl")
+include("multidim/multidim.jl")
 include("root_finding/root_finding.jl")
 
 
