@@ -6,13 +6,25 @@ facts("Tests with rational intervals") do
     a = Interval(1//2, 3//4)
     b = Interval(3//7, 9//12)
 
-    @fact a + b --> Interval(13//14, 3//2)
+    @fact a + b --> Interval(13//14, 3//2)  # exact
 
-    @fact sqrt(a + b) --> Interval(0.9636241116594315, 1.224744871391589)
+    @fact sqrt(a + b) --> Interval(0.9636241116594314, 1.2247448713915892)
 
     @fact rationalize(1//2) --> 1//2
     @fact rationalize(BigInt, 1//2) --> BigInt(1)//2
 
+    X = Interval(1//3)
+    @fact sqrt(X) --> Interval(0.5773502691896257, 0.5773502691896258)
+
+end
+
+set_interval_precision(64)
+
+facts("Rounding rational intervals") do
+
+    X = Interval(big(1)//3)
+    Y = Interval(big"5.77350269189625764452e-01", big"5.77350269189625764561e-01")
+    @fact sqrt(X) --> Y
 end
 
 facts("Tests with float intervals") do
