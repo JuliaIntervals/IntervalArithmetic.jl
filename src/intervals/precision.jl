@@ -14,7 +14,7 @@ set_interval_precision(::Type{Float64}, prec=-1) = parameters.precision_type = F
 
 
 function set_interval_precision(::Type{BigFloat}, precision::Integer=256)
-    set_bigfloat_precision(precision)
+    setprecision(precision)
 
     parameters.precision_type = BigFloat
     parameters.precision = precision

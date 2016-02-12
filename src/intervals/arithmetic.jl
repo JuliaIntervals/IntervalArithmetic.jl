@@ -191,14 +191,14 @@ function fma{T}(a::Interval{T}, b::Interval{T}, c::Interval{T})
         return entireinterval(T)
     end
 
-    lo = with_rounding(T, RoundDown) do
+    lo = setrounding(T, RoundDown) do
         lo1 = fma(a.lo, b.lo, c.lo)
         lo2 = fma(a.lo, b.hi, c.lo)
         lo3 = fma(a.hi, b.lo, c.lo)
         lo4 = fma(a.hi, b.hi, c.lo)
         min(lo1, lo2, lo3, lo4)
     end
-    hi = with_rounding(T, RoundUp) do
+    hi = setrounding(T, RoundUp) do
         hi1 = fma(a.lo, b.lo, c.hi)
         hi2 = fma(a.lo, b.hi, c.hi)
         hi3 = fma(a.hi, b.lo, c.hi)
@@ -213,7 +213,7 @@ end
 
 function mag{T<:Real}(a::Interval{T})
     isempty(a) && return convert(eltype(a), NaN)
-    # r1, r2 = with_rounding(T, RoundUp) do
+    # r1, r2 = setrounding(T, RoundUp) do
     #     abs(a.lo), abs(a.hi)
     # end
     max( abs(a.lo), abs(a.hi) )
@@ -222,7 +222,7 @@ end
 function mig{T<:Real}(a::Interval{T})
     isempty(a) && return convert(eltype(a), NaN)
     zero(a.lo) ∈ a && return zero(a.lo)
-    r1, r2 = with_rounding(T, RoundDown) do
+    r1, r2 = setrounding(T, RoundDown) do
         abs(a.lo), abs(a.hi)
     end
     min( r1, r2 )
@@ -339,7 +339,7 @@ end
 
 function diam{T<:Real}(a::Interval{T})
     isempty(a) && return convert(T, NaN)
-    @with_rounding(T, a.hi - a.lo, RoundUp) #cf page 64 of IEEE1788
+    @setrounding(T, a.hi - a.lo, RoundUp) #cf page 64 of IEEE1788
 end
 
 # Should `radius` this yield diam(a)/2? This affects other functions!
@@ -364,7 +364,7 @@ function cancelminus(a::Interval, b::Interval)
     ans = false
     if diam(a) == diam(b)
         prec = T == Float64 ? 128 : 128+get_bigfloat_precision()
-        ans = with_bigfloat_precision(prec) do
+        ans = setprecision(prec) do
             diam(@biginterval(a)) < diam(@biginterval(b))
         end
     end
