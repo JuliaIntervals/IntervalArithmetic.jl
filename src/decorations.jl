@@ -29,6 +29,20 @@ Box(a...) = Box([a...])
 
 #Box(DecoratedInterval(I"1", com), DecoratedInterval(I"2", com))
 
+function DecoratedInterval(I::Interval)
+    decoration = com
+
+    if isempty(I)
+        decoration = trv
+    end
+
+    if isinf(diam(I))  # unbounded
+        decoration = dac
+    end
+
+    DecoratedInterval(I, decoration)
+
+end
 
 
 # Define sin(::DecoratedInterval)
@@ -55,7 +69,7 @@ function Base.sqrt{T}(xx::DecoratedInterval{T})
     if x ⊆ domain
 
         if isunbounded(x)
-            DecoratedInterval(sqrt(x), decay(xx, dac))
+            return DecoratedInterval(sqrt(x), decay(xx, dac))
         else
             return DecoratedInterval(sqrt(x), decay(xx, com))
         end
@@ -64,3 +78,23 @@ function Base.sqrt{T}(xx::DecoratedInterval{T})
 
     DecoratedInterval(sqrt(x ∩ domain), decay(xx, trv))
 end
+
+function Base.asin{T}(xx::DecoratedInterval{T})
+    x = interval(xx)
+
+    domain = Interval{T}(-one(T), one(T))
+
+    if x ⊆ domain
+
+        return DecoratedInterval(asin(x), decay(xx, com))
+
+    end
+
+    DecoratedInterval(sqrt(x ∩ domain), decay(xx, trv))
+end
+
+a = DecoratedInterval(@interval(1, 2), com)
+sqrt(a)
+
+a = DecoratedInterval(@interval(-1, 1), com)
+sqrt(a)
