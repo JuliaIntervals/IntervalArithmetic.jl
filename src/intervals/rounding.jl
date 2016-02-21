@@ -2,12 +2,18 @@
 
 ## Macros for directed rounding:
 
-# Use the following empty definitions for rounding types other than Float64:
-Base.set_rounding(whatever, rounding_mode) = ()
-Base.get_rounding(whatever) = ()
+# Define how to round rationals, e.g for sqrt of rational interval:
 
-Base.Rounding.get_rounding_raw(whatever) = Base.Rounding.set_rounding_raw(whatever, rounding_mode) = ()
+# Find the corresponding AbstractFloat type for a given rational type:
+Base.float{T}(::Type{Rational{T}}) = typeof(float(one(Rational{T})))
 
+# Use that type for rounding with rationals, e.g. for sqrt:
+function Base.with_rounding{T}(f::Function, ::Type{Rational{T}},
+    rounding_mode::RoundingMode)
+    with_rounding(f, float(Rational{T}), rounding_mode)
+end
+
+# Rounding macros:
 
 macro show_rounding(T, expr)
    quote

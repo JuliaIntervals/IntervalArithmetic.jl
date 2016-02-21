@@ -76,7 +76,7 @@ end
 # Floating-point power of a BigFloat interval:
 function ^(a::Interval{BigFloat}, x::AbstractFloat)
     T = BigFloat
-    domain = Interval(zero(T), Inf)
+    domain = Interval(zero(T), convert(T, Inf))
 
     if a == zero(a)
         a = a ∩ domain
@@ -112,7 +112,7 @@ end
 # Rational power
 function ^{S<:Integer}(a::Interval{BigFloat}, r::Rational{S})
     T = BigFloat
-    domain = Interval(zero(a.lo), Inf)
+    domain = Interval(zero(a.lo), convert(T, Inf))
 
     if a == zero(a)
         a = a ∩ domain
@@ -135,7 +135,7 @@ end
 # Interval power of an interval:
 function ^(a::Interval{BigFloat}, x::Interval)
     T = BigFloat
-    domain = Interval(zero(T), Inf)
+    domain = Interval(zero(T), convert(T, Inf))
 
     a = a ∩ domain
 
@@ -157,7 +157,7 @@ Base.inf(x::Rational) = 1//0  # to allow sqrt()
 
 
 function sqrt{T}(a::Interval{T})
-    domain = Interval(zero(T), Inf)
+    domain = Interval(zero(T), convert(T, Inf))
     a = a ∩ domain
 
     isempty(a) && return a
