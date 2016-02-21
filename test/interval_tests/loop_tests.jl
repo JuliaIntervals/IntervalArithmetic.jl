@@ -84,7 +84,7 @@ end
 
 facts("Pi tests") do
 
-    big_pi = with_bigfloat_precision(256) do
+    big_pi = setprecision(256) do
         big(pi)
     end
 

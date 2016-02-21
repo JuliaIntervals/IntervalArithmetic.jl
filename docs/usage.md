@@ -206,7 +206,7 @@ julia> get_interval_precision()
 ```
 The result is a tuple of the type (currently `Float64` or `BigFloat`) and the precision (relevant only for `BigFloat`s).
 
-NB: The standard Julia function `set_bigfloat_precision` is used internally by `set_interval_precision`, but it should not be used directly, since `set_interval_precision` carries out additional steps to ensure internal consistency of certain interval operations.
+NB: The standard Julia function `setprecision` is used internally by `set_interval_precision`, but it should not be used directly, since `set_interval_precision` carries out additional steps to ensure internal consistency of certain interval operations.
 
 ## Elementary functions
 

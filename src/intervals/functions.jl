@@ -178,7 +178,7 @@ end
 for f in (:exp2, :exp10)
 
     @eval function ($f)(x::BigFloat, r::RoundingMode)  # add BigFloat functions with rounding:
-            with_rounding(BigFloat, r) do
+            setrounding(BigFloat, r) do
                 ($f)(x)
             end
         end

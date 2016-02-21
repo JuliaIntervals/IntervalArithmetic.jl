@@ -8,7 +8,7 @@ immutable Jet{T} <: Number  # is this really a Number?  Then promotion rules wor
     der::T   # derative u'(a)
 end
 
-Jet{T}(a::T, b::T) = Jet{T}(a, b)
+#Jet{T}(a::T, b::T) = Jet{T}(a, b)
 #Jet(a, b) = Jet{T}(a,b)
 
 # import Base:

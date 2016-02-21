@@ -1,33 +1,41 @@
 # This file is part of the ValidatedNumerics.jl package; MIT licensed
 
-## Macros for directed rounding:
+# Rounding for rational intervals, e.g for sqrt of rational interval:
+# Find the corresponding AbstractFloat type for a given rational type
 
-# Define how to round rationals, e.g for sqrt of rational interval:
-
-# Find the corresponding AbstractFloat type for a given rational type:
 Base.float{T}(::Type{Rational{T}}) = typeof(float(one(Rational{T})))
 
 # Use that type for rounding with rationals, e.g. for sqrt:
-function Base.with_rounding{T}(f::Function, ::Type{Rational{T}},
-    rounding_mode::RoundingMode)
-    with_rounding(f, float(Rational{T}), rounding_mode)
+
+if VERSION < v"0.5.0-dev+1182"
+
+    function Base.with_rounding{T}(f::Function, ::Type{Rational{T}},
+        rounding_mode::RoundingMode)
+        setrounding(f, float(Rational{T}), rounding_mode)
+    end
+
+else
+    function Base.setrounding{T}(f::Function, ::Type{Rational{T}},
+        rounding_mode::RoundingMode)
+        setrounding(f, float(Rational{T}), rounding_mode)
+    end
 end
 
-# Rounding macros:
+# Macros for directed rounding:
 
 macro show_rounding(T, expr)
    quote
        for mode in (:RoundNearest, :RoundDown, :RoundUp)
-           ex = @with_rounding($T, $expr, $mode)
+           ex = @setrounding($T, $expr, $mode)
            @show mode, ex
        end
    end
 end
 
 
-macro with_rounding(T, expr, rounding_mode)
+macro setrounding(T, expr, rounding_mode)
     quote
-        with_rounding($T, $rounding_mode) do
+        setrounding($T, $rounding_mode) do
             $expr
         end
     end
@@ -47,8 +55,8 @@ macro round(T, expr1, expr2)
             Interval(prevfloat($expr1), nextfloat($expr2))
 
         else # mode == :narrow
-            lo = @with_rounding($T, $expr1, RoundDown)
-            hi = @with_rounding($T, $expr2, RoundUp)
+            lo = @setrounding($T, $expr1, RoundDown)
+            hi = @setrounding($T, $expr2, RoundUp)
             Interval(lo, hi)
         end
     end
@@ -118,7 +126,7 @@ function make_interval(::Type{Float64}, x::Float64)
 end
 
 function make_interval(::Type{Float64}, x::Integer)
-    a = with_bigfloat_precision(53) do
+    a = setprecision(53) do
         make_interval(BigFloat, x)
     end
     float(a)

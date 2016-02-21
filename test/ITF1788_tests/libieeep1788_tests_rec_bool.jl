@@ -26,7 +26,7 @@ using FactCheck
 using ValidatedNumerics
 
 #Preamble
-set_bigfloat_precision(53)
+setprecision(53)
 set_interval_precision(Float64)
 set_interval_rounding(:narrow)
 

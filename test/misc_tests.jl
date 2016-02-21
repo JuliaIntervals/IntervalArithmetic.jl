@@ -9,7 +9,7 @@ end
 
 facts("Rationalize tests") do
     for rounding_mode in (RoundNearest, RoundDown, RoundUp)
-        a = with_rounding(Float64, rounding_mode) do
+        a = setrounding(Float64, rounding_mode) do
             # @compat a = parse(Float64, "0.1")
             1 / 10
         end

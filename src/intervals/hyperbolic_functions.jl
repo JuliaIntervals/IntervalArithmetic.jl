@@ -11,11 +11,11 @@ function cosh{T}(a::Interval{T})
     return Interval(cosh(mig(a), RoundDown), cosh(mag(a), RoundUp))
 end
 
-function tanh(a::Interval{Float64})
-    isempty(a) && return a
-
-    float(tanh(big53(a)))
-end
+# function tanh(a::Interval{Float64})
+#     isempty(a) && return a
+#
+#     float(tanh(big53(a)))
+# end
 
 function tanh(a::Interval{BigFloat})
     isempty(a) && return a

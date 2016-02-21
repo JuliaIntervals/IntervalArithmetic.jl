@@ -8,8 +8,9 @@ using Compat
 #using FactCheck
 
 using CRlibm
-set_rounding(BigFloat, RoundNearest)
-set_rounding(Float64, RoundNearest)
+
+setrounding(BigFloat, RoundNearest)
+setrounding(Float64, RoundNearest)
 
 import Base:
     +, -, *, /, //, fma,
@@ -21,8 +22,7 @@ import Base:
     sinh, cosh, tanh, asinh, acosh, atanh,
     union, intersect, isempty,
     convert, promote_rule, eltype,
-    BigFloat, float,
-    set_rounding, widen,
+    BigFloat, float, widen,
     ⊆, eps,
     floor, ceil, trunc, sign, round
 
