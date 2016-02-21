@@ -363,7 +363,7 @@ function cancelminus(a::Interval, b::Interval)
     # The following is needed to avoid finite precision problems
     ans = false
     if diam(a) == diam(b)
-        prec = T == Float64 ? 128 : 128+get_bigfloat_precision()
+        prec = T == Float64 ? 128 : 128+precision(BigFloat)
         ans = setprecision(prec) do
             diam(@biginterval(a)) < diam(@biginterval(b))
         end

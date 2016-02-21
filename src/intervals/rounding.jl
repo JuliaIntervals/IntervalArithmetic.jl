@@ -6,11 +6,20 @@
 Base.float{T}(::Type{Rational{T}}) = typeof(float(one(Rational{T})))
 
 # Use that type for rounding with rationals, e.g. for sqrt:
-function Base.with_rounding{T}(f::Function, ::Type{Rational{T}},
-    rounding_mode::RoundingMode)
-    with_rounding(f, float(Rational{T}), rounding_mode)
-end
 
+if VERSION < v"0.5.0-dev+1182"
+
+    function Base.with_rounding{T}(f::Function, ::Type{Rational{T}},
+        rounding_mode::RoundingMode)
+        setrounding(f, float(Rational{T}), rounding_mode)
+    end
+
+else
+    function Base.setrounding{T}(f::Function, ::Type{Rational{T}},
+        rounding_mode::RoundingMode)
+        setrounding(f, float(Rational{T}), rounding_mode)
+    end
+end
 
 # Macros for directed rounding:
 
