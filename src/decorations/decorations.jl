@@ -1,13 +1,8 @@
-using ValidatedNumerics
+# Decorated intervals, following the IEEE 1758-2015 standard
 
-import ValidatedNumerics.AbstractInterval
 
 @enum DECORATION ill=0 trv=1 def=2 dac=3 com=4
-# < and min work automatically for enums!
-
-macro I_str(ex)
-    @interval ex
-end
+# < and min work automatically for enums
 
 
 type DecoratedInterval{T <: AbstractFloat} <: AbstractInterval
@@ -21,7 +16,7 @@ decoration(x::DecoratedInterval) = x.decoration
 Base.show(io::IO, x::DecoratedInterval) = print(io, x.interval, "_", x.decoration)
 
 
-
+# Automatic decorations for an interval
 function DecoratedInterval(I::Interval)
     decoration = com
 
@@ -41,6 +36,7 @@ end
 decay(a::DECORATION, b::DECORATION) = min(a, b)
 decay(xx::DecoratedInterval, a::DECORATION) = min(decoration(xx), a)
 
+# Define functions on decorated intervals
 function Base.sign{T}(xx::DecoratedInterval{T})
     x = interval(xx)
 
@@ -52,15 +48,13 @@ function Base.sign{T}(xx::DecoratedInterval{T})
 
 end
 
-
-restricted_functions = Dict(   # those with restricted domains
+# Functions with restricted domains:
+restricted_functions = Dict(
     :sqrt => [0, ∞],
     :asin => [-1, 1]
 )
 
-# do separately for T = Float64 and T = BigFloat?
-# or convert the domain explicitly?
-
+# Define functions with restricted domains on DecoratedInterval's:
 for (f, domain) in restricted_functions
 
     domain = Interval(domain...)
@@ -83,12 +77,3 @@ for (f, domain) in restricted_functions
         end
     #end
 end
-
-
-
-a = DecoratedInterval(@interval(1, 2), com)
-@show a, sqrt(a)
-
-a = DecoratedInterval(@interval(-1, 1), com)
-@show a, sqrt(a)
-@show a, asin(a)

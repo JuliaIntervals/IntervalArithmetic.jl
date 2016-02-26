@@ -55,6 +55,11 @@ end
 export
     IntervalBox, @intervalbox
 
+## Decorations
+export
+    interval, decoration, DecoratedInterval,
+    com, dac, def, trv, ill
+
 ## Root finding
 export
     newton, krawczyk,
@@ -76,9 +81,14 @@ end
 
 include("intervals/intervals.jl")
 include("multidim/multidim.jl")
+include("decorations/decorations.jl")
 
 include("root_finding/root_finding.jl")
 
+# notation I"[3,4]"
+macro I_str(ex)
+    @interval ex
+end
 
 
 end # module ValidatedNumerics
