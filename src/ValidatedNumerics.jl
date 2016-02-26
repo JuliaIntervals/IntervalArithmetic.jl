@@ -25,6 +25,8 @@ import Base:
     precision,
     isfinite, isnan
 
+export
+    @I_str
 
 export
     Interval, AbstractInterval,

@@ -51,6 +51,8 @@ end
 # Functions with restricted domains:
 restricted_functions = Dict(
     :sqrt => [0, ∞],
+    :log => [0, ∞],
+
     :asin => [-1, 1]
 )
 
@@ -59,21 +61,44 @@ for (f, domain) in restricted_functions
 
     domain = Interval(domain...)
 
-    #code = quote
     @eval function Base.$(f){T}(xx::DecoratedInterval{T})
-            x = interval(xx)
+        x = interval(xx)
 
-            if x ⊆ $(domain)
+        if x ⊆ $(domain)
 
-                if isunbounded(x)  # unnecessary if domain is bounded
-                    return DecoratedInterval($(f)(x), decay(xx, dac))
-                else
-                    return DecoratedInterval($(f)(x), decay(xx, com))
-                end
-
+            if isunbounded(x)  # unnecessary if domain is bounded
+                return DecoratedInterval($(f)(x), decay(xx, dac))
+            else
+                return DecoratedInterval($(f)(x), decay(xx, com))
             end
 
-            DecoratedInterval($f(x ∩ $(domain)), decay(xx, trv))
         end
-    #end
+
+        DecoratedInterval($f(x ∩ $(domain)), decay(xx, trv))
+    end
+end
+
+
+# Define unary functions with no domain restrictions
+
+unrestricted_functions = [:exp, :sinh, :cosh]
+
+for f in unrestricted_functions
+
+    @eval function Base.$(f){T}(xx::DecoratedInterval{T})
+        x = interval(xx)
+
+        DecoratedInterval($f(x), decay(xx, com))
+    end
+end
+
+binary_functions = [:+, :-, :*, :/]
+for f in binary_functions
+
+    @eval function Base.$(f){T}(xx::DecoratedInterval{T}, yy::DecoratedInterval{T})
+        x = interval(xx)
+        y = interval(yy)
+
+        DecoratedInterval($f(x, y), decay(xx, com))
+    end
 end
