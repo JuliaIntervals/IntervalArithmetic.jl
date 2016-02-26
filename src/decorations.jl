@@ -27,7 +27,6 @@ end
 
 Box(a...) = Box([a...])
 
-#Box(DecoratedInterval(I"1", com), DecoratedInterval(I"2", com))
 
 function DecoratedInterval(I::Interval)
     decoration = com
@@ -45,8 +44,6 @@ function DecoratedInterval(I::Interval)
 end
 
 
-# Define sin(::DecoratedInterval)
-
 decay(a::DECORATION, b::DECORATION) = min(a, b)
 decay(xx::DecoratedInterval, a::DECORATION) = min(decoration(xx), a)
 
@@ -61,40 +58,74 @@ function Base.sign{T}(xx::DecoratedInterval{T})
 
 end
 
-function Base.sqrt{T}(xx::DecoratedInterval{T})
-    x = interval(xx)
 
-    domain = Interval{T}(zero(T), convert(T, ∞))
+restricted_functions = Dict(   # those with restricted domains
+    :sqrt => [0, ∞],
+    :asin => [-1, 1]
+)
 
-    if x ⊆ domain
+for (f, domain) in restricted_functions
 
-        if isunbounded(x)
-            return DecoratedInterval(sqrt(x), decay(xx, dac))
-        else
-            return DecoratedInterval(sqrt(x), decay(xx, com))
+    domain = Interval(domain...)
+
+    #code = quote
+    @eval function Base.$(f){T}(xx::DecoratedInterval{T})
+            x = interval(xx)
+
+            if x ⊆ $(domain)
+
+                if isunbounded(x)  # unnecessary if domain is bounded
+                    return DecoratedInterval($(f)(x), decay(xx, dac))
+                else
+                    return DecoratedInterval($(f)(x), decay(xx, com))
+                end
+
+            end
+
+            DecoratedInterval($f(x ∩ $(domain)), decay(xx, trv))
         end
-
-    end
-
-    DecoratedInterval(sqrt(x ∩ domain), decay(xx, trv))
+    #end
 end
 
-function Base.asin{T}(xx::DecoratedInterval{T})
-    x = interval(xx)
 
-    domain = Interval{T}(-one(T), one(T))
 
-    if x ⊆ domain
-
-        return DecoratedInterval(asin(x), decay(xx, com))
-
-    end
-
-    DecoratedInterval(sqrt(x ∩ domain), decay(xx, trv))
-end
+#
+#
+# function Base.sqrt{T}(xx::DecoratedInterval{T})
+#     x = interval(xx)
+#
+#     domain = Interval{T}(zero(T), convert(T, ∞))
+#
+#     if x ⊆ domain
+#
+#         if isunbounded(x)
+#             return DecoratedInterval(sqrt(x), decay(xx, dac))
+#         else
+#             return DecoratedInterval(sqrt(x), decay(xx, com))
+#         end
+#
+#     end
+#
+#     DecoratedInterval(sqrt(x ∩ domain), decay(xx, trv))
+# end
+#
+# function Base.asin{T}(xx::DecoratedInterval{T})
+#     x = interval(xx)
+#
+#     domain = Interval{T}(-one(T), one(T))
+#
+#     if x ⊆ domain
+#
+#         return DecoratedInterval(asin(x), decay(xx, com))
+#
+#     end
+#
+#     DecoratedInterval(sqrt(x ∩ domain), decay(xx, trv))
+# end
 
 a = DecoratedInterval(@interval(1, 2), com)
-sqrt(a)
+@show a, sqrt(a)
 
 a = DecoratedInterval(@interval(-1, 1), com)
-sqrt(a)
+@show a, sqrt(a)
+@show a, asin(a)
