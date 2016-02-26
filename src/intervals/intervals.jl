@@ -5,7 +5,7 @@
 
 ## Interval type
 
-abstract AbstractInterval <: Number
+abstract AbstractInterval <: Real
 
 immutable Interval{T<:Real} <: AbstractInterval
     lo :: T

@@ -3,7 +3,7 @@ using ValidatedNumerics
 import ValidatedNumerics.AbstractInterval
 
 @enum DECORATION ill=0 trv=1 def=2 dac=3 com=4
-# < and min work automatically!
+# < and min work automatically for enums!
 
 macro I_str(ex)
     @interval ex
@@ -57,6 +57,9 @@ restricted_functions = Dict(   # those with restricted domains
     :sqrt => [0, ∞],
     :asin => [-1, 1]
 )
+
+# do separately for T = Float64 and T = BigFloat?
+# or convert the domain explicitly?
 
 for (f, domain) in restricted_functions
 
