@@ -59,6 +59,7 @@ export
 
 ## Decorations
 export
+    @decorated,
     interval, decoration, DecoratedInterval,
     com, dac, def, trv, ill
 

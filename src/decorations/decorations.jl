@@ -36,6 +36,10 @@ function DecoratedInterval(I::Interval)
 
 end
 
+macro decorated(ex)
+    :(DecoratedInterval($ex))
+end
+
 
 decay(a::DECORATION, b::DECORATION) = min(a, b)
 decay(xx::DecoratedInterval, a::DECORATION) = min(decoration(xx), a)
