@@ -24,7 +24,8 @@ import Base:
     convert, promote_rule, eltype,
     BigFloat, float, widen,
     ⊆, eps,
-    floor, ceil, trunc, sign, round
+    floor, ceil, trunc, sign, round,
+    expm1, log1p
 
 
 export
