@@ -21,17 +21,8 @@ else
     end
 end
 
+
 # Macros for directed rounding:
-
-macro show_rounding(T, expr)
-   quote
-       for mode in (:RoundNearest, :RoundDown, :RoundUp)
-           ex = @setrounding($T, $expr, $mode)
-           @show mode, ex
-       end
-   end
-end
-
 
 macro setrounding(T, expr, rounding_mode)
     quote
@@ -42,7 +33,7 @@ macro setrounding(T, expr, rounding_mode)
 end
 
 
- doc"""The `@round` macro creates a rounded interval according to the current
+doc"""The `@round` macro creates a rounded interval according to the current
 interval rounding mode. It is the main function used to create intervals in the
 library (e.g. when adding two intervals, etc.). It uses the interval rounding mode (see get_interval_rounding())"""
 macro round(T, expr1, expr2)
@@ -88,7 +79,7 @@ function split_interval_string(T, x::AbstractString)
 end
 
 
- doc"""`make_interval` is used by `@interval` to create intervals from
+doc"""`make_interval` is used by `@interval` to create intervals from
 individual elements of different types"""
 # make_interval for BigFloat intervals
 make_interval(::Type{BigFloat}, x::AbstractString) =
@@ -167,7 +158,7 @@ function make_interval{T<:Integer}(::Type{Rational{T}}, x::Interval)
 end
 
 
- doc"""`transform` transforms a string by applying the function `f` and type
+doc"""`transform` transforms a string by applying the function `f` and type
 `T` to each argument, i.e. `:(x+y)` is transformed to `:(f(T, x) + f(T, y))`
 """
 transform(x, f, T) = :($f($(esc(T)), $(esc(x))))   # use if x is not an expression
@@ -228,7 +219,7 @@ float(x::Interval) =
 ## Change type of interval rounding:
 
 
- doc"""`get_interval_rounding()` returns the current interval rounding mode.
+doc"""`get_interval_rounding()` returns the current interval rounding mode.
 There are two possible rounding modes:
 
 - :narrow  -- changes the floating-point rounding mode to `RoundUp` and `RoundDown`.
