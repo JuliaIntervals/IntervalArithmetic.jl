@@ -120,7 +120,7 @@ function make_interval(::Type{Float64}, x::Integer)
     a = setprecision(53) do
         make_interval(BigFloat, x)
     end
-    float(a)
+    Float64(a)
 end
 
 make_interval(::Type{Float64}, x::BigFloat) = @thin_round(Float64, convert(Float64, x))

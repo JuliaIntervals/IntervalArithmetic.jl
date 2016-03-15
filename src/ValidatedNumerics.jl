@@ -44,10 +44,9 @@ export
     pi_interval,
     midpoint_radius, interval_from_midpoint_radius,
     RoundTiesToEven, RoundTiesToAway,
-    cancelminus, cancelplus, isunbounded
+    cancelminus, cancelplus, isunbounded,
+    .., @I_str
 
-export
-    ..
 
 ## Multidimensional
 export
@@ -71,13 +70,10 @@ end
 
 include("misc.jl")
 include("intervals/intervals.jl")
-
-a..b = @interval(a, b)
-
 include("multidim/multidim.jl")
+
 include("root_finding/root_finding.jl")
 
-Base.isfinite(x::Interval) = isfinite(x.lo) && isfinite(x.hi)
 
 
 end # module ValidatedNumerics
