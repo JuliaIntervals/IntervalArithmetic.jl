@@ -95,6 +95,11 @@ function make_interval{T<:Real}(::Type{BigFloat}, x::T)
     @thin_round(BigFloat, BigFloat(x))
 end
 
+function make_interval(::Type{BigFloat}, x::Float64)
+    y = rationalize(x)
+    make_interval(BigFloat, y)
+end
+
 function make_interval(::Type{BigFloat}, x::Interval)
     @round(BigFloat, BigFloat(x.lo), BigFloat(x.hi))
 end

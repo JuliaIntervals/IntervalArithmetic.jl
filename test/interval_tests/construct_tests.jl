@@ -135,4 +135,8 @@ facts("Constructing intervals") do
     @fact params.precision == 256 --> true
     @fact params.rounding == :narrow --> true
 
+    set_interval_precision(53)
+    a = big(1)//3
+    @fact @interval(a) --> Interval(3.3333333333333331e-01, 3.3333333333333337e-01)
+
 end
