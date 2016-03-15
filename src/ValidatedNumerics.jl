@@ -26,6 +26,7 @@ import Base:
     ⊆, eps,
     floor, ceil, trunc, sign, round,
     expm1, log1p
+    isfinite
 
 
 export
@@ -76,6 +77,7 @@ a..b = @interval(a, b)
 include("multidim/multidim.jl")
 include("root_finding/root_finding.jl")
 
+Base.isfinite(x::Interval) = isfinite(x.lo) && isfinite(x.hi)
 
 
 end # module ValidatedNumerics
