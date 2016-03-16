@@ -5,9 +5,12 @@
 # CRlibm does not contain a correctly-rounded ^ function for Float64
 # Use the BigFloat version from MPFR instead, which is correctly-rounded:
 
+# Write explicitly like this to avoid ambiguity warnings:
 for T in (:Integer, :Rational, :Float64, :BigFloat, :Interval)
-    @eval ^(a::Interval{Float64}, x::$T) = float(big53(a)^x)
+
+    @eval ^(a::Interval{Float64}, x::$T) = convert(Interval{Float64}, big53(a)^x)
 end
+
 
 # Integer power:
 

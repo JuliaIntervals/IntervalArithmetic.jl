@@ -214,9 +214,9 @@ function make_interval(T, expr1, expr2)
 end
 
 
-# float(x::Interval) = Interval(convert(Float64,x.lo),convert(Float64,x.hi))
 float(x::Interval) =
-    @round(BigFloat, convert(Float64, x.lo), convert(Float64, x.hi))
+    # @round(BigFloat, convert(Float64, x.lo), convert(Float64, x.hi))
+    make_interval(Float64, x)
 
 ## Change type of interval rounding:
 

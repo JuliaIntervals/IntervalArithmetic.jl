@@ -3,7 +3,6 @@
 using ValidatedNumerics
 using FactCheck
 
-
 facts("Constructing intervals") do
     set_interval_precision(53)
     @fact get_interval_precision() == (BigFloat,53) --> true
