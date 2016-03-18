@@ -6,8 +6,6 @@
 import Base:
     ⊆, ∩, isempty
 
-export IntervalBox
-
 
 doc"""An `IntervalBox` is a Cartesian product of an arbitrary number of `Interval`s,
 representing an $N$-dimensional rectangular IntervalBox."""
