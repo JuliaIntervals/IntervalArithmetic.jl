@@ -23,7 +23,7 @@ facts("Operations on boxes") do
 end
 
 facts("@box tests") do
-    @box f(x, y) = (x + y, x - y)
+    @intervalbox f(x, y) = (x + y, x - y)
 
     X = IntervalBox(1..1, 2..2)
     @fact f(X) --> IntervalBox(3..3, -1 .. -1)
