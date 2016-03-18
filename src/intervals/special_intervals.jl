@@ -33,6 +33,8 @@ nai() = nai(get_interval_precision()[1])
 
 isnai(x::Interval) = isnan(x.lo) || isnan(x.hi)
 
+isfinite(x::Interval) = isfinite(x.lo) && isfinite(x.hi)
+isnan(x::Interval) = isnai(x)
 
 doc"""`isthin(x)` corresponds to `isSingleton`, i.e. it checks if `x` is the set consisting of a single exactly representable float. Thus any float which is not exactly representable does *not* yield a thin interval."""
 function isthin(x::Interval)

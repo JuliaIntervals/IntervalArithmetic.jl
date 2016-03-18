@@ -4,10 +4,10 @@ __precompile__(true)
 
 module ValidatedNumerics
 
-using Compat
-#using FactCheck
-
 using CRlibm
+using Compat
+using FixedSizeArrays
+
 
 setrounding(BigFloat, RoundNearest)
 setrounding(Float64, RoundNearest)
@@ -25,7 +25,8 @@ import Base:
     BigFloat, float, widen,
     ⊆, eps,
     floor, ceil, trunc, sign, round,
-    expm1, log1p
+    expm1, log1p,
+    isfinite, isnan
 
 
 export
@@ -43,7 +44,13 @@ export
     pi_interval,
     midpoint_radius, interval_from_midpoint_radius,
     RoundTiesToEven, RoundTiesToAway,
-    cancelminus, cancelplus, isunbounded
+    cancelminus, cancelplus, isunbounded,
+    .., @I_str
+
+
+## Multidimensional
+export
+    IntervalBox, @intervalbox
 
 ## Root finding
 export
@@ -63,6 +70,8 @@ end
 
 include("misc.jl")
 include("intervals/intervals.jl")
+include("multidim/multidim.jl")
+
 include("root_finding/root_finding.jl")
 
 

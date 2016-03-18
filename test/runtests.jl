@@ -14,12 +14,15 @@ include("misc_tests.jl")
 # Interval tests:
 
 include("interval_tests/interval_tests.jl")
+include("multidim_tests/multidim_tests.jl")
 
 
 # Root-finding tests:
 
 include("root_finding_tests/auto_diff_tests.jl")
 include("root_finding_tests/root_finding_tests.jl")
+
+# Multidimensional boxes tests:
 
 # ITF1788 tests
 
