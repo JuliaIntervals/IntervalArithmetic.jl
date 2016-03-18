@@ -25,8 +25,8 @@ import Base:
     BigFloat, float, widen,
     ⊆, eps,
     floor, ceil, trunc, sign, round,
-    expm1, log1p
-    isfinite
+    expm1, log1p,
+    isfinite, isnan
 
 
 export
@@ -50,7 +50,7 @@ export
 
 ## Multidimensional
 export
-    IntervalBox, @box
+    IntervalBox, @intervalbox
 
 ## Root finding
 export

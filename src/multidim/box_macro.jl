@@ -7,7 +7,7 @@ Both the original n-argument function and the `IntervalBox` version are defined.
 
 Example:
 
-    @box f(x, y) = (x + y, x - y)
+    @intervalbox f(x, y) = (x + y, x - y)
 
     X = IntervalBox(1..1, 2..2)
     f(X)
@@ -15,7 +15,7 @@ Example:
 (No significant error checking is performed!)
 """
 
-macro box(ex)
+macro intervalbox(ex)
     # @show ex
     # @show ex.head
     if ex.head != :(=)
