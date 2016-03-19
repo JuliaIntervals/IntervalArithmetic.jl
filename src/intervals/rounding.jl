@@ -154,7 +154,7 @@ make_interval{T<:Integer, S<:Integer}(::Type{Rational{T}}, x::Rational{S}) =
 #     Interval(rationalize(T, x))
 
 function make_interval{T<:Integer, S<:Integer}(::Type{Rational{T}}, x::Rational{S})
-    Interval{Rational{T}(x*one(Rational{T}))
+  Interval(x*one(Rational{T}))
 end
 
 
@@ -181,6 +181,10 @@ function transform(expr::Expr, f::Symbol, T)
             new_expr.args[1] = :($(esc(expr.args[1])))
             first = 2
         end
+    end
+
+    if expr.head == :macrocall  # handles BigInts etc.
+        return :($f($(esc(T)), $(esc(expr))))  # hack: pass straight through
     end
 
     for (i, arg) in enumerate(expr.args)
@@ -238,3 +242,5 @@ function set_interval_rounding(mode)
 
     parameters.rounding = mode  # a symbol
 end
+
+big{T}(x::Interval{T}) = convert(Interval{BigFloat}, x)

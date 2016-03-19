@@ -26,7 +26,8 @@ import Base:
     ⊆, eps,
     floor, ceil, trunc, sign, round,
     expm1, log1p,
-    isfinite, isnan
+    isfinite, isnan,
+    big
 
 
 export
