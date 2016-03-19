@@ -96,8 +96,8 @@ function make_interval{T<:Real}(::Type{BigFloat}, x::T)
 end
 
 function make_interval(::Type{BigFloat}, x::Float64)
-    y = rationalize(x)
-    make_interval(BigFloat, y)
+    #y = rationalize(x)
+    make_interval(BigFloat, rationalize(x))
 end
 
 function make_interval(::Type{BigFloat}, x::Interval)
@@ -111,7 +111,7 @@ make_interval(::Type{Float64}, x::AbstractString) = split_interval_string(Float6
 make_interval(::Type{Float64}, x::Irrational) = make_interval(Float64, make_interval(BigFloat, x))
 
 function make_interval(::Type{Float64}, x::Float64)
-    isinf(x) && return Interval(x)
+    #isinf(x) && return Interval(x)
     make_interval(Float64, rationalize(x))
 end
 
@@ -131,15 +131,15 @@ end
 
 
 # make_interval for Rational intervals
-function make_interval(::Type{Rational{Int}}, x::Irrational)
-    a = float(make_interval(BigFloat, x))
-    make_interval(Rational{Int}, a)
-end
-
-function make_interval(::Type{Rational{BigInt}}, x::Irrational)
-    a = make_interval(BigFloat, x)
-    make_interval(Rational{BigInt}, a)
-end
+# function make_interval(::Type{Rational{Int}}, x::Irrational)
+#     a = flofat(make_interval(BigFloat, x))
+#     make_interval(Rational{Int}, a)
+# end
+#
+# function make_interval(::Type{Rational{BigInt}}, x::Irrational)
+#     a = make_interval(BigFloat, x)
+#     make_interval(Rational{BigInt}, a)
+# end
 
 make_interval{T<:Integer, S<:Integer}(::Type{Rational{T}}, x::S) =
     Interval(x*one(Rational{T}))
@@ -147,16 +147,14 @@ make_interval{T<:Integer, S<:Integer}(::Type{Rational{T}}, x::S) =
 make_interval{T<:Integer, S<:Integer}(::Type{Rational{T}}, x::Rational{S}) =
     Interval(x*one(Rational{T}))
 
-make_interval{T<:Integer, S<:Float64}(::Type{Rational{T}}, x::S) =
-    Interval(rationalize(T, x))
+# make_interval{T<:Integer, S<:Float64}(::Type{Rational{T}}, x::S) =
+#     Interval(rationalize(T, x))
+#
+# make_interval{T<:Integer, S<:BigFloat}(::Type{Rational{T}}, x::S) =
+#     Interval(rationalize(T, x))
 
-make_interval{T<:Integer, S<:BigFloat}(::Type{Rational{T}}, x::S) =
-    Interval(rationalize(T, x))
-
-function make_interval{T<:Integer}(::Type{Rational{T}}, x::Interval)
-    a = make_interval(Rational{T}, x.lo)
-    b = make_interval(Rational{T}, x.hi)
-    Interval(a.lo, b.hi)
+function make_interval{T<:Integer, S<:Integer}(::Type{Rational{T}}, x::Rational{S})
+    Interval{Rational{T}(x*one(Rational{T}))
 end
 
 
