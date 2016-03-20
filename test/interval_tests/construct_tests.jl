@@ -139,3 +139,18 @@ facts("Constructing intervals") do
     @fact @interval(a) --> Interval(3.3333333333333331e-01, 3.3333333333333337e-01)
 
 end
+
+facts("Big intervals") do
+    a = @floatinterval(3)
+    @fact typeof(big(a)) --> Interval{BigFloat}
+
+    @fact @floatinterval(123412341234123412341241234) --> Interval(1.234123412341234e26, 1.234123412341234e26)
+    @fact @interval(big"3") --> @floatinterval(3)
+    @fact @floatinterval(big"1e10000") --> Interval(1.7976931348623157e308, ∞)
+
+    a = big(10)^10000
+    @fact @floatinterval(a) --> Interval(1.7976931348623157e308, ∞)
+    set_interval_precision(53)
+    @fact @biginterval(a) --> Interval(big"9.9999999999999994e+9999", big"1.0000000000000001e+10000")
+    
+end
