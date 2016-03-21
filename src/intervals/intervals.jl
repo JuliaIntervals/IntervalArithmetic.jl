@@ -10,10 +10,10 @@ immutable Interval{T<:Real} <: Real
     hi :: T
 
     function Interval(a::Real, b::Real)
-        # The following exception is needed to define emptyintervals as [∞,-∞]
-        (isinf(a) && isinf(b)) && return new(a, b)
 
         if a > b
+            (isinf(a) && isinf(b)) && return new(a, b)  # empty interval = [∞,-∞]
+
             throw(ArgumentError("Must have a ≤ b to construct Interval(a, b)."))
         end
 
