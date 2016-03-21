@@ -104,6 +104,11 @@ function make_interval(::Type{BigFloat}, x::Interval)
     @round(BigFloat, BigFloat(x.lo), BigFloat(x.hi))
 end
 
+#make_interval(BigFloat, x::Complex{Bool}) = (x == im) && one(Interval{BigFloat})*im
+make_interval(BigFloat, x::Complex{Bool}) = (x == im) ?
+    one(Interval{BigFloat})*im : throw(ArgumentError("Complex{Bool} ≂̸ im"))
+
+
 
 # make_interval for Float64 intervals
 make_interval(::Type{Float64}, x::AbstractString) = split_interval_string(Float64, x)
@@ -119,7 +124,8 @@ make_interval(::Type{Float64}, x::Rational) = @thin_round(float(typeof(x)), Floa
 # round using the correct floating-point type
 
 function make_interval(::Type{Float64}, x::Integer)
-    @thin_round(Float64, Float64(x))
+    #@thin_round(Float64, Float64(x))
+    Interval( Float64(x, RoundDown), Float64(x, RoundUp) )
 end
 
 make_interval(::Type{Float64}, x::BigFloat) = @thin_round(BigFloat, Float64(x))
@@ -128,6 +134,10 @@ make_interval(::Type{Float64}, x::BigFloat) = @thin_round(BigFloat, Float64(x))
 function make_interval(::Type{Float64}, x::Interval)
     Interval( Float64(x.lo, RoundDown), Float64(x.hi, RoundUp) )
 end
+
+make_interval(Float64, x::Complex{Bool}) = (x == im) ?
+    one(Interval{Float64})*im : throw(ArgumentError("Complex{Bool} ≂̸ im"))
+
 
 
 # make_interval for Rational intervals
@@ -216,9 +226,7 @@ function make_interval(T, expr1, expr2)
 end
 
 
-float(x::Interval) =
-    # @round(BigFloat, convert(Float64, x.lo), convert(Float64, x.hi))
-    make_interval(Float64, x)
+float(x::Interval) = convert(Interval{Float64}, x)
 
 ## Change type of interval rounding:
 
