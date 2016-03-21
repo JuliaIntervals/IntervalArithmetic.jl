@@ -24,8 +24,8 @@ facts("Constructing intervals") do
     @fact Interval(BigInt(1)//10) --> Interval{Rational{BigInt}}(1//10, 1//10)
     @fact Interval( (1.0, 2.0) ) --> Interval(1.0, 2.0)
 
-    # @fact Interval{Rational{Int}}(1) --> Interval(1//1)
-    # @fact Interval{Rational{Int}}(pi) --> Interval(rationalize(1.0*pi))
+    @fact Interval{Rational{Int}}(1) --> Interval(1//1)
+    #@fact Interval{Rational{Int}}(pi) --> Interval(rationalize(1.0*pi))
 
     @fact Interval{BigFloat}(1) --> Interval{BigFloat}(big(1.0),big(1.0))
     @fact Interval{BigFloat}(pi) -->
@@ -41,17 +41,17 @@ facts("Constructing intervals") do
 
 
     # Conversions; may involve rounding
-    # @fact convert(Interval, 1) --> Interval(1.0)
-    # @fact convert(Interval, pi) --> @interval(pi)
-    # @fact convert(Interval, eu) --> @interval(eu)
-    # @fact convert(Interval, BigInt(1)) --> Interval(BigInt(1))
-    # @fact convert(Interval, 1//10) --> @interval(1//10)
-    # @fact convert(Interval, 0.1) --> Interval(0.09999999999999999, 0.1)
-    # @fact convert(Interval, BigFloat(0.1)) --> Interval(big(0.1))
-    # a = @interval(0.1)
+    @fact convert(Interval, 1) --> Interval(1.0)
+    @fact convert(Interval, pi) --> @interval(pi)
+    @fact convert(Interval, eu) --> @interval(eu)
+    @fact convert(Interval, BigInt(1)) --> Interval(BigInt(1))
+    @fact convert(Interval, 1//10) --> @interval(1//10)
+    @fact convert(Interval, 0.1) --> Interval(0.09999999999999999, 0.1)
+    @fact convert(Interval, BigFloat(0.1)) --> Interval(big(0.1))
+    a = @interval(0.1)
 
-    # @fact convert(Interval{Rational{Int}},a) --> Interval(1//10)
-    # @fact convert(Interval{Rational{BigInt}},pi) --> Interval{Rational{BigInt}}(pi)
+    #@fact convert(Interval{Rational{Int}},a) --> Interval(1//10)
+    #@fact convert(Interval{Rational{BigInt}},pi) --> Interval{Rational{BigInt}}(pi)
 
 
     # Constructors from the macros @interval, @floatinterval @biginterval
