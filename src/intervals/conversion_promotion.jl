@@ -15,6 +15,11 @@ promote_rule{T<:Real}(::Type{BigFloat}, ::Type{Interval{T}}) =
 
 ## Conversion rules
 
+# Just specifying Interval defaults to Float64 interval
+# Remove this default so that it is necessary to explicitly specify?
+convert(::Type{Interval}, x::Real) = convert(Interval{Float64}, x)
+#convert{T<:Real}(::Type{Interval}, x::T) = make_interval(Float64, x)
+
 doc"""`split_interval_string` deals with strings of the form
 \"[3.5, 7.2]\""""
 
@@ -44,7 +49,7 @@ end
 
 function convert(::Type{Interval{BigFloat}}, x::Float64)
     #y = rationalize(x)
-    make_interval(BigFloat, rationalize(x))
+    convert(Interval{BigFloat}, rationalize(x))
 end
 
 function convert(::Type{Interval{BigFloat}}, x::Interval)

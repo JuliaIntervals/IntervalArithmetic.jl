@@ -124,7 +124,7 @@ function ^{S<:Integer}(a::Interval{BigFloat}, r::Rational{S})
     end
 
     isinteger(r) && return convert(Interval{T}, a^round(S,r))
-    r == one(S)//2 && return
+    r == one(S)//2 && return sqrt(a)
 
     a = a ∩ domain
     (isempty(r) || isempty(a)) && return emptyinterval(a)
