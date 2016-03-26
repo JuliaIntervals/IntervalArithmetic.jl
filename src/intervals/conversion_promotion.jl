@@ -4,10 +4,10 @@
 
 ## Default conversion to Interval, corresponds to Interval{Float64}
 # do we really need this?
-convert{T<:Real}(::Type{Interval}, x::T) = make_interval(Float64, x)
+#convert{T<:Real}(::Type{Interval}, x::T) = make_interval(Float64, x)
 
 ## Conversion to specific type intervals
-convert{T<:Real}(::Type{Interval{T}}, x::Real) = make_interval(T, x)
+#convert{T<:Real}(::Type{Interval{T}}, x::Real) = make_interval(T, x)
 
 
 ## Promotion rules

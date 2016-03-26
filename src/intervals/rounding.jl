@@ -88,77 +88,76 @@ individual elements of different types"""
 
 # make_interval for BigFloat intervals
 
-make_interval(::Type{BigFloat}, x::AbstractString) =
+convert(::Type{Interval{BigFloat}}, x::AbstractString) =
     split_interval_string(BigFloat, x)
 
-function make_interval{T<:Real}(::Type{BigFloat}, x::T)
+function convert{T<:Real}(::Type{Interval{BigFloat}}, x::T)
     @thin_round(BigFloat, BigFloat(x))
 end
 
-function make_interval(::Type{BigFloat}, x::Float64)
+function convert(::Type{Interval{BigFloat}}, x::Float64)
     #y = rationalize(x)
     make_interval(BigFloat, rationalize(x))
 end
 
-function make_interval(::Type{BigFloat}, x::Interval)
+function convert(::Type{Interval{BigFloat}}, x::Interval)
     @round(BigFloat, BigFloat(x.lo), BigFloat(x.hi))
 end
 
 
 # make_interval for Float64 intervals
-make_interval(::Type{Float64}, x::AbstractString) = split_interval_string(Float64, x)
+convert(::Type{Interval{Float64}}, x::AbstractString) = split_interval_string(Float64, x)
 
-make_interval(::Type{Float64}, x::Irrational) = make_interval(Float64, make_interval(BigFloat, x))
+convert(::Type{Interval{Float64}}, x::Irrational) = convert(Interval{Float64}, convert(Interval{BigFloat}, x))
 
-function make_interval(::Type{Float64}, x::Float64)
+function convert(::Type{Interval{Float64}}, x::Float64)
     #isinf(x) && return Interval(x)
-    make_interval(Float64, rationalize(x))
+    convert(Interval{Float64}, rationalize(x))
 end
 
-make_interval(::Type{Float64}, x::Rational) = @thin_round(float(typeof(x)), Float64(x))
+convert(::Type{Interval{Float64}}, x::Rational) = @thin_round(float(typeof(x)), Float64(x))
 # round using the correct floating-point type
 
-function make_interval(::Type{Float64}, x::Integer)
+function convert(::Type{Interval{Float64}}, x::Integer)
     Interval( Float64(x, RoundDown), Float64(x, RoundUp) )
 end
 
 
 
-make_interval(::Type{Float64}, x::BigFloat) = @thin_round(BigFloat, Float64(x))
+convert(::Type{Interval{Float64}}, x::BigFloat) = @thin_round(BigFloat, Float64(x))
 # NB: Must use rounding of BigFloat, not of Float64, when converting BigFloats
 
-function make_interval(::Type{Float64}, x::Interval)
+function convert(::Type{Interval{Float64}}, x::Interval)
     Interval( Float64(x.lo, RoundDown), Float64(x.hi, RoundUp) )
 end
 
 
 # For complex:
-make_interval{T}(::Type{T}, x::Complex{Bool}) = (x == im) ?
+convert{T}(::Type{Interval{T}}, x::Complex{Bool}) = (x == im) ?
     one(T)*im : throw(ArgumentError("Complex{Bool} not equal to im"))
 
 
 
-# make_interval for Rational intervals
-function make_interval(::Type{Rational{Int}}, x::Irrational)
-    a = float(make_interval(BigFloat, x))
-    make_interval(Rational{Int}, a)
+function convert(::Type{Interval{Rational{Int}}}, x::Irrational)
+    a = float(convert(Interval{BigFloat}, x))
+    convert(Interval{Rational{Int}}, a)
 end
 
-function make_interval(::Type{Rational{BigInt}}, x::Irrational)
-    a = make_interval(BigFloat, x)
-    make_interval(Rational{BigInt}, a)
+function convert(::Type{Interval{Rational{BigInt}}}, x::Irrational)
+    a = convert(Interval{BigFloat}, x)
+    convert(Interval{Rational{BigInt}}, a)
 end
 
-make_interval{T<:Integer, S<:Integer}(::Type{Rational{T}}, x::S) =
+convert{T<:Integer, S<:Integer}(::Type{Interval{Rational{T}}}, x::S) =
     Interval(x*one(Rational{T}))
 
-make_interval{T<:Integer, S<:Integer}(::Type{Rational{T}}, x::Rational{S}) =
+convert{T<:Integer, S<:Integer}(::Type{Interval{Rational{T}}}, x::Rational{S}) =
     Interval(x*one(Rational{T}))
 
-make_interval{T<:Integer, S<:Float64}(::Type{Rational{T}}, x::S) =
+convert{T<:Integer, S<:Float64}(::Type{Interval{Rational{T}}}, x::S) =
     Interval(rationalize(T, x))
 
-make_interval{T<:Integer, S<:BigFloat}(::Type{Rational{T}}, x::S) =
+convert{T<:Integer, S<:BigFloat}(::Type{Interval{Rational{T}}}, x::S) =
     Interval(rationalize(T, x))
 
 
@@ -208,13 +207,13 @@ and making each literal (0.1, 1, etc.) into a corresponding interval constructio
 by calling `transform`."""
 
 function make_interval(T, expr1, expr2)
-    expr1 = transform(expr1, :make_interval, T)
+    expr1 = transform(expr1, :convert, :(Interval{$T}))
 
     if isempty(expr2)  # only one argument
         return expr1
     end
 
-    expr2 = transform(expr2[1], :make_interval, T)
+    expr2 = transform(expr2[1], :convert, :(Interval{$T}))
 
     :(hull($expr1, $expr2))
 end
@@ -222,7 +221,7 @@ end
 
 float(x::Interval) =
     # @round(BigFloat, convert(Float64, x.lo), convert(Float64, x.hi))
-    make_interval(Float64, x)
+    convert(Interval{Float64}, x)
 
 ## Change type of interval rounding:
 

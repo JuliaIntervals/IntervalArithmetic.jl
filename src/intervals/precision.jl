@@ -18,7 +18,7 @@ function set_interval_precision(::Type{BigFloat}, precision::Integer=256)
 
     parameters.precision_type = BigFloat
     parameters.precision = precision
-    parameters.pi = make_interval(BigFloat, pi)
+    parameters.pi = convert(Interval{BigFloat}, pi)
 
     precision
 end
@@ -40,7 +40,7 @@ get_interval_precision() =
     parameters.precision_type == Float64 ? (Float64, -1) : (BigFloat, parameters.precision)
 
 
-const float_interval_pi = make_interval(Float64, pi)  # does not change
+const float_interval_pi = convert(Interval{Float64}, pi)  # does not change
 
 pi_interval(::Type{BigFloat}) = parameters.pi
 pi_interval(::Type{Float64})  = float_interval_pi
