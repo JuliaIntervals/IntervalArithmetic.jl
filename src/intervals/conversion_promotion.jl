@@ -44,7 +44,8 @@ convert(::Type{Interval{BigFloat}}, x::AbstractString) =
     split_interval_string(BigFloat, x)
 
 function convert{T<:Real}(::Type{Interval{BigFloat}}, x::T)
-    @thin_round(BigFloat, BigFloat(x))
+    Interval{BigFloat}(BigFloat(x, RoundDown), BigFloat(x, RoundUp))
+    # the rounding up could be down as nextfloat of the rounded down one
 end
 
 function convert(::Type{Interval{BigFloat}}, x::Float64)
@@ -53,34 +54,38 @@ function convert(::Type{Interval{BigFloat}}, x::Float64)
 end
 
 function convert(::Type{Interval{BigFloat}}, x::Interval)
-    @round(BigFloat, BigFloat(x.lo), BigFloat(x.hi))
+    Interval{BigFloat}(BigFloat(x.lo, RoundDown), BigFloat(x.hi, RoundUp))
 end
 
 
 # Float64 intervals:
 convert(::Type{Interval{Float64}}, x::AbstractString) = split_interval_string(Float64, x)
 
-convert(::Type{Interval{Float64}}, x::Irrational) = convert(Interval{Float64}, convert(Interval{BigFloat}, x))
+#convert(::Type{Interval{Float64}}, x::Irrational) = convert(Interval{Float64}, convert(Interval{BigFloat}, x))
 
+function convert{T<:Real}(::Type{Interval{Float64}}, x::T)
+    Interval{Float64}(Float64(x, RoundDown), Float64(x, RoundUp))
+    # the rounding up could be down as nextfloat of the rounded down one
+end
 function convert(::Type{Interval{Float64}}, x::Float64)
     #isinf(x) && return Interval(x)
     convert(Interval{Float64}, rationalize(x))
 end
 
-convert(::Type{Interval{Float64}}, x::Rational) = @thin_round(float(typeof(x)), Float64(x))
+#convert(::Type{Interval{Float64}}, x::Rational) = @thin_round(float(typeof(x)), Float64(x))
 # round using the correct floating-point type
 
-function convert(::Type{Interval{Float64}}, x::Integer)
-    Interval( Float64(x, RoundDown), Float64(x, RoundUp) )
-end
+#function convert(::Type{Interval{Float64}}, x::Integer)
+    #Interval( Float64(x, RoundDown), Float64(x, RoundUp) )
+#end
 
 
 
-convert(::Type{Interval{Float64}}, x::BigFloat) = @thin_round(BigFloat, Float64(x))
+#convert(::Type{Interval{Float64}}, x::BigFloat) = @thin_round(BigFloat, Float64(x))
 # NB: Must use rounding of BigFloat, not of Float64, when converting BigFloats
 
 function convert(::Type{Interval{Float64}}, x::Interval)
-    Interval( Float64(x.lo, RoundDown), Float64(x.hi, RoundUp) )
+    Interval{Float64}( Float64(x.lo, RoundDown), Float64(x.hi, RoundUp) )
 end
 
 
