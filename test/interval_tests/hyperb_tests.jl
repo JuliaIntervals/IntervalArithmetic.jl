@@ -6,6 +6,8 @@ using FactCheck
 set_interval_precision(128)
 set_interval_precision(Float64)
 
+@show @biginterval(1)
+
 facts("Hyperb tests") do
     @fact sinh(emptyinterval()) --> emptyinterval()
     @fact sinh(Interval(0.5)) --> Interval(0.5210953054937473, 0.5210953054937474)
