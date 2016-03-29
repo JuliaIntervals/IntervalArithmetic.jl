@@ -10,13 +10,15 @@ function big53(a::Interval{Float64})
 end
 
 
-set_interval_precision(::Type{Float64}, prec=-1) = parameters.precision_type = Float64
+set_interval_precision(::Type{Float64}) = parameters.precision_type = Float64
+# does not change the BigFloat precision
 
 
-function set_interval_precision(::Type{BigFloat}, precision::Integer=256)
-    setprecision(precision)
+function set_interval_precision{T}(::Type{T}, precision::Integer=256)
+    #println("SETTING BIGFLOAT PRECISION TO $precision")
+    setprecision(BigFloat, precision)
 
-    parameters.precision_type = BigFloat
+    parameters.precision_type = T
     parameters.precision = precision
     parameters.pi = convert(Interval{BigFloat}, pi)
 
@@ -25,6 +27,7 @@ end
 
 function with_interval_precision(f::Function, precision::Integer=256)
     old_interval_precision = get_interval_precision()
+    #@show old_interval_precision
     set_interval_precision(precision)
     try
         return f()
@@ -36,8 +39,8 @@ end
 set_interval_precision(precision) = set_interval_precision(BigFloat, precision)
 set_interval_precision(t::Tuple) = set_interval_precision(t...)
 
-get_interval_precision() =
-    parameters.precision_type == Float64 ? (Float64, -1) : (BigFloat, parameters.precision)
+get_interval_precision() = (parameters.precision_type, parameters.precision)
+    #parameters.precision_type == Float64 ? (Float64, -1) : (BigFloat, parameters.precision)
 
 
 const float_interval_pi = convert(Interval{Float64}, pi)  # does not change
