@@ -5,10 +5,10 @@ using FactCheck
 
 facts("Constructing intervals") do
     set_interval_precision(53)
-    @fact get_interval_precision() == (BigFloat,53) --> true
+    @fact get_interval_precision() == (BigFloat, 53) --> true
 
     set_interval_precision(Float64)
-    @fact get_interval_precision() == (Float64,-1) --> true
+    @fact get_interval_precision() == (Float64, 53) --> true
 
     # Checks for parameters
     @fact ValidatedNumerics.parameters.precision_type --> Float64

@@ -217,20 +217,22 @@ facts("Consistency tests") do
 end
 
 facts("Precision tests") do
-    set_interval_precision(64)
-    a = @interval(0.1, 0.3)
-
-    @fact get_interval_precision() == (BigFloat, 64) --> true
+    set_interval_precision(100)
+    @fact get_interval_precision() == (BigFloat, 100) --> true
 
     set_interval_precision(Float64)
+    @fact get_interval_precision() == (Float64, 100) --> true
 
-    @fact get_interval_precision() == (Float64, -1) --> true
+    a = @interval(0.1, 0.3)
 
     b = with_interval_precision(64) do
         @interval(0.1, 0.3)
     end
 
     @fact a == b --> true
+
+    @fact get_interval_precision() == (Float64, 100) --> true
+
 end
 
 facts("Interval rounding tests") do
