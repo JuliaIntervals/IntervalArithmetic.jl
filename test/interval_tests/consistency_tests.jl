@@ -229,7 +229,7 @@ facts("Precision tests") do
         @interval(0.1, 0.3)
     end
 
-    @fact a == b --> true
+    @fact b ⊆ a --> true
 
     @fact get_interval_precision() == (Float64, 100) --> true
 
