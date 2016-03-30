@@ -74,7 +74,7 @@ facts("Trig tests") do
 
     @fact atan2(∅, entireinterval()) --> ∅
     @fact atan2(entireinterval(), ∅) --> ∅
-    @fact atan2(@interval(0.0, 1.0), @biginterval(0.0)) --> @biginterval(pi/2)
+    @fact atan2(@interval(0.0, 1.0), @biginterval(0.0)) --> @interval(pi/2)
     @fact atan2(@interval(0.0, 1.0), @interval(0.0)) --> @interval(pi/2)
     @fact atan2(@interval(-1.0, -0.1), @interval(0.0)) --> @interval(-pi/2)
     @fact atan2(@interval(-1.0, 1.0), @interval(0.0)) --> @interval(-pi/2, pi/2)
