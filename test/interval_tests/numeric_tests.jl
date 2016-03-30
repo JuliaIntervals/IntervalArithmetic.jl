@@ -34,8 +34,9 @@ facts("Numeric tests") do
     @fact Interval(0.0, 1.0)/Interval(0.0,1.0) --> Interval(0.0, Inf)
     @fact Interval(-1.0, 1.0)/Interval(0.0,1.0) --> entireinterval(c)
     @fact Interval(-1.0, 1.0)/Interval(-1.0,1.0) --> entireinterval(c)
+end
 
-    # Powers
+facts("Power tests") do
     @fact @interval(0,3) ^ 2 --> Interval(0, 9)
     @fact @interval(2,3) ^ 2 --> Interval(4, 9)
     @fact @interval(-3,0) ^ 2 --> Interval(0, 9)
@@ -78,8 +79,9 @@ facts("Numeric tests") do
     @fact @interval(0.1,0.7)^(1//3) --> Interval(0.4641588833612778, 0.8879040017426008)
     @fact @interval(0.1,0.7)^(1/3)  --> roughly(Interval(0.46415888336127786, 0.8879040017426008))
 
+end
 
-    # exp and log
+facts("Exp and log tests") do
     @fact exp(@biginterval(1//2)) ⊆ exp(@interval(1//2)) --> true
     @fact exp(@interval(1//2)) --> Interval(1.648721270700128, 1.6487212707001282)
     @fact exp(@biginterval(0.1)) ⊆ exp(@interval(0.1)) --> true
@@ -101,8 +103,9 @@ facts("Numeric tests") do
     @fact log2(@interval(0.25, 0.5)) --> Interval(-2.0, -1.0)
     @fact log10(@biginterval(1//10)) ⊆ log10(@interval(1//10)) --> true
     @fact log10(@interval(0.01, 0.1)) --> @interval(log10(0.01), log10(0.1))
+end
 
-    # comparison
+facts("Comparison tests") do
     d = @interval(0.1, 2)
 
     @fact d < 3 --> true
@@ -117,8 +120,9 @@ facts("Numeric tests") do
 
     # real
     @fact real(@interval(-1, 1)) --> Interval(-1, 1)
+end
 
-    # rationals
+facts("Rational tests") do
 
     f = 1 // 3
     g = 1 // 3
@@ -135,7 +139,9 @@ facts("Numeric tests") do
     @fact big(1.)/9 ∈ @interval(1/9) --> true
 
     @fact @interval(1/9) == @interval(1//9) --> true
+end
 
+facts("Floor etc. tests") do
     a = @interval(0.1)
     b = Interval(0.1, 0.1)
     @fact dist(a,b) <= eps(a) --> true
