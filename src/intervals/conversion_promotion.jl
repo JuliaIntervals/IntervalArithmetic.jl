@@ -38,59 +38,27 @@ function split_interval_string(T, x::AbstractString)
 end
 
 
-# BigFloat intervals:
+# Floating point intervals:
 
-convert(::Type{Interval{BigFloat}}, x::AbstractString) =
-    split_interval_string(BigFloat, x)
+convert{T<:AbstractFloat}(::Type{Interval{T}}, x::AbstractString) =
+    split_interval_string(T, x)
 
-function convert{T<:Real}(::Type{Interval{BigFloat}}, x::T)
-    Interval{BigFloat}(BigFloat(x, RoundDown), BigFloat(x, RoundUp))
+function convert{T<:AbstractFloat, S<:Real}(::Type{Interval{T}}, x::S)
+    Interval{T}( T(x, RoundDown), T(x, RoundUp) )
     # the rounding up could be down as nextfloat of the rounded down one
 end
 
-function convert(::Type{Interval{BigFloat}}, x::Float64)
-    #y = rationalize(x)
-    convert(Interval{BigFloat}, rationalize(x))
+function convert{T<:AbstractFloat}(::Type{Interval{T}}, x::Float64)
+    convert(Interval{T}, rationalize(x))
 end
 
-function convert(::Type{Interval{BigFloat}}, x::Interval)
-    Interval{BigFloat}(BigFloat(x.lo, RoundDown), BigFloat(x.hi, RoundUp))
-end
-
-
-# Float64 intervals:
-convert(::Type{Interval{Float64}}, x::AbstractString) = split_interval_string(Float64, x)
-
-#convert(::Type{Interval{Float64}}, x::Irrational) = convert(Interval{Float64}, convert(Interval{BigFloat}, x))
-
-function convert{T<:Real}(::Type{Interval{Float64}}, x::T)
-    Interval{Float64}(Float64(x, RoundDown), Float64(x, RoundUp))
-    # the rounding up could be down as nextfloat of the rounded down one
-end
-function convert(::Type{Interval{Float64}}, x::Float64)
-    #isinf(x) && return Interval(x)
-    convert(Interval{Float64}, rationalize(x))
-end
-
-#convert(::Type{Interval{Float64}}, x::Rational) = @thin_round(float(typeof(x)), Float64(x))
-# round using the correct floating-point type
-
-#function convert(::Type{Interval{Float64}}, x::Integer)
-    #Interval( Float64(x, RoundDown), Float64(x, RoundUp) )
-#end
-
-
-
-#convert(::Type{Interval{Float64}}, x::BigFloat) = @thin_round(BigFloat, Float64(x))
-# NB: Must use rounding of BigFloat, not of Float64, when converting BigFloats
-
-function convert(::Type{Interval{Float64}}, x::Interval)
-    Interval{Float64}( Float64(x.lo, RoundDown), Float64(x.hi, RoundUp) )
+function convert{T<:AbstractFloat}(::Type{Interval{T}}, x::Interval)
+    Interval{T}( T(x.lo, RoundDown), T(x.hi, RoundUp) )
 end
 
 
 # Complex numbers:
-convert{T}(::Type{Interval{T}}, x::Complex{Bool}) = (x == im) ?
+convert{T<:AbstractFloat}(::Type{Interval{T}}, x::Complex{Bool}) = (x == im) ?
     one(T)*im : throw(ArgumentError("Complex{Bool} not equal to im"))
 
 
