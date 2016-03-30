@@ -5,11 +5,12 @@ using FactCheck
 
 set_interval_precision(Float64)
 
-facts("Consistency tests") do
-    a = @interval(1.1, 0.1)
-    b = @interval(0.9, 2.0)
-    c = @interval(0.25, 4.0)
+a = @interval(1.1, 0.1)
+b = @interval(0.9, 2.0)
+c = @interval(0.25, 4.0)
 
+facts("Consistency tests") do
+    
     @fact isa( @interval(1,2), Interval ) --> true
     @fact isa( @interval(0.1), Interval ) --> true
     @fact isa( zero(b), Interval ) --> true
@@ -38,6 +39,9 @@ facts("Consistency tests") do
     @fact a*b --> Interval(a.lo*b.lo, a.hi*b.hi)
     @fact Interval(0,1) * emptyinterval(a) --> emptyinterval(a)
     @fact a * Interval(0) --> zero(a)
+end
+
+facts("inv") do
 
     @fact inv( zero(a) ) --> emptyinterval()
     @fact inv( @interval(0, 1) ) --> Interval(1, Inf)
@@ -51,7 +55,9 @@ facts("Consistency tests") do
     @fact inv(@interval(-4.0,4.0)) --> entireinterval(Float64)
     @fact @interval(0)/@interval(0) --> emptyinterval()
     @fact typeof(emptyinterval()) --> Interval{Float64}
+end
 
+facts("fma consistency") do
     @fact fma(emptyinterval(), a, b) --> emptyinterval()
     @fact fma(entireinterval(), zero(a), b) --> b
     @fact fma(entireinterval(), one(a), b) --> entireinterval()
@@ -59,13 +65,17 @@ facts("Consistency tests") do
     @fact fma(one(a), entireinterval(), b) --> entireinterval()
     @fact fma(a, zero(a), c) --> c
     @fact fma(Interval(1//2), Interval(1//3), Interval(1//12)) --> Interval(3//12)
+end
 
+facts("∈ tests") do
     @fact Inf ∈ entireinterval() --> false
     @fact 0.1 ∈ @interval(0.1) --> true
     @fact 0.1 in @interval(0.1) --> true
     @fact -Inf ∈ entireinterval() --> false
     @fact Inf ∈ entireinterval() --> false
+end
 
+facts("Inclusion tests") do
     @fact b ⊆ c --> true
     @fact emptyinterval(c) ⊆ c --> true
     @fact c ⊆ emptyinterval(c) --> false
@@ -77,6 +87,10 @@ facts("Consistency tests") do
     @fact isdisjoint(a, b) --> false
     @fact isdisjoint(emptyinterval(a), a) --> true
     @fact isdisjoint(emptyinterval(), emptyinterval()) --> true
+
+end
+
+facts("Comparison tests") do
     @fact ValidatedNumerics.islessprime(a.lo, b.lo) --> a.lo < b.lo
     @fact ValidatedNumerics.islessprime(Inf, Inf) --> true
     @fact ∅ <= ∅ --> true
@@ -97,7 +111,9 @@ facts("Consistency tests") do
     @fact isunbounded(Interval(-Inf, 0.0)) --> true
     @fact isunbounded(Interval(0.0, Inf)) --> true
     @fact isunbounded(a) --> false
+end
 
+facts("Intersection tests") do
     @fact emptyinterval() --> Interval(Inf, -Inf)
     @fact a ∩ @interval(-1) --> emptyinterval(a)
     @fact isempty(a ∩ @interval(-1) ) --> true
@@ -107,6 +123,9 @@ facts("Consistency tests") do
 
     @fact intersect(a, hull(a,b)) --> a
     @fact union(a,b) --> Interval(a.lo, b.hi)
+end
+
+facts("Special interval tests") do
 
     @fact entireinterval(Float64) --> Interval(-Inf, Inf)
     @fact isentire(entireinterval(a)) --> true
@@ -128,6 +147,9 @@ facts("Consistency tests") do
     @fact infimum(entireinterval(a)) --> -Inf
     @fact supremum(entireinterval(a)) --> Inf
     @fact isnan(supremum(nai(BigFloat))) --> true
+end
+
+facts("mid etc.") do
 
     @fact mid( Interval(1//2) ) --> 1//2
     @fact diam( Interval(1//2) ) --> 0//1
@@ -141,6 +163,9 @@ facts("Consistency tests") do
     @fact mag( Interval(1//2) ) --> 1//2
     @fact isnan(mag(emptyinterval())) --> true
     @fact diam(a) --> 1.0000000000000002
+end
+
+facts("cancelplus tests") do
 
     x = Interval(-2.0, 4.440892098500622e-16)
     y = Interval(-4.440892098500624e-16, 2.0)
@@ -170,6 +195,9 @@ facts("Consistency tests") do
     @fact cancelplus(Interval(0.0), Interval(1.0)) --> Interval(1.0)
     @fact cancelminus(Interval(-5.0, 0.0), Interval(0.0, 5.0)) --> Interval(-5.0)
     @fact cancelplus(Interval(-5.0, 0.0), Interval(0.0, 5.0)) --> Interval(0.0)
+end
+
+facts("mid and radius") do
 
     # NOTE: By some strange reason radius is not recognized here
     @fact ValidatedNumerics.radius(Interval(-1//10,1//10)) -->
@@ -181,6 +209,9 @@ facts("Consistency tests") do
     @fact isnan(mid(nai())) --> true
     # In v0.3 it corresponds to AssertionError
     @fact_throws ArgumentError nai(Interval(1//2))
+end
+
+facts("abs, min, max, sign") do
 
     @fact abs(entireinterval()) --> Interval(0.0, Inf)
     @fact abs(emptyinterval()) --> emptyinterval()
