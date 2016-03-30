@@ -171,11 +171,11 @@ facts("Floor etc. tests") do
     set_interval_precision(Float64)
 
     a = @interval(-3.0, 2.0)
-    @fact a --> Interval(prevfloat(-3.0), nextfloat(2.0))
-    @fact a^3 --> Interval(-27.00000000000003, 8.000000000000012)
-    @fact Interval(-3,2)^3 --> Interval(-27.000000000000014, 8.000000000000007)
+    @fact a --> Interval(-3.0, 2.0)
+    @fact a^3 --> Interval(-27.000000000000004, 8.000000000000002)
+    @fact Interval(-3,2)^3 --> Interval(-27.000000000000004, 8.000000000000002)
 
-    @fact Interval(-27.0, 8.0)^(1//3) --> Interval(-5.0e-324, 2.0000000000000013)
+    @fact Interval(-27.0, 8.0)^(1//3) --> Interval(-5.0e-324, 2.0000000000000004)
 
     set_interval_rounding(:narrow)
 end
