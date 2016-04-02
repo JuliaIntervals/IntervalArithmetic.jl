@@ -6,16 +6,3 @@ facts("Misc tests") do
     @fact pi < pi --> false
     @fact pi > pi --> false
 end
-
-facts("Rationalize tests") do
-    for rounding_mode in (RoundNearest, RoundDown, RoundUp)
-        a = setrounding(Float64, rounding_mode) do
-            # @compat a = parse(Float64, "0.1")
-            1 / 10
-        end
-
-        #println("Rationalizing a=$a")
-        @fact ValidatedNumerics.old_rationalize(a) == 1//10 --> true
-
-    end
-end
