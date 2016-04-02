@@ -38,16 +38,16 @@ eltype{T<:Real}(x::Interval{T}) = T
 
 
 ## Include files
-include("special_intervals.jl")
+include("special.jl")
 include("printing.jl")
 include("rationalize.jl")
 include("parameters.jl")
 include("rounding.jl")
-include("macro_definitions.jl")
-include("conversion_promotion.jl")
+include("macros.jl")
+include("conversion.jl")
 include("arithmetic.jl")
 include("precision.jl")
 include("functions.jl")
-include("trigonometric_functions.jl")
-include("hyperbolic_functions.jl")
+include("trigonometric.jl")
+include("hyperbolic.jl")
 include("syntax.jl")
