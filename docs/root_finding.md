@@ -104,7 +104,7 @@ julia> roots = newton(f, @interval(-5, 5))
  Root([-1.4142135623730951, -1.414213562373095], :unique)
  Root([1.414213562373095, 1.4142135623730951], :unique)
 
-julia> set_interval_precision(256)
+julia> setprecision(Interval, 256)
 256
 
 julia> newton(f, roots)

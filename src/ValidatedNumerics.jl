@@ -8,10 +8,6 @@ using CRlibm
 using Compat
 using FixedSizeArrays
 
-
-setrounding(BigFloat, RoundNearest)
-setrounding(Float64, RoundNearest)
-
 import Base:
     +, -, *, /, //, fma,
     <, >, ==, !=, ⊆, ^, <=,
@@ -26,25 +22,31 @@ import Base:
     ⊆, eps,
     floor, ceil, trunc, sign, round,
     expm1, log1p,
-    isfinite, isnan
+    isfinite, isnan,
+    precision
+
+if VERSION >= v"0.5.0-dev+1182"
+    import Base: rounding, setrounding, setprecision
+else
+    import Compat: rounding, setrounding, setprecision
+end
+
 
 export
     Interval,
     @interval, @biginterval, @floatinterval, @make_interval,
-    get_interval_rounding, set_interval_rounding,
     diam, radius, mid, mag, mig, hull, isinside,
     emptyinterval, ∅, ∞, isempty, interior, isdisjoint, ⪽,
     precedes, strictprecedes, ≺,
     entireinterval, isentire, nai, isnai, isthin, iscommon,
     widen, infimum, supremum,
-    set_interval_precision, get_interval_precision,
-    with_interval_precision,
     parameters, eps, dist, roughly,
     pi_interval,
     midpoint_radius, interval_from_midpoint_radius,
     RoundTiesToEven, RoundTiesToAway,
     cancelminus, cancelplus, isunbounded,
-    .., @I_str
+    .., @I_str,
+    precision, setprecision, setrounding, rounding
 
 
 ## Multidimensional
@@ -60,8 +62,11 @@ export
     find_roots_midpoint
 
 function __init__()
-    set_interval_precision(256)  # set up pi
-    set_interval_precision(Float64)
+    setrounding(BigFloat, RoundNearest)
+    setrounding(Float64, RoundNearest)
+
+    setprecision(Interval, 256)  # set up pi
+    setprecision(Interval, Float64)
 end
 
 

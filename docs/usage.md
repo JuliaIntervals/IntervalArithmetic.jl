@@ -182,7 +182,7 @@ By default, the `@interval` macro creates intervals of `Float64`s.
 This may be changed using the `set_interval_precision` function:
 
 ```julia
-julia> set_interval_precision(256)
+julia> setprecision(Interval, 256)
 256
 
 julia> @interval 3π/2 + 1
@@ -192,7 +192,7 @@ The subscript `256` at the end denotes the precision.
 
 To change back to `Float64`s, use
 ```julia
-julia> set_interval_precision(Float64)
+julia> setprecision(Interval, Float64)
 Float64
 
 julia> @interval(pi)
@@ -201,7 +201,7 @@ julia> @interval(pi)
 
 To check which mode is currently set, use
 ```julia
-julia> get_interval_precision()
+julia> precision(Interval)()
 (Float64,-1)
 ```
 The result is a tuple of the type (currently `Float64` or `BigFloat`) and the precision (relevant only for `BigFloat`s).
@@ -223,7 +223,7 @@ Again, the result should contain the result of applying the function to each rea
 Currently, this may be correctly calculated by using `BigFloat`s with a precision of 53 bits (the same as that of `Float64`s):
 
 ```julia
-julia> set_interval_precision(53)
+julia> setprecision(Interval, 53)
 53
 
 julia> sin(@interval(1))
@@ -239,16 +239,16 @@ Note, however, that calculations with `BigFloat`s are carried out in software, a
 By default, the directed rounding used corresponds to using the `RoundDown` and `RoundUp` rounding modes when performing calculations; this gives the narrowest resulting intervals, and is set by
 
 ```julia
-set_interval_rounding(:narrow)
+setrounding(Interval, :narrow)
 ```
 
 An alternative rounding method is to perform calculations using the (standard) `RoundNearest` rounding mode, and then widen the result by one machine epsilon in each direction using `prevfloat` and `nextfloat`. This is achived by
 ```julia
-set_interval_rounding(:wide)
+setrounding(Interval, :wide)
 ```
 It generally results in wider intervals, but seems to be significantly faster.
 
 The current interval rounding mode may be obtained by
 ```julia
-get_interval_rounding()
+rounding(Interval)
 ```

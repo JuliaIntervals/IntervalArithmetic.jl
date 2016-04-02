@@ -3,8 +3,8 @@
 using ValidatedNumerics
 using FactCheck
 
-set_interval_precision(Float64)
-set_interval_rounding(:narrow)
+setprecision(Interval, Float64)
+setrounding(Interval, :narrow)
 
 
 facts("Numeric tests") do
@@ -167,8 +167,8 @@ facts("Floor etc. tests") do
     @fact round(@interval(-2.5, 0.1), RoundTiesToAway) --> Interval(-3.0, 0.0)
 
     # :wide tests
-    set_interval_rounding(:wide)
-    set_interval_precision(Float64)
+    setrounding(Interval, :wide)
+    setprecision(Interval, Float64)
 
     a = @interval(-3.0, 2.0)
     @fact a --> Interval(-3.0, 2.0)
@@ -177,5 +177,5 @@ facts("Floor etc. tests") do
 
     @fact Interval(-27.0, 8.0)^(1//3) --> Interval(-5.0e-324, 2.0000000000000004)
 
-    set_interval_rounding(:narrow)
+    setrounding(Interval, :narrow)
 end

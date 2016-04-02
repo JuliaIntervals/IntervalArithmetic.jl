@@ -18,7 +18,7 @@ facts("Tests with rational intervals") do
 
 end
 
-set_interval_precision(64)
+setprecision(Interval, 64)
 
 facts("Rounding rational intervals") do
 

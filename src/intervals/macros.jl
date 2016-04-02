@@ -44,11 +44,11 @@ end
 
 doc"""The `@round` macro creates a rounded interval according to the current
 interval rounding mode. It is the main function used to create intervals in the
-library (e.g. when adding two intervals, etc.). It uses the interval rounding mode (see get_interval_rounding())"""
+library (e.g. when adding two intervals, etc.). It uses the interval rounding mode (see rounding(Interval))"""
 macro round(T, expr1, expr2)
     #@show "round", expr1, expr2
     quote
-        mode = get_interval_rounding()
+        mode = rounding(Interval)
 
         if mode == :wide  #works with any rounding mode set, but the result will depend on the rounding mode
             # we assume RoundNearest

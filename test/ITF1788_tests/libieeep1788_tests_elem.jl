@@ -27,8 +27,8 @@ using ValidatedNumerics
 
 #Preamble
 setprecision(53)
-set_interval_precision(Float64)
-set_interval_rounding(:narrow)
+setprecision(Interval, Float64)
+setrounding(Interval, :narrow)
 
 facts("minimal_pos_test") do
     @fact +Interval(1.0, 2.0) --> Interval(1.0, 2.0)
