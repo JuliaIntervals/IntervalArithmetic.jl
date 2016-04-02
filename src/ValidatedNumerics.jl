@@ -54,7 +54,7 @@ export
 ## Root finding
 export
     newton, krawczyk,
-    differentiate, D, # should these be exported?
+    derivative,  # reexport derivative from ForwardDiff
     Root, is_unique,
     find_roots,
     find_roots_midpoint
