@@ -22,12 +22,11 @@ import Base:
     sinh, cosh, tanh, asinh, acosh, atanh,
     union, intersect, isempty,
     convert, promote_rule, eltype,
-    BigFloat, float, widen,
+    BigFloat, float, widen, big,
     ⊆, eps,
     floor, ceil, trunc, sign, round,
     expm1, log1p,
     isfinite, isnan
-
 
 export
     Interval,

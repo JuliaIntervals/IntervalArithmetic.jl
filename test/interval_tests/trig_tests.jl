@@ -3,9 +3,8 @@
 using ValidatedNumerics
 using FactCheck
 
-#set_interval_precision(53)
-set_interval_precision(53)
-
+set_interval_precision(128)
+set_interval_precision(Float64)
 
 facts("Trig tests") do
     @fact sin(@interval(0.5)) --> Interval(0.47942553860420295, 0.47942553860420301)
@@ -75,7 +74,7 @@ facts("Trig tests") do
 
     @fact atan2(∅, entireinterval()) --> ∅
     @fact atan2(entireinterval(), ∅) --> ∅
-    @fact atan2(@interval(0.0, 1.0), @biginterval(0.0)) --> @biginterval(pi/2)
+    @fact atan2(@interval(0.0, 1.0), @biginterval(0.0)) --> @interval(pi/2)
     @fact atan2(@interval(0.0, 1.0), @interval(0.0)) --> @interval(pi/2)
     @fact atan2(@interval(-1.0, -0.1), @interval(0.0)) --> @interval(-pi/2)
     @fact atan2(@interval(-1.0, 1.0), @interval(0.0)) --> @interval(-pi/2, pi/2)

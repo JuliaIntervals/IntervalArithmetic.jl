@@ -5,9 +5,12 @@
 # CRlibm does not contain a correctly-rounded ^ function for Float64
 # Use the BigFloat version from MPFR instead, which is correctly-rounded:
 
+# Write explicitly like this to avoid ambiguity warnings:
 for T in (:Integer, :Rational, :Float64, :BigFloat, :Interval)
-    @eval ^(a::Interval{Float64}, x::$T) = float(big53(a)^x)
+
+    @eval ^(a::Interval{Float64}, x::$T) = convert(Interval{Float64}, big53(a)^x)
 end
+
 
 # Integer power:
 
@@ -106,7 +109,7 @@ end
 function ^{T<:Integer,}(a::Interval{Rational{T}}, x::AbstractFloat)
     a = Interval(a.lo.num/a.lo.den, a.hi.num/a.hi.den)
     a = a^x
-    make_interval(Rational{T}, a)
+    convert(Interval{Rational{T}}, a)
 end
 
 # Rational power
@@ -120,8 +123,8 @@ function ^{S<:Integer}(a::Interval{BigFloat}, r::Rational{S})
         return emptyinterval(a)
     end
 
-    isinteger(r) && return make_interval(T, a^round(S,r))
-    r == one(S)//2 && return make_interval(T, sqrt(a))
+    isinteger(r) && return convert(Interval{T}, a^round(S,r))
+    r == one(S)//2 && return sqrt(a)
 
     a = a ∩ domain
     (isempty(r) || isempty(a)) && return emptyinterval(a)
@@ -129,7 +132,7 @@ function ^{S<:Integer}(a::Interval{BigFloat}, r::Rational{S})
     r = r.num / r.den
     a = a^r
 
-    make_interval(T, a)
+    convert(Interval{T}, a)
 end
 
 # Interval power of an interval:
