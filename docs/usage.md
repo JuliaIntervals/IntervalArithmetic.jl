@@ -201,7 +201,7 @@ julia> @interval(pi)
 
 To check which mode is currently set, use
 ```julia
-julia> precision(Interval)()
+julia> precision(Interval)
 (Float64,-1)
 ```
 The result is a tuple of the type (currently `Float64` or `BigFloat`) and the precision (relevant only for `BigFloat`s).

@@ -10,7 +10,7 @@ b = @interval(0.9, 2.0)
 c = @interval(0.25, 4.0)
 
 facts("Consistency tests") do
-    
+
     @fact isa( @interval(1,2), Interval ) --> true
     @fact isa( @interval(0.1), Interval ) --> true
     @fact isa( zero(b), Interval ) --> true
@@ -249,10 +249,10 @@ end
 
 facts("Precision tests") do
     setprecision(Interval, 100)
-    @fact precision(Interval)() == (BigFloat, 100) --> true
+    @fact precision(Interval) == (BigFloat, 100) --> true
 
     setprecision(Interval, Float64)
-    @fact precision(Interval)() == (Float64, 100) --> true
+    @fact precision(Interval) == (Float64, 100) --> true
 
     a = @interval(0.1, 0.3)
 
@@ -262,7 +262,7 @@ facts("Precision tests") do
 
     @fact b ⊆ a --> true
 
-    @fact precision(Interval)() == (Float64, 100) --> true
+    @fact precision(Interval) == (Float64, 100) --> true
 
 end
 
