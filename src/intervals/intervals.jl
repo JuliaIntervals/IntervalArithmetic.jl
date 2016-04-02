@@ -50,4 +50,12 @@ include("precision.jl")
 include("functions.jl")
 include("trigonometric.jl")
 include("hyperbolic.jl")
-include("syntax.jl")
+
+
+# Syntax for intervals
+
+a..b = @interval(a, b)
+
+macro I_str(ex)  # I"[3,4]"
+    @interval(ex)
+end
