@@ -41,7 +41,6 @@ eltype{T<:Real}(x::Interval{T}) = T
 include("special.jl")
 include("printing.jl")
 include("rationalize.jl")
-include("rounding.jl")
 include("macros.jl")
 include("conversion.jl")
 include("arithmetic.jl")
