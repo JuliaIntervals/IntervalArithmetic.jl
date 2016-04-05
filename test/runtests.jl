@@ -26,7 +26,9 @@ include("root_finding_tests/root_finding_tests.jl")
 
 # ITF1788 tests
 
-include("ITF1788_tests/ITF1788_tests.jl")
+if VERSION < v"0.5-dev"
+    include("ITF1788_tests/ITF1788_tests.jl")
+end
 
 FactCheck.exitstatus()
 
