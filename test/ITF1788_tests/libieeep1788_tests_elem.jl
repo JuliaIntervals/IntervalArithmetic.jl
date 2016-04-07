@@ -1430,7 +1430,6 @@ facts("minimal_pown_dec_test") do
 
 end
 
-if VERSION < v"0.5-dev"
 facts("minimal_pow_test") do
     @fact ∅ ^ ∅ --> ∅
     @fact ∅ ^ entireinterval(Float64) --> ∅
@@ -2776,7 +2775,6 @@ facts("minimal_pow_test") do
     @fact Interval(-1.0, -0.1) ^ Interval(-Inf, -1.0) --> ∅
     @fact Interval(-1.0, -0.1) ^ Interval(-Inf, -2.5) --> ∅
     @fact Interval(-1.0, -0.1) ^ Interval(-2.5, -2.5) --> ∅
-end
 end
 
 facts("minimal_pow_dec_test") do
