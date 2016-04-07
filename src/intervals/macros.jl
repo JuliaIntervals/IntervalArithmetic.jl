@@ -1,28 +1,33 @@
 # This file is part of the ValidatedNumerics.jl package; MIT licensed
 
-# Rounding for rational intervals, e.g for sqrt of rational interval:
-# Find the corresponding AbstractFloat type for a given rational type
+doc"""The `@interval` macro is the main method to create an interval.
+It converts each expression into a narrow interval that is guaranteed to contain the true value passed by the user in the one or two expressions passed to it.
+When passed two expressions, it takes the hull of the resulting intervals
+to give a guaranteed containing interval.
 
-Base.float{T}(::Type{Rational{T}}) = typeof(float(one(Rational{T})))
+Examples:
+```
+    @interval(0.1)
 
-# better to just do the following ?
-# Base.float(::Type{Rational{Int64}}) = Float64
-# Base.float(::Type{Rational{BigInt}}) = BigFloat
+    @interval(0.1, 0.2)
 
-# Use that type for rounding with rationals, e.g. for sqrt:
+    @interval(1/3, 1/6)
 
-if VERSION < v"0.5.0-dev+1182"
+    @interval(1/3^2)
+```
+"""
+macro interval(expr1, expr2...)
+    make_interval(:(parameters.precision_type), expr1, expr2)
+end
 
-    function Base.with_rounding{T}(f::Function, ::Type{Rational{T}},
-        rounding_mode::RoundingMode)
-        setrounding(f, float(Rational{T}), rounding_mode)
-    end
+doc"The `@floatinterval` macro constructs an interval with `Float64` entries."
+macro floatinterval(expr1, expr2...)
+    make_interval(Float64, expr1, expr2)
+end
 
-else
-    function Base.setrounding{T}(f::Function, ::Type{Rational{T}},
-        rounding_mode::RoundingMode)
-        setrounding(f, float(Rational{T}), rounding_mode)
-    end
+doc"The `@biginterval` macro constructs an interval with `BigFloat` entries."
+macro biginterval(expr1, expr2...)
+    make_interval(BigFloat, expr1, expr2)
 end
 
 
@@ -64,7 +69,6 @@ macro thin_round(T, expr)
         @round($T, $expr, $expr)
     end
 end
-
 
 
 
@@ -124,33 +128,3 @@ function make_interval(T, expr1, expr2)
 
     :(hull($expr1, $expr2))
 end
-
-
-float(x::Interval) =
-    # @round(BigFloat, convert(Float64, x.lo), convert(Float64, x.hi))
-    convert(Interval{Float64}, x)
-
-## Change type of interval rounding:
-
-
-doc"""`get_interval_rounding()` returns the current interval rounding mode.
-There are two possible rounding modes:
-
-- :narrow  -- changes the floating-point rounding mode to `RoundUp` and `RoundDown`.
-This gives the narrowest possible interval.
-
-- :wide -- Leaves the floating-point rounding mode in `RoundNearest` and uses
-`prevfloat` and `nextfloat` to achieve directed rounding. This creates an interval of width 2`eps`.
-"""
-
-get_interval_rounding() = parameters.rounding
-
-function set_interval_rounding(mode)
-    if mode ∉ [:wide, :narrow]
-        throw(ArgumentError("Only possible interval rounding modes are `:wide` and `:narrow`"))
-    end
-
-    parameters.rounding = mode  # a symbol
-end
-
-big{T}(x::Interval{T}) = convert(Interval{BigFloat}, x)

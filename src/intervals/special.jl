@@ -1,6 +1,6 @@
 # This file is part of the ValidatedNumerics.jl package; MIT licensed
 
-## Definitions of special intervals
+## Definitions of special intervals and associated functions
 
 ## Empty interval:
 doc"""`emptyinterval`s are represented as the interval [∞, -∞]; note

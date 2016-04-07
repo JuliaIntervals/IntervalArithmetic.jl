@@ -38,16 +38,46 @@ eltype{T<:Real}(x::Interval{T}) = T
 
 
 ## Include files
-include("special_intervals.jl")
-include("printing.jl")
-include("rationalize.jl")
-include("parameters.jl")
-include("rounding.jl")
-include("macro_definitions.jl")
-include("conversion_promotion.jl")
-include("arithmetic.jl")
+include("special.jl")
+include("macros.jl")
+include("conversion.jl")
 include("precision.jl")
+include("arithmetic.jl")
 include("functions.jl")
-include("trigonometric_functions.jl")
-include("hyperbolic_functions.jl")
-include("syntax.jl")
+include("trigonometric.jl")
+include("hyperbolic.jl")
+
+
+# Syntax for intervals
+
+a..b = @interval(a, b)
+
+macro I_str(ex)  # I"[3,4]"
+    @interval(ex)
+end
+
+
+## Output
+
+function basic_show(io::IO, a::Interval)
+    if isempty(a)
+        output = "∅"
+    else
+        output = "[$(a.lo), $(a.hi)]"
+        output = replace(output, "inf", "∞")
+        output = replace(output, "Inf", "∞")
+
+        output
+    end
+
+    print(io, output)
+end
+
+show(io::IO, a::Interval) = basic_show(io, a)
+show(io::IO, a::Interval{BigFloat}) = ( basic_show(io, a); print(io, subscriptify(precision(a.lo))) )
+
+function subscriptify(n::Int)
+    subscript_digits = [c for c in "₀₁₂₃₄₅₆₇₈₉"]
+    dig = reverse(digits(n))
+    join([subscript_digits[i+1] for i in dig])
+end

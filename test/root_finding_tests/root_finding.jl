@@ -1,7 +1,7 @@
 using ValidatedNumerics
 using FactCheck
 
-include("wilkinson_polynomials.jl")
+include("wilkinson.jl")
 
 
 function generate_wilkinson(n)#, T=BigFloat)   # SLOW
