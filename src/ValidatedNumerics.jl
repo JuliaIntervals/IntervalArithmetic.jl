@@ -47,10 +47,10 @@ export
     cancelminus, cancelplus, isunbounded,
     .., @I_str
 
-if VERSION < v"0.5.0-dev+1182"
+#if VERSION < v"0.5.0-dev+1182"
     export
-        setprecision, setrounding, rounding
-end
+      precision, setprecision, setrounding, rounding
+#end
 
 
 ## Multidimensional
