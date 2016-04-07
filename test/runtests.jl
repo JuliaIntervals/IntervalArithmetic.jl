@@ -19,7 +19,6 @@ include("multidim_tests/multidim.jl")
 
 # Root-finding tests:
 
-include("root_finding_tests/auto_diff.jl")
 include("root_finding_tests/root_finding.jl")
 
 # Multidimensional boxes tests:

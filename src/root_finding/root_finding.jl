@@ -1,5 +1,9 @@
 # This file is part of the ValidatedNumerics.jl package; MIT licensed
 
+using ForwardDiff
+
+const D = ForwardDiff.derivative
+
 immutable Root{T<:Real}
     interval::Interval{T}
     root_type::Symbol
@@ -13,7 +17,7 @@ is_unique{T}(root::Root{T}) = root.root_type == :unique
 ⊆(a::Root, b::Root) = a.interval ⊆ b.interval
 
 
-include("automatic_differentiation.jl")
+# include("automatic_differentiation.jl")
 include("newton.jl")
 include("krawczyk.jl")
 

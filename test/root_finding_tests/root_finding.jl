@@ -1,6 +1,8 @@
 using ValidatedNumerics
 using FactCheck
 
+const D = ValidatedNumerics.derivative
+
 include("wilkinson.jl")
 
 
