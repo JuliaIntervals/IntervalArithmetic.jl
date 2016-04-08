@@ -22,14 +22,8 @@ import Base:
     ⊆, eps,
     floor, ceil, trunc, sign, round,
     expm1, log1p,
-    isfinite, isnan,
-    precision
-
-if VERSION >= v"0.5.0-dev+1182"
-    import Base: rounding, setrounding, setprecision
-else
-    import Compat: rounding, setrounding, setprecision
-end
+    precision,
+    isfinite, isnan
 
 
 export
@@ -47,10 +41,14 @@ export
     cancelminus, cancelplus, isunbounded,
     .., @I_str
 
-#if VERSION < v"0.5.0-dev+1182"
-    export
-      precision, setprecision, setrounding, rounding
-#end
+if VERSION >= v"0.5.0-dev+1182"
+    import Base: rounding, setrounding, setprecision
+else
+    import Compat:
+        rounding, setrounding, setprecision
+
+    export rounding, setrounding, setprecision  # reexport
+end
 
 
 ## Multidimensional
