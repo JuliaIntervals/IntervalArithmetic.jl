@@ -27,8 +27,8 @@ using ValidatedNumerics
 
 #Preamble
 setprecision(53)
-set_interval_precision(Float64)
-set_interval_rounding(:narrow)
+setprecision(Interval, Float64)
+setrounding(Interval, :narrow)
 
 facts("minimal_intersection_test") do
     @fact Interval(1.0, 3.0) ∩ Interval(2.1, 4.0) --> Interval(2.1, 3.0)

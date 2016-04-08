@@ -26,19 +26,14 @@ function generate_wilkinson(n)#, T=BigFloat)   # SLOW
 end
 
 
-set_interval_precision(BigFloat)
-big_pi = @interval(pi)
-
-set_interval_precision(Float64)
+setprecision(Interval, Float64)
 float_pi = @interval(pi)
 
-
+setprecision(Interval, 10000)
+big_pi = @interval(pi)
 # Using precision "only" 256 leads to overestimation of the true roots for `cos`
 # i.e the Newton method gives more accurate results!
 
-set_interval_precision(10000)
-
-big_pi = @interval(pi)
 half_pi = big_pi / 2
 three_halves_pi = 3*big_pi/2
 
@@ -55,12 +50,14 @@ function_list = [
 
 
 facts("Testing root finding") do
-    for interval_precision in (:wide, :narrow)
-        context("Interval precision: $interval_precision") do
 
-            for precision_type in ( (BigFloat,53), (BigFloat,256), (Float64, 64) ) #, (BigFloat,1024) )#, (Float64, -1)
-                context("Precision: $precision_type") do
-                    set_interval_precision(precision_type)
+    for rounding_type in (:wide, :narrow)
+        context("Interval rounding: $rounding_type") do
+            setrounding(Interval, rounding_type)
+
+            for prec in ( (BigFloat,53), (BigFloat,256), (Float64,64) )
+                context("Precision: $prec") do
+                    setprecision(Interval, prec)
 
                     for method in (newton, krawczyk)
                         context("Method $method") do
@@ -87,7 +84,7 @@ facts("Testing root finding") do
                                             for i in 1:length(roots)
                                                 root = roots[i]
 
-                                                @fact isa(root, Root{precision_type[1]}) --> true
+                                                @fact isa(root, Root{prec[1]}) --> true
                                                 @fact is_unique(root) --> true
                                                 @fact true_roots[i] ⊆ root.interval --> true
                                             end
@@ -113,7 +110,7 @@ facts() do
     @fact length(roots) --> 0
 end
 
-set_interval_precision(Float64)
+setprecision(Interval, Float64)
 
 facts("find_roots tests") do
     f(x) = x^2 - 2
@@ -126,7 +123,7 @@ facts("find_roots tests") do
     roots = find_roots(f, -5, 5)
     @fact length(roots) --> 2
 
-    set_interval_precision(256)
+    setprecision(Interval, 256)
 
     for method in (newton, krawczyk)
         new_roots = method(f, roots)

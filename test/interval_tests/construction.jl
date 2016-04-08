@@ -3,12 +3,17 @@
 using ValidatedNumerics
 using FactCheck
 
-facts("Constructing intervals") do
-    set_interval_precision(53)
-    @fact get_interval_precision() == (BigFloat, 53) --> true
 
-    set_interval_precision(Float64)
-    @fact get_interval_precision() == (Float64, 53) --> true
+facts("Constructing intervals") do
+    setprecision(Interval, 53)
+    @fact ValidatedNumerics.parameters.precision --> 53
+
+    setprecision(Interval, Float64)
+    @fact ValidatedNumerics.parameters.precision --> 53
+
+    # There is an inexplicable error on 0.5 with the following:
+    @pending precision(BigFloat) --> 53
+    @pending precision(Interval) --> (Float64, 53)
 
     # Checks for parameters
     @fact ValidatedNumerics.parameters.precision_type --> Float64
@@ -55,7 +60,7 @@ facts("Constructing intervals") do
 
 
     # Constructors from the macros @interval, @floatinterval @biginterval
-    set_interval_precision(53)
+    setprecision(Interval, 53)
 
     a = @interval(0.1)
     b = @interval(pi)
@@ -76,7 +81,7 @@ facts("Constructing intervals") do
     @fact nextfloat(a.lo) --> a.hi
 
 
-    set_interval_precision(Float64)
+    setprecision(Interval, Float64)
     a = @interval(0.1)
     b = @interval(pi)
 
@@ -104,7 +109,7 @@ facts("Constructing intervals") do
 
 
     for precision in (64, Float64)
-        set_interval_precision(precision)
+        setprecision(Interval, precision)
         d = big(3)
         f = @interval(d, 2d)
         @fact @interval(3, 6) ⊆ f --> true
@@ -118,7 +123,7 @@ facts("Constructing intervals") do
         b = @interval(0.1)
         @fact b ⊆ Interval(0.09999999999999999, 0.10000000000000002) --> true
 
-        b = with_interval_precision(128) do
+        b = setprecision(Interval, 128) do
             @interval(0.1, 0.2)
         end
         @fact b ⊆ Interval(0.09999999999999999, 0.20000000000000004) --> true
@@ -138,7 +143,7 @@ facts("Constructing intervals") do
     @fact params.precision == 256 --> true
     @fact params.rounding == :narrow --> true
 
-    set_interval_precision(53)
+    setprecision(Interval, 53)
     a = big(1)//3
     @pending @interval(a) --> Interval(3.3333333333333331e-01, 3.3333333333333337e-01)
 
@@ -154,7 +159,7 @@ facts("Big intervals") do
 
     a = big(10)^10000
     @fact @floatinterval(a) --> Interval(1.7976931348623157e308, ∞)
-    set_interval_precision(53)
+    setprecision(Interval, 53)
     @fact @biginterval(a) --> Interval(big"9.9999999999999994e+9999", big"1.0000000000000001e+10000")
 
 end

@@ -27,8 +27,8 @@ using ValidatedNumerics
 
 #Preamble
 setprecision(53)
-set_interval_precision(Float64)
-set_interval_rounding(:narrow)
+setprecision(Interval, Float64)
+setrounding(Interval, :narrow)
 
 facts("minimal_overlap_test") do
 

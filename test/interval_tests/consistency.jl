@@ -3,14 +3,14 @@
 using ValidatedNumerics
 using FactCheck
 
-set_interval_precision(Float64)
+setprecision(Interval, Float64)
 
 a = @interval(1.1, 0.1)
 b = @interval(0.9, 2.0)
 c = @interval(0.25, 4.0)
 
 facts("Consistency tests") do
-    
+
     @fact isa( @interval(1,2), Interval ) --> true
     @fact isa( @interval(0.1), Interval ) --> true
     @fact isa( zero(b), Interval ) --> true
@@ -248,32 +248,32 @@ facts("abs, min, max, sign") do
 end
 
 facts("Precision tests") do
-    set_interval_precision(100)
-    @fact get_interval_precision() == (BigFloat, 100) --> true
+    setprecision(Interval, 100)
+    @fact precision(Interval) == (BigFloat, 100) --> true
 
-    set_interval_precision(Float64)
-    @fact get_interval_precision() == (Float64, 100) --> true
+    setprecision(Interval, Float64)
+    @fact precision(Interval) == (Float64, 100) --> true
 
     a = @interval(0.1, 0.3)
 
-    b = with_interval_precision(64) do
+    b = setprecision(Interval, 64) do
         @interval(0.1, 0.3)
     end
 
     @fact b ⊆ a --> true
 
-    @fact get_interval_precision() == (Float64, 100) --> true
+    @fact precision(Interval) == (Float64, 100) --> true
 
 end
 
 facts("Interval rounding tests") do
-    set_interval_rounding(:wide)
-    @fact get_interval_rounding() == :wide --> true
+    setrounding(Interval, :wide)
+    @fact rounding(Interval) == :wide --> true
 
-    @fact_throws ArgumentError set_interval_rounding(:hello)
+    @fact_throws ArgumentError setrounding(Interval, :hello)
 
-    set_interval_rounding(:narrow)
-    @fact get_interval_rounding() == :narrow --> true
+    setrounding(Interval, :narrow)
+    @fact rounding(Interval) == :narrow --> true
 
 end
 

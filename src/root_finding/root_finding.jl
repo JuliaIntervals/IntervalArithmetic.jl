@@ -38,7 +38,7 @@ function find_roots(f::Function, a::Real, b::Real, method::Function=newton;
            tolerance=eps(1.0*a), debug=false, maxlevel=30, precision::Int=-1)
 
     if precision >= 0
-        with_interval_precision(precision) do
+        setprecision(Interval, precision) do
             find_roots(f, @interval(a, b), method; tolerance=tolerance, debug=debug, maxlevel=maxlevel)
         end
 

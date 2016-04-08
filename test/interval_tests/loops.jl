@@ -20,7 +20,7 @@ end
 
 ## Calculate pi by summing 1/i^2 to give pi^2/6:
 
-set_interval_precision(53)
+setprecision(Interval, 53)
 
 function calc_pi1(N)
     S1 = @interval(0)

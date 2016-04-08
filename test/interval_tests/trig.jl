@@ -3,8 +3,8 @@
 using ValidatedNumerics
 using FactCheck
 
-set_interval_precision(128)
-set_interval_precision(Float64)
+setprecision(Interval, 128)
+setprecision(Interval, Float64)
 
 facts("Trig tests") do
     @fact sin(@interval(0.5)) --> Interval(0.47942553860420295, 0.47942553860420301)

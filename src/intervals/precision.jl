@@ -17,43 +17,47 @@ const parameters = IntervalParameters()
 
 doc"`big53` creates an equivalent `BigFloat` interval to a given `Float64` interval."
 function big53(a::Interval{Float64})
-    x = with_interval_precision(53) do  # precision of Float64
+    x = setprecision(Interval, 53) do  # precision of Float64
         convert(Interval{BigFloat}, a)
     end
 end
 
 
-set_interval_precision(::Type{Float64}) = parameters.precision_type = Float64
+setprecision(::Type{Interval}, ::Type{Float64}) = parameters.precision_type = Float64
 # does not change the BigFloat precision
 
 
-function set_interval_precision{T}(::Type{T}, precision::Integer=256)
+function setprecision{T<:AbstractFloat}(::Type{Interval}, ::Type{T}, prec::Integer)
     #println("SETTING BIGFLOAT PRECISION TO $precision")
-    setprecision(BigFloat, precision)
+    setprecision(BigFloat, prec)
 
     parameters.precision_type = T
-    parameters.precision = precision
+    parameters.precision = prec
     parameters.pi = convert(Interval{BigFloat}, pi)
 
-    precision
+    prec
 end
 
-function with_interval_precision(f::Function, precision::Integer=256)
-    old_interval_precision = get_interval_precision()
-    #@show old_interval_precision
-    set_interval_precision(precision)
+setprecision{T<:AbstractFloat}(::Type{Interval{T}}, prec) = setprecision(Interval, T, prec)
+
+setprecision(::Type{Interval}, prec::Integer) = setprecision(Interval, BigFloat, prec)
+
+function setprecision(f::Function, ::Type{Interval}, prec::Integer)
+
+    old_precision = precision(Interval)
+    setprecision(Interval, prec)
+
     try
         return f()
     finally
-        set_interval_precision(old_interval_precision)
+        setprecision(Interval, old_precision)
     end
 end
 
-set_interval_precision(precision) = set_interval_precision(BigFloat, precision)
-set_interval_precision(t::Tuple) = set_interval_precision(t...)
+# setprecision(::Type{Interval}, precision) = setprecision(Interval, precision)
+setprecision(::Type{Interval}, t::Tuple) = setprecision(Interval, t...)
 
-get_interval_precision() = (parameters.precision_type, parameters.precision)
-    #parameters.precision_type == Float64 ? (Float64, -1) : (BigFloat, parameters.precision)
+precision(::Type{Interval}) = (parameters.precision_type, parameters.precision)
 
 
 const float_interval_pi = convert(Interval{Float64}, pi)  # does not change
@@ -88,9 +92,6 @@ else
 end
 
 
-
-
-
 float(x::Interval) =
     # @round(BigFloat, convert(Float64, x.lo), convert(Float64, x.hi))
     convert(Interval{Float64}, x)
@@ -98,7 +99,7 @@ float(x::Interval) =
 ## Change type of interval rounding:
 
 
-doc"""`get_interval_rounding()` returns the current interval rounding mode.
+doc"""`rounding(Interval)` returns the current interval rounding mode.
 There are two possible rounding modes:
 
 - :narrow  -- changes the floating-point rounding mode to `RoundUp` and `RoundDown`.
@@ -108,9 +109,9 @@ This gives the narrowest possible interval.
 `prevfloat` and `nextfloat` to achieve directed rounding. This creates an interval of width 2`eps`.
 """
 
-get_interval_rounding() = parameters.rounding
+rounding(::Type{Interval}) = parameters.rounding
 
-function set_interval_rounding(mode)
+function setrounding(::Type{Interval}, mode)
     if mode ∉ [:wide, :narrow]
         throw(ArgumentError("Only possible interval rounding modes are `:wide` and `:narrow`"))
     end
