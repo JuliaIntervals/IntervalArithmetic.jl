@@ -1,2 +1,2 @@
-include("box.jl")
-include("box_macro.jl")
+include("intervalbox.jl")
+include("intervalbox_macro.jl")

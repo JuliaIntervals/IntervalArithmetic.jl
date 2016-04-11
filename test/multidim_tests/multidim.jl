@@ -1,4 +1,5 @@
 using FactCheck
+using ValidatedNumerics
 
 facts("Operations on boxes") do
     A = IntervalBox(1..2, 3..4)
@@ -17,15 +18,21 @@ facts("Operations on boxes") do
 
     v = [@interval(i, i+1) for i in 1:10]
     V = IntervalBox(v...)
-
     @fact length(V) --> 10
+
+    Y = IntervalBox(1..2)  # single interval
+    @fact isa(Y, IntervalBox) --> true
+    @fact length(Y.intervals) --> 1
+    @fact Y --> IntervalBox( (Interval(1., 2.),) )
 
 end
 
-facts("@box tests") do
+facts("@intervalbox tests") do
     @intervalbox f(x, y) = (x + y, x - y)
 
     X = IntervalBox(1..1, 2..2)
     @fact f(X) --> IntervalBox(3..3, -1 .. -1)
 
+    @intervalbox g(x, y) = x - y
+    @fact isa(g(X), IntervalBox) --> true
 end
