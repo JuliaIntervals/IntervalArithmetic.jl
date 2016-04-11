@@ -4,8 +4,9 @@
 
 - [Added `IntervalBox` type](https://github.com/dpsanders/ValidatedNumerics.jl/pull/88), representing a multi-dimensional (hyper-)box as a `FixedSizeArray` of `Interval`s.
 
-- Internal clean-up, including rewriting what was the unexported `make_interval`
-as (exported) methods for `convert`.
+- Internal clean-up, including rewriting what was the internal, unexported `make_interval`
+function as (exported) methods for `convert`, so that you can now write e.g.
+`convert(Interval{Float64}, "0.1")`; this is used by `@interval`.
 
 - [Replaced](https://github.com/dpsanders/ValidatedNumerics.jl/pull/101) the simple automatic differentiation functionality that was part of
 the package with the sophisticated `ForwardDiff` package.
@@ -21,6 +22,9 @@ new, [flexible names](https://github.com/JuliaLang/julia/pull/13232) in Julia v0
 
 - The ITF1788 test suite has been temporarily disabled on Julia v0.5 due to a
 performance regression in parsing long test suites.
+
+- `convert(Interval, x)` has been removed. You must specify the element type of
+the interval, e.g. `convert(Interval{Float64}, 0.1)`
 
 # v0.2
 
