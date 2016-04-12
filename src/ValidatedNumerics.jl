@@ -58,7 +58,7 @@ export
 ## Root finding
 export
     newton, krawczyk,
-    derivative,  # reexport derivative from ForwardDiff
+    derivative, jacobian,  # reexport derivative from ForwardDiff
     Root, is_unique,
     find_roots,
     find_roots_midpoint
