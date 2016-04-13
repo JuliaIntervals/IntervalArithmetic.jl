@@ -76,10 +76,19 @@ facts("Power tests") do
     @fact @interval(1,27)^@interval(1/3) --> roughly(Interval(1., 3.))
     @fact @interval(1,27)^(1/3) --> roughly(Interval(1., 3.))
     @fact Interval(1., 3.) ⊆ @interval(1,27)^(1//3) --> true
-    @fact @interval(0.1,0.7)^(1//3) --> Interval(0.4641588833612778, 0.8879040017426008)
+    @fact @interval(0.1,0.7)^(1//3) --> Interval(0.46415888336127786, 0.8879040017426008)
     @fact @interval(0.1,0.7)^(1/3)  --> roughly(Interval(0.46415888336127786, 0.8879040017426008))
 
+    setprecision(Interval, 256)
+    x = @biginterval(27)
+    y = x^(1//3)
+    @fact (0 < diam(y) < 1e-76) --> true
+    y = x^(1/3)
+    @fact (0 < diam(y) < 1e-76) --> true
+    @fact x^(1//3) --> x^(1/3)
 end
+
+setprecision(Interval, Float64)
 
 facts("Exp and log tests") do
     @fact exp(@biginterval(1//2)) ⊆ exp(@interval(1//2)) --> true

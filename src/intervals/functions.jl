@@ -93,7 +93,7 @@ function ^(a::Interval{BigFloat}, x::AbstractFloat)
     a = a ∩ domain
     (isempty(x) || isempty(a)) && return emptyinterval(a)
 
-    xx = @interval(x)
+    xx = convert(Interval{BigFloat}, x)
 
     lo = @round(T, a.lo^xx.lo, a.lo^xx.lo)
     lo1 = @round(T, a.lo^xx.hi, a.lo^xx.hi)
@@ -129,10 +129,9 @@ function ^{S<:Integer}(a::Interval{BigFloat}, r::Rational{S})
     a = a ∩ domain
     (isempty(r) || isempty(a)) && return emptyinterval(a)
 
-    r = r.num / r.den
-    a = a^r
+    y = convert(Interval{BigFloat}, r)
 
-    convert(Interval{T}, a)
+    a^y
 end
 
 # Interval power of an interval:
