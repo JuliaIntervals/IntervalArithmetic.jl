@@ -5,8 +5,9 @@ site_description: 'ValidatedNumerics.jl: A Julia package for rigorous numerics'
 repo_url: https://github.com/dpsanders/ValidatedNumerics.jl
 
 pages:
-    - 'Validated Numerics package': 'index.md'
+    - 'Package': 'index.md'
     - 'Basic usage': 'usage.md'
+    - 'Multi-dimensional': 'multidim.md'
     - 'Root finding': 'root_finding.md'
     - 'Rounding': 'rounding.md'
 
