@@ -45,7 +45,9 @@ in{T<:Real}(x::T, a::DecoratedInterval) = in(x, interval(a))
 
 
 ## scalar functions: mig, mag and friends
-scalar_functions = ( :mig, :mag, :infimum, :supremum, :mid, :diam, :radius )
+scalar_functions = (
+    :mig, :mag, :infimum, :supremum, :mid, :diam, :radius, :dist, :eps
+)
 
 for f in scalar_functions
     @eval $(f){T}(xx::DecoratedInterval{T}) = $f(interval(xx))
@@ -93,9 +95,13 @@ function fma{T}(xx::DecoratedInterval{T}, yy::DecoratedInterval{T}, zz::Decorate
     DecoratedInterval(r, d)
 end
 
+# other related functions
+other_functions = ( :cancelplus, :cancelminus, :intersect, :hull, :union )
 
-
-
+for f in other_functions
+    @eval $(f){T}(xx::DecoratedInterval{T}, yy::DecoratedInterval{T}) =
+        DecoratedInterval($(f)(interval(xx), interval(yy)), trv)
+end
 
 ## Functions on unrestricted domains; tan and atan2 are treated separately
 unrestricted_functions =(
