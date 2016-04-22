@@ -35,4 +35,11 @@ facts("@intervalbox tests") do
 
     @intervalbox g(x, y) = x - y
     @fact isa(g(X), IntervalBox) --> true
+
+
+    setprecision(Interval, Float64)
+
+    X = IntervalBox(1..1, 2..2)
+    @fact string(X) --> "[1.0, 1.0] × [2.0, 2.0]"
+
 end
