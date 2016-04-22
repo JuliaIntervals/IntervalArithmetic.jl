@@ -2,15 +2,16 @@
 
 
 decay(a::DECORATION, b::DECORATION) = min(a, b)
+decay(a::DECORATION, b::DECORATION, c::DECORATION) = min(a, b, c)
 function decay(a::DECORATION)
     a == com && return dac
     a == dac && return def
     a == def && return trv
     ill
 end
-decay(xx::DecoratedInterval, a::DECORATION) = min(decoration(xx), a)
-decay(xx::DecoratedInterval, yy::DecoratedInterval) = min(decoration(xx), decoration(yy))
-
+# decay(xx::DecoratedInterval, a::DECORATION) = min(decoration(xx), a)
+# decay(xx::DecoratedInterval, yy::DecoratedInterval) = min(decoration(xx), decoration(yy))
+export decay
 
 # zero, one
 zero{T<:Real}(a::DecoratedInterval{T}) = DecoratedInterval(zero(T))
@@ -31,8 +32,6 @@ bool_binary_functions = (
     :interior, :isdisjoint, :precedes, :strictprecedes
 )
 
-in{T<:Real}(x::T, a::DecoratedInterval) = in(interval(a))
-
 for f in bool_functions
     @eval $(f)(xx::DecoratedInterval) = $(f)(interval(xx))
 end
@@ -42,20 +41,27 @@ for f in bool_binary_functions
         $(f)(interval(xx), interval(yy))
 end
 
-## Arithmetic function
+in{T<:Real}(x::T, a::DecoratedInterval) = in(x, interval(a))
+
+
+## scalar functions: mig, mag and friends
+scalar_functions = ( :mig, :mag, :infimum, :supremum, :mid, :diam, :radius )
+
+for f in scalar_functions
+    @eval $(f){T}(xx::DecoratedInterval{T}) = $f(interval(xx))
+end
+
+## Arithmetic function; / is treated separately
 arithm_functions = ( :+, :-, :* )
 
-# unary + and -
 +(xx::DecoratedInterval) =  xx
 -(xx::DecoratedInterval) =  DecoratedInterval(-interval(xx), decoration(xx))
-
 for f in arithm_functions
     @eval function $(f){T}(xx::DecoratedInterval{T}, yy::DecoratedInterval{T})
         x = interval(xx)
         y = interval(yy)
         r = $f(x, y)
-        dec = decay(xx, yy)
-        dec = decay(decoration(r), dec)
+        dec = decay(decoration(xx), decoration(yy), decoration(r))
         DecoratedInterval(r, dec)
     end
 end
@@ -63,22 +69,74 @@ end
 # Division
 function inv{T}(xx::DecoratedInterval{T})
     x = interval(xx)
-    dx = zero(T) ∈ x ? decay(xx,trv) : decoration(xx)
+    dx = decoration(xx)
+    dx = zero(T) ∈ x ? decay(dx,trv) : dx
     r = inv(x)
     dx = decay(decoration(r), dx)
     DecoratedInterval( r, dx )
 end
-
 function /{T}(xx::DecoratedInterval{T}, yy::DecoratedInterval{T})
-    y = interval(yy)
-    dy = zero(T) ∈ y ? decay(yy, trv) : decoration(yy)
     x = interval(xx)
-    dx = decoration(xx)
-    #
+    y = interval(yy)
     r = x / y
-    dx = decay(dx, dy)
-    dx = decay(decoration(r), dx)
-    DecoratedInterval(r, dx)
+    dy = decoration(yy)
+    dy = zero(T) ∈ y ? decay(dy, trv) : dy
+    dy = decay(decoration(xx), dy, decoration(r))
+    DecoratedInterval(r, dy)
+end
+
+## fma
+function fma{T}(xx::DecoratedInterval{T}, yy::DecoratedInterval{T}, zz::DecoratedInterval{T})
+    r = fma(interval(xx), interval(yy), interval(zz))
+    d = decay(decoration(xx), decoration(yy), decoration(zz))
+    d = decay(decoration(r), d)
+    DecoratedInterval(r, d)
+end
+
+
+
+
+
+## Functions on unrestricted domains; tan and atan2 are treated separately
+unrestricted_functions =(
+    :exp, :exp2, :exp10,
+    :sin, :cos,
+    :atan,
+    :sinh, :cosh, :tanh)
+
+for f in unrestricted_functions
+    @eval function $(f){T}(xx::DecoratedInterval{T})
+        x = interval(xx)
+        r = $f(x)
+        d = decay(decoration(r), decoration(xx))
+        DecoratedInterval(r, d)
+    end
+end
+
+function tan{T}(xx::DecoratedInterval{T})
+    x = interval(xx)
+    r = tan(x)
+    d = decay(decoration(r), decoration(xx))
+    if isunbounded(r)
+        d = decay(d, trv)
+    end
+    DecoratedInterval(r, d)
+end
+
+function atan2{T}(yy::DecoratedInterval{T}, xx::DecoratedInterval{T})
+    x = interval(xx)
+    y = interval(yy)
+    r = atan2(y, x)
+    d = decoration(r)
+    d = decay(d, decoration(xx), decoration(yy))
+    # Check cases when decoration is trv and decays (from com or dac)
+    if zero(T) ∈ y
+        zero(T) ∈ x && return DecoratedInterval(r, trv)
+        if x.hi < zero(T) && y.lo != y.hi && signbit(y.lo) && Int(d) > 2
+            return DecoratedInterval(r, decay(d))
+        end
+    end
+    DecoratedInterval(r, d)
 end
 
 
@@ -102,21 +160,15 @@ end
 # Functions with restricted domains:
 restricted_functions = Dict(
     :sqrt => [0, ∞],
-
     :log => [0, ∞],
     :log2 => [0, ∞],
     :log10 => [0, ∞],
-
     :asin => [-1, 1],
     :acos => [-1, 1],
-
     :acosh => [1, ∞],
     :atanh => [-1, 1]
 )
 
-binary_functions = ( :min, :max )
-
-# three_argument = [:fma]
 # power function must be defined separately and carefully
 
 # Discontinuous like sign:  floor, ceil, trunc, RoundTiesToEven, RoundTiesToAway
@@ -147,15 +199,7 @@ end
 
 # Define unary functions with no domain restrictions
 
-
-
-for f in unrestricted_functions
-    @eval function $(f){T}(xx::DecoratedInterval{T})
-        x = interval(xx)
-
-        DecoratedInterval(r, decay(xx,com))
-    end
-end
+binary_functions = ( :min, :max )
 
 for f in binary_functions
 
