@@ -48,7 +48,20 @@ facts("minimal_inf_test") do
 end
 
 facts("minimal_inf_dec_test") do
-
+    @fact infimum(DecoratedInterval(∅, trv)) --> Inf
+    @fact infimum(DecoratedInterval(Interval(-Inf, Inf), def)) --> -Inf
+    @fact infimum(DecoratedInterval(Interval(1.0, 2.0), com)) --> 1.0
+    @fact infimum(DecoratedInterval(Interval(-3.0, -2.0), trv)) --> -3.0
+    @fact infimum(DecoratedInterval(Interval(-Inf, 2.0), dac)) --> -Inf
+    @fact infimum(DecoratedInterval(Interval(-Inf, 0.0), def)) --> -Inf
+    @fact infimum(DecoratedInterval(Interval(-Inf, -0.0), trv)) --> -Inf
+    @fact infimum(DecoratedInterval(Interval(-2.0, Inf), trv)) --> -2.0
+    @fact infimum(DecoratedInterval(Interval(0.0, Inf), def)) --> -0.0
+    @fact infimum(DecoratedInterval(Interval(-0.0, Inf), trv)) --> -0.0
+    @fact infimum(DecoratedInterval(Interval(-0.0, 0.0), dac)) --> -0.0
+    @fact infimum(DecoratedInterval(Interval(0.0, -0.0), trv)) --> -0.0
+    @fact infimum(DecoratedInterval(Interval(0.0, 0.0), trv)) --> -0.0
+    @fact infimum(DecoratedInterval(Interval(-0.0, -0.0), trv)) --> -0.0
 end
 
 facts("minimal_sup_test") do
@@ -69,7 +82,20 @@ facts("minimal_sup_test") do
 end
 
 facts("minimal_sup_dec_test") do
-
+    @fact supremum(DecoratedInterval(∅, trv)) --> -Inf
+    @fact supremum(DecoratedInterval(Interval(-Inf, Inf), def)) --> Inf
+    @fact supremum(DecoratedInterval(Interval(1.0, 2.0), com)) --> 2.0
+    @fact supremum(DecoratedInterval(Interval(-3.0, -2.0), trv)) --> -2.0
+    @fact supremum(DecoratedInterval(Interval(-Inf, 2.0), dac)) --> 2.0
+    @fact supremum(DecoratedInterval(Interval(-Inf, 0.0), def)) --> 0.0
+    @fact supremum(DecoratedInterval(Interval(-Inf, -0.0), trv)) --> 0.0
+    @fact supremum(DecoratedInterval(Interval(-2.0, Inf), trv)) --> Inf
+    @fact supremum(DecoratedInterval(Interval(0.0, Inf), def)) --> Inf
+    @fact supremum(DecoratedInterval(Interval(-0.0, Inf), trv)) --> Inf
+    @fact supremum(DecoratedInterval(Interval(-0.0, 0.0), dac)) --> +0.0
+    @fact supremum(DecoratedInterval(Interval(0.0, -0.0), trv)) --> +0.0
+    @fact supremum(DecoratedInterval(Interval(0.0, 0.0), trv)) --> +0.0
+    @fact supremum(DecoratedInterval(Interval(-0.0, -0.0), trv)) --> +0.0
 end
 
 facts("minimal_mid_test") do
@@ -83,7 +109,13 @@ facts("minimal_mid_test") do
 end
 
 facts("minimal_mid_dec_test") do
-
+    @fact mid(DecoratedInterval(Interval(-Inf, Inf), def)) --> 0.0
+    @fact mid(DecoratedInterval(Interval(-0x1.fffffffffffffp1023, +0x1.fffffffffffffp1023), trv)) --> 0.0
+    @fact mid(DecoratedInterval(Interval(0.0, 2.0), com)) --> 1.0
+    @fact mid(DecoratedInterval(Interval(2.0, 2.0), dac)) --> 2.0
+    @fact mid(DecoratedInterval(Interval(-2.0, 2.0), trv)) --> 0.0
+    @fact mid(DecoratedInterval(Interval(-0x0.0000000000002p-1022, 0x0.0000000000001p-1022), trv)) --> 0.0
+    @fact mid(DecoratedInterval(Interval(-0x0.0000000000001p-1022, 0x0.0000000000002p-1022), trv)) --> 0.0
 end
 
 facts("minimal_rad_test") do
@@ -95,7 +127,11 @@ facts("minimal_rad_test") do
 end
 
 facts("minimal_rad_dec_test") do
-
+    @fact radius(DecoratedInterval(Interval(0.0, 2.0), trv)) --> 1.0
+    @fact radius(DecoratedInterval(Interval(2.0, 2.0), com)) --> 0.0
+    @fact radius(DecoratedInterval(Interval(-Inf, Inf), trv)) --> Inf
+    @fact radius(DecoratedInterval(Interval(0.0, Inf), def)) --> Inf
+    @fact radius(DecoratedInterval(Interval(-Inf, 1.2), trv)) --> Inf
 end
 
 facts("minimal_wid_test") do
@@ -107,7 +143,11 @@ facts("minimal_wid_test") do
 end
 
 facts("minimal_wid_dec_test") do
-
+    @fact diam(DecoratedInterval(Interval(2.0, 2.0), com)) --> 0.0
+    @fact diam(DecoratedInterval(Interval(1.0, 2.0), trv)) --> 1.0
+    @fact diam(DecoratedInterval(Interval(1.0, Inf), trv)) --> Inf
+    @fact diam(DecoratedInterval(Interval(-Inf, 2.0), def)) --> Inf
+    @fact diam(DecoratedInterval(Interval(-Inf, Inf), trv)) --> Inf
 end
 
 facts("minimal_mag_test") do
@@ -121,7 +161,13 @@ facts("minimal_mag_test") do
 end
 
 facts("minimal_mag_dec_test") do
-
+    @fact mag(DecoratedInterval(Interval(1.0, 2.0), com)) --> 2.0
+    @fact mag(DecoratedInterval(Interval(-4.0, 2.0), trv)) --> 4.0
+    @fact mag(DecoratedInterval(Interval(-Inf, 2.0), trv)) --> Inf
+    @fact mag(DecoratedInterval(Interval(1.0, Inf), def)) --> Inf
+    @fact mag(DecoratedInterval(Interval(-Inf, Inf), trv)) --> Inf
+    @fact mag(DecoratedInterval(Interval(-0.0, 0.0), trv)) --> 0.0
+    @fact mag(DecoratedInterval(Interval(-0.0, -0.0), trv)) --> 0.0
 end
 
 facts("minimal_mig_test") do
@@ -138,6 +184,15 @@ facts("minimal_mig_test") do
 end
 
 facts("minimal_mig_dec_test") do
-
+    @fact mig(DecoratedInterval(Interval(1.0, 2.0), com)) --> 1.0
+    @fact mig(DecoratedInterval(Interval(-4.0, 2.0), trv)) --> 0.0
+    @fact mig(DecoratedInterval(Interval(-4.0, -2.0), trv)) --> 2.0
+    @fact mig(DecoratedInterval(Interval(-Inf, 2.0), def)) --> 0.0
+    @fact mig(DecoratedInterval(Interval(-Inf, -2.0), trv)) --> 2.0
+    @fact mig(DecoratedInterval(Interval(-1.0, Inf), trv)) --> 0.0
+    @fact mig(DecoratedInterval(Interval(1.0, Inf), trv)) --> 1.0
+    @fact mig(DecoratedInterval(Interval(-Inf, Inf), trv)) --> 0.0
+    @fact mig(DecoratedInterval(Interval(-0.0, 0.0), trv)) --> 0.0
+    @fact mig(DecoratedInterval(Interval(-0.0, -0.0), trv)) --> 0.0
 end
 # FactCheck.exitstatus()

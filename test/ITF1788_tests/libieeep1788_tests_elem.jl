@@ -1,16 +1,16 @@
 #
 # Copyright 2013 - 2015 Marco Nehmeier (nehmeier@informatik.uni-wuerzburg.de)
 # Copyright 2015 Oliver Heimlich (oheim@posteo.de)
-#
+# 
 # Original author: Marco Nehmeier (unit tests in libieeep1788)
 # Converted into portable ITL format by Oliver Heimlich with minor corrections.
-#
+# 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-#
+# 
 #     http://www.apache.org/licenses/LICENSE-2.0
-#
+# 
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -45,7 +45,12 @@ facts("minimal_pos_test") do
 end
 
 facts("minimal_pos_dec_test") do
-
+    @fact +DecoratedInterval(∅, trv) --> DecoratedInterval(∅, trv)
+    @fact decoration(+DecoratedInterval(∅, trv)) --> decoration(DecoratedInterval(∅, trv))
+    @fact +DecoratedInterval(entireinterval(Float64), def) --> DecoratedInterval(entireinterval(Float64), def)
+    @fact decoration(+DecoratedInterval(entireinterval(Float64), def)) --> decoration(DecoratedInterval(entireinterval(Float64), def))
+    @fact +DecoratedInterval(Interval(1.0, 2.0), com) --> DecoratedInterval(Interval(1.0, 2.0), com)
+    @fact decoration(+DecoratedInterval(Interval(1.0, 2.0), com)) --> decoration(DecoratedInterval(Interval(1.0, 2.0), com))
 end
 
 facts("minimal_neg_test") do
@@ -63,7 +68,12 @@ facts("minimal_neg_test") do
 end
 
 facts("minimal_neg_dec_test") do
-
+    @fact -(DecoratedInterval(∅, trv)) --> DecoratedInterval(∅, trv)
+    @fact decoration(-(DecoratedInterval(∅, trv))) --> decoration(DecoratedInterval(∅, trv))
+    @fact -(DecoratedInterval(entireinterval(Float64), def)) --> DecoratedInterval(entireinterval(Float64), def)
+    @fact decoration(-(DecoratedInterval(entireinterval(Float64), def))) --> decoration(DecoratedInterval(entireinterval(Float64), def))
+    @fact -(DecoratedInterval(Interval(1.0, 2.0), com)) --> DecoratedInterval(Interval(-2.0, -1.0), com)
+    @fact decoration(-(DecoratedInterval(Interval(1.0, 2.0), com))) --> decoration(DecoratedInterval(Interval(-2.0, -1.0), com))
 end
 
 facts("minimal_add_test") do
@@ -101,7 +111,16 @@ facts("minimal_add_test") do
 end
 
 facts("minimal_add_dec_test") do
-
+    @fact DecoratedInterval(Interval(1.0, 2.0), com) + DecoratedInterval(Interval(5.0, 7.0), com) --> DecoratedInterval(Interval(6.0, 9.0), com)
+    @fact decoration(DecoratedInterval(Interval(1.0, 2.0), com) + DecoratedInterval(Interval(5.0, 7.0), com)) --> decoration(DecoratedInterval(Interval(6.0, 9.0), com))
+    @fact DecoratedInterval(Interval(1.0, 2.0), com) + DecoratedInterval(Interval(5.0, 7.0), def) --> DecoratedInterval(Interval(6.0, 9.0), def)
+    @fact decoration(DecoratedInterval(Interval(1.0, 2.0), com) + DecoratedInterval(Interval(5.0, 7.0), def)) --> decoration(DecoratedInterval(Interval(6.0, 9.0), def))
+    @fact DecoratedInterval(Interval(1.0, 2.0), com) + DecoratedInterval(Interval(5.0, 0x1.fffffffffffffp1023), com) --> DecoratedInterval(Interval(6.0, Inf), dac)
+    @fact decoration(DecoratedInterval(Interval(1.0, 2.0), com) + DecoratedInterval(Interval(5.0, 0x1.fffffffffffffp1023), com)) --> decoration(DecoratedInterval(Interval(6.0, Inf), dac))
+    @fact DecoratedInterval(Interval(-0x1.fffffffffffffp1023, 2.0), com) + DecoratedInterval(Interval(-0.1, 5.0), com) --> DecoratedInterval(Interval(-Inf, 7.0), dac)
+    @fact decoration(DecoratedInterval(Interval(-0x1.fffffffffffffp1023, 2.0), com) + DecoratedInterval(Interval(-0.1, 5.0), com)) --> decoration(DecoratedInterval(Interval(-Inf, 7.0), dac))
+    @fact DecoratedInterval(Interval(1.0, 2.0), trv) + DecoratedInterval(∅, trv) --> DecoratedInterval(∅, trv)
+    @fact decoration(DecoratedInterval(Interval(1.0, 2.0), trv) + DecoratedInterval(∅, trv)) --> decoration(DecoratedInterval(∅, trv))
 end
 
 facts("minimal_sub_test") do
@@ -139,7 +158,16 @@ facts("minimal_sub_test") do
 end
 
 facts("minimal_sub_dec_test") do
-
+    @fact DecoratedInterval(Interval(1.0, 2.0), com) - DecoratedInterval(Interval(5.0, 7.0), com) --> DecoratedInterval(Interval(-6.0, -3.0), com)
+    @fact decoration(DecoratedInterval(Interval(1.0, 2.0), com) - DecoratedInterval(Interval(5.0, 7.0), com)) --> decoration(DecoratedInterval(Interval(-6.0, -3.0), com))
+    @fact DecoratedInterval(Interval(1.0, 2.0), com) - DecoratedInterval(Interval(5.0, 7.0), def) --> DecoratedInterval(Interval(-6.0, -3.0), def)
+    @fact decoration(DecoratedInterval(Interval(1.0, 2.0), com) - DecoratedInterval(Interval(5.0, 7.0), def)) --> decoration(DecoratedInterval(Interval(-6.0, -3.0), def))
+    @fact DecoratedInterval(Interval(-1.0, 2.0), com) - DecoratedInterval(Interval(5.0, 0x1.fffffffffffffp1023), com) --> DecoratedInterval(Interval(-Inf, -3.0), dac)
+    @fact decoration(DecoratedInterval(Interval(-1.0, 2.0), com) - DecoratedInterval(Interval(5.0, 0x1.fffffffffffffp1023), com)) --> decoration(DecoratedInterval(Interval(-Inf, -3.0), dac))
+    @fact DecoratedInterval(Interval(-0x1.fffffffffffffp1023, 2.0), com) - DecoratedInterval(Interval(-1.0, 5.0), com) --> DecoratedInterval(Interval(-Inf, 3.0), dac)
+    @fact decoration(DecoratedInterval(Interval(-0x1.fffffffffffffp1023, 2.0), com) - DecoratedInterval(Interval(-1.0, 5.0), com)) --> decoration(DecoratedInterval(Interval(-Inf, 3.0), dac))
+    @fact DecoratedInterval(Interval(1.0, 2.0), trv) - DecoratedInterval(∅, trv) --> DecoratedInterval(∅, trv)
+    @fact decoration(DecoratedInterval(Interval(1.0, 2.0), trv) - DecoratedInterval(∅, trv)) --> decoration(DecoratedInterval(∅, trv))
 end
 
 facts("minimal_mul_test") do
@@ -264,7 +292,16 @@ facts("minimal_mul_test") do
 end
 
 facts("minimal_mul_dec_test") do
-
+    @fact DecoratedInterval(Interval(1.0, 2.0), com) * DecoratedInterval(Interval(5.0, 7.0), com) --> DecoratedInterval(Interval(5.0, 14.0), com)
+    @fact decoration(DecoratedInterval(Interval(1.0, 2.0), com) * DecoratedInterval(Interval(5.0, 7.0), com)) --> decoration(DecoratedInterval(Interval(5.0, 14.0), com))
+    @fact DecoratedInterval(Interval(1.0, 2.0), com) * DecoratedInterval(Interval(5.0, 7.0), def) --> DecoratedInterval(Interval(5.0, 14.0), def)
+    @fact decoration(DecoratedInterval(Interval(1.0, 2.0), com) * DecoratedInterval(Interval(5.0, 7.0), def)) --> decoration(DecoratedInterval(Interval(5.0, 14.0), def))
+    @fact DecoratedInterval(Interval(1.0, 2.0), com) * DecoratedInterval(Interval(5.0, 0x1.fffffffffffffp1023), com) --> DecoratedInterval(Interval(5.0, Inf), dac)
+    @fact decoration(DecoratedInterval(Interval(1.0, 2.0), com) * DecoratedInterval(Interval(5.0, 0x1.fffffffffffffp1023), com)) --> decoration(DecoratedInterval(Interval(5.0, Inf), dac))
+    @fact DecoratedInterval(Interval(-0x1.fffffffffffffp1023, 2.0), com) * DecoratedInterval(Interval(-1.0, 5.0), com) --> DecoratedInterval(Interval(-Inf, 0x1.fffffffffffffp1023), dac)
+    @fact decoration(DecoratedInterval(Interval(-0x1.fffffffffffffp1023, 2.0), com) * DecoratedInterval(Interval(-1.0, 5.0), com)) --> decoration(DecoratedInterval(Interval(-Inf, 0x1.fffffffffffffp1023), dac))
+    @fact DecoratedInterval(Interval(1.0, 2.0), trv) * DecoratedInterval(∅, trv) --> DecoratedInterval(∅, trv)
+    @fact decoration(DecoratedInterval(Interval(1.0, 2.0), trv) * DecoratedInterval(∅, trv)) --> decoration(DecoratedInterval(∅, trv))
 end
 
 facts("minimal_div_test") do
@@ -612,71 +649,348 @@ facts("minimal_div_test") do
 end
 
 facts("minimal_div_dec_test") do
-
+    @fact DecoratedInterval(Interval(-2.0, -1.0), com) / DecoratedInterval(Interval(-10.0, -3.0), com) --> DecoratedInterval(Interval(0x1.9999999999999p-4, 0x1.5555555555556p-1), com)
+    @fact decoration(DecoratedInterval(Interval(-2.0, -1.0), com) / DecoratedInterval(Interval(-10.0, -3.0), com)) --> decoration(DecoratedInterval(Interval(0x1.9999999999999p-4, 0x1.5555555555556p-1), com))
+    @fact DecoratedInterval(Interval(-200.0, -1.0), com) / DecoratedInterval(Interval(0x0.0000000000001p-1022, 10.0), com) --> DecoratedInterval(Interval(-Inf, -0x1.9999999999999p-4), dac)
+    @fact decoration(DecoratedInterval(Interval(-200.0, -1.0), com) / DecoratedInterval(Interval(0x0.0000000000001p-1022, 10.0), com)) --> decoration(DecoratedInterval(Interval(-Inf, -0x1.9999999999999p-4), dac))
+    @fact DecoratedInterval(Interval(-2.0, -1.0), com) / DecoratedInterval(Interval(0.0, 10.0), com) --> DecoratedInterval(Interval(-Inf, -0x1.9999999999999p-4), trv)
+    @fact decoration(DecoratedInterval(Interval(-2.0, -1.0), com) / DecoratedInterval(Interval(0.0, 10.0), com)) --> decoration(DecoratedInterval(Interval(-Inf, -0x1.9999999999999p-4), trv))
+    @fact DecoratedInterval(Interval(1.0, 3.0), def) / DecoratedInterval(Interval(-Inf, -10.0), dac) --> DecoratedInterval(Interval(-0x1.3333333333334p-2, 0.0), def)
+    @fact decoration(DecoratedInterval(Interval(1.0, 3.0), def) / DecoratedInterval(Interval(-Inf, -10.0), dac)) --> decoration(DecoratedInterval(Interval(-0x1.3333333333334p-2, 0.0), def))
+    @fact DecoratedInterval(Interval(1.0, 2.0), trv) / DecoratedInterval(∅, trv) --> DecoratedInterval(∅, trv)
+    @fact decoration(DecoratedInterval(Interval(1.0, 2.0), trv) / DecoratedInterval(∅, trv)) --> decoration(DecoratedInterval(∅, trv))
 end
 
 facts("minimal_recip_test") do
     @fact inv(Interval(-50.0, -10.0)) --> Interval(-0x1.999999999999ap-4, -0x1.47ae147ae147ap-6)
+    @fact (Interval(-50.0, -10.0))^(-1) --> Interval(-0x1.999999999999ap-4, -0x1.47ae147ae147ap-6)
+    @fact (Interval(-50.0, -10.0))^(-1//1) --> Interval(-0x1.999999999999ap-4, -0x1.47ae147ae147ap-6)
+    @fact (Interval(-50.0, -10.0))^(-1.0) --> Interval(-0x1.999999999999ap-4, -0x1.47ae147ae147ap-6)
+    @fact 1 /(Interval(-50.0, -10.0)) --> Interval(-0x1.999999999999ap-4, -0x1.47ae147ae147ap-6)
     @fact inv(Interval(10.0, 50.0)) --> Interval(0x1.47ae147ae147ap-6, 0x1.999999999999ap-4)
+    @fact (Interval(10.0, 50.0))^(-1) --> Interval(0x1.47ae147ae147ap-6, 0x1.999999999999ap-4)
+    @fact (Interval(10.0, 50.0))^(-1//1) --> Interval(0x1.47ae147ae147ap-6, 0x1.999999999999ap-4)
+    @fact (Interval(10.0, 50.0))^(-1.0) --> Interval(0x1.47ae147ae147ap-6, 0x1.999999999999ap-4)
+    @fact 1 /(Interval(10.0, 50.0)) --> Interval(0x1.47ae147ae147ap-6, 0x1.999999999999ap-4)
     @fact inv(Interval(-Inf, -10.0)) --> Interval(-0x1.999999999999ap-4, 0.0)
+    @fact (Interval(-Inf, -10.0))^(-1) --> Interval(-0x1.999999999999ap-4, 0.0)
+    @fact (Interval(-Inf, -10.0))^(-1//1) --> Interval(-0x1.999999999999ap-4, 0.0)
+    @fact (Interval(-Inf, -10.0))^(-1.0) --> Interval(-0x1.999999999999ap-4, 0.0)
+    @fact 1 /(Interval(-Inf, -10.0)) --> Interval(-0x1.999999999999ap-4, 0.0)
     @fact inv(Interval(10.0, Inf)) --> Interval(0.0, 0x1.999999999999ap-4)
+    @fact (Interval(10.0, Inf))^(-1) --> Interval(0.0, 0x1.999999999999ap-4)
+    @fact (Interval(10.0, Inf))^(-1//1) --> Interval(0.0, 0x1.999999999999ap-4)
+    @fact (Interval(10.0, Inf))^(-1.0) --> Interval(0.0, 0x1.999999999999ap-4)
+    @fact 1 /(Interval(10.0, Inf)) --> Interval(0.0, 0x1.999999999999ap-4)
     @fact inv(Interval(0.0, 0.0)) --> ∅
+    @fact (Interval(0.0, 0.0))^(-1) --> ∅
+    @fact (Interval(0.0, 0.0))^(-1//1) --> ∅
+    @fact (Interval(0.0, 0.0))^(-1.0) --> ∅
+    @fact 1 /(Interval(0.0, 0.0)) --> ∅
     @fact inv(Interval(-0.0, -0.0)) --> ∅
+    @fact (Interval(-0.0, -0.0))^(-1) --> ∅
+    @fact (Interval(-0.0, -0.0))^(-1//1) --> ∅
+    @fact (Interval(-0.0, -0.0))^(-1.0) --> ∅
+    @fact 1 /(Interval(-0.0, -0.0)) --> ∅
     @fact inv(Interval(-10.0, 0.0)) --> Interval(-Inf, -0x1.9999999999999p-4)
+    @fact (Interval(-10.0, 0.0))^(-1) --> Interval(-Inf, -0x1.9999999999999p-4)
+    @fact (Interval(-10.0, 0.0))^(-1//1) --> Interval(-Inf, -0x1.9999999999999p-4)
+    @fact (Interval(-10.0, 0.0))^(-1.0) --> Interval(-Inf, -0x1.9999999999999p-4)
+    @fact 1 /(Interval(-10.0, 0.0)) --> Interval(-Inf, -0x1.9999999999999p-4)
     @fact inv(Interval(-10.0, -0.0)) --> Interval(-Inf, -0x1.9999999999999p-4)
+    @fact (Interval(-10.0, -0.0))^(-1) --> Interval(-Inf, -0x1.9999999999999p-4)
+    @fact (Interval(-10.0, -0.0))^(-1//1) --> Interval(-Inf, -0x1.9999999999999p-4)
+    @fact (Interval(-10.0, -0.0))^(-1.0) --> Interval(-Inf, -0x1.9999999999999p-4)
+    @fact 1 /(Interval(-10.0, -0.0)) --> Interval(-Inf, -0x1.9999999999999p-4)
     @fact inv(Interval(-10.0, 10.0)) --> entireinterval(Float64)
+    @fact (Interval(-10.0, 10.0))^(-1) --> entireinterval(Float64)
+    @fact (Interval(-10.0, 10.0))^(-1//1) --> entireinterval(Float64)
+    @fact (Interval(-10.0, 10.0))^(-1.0) --> entireinterval(Float64)
+    @fact 1 /(Interval(-10.0, 10.0)) --> entireinterval(Float64)
     @fact inv(Interval(0.0, 10.0)) --> Interval(0x1.9999999999999p-4, Inf)
+    @fact (Interval(0.0, 10.0))^(-1) --> Interval(0x1.9999999999999p-4, Inf)
+    @fact (Interval(0.0, 10.0))^(-1//1) --> Interval(0x1.9999999999999p-4, Inf)
+    @fact (Interval(0.0, 10.0))^(-1.0) --> Interval(0x1.9999999999999p-4, Inf)
+    @fact 1 /(Interval(0.0, 10.0)) --> Interval(0x1.9999999999999p-4, Inf)
     @fact inv(Interval(-0.0, 10.0)) --> Interval(0x1.9999999999999p-4, Inf)
+    @fact (Interval(-0.0, 10.0))^(-1) --> Interval(0x1.9999999999999p-4, Inf)
+    @fact (Interval(-0.0, 10.0))^(-1//1) --> Interval(0x1.9999999999999p-4, Inf)
+    @fact (Interval(-0.0, 10.0))^(-1.0) --> Interval(0x1.9999999999999p-4, Inf)
+    @fact 1 /(Interval(-0.0, 10.0)) --> Interval(0x1.9999999999999p-4, Inf)
     @fact inv(Interval(-Inf, 0.0)) --> Interval(-Inf, 0.0)
+    @fact (Interval(-Inf, 0.0))^(-1) --> Interval(-Inf, 0.0)
+    @fact (Interval(-Inf, 0.0))^(-1//1) --> Interval(-Inf, 0.0)
+    @fact (Interval(-Inf, 0.0))^(-1.0) --> Interval(-Inf, 0.0)
+    @fact 1 /(Interval(-Inf, 0.0)) --> Interval(-Inf, 0.0)
     @fact inv(Interval(-Inf, -0.0)) --> Interval(-Inf, 0.0)
+    @fact (Interval(-Inf, -0.0))^(-1) --> Interval(-Inf, 0.0)
+    @fact (Interval(-Inf, -0.0))^(-1//1) --> Interval(-Inf, 0.0)
+    @fact (Interval(-Inf, -0.0))^(-1.0) --> Interval(-Inf, 0.0)
+    @fact 1 /(Interval(-Inf, -0.0)) --> Interval(-Inf, 0.0)
     @fact inv(Interval(-Inf, 10.0)) --> entireinterval(Float64)
+    @fact (Interval(-Inf, 10.0))^(-1) --> entireinterval(Float64)
+    @fact (Interval(-Inf, 10.0))^(-1//1) --> entireinterval(Float64)
+    @fact (Interval(-Inf, 10.0))^(-1.0) --> entireinterval(Float64)
+    @fact 1 /(Interval(-Inf, 10.0)) --> entireinterval(Float64)
     @fact inv(Interval(-10.0, Inf)) --> entireinterval(Float64)
+    @fact (Interval(-10.0, Inf))^(-1) --> entireinterval(Float64)
+    @fact (Interval(-10.0, Inf))^(-1//1) --> entireinterval(Float64)
+    @fact (Interval(-10.0, Inf))^(-1.0) --> entireinterval(Float64)
+    @fact 1 /(Interval(-10.0, Inf)) --> entireinterval(Float64)
     @fact inv(Interval(0.0, Inf)) --> Interval(0.0, Inf)
+    @fact (Interval(0.0, Inf))^(-1) --> Interval(0.0, Inf)
+    @fact (Interval(0.0, Inf))^(-1//1) --> Interval(0.0, Inf)
+    @fact (Interval(0.0, Inf))^(-1.0) --> Interval(0.0, Inf)
+    @fact 1 /(Interval(0.0, Inf)) --> Interval(0.0, Inf)
     @fact inv(Interval(-0.0, Inf)) --> Interval(0.0, Inf)
+    @fact (Interval(-0.0, Inf))^(-1) --> Interval(0.0, Inf)
+    @fact (Interval(-0.0, Inf))^(-1//1) --> Interval(0.0, Inf)
+    @fact (Interval(-0.0, Inf))^(-1.0) --> Interval(0.0, Inf)
+    @fact 1 /(Interval(-0.0, Inf)) --> Interval(0.0, Inf)
     @fact inv(entireinterval(Float64)) --> entireinterval(Float64)
+    @fact (entireinterval(Float64))^(-1) --> entireinterval(Float64)
+    @fact (entireinterval(Float64))^(-1//1) --> entireinterval(Float64)
+    @fact (entireinterval(Float64))^(-1.0) --> entireinterval(Float64)
+    @fact 1 /(entireinterval(Float64)) --> entireinterval(Float64)
 end
 
 facts("minimal_recip_dec_test") do
-
+    @fact inv(DecoratedInterval(Interval(10.0, 50.0), com)) --> DecoratedInterval(Interval(0x1.47ae147ae147ap-6, 0x1.999999999999ap-4), com)
+    @fact decoration(inv(DecoratedInterval(Interval(10.0, 50.0), com))) --> decoration(DecoratedInterval(Interval(0x1.47ae147ae147ap-6, 0x1.999999999999ap-4), com))
+    @fact (DecoratedInterval(Interval(10.0, 50.0), com))^(-1) --> DecoratedInterval(Interval(0x1.47ae147ae147ap-6, 0x1.999999999999ap-4), com)
+    @fact decoration((DecoratedInterval(Interval(10.0, 50.0), com))^(-1)) --> decoration(DecoratedInterval(Interval(0x1.47ae147ae147ap-6, 0x1.999999999999ap-4), com))
+    @fact (DecoratedInterval(Interval(10.0, 50.0), com))^(-1//1) --> DecoratedInterval(Interval(0x1.47ae147ae147ap-6, 0x1.999999999999ap-4), com)
+    @fact decoration((DecoratedInterval(Interval(10.0, 50.0), com))^(-1//1)) --> decoration(DecoratedInterval(Interval(0x1.47ae147ae147ap-6, 0x1.999999999999ap-4), com))
+    @fact (DecoratedInterval(Interval(10.0, 50.0), com))^(-1.0) --> DecoratedInterval(Interval(0x1.47ae147ae147ap-6, 0x1.999999999999ap-4), com)
+    @fact decoration((DecoratedInterval(Interval(10.0, 50.0), com))^(-1.0)) --> decoration(DecoratedInterval(Interval(0x1.47ae147ae147ap-6, 0x1.999999999999ap-4), com))
+    @fact 1 /(DecoratedInterval(Interval(10.0, 50.0), com)) --> DecoratedInterval(Interval(0x1.47ae147ae147ap-6, 0x1.999999999999ap-4), com)
+    @fact decoration(1 /(DecoratedInterval(Interval(10.0, 50.0), com))) --> decoration(DecoratedInterval(Interval(0x1.47ae147ae147ap-6, 0x1.999999999999ap-4), com))
+    @fact inv(DecoratedInterval(Interval(-Inf, -10.0), dac)) --> DecoratedInterval(Interval(-0x1.999999999999ap-4, 0.0), dac)
+    @fact decoration(inv(DecoratedInterval(Interval(-Inf, -10.0), dac))) --> decoration(DecoratedInterval(Interval(-0x1.999999999999ap-4, 0.0), dac))
+    @fact (DecoratedInterval(Interval(-Inf, -10.0), dac))^(-1) --> DecoratedInterval(Interval(-0x1.999999999999ap-4, 0.0), dac)
+    @fact decoration((DecoratedInterval(Interval(-Inf, -10.0), dac))^(-1)) --> decoration(DecoratedInterval(Interval(-0x1.999999999999ap-4, 0.0), dac))
+    @fact (DecoratedInterval(Interval(-Inf, -10.0), dac))^(-1//1) --> DecoratedInterval(Interval(-0x1.999999999999ap-4, 0.0), dac)
+    @fact decoration((DecoratedInterval(Interval(-Inf, -10.0), dac))^(-1//1)) --> decoration(DecoratedInterval(Interval(-0x1.999999999999ap-4, 0.0), dac))
+    @fact (DecoratedInterval(Interval(-Inf, -10.0), dac))^(-1.0) --> DecoratedInterval(Interval(-0x1.999999999999ap-4, 0.0), dac)
+    @fact decoration((DecoratedInterval(Interval(-Inf, -10.0), dac))^(-1.0)) --> decoration(DecoratedInterval(Interval(-0x1.999999999999ap-4, 0.0), dac))
+    @fact 1 /(DecoratedInterval(Interval(-Inf, -10.0), dac)) --> DecoratedInterval(Interval(-0x1.999999999999ap-4, 0.0), dac)
+    @fact decoration(1 /(DecoratedInterval(Interval(-Inf, -10.0), dac))) --> decoration(DecoratedInterval(Interval(-0x1.999999999999ap-4, 0.0), dac))
+    @fact inv(DecoratedInterval(Interval(-0x1.fffffffffffffp1023, -0x0.0000000000001p-1022), def)) --> DecoratedInterval(Interval(-Inf, -0x0.4p-1022), def)
+    @fact decoration(inv(DecoratedInterval(Interval(-0x1.fffffffffffffp1023, -0x0.0000000000001p-1022), def))) --> decoration(DecoratedInterval(Interval(-Inf, -0x0.4p-1022), def))
+    @fact (DecoratedInterval(Interval(-0x1.fffffffffffffp1023, -0x0.0000000000001p-1022), def))^(-1) --> DecoratedInterval(Interval(-Inf, -0x0.4p-1022), def)
+    @fact decoration((DecoratedInterval(Interval(-0x1.fffffffffffffp1023, -0x0.0000000000001p-1022), def))^(-1)) --> decoration(DecoratedInterval(Interval(-Inf, -0x0.4p-1022), def))
+    @fact (DecoratedInterval(Interval(-0x1.fffffffffffffp1023, -0x0.0000000000001p-1022), def))^(-1//1) --> DecoratedInterval(Interval(-Inf, -0x0.4p-1022), def)
+    @fact decoration((DecoratedInterval(Interval(-0x1.fffffffffffffp1023, -0x0.0000000000001p-1022), def))^(-1//1)) --> decoration(DecoratedInterval(Interval(-Inf, -0x0.4p-1022), def))
+    @fact (DecoratedInterval(Interval(-0x1.fffffffffffffp1023, -0x0.0000000000001p-1022), def))^(-1.0) --> DecoratedInterval(Interval(-Inf, -0x0.4p-1022), def)
+    @fact decoration((DecoratedInterval(Interval(-0x1.fffffffffffffp1023, -0x0.0000000000001p-1022), def))^(-1.0)) --> decoration(DecoratedInterval(Interval(-Inf, -0x0.4p-1022), def))
+    @fact 1 /(DecoratedInterval(Interval(-0x1.fffffffffffffp1023, -0x0.0000000000001p-1022), def)) --> DecoratedInterval(Interval(-Inf, -0x0.4p-1022), def)
+    @fact decoration(1 /(DecoratedInterval(Interval(-0x1.fffffffffffffp1023, -0x0.0000000000001p-1022), def))) --> decoration(DecoratedInterval(Interval(-Inf, -0x0.4p-1022), def))
+    @fact inv(DecoratedInterval(Interval(0.0, 0.0), com)) --> DecoratedInterval(∅, trv)
+    @fact decoration(inv(DecoratedInterval(Interval(0.0, 0.0), com))) --> decoration(DecoratedInterval(∅, trv))
+    @fact (DecoratedInterval(Interval(0.0, 0.0), com))^(-1) --> DecoratedInterval(∅, trv)
+    @fact decoration((DecoratedInterval(Interval(0.0, 0.0), com))^(-1)) --> decoration(DecoratedInterval(∅, trv))
+    @fact (DecoratedInterval(Interval(0.0, 0.0), com))^(-1//1) --> DecoratedInterval(∅, trv)
+    @fact decoration((DecoratedInterval(Interval(0.0, 0.0), com))^(-1//1)) --> decoration(DecoratedInterval(∅, trv))
+    @fact (DecoratedInterval(Interval(0.0, 0.0), com))^(-1.0) --> DecoratedInterval(∅, trv)
+    @fact decoration((DecoratedInterval(Interval(0.0, 0.0), com))^(-1.0)) --> decoration(DecoratedInterval(∅, trv))
+    @fact 1 /(DecoratedInterval(Interval(0.0, 0.0), com)) --> DecoratedInterval(∅, trv)
+    @fact decoration(1 /(DecoratedInterval(Interval(0.0, 0.0), com))) --> decoration(DecoratedInterval(∅, trv))
+    @fact inv(DecoratedInterval(Interval(-10.0, 0.0), com)) --> DecoratedInterval(Interval(-Inf, -0x1.9999999999999p-4), trv)
+    @fact decoration(inv(DecoratedInterval(Interval(-10.0, 0.0), com))) --> decoration(DecoratedInterval(Interval(-Inf, -0x1.9999999999999p-4), trv))
+    @fact (DecoratedInterval(Interval(-10.0, 0.0), com))^(-1) --> DecoratedInterval(Interval(-Inf, -0x1.9999999999999p-4), trv)
+    @fact decoration((DecoratedInterval(Interval(-10.0, 0.0), com))^(-1)) --> decoration(DecoratedInterval(Interval(-Inf, -0x1.9999999999999p-4), trv))
+    @fact (DecoratedInterval(Interval(-10.0, 0.0), com))^(-1//1) --> DecoratedInterval(Interval(-Inf, -0x1.9999999999999p-4), trv)
+    @fact decoration((DecoratedInterval(Interval(-10.0, 0.0), com))^(-1//1)) --> decoration(DecoratedInterval(Interval(-Inf, -0x1.9999999999999p-4), trv))
+    @fact (DecoratedInterval(Interval(-10.0, 0.0), com))^(-1.0) --> DecoratedInterval(Interval(-Inf, -0x1.9999999999999p-4), trv)
+    @fact decoration((DecoratedInterval(Interval(-10.0, 0.0), com))^(-1.0)) --> decoration(DecoratedInterval(Interval(-Inf, -0x1.9999999999999p-4), trv))
+    @fact 1 /(DecoratedInterval(Interval(-10.0, 0.0), com)) --> DecoratedInterval(Interval(-Inf, -0x1.9999999999999p-4), trv)
+    @fact decoration(1 /(DecoratedInterval(Interval(-10.0, 0.0), com))) --> decoration(DecoratedInterval(Interval(-Inf, -0x1.9999999999999p-4), trv))
+    @fact inv(DecoratedInterval(Interval(-10.0, Inf), dac)) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration(inv(DecoratedInterval(Interval(-10.0, Inf), dac))) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact (DecoratedInterval(Interval(-10.0, Inf), dac))^(-1) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration((DecoratedInterval(Interval(-10.0, Inf), dac))^(-1)) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact (DecoratedInterval(Interval(-10.0, Inf), dac))^(-1//1) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration((DecoratedInterval(Interval(-10.0, Inf), dac))^(-1//1)) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact (DecoratedInterval(Interval(-10.0, Inf), dac))^(-1.0) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration((DecoratedInterval(Interval(-10.0, Inf), dac))^(-1.0)) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact 1 /(DecoratedInterval(Interval(-10.0, Inf), dac)) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration(1 /(DecoratedInterval(Interval(-10.0, Inf), dac))) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact inv(DecoratedInterval(Interval(-0.0, Inf), dac)) --> DecoratedInterval(Interval(0.0, Inf), trv)
+    @fact decoration(inv(DecoratedInterval(Interval(-0.0, Inf), dac))) --> decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @fact (DecoratedInterval(Interval(-0.0, Inf), dac))^(-1) --> DecoratedInterval(Interval(0.0, Inf), trv)
+    @fact decoration((DecoratedInterval(Interval(-0.0, Inf), dac))^(-1)) --> decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @fact (DecoratedInterval(Interval(-0.0, Inf), dac))^(-1//1) --> DecoratedInterval(Interval(0.0, Inf), trv)
+    @fact decoration((DecoratedInterval(Interval(-0.0, Inf), dac))^(-1//1)) --> decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @fact (DecoratedInterval(Interval(-0.0, Inf), dac))^(-1.0) --> DecoratedInterval(Interval(0.0, Inf), trv)
+    @fact decoration((DecoratedInterval(Interval(-0.0, Inf), dac))^(-1.0)) --> decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @fact 1 /(DecoratedInterval(Interval(-0.0, Inf), dac)) --> DecoratedInterval(Interval(0.0, Inf), trv)
+    @fact decoration(1 /(DecoratedInterval(Interval(-0.0, Inf), dac))) --> decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @fact inv(DecoratedInterval(entireinterval(Float64), def)) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration(inv(DecoratedInterval(entireinterval(Float64), def))) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact (DecoratedInterval(entireinterval(Float64), def))^(-1) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration((DecoratedInterval(entireinterval(Float64), def))^(-1)) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact (DecoratedInterval(entireinterval(Float64), def))^(-1//1) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration((DecoratedInterval(entireinterval(Float64), def))^(-1//1)) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact (DecoratedInterval(entireinterval(Float64), def))^(-1.0) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration((DecoratedInterval(entireinterval(Float64), def))^(-1.0)) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact 1 /(DecoratedInterval(entireinterval(Float64), def)) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration(1 /(DecoratedInterval(entireinterval(Float64), def))) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
 end
 
 facts("minimal_sqr_test") do
-    @fact ∅ ^ 2 --> ∅
-    @fact entireinterval(Float64) ^ 2 --> Interval(0.0, Inf)
-    @fact Interval(-Inf, -0x0.0000000000001p-1022) ^ 2 --> Interval(0.0, Inf)
-    @fact Interval(-1.0, 1.0) ^ 2 --> Interval(0.0, 1.0)
-    @fact Interval(0.0, 1.0) ^ 2 --> Interval(0.0, 1.0)
-    @fact Interval(-0.0, 1.0) ^ 2 --> Interval(0.0, 1.0)
-    @fact Interval(-5.0, 3.0) ^ 2 --> Interval(0.0, 25.0)
-    @fact Interval(-5.0, 0.0) ^ 2 --> Interval(0.0, 25.0)
-    @fact Interval(-5.0, -0.0) ^ 2 --> Interval(0.0, 25.0)
-    @fact Interval(0x1.999999999999ap-4, 0x1.999999999999ap-4) ^ 2 --> Interval(0x1.47ae147ae147bp-7, 0x1.47ae147ae147cp-7)
-    @fact Interval(-0x1.ffffffffffffp+0, 0x1.999999999999ap-4) ^ 2 --> Interval(0.0, 0x1.fffffffffffe1p+1)
-    @fact Interval(-0x1.ffffffffffffp+0, -0x1.ffffffffffffp+0) ^ 2 --> Interval(0x1.fffffffffffep+1, 0x1.fffffffffffe1p+1)
+    @fact ∅ ^2 --> ∅
+    @fact ∅ ^(2//1) --> ∅
+    @fact ∅ ^(2.0) --> ∅
+    @fact entireinterval(Float64) ^2 --> Interval(0.0, Inf)
+    @fact entireinterval(Float64) ^(2//1) --> Interval(0.0, Inf)
+    @fact entireinterval(Float64) ^(2.0) --> Interval(0.0, Inf)
+    @fact Interval(-Inf, -0x0.0000000000001p-1022) ^2 --> Interval(0.0, Inf)
+    @fact Interval(-Inf, -0x0.0000000000001p-1022) ^(2//1) --> Interval(0.0, Inf)
+    @fact Interval(-Inf, -0x0.0000000000001p-1022) ^(2.0) --> Interval(0.0, Inf)
+    @fact Interval(-1.0, 1.0) ^2 --> Interval(0.0, 1.0)
+    @fact Interval(-1.0, 1.0) ^(2//1) --> Interval(0.0, 1.0)
+    @fact Interval(-1.0, 1.0) ^(2.0) --> Interval(0.0, 1.0)
+    @fact Interval(0.0, 1.0) ^2 --> Interval(0.0, 1.0)
+    @fact Interval(0.0, 1.0) ^(2//1) --> Interval(0.0, 1.0)
+    @fact Interval(0.0, 1.0) ^(2.0) --> Interval(0.0, 1.0)
+    @fact Interval(-0.0, 1.0) ^2 --> Interval(0.0, 1.0)
+    @fact Interval(-0.0, 1.0) ^(2//1) --> Interval(0.0, 1.0)
+    @fact Interval(-0.0, 1.0) ^(2.0) --> Interval(0.0, 1.0)
+    @fact Interval(-5.0, 3.0) ^2 --> Interval(0.0, 25.0)
+    @fact Interval(-5.0, 3.0) ^(2//1) --> Interval(0.0, 25.0)
+    @fact Interval(-5.0, 3.0) ^(2.0) --> Interval(0.0, 25.0)
+    @fact Interval(-5.0, 0.0) ^2 --> Interval(0.0, 25.0)
+    @fact Interval(-5.0, 0.0) ^(2//1) --> Interval(0.0, 25.0)
+    @fact Interval(-5.0, 0.0) ^(2.0) --> Interval(0.0, 25.0)
+    @fact Interval(-5.0, -0.0) ^2 --> Interval(0.0, 25.0)
+    @fact Interval(-5.0, -0.0) ^(2//1) --> Interval(0.0, 25.0)
+    @fact Interval(-5.0, -0.0) ^(2.0) --> Interval(0.0, 25.0)
+    @fact Interval(0x1.999999999999ap-4, 0x1.999999999999ap-4) ^2 --> Interval(0x1.47ae147ae147bp-7, 0x1.47ae147ae147cp-7)
+    @fact Interval(0x1.999999999999ap-4, 0x1.999999999999ap-4) ^(2//1) --> Interval(0x1.47ae147ae147bp-7, 0x1.47ae147ae147cp-7)
+    @fact Interval(0x1.999999999999ap-4, 0x1.999999999999ap-4) ^(2.0) --> Interval(0x1.47ae147ae147bp-7, 0x1.47ae147ae147cp-7)
+    @fact Interval(-0x1.ffffffffffffp+0, 0x1.999999999999ap-4) ^2 --> Interval(0.0, 0x1.fffffffffffe1p+1)
+    @fact Interval(-0x1.ffffffffffffp+0, 0x1.999999999999ap-4) ^(2//1) --> Interval(0.0, 0x1.fffffffffffe1p+1)
+    @fact Interval(-0x1.ffffffffffffp+0, 0x1.999999999999ap-4) ^(2.0) --> Interval(0.0, 0x1.fffffffffffe1p+1)
+    @fact Interval(-0x1.ffffffffffffp+0, -0x1.ffffffffffffp+0) ^2 --> Interval(0x1.fffffffffffep+1, 0x1.fffffffffffe1p+1)
+    @fact Interval(-0x1.ffffffffffffp+0, -0x1.ffffffffffffp+0) ^(2//1) --> Interval(0x1.fffffffffffep+1, 0x1.fffffffffffe1p+1)
+    @fact Interval(-0x1.ffffffffffffp+0, -0x1.ffffffffffffp+0) ^(2.0) --> Interval(0x1.fffffffffffep+1, 0x1.fffffffffffe1p+1)
 end
 
 facts("minimal_sqr_dec_test") do
-
+    @fact DecoratedInterval(Interval(-0x1.fffffffffffffp1023, -0x0.0000000000001p-1022), com) ^2 --> DecoratedInterval(Interval(0.0, Inf), dac)
+    @fact decoration(DecoratedInterval(Interval(-0x1.fffffffffffffp1023, -0x0.0000000000001p-1022), com) ^2) --> decoration(DecoratedInterval(Interval(0.0, Inf), dac))
+    @fact DecoratedInterval(Interval(-0x1.fffffffffffffp1023, -0x0.0000000000001p-1022), com) ^(2//1) --> DecoratedInterval(Interval(0.0, Inf), dac)
+    @fact decoration(DecoratedInterval(Interval(-0x1.fffffffffffffp1023, -0x0.0000000000001p-1022), com) ^(2//1)) --> decoration(DecoratedInterval(Interval(0.0, Inf), dac))
+    @fact DecoratedInterval(Interval(-0x1.fffffffffffffp1023, -0x0.0000000000001p-1022), com) ^(2.0) --> DecoratedInterval(Interval(0.0, Inf), dac)
+    @fact decoration(DecoratedInterval(Interval(-0x1.fffffffffffffp1023, -0x0.0000000000001p-1022), com) ^(2.0)) --> decoration(DecoratedInterval(Interval(0.0, Inf), dac))
+    @fact DecoratedInterval(Interval(-1.0, 1.0), def) ^2 --> DecoratedInterval(Interval(0.0, 1.0), def)
+    @fact decoration(DecoratedInterval(Interval(-1.0, 1.0), def) ^2) --> decoration(DecoratedInterval(Interval(0.0, 1.0), def))
+    @fact DecoratedInterval(Interval(-1.0, 1.0), def) ^(2//1) --> DecoratedInterval(Interval(0.0, 1.0), def)
+    @fact decoration(DecoratedInterval(Interval(-1.0, 1.0), def) ^(2//1)) --> decoration(DecoratedInterval(Interval(0.0, 1.0), def))
+    @fact DecoratedInterval(Interval(-1.0, 1.0), def) ^(2.0) --> DecoratedInterval(Interval(0.0, 1.0), def)
+    @fact decoration(DecoratedInterval(Interval(-1.0, 1.0), def) ^(2.0)) --> decoration(DecoratedInterval(Interval(0.0, 1.0), def))
+    @fact DecoratedInterval(Interval(-5.0, 3.0), com) ^2 --> DecoratedInterval(Interval(0.0, 25.0), com)
+    @fact decoration(DecoratedInterval(Interval(-5.0, 3.0), com) ^2) --> decoration(DecoratedInterval(Interval(0.0, 25.0), com))
+    @fact DecoratedInterval(Interval(-5.0, 3.0), com) ^(2//1) --> DecoratedInterval(Interval(0.0, 25.0), com)
+    @fact decoration(DecoratedInterval(Interval(-5.0, 3.0), com) ^(2//1)) --> decoration(DecoratedInterval(Interval(0.0, 25.0), com))
+    @fact DecoratedInterval(Interval(-5.0, 3.0), com) ^(2.0) --> DecoratedInterval(Interval(0.0, 25.0), com)
+    @fact decoration(DecoratedInterval(Interval(-5.0, 3.0), com) ^(2.0)) --> decoration(DecoratedInterval(Interval(0.0, 25.0), com))
+    @fact DecoratedInterval(Interval(0x1.999999999999ap-4, 0x1.999999999999ap-4), com) ^2 --> DecoratedInterval(Interval(0x1.47ae147ae147bp-7, 0x1.47ae147ae147cp-7), com)
+    @fact decoration(DecoratedInterval(Interval(0x1.999999999999ap-4, 0x1.999999999999ap-4), com) ^2) --> decoration(DecoratedInterval(Interval(0x1.47ae147ae147bp-7, 0x1.47ae147ae147cp-7), com))
+    @fact DecoratedInterval(Interval(0x1.999999999999ap-4, 0x1.999999999999ap-4), com) ^(2//1) --> DecoratedInterval(Interval(0x1.47ae147ae147bp-7, 0x1.47ae147ae147cp-7), com)
+    @fact decoration(DecoratedInterval(Interval(0x1.999999999999ap-4, 0x1.999999999999ap-4), com) ^(2//1)) --> decoration(DecoratedInterval(Interval(0x1.47ae147ae147bp-7, 0x1.47ae147ae147cp-7), com))
+    @fact DecoratedInterval(Interval(0x1.999999999999ap-4, 0x1.999999999999ap-4), com) ^(2.0) --> DecoratedInterval(Interval(0x1.47ae147ae147bp-7, 0x1.47ae147ae147cp-7), com)
+    @fact decoration(DecoratedInterval(Interval(0x1.999999999999ap-4, 0x1.999999999999ap-4), com) ^(2.0)) --> decoration(DecoratedInterval(Interval(0x1.47ae147ae147bp-7, 0x1.47ae147ae147cp-7), com))
 end
 
 facts("minimal_sqrt_test") do
     @fact sqrt(∅) --> ∅
+    @fact (∅)^(1/2) --> ∅
+    @fact (∅)^(0.5) --> ∅
+    @fact (∅)^(1//2) --> ∅
     @fact sqrt(entireinterval(Float64)) --> Interval(0.0, Inf)
+    @fact (entireinterval(Float64))^(1/2) --> Interval(0.0, Inf)
+    @fact (entireinterval(Float64))^(0.5) --> Interval(0.0, Inf)
+    @fact (entireinterval(Float64))^(1//2) --> Interval(0.0, Inf)
     @fact sqrt(Interval(-Inf, -0x0.0000000000001p-1022)) --> ∅
+    @fact (Interval(-Inf, -0x0.0000000000001p-1022))^(1/2) --> ∅
+    @fact (Interval(-Inf, -0x0.0000000000001p-1022))^(0.5) --> ∅
+    @fact (Interval(-Inf, -0x0.0000000000001p-1022))^(1//2) --> ∅
     @fact sqrt(Interval(-1.0, 1.0)) --> Interval(0.0, 1.0)
+    @fact (Interval(-1.0, 1.0))^(1/2) --> Interval(0.0, 1.0)
+    @fact (Interval(-1.0, 1.0))^(0.5) --> Interval(0.0, 1.0)
+    @fact (Interval(-1.0, 1.0))^(1//2) --> Interval(0.0, 1.0)
     @fact sqrt(Interval(0.0, 1.0)) --> Interval(0.0, 1.0)
+    @fact (Interval(0.0, 1.0))^(1/2) --> Interval(0.0, 1.0)
+    @fact (Interval(0.0, 1.0))^(0.5) --> Interval(0.0, 1.0)
+    @fact (Interval(0.0, 1.0))^(1//2) --> Interval(0.0, 1.0)
     @fact sqrt(Interval(-0.0, 1.0)) --> Interval(0.0, 1.0)
+    @fact (Interval(-0.0, 1.0))^(1/2) --> Interval(0.0, 1.0)
+    @fact (Interval(-0.0, 1.0))^(0.5) --> Interval(0.0, 1.0)
+    @fact (Interval(-0.0, 1.0))^(1//2) --> Interval(0.0, 1.0)
     @fact sqrt(Interval(-5.0, 25.0)) --> Interval(0.0, 5.0)
+    @fact (Interval(-5.0, 25.0))^(1/2) --> Interval(0.0, 5.0)
+    @fact (Interval(-5.0, 25.0))^(0.5) --> Interval(0.0, 5.0)
+    @fact (Interval(-5.0, 25.0))^(1//2) --> Interval(0.0, 5.0)
     @fact sqrt(Interval(0.0, 25.0)) --> Interval(0.0, 5.0)
+    @fact (Interval(0.0, 25.0))^(1/2) --> Interval(0.0, 5.0)
+    @fact (Interval(0.0, 25.0))^(0.5) --> Interval(0.0, 5.0)
+    @fact (Interval(0.0, 25.0))^(1//2) --> Interval(0.0, 5.0)
     @fact sqrt(Interval(-0.0, 25.0)) --> Interval(0.0, 5.0)
+    @fact (Interval(-0.0, 25.0))^(1/2) --> Interval(0.0, 5.0)
+    @fact (Interval(-0.0, 25.0))^(0.5) --> Interval(0.0, 5.0)
+    @fact (Interval(-0.0, 25.0))^(1//2) --> Interval(0.0, 5.0)
     @fact sqrt(Interval(-5.0, Inf)) --> Interval(0.0, Inf)
+    @fact (Interval(-5.0, Inf))^(1/2) --> Interval(0.0, Inf)
+    @fact (Interval(-5.0, Inf))^(0.5) --> Interval(0.0, Inf)
+    @fact (Interval(-5.0, Inf))^(1//2) --> Interval(0.0, Inf)
     @fact sqrt(Interval(0x1.999999999999ap-4, 0x1.999999999999ap-4)) --> Interval(0x1.43d136248490fp-2, 0x1.43d136248491p-2)
+    @fact (Interval(0x1.999999999999ap-4, 0x1.999999999999ap-4))^(1/2) --> Interval(0x1.43d136248490fp-2, 0x1.43d136248491p-2)
+    @fact (Interval(0x1.999999999999ap-4, 0x1.999999999999ap-4))^(0.5) --> Interval(0x1.43d136248490fp-2, 0x1.43d136248491p-2)
+    @fact (Interval(0x1.999999999999ap-4, 0x1.999999999999ap-4))^(1//2) --> Interval(0x1.43d136248490fp-2, 0x1.43d136248491p-2)
     @fact sqrt(Interval(-0x1.ffffffffffffp+0, 0x1.999999999999ap-4)) --> Interval(0.0, 0x1.43d136248491p-2)
+    @fact (Interval(-0x1.ffffffffffffp+0, 0x1.999999999999ap-4))^(1/2) --> Interval(0.0, 0x1.43d136248491p-2)
+    @fact (Interval(-0x1.ffffffffffffp+0, 0x1.999999999999ap-4))^(0.5) --> Interval(0.0, 0x1.43d136248491p-2)
+    @fact (Interval(-0x1.ffffffffffffp+0, 0x1.999999999999ap-4))^(1//2) --> Interval(0.0, 0x1.43d136248491p-2)
     @fact sqrt(Interval(0x1.999999999999ap-4, 0x1.ffffffffffffp+0)) --> Interval(0x1.43d136248490fp-2, 0x1.6a09e667f3bc7p+0)
+    @fact (Interval(0x1.999999999999ap-4, 0x1.ffffffffffffp+0))^(1/2) --> Interval(0x1.43d136248490fp-2, 0x1.6a09e667f3bc7p+0)
+    @fact (Interval(0x1.999999999999ap-4, 0x1.ffffffffffffp+0))^(0.5) --> Interval(0x1.43d136248490fp-2, 0x1.6a09e667f3bc7p+0)
+    @fact (Interval(0x1.999999999999ap-4, 0x1.ffffffffffffp+0))^(1//2) --> Interval(0x1.43d136248490fp-2, 0x1.6a09e667f3bc7p+0)
 end
 
 facts("minimal_sqrt_dec_test") do
-
+    @fact sqrt(DecoratedInterval(Interval(1.0, 4.0), com)) --> DecoratedInterval(Interval(1.0, 2.0), com)
+    @fact decoration(sqrt(DecoratedInterval(Interval(1.0, 4.0), com))) --> decoration(DecoratedInterval(Interval(1.0, 2.0), com))
+    @fact (DecoratedInterval(Interval(1.0, 4.0), com))^(1/2) --> DecoratedInterval(Interval(1.0, 2.0), com)
+    @fact decoration((DecoratedInterval(Interval(1.0, 4.0), com))^(1/2)) --> decoration(DecoratedInterval(Interval(1.0, 2.0), com))
+    @fact (DecoratedInterval(Interval(1.0, 4.0), com))^(0.5) --> DecoratedInterval(Interval(1.0, 2.0), com)
+    @fact decoration((DecoratedInterval(Interval(1.0, 4.0), com))^(0.5)) --> decoration(DecoratedInterval(Interval(1.0, 2.0), com))
+    @fact (DecoratedInterval(Interval(1.0, 4.0), com))^(1//2) --> DecoratedInterval(Interval(1.0, 2.0), com)
+    @fact decoration((DecoratedInterval(Interval(1.0, 4.0), com))^(1//2)) --> decoration(DecoratedInterval(Interval(1.0, 2.0), com))
+    @fact sqrt(DecoratedInterval(Interval(-5.0, 25.0), com)) --> DecoratedInterval(Interval(0.0, 5.0), trv)
+    @fact decoration(sqrt(DecoratedInterval(Interval(-5.0, 25.0), com))) --> decoration(DecoratedInterval(Interval(0.0, 5.0), trv))
+    @fact (DecoratedInterval(Interval(-5.0, 25.0), com))^(1/2) --> DecoratedInterval(Interval(0.0, 5.0), trv)
+    @fact decoration((DecoratedInterval(Interval(-5.0, 25.0), com))^(1/2)) --> decoration(DecoratedInterval(Interval(0.0, 5.0), trv))
+    @fact (DecoratedInterval(Interval(-5.0, 25.0), com))^(0.5) --> DecoratedInterval(Interval(0.0, 5.0), trv)
+    @fact decoration((DecoratedInterval(Interval(-5.0, 25.0), com))^(0.5)) --> decoration(DecoratedInterval(Interval(0.0, 5.0), trv))
+    @fact (DecoratedInterval(Interval(-5.0, 25.0), com))^(1//2) --> DecoratedInterval(Interval(0.0, 5.0), trv)
+    @fact decoration((DecoratedInterval(Interval(-5.0, 25.0), com))^(1//2)) --> decoration(DecoratedInterval(Interval(0.0, 5.0), trv))
+    @fact sqrt(DecoratedInterval(Interval(0.0, 25.0), def)) --> DecoratedInterval(Interval(0.0, 5.0), def)
+    @fact decoration(sqrt(DecoratedInterval(Interval(0.0, 25.0), def))) --> decoration(DecoratedInterval(Interval(0.0, 5.0), def))
+    @fact (DecoratedInterval(Interval(0.0, 25.0), def))^(1/2) --> DecoratedInterval(Interval(0.0, 5.0), def)
+    @fact decoration((DecoratedInterval(Interval(0.0, 25.0), def))^(1/2)) --> decoration(DecoratedInterval(Interval(0.0, 5.0), def))
+    @fact (DecoratedInterval(Interval(0.0, 25.0), def))^(0.5) --> DecoratedInterval(Interval(0.0, 5.0), def)
+    @fact decoration((DecoratedInterval(Interval(0.0, 25.0), def))^(0.5)) --> decoration(DecoratedInterval(Interval(0.0, 5.0), def))
+    @fact (DecoratedInterval(Interval(0.0, 25.0), def))^(1//2) --> DecoratedInterval(Interval(0.0, 5.0), def)
+    @fact decoration((DecoratedInterval(Interval(0.0, 25.0), def))^(1//2)) --> decoration(DecoratedInterval(Interval(0.0, 5.0), def))
+    @fact sqrt(DecoratedInterval(Interval(-5.0, Inf), dac)) --> DecoratedInterval(Interval(0.0, Inf), trv)
+    @fact decoration(sqrt(DecoratedInterval(Interval(-5.0, Inf), dac))) --> decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @fact (DecoratedInterval(Interval(-5.0, Inf), dac))^(1/2) --> DecoratedInterval(Interval(0.0, Inf), trv)
+    @fact decoration((DecoratedInterval(Interval(-5.0, Inf), dac))^(1/2)) --> decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @fact (DecoratedInterval(Interval(-5.0, Inf), dac))^(0.5) --> DecoratedInterval(Interval(0.0, Inf), trv)
+    @fact decoration((DecoratedInterval(Interval(-5.0, Inf), dac))^(0.5)) --> decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @fact (DecoratedInterval(Interval(-5.0, Inf), dac))^(1//2) --> DecoratedInterval(Interval(0.0, Inf), trv)
+    @fact decoration((DecoratedInterval(Interval(-5.0, Inf), dac))^(1//2)) --> decoration(DecoratedInterval(Interval(0.0, Inf), trv))
 end
 
 facts("minimal_fma_test") do
@@ -1257,7 +1571,12 @@ facts("minimal_fma_test") do
 end
 
 facts("minimal_fma_dec_test") do
-
+    @fact fma(DecoratedInterval(Interval(-0.5, -0.1), com), DecoratedInterval(Interval(-Inf, 3.0), dac), DecoratedInterval(Interval(-0.1, 0.1), com)) --> DecoratedInterval(Interval(-0x1.999999999999ap+0, Inf), dac)
+    @fact decoration(fma(DecoratedInterval(Interval(-0.5, -0.1), com), DecoratedInterval(Interval(-Inf, 3.0), dac), DecoratedInterval(Interval(-0.1, 0.1), com))) --> decoration(DecoratedInterval(Interval(-0x1.999999999999ap+0, Inf), dac))
+    @fact fma(DecoratedInterval(Interval(1.0, 2.0), com), DecoratedInterval(Interval(1.0, 0x1.fffffffffffffp1023), com), DecoratedInterval(Interval(0.0, 1.0), com)) --> DecoratedInterval(Interval(1.0, Inf), dac)
+    @fact decoration(fma(DecoratedInterval(Interval(1.0, 2.0), com), DecoratedInterval(Interval(1.0, 0x1.fffffffffffffp1023), com), DecoratedInterval(Interval(0.0, 1.0), com))) --> decoration(DecoratedInterval(Interval(1.0, Inf), dac))
+    @fact fma(DecoratedInterval(Interval(1.0, 2.0), com), DecoratedInterval(Interval(1.0, 2.0), com), DecoratedInterval(Interval(2.0, 5.0), com)) --> DecoratedInterval(Interval(3.0, 9.0), com)
+    @fact decoration(fma(DecoratedInterval(Interval(1.0, 2.0), com), DecoratedInterval(Interval(1.0, 2.0), com), DecoratedInterval(Interval(2.0, 5.0), com))) --> decoration(DecoratedInterval(Interval(3.0, 9.0), com))
 end
 
 facts("minimal_pown_test") do
@@ -1427,7 +1746,28 @@ facts("minimal_pown_test") do
 end
 
 facts("minimal_pown_dec_test") do
-
+    @fact DecoratedInterval(Interval(-5.0, 10.0), com) ^ 0 --> DecoratedInterval(Interval(1.0, 1.0), com)
+    @fact decoration(DecoratedInterval(Interval(-5.0, 10.0), com) ^ 0) --> decoration(DecoratedInterval(Interval(1.0, 1.0), com))
+    @fact DecoratedInterval(Interval(-Inf, 15.0), dac) ^ 0 --> DecoratedInterval(Interval(1.0, 1.0), dac)
+    @fact decoration(DecoratedInterval(Interval(-Inf, 15.0), dac) ^ 0) --> decoration(DecoratedInterval(Interval(1.0, 1.0), dac))
+    @fact DecoratedInterval(Interval(-3.0, 5.0), def) ^ 2 --> DecoratedInterval(Interval(0.0, 25.0), def)
+    @fact decoration(DecoratedInterval(Interval(-3.0, 5.0), def) ^ 2) --> decoration(DecoratedInterval(Interval(0.0, 25.0), def))
+    @fact DecoratedInterval(Interval(-0x1.fffffffffffffp1023, 2.0), com) ^ 2 --> DecoratedInterval(Interval(0.0, Inf), dac)
+    @fact decoration(DecoratedInterval(Interval(-0x1.fffffffffffffp1023, 2.0), com) ^ 2) --> decoration(DecoratedInterval(Interval(0.0, Inf), dac))
+    @fact DecoratedInterval(Interval(-3.0, 5.0), dac) ^ 3 --> DecoratedInterval(Interval(-27.0, 125.0), dac)
+    @fact decoration(DecoratedInterval(Interval(-3.0, 5.0), dac) ^ 3) --> decoration(DecoratedInterval(Interval(-27.0, 125.0), dac))
+    @fact DecoratedInterval(Interval(-0x1.fffffffffffffp1023, 2.0), com) ^ 3 --> DecoratedInterval(Interval(-Inf, 8.0), dac)
+    @fact decoration(DecoratedInterval(Interval(-0x1.fffffffffffffp1023, 2.0), com) ^ 3) --> decoration(DecoratedInterval(Interval(-Inf, 8.0), dac))
+    @fact DecoratedInterval(Interval(3.0, 5.0), com) ^ -2 --> DecoratedInterval(Interval(0x1.47ae147ae147ap-5, 0x1.c71c71c71c71dp-4), com)
+    @fact decoration(DecoratedInterval(Interval(3.0, 5.0), com) ^ -2) --> decoration(DecoratedInterval(Interval(0x1.47ae147ae147ap-5, 0x1.c71c71c71c71dp-4), com))
+    @fact DecoratedInterval(Interval(-5.0, -3.0), def) ^ -2 --> DecoratedInterval(Interval(0x1.47ae147ae147ap-5, 0x1.c71c71c71c71dp-4), def)
+    @fact decoration(DecoratedInterval(Interval(-5.0, -3.0), def) ^ -2) --> decoration(DecoratedInterval(Interval(0x1.47ae147ae147ap-5, 0x1.c71c71c71c71dp-4), def))
+    @fact DecoratedInterval(Interval(-5.0, 3.0), com) ^ -2 --> DecoratedInterval(Interval(0x1.47ae147ae147ap-5, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(-5.0, 3.0), com) ^ -2) --> decoration(DecoratedInterval(Interval(0x1.47ae147ae147ap-5, Inf), trv))
+    @fact DecoratedInterval(Interval(3.0, 5.0), dac) ^ -3 --> DecoratedInterval(Interval(0x1.0624dd2f1a9fbp-7, 0x1.2f684bda12f69p-5), dac)
+    @fact decoration(DecoratedInterval(Interval(3.0, 5.0), dac) ^ -3) --> decoration(DecoratedInterval(Interval(0x1.0624dd2f1a9fbp-7, 0x1.2f684bda12f69p-5), dac))
+    @fact DecoratedInterval(Interval(-3.0, 5.0), com) ^ -3 --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration(DecoratedInterval(Interval(-3.0, 5.0), com) ^ -3) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
 end
 
 facts("minimal_pow_test") do
@@ -2778,7 +3118,174 @@ facts("minimal_pow_test") do
 end
 
 facts("minimal_pow_dec_test") do
-
+    @fact DecoratedInterval(Interval(0.1, 0.5), com) ^ DecoratedInterval(Interval(0.0, 1.0), com) --> DecoratedInterval(Interval(0x1.999999999999ap-4, 1.0), com)
+    @fact decoration(DecoratedInterval(Interval(0.1, 0.5), com) ^ DecoratedInterval(Interval(0.0, 1.0), com)) --> decoration(DecoratedInterval(Interval(0x1.999999999999ap-4, 1.0), com))
+    @fact DecoratedInterval(Interval(0.1, 0.5), com) ^ DecoratedInterval(Interval(0.1, 0.1), def) --> DecoratedInterval(Interval(0x1.96b230bcdc434p-1, 0x1.ddb680117ab13p-1), def)
+    @fact decoration(DecoratedInterval(Interval(0.1, 0.5), com) ^ DecoratedInterval(Interval(0.1, 0.1), def)) --> decoration(DecoratedInterval(Interval(0x1.96b230bcdc434p-1, 0x1.ddb680117ab13p-1), def))
+    @fact DecoratedInterval(Interval(0.1, 0.5), trv) ^ DecoratedInterval(Interval(-2.5, 2.5), dac) --> DecoratedInterval(Interval(0x1.9e7c6e43390b7p-9, 0x1.3c3a4edfa9758p+8), trv)
+    @fact decoration(DecoratedInterval(Interval(0.1, 0.5), trv) ^ DecoratedInterval(Interval(-2.5, 2.5), dac)) --> decoration(DecoratedInterval(Interval(0x1.9e7c6e43390b7p-9, 0x1.3c3a4edfa9758p+8), trv))
+    @fact DecoratedInterval(Interval(0.1, 0.5), com) ^ DecoratedInterval(Interval(-2.5, Inf), dac) --> DecoratedInterval(Interval(0.0, 0x1.3c3a4edfa9758p+8), dac)
+    @fact decoration(DecoratedInterval(Interval(0.1, 0.5), com) ^ DecoratedInterval(Interval(-2.5, Inf), dac)) --> decoration(DecoratedInterval(Interval(0.0, 0x1.3c3a4edfa9758p+8), dac))
+    @fact DecoratedInterval(Interval(0.1, 0.5), trv) ^ DecoratedInterval(Interval(-Inf, 0.1), dac) --> DecoratedInterval(Interval(0x1.96b230bcdc434p-1, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(0.1, 0.5), trv) ^ DecoratedInterval(Interval(-Inf, 0.1), dac)) --> decoration(DecoratedInterval(Interval(0x1.96b230bcdc434p-1, Inf), trv))
+    @fact DecoratedInterval(Interval(0.1, 1.0), com) ^ DecoratedInterval(Interval(0.0, 2.5), com) --> DecoratedInterval(Interval(0x1.9e7c6e43390b7p-9, 1.0), com)
+    @fact decoration(DecoratedInterval(Interval(0.1, 1.0), com) ^ DecoratedInterval(Interval(0.0, 2.5), com)) --> decoration(DecoratedInterval(Interval(0x1.9e7c6e43390b7p-9, 1.0), com))
+    @fact DecoratedInterval(Interval(0.1, 1.0), def) ^ DecoratedInterval(Interval(1.0, 1.0), dac) --> DecoratedInterval(Interval(0x1.999999999999ap-4, 1.0), def)
+    @fact decoration(DecoratedInterval(Interval(0.1, 1.0), def) ^ DecoratedInterval(Interval(1.0, 1.0), dac)) --> decoration(DecoratedInterval(Interval(0x1.999999999999ap-4, 1.0), def))
+    @fact DecoratedInterval(Interval(0.1, 1.0), trv) ^ DecoratedInterval(Interval(-2.5, 1.0), def) --> DecoratedInterval(Interval(0x1.999999999999ap-4, 0x1.3c3a4edfa9758p+8), trv)
+    @fact decoration(DecoratedInterval(Interval(0.1, 1.0), trv) ^ DecoratedInterval(Interval(-2.5, 1.0), def)) --> decoration(DecoratedInterval(Interval(0x1.999999999999ap-4, 0x1.3c3a4edfa9758p+8), trv))
+    @fact DecoratedInterval(Interval(0.5, 1.5), dac) ^ DecoratedInterval(Interval(0.1, 0.1), com) --> DecoratedInterval(Interval(0x1.ddb680117ab12p-1, 0x1.0a97dce72a0cbp+0), dac)
+    @fact decoration(DecoratedInterval(Interval(0.5, 1.5), dac) ^ DecoratedInterval(Interval(0.1, 0.1), com)) --> decoration(DecoratedInterval(Interval(0x1.ddb680117ab12p-1, 0x1.0a97dce72a0cbp+0), dac))
+    @fact DecoratedInterval(Interval(0.5, 1.5), def) ^ DecoratedInterval(Interval(-2.5, 0.1), trv) --> DecoratedInterval(Interval(0x1.7398bf1d1ee6fp-2, 0x1.6a09e667f3bcdp+2), trv)
+    @fact decoration(DecoratedInterval(Interval(0.5, 1.5), def) ^ DecoratedInterval(Interval(-2.5, 0.1), trv)) --> decoration(DecoratedInterval(Interval(0x1.7398bf1d1ee6fp-2, 0x1.6a09e667f3bcdp+2), trv))
+    @fact DecoratedInterval(Interval(0.5, 1.5), com) ^ DecoratedInterval(Interval(-2.5, -2.5), com) --> DecoratedInterval(Interval(0x1.7398bf1d1ee6fp-2, 0x1.6a09e667f3bcdp+2), com)
+    @fact decoration(DecoratedInterval(Interval(0.5, 1.5), com) ^ DecoratedInterval(Interval(-2.5, -2.5), com)) --> decoration(DecoratedInterval(Interval(0x1.7398bf1d1ee6fp-2, 0x1.6a09e667f3bcdp+2), com))
+    @fact DecoratedInterval(Interval(0.5, Inf), dac) ^ DecoratedInterval(Interval(0.1, 0.1), com) --> DecoratedInterval(Interval(0x1.ddb680117ab12p-1, Inf), dac)
+    @fact decoration(DecoratedInterval(Interval(0.5, Inf), dac) ^ DecoratedInterval(Interval(0.1, 0.1), com)) --> decoration(DecoratedInterval(Interval(0x1.ddb680117ab12p-1, Inf), dac))
+    @fact DecoratedInterval(Interval(0.5, Inf), def) ^ DecoratedInterval(Interval(-2.5, -0.0), com) --> DecoratedInterval(Interval(0.0, 0x1.6a09e667f3bcdp+2), def)
+    @fact decoration(DecoratedInterval(Interval(0.5, Inf), def) ^ DecoratedInterval(Interval(-2.5, -0.0), com)) --> decoration(DecoratedInterval(Interval(0.0, 0x1.6a09e667f3bcdp+2), def))
+    @fact DecoratedInterval(Interval(1.0, 1.5), com) ^ DecoratedInterval(Interval(-0.1, 0.1), def) --> DecoratedInterval(Interval(0x1.eba7c9e4d31e9p-1, 0x1.0a97dce72a0cbp+0), def)
+    @fact decoration(DecoratedInterval(Interval(1.0, 1.5), com) ^ DecoratedInterval(Interval(-0.1, 0.1), def)) --> decoration(DecoratedInterval(Interval(0x1.eba7c9e4d31e9p-1, 0x1.0a97dce72a0cbp+0), def))
+    @fact DecoratedInterval(Interval(1.0, 1.5), trv) ^ DecoratedInterval(Interval(-0.1, -0.1), com) --> DecoratedInterval(Interval(0x1.eba7c9e4d31e9p-1, 1.0), trv)
+    @fact decoration(DecoratedInterval(Interval(1.0, 1.5), trv) ^ DecoratedInterval(Interval(-0.1, -0.1), com)) --> decoration(DecoratedInterval(Interval(0x1.eba7c9e4d31e9p-1, 1.0), trv))
+    @fact DecoratedInterval(Interval(1.0, Inf), dac) ^ DecoratedInterval(Interval(1.0, 1.0), dac) --> DecoratedInterval(Interval(1.0, Inf), dac)
+    @fact decoration(DecoratedInterval(Interval(1.0, Inf), dac) ^ DecoratedInterval(Interval(1.0, 1.0), dac)) --> decoration(DecoratedInterval(Interval(1.0, Inf), dac))
+    @fact DecoratedInterval(Interval(1.0, Inf), def) ^ DecoratedInterval(Interval(-1.0, -0.0), dac) --> DecoratedInterval(Interval(0x0p+0, 1.0), def)
+    @fact decoration(DecoratedInterval(Interval(1.0, Inf), def) ^ DecoratedInterval(Interval(-1.0, -0.0), dac)) --> decoration(DecoratedInterval(Interval(0x0p+0, 1.0), def))
+    @fact DecoratedInterval(Interval(1.1, 1.5), def) ^ DecoratedInterval(Interval(1.0, 2.5), com) --> DecoratedInterval(Interval(0x1.199999999999ap+0, 0x1.60b9fd68a4555p+1), def)
+    @fact decoration(DecoratedInterval(Interval(1.1, 1.5), def) ^ DecoratedInterval(Interval(1.0, 2.5), com)) --> decoration(DecoratedInterval(Interval(0x1.199999999999ap+0, 0x1.60b9fd68a4555p+1), def))
+    @fact DecoratedInterval(Interval(1.1, 1.5), com) ^ DecoratedInterval(Interval(-0.1, -0.1), com) --> DecoratedInterval(Interval(0x1.eba7c9e4d31e9p-1, 0x1.fb24af5281928p-1), com)
+    @fact decoration(DecoratedInterval(Interval(1.1, 1.5), com) ^ DecoratedInterval(Interval(-0.1, -0.1), com)) --> decoration(DecoratedInterval(Interval(0x1.eba7c9e4d31e9p-1, 0x1.fb24af5281928p-1), com))
+    @fact DecoratedInterval(Interval(1.1, Inf), dac) ^ DecoratedInterval(Interval(0.1, Inf), dac) --> DecoratedInterval(Interval(0x1.02739c65d58bfp+0, Inf), dac)
+    @fact decoration(DecoratedInterval(Interval(1.1, Inf), dac) ^ DecoratedInterval(Interval(0.1, Inf), dac)) --> decoration(DecoratedInterval(Interval(0x1.02739c65d58bfp+0, Inf), dac))
+    @fact DecoratedInterval(Interval(1.1, Inf), def) ^ DecoratedInterval(Interval(-2.5, Inf), dac) --> DecoratedInterval(Interval(0x0p+0, Inf), def)
+    @fact decoration(DecoratedInterval(Interval(1.1, Inf), def) ^ DecoratedInterval(Interval(-2.5, Inf), dac)) --> decoration(DecoratedInterval(Interval(0x0p+0, Inf), def))
+    @fact DecoratedInterval(Interval(1.1, Inf), trv) ^ DecoratedInterval(Interval(-Inf, -1.0), def) --> DecoratedInterval(Interval(0x0p+0, 0x1.d1745d1745d17p-1), trv)
+    @fact decoration(DecoratedInterval(Interval(1.1, Inf), trv) ^ DecoratedInterval(Interval(-Inf, -1.0), def)) --> decoration(DecoratedInterval(Interval(0x0p+0, 0x1.d1745d1745d17p-1), trv))
+    @fact DecoratedInterval(Interval(0.0, 0.5), com) ^ DecoratedInterval(Interval(0.1, 0.1), com) --> DecoratedInterval(Interval(0.0, 0x1.ddb680117ab13p-1), com)
+    @fact decoration(DecoratedInterval(Interval(0.0, 0.5), com) ^ DecoratedInterval(Interval(0.1, 0.1), com)) --> decoration(DecoratedInterval(Interval(0.0, 0x1.ddb680117ab13p-1), com))
+    @fact DecoratedInterval(Interval(0.0, 0.5), com) ^ DecoratedInterval(Interval(2.5, Inf), dac) --> DecoratedInterval(Interval(0.0, 0x1.6a09e667f3bcdp-3), dac)
+    @fact decoration(DecoratedInterval(Interval(0.0, 0.5), com) ^ DecoratedInterval(Interval(2.5, Inf), dac)) --> decoration(DecoratedInterval(Interval(0.0, 0x1.6a09e667f3bcdp-3), dac))
+    @fact DecoratedInterval(Interval(0.0, 0.5), com) ^ DecoratedInterval(Interval(-Inf, -2.5), dac) --> DecoratedInterval(Interval(0x1.6a09e667f3bccp+2, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(0.0, 0.5), com) ^ DecoratedInterval(Interval(-Inf, -2.5), dac)) --> decoration(DecoratedInterval(Interval(0x1.6a09e667f3bccp+2, Inf), trv))
+    @fact DecoratedInterval(Interval(0.0, 1.0), com) ^ DecoratedInterval(Interval(0.0, 0.0), com) --> DecoratedInterval(Interval(1.0, 1.0), trv)
+    @fact decoration(DecoratedInterval(Interval(0.0, 1.0), com) ^ DecoratedInterval(Interval(0.0, 0.0), com)) --> decoration(DecoratedInterval(Interval(1.0, 1.0), trv))
+    @fact DecoratedInterval(Interval(0.0, 1.0), def) ^ DecoratedInterval(Interval(0.0, 2.5), dac) --> DecoratedInterval(Interval(0.0, 1.0), trv)
+    @fact decoration(DecoratedInterval(Interval(0.0, 1.0), def) ^ DecoratedInterval(Interval(0.0, 2.5), dac)) --> decoration(DecoratedInterval(Interval(0.0, 1.0), trv))
+    @fact DecoratedInterval(Interval(0.0, 1.0), dac) ^ DecoratedInterval(Interval(1.0, 2.5), com) --> DecoratedInterval(Interval(0.0, 1.0), dac)
+    @fact decoration(DecoratedInterval(Interval(0.0, 1.0), dac) ^ DecoratedInterval(Interval(1.0, 2.5), com)) --> decoration(DecoratedInterval(Interval(0.0, 1.0), dac))
+    @fact DecoratedInterval(Interval(0.0, 1.0), com) ^ DecoratedInterval(Interval(-2.5, 0.1), dac) --> DecoratedInterval(Interval(0.0, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(0.0, 1.0), com) ^ DecoratedInterval(Interval(-2.5, 0.1), dac)) --> decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @fact DecoratedInterval(Interval(0.0, 1.0), def) ^ DecoratedInterval(entireinterval(Float64), def) --> DecoratedInterval(Interval(0.0, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(0.0, 1.0), def) ^ DecoratedInterval(entireinterval(Float64), def)) --> decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @fact DecoratedInterval(Interval(0.0, 1.0), dac) ^ DecoratedInterval(Interval(-0.1, 0.0), com) --> DecoratedInterval(Interval(1.0, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(0.0, 1.0), dac) ^ DecoratedInterval(Interval(-0.1, 0.0), com)) --> decoration(DecoratedInterval(Interval(1.0, Inf), trv))
+    @fact DecoratedInterval(Interval(0.0, 1.0), com) ^ DecoratedInterval(Interval(-Inf, 0.0), dac) --> DecoratedInterval(Interval(1.0, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(0.0, 1.0), com) ^ DecoratedInterval(Interval(-Inf, 0.0), dac)) --> decoration(DecoratedInterval(Interval(1.0, Inf), trv))
+    @fact DecoratedInterval(Interval(0.0, 1.0), def) ^ DecoratedInterval(Interval(-Inf, -2.5), dac) --> DecoratedInterval(Interval(1.0, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(0.0, 1.0), def) ^ DecoratedInterval(Interval(-Inf, -2.5), dac)) --> decoration(DecoratedInterval(Interval(1.0, Inf), trv))
+    @fact DecoratedInterval(Interval(0.0, 1.5), com) ^ DecoratedInterval(Interval(0.0, 2.5), com) --> DecoratedInterval(Interval(0.0, 0x1.60b9fd68a4555p+1), trv)
+    @fact decoration(DecoratedInterval(Interval(0.0, 1.5), com) ^ DecoratedInterval(Interval(0.0, 2.5), com)) --> decoration(DecoratedInterval(Interval(0.0, 0x1.60b9fd68a4555p+1), trv))
+    @fact DecoratedInterval(Interval(0.0, 1.5), def) ^ DecoratedInterval(Interval(2.5, 2.5), dac) --> DecoratedInterval(Interval(0.0, 0x1.60b9fd68a4555p+1), def)
+    @fact decoration(DecoratedInterval(Interval(0.0, 1.5), def) ^ DecoratedInterval(Interval(2.5, 2.5), dac)) --> decoration(DecoratedInterval(Interval(0.0, 0x1.60b9fd68a4555p+1), def))
+    @fact DecoratedInterval(Interval(0.0, 1.5), dac) ^ DecoratedInterval(Interval(-1.0, 0.0), com) --> DecoratedInterval(Interval(0x1.5555555555555p-1, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(0.0, 1.5), dac) ^ DecoratedInterval(Interval(-1.0, 0.0), com)) --> decoration(DecoratedInterval(Interval(0x1.5555555555555p-1, Inf), trv))
+    @fact DecoratedInterval(Interval(0.0, 1.5), com) ^ DecoratedInterval(Interval(-2.5, -2.5), def) --> DecoratedInterval(Interval(0x1.7398bf1d1ee6fp-2, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(0.0, 1.5), com) ^ DecoratedInterval(Interval(-2.5, -2.5), def)) --> decoration(DecoratedInterval(Interval(0x1.7398bf1d1ee6fp-2, Inf), trv))
+    @fact DecoratedInterval(Interval(0.0, Inf), dac) ^ DecoratedInterval(Interval(0.1, 0.1), com) --> DecoratedInterval(Interval(0.0, Inf), dac)
+    @fact decoration(DecoratedInterval(Interval(0.0, Inf), dac) ^ DecoratedInterval(Interval(0.1, 0.1), com)) --> decoration(DecoratedInterval(Interval(0.0, Inf), dac))
+    @fact DecoratedInterval(Interval(0.0, Inf), def) ^ DecoratedInterval(Interval(-1.0, 1.0), dac) --> DecoratedInterval(Interval(0.0, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(0.0, Inf), def) ^ DecoratedInterval(Interval(-1.0, 1.0), dac)) --> decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @fact DecoratedInterval(Interval(0.0, Inf), trv) ^ DecoratedInterval(Interval(-Inf, -1.0), def) --> DecoratedInterval(Interval(0.0, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(0.0, Inf), trv) ^ DecoratedInterval(Interval(-Inf, -1.0), def)) --> decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @fact DecoratedInterval(Interval(0.0, Inf), dac) ^ DecoratedInterval(Interval(-2.5, -2.5), dac) --> DecoratedInterval(Interval(0.0, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(0.0, Inf), dac) ^ DecoratedInterval(Interval(-2.5, -2.5), dac)) --> decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @fact DecoratedInterval(Interval(-0.0, 0.5), com) ^ DecoratedInterval(Interval(0.0, Inf), dac) --> DecoratedInterval(Interval(0.0, 1.0), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.0, 0.5), com) ^ DecoratedInterval(Interval(0.0, Inf), dac)) --> decoration(DecoratedInterval(Interval(0.0, 1.0), trv))
+    @fact DecoratedInterval(Interval(-0.0, 0.5), def) ^ DecoratedInterval(Interval(0.1, Inf), def) --> DecoratedInterval(Interval(0.0, 0x1.ddb680117ab13p-1), def)
+    @fact decoration(DecoratedInterval(Interval(-0.0, 0.5), def) ^ DecoratedInterval(Interval(0.1, Inf), def)) --> decoration(DecoratedInterval(Interval(0.0, 0x1.ddb680117ab13p-1), def))
+    @fact DecoratedInterval(Interval(-0.0, 0.5), dac) ^ DecoratedInterval(Interval(2.5, 2.5), com) --> DecoratedInterval(Interval(0.0, 0x1.6a09e667f3bcdp-3), dac)
+    @fact decoration(DecoratedInterval(Interval(-0.0, 0.5), dac) ^ DecoratedInterval(Interval(2.5, 2.5), com)) --> decoration(DecoratedInterval(Interval(0.0, 0x1.6a09e667f3bcdp-3), dac))
+    @fact DecoratedInterval(Interval(-0.0, 0.5), trv) ^ DecoratedInterval(Interval(-2.5, -0.0), dac) --> DecoratedInterval(Interval(1.0, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.0, 0.5), trv) ^ DecoratedInterval(Interval(-2.5, -0.0), dac)) --> decoration(DecoratedInterval(Interval(1.0, Inf), trv))
+    @fact DecoratedInterval(Interval(-0.0, 0.5), com) ^ DecoratedInterval(Interval(-Inf, -0.1), def) --> DecoratedInterval(Interval(0x1.125fbee250664p+0, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.0, 0.5), com) ^ DecoratedInterval(Interval(-Inf, -0.1), def)) --> decoration(DecoratedInterval(Interval(0x1.125fbee250664p+0, Inf), trv))
+    @fact DecoratedInterval(Interval(-0.0, 0.5), def) ^ DecoratedInterval(Interval(-Inf, -2.5), dac) --> DecoratedInterval(Interval(0x1.6a09e667f3bccp+2, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.0, 0.5), def) ^ DecoratedInterval(Interval(-Inf, -2.5), dac)) --> decoration(DecoratedInterval(Interval(0x1.6a09e667f3bccp+2, Inf), trv))
+    @fact DecoratedInterval(Interval(-0.0, 1.0), com) ^ DecoratedInterval(Interval(2.5, 2.5), dac) --> DecoratedInterval(Interval(0.0, 1.0), dac)
+    @fact decoration(DecoratedInterval(Interval(-0.0, 1.0), com) ^ DecoratedInterval(Interval(2.5, 2.5), dac)) --> decoration(DecoratedInterval(Interval(0.0, 1.0), dac))
+    @fact DecoratedInterval(Interval(-0.0, 1.0), dac) ^ DecoratedInterval(Interval(-1.0, Inf), def) --> DecoratedInterval(Interval(0.0, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.0, 1.0), dac) ^ DecoratedInterval(Interval(-1.0, Inf), def)) --> decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @fact DecoratedInterval(Interval(-0.0, 1.0), com) ^ DecoratedInterval(entireinterval(Float64), def) --> DecoratedInterval(Interval(0.0, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.0, 1.0), com) ^ DecoratedInterval(entireinterval(Float64), def)) --> decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @fact DecoratedInterval(Interval(-0.0, 1.0), def) ^ DecoratedInterval(Interval(-2.5, -2.5), com) --> DecoratedInterval(Interval(1.0, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.0, 1.0), def) ^ DecoratedInterval(Interval(-2.5, -2.5), com)) --> decoration(DecoratedInterval(Interval(1.0, Inf), trv))
+    @fact DecoratedInterval(Interval(-0.0, 1.0), dac) ^ DecoratedInterval(Interval(-Inf, -2.5), def) --> DecoratedInterval(Interval(1.0, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.0, 1.0), dac) ^ DecoratedInterval(Interval(-Inf, -2.5), def)) --> decoration(DecoratedInterval(Interval(1.0, Inf), trv))
+    @fact DecoratedInterval(Interval(-0.0, 1.5), com) ^ DecoratedInterval(Interval(0.1, 2.5), dac) --> DecoratedInterval(Interval(0.0, 0x1.60b9fd68a4555p+1), dac)
+    @fact decoration(DecoratedInterval(Interval(-0.0, 1.5), com) ^ DecoratedInterval(Interval(0.1, 2.5), dac)) --> decoration(DecoratedInterval(Interval(0.0, 0x1.60b9fd68a4555p+1), dac))
+    @fact DecoratedInterval(Interval(-0.0, 1.5), def) ^ DecoratedInterval(Interval(-1.0, 0.0), trv) --> DecoratedInterval(Interval(0x1.5555555555555p-1, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.0, 1.5), def) ^ DecoratedInterval(Interval(-1.0, 0.0), trv)) --> decoration(DecoratedInterval(Interval(0x1.5555555555555p-1, Inf), trv))
+    @fact DecoratedInterval(Interval(-0.0, 1.5), dac) ^ DecoratedInterval(Interval(-2.5, -0.1), def) --> DecoratedInterval(Interval(0x1.7398bf1d1ee6fp-2, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.0, 1.5), dac) ^ DecoratedInterval(Interval(-2.5, -0.1), def)) --> decoration(DecoratedInterval(Interval(0x1.7398bf1d1ee6fp-2, Inf), trv))
+    @fact DecoratedInterval(Interval(-0.0, 1.5), com) ^ DecoratedInterval(Interval(-2.5, -2.5), com) --> DecoratedInterval(Interval(0x1.7398bf1d1ee6fp-2, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.0, 1.5), com) ^ DecoratedInterval(Interval(-2.5, -2.5), com)) --> decoration(DecoratedInterval(Interval(0x1.7398bf1d1ee6fp-2, Inf), trv))
+    @fact DecoratedInterval(Interval(-0.0, 1.5), def) ^ DecoratedInterval(Interval(-Inf, -2.5), dac) --> DecoratedInterval(Interval(0.0, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.0, 1.5), def) ^ DecoratedInterval(Interval(-Inf, -2.5), dac)) --> decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @fact DecoratedInterval(Interval(-0.0, Inf), dac) ^ DecoratedInterval(Interval(-0.1, Inf), dac) --> DecoratedInterval(Interval(0.0, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.0, Inf), dac) ^ DecoratedInterval(Interval(-0.1, Inf), dac)) --> decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @fact DecoratedInterval(Interval(-0.0, Inf), def) ^ DecoratedInterval(Interval(-2.5, -0.0), com) --> DecoratedInterval(Interval(0.0, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.0, Inf), def) ^ DecoratedInterval(Interval(-2.5, -0.0), com)) --> decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @fact DecoratedInterval(Interval(-0.0, Inf), trv) ^ DecoratedInterval(Interval(-Inf, 0.0), def) --> DecoratedInterval(Interval(0.0, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.0, Inf), trv) ^ DecoratedInterval(Interval(-Inf, 0.0), def)) --> decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @fact DecoratedInterval(Interval(-0.0, Inf), dac) ^ DecoratedInterval(Interval(-Inf, -0.0), trv) --> DecoratedInterval(Interval(0.0, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.0, Inf), dac) ^ DecoratedInterval(Interval(-Inf, -0.0), trv)) --> decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @fact DecoratedInterval(Interval(-0.0, Inf), def) ^ DecoratedInterval(Interval(-Inf, -1.0), def) --> DecoratedInterval(Interval(0.0, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.0, Inf), def) ^ DecoratedInterval(Interval(-Inf, -1.0), def)) --> decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @fact DecoratedInterval(Interval(-0.1, 0.5), def) ^ DecoratedInterval(Interval(0.1, Inf), dac) --> DecoratedInterval(Interval(0.0, 0x1.ddb680117ab13p-1), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.1, 0.5), def) ^ DecoratedInterval(Interval(0.1, Inf), dac)) --> decoration(DecoratedInterval(Interval(0.0, 0x1.ddb680117ab13p-1), trv))
+    @fact DecoratedInterval(Interval(-0.1, 0.5), com) ^ DecoratedInterval(Interval(-0.1, -0.1), com) --> DecoratedInterval(Interval(0x1.125fbee250664p+0, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.1, 0.5), com) ^ DecoratedInterval(Interval(-0.1, -0.1), com)) --> decoration(DecoratedInterval(Interval(0x1.125fbee250664p+0, Inf), trv))
+    @fact DecoratedInterval(Interval(-0.1, 0.5), dac) ^ DecoratedInterval(Interval(-Inf, -2.5), def) --> DecoratedInterval(Interval(0x1.6a09e667f3bccp+2, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.1, 0.5), dac) ^ DecoratedInterval(Interval(-Inf, -2.5), def)) --> decoration(DecoratedInterval(Interval(0x1.6a09e667f3bccp+2, Inf), trv))
+    @fact DecoratedInterval(Interval(-0.1, 1.0), com) ^ DecoratedInterval(Interval(0.0, 0.0), com) --> DecoratedInterval(Interval(1.0, 1.0), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.1, 1.0), com) ^ DecoratedInterval(Interval(0.0, 0.0), com)) --> decoration(DecoratedInterval(Interval(1.0, 1.0), trv))
+    @fact DecoratedInterval(Interval(-0.1, 1.0), dac) ^ DecoratedInterval(Interval(-Inf, 2.5), dac) --> DecoratedInterval(Interval(0.0, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.1, 1.0), dac) ^ DecoratedInterval(Interval(-Inf, 2.5), dac)) --> decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @fact DecoratedInterval(Interval(-0.1, 1.0), def) ^ DecoratedInterval(Interval(-Inf, -1.0), def) --> DecoratedInterval(Interval(1.0, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.1, 1.0), def) ^ DecoratedInterval(Interval(-Inf, -1.0), def)) --> decoration(DecoratedInterval(Interval(1.0, Inf), trv))
+    @fact DecoratedInterval(Interval(-0.1, 1.0), com) ^ DecoratedInterval(Interval(-2.5, -2.5), com) --> DecoratedInterval(Interval(1.0, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.1, 1.0), com) ^ DecoratedInterval(Interval(-2.5, -2.5), com)) --> decoration(DecoratedInterval(Interval(1.0, Inf), trv))
+    @fact DecoratedInterval(Interval(-0.1, 1.0), trv) ^ DecoratedInterval(Interval(-Inf, -2.5), trv) --> DecoratedInterval(Interval(1.0, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.1, 1.0), trv) ^ DecoratedInterval(Interval(-Inf, -2.5), trv)) --> decoration(DecoratedInterval(Interval(1.0, Inf), trv))
+    @fact DecoratedInterval(Interval(-0.1, 1.5), trv) ^ DecoratedInterval(Interval(0.0, 2.5), com) --> DecoratedInterval(Interval(0.0, 0x1.60b9fd68a4555p+1), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.1, 1.5), trv) ^ DecoratedInterval(Interval(0.0, 2.5), com)) --> decoration(DecoratedInterval(Interval(0.0, 0x1.60b9fd68a4555p+1), trv))
+    @fact DecoratedInterval(Interval(-0.1, 1.5), com) ^ DecoratedInterval(Interval(2.5, 2.5), dac) --> DecoratedInterval(Interval(0.0, 0x1.60b9fd68a4555p+1), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.1, 1.5), com) ^ DecoratedInterval(Interval(2.5, 2.5), dac)) --> decoration(DecoratedInterval(Interval(0.0, 0x1.60b9fd68a4555p+1), trv))
+    @fact DecoratedInterval(Interval(-0.1, 1.5), dac) ^ DecoratedInterval(Interval(-1.0, 0.0), trv) --> DecoratedInterval(Interval(0x1.5555555555555p-1, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.1, 1.5), dac) ^ DecoratedInterval(Interval(-1.0, 0.0), trv)) --> decoration(DecoratedInterval(Interval(0x1.5555555555555p-1, Inf), trv))
+    @fact DecoratedInterval(Interval(-0.1, 1.5), com) ^ DecoratedInterval(Interval(-0.1, -0.1), com) --> DecoratedInterval(Interval(0x1.eba7c9e4d31e9p-1, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.1, 1.5), com) ^ DecoratedInterval(Interval(-0.1, -0.1), com)) --> decoration(DecoratedInterval(Interval(0x1.eba7c9e4d31e9p-1, Inf), trv))
+    @fact DecoratedInterval(Interval(-0.1, 1.5), def) ^ DecoratedInterval(Interval(-2.5, -2.5), def) --> DecoratedInterval(Interval(0x1.7398bf1d1ee6fp-2, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.1, 1.5), def) ^ DecoratedInterval(Interval(-2.5, -2.5), def)) --> decoration(DecoratedInterval(Interval(0x1.7398bf1d1ee6fp-2, Inf), trv))
+    @fact DecoratedInterval(Interval(-0.1, Inf), dac) ^ DecoratedInterval(Interval(-0.1, 2.5), com) --> DecoratedInterval(Interval(0.0, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.1, Inf), dac) ^ DecoratedInterval(Interval(-0.1, 2.5), com)) --> decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @fact DecoratedInterval(Interval(-0.1, Inf), def) ^ DecoratedInterval(Interval(-2.5, 0.0), def) --> DecoratedInterval(Interval(0.0, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.1, Inf), def) ^ DecoratedInterval(Interval(-2.5, 0.0), def)) --> decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @fact DecoratedInterval(Interval(-0.1, Inf), dac) ^ DecoratedInterval(Interval(-2.5, -2.5), trv) --> DecoratedInterval(Interval(0.0, Inf), trv)
+    @fact decoration(DecoratedInterval(Interval(-0.1, Inf), dac) ^ DecoratedInterval(Interval(-2.5, -2.5), trv)) --> decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @fact DecoratedInterval(Interval(0.0, 0.0), com) ^ DecoratedInterval(Interval(1.0, Inf), dac) --> DecoratedInterval(Interval(0.0, 0.0), dac)
+    @fact decoration(DecoratedInterval(Interval(0.0, 0.0), com) ^ DecoratedInterval(Interval(1.0, Inf), dac)) --> decoration(DecoratedInterval(Interval(0.0, 0.0), dac))
+    @fact DecoratedInterval(Interval(0.0, 0.0), com) ^ DecoratedInterval(Interval(-2.5, 0.1), com) --> DecoratedInterval(Interval(0.0, 0.0), trv)
+    @fact decoration(DecoratedInterval(Interval(0.0, 0.0), com) ^ DecoratedInterval(Interval(-2.5, 0.1), com)) --> decoration(DecoratedInterval(Interval(0.0, 0.0), trv))
+    @fact DecoratedInterval(Interval(0.0, 0.0), dac) ^ DecoratedInterval(Interval(-1.0, 0.0), def) --> DecoratedInterval(∅, trv)
+    @fact decoration(DecoratedInterval(Interval(0.0, 0.0), dac) ^ DecoratedInterval(Interval(-1.0, 0.0), def)) --> decoration(DecoratedInterval(∅, trv))
+    @fact DecoratedInterval(Interval(-1.0, -0.1), com) ^ DecoratedInterval(Interval(-0.1, 1.0), def) --> DecoratedInterval(∅, trv)
+    @fact decoration(DecoratedInterval(Interval(-1.0, -0.1), com) ^ DecoratedInterval(Interval(-0.1, 1.0), def)) --> decoration(DecoratedInterval(∅, trv))
+    @fact DecoratedInterval(Interval(-1.0, -0.1), dac) ^ DecoratedInterval(Interval(-0.1, 2.5), com) --> DecoratedInterval(∅, trv)
+    @fact decoration(DecoratedInterval(Interval(-1.0, -0.1), dac) ^ DecoratedInterval(Interval(-0.1, 2.5), com)) --> decoration(DecoratedInterval(∅, trv))
+    @fact DecoratedInterval(Interval(-1.0, -0.1), def) ^ DecoratedInterval(Interval(-0.1, Inf), trv) --> DecoratedInterval(∅, trv)
+    @fact decoration(DecoratedInterval(Interval(-1.0, -0.1), def) ^ DecoratedInterval(Interval(-0.1, Inf), trv)) --> decoration(DecoratedInterval(∅, trv))
 end
 
 facts("minimal_exp_test") do
@@ -2804,7 +3311,10 @@ facts("minimal_exp_test") do
 end
 
 facts("minimal_exp_dec_test") do
-
+    @fact exp(DecoratedInterval(Interval(0x1.62e42fefa39fp+9, 0x1.62e42fefa39fp+9), com)) --> DecoratedInterval(Interval(0x1.fffffffffffffp+1023, Inf), dac)
+    @fact decoration(exp(DecoratedInterval(Interval(0x1.62e42fefa39fp+9, 0x1.62e42fefa39fp+9), com))) --> decoration(DecoratedInterval(Interval(0x1.fffffffffffffp+1023, Inf), dac))
+    @fact exp(DecoratedInterval(Interval(0.0, 0x1.62e42fefa39ep+9), def)) --> DecoratedInterval(Interval(1.0, 0x1.fffffffffc32bp+1023), def)
+    @fact decoration(exp(DecoratedInterval(Interval(0.0, 0x1.62e42fefa39ep+9), def))) --> decoration(DecoratedInterval(Interval(1.0, 0x1.fffffffffc32bp+1023), def))
 end
 
 facts("minimal_exp2_test") do
@@ -2829,7 +3339,10 @@ facts("minimal_exp2_test") do
 end
 
 facts("minimal_exp2_dec_test") do
-
+    @fact exp2(DecoratedInterval(Interval(1024.0, 1024.0), com)) --> DecoratedInterval(Interval(0x1.fffffffffffffp+1023, Inf), dac)
+    @fact decoration(exp2(DecoratedInterval(Interval(1024.0, 1024.0), com))) --> decoration(DecoratedInterval(Interval(0x1.fffffffffffffp+1023, Inf), dac))
+    @fact exp2(DecoratedInterval(Interval(0x1.87f42b972949cp-1, 0x1.8b55484710029p+6), def)) --> DecoratedInterval(Interval(0x1.b333333333332p+0, 0x1.c81fd88228b4fp+98), def)
+    @fact decoration(exp2(DecoratedInterval(Interval(0x1.87f42b972949cp-1, 0x1.8b55484710029p+6), def))) --> decoration(DecoratedInterval(Interval(0x1.b333333333332p+0, 0x1.c81fd88228b4fp+98), def))
 end
 
 facts("minimal_exp10_test") do
@@ -2855,7 +3368,10 @@ facts("minimal_exp10_test") do
 end
 
 facts("minimal_exp10_dec_test") do
-
+    @fact exp10(DecoratedInterval(Interval(0x1.34413509f79ffp+8, 0x1.34413509f79ffp+8), com)) --> DecoratedInterval(Interval(0x1.fffffffffffffp+1023, Inf), dac)
+    @fact decoration(exp10(DecoratedInterval(Interval(0x1.34413509f79ffp+8, 0x1.34413509f79ffp+8), com))) --> decoration(DecoratedInterval(Interval(0x1.fffffffffffffp+1023, Inf), dac))
+    @fact exp10(DecoratedInterval(Interval(0x1.87f42b972949cp-1, 0x1.8b55484710029p+6), def)) --> DecoratedInterval(Interval(0x1.75014b7296807p+2, 0x1.3eec1d47dfb2bp+328), def)
+    @fact decoration(exp10(DecoratedInterval(Interval(0x1.87f42b972949cp-1, 0x1.8b55484710029p+6), def))) --> decoration(DecoratedInterval(Interval(0x1.75014b7296807p+2, 0x1.3eec1d47dfb2bp+328), def))
 end
 
 facts("minimal_log_test") do
@@ -2883,7 +3399,12 @@ facts("minimal_log_test") do
 end
 
 facts("minimal_log_dec_test") do
-
+    @fact log(DecoratedInterval(Interval(0x0.0000000000001p-1022, 0x1.fffffffffffffp1023), com)) --> DecoratedInterval(Interval(-0x1.74385446d71c4p9, 0x1.62e42fefa39fp+9), com)
+    @fact decoration(log(DecoratedInterval(Interval(0x0.0000000000001p-1022, 0x1.fffffffffffffp1023), com))) --> decoration(DecoratedInterval(Interval(-0x1.74385446d71c4p9, 0x1.62e42fefa39fp+9), com))
+    @fact log(DecoratedInterval(Interval(0.0, 1.0), com)) --> DecoratedInterval(Interval(-Inf, 0.0), trv)
+    @fact decoration(log(DecoratedInterval(Interval(0.0, 1.0), com))) --> decoration(DecoratedInterval(Interval(-Inf, 0.0), trv))
+    @fact log(DecoratedInterval(Interval(0x1.5bf0a8b14576ap+1, 0x1.5bf0a8b14576ap+1), def)) --> DecoratedInterval(Interval(0x1p+0, 0x1.0000000000001p+0), def)
+    @fact decoration(log(DecoratedInterval(Interval(0x1.5bf0a8b14576ap+1, 0x1.5bf0a8b14576ap+1), def))) --> decoration(DecoratedInterval(Interval(0x1p+0, 0x1.0000000000001p+0), def))
 end
 
 facts("minimal_log2_test") do
@@ -2909,7 +3430,14 @@ facts("minimal_log2_test") do
 end
 
 facts("minimal_log2_dec_test") do
-
+    @fact log2(DecoratedInterval(Interval(0x0.0000000000001p-1022, 0x1.fffffffffffffp1023), com)) --> DecoratedInterval(Interval(-1074.0, 1024.0), com)
+    @fact decoration(log2(DecoratedInterval(Interval(0x0.0000000000001p-1022, 0x1.fffffffffffffp1023), com))) --> decoration(DecoratedInterval(Interval(-1074.0, 1024.0), com))
+    @fact log2(DecoratedInterval(Interval(0x0.0000000000001p-1022, Inf), dac)) --> DecoratedInterval(Interval(-1074.0, Inf), dac)
+    @fact decoration(log2(DecoratedInterval(Interval(0x0.0000000000001p-1022, Inf), dac))) --> decoration(DecoratedInterval(Interval(-1074.0, Inf), dac))
+    @fact log2(DecoratedInterval(Interval(2.0, 32.0), def)) --> DecoratedInterval(Interval(1.0, 5.0), def)
+    @fact decoration(log2(DecoratedInterval(Interval(2.0, 32.0), def))) --> decoration(DecoratedInterval(Interval(1.0, 5.0), def))
+    @fact log2(DecoratedInterval(Interval(0.0, 0x1.fffffffffffffp1023), com)) --> DecoratedInterval(Interval(-Inf, 1024.0), trv)
+    @fact decoration(log2(DecoratedInterval(Interval(0.0, 0x1.fffffffffffffp1023), com))) --> decoration(DecoratedInterval(Interval(-Inf, 1024.0), trv))
 end
 
 facts("minimal_log10_test") do
@@ -2936,7 +3464,10 @@ facts("minimal_log10_test") do
 end
 
 facts("minimal_log10_dec_test") do
-
+    @fact log10(DecoratedInterval(Interval(0x0.0000000000001p-1022, 0x1.fffffffffffffp1023), com)) --> DecoratedInterval(Interval(-0x1.434e6420f4374p+8, 0x1.34413509f79ffp+8), com)
+    @fact decoration(log10(DecoratedInterval(Interval(0x0.0000000000001p-1022, 0x1.fffffffffffffp1023), com))) --> decoration(DecoratedInterval(Interval(-0x1.434e6420f4374p+8, 0x1.34413509f79ffp+8), com))
+    @fact log10(DecoratedInterval(Interval(0.0, 0x1.fffffffffffffp1023), dac)) --> DecoratedInterval(Interval(-Inf, 0x1.34413509f79ffp+8), trv)
+    @fact decoration(log10(DecoratedInterval(Interval(0.0, 0x1.fffffffffffffp1023), dac))) --> decoration(DecoratedInterval(Interval(-Inf, 0x1.34413509f79ffp+8), trv))
 end
 
 facts("minimal_sin_test") do
@@ -2995,7 +3526,12 @@ facts("minimal_sin_test") do
 end
 
 facts("minimal_sin_dec_test") do
-
+    @fact sin(DecoratedInterval(Interval(-0x1.921fb54442d18p+1, -0x1.921fb54442d18p+0), def)) --> DecoratedInterval(Interval(-0x1p+0, -0x1.1a62633145c06p-53), def)
+    @fact decoration(sin(DecoratedInterval(Interval(-0x1.921fb54442d18p+1, -0x1.921fb54442d18p+0), def))) --> decoration(DecoratedInterval(Interval(-0x1p+0, -0x1.1a62633145c06p-53), def))
+    @fact sin(DecoratedInterval(Interval(-Inf, -0.0), trv)) --> DecoratedInterval(Interval(-1.0, 1.0), trv)
+    @fact decoration(sin(DecoratedInterval(Interval(-Inf, -0.0), trv))) --> decoration(DecoratedInterval(Interval(-1.0, 1.0), trv))
+    @fact sin(DecoratedInterval(entireinterval(Float64), def)) --> DecoratedInterval(Interval(-1.0, 1.0), def)
+    @fact decoration(sin(DecoratedInterval(entireinterval(Float64), def))) --> decoration(DecoratedInterval(Interval(-1.0, 1.0), def))
 end
 
 facts("minimal_cos_test") do
@@ -3054,7 +3590,12 @@ facts("minimal_cos_test") do
 end
 
 facts("minimal_cos_dec_test") do
-
+    @fact cos(DecoratedInterval(Interval(-0x1.921fb54442d18p+0, -0x1.921fb54442d18p+0), trv)) --> DecoratedInterval(Interval(0x1.1a62633145c06p-54, 0x1.1a62633145c07p-54), trv)
+    @fact decoration(cos(DecoratedInterval(Interval(-0x1.921fb54442d18p+0, -0x1.921fb54442d18p+0), trv))) --> decoration(DecoratedInterval(Interval(0x1.1a62633145c06p-54, 0x1.1a62633145c07p-54), trv))
+    @fact cos(DecoratedInterval(Interval(-Inf, -0.0), def)) --> DecoratedInterval(Interval(-1.0, 1.0), def)
+    @fact decoration(cos(DecoratedInterval(Interval(-Inf, -0.0), def))) --> decoration(DecoratedInterval(Interval(-1.0, 1.0), def))
+    @fact cos(DecoratedInterval(entireinterval(Float64), def)) --> DecoratedInterval(Interval(-1.0, 1.0), def)
+    @fact decoration(cos(DecoratedInterval(entireinterval(Float64), def))) --> decoration(DecoratedInterval(Interval(-1.0, 1.0), def))
 end
 
 facts("minimal_tan_test") do
@@ -3094,7 +3635,72 @@ facts("minimal_tan_test") do
 end
 
 facts("minimal_tan_dec_test") do
-
+    @fact tan(DecoratedInterval(∅, trv)) --> DecoratedInterval(∅, trv)
+    @fact decoration(tan(DecoratedInterval(∅, trv))) --> decoration(DecoratedInterval(∅, trv))
+    @fact tan(DecoratedInterval(Interval(0.0, Inf), dac)) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration(tan(DecoratedInterval(Interval(0.0, Inf), dac))) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact tan(DecoratedInterval(Interval(-0.0, Inf), def)) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration(tan(DecoratedInterval(Interval(-0.0, Inf), def))) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact tan(DecoratedInterval(Interval(-Inf, 0.0), trv)) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration(tan(DecoratedInterval(Interval(-Inf, 0.0), trv))) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact tan(DecoratedInterval(Interval(-Inf, -0.0), dac)) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration(tan(DecoratedInterval(Interval(-Inf, -0.0), dac))) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact tan(DecoratedInterval(entireinterval(Float64), def)) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration(tan(DecoratedInterval(entireinterval(Float64), def))) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact tan(DecoratedInterval(Interval(0.0, 0.0), com)) --> DecoratedInterval(Interval(0.0, 0.0), com)
+    @fact decoration(tan(DecoratedInterval(Interval(0.0, 0.0), com))) --> decoration(DecoratedInterval(Interval(0.0, 0.0), com))
+    @fact tan(DecoratedInterval(Interval(-0.0, -0.0), def)) --> DecoratedInterval(Interval(0.0, 0.0), def)
+    @fact decoration(tan(DecoratedInterval(Interval(-0.0, -0.0), def))) --> decoration(DecoratedInterval(Interval(0.0, 0.0), def))
+    @fact tan(DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d18p+0), com)) --> DecoratedInterval(Interval(0x1.d02967c31cdb4p+53, 0x1.d02967c31cdb5p+53), com)
+    @fact decoration(tan(DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d18p+0), com))) --> decoration(DecoratedInterval(Interval(0x1.d02967c31cdb4p+53, 0x1.d02967c31cdb5p+53), com))
+    @fact tan(DecoratedInterval(Interval(0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), def)) --> DecoratedInterval(Interval(-0x1.617a15494767bp+52, -0x1.617a15494767ap+52), def)
+    @fact decoration(tan(DecoratedInterval(Interval(0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), def))) --> decoration(DecoratedInterval(Interval(-0x1.617a15494767bp+52, -0x1.617a15494767ap+52), def))
+    @fact tan(DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+0), dac)) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration(tan(DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+0), dac))) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact tan(DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d18p+1), trv)) --> DecoratedInterval(Interval(-0x1.1a62633145c07p-53, -0x1.1a62633145c06p-53), trv)
+    @fact decoration(tan(DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d18p+1), trv))) --> decoration(DecoratedInterval(Interval(-0x1.1a62633145c07p-53, -0x1.1a62633145c06p-53), trv))
+    @fact tan(DecoratedInterval(Interval(0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), com)) --> DecoratedInterval(Interval(0x1.72cece675d1fcp-52, 0x1.72cece675d1fdp-52), com)
+    @fact decoration(tan(DecoratedInterval(Interval(0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), com))) --> decoration(DecoratedInterval(Interval(0x1.72cece675d1fcp-52, 0x1.72cece675d1fdp-52), com))
+    @fact tan(DecoratedInterval(Interval(0.0, 0x1.921fb54442d18p+0), dac)) --> DecoratedInterval(Interval(0.0, 0x1.d02967c31cdb5p+53), dac)
+    @fact decoration(tan(DecoratedInterval(Interval(0.0, 0x1.921fb54442d18p+0), dac))) --> decoration(DecoratedInterval(Interval(0.0, 0x1.d02967c31cdb5p+53), dac))
+    @fact tan(DecoratedInterval(Interval(-0.0, 0x1.921fb54442d18p+0), com)) --> DecoratedInterval(Interval(0.0, 0x1.d02967c31cdb5p+53), com)
+    @fact decoration(tan(DecoratedInterval(Interval(-0.0, 0x1.921fb54442d18p+0), com))) --> decoration(DecoratedInterval(Interval(0.0, 0x1.d02967c31cdb5p+53), com))
+    @fact tan(DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+0), trv)) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration(tan(DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+0), trv))) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact tan(DecoratedInterval(Interval(-0.0, 0x1.921fb54442d19p+0), def)) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration(tan(DecoratedInterval(Interval(-0.0, 0x1.921fb54442d19p+0), def))) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact tan(DecoratedInterval(Interval(0.0, 0x1.921fb54442d18p+1), dac)) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration(tan(DecoratedInterval(Interval(0.0, 0x1.921fb54442d18p+1), dac))) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact tan(DecoratedInterval(Interval(-0.0, 0x1.921fb54442d18p+1), com)) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration(tan(DecoratedInterval(Interval(-0.0, 0x1.921fb54442d18p+1), com))) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact tan(DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv)) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration(tan(DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv))) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact tan(DecoratedInterval(Interval(-0.0, 0x1.921fb54442d19p+1), def)) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration(tan(DecoratedInterval(Interval(-0.0, 0x1.921fb54442d19p+1), def))) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact tan(DecoratedInterval(Interval(0x1p-51, 0x1.921fb54442d18p+1), dac)) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration(tan(DecoratedInterval(Interval(0x1p-51, 0x1.921fb54442d18p+1), dac))) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact tan(DecoratedInterval(Interval(0x1p-51, 0x1.921fb54442d19p+1), com)) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration(tan(DecoratedInterval(Interval(0x1p-51, 0x1.921fb54442d19p+1), com))) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact tan(DecoratedInterval(Interval(0x1p-52, 0x1.921fb54442d18p+1), trv)) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration(tan(DecoratedInterval(Interval(0x1p-52, 0x1.921fb54442d18p+1), trv))) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact tan(DecoratedInterval(Interval(0x1p-52, 0x1.921fb54442d19p+1), def)) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration(tan(DecoratedInterval(Interval(0x1p-52, 0x1.921fb54442d19p+1), def))) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact tan(DecoratedInterval(Interval(-0x1.921fb54442d18p+0, 0x1.921fb54442d18p+0), com)) --> DecoratedInterval(Interval(-0x1.d02967c31cdb5p+53, 0x1.d02967c31cdb5p+53), com)
+    @fact decoration(tan(DecoratedInterval(Interval(-0x1.921fb54442d18p+0, 0x1.921fb54442d18p+0), com))) --> decoration(DecoratedInterval(Interval(-0x1.d02967c31cdb5p+53, 0x1.d02967c31cdb5p+53), com))
+    @fact tan(DecoratedInterval(Interval(-0x1.921fb54442d18p+0, 0x1.921fb54442d19p+0), trv)) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration(tan(DecoratedInterval(Interval(-0x1.921fb54442d18p+0, 0x1.921fb54442d19p+0), trv))) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact tan(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d18p+0), def)) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration(tan(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d18p+0), def))) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact tan(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), dac)) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration(tan(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), dac))) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact tan(DecoratedInterval(Interval(-0x1.555475a31a4bep-2, 0x1.999999999999ap-4), com)) --> DecoratedInterval(Interval(-0x1.628f4fd931fefp-2, 0x1.9af8877430b81p-4), com)
+    @fact decoration(tan(DecoratedInterval(Interval(-0x1.555475a31a4bep-2, 0x1.999999999999ap-4), com))) --> decoration(DecoratedInterval(Interval(-0x1.628f4fd931fefp-2, 0x1.9af8877430b81p-4), com))
+    @fact tan(DecoratedInterval(Interval(0x1.4e18e147ae148p+12, 0x1.4e2028f5c28f6p+12), dac)) --> DecoratedInterval(Interval(-0x1.d6d67b035b6b4p+2, -0x1.7e42b0760e3f3p+0), dac)
+    @fact decoration(tan(DecoratedInterval(Interval(0x1.4e18e147ae148p+12, 0x1.4e2028f5c28f6p+12), dac))) --> decoration(DecoratedInterval(Interval(-0x1.d6d67b035b6b4p+2, -0x1.7e42b0760e3f3p+0), dac))
+    @fact tan(DecoratedInterval(Interval(0x1.4e18e147ae148p+12, 0x1.546028f5c28f6p+12), def)) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration(tan(DecoratedInterval(Interval(0x1.4e18e147ae148p+12, 0x1.546028f5c28f6p+12), def))) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact tan(DecoratedInterval(Interval(0x1.fae147ae147aep-1, 0x1.028f5c28f5c29p+0), trv)) --> DecoratedInterval(Interval(0x1.860fadcc59064p+0, 0x1.979ad0628469dp+0), trv)
+    @fact decoration(tan(DecoratedInterval(Interval(0x1.fae147ae147aep-1, 0x1.028f5c28f5c29p+0), trv))) --> decoration(DecoratedInterval(Interval(0x1.860fadcc59064p+0, 0x1.979ad0628469dp+0), trv))
 end
 
 facts("minimal_asin_test") do
@@ -3119,7 +3725,16 @@ facts("minimal_asin_test") do
 end
 
 facts("minimal_asin_dec_test") do
-
+    @fact asin(DecoratedInterval(Interval(0.0, Inf), dac)) --> DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+0), trv)
+    @fact decoration(asin(DecoratedInterval(Interval(0.0, Inf), dac))) --> decoration(DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+0), trv))
+    @fact asin(DecoratedInterval(Interval(-Inf, 0.0), def)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0.0), trv)
+    @fact decoration(asin(DecoratedInterval(Interval(-Inf, 0.0), def))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0.0), trv))
+    @fact asin(DecoratedInterval(Interval(-1.0, 1.0), com)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), com)
+    @fact decoration(asin(DecoratedInterval(Interval(-1.0, 1.0), com))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), com))
+    @fact asin(DecoratedInterval(entireinterval(Float64), def)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), trv)
+    @fact decoration(asin(DecoratedInterval(entireinterval(Float64), def))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), trv))
+    @fact asin(DecoratedInterval(Interval(-0x1.51eb851eb851fp-2, 0x1.fffffffffffffp-1), def)) --> DecoratedInterval(Interval(-0x1.585ff6e341c3fp-2, 0x1.921fb50442d19p+0), def)
+    @fact decoration(asin(DecoratedInterval(Interval(-0x1.51eb851eb851fp-2, 0x1.fffffffffffffp-1), def))) --> decoration(DecoratedInterval(Interval(-0x1.585ff6e341c3fp-2, 0x1.921fb50442d19p+0), def))
 end
 
 facts("minimal_acos_test") do
@@ -3144,7 +3759,16 @@ facts("minimal_acos_test") do
 end
 
 facts("minimal_acos_dec_test") do
-
+    @fact acos(DecoratedInterval(Interval(0.0, Inf), dac)) --> DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+0), trv)
+    @fact decoration(acos(DecoratedInterval(Interval(0.0, Inf), dac))) --> decoration(DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+0), trv))
+    @fact acos(DecoratedInterval(Interval(-Inf, 0.0), def)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(acos(DecoratedInterval(Interval(-Inf, 0.0), def))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+1), trv))
+    @fact acos(DecoratedInterval(Interval(-1.0, 1.0), com)) --> DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), com)
+    @fact decoration(acos(DecoratedInterval(Interval(-1.0, 1.0), com))) --> decoration(DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), com))
+    @fact acos(DecoratedInterval(entireinterval(Float64), def)) --> DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(acos(DecoratedInterval(entireinterval(Float64), def))) --> decoration(DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv))
+    @fact acos(DecoratedInterval(Interval(-0x1.51eb851eb851fp-2, 0x1.fffffffffffffp-1), def)) --> DecoratedInterval(Interval(0x1p-26, 0x1.e837b2fd13428p+0), def)
+    @fact decoration(acos(DecoratedInterval(Interval(-0x1.51eb851eb851fp-2, 0x1.fffffffffffffp-1), def))) --> decoration(DecoratedInterval(Interval(0x1p-26, 0x1.e837b2fd13428p+0), def))
 end
 
 facts("minimal_atan_test") do
@@ -3161,7 +3785,16 @@ facts("minimal_atan_test") do
 end
 
 facts("minimal_atan_dec_test") do
-
+    @fact atan(DecoratedInterval(Interval(0.0, Inf), dac)) --> DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+0), dac)
+    @fact decoration(atan(DecoratedInterval(Interval(0.0, Inf), dac))) --> decoration(DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+0), dac))
+    @fact atan(DecoratedInterval(Interval(-Inf, 0.0), def)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0.0), def)
+    @fact decoration(atan(DecoratedInterval(Interval(-Inf, 0.0), def))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0.0), def))
+    @fact atan(DecoratedInterval(entireinterval(Float64), def)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), def)
+    @fact decoration(atan(DecoratedInterval(entireinterval(Float64), def))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), def))
+    @fact atan(DecoratedInterval(Interval(1.0, 0x1.4c2463567c5acp+25), trv)) --> DecoratedInterval(Interval(0x1.921fb54442d18p-1, 0x1.921fb4e19abd7p+0), trv)
+    @fact decoration(atan(DecoratedInterval(Interval(1.0, 0x1.4c2463567c5acp+25), trv))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p-1, 0x1.921fb4e19abd7p+0), trv))
+    @fact atan(DecoratedInterval(Interval(-0x1.fd219490eaac1p+38, -0x1.1af1c9d74f06dp+9), com)) --> DecoratedInterval(Interval(-0x1.921fb54440cebp+0, -0x1.91abe5c1e4c6dp+0), com)
+    @fact decoration(atan(DecoratedInterval(Interval(-0x1.fd219490eaac1p+38, -0x1.1af1c9d74f06dp+9), com))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54440cebp+0, -0x1.91abe5c1e4c6dp+0), com))
 end
 
 facts("minimal_atan2_test") do
@@ -3337,7 +3970,342 @@ facts("minimal_atan2_test") do
 end
 
 facts("minimal_atan2_dec_test") do
-
+    @fact atan2(DecoratedInterval(∅, trv), DecoratedInterval(entireinterval(Float64), def)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(∅, trv), DecoratedInterval(entireinterval(Float64), def))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(∅, trv), DecoratedInterval(Interval(0.0, 0.0), com)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(∅, trv), DecoratedInterval(Interval(0.0, 0.0), com))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-0.0, 0.0), dac)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-0.0, 0.0), dac))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(∅, trv), DecoratedInterval(Interval(0.0, -0.0), def)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(∅, trv), DecoratedInterval(Interval(0.0, -0.0), def))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-0.0, -0.0), trv)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-0.0, -0.0), trv))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-2.0, -0.1), com)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-2.0, -0.1), com))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-2.0, 0.0), dac)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-2.0, 0.0), dac))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-2.0, -0.0), def)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-2.0, -0.0), def))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-2.0, 1.0), trv)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-2.0, 1.0), trv))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(∅, trv), DecoratedInterval(Interval(0.0, 1.0), com)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(∅, trv), DecoratedInterval(Interval(0.0, 1.0), com))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-0.0, 1.0), dac)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-0.0, 1.0), dac))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(∅, trv), DecoratedInterval(Interval(0.1, 1.0), def)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(∅, trv), DecoratedInterval(Interval(0.1, 1.0), def))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(∅, trv)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(∅, trv))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(entireinterval(Float64), def)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(entireinterval(Float64), def))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(0.0, 0.0), com)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(0.0, 0.0), com))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), trv))
+    @fact atan2(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(0.0, -0.0), def)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(0.0, -0.0), def))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), trv))
+    @fact atan2(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(-0.0, 0.0), dac)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(-0.0, 0.0), dac))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), trv))
+    @fact atan2(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(-0.0, -0.0), trv)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(-0.0, -0.0), trv))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), trv))
+    @fact atan2(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(-2.0, -0.1), com)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), def)
+    @fact decoration(atan2(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(-2.0, -0.1), com))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), def))
+    @fact atan2(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(-2.0, 0.0), dac)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(-2.0, 0.0), dac))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(-2.0, -0.0), def)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(-2.0, -0.0), def))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(-2.0, 1.0), trv)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(-2.0, 1.0), trv))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(0.0, 1.0), dac)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(0.0, 1.0), dac))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), trv))
+    @fact atan2(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(-0.0, 1.0), def)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(-0.0, 1.0), def))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), trv))
+    @fact atan2(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(0.1, 1.0), com)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), def)
+    @fact decoration(atan2(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(0.1, 1.0), com))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), def))
+    @fact atan2(DecoratedInterval(Interval(0.0, 0.0), com), DecoratedInterval(∅, trv)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, 0.0), com), DecoratedInterval(∅, trv))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, 0.0), dac), DecoratedInterval(entireinterval(Float64), def)) --> DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, 0.0), dac), DecoratedInterval(entireinterval(Float64), def))) --> decoration(DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, 0.0), def), DecoratedInterval(Interval(0.0, 0.0), trv)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, 0.0), def), DecoratedInterval(Interval(0.0, 0.0), trv))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, 0.0), trv), DecoratedInterval(Interval(-0.0, 0.0), dac)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, 0.0), trv), DecoratedInterval(Interval(-0.0, 0.0), dac))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, 0.0), com), DecoratedInterval(Interval(0.0, -0.0), def)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, 0.0), com), DecoratedInterval(Interval(0.0, -0.0), def))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, 0.0), dac), DecoratedInterval(Interval(-0.0, -0.0), com)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, 0.0), dac), DecoratedInterval(Interval(-0.0, -0.0), com))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, 0.0), com), DecoratedInterval(Interval(-2.0, -0.1), dac)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d19p+1), dac)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, 0.0), com), DecoratedInterval(Interval(-2.0, -0.1), dac))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d19p+1), dac))
+    @fact atan2(DecoratedInterval(Interval(0.0, 0.0), trv), DecoratedInterval(Interval(-2.0, 0.0), com)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, 0.0), trv), DecoratedInterval(Interval(-2.0, 0.0), com))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, 0.0), com), DecoratedInterval(Interval(-2.0, -0.0), trv)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, 0.0), com), DecoratedInterval(Interval(-2.0, -0.0), trv))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, 0.0), dac), DecoratedInterval(Interval(-2.0, 1.0), def)) --> DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, 0.0), dac), DecoratedInterval(Interval(-2.0, 1.0), def))) --> decoration(DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, 0.0), def), DecoratedInterval(Interval(0.0, 1.0), com)) --> DecoratedInterval(Interval(0.0, 0.0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, 0.0), def), DecoratedInterval(Interval(0.0, 1.0), com))) --> decoration(DecoratedInterval(Interval(0.0, 0.0), trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, 0.0), trv), DecoratedInterval(Interval(-0.0, 1.0), dac)) --> DecoratedInterval(Interval(0.0, 0.0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, 0.0), trv), DecoratedInterval(Interval(-0.0, 1.0), dac))) --> decoration(DecoratedInterval(Interval(0.0, 0.0), trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, 0.0), com), DecoratedInterval(Interval(0.1, 1.0), com)) --> DecoratedInterval(Interval(0.0, 0.0), com)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, 0.0), com), DecoratedInterval(Interval(0.1, 1.0), com))) --> decoration(DecoratedInterval(Interval(0.0, 0.0), com))
+    @fact atan2(DecoratedInterval(Interval(-0.0, 0.0), com), DecoratedInterval(∅, trv)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, 0.0), com), DecoratedInterval(∅, trv))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, 0.0), dac), DecoratedInterval(entireinterval(Float64), def)) --> DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, 0.0), dac), DecoratedInterval(entireinterval(Float64), def))) --> decoration(DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, 0.0), def), DecoratedInterval(Interval(0.0, 0.0), com)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, 0.0), def), DecoratedInterval(Interval(0.0, 0.0), com))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, 0.0), trv), DecoratedInterval(Interval(-0.0, 0.0), trv)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, 0.0), trv), DecoratedInterval(Interval(-0.0, 0.0), trv))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, 0.0), com), DecoratedInterval(Interval(0.0, -0.0), def)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, 0.0), com), DecoratedInterval(Interval(0.0, -0.0), def))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, 0.0), dac), DecoratedInterval(Interval(-0.0, -0.0), com)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, 0.0), dac), DecoratedInterval(Interval(-0.0, -0.0), com))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, 0.0), dac), DecoratedInterval(Interval(-2.0, -0.1), dac)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d19p+1), dac)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, 0.0), dac), DecoratedInterval(Interval(-2.0, -0.1), dac))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d19p+1), dac))
+    @fact atan2(DecoratedInterval(Interval(-0.0, 0.0), trv), DecoratedInterval(Interval(-2.0, 0.0), com)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, 0.0), trv), DecoratedInterval(Interval(-2.0, 0.0), com))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, 0.0), com), DecoratedInterval(Interval(-2.0, -0.0), trv)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, 0.0), com), DecoratedInterval(Interval(-2.0, -0.0), trv))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, 0.0), dac), DecoratedInterval(Interval(-2.0, 1.0), def)) --> DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, 0.0), dac), DecoratedInterval(Interval(-2.0, 1.0), def))) --> decoration(DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, 0.0), com), DecoratedInterval(Interval(0.0, 1.0), com)) --> DecoratedInterval(Interval(0.0, 0.0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, 0.0), com), DecoratedInterval(Interval(0.0, 1.0), com))) --> decoration(DecoratedInterval(Interval(0.0, 0.0), trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, 0.0), def), DecoratedInterval(Interval(-0.0, 1.0), dac)) --> DecoratedInterval(Interval(0.0, 0.0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, 0.0), def), DecoratedInterval(Interval(-0.0, 1.0), dac))) --> decoration(DecoratedInterval(Interval(0.0, 0.0), trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, 0.0), com), DecoratedInterval(Interval(0.1, 1.0), com)) --> DecoratedInterval(Interval(0.0, 0.0), com)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, 0.0), com), DecoratedInterval(Interval(0.1, 1.0), com))) --> decoration(DecoratedInterval(Interval(0.0, 0.0), com))
+    @fact atan2(DecoratedInterval(Interval(0.0, -0.0), com), DecoratedInterval(∅, trv)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, -0.0), com), DecoratedInterval(∅, trv))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, -0.0), dac), DecoratedInterval(entireinterval(Float64), def)) --> DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, -0.0), dac), DecoratedInterval(entireinterval(Float64), def))) --> decoration(DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, -0.0), def), DecoratedInterval(Interval(0.0, 0.0), dac)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, -0.0), def), DecoratedInterval(Interval(0.0, 0.0), dac))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, -0.0), trv), DecoratedInterval(Interval(-0.0, 0.0), com)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, -0.0), trv), DecoratedInterval(Interval(-0.0, 0.0), com))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, -0.0), dac), DecoratedInterval(Interval(0.0, -0.0), def)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, -0.0), dac), DecoratedInterval(Interval(0.0, -0.0), def))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, -0.0), com), DecoratedInterval(Interval(-0.0, -0.0), trv)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, -0.0), com), DecoratedInterval(Interval(-0.0, -0.0), trv))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, -0.0), com), DecoratedInterval(Interval(-2.0, -0.1), dac)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d19p+1), dac)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, -0.0), com), DecoratedInterval(Interval(-2.0, -0.1), dac))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d19p+1), dac))
+    @fact atan2(DecoratedInterval(Interval(0.0, -0.0), def), DecoratedInterval(Interval(-2.0, 0.0), com)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, -0.0), def), DecoratedInterval(Interval(-2.0, 0.0), com))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, -0.0), com), DecoratedInterval(Interval(-2.0, -0.0), dac)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, -0.0), com), DecoratedInterval(Interval(-2.0, -0.0), dac))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, -0.0), dac), DecoratedInterval(Interval(-2.0, 1.0), com)) --> DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, -0.0), dac), DecoratedInterval(Interval(-2.0, 1.0), com))) --> decoration(DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, -0.0), com), DecoratedInterval(Interval(0.0, 1.0), trv)) --> DecoratedInterval(Interval(0.0, 0.0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, -0.0), com), DecoratedInterval(Interval(0.0, 1.0), trv))) --> decoration(DecoratedInterval(Interval(0.0, 0.0), trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, -0.0), def), DecoratedInterval(Interval(-0.0, 1.0), com)) --> DecoratedInterval(Interval(0.0, 0.0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, -0.0), def), DecoratedInterval(Interval(-0.0, 1.0), com))) --> decoration(DecoratedInterval(Interval(0.0, 0.0), trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, -0.0), com), DecoratedInterval(Interval(0.1, 1.0), def)) --> DecoratedInterval(Interval(0.0, 0.0), def)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, -0.0), com), DecoratedInterval(Interval(0.1, 1.0), def))) --> decoration(DecoratedInterval(Interval(0.0, 0.0), def))
+    @fact atan2(DecoratedInterval(Interval(-0.0, -0.0), com), DecoratedInterval(∅, trv)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, -0.0), com), DecoratedInterval(∅, trv))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, -0.0), def), DecoratedInterval(entireinterval(Float64), def)) --> DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, -0.0), def), DecoratedInterval(entireinterval(Float64), def))) --> decoration(DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, -0.0), dac), DecoratedInterval(Interval(0.0, 0.0), com)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, -0.0), dac), DecoratedInterval(Interval(0.0, 0.0), com))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, -0.0), trv), DecoratedInterval(Interval(-0.0, 0.0), def)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, -0.0), trv), DecoratedInterval(Interval(-0.0, 0.0), def))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, -0.0), com), DecoratedInterval(Interval(0.0, -0.0), trv)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, -0.0), com), DecoratedInterval(Interval(0.0, -0.0), trv))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, -0.0), dac), DecoratedInterval(Interval(-0.0, -0.0), com)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, -0.0), dac), DecoratedInterval(Interval(-0.0, -0.0), com))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, -0.0), def), DecoratedInterval(Interval(-2.0, -0.1), dac)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d19p+1), def)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, -0.0), def), DecoratedInterval(Interval(-2.0, -0.1), dac))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d19p+1), def))
+    @fact atan2(DecoratedInterval(Interval(-0.0, -0.0), trv), DecoratedInterval(Interval(-2.0, 0.0), def)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, -0.0), trv), DecoratedInterval(Interval(-2.0, 0.0), def))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, -0.0), dac), DecoratedInterval(Interval(-2.0, -0.0), trv)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, -0.0), dac), DecoratedInterval(Interval(-2.0, -0.0), trv))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, -0.0), def), DecoratedInterval(Interval(-2.0, 1.0), com)) --> DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, -0.0), def), DecoratedInterval(Interval(-2.0, 1.0), com))) --> decoration(DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, -0.0), com), DecoratedInterval(Interval(0.0, 1.0), com)) --> DecoratedInterval(Interval(0.0, 0.0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, -0.0), com), DecoratedInterval(Interval(0.0, 1.0), com))) --> decoration(DecoratedInterval(Interval(0.0, 0.0), trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, -0.0), trv), DecoratedInterval(Interval(-0.0, 1.0), dac)) --> DecoratedInterval(Interval(0.0, 0.0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, -0.0), trv), DecoratedInterval(Interval(-0.0, 1.0), dac))) --> decoration(DecoratedInterval(Interval(0.0, 0.0), trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, -0.0), com), DecoratedInterval(Interval(0.1, 1.0), com)) --> DecoratedInterval(Interval(0.0, 0.0), com)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, -0.0), com), DecoratedInterval(Interval(0.1, 1.0), com))) --> decoration(DecoratedInterval(Interval(0.0, 0.0), com))
+    @fact atan2(DecoratedInterval(Interval(-2.0, -0.1), dac), DecoratedInterval(∅, trv)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, -0.1), dac), DecoratedInterval(∅, trv))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, -0.1), def), DecoratedInterval(entireinterval(Float64), def)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0.0), def)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, -0.1), def), DecoratedInterval(entireinterval(Float64), def))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0.0), def))
+    @fact atan2(DecoratedInterval(Interval(-2.0, -0.1), trv), DecoratedInterval(Interval(0.0, 0.0), com)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, -0x1.921fb54442d18p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, -0.1), trv), DecoratedInterval(Interval(0.0, 0.0), com))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, -0x1.921fb54442d18p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, -0.1), com), DecoratedInterval(Interval(0.0, -0.0), dac)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, -0x1.921fb54442d18p+0), dac)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, -0.1), com), DecoratedInterval(Interval(0.0, -0.0), dac))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, -0x1.921fb54442d18p+0), dac))
+    @fact atan2(DecoratedInterval(Interval(-2.0, -0.1), dac), DecoratedInterval(Interval(-0.0, 0.0), def)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, -0x1.921fb54442d18p+0), def)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, -0.1), dac), DecoratedInterval(Interval(-0.0, 0.0), def))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, -0x1.921fb54442d18p+0), def))
+    @fact atan2(DecoratedInterval(Interval(-2.0, -0.1), com), DecoratedInterval(Interval(0.0, -0.0), trv)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, -0x1.921fb54442d18p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, -0.1), com), DecoratedInterval(Interval(0.0, -0.0), trv))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, -0x1.921fb54442d18p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, -0.1), def), DecoratedInterval(Interval(-2.0, -0.1), com)) --> DecoratedInterval(Interval(-0x1.8bbaabde5e29cp+1, -0x1.9ee9c8100c211p+0), def)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, -0.1), def), DecoratedInterval(Interval(-2.0, -0.1), com))) --> decoration(DecoratedInterval(Interval(-0x1.8bbaabde5e29cp+1, -0x1.9ee9c8100c211p+0), def))
+    @fact atan2(DecoratedInterval(Interval(-2.0, -0.1), com), DecoratedInterval(Interval(-2.0, 0.0), def)) --> DecoratedInterval(Interval(-0x1.8bbaabde5e29cp+1, -0x1.921fb54442d18p+0), def)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, -0.1), com), DecoratedInterval(Interval(-2.0, 0.0), def))) --> decoration(DecoratedInterval(Interval(-0x1.8bbaabde5e29cp+1, -0x1.921fb54442d18p+0), def))
+    @fact atan2(DecoratedInterval(Interval(-2.0, -0.1), trv), DecoratedInterval(Interval(-2.0, -0.0), dac)) --> DecoratedInterval(Interval(-0x1.8bbaabde5e29cp+1, -0x1.921fb54442d18p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, -0.1), trv), DecoratedInterval(Interval(-2.0, -0.0), dac))) --> decoration(DecoratedInterval(Interval(-0x1.8bbaabde5e29cp+1, -0x1.921fb54442d18p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, -0.1), def), DecoratedInterval(Interval(-2.0, 1.0), trv)) --> DecoratedInterval(Interval(-0x1.8bbaabde5e29cp+1, -0x1.983e282e2cc4cp-4), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, -0.1), def), DecoratedInterval(Interval(-2.0, 1.0), trv))) --> decoration(DecoratedInterval(Interval(-0x1.8bbaabde5e29cp+1, -0x1.983e282e2cc4cp-4), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, -0.1), com), DecoratedInterval(Interval(0.0, 1.0), def)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, -0x1.983e282e2cc4cp-4), def)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, -0.1), com), DecoratedInterval(Interval(0.0, 1.0), def))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, -0x1.983e282e2cc4cp-4), def))
+    @fact atan2(DecoratedInterval(Interval(-2.0, -0.1), dac), DecoratedInterval(Interval(-0.0, 1.0), com)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, -0x1.983e282e2cc4cp-4), dac)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, -0.1), dac), DecoratedInterval(Interval(-0.0, 1.0), com))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, -0x1.983e282e2cc4cp-4), dac))
+    @fact atan2(DecoratedInterval(Interval(-2.0, -0.1), com), DecoratedInterval(Interval(0.1, 1.0), com)) --> DecoratedInterval(Interval(-0x1.8555a2787982p+0, -0x1.983e282e2cc4cp-4), com)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, -0.1), com), DecoratedInterval(Interval(0.1, 1.0), com))) --> decoration(DecoratedInterval(Interval(-0x1.8555a2787982p+0, -0x1.983e282e2cc4cp-4), com))
+    @fact atan2(DecoratedInterval(Interval(-2.0, 0.0), def), DecoratedInterval(∅, trv)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, 0.0), def), DecoratedInterval(∅, trv))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, 0.0), def), DecoratedInterval(entireinterval(Float64), def)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, 0.0), def), DecoratedInterval(entireinterval(Float64), def))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, 0.0), dac), DecoratedInterval(Interval(0.0, 0.0), dac)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, -0x1.921fb54442d18p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, 0.0), dac), DecoratedInterval(Interval(0.0, 0.0), dac))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, -0x1.921fb54442d18p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, 0.0), trv), DecoratedInterval(Interval(-0.0, 0.0), com)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, -0x1.921fb54442d18p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, 0.0), trv), DecoratedInterval(Interval(-0.0, 0.0), com))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, -0x1.921fb54442d18p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, 0.0), com), DecoratedInterval(Interval(0.0, -0.0), trv)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, -0x1.921fb54442d18p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, 0.0), com), DecoratedInterval(Interval(0.0, -0.0), trv))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, -0x1.921fb54442d18p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, 0.0), def), DecoratedInterval(Interval(-0.0, -0.0), def)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, -0x1.921fb54442d18p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, 0.0), def), DecoratedInterval(Interval(-0.0, -0.0), def))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, -0x1.921fb54442d18p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, 0.0), com), DecoratedInterval(Interval(-2.0, -0.1), dac)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), def)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, 0.0), com), DecoratedInterval(Interval(-2.0, -0.1), dac))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), def))
+    @fact atan2(DecoratedInterval(Interval(-2.0, 0.0), dac), DecoratedInterval(Interval(-2.0, 0.0), com)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, 0.0), dac), DecoratedInterval(Interval(-2.0, 0.0), com))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, 0.0), com), DecoratedInterval(Interval(-2.0, -0.0), dac)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, 0.0), com), DecoratedInterval(Interval(-2.0, -0.0), dac))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, 0.0), trv), DecoratedInterval(Interval(-2.0, 1.0), com)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, 0.0), trv), DecoratedInterval(Interval(-2.0, 1.0), com))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, 0.0), def), DecoratedInterval(Interval(0.0, 1.0), def)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0.0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, 0.0), def), DecoratedInterval(Interval(0.0, 1.0), def))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0.0), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, 0.0), com), DecoratedInterval(Interval(-0.0, 1.0), dac)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0.0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, 0.0), com), DecoratedInterval(Interval(-0.0, 1.0), dac))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0.0), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, 0.0), com), DecoratedInterval(Interval(0.1, 1.0), com)) --> DecoratedInterval(Interval(-0x1.8555a2787982p+0, 0.0), com)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, 0.0), com), DecoratedInterval(Interval(0.1, 1.0), com))) --> decoration(DecoratedInterval(Interval(-0x1.8555a2787982p+0, 0.0), com))
+    @fact atan2(DecoratedInterval(Interval(-2.0, -0.0), trv), DecoratedInterval(∅, trv)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, -0.0), trv), DecoratedInterval(∅, trv))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, -0.0), dac), DecoratedInterval(entireinterval(Float64), def)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, -0.0), dac), DecoratedInterval(entireinterval(Float64), def))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, -0.0), com), DecoratedInterval(Interval(0.0, 0.0), com)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, -0x1.921fb54442d18p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, -0.0), com), DecoratedInterval(Interval(0.0, 0.0), com))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, -0x1.921fb54442d18p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, -0.0), def), DecoratedInterval(Interval(-0.0, 0.0), dac)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, -0x1.921fb54442d18p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, -0.0), def), DecoratedInterval(Interval(-0.0, 0.0), dac))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, -0x1.921fb54442d18p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, -0.0), dac), DecoratedInterval(Interval(0.0, -0.0), def)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, -0x1.921fb54442d18p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, -0.0), dac), DecoratedInterval(Interval(0.0, -0.0), def))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, -0x1.921fb54442d18p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, -0.0), com), DecoratedInterval(Interval(-0.0, -0.0), trv)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, -0x1.921fb54442d18p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, -0.0), com), DecoratedInterval(Interval(-0.0, -0.0), trv))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, -0x1.921fb54442d18p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, -0.0), def), DecoratedInterval(Interval(-2.0, -0.1), com)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), def)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, -0.0), def), DecoratedInterval(Interval(-2.0, -0.1), com))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), def))
+    @fact atan2(DecoratedInterval(Interval(-2.0, -0.0), com), DecoratedInterval(Interval(-2.0, 0.0), dac)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, -0.0), com), DecoratedInterval(Interval(-2.0, 0.0), dac))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, -0.0), dac), DecoratedInterval(Interval(-2.0, -0.0), def)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, -0.0), dac), DecoratedInterval(Interval(-2.0, -0.0), def))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, -0.0), def), DecoratedInterval(Interval(-2.0, 1.0), trv)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, -0.0), def), DecoratedInterval(Interval(-2.0, 1.0), trv))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, -0.0), trv), DecoratedInterval(Interval(0.0, 1.0), dac)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0.0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, -0.0), trv), DecoratedInterval(Interval(0.0, 1.0), dac))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0.0), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, -0.0), com), DecoratedInterval(Interval(-0.0, 1.0), com)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0.0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, -0.0), com), DecoratedInterval(Interval(-0.0, 1.0), com))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0.0), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, -0.0), com), DecoratedInterval(Interval(0.1, 1.0), com)) --> DecoratedInterval(Interval(-0x1.8555a2787982p+0, 0.0), com)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, -0.0), com), DecoratedInterval(Interval(0.1, 1.0), com))) --> decoration(DecoratedInterval(Interval(-0x1.8555a2787982p+0, 0.0), com))
+    @fact atan2(DecoratedInterval(Interval(-2.0, 1.0), def), DecoratedInterval(∅, trv)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, 1.0), def), DecoratedInterval(∅, trv))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, 1.0), dac), DecoratedInterval(entireinterval(Float64), def)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, 1.0), dac), DecoratedInterval(entireinterval(Float64), def))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, 1.0), def), DecoratedInterval(Interval(0.0, 0.0), def)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, 1.0), def), DecoratedInterval(Interval(0.0, 0.0), def))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, 1.0), com), DecoratedInterval(Interval(-0.0, 0.0), dac)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, 1.0), com), DecoratedInterval(Interval(-0.0, 0.0), dac))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, 1.0), trv), DecoratedInterval(Interval(0.0, -0.0), trv)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, 1.0), trv), DecoratedInterval(Interval(0.0, -0.0), trv))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, 1.0), com), DecoratedInterval(Interval(-0.0, -0.0), com)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, 1.0), com), DecoratedInterval(Interval(-0.0, -0.0), com))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, 1.0), dac), DecoratedInterval(Interval(-2.0, -0.1), dac)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), def)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, 1.0), dac), DecoratedInterval(Interval(-2.0, -0.1), dac))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), def))
+    @fact atan2(DecoratedInterval(Interval(-2.0, 1.0), def), DecoratedInterval(Interval(-2.0, 0.0), def)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, 1.0), def), DecoratedInterval(Interval(-2.0, 0.0), def))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, 1.0), trv), DecoratedInterval(Interval(-2.0, -0.0), trv)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, 1.0), trv), DecoratedInterval(Interval(-2.0, -0.0), trv))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, 1.0), dac), DecoratedInterval(Interval(-2.0, 1.0), com)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, 1.0), dac), DecoratedInterval(Interval(-2.0, 1.0), com))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, 1.0), com), DecoratedInterval(Interval(0.0, 1.0), dac)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, 1.0), com), DecoratedInterval(Interval(0.0, 1.0), dac))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, 1.0), trv), DecoratedInterval(Interval(-0.0, 1.0), dac)) --> DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, 1.0), trv), DecoratedInterval(Interval(-0.0, 1.0), dac))) --> decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(-2.0, 1.0), com), DecoratedInterval(Interval(0.1, 1.0), com)) --> DecoratedInterval(Interval(-0x1.8555a2787982p+0, 0x1.789bd2c160054p+0), com)
+    @fact decoration(atan2(DecoratedInterval(Interval(-2.0, 1.0), com), DecoratedInterval(Interval(0.1, 1.0), com))) --> decoration(DecoratedInterval(Interval(-0x1.8555a2787982p+0, 0x1.789bd2c160054p+0), com))
+    @fact atan2(DecoratedInterval(Interval(-0.0, 1.0), com), DecoratedInterval(∅, trv)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, 1.0), com), DecoratedInterval(∅, trv))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, 1.0), dac), DecoratedInterval(entireinterval(Float64), def)) --> DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, 1.0), dac), DecoratedInterval(entireinterval(Float64), def))) --> decoration(DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, 1.0), def), DecoratedInterval(Interval(0.0, 0.0), def)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, 1.0), def), DecoratedInterval(Interval(0.0, 0.0), def))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, 1.0), trv), DecoratedInterval(Interval(-0.0, 0.0), trv)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, 1.0), trv), DecoratedInterval(Interval(-0.0, 0.0), trv))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, 1.0), dac), DecoratedInterval(Interval(0.0, -0.0), dac)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, 1.0), dac), DecoratedInterval(Interval(0.0, -0.0), dac))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, 1.0), com), DecoratedInterval(Interval(-0.0, -0.0), def)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, 1.0), com), DecoratedInterval(Interval(-0.0, -0.0), def))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, 1.0), com), DecoratedInterval(Interval(-2.0, -0.1), com)) --> DecoratedInterval(Interval(0x1.aba397c7259ddp+0, 0x1.921fb54442d19p+1), dac)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, 1.0), com), DecoratedInterval(Interval(-2.0, -0.1), com))) --> decoration(DecoratedInterval(Interval(0x1.aba397c7259ddp+0, 0x1.921fb54442d19p+1), dac))
+    @fact atan2(DecoratedInterval(Interval(-0.0, 1.0), def), DecoratedInterval(Interval(-2.0, 0.0), com)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, 1.0), def), DecoratedInterval(Interval(-2.0, 0.0), com))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, 1.0), def), DecoratedInterval(Interval(-2.0, -0.0), def)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, 1.0), def), DecoratedInterval(Interval(-2.0, -0.0), def))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, 1.0), dac), DecoratedInterval(Interval(-2.0, 1.0), dac)) --> DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, 1.0), dac), DecoratedInterval(Interval(-2.0, 1.0), dac))) --> decoration(DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, 1.0), dac), DecoratedInterval(Interval(0.0, 1.0), dac)) --> DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, 1.0), dac), DecoratedInterval(Interval(0.0, 1.0), dac))) --> decoration(DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, 1.0), trv), DecoratedInterval(Interval(-0.0, 1.0), com)) --> DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, 1.0), trv), DecoratedInterval(Interval(-0.0, 1.0), com))) --> decoration(DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(-0.0, 1.0), trv), DecoratedInterval(Interval(0.1, 1.0), com)) --> DecoratedInterval(Interval(0.0, 0x1.789bd2c160054p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(-0.0, 1.0), trv), DecoratedInterval(Interval(0.1, 1.0), com))) --> decoration(DecoratedInterval(Interval(0.0, 0x1.789bd2c160054p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, 1.0), def), DecoratedInterval(∅, trv)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, 1.0), def), DecoratedInterval(∅, trv))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, 1.0), dac), DecoratedInterval(entireinterval(Float64), def)) --> DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, 1.0), dac), DecoratedInterval(entireinterval(Float64), def))) --> decoration(DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, 1.0), dac), DecoratedInterval(Interval(0.0, 0.0), def)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, 1.0), dac), DecoratedInterval(Interval(0.0, 0.0), def))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, 1.0), trv), DecoratedInterval(Interval(-0.0, 0.0), trv)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, 1.0), trv), DecoratedInterval(Interval(-0.0, 0.0), trv))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, 1.0), trv), DecoratedInterval(Interval(0.0, -0.0), dac)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, 1.0), trv), DecoratedInterval(Interval(0.0, -0.0), dac))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, 1.0), def), DecoratedInterval(Interval(-0.0, -0.0), com)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, 1.0), def), DecoratedInterval(Interval(-0.0, -0.0), com))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, 1.0), dac), DecoratedInterval(Interval(-2.0, -0.1), dac)) --> DecoratedInterval(Interval(0x1.aba397c7259ddp+0, 0x1.921fb54442d19p+1), dac)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, 1.0), dac), DecoratedInterval(Interval(-2.0, -0.1), dac))) --> decoration(DecoratedInterval(Interval(0x1.aba397c7259ddp+0, 0x1.921fb54442d19p+1), dac))
+    @fact atan2(DecoratedInterval(Interval(0.0, 1.0), def), DecoratedInterval(Interval(-2.0, 0.0), trv)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, 1.0), def), DecoratedInterval(Interval(-2.0, 0.0), trv))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, 1.0), dac), DecoratedInterval(Interval(-2.0, -0.0), dac)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, 1.0), dac), DecoratedInterval(Interval(-2.0, -0.0), dac))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, 1.0), dac), DecoratedInterval(Interval(-2.0, 1.0), def)) --> DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, 1.0), dac), DecoratedInterval(Interval(-2.0, 1.0), def))) --> decoration(DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, 1.0), dac), DecoratedInterval(Interval(0.0, 1.0), trv)) --> DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, 1.0), dac), DecoratedInterval(Interval(0.0, 1.0), trv))) --> decoration(DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, 1.0), dac), DecoratedInterval(Interval(-0.0, 1.0), def)) --> DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, 1.0), dac), DecoratedInterval(Interval(-0.0, 1.0), def))) --> decoration(DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(0.0, 1.0), com), DecoratedInterval(Interval(0.1, 1.0), com)) --> DecoratedInterval(Interval(0.0, 0x1.789bd2c160054p+0), com)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.0, 1.0), com), DecoratedInterval(Interval(0.1, 1.0), com))) --> decoration(DecoratedInterval(Interval(0.0, 0x1.789bd2c160054p+0), com))
+    @fact atan2(DecoratedInterval(Interval(0.1, 1.0), dac), DecoratedInterval(∅, trv)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.1, 1.0), dac), DecoratedInterval(∅, trv))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atan2(DecoratedInterval(Interval(0.1, 1.0), dac), DecoratedInterval(entireinterval(Float64), def)) --> DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), def)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.1, 1.0), dac), DecoratedInterval(entireinterval(Float64), def))) --> decoration(DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), def))
+    @fact atan2(DecoratedInterval(Interval(0.1, 1.0), def), DecoratedInterval(Interval(0.0, 0.0), com)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+0), def)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.1, 1.0), def), DecoratedInterval(Interval(0.0, 0.0), com))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+0), def))
+    @fact atan2(DecoratedInterval(Interval(0.1, 1.0), trv), DecoratedInterval(Interval(-0.0, 0.0), def)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.1, 1.0), trv), DecoratedInterval(Interval(-0.0, 0.0), def))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(0.1, 1.0), trv), DecoratedInterval(Interval(0.0, -0.0), def)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+0), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.1, 1.0), trv), DecoratedInterval(Interval(0.0, -0.0), def))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+0), trv))
+    @fact atan2(DecoratedInterval(Interval(0.1, 1.0), dac), DecoratedInterval(Interval(-0.0, -0.0), def)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+0), def)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.1, 1.0), dac), DecoratedInterval(Interval(-0.0, -0.0), def))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d19p+0), def))
+    @fact atan2(DecoratedInterval(Interval(0.1, 1.0), com), DecoratedInterval(Interval(-2.0, -0.1), trv)) --> DecoratedInterval(Interval(0x1.aba397c7259ddp+0, 0x1.8bbaabde5e29cp+1), trv)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.1, 1.0), com), DecoratedInterval(Interval(-2.0, -0.1), trv))) --> decoration(DecoratedInterval(Interval(0x1.aba397c7259ddp+0, 0x1.8bbaabde5e29cp+1), trv))
+    @fact atan2(DecoratedInterval(Interval(0.1, 1.0), com), DecoratedInterval(Interval(-2.0, 0.0), dac)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.8bbaabde5e29cp+1), dac)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.1, 1.0), com), DecoratedInterval(Interval(-2.0, 0.0), dac))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.8bbaabde5e29cp+1), dac))
+    @fact atan2(DecoratedInterval(Interval(0.1, 1.0), com), DecoratedInterval(Interval(-2.0, -0.0), dac)) --> DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.8bbaabde5e29cp+1), dac)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.1, 1.0), com), DecoratedInterval(Interval(-2.0, -0.0), dac))) --> decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.8bbaabde5e29cp+1), dac))
+    @fact atan2(DecoratedInterval(Interval(0.1, 1.0), def), DecoratedInterval(Interval(-2.0, 1.0), dac)) --> DecoratedInterval(Interval(0x1.983e282e2cc4cp-4, 0x1.8bbaabde5e29cp+1), def)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.1, 1.0), def), DecoratedInterval(Interval(-2.0, 1.0), dac))) --> decoration(DecoratedInterval(Interval(0x1.983e282e2cc4cp-4, 0x1.8bbaabde5e29cp+1), def))
+    @fact atan2(DecoratedInterval(Interval(0.1, 1.0), def), DecoratedInterval(Interval(0.0, 1.0), def)) --> DecoratedInterval(Interval(0x1.983e282e2cc4cp-4, 0x1.921fb54442d19p+0), def)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.1, 1.0), def), DecoratedInterval(Interval(0.0, 1.0), def))) --> decoration(DecoratedInterval(Interval(0x1.983e282e2cc4cp-4, 0x1.921fb54442d19p+0), def))
+    @fact atan2(DecoratedInterval(Interval(0.1, 1.0), dac), DecoratedInterval(Interval(-0.0, 1.0), def)) --> DecoratedInterval(Interval(0x1.983e282e2cc4cp-4, 0x1.921fb54442d19p+0), def)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.1, 1.0), dac), DecoratedInterval(Interval(-0.0, 1.0), def))) --> decoration(DecoratedInterval(Interval(0x1.983e282e2cc4cp-4, 0x1.921fb54442d19p+0), def))
+    @fact atan2(DecoratedInterval(Interval(0.1, 1.0), dac), DecoratedInterval(Interval(0.1, 1.0), def)) --> DecoratedInterval(Interval(0x1.983e282e2cc4cp-4, 0x1.789bd2c160054p+0), def)
+    @fact decoration(atan2(DecoratedInterval(Interval(0.1, 1.0), dac), DecoratedInterval(Interval(0.1, 1.0), def))) --> decoration(DecoratedInterval(Interval(0x1.983e282e2cc4cp-4, 0x1.789bd2c160054p+0), def))
 end
 
 facts("minimal_sinh_test") do
@@ -3355,7 +4323,16 @@ facts("minimal_sinh_test") do
 end
 
 facts("minimal_sinh_dec_test") do
-
+    @fact sinh(DecoratedInterval(entireinterval(Float64), def)) --> DecoratedInterval(entireinterval(Float64), def)
+    @fact decoration(sinh(DecoratedInterval(entireinterval(Float64), def))) --> decoration(DecoratedInterval(entireinterval(Float64), def))
+    @fact sinh(DecoratedInterval(Interval(0.0, Inf), dac)) --> DecoratedInterval(Interval(0.0, Inf), dac)
+    @fact decoration(sinh(DecoratedInterval(Interval(0.0, Inf), dac))) --> decoration(DecoratedInterval(Interval(0.0, Inf), dac))
+    @fact sinh(DecoratedInterval(Interval(-Inf, 0.0), def)) --> DecoratedInterval(Interval(-Inf, 0.0), def)
+    @fact decoration(sinh(DecoratedInterval(Interval(-Inf, 0.0), def))) --> decoration(DecoratedInterval(Interval(-Inf, 0.0), def))
+    @fact sinh(DecoratedInterval(Interval(1.0, 0x1.2c903022dd7aap+8), com)) --> DecoratedInterval(Interval(0x1.2cd9fc44eb982p+0, 0x1.89bca168970c6p+432), com)
+    @fact decoration(sinh(DecoratedInterval(Interval(1.0, 0x1.2c903022dd7aap+8), com))) --> decoration(DecoratedInterval(Interval(0x1.2cd9fc44eb982p+0, 0x1.89bca168970c6p+432), com))
+    @fact sinh(DecoratedInterval(Interval(-0x1.fd219490eaac1p+38, -0x1.1af1c9d74f06dp+9), com)) --> DecoratedInterval(Interval(-Inf, -0x1.53045b4f849dep+815), dac)
+    @fact decoration(sinh(DecoratedInterval(Interval(-0x1.fd219490eaac1p+38, -0x1.1af1c9d74f06dp+9), com))) --> decoration(DecoratedInterval(Interval(-Inf, -0x1.53045b4f849dep+815), dac))
 end
 
 facts("minimal_cosh_test") do
@@ -3373,7 +4350,16 @@ facts("minimal_cosh_test") do
 end
 
 facts("minimal_cosh_dec_test") do
-
+    @fact cosh(DecoratedInterval(Interval(0.0, Inf), dac)) --> DecoratedInterval(Interval(1.0, Inf), dac)
+    @fact decoration(cosh(DecoratedInterval(Interval(0.0, Inf), dac))) --> decoration(DecoratedInterval(Interval(1.0, Inf), dac))
+    @fact cosh(DecoratedInterval(Interval(-Inf, 0.0), def)) --> DecoratedInterval(Interval(1.0, Inf), def)
+    @fact decoration(cosh(DecoratedInterval(Interval(-Inf, 0.0), def))) --> decoration(DecoratedInterval(Interval(1.0, Inf), def))
+    @fact cosh(DecoratedInterval(entireinterval(Float64), def)) --> DecoratedInterval(Interval(1.0, Inf), def)
+    @fact decoration(cosh(DecoratedInterval(entireinterval(Float64), def))) --> decoration(DecoratedInterval(Interval(1.0, Inf), def))
+    @fact cosh(DecoratedInterval(Interval(1.0, 0x1.2c903022dd7aap+8), def)) --> DecoratedInterval(Interval(0x1.8b07551d9f55p+0, 0x1.89bca168970c6p+432), def)
+    @fact decoration(cosh(DecoratedInterval(Interval(1.0, 0x1.2c903022dd7aap+8), def))) --> decoration(DecoratedInterval(Interval(0x1.8b07551d9f55p+0, 0x1.89bca168970c6p+432), def))
+    @fact cosh(DecoratedInterval(Interval(-0x1.fd219490eaac1p+38, -0x1.1af1c9d74f06dp+9), com)) --> DecoratedInterval(Interval(0x1.53045b4f849dep+815, Inf), dac)
+    @fact decoration(cosh(DecoratedInterval(Interval(-0x1.fd219490eaac1p+38, -0x1.1af1c9d74f06dp+9), com))) --> decoration(DecoratedInterval(Interval(0x1.53045b4f849dep+815, Inf), dac))
 end
 
 facts("minimal_tanh_test") do
@@ -3391,7 +4377,16 @@ facts("minimal_tanh_test") do
 end
 
 facts("minimal_tanh_dec_test") do
-
+    @fact tanh(DecoratedInterval(Interval(0.0, Inf), dac)) --> DecoratedInterval(Interval(0.0, 1.0), dac)
+    @fact decoration(tanh(DecoratedInterval(Interval(0.0, Inf), dac))) --> decoration(DecoratedInterval(Interval(0.0, 1.0), dac))
+    @fact tanh(DecoratedInterval(Interval(-Inf, 0.0), def)) --> DecoratedInterval(Interval(-1.0, 0.0), def)
+    @fact decoration(tanh(DecoratedInterval(Interval(-Inf, 0.0), def))) --> decoration(DecoratedInterval(Interval(-1.0, 0.0), def))
+    @fact tanh(DecoratedInterval(entireinterval(Float64), def)) --> DecoratedInterval(Interval(-1.0, 1.0), def)
+    @fact decoration(tanh(DecoratedInterval(entireinterval(Float64), def))) --> decoration(DecoratedInterval(Interval(-1.0, 1.0), def))
+    @fact tanh(DecoratedInterval(Interval(1.0, 0x1.2c903022dd7aap+8), com)) --> DecoratedInterval(Interval(0x1.85efab514f394p-1, 0x1p+0), com)
+    @fact decoration(tanh(DecoratedInterval(Interval(1.0, 0x1.2c903022dd7aap+8), com))) --> decoration(DecoratedInterval(Interval(0x1.85efab514f394p-1, 0x1p+0), com))
+    @fact tanh(DecoratedInterval(Interval(-0x1.fd219490eaac1p+38, -0x1.1af1c9d74f06dp+9), trv)) --> DecoratedInterval(Interval(-0x1p+0, -0x1.fffffffffffffp-1), trv)
+    @fact decoration(tanh(DecoratedInterval(Interval(-0x1.fd219490eaac1p+38, -0x1.1af1c9d74f06dp+9), trv))) --> decoration(DecoratedInterval(Interval(-0x1p+0, -0x1.fffffffffffffp-1), trv))
 end
 
 facts("minimal_asinh_test") do
@@ -3409,7 +4404,16 @@ facts("minimal_asinh_test") do
 end
 
 facts("minimal_asinh_dec_test") do
-
+    @fact asinh(DecoratedInterval(Interval(0.0, Inf), dac)) --> DecoratedInterval(Interval(0.0, Inf), dac)
+    @fact decoration(asinh(DecoratedInterval(Interval(0.0, Inf), dac))) --> decoration(DecoratedInterval(Interval(0.0, Inf), dac))
+    @fact asinh(DecoratedInterval(Interval(-Inf, 0.0), trv)) --> DecoratedInterval(Interval(-Inf, 0.0), trv)
+    @fact decoration(asinh(DecoratedInterval(Interval(-Inf, 0.0), trv))) --> decoration(DecoratedInterval(Interval(-Inf, 0.0), trv))
+    @fact asinh(DecoratedInterval(entireinterval(Float64), def)) --> DecoratedInterval(entireinterval(Float64), def)
+    @fact decoration(asinh(DecoratedInterval(entireinterval(Float64), def))) --> decoration(DecoratedInterval(entireinterval(Float64), def))
+    @fact asinh(DecoratedInterval(Interval(1.0, 0x1.2c903022dd7aap+8), com)) --> DecoratedInterval(Interval(0x1.c34366179d426p-1, 0x1.9986127438a87p+2), com)
+    @fact decoration(asinh(DecoratedInterval(Interval(1.0, 0x1.2c903022dd7aap+8), com))) --> decoration(DecoratedInterval(Interval(0x1.c34366179d426p-1, 0x1.9986127438a87p+2), com))
+    @fact asinh(DecoratedInterval(Interval(-0x1.fd219490eaac1p+38, -0x1.1af1c9d74f06dp+9), def)) --> DecoratedInterval(Interval(-0x1.bb86380a6cc45p+4, -0x1.c204d8eb20827p+2), def)
+    @fact decoration(asinh(DecoratedInterval(Interval(-0x1.fd219490eaac1p+38, -0x1.1af1c9d74f06dp+9), def))) --> decoration(DecoratedInterval(Interval(-0x1.bb86380a6cc45p+4, -0x1.c204d8eb20827p+2), def))
 end
 
 facts("minimal_acosh_test") do
@@ -3427,7 +4431,22 @@ facts("minimal_acosh_test") do
 end
 
 facts("minimal_acosh_dec_test") do
-
+    @fact acosh(DecoratedInterval(Interval(0.0, Inf), dac)) --> DecoratedInterval(Interval(0.0, Inf), trv)
+    @fact decoration(acosh(DecoratedInterval(Interval(0.0, Inf), dac))) --> decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @fact acosh(DecoratedInterval(Interval(1.0, Inf), dac)) --> DecoratedInterval(Interval(0.0, Inf), dac)
+    @fact decoration(acosh(DecoratedInterval(Interval(1.0, Inf), dac))) --> decoration(DecoratedInterval(Interval(0.0, Inf), dac))
+    @fact acosh(DecoratedInterval(entireinterval(Float64), def)) --> DecoratedInterval(Interval(0.0, Inf), trv)
+    @fact decoration(acosh(DecoratedInterval(entireinterval(Float64), def))) --> decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @fact acosh(DecoratedInterval(Interval(1.0, 1.0), com)) --> DecoratedInterval(Interval(0.0, 0.0), com)
+    @fact decoration(acosh(DecoratedInterval(Interval(1.0, 1.0), com))) --> decoration(DecoratedInterval(Interval(0.0, 0.0), com))
+    @fact acosh(DecoratedInterval(Interval(0.9, 1.0), com)) --> DecoratedInterval(Interval(0.0, 0.0), trv)
+    @fact decoration(acosh(DecoratedInterval(Interval(0.9, 1.0), com))) --> decoration(DecoratedInterval(Interval(0.0, 0.0), trv))
+    @fact acosh(DecoratedInterval(Interval(1.0, 0x1.2c903022dd7aap+8), dac)) --> DecoratedInterval(Interval(0.0, 0x1.9985fb3d532afp+2), dac)
+    @fact decoration(acosh(DecoratedInterval(Interval(1.0, 0x1.2c903022dd7aap+8), dac))) --> decoration(DecoratedInterval(Interval(0.0, 0x1.9985fb3d532afp+2), dac))
+    @fact acosh(DecoratedInterval(Interval(0.9, 0x1.2c903022dd7aap+8), com)) --> DecoratedInterval(Interval(0.0, 0x1.9985fb3d532afp+2), trv)
+    @fact decoration(acosh(DecoratedInterval(Interval(0.9, 0x1.2c903022dd7aap+8), com))) --> decoration(DecoratedInterval(Interval(0.0, 0x1.9985fb3d532afp+2), trv))
+    @fact acosh(DecoratedInterval(Interval(0x1.14d4e82b2b26fp+15, 0x1.72dbe91c837b5p+29), def)) --> DecoratedInterval(Interval(0x1.656510b4baec3p+3, 0x1.52a415ee8455ap+4), def)
+    @fact decoration(acosh(DecoratedInterval(Interval(0x1.14d4e82b2b26fp+15, 0x1.72dbe91c837b5p+29), def))) --> decoration(DecoratedInterval(Interval(0x1.656510b4baec3p+3, 0x1.52a415ee8455ap+4), def))
 end
 
 facts("minimal_atanh_test") do
@@ -3449,7 +4468,24 @@ facts("minimal_atanh_test") do
 end
 
 facts("minimal_atanh_dec_test") do
-
+    @fact atanh(DecoratedInterval(Interval(0.0, Inf), dac)) --> DecoratedInterval(Interval(0.0, Inf), trv)
+    @fact decoration(atanh(DecoratedInterval(Interval(0.0, Inf), dac))) --> decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @fact atanh(DecoratedInterval(Interval(-Inf, 0.0), def)) --> DecoratedInterval(Interval(-Inf, 0.0), trv)
+    @fact decoration(atanh(DecoratedInterval(Interval(-Inf, 0.0), def))) --> decoration(DecoratedInterval(Interval(-Inf, 0.0), trv))
+    @fact atanh(DecoratedInterval(Interval(-1.0, 1.0), com)) --> DecoratedInterval(entireinterval(Float64), trv)
+    @fact decoration(atanh(DecoratedInterval(Interval(-1.0, 1.0), com))) --> decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @fact atanh(DecoratedInterval(Interval(0.0, 0.0), com)) --> DecoratedInterval(Interval(0.0, 0.0), com)
+    @fact decoration(atanh(DecoratedInterval(Interval(0.0, 0.0), com))) --> decoration(DecoratedInterval(Interval(0.0, 0.0), com))
+    @fact atanh(DecoratedInterval(Interval(1.0, 1.0), def)) --> DecoratedInterval(∅, trv)
+    @fact decoration(atanh(DecoratedInterval(Interval(1.0, 1.0), def))) --> decoration(DecoratedInterval(∅, trv))
+    @fact atanh(DecoratedInterval(Interval(0x1.4c0420f6f08ccp-2, 0x1.fffffffffffffp-1), com)) --> DecoratedInterval(Interval(0x1.5871dd2df9102p-2, 0x1.2b708872320e2p+4), com)
+    @fact decoration(atanh(DecoratedInterval(Interval(0x1.4c0420f6f08ccp-2, 0x1.fffffffffffffp-1), com))) --> decoration(DecoratedInterval(Interval(0x1.5871dd2df9102p-2, 0x1.2b708872320e2p+4), com))
+    @fact atanh(DecoratedInterval(Interval(-1.0, 0x1.fffffffffffffp-1), com)) --> DecoratedInterval(Interval(-Inf, 0x1.2b708872320e2p+4), trv)
+    @fact decoration(atanh(DecoratedInterval(Interval(-1.0, 0x1.fffffffffffffp-1), com))) --> decoration(DecoratedInterval(Interval(-Inf, 0x1.2b708872320e2p+4), trv))
+    @fact atanh(DecoratedInterval(Interval(-0x1.ffb88e9eb6307p-1, 0x1.999999999999ap-4), def)) --> DecoratedInterval(Interval(-0x1.06a3a97d7979cp+2, 0x1.9af93cd234413p-4), def)
+    @fact decoration(atanh(DecoratedInterval(Interval(-0x1.ffb88e9eb6307p-1, 0x1.999999999999ap-4), def))) --> decoration(DecoratedInterval(Interval(-0x1.06a3a97d7979cp+2, 0x1.9af93cd234413p-4), def))
+    @fact atanh(DecoratedInterval(Interval(-0x1.ffb88e9eb6307p-1, 1.0), com)) --> DecoratedInterval(Interval(-0x1.06a3a97d7979cp+2, Inf), trv)
+    @fact decoration(atanh(DecoratedInterval(Interval(-0x1.ffb88e9eb6307p-1, 1.0), com))) --> decoration(DecoratedInterval(Interval(-0x1.06a3a97d7979cp+2, Inf), trv))
 end
 
 facts("minimal_sign_test") do
@@ -3467,7 +4503,20 @@ facts("minimal_sign_test") do
 end
 
 facts("minimal_sign_dec_test") do
-
+    @fact sign(DecoratedInterval(Interval(1.0, 2.0), com)) --> DecoratedInterval(Interval(1.0, 1.0), com)
+    @fact decoration(sign(DecoratedInterval(Interval(1.0, 2.0), com))) --> decoration(DecoratedInterval(Interval(1.0, 1.0), com))
+    @fact sign(DecoratedInterval(Interval(-1.0, 2.0), com)) --> DecoratedInterval(Interval(-1.0, 1.0), def)
+    @fact decoration(sign(DecoratedInterval(Interval(-1.0, 2.0), com))) --> decoration(DecoratedInterval(Interval(-1.0, 1.0), def))
+    @fact sign(DecoratedInterval(Interval(-1.0, 0.0), com)) --> DecoratedInterval(Interval(-1.0, 0.0), def)
+    @fact decoration(sign(DecoratedInterval(Interval(-1.0, 0.0), com))) --> decoration(DecoratedInterval(Interval(-1.0, 0.0), def))
+    @fact sign(DecoratedInterval(Interval(0.0, 2.0), com)) --> DecoratedInterval(Interval(0.0, 1.0), def)
+    @fact decoration(sign(DecoratedInterval(Interval(0.0, 2.0), com))) --> decoration(DecoratedInterval(Interval(0.0, 1.0), def))
+    @fact sign(DecoratedInterval(Interval(-0.0, 2.0), def)) --> DecoratedInterval(Interval(0.0, 1.0), def)
+    @fact decoration(sign(DecoratedInterval(Interval(-0.0, 2.0), def))) --> decoration(DecoratedInterval(Interval(0.0, 1.0), def))
+    @fact sign(DecoratedInterval(Interval(-5.0, -2.0), trv)) --> DecoratedInterval(Interval(-1.0, -1.0), trv)
+    @fact decoration(sign(DecoratedInterval(Interval(-5.0, -2.0), trv))) --> decoration(DecoratedInterval(Interval(-1.0, -1.0), trv))
+    @fact sign(DecoratedInterval(Interval(0.0, 0.0), dac)) --> DecoratedInterval(Interval(0.0, 0.0), dac)
+    @fact decoration(sign(DecoratedInterval(Interval(0.0, 0.0), dac))) --> decoration(DecoratedInterval(Interval(0.0, 0.0), dac))
 end
 
 facts("minimal_ceil_test") do
@@ -3504,7 +4553,62 @@ facts("minimal_ceil_test") do
 end
 
 facts("minimal_ceil_dec_test") do
-
+    @fact ceil(DecoratedInterval(Interval(1.1, 2.0), com)) --> DecoratedInterval(Interval(2.0, 2.0), dac)
+    @fact decoration(ceil(DecoratedInterval(Interval(1.1, 2.0), com))) --> decoration(DecoratedInterval(Interval(2.0, 2.0), dac))
+    @fact round(DecoratedInterval(Interval(1.1, 2.0), com), RoundUp) --> DecoratedInterval(Interval(2.0, 2.0), dac)
+    @fact decoration(round(DecoratedInterval(Interval(1.1, 2.0), com), RoundUp)) --> decoration(DecoratedInterval(Interval(2.0, 2.0), dac))
+    @fact ceil(DecoratedInterval(Interval(-1.1, 2.0), com)) --> DecoratedInterval(Interval(-1.0, 2.0), def)
+    @fact decoration(ceil(DecoratedInterval(Interval(-1.1, 2.0), com))) --> decoration(DecoratedInterval(Interval(-1.0, 2.0), def))
+    @fact round(DecoratedInterval(Interval(-1.1, 2.0), com), RoundUp) --> DecoratedInterval(Interval(-1.0, 2.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(-1.1, 2.0), com), RoundUp)) --> decoration(DecoratedInterval(Interval(-1.0, 2.0), def))
+    @fact ceil(DecoratedInterval(Interval(-1.1, 0.0), dac)) --> DecoratedInterval(Interval(-1.0, 0.0), def)
+    @fact decoration(ceil(DecoratedInterval(Interval(-1.1, 0.0), dac))) --> decoration(DecoratedInterval(Interval(-1.0, 0.0), def))
+    @fact round(DecoratedInterval(Interval(-1.1, 0.0), dac), RoundUp) --> DecoratedInterval(Interval(-1.0, 0.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(-1.1, 0.0), dac), RoundUp)) --> decoration(DecoratedInterval(Interval(-1.0, 0.0), def))
+    @fact ceil(DecoratedInterval(Interval(-1.1, -0.0), trv)) --> DecoratedInterval(Interval(-1.0, 0.0), trv)
+    @fact decoration(ceil(DecoratedInterval(Interval(-1.1, -0.0), trv))) --> decoration(DecoratedInterval(Interval(-1.0, 0.0), trv))
+    @fact round(DecoratedInterval(Interval(-1.1, -0.0), trv), RoundUp) --> DecoratedInterval(Interval(-1.0, 0.0), trv)
+    @fact decoration(round(DecoratedInterval(Interval(-1.1, -0.0), trv), RoundUp)) --> decoration(DecoratedInterval(Interval(-1.0, 0.0), trv))
+    @fact ceil(DecoratedInterval(Interval(-1.1, -0.4), dac)) --> DecoratedInterval(Interval(-1.0, 0.0), def)
+    @fact decoration(ceil(DecoratedInterval(Interval(-1.1, -0.4), dac))) --> decoration(DecoratedInterval(Interval(-1.0, 0.0), def))
+    @fact round(DecoratedInterval(Interval(-1.1, -0.4), dac), RoundUp) --> DecoratedInterval(Interval(-1.0, 0.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(-1.1, -0.4), dac), RoundUp)) --> decoration(DecoratedInterval(Interval(-1.0, 0.0), def))
+    @fact ceil(DecoratedInterval(Interval(-1.9, 2.2), com)) --> DecoratedInterval(Interval(-1.0, 3.0), def)
+    @fact decoration(ceil(DecoratedInterval(Interval(-1.9, 2.2), com))) --> decoration(DecoratedInterval(Interval(-1.0, 3.0), def))
+    @fact round(DecoratedInterval(Interval(-1.9, 2.2), com), RoundUp) --> DecoratedInterval(Interval(-1.0, 3.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(-1.9, 2.2), com), RoundUp)) --> decoration(DecoratedInterval(Interval(-1.0, 3.0), def))
+    @fact ceil(DecoratedInterval(Interval(-1.0, 2.2), dac)) --> DecoratedInterval(Interval(-1.0, 3.0), def)
+    @fact decoration(ceil(DecoratedInterval(Interval(-1.0, 2.2), dac))) --> decoration(DecoratedInterval(Interval(-1.0, 3.0), def))
+    @fact round(DecoratedInterval(Interval(-1.0, 2.2), dac), RoundUp) --> DecoratedInterval(Interval(-1.0, 3.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(-1.0, 2.2), dac), RoundUp)) --> decoration(DecoratedInterval(Interval(-1.0, 3.0), def))
+    @fact ceil(DecoratedInterval(Interval(0.0, 2.2), trv)) --> DecoratedInterval(Interval(0.0, 3.0), trv)
+    @fact decoration(ceil(DecoratedInterval(Interval(0.0, 2.2), trv))) --> decoration(DecoratedInterval(Interval(0.0, 3.0), trv))
+    @fact round(DecoratedInterval(Interval(0.0, 2.2), trv), RoundUp) --> DecoratedInterval(Interval(0.0, 3.0), trv)
+    @fact decoration(round(DecoratedInterval(Interval(0.0, 2.2), trv), RoundUp)) --> decoration(DecoratedInterval(Interval(0.0, 3.0), trv))
+    @fact ceil(DecoratedInterval(Interval(-0.0, 2.2), def)) --> DecoratedInterval(Interval(0.0, 3.0), def)
+    @fact decoration(ceil(DecoratedInterval(Interval(-0.0, 2.2), def))) --> decoration(DecoratedInterval(Interval(0.0, 3.0), def))
+    @fact round(DecoratedInterval(Interval(-0.0, 2.2), def), RoundUp) --> DecoratedInterval(Interval(0.0, 3.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(-0.0, 2.2), def), RoundUp)) --> decoration(DecoratedInterval(Interval(0.0, 3.0), def))
+    @fact ceil(DecoratedInterval(Interval(-1.5, Inf), trv)) --> DecoratedInterval(Interval(-1.0, Inf), trv)
+    @fact decoration(ceil(DecoratedInterval(Interval(-1.5, Inf), trv))) --> decoration(DecoratedInterval(Interval(-1.0, Inf), trv))
+    @fact round(DecoratedInterval(Interval(-1.5, Inf), trv), RoundUp) --> DecoratedInterval(Interval(-1.0, Inf), trv)
+    @fact decoration(round(DecoratedInterval(Interval(-1.5, Inf), trv), RoundUp)) --> decoration(DecoratedInterval(Interval(-1.0, Inf), trv))
+    @fact ceil(DecoratedInterval(Interval(0x1.fffffffffffffp1023, Inf), dac)) --> DecoratedInterval(Interval(0x1.fffffffffffffp1023, Inf), def)
+    @fact decoration(ceil(DecoratedInterval(Interval(0x1.fffffffffffffp1023, Inf), dac))) --> decoration(DecoratedInterval(Interval(0x1.fffffffffffffp1023, Inf), def))
+    @fact round(DecoratedInterval(Interval(0x1.fffffffffffffp1023, Inf), dac), RoundUp) --> DecoratedInterval(Interval(0x1.fffffffffffffp1023, Inf), def)
+    @fact decoration(round(DecoratedInterval(Interval(0x1.fffffffffffffp1023, Inf), dac), RoundUp)) --> decoration(DecoratedInterval(Interval(0x1.fffffffffffffp1023, Inf), def))
+    @fact ceil(DecoratedInterval(Interval(0x1.fffffffffffffp1023, 0x1.fffffffffffffp1023), com)) --> DecoratedInterval(Interval(0x1.fffffffffffffp1023, 0x1.fffffffffffffp1023), dac)
+    @fact decoration(ceil(DecoratedInterval(Interval(0x1.fffffffffffffp1023, 0x1.fffffffffffffp1023), com))) --> decoration(DecoratedInterval(Interval(0x1.fffffffffffffp1023, 0x1.fffffffffffffp1023), dac))
+    @fact round(DecoratedInterval(Interval(0x1.fffffffffffffp1023, 0x1.fffffffffffffp1023), com), RoundUp) --> DecoratedInterval(Interval(0x1.fffffffffffffp1023, 0x1.fffffffffffffp1023), dac)
+    @fact decoration(round(DecoratedInterval(Interval(0x1.fffffffffffffp1023, 0x1.fffffffffffffp1023), com), RoundUp)) --> decoration(DecoratedInterval(Interval(0x1.fffffffffffffp1023, 0x1.fffffffffffffp1023), dac))
+    @fact ceil(DecoratedInterval(Interval(-Inf, 2.2), trv)) --> DecoratedInterval(Interval(-Inf, 3.0), trv)
+    @fact decoration(ceil(DecoratedInterval(Interval(-Inf, 2.2), trv))) --> decoration(DecoratedInterval(Interval(-Inf, 3.0), trv))
+    @fact round(DecoratedInterval(Interval(-Inf, 2.2), trv), RoundUp) --> DecoratedInterval(Interval(-Inf, 3.0), trv)
+    @fact decoration(round(DecoratedInterval(Interval(-Inf, 2.2), trv), RoundUp)) --> decoration(DecoratedInterval(Interval(-Inf, 3.0), trv))
+    @fact ceil(DecoratedInterval(Interval(-Inf, -0x1.fffffffffffffp1023), dac)) --> DecoratedInterval(Interval(-Inf, -0x1.fffffffffffffp1023), def)
+    @fact decoration(ceil(DecoratedInterval(Interval(-Inf, -0x1.fffffffffffffp1023), dac))) --> decoration(DecoratedInterval(Interval(-Inf, -0x1.fffffffffffffp1023), def))
+    @fact round(DecoratedInterval(Interval(-Inf, -0x1.fffffffffffffp1023), dac), RoundUp) --> DecoratedInterval(Interval(-Inf, -0x1.fffffffffffffp1023), def)
+    @fact decoration(round(DecoratedInterval(Interval(-Inf, -0x1.fffffffffffffp1023), dac), RoundUp)) --> decoration(DecoratedInterval(Interval(-Inf, -0x1.fffffffffffffp1023), def))
 end
 
 facts("minimal_floor_test") do
@@ -3537,7 +4641,50 @@ facts("minimal_floor_test") do
 end
 
 facts("minimal_floor_dec_test") do
-
+    @fact floor(DecoratedInterval(Interval(1.1, 2.0), com)) --> DecoratedInterval(Interval(1.0, 2.0), def)
+    @fact decoration(floor(DecoratedInterval(Interval(1.1, 2.0), com))) --> decoration(DecoratedInterval(Interval(1.0, 2.0), def))
+    @fact round(DecoratedInterval(Interval(1.1, 2.0), com), RoundDown) --> DecoratedInterval(Interval(1.0, 2.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(1.1, 2.0), com), RoundDown)) --> decoration(DecoratedInterval(Interval(1.0, 2.0), def))
+    @fact floor(DecoratedInterval(Interval(-1.1, 2.0), def)) --> DecoratedInterval(Interval(-2.0, 2.0), def)
+    @fact decoration(floor(DecoratedInterval(Interval(-1.1, 2.0), def))) --> decoration(DecoratedInterval(Interval(-2.0, 2.0), def))
+    @fact round(DecoratedInterval(Interval(-1.1, 2.0), def), RoundDown) --> DecoratedInterval(Interval(-2.0, 2.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(-1.1, 2.0), def), RoundDown)) --> decoration(DecoratedInterval(Interval(-2.0, 2.0), def))
+    @fact floor(DecoratedInterval(Interval(-1.1, 0.0), dac)) --> DecoratedInterval(Interval(-2.0, 0.0), def)
+    @fact decoration(floor(DecoratedInterval(Interval(-1.1, 0.0), dac))) --> decoration(DecoratedInterval(Interval(-2.0, 0.0), def))
+    @fact round(DecoratedInterval(Interval(-1.1, 0.0), dac), RoundDown) --> DecoratedInterval(Interval(-2.0, 0.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(-1.1, 0.0), dac), RoundDown)) --> decoration(DecoratedInterval(Interval(-2.0, 0.0), def))
+    @fact floor(DecoratedInterval(Interval(-1.2, -1.1), com)) --> DecoratedInterval(Interval(-2.0, -2.0), com)
+    @fact decoration(floor(DecoratedInterval(Interval(-1.2, -1.1), com))) --> decoration(DecoratedInterval(Interval(-2.0, -2.0), com))
+    @fact round(DecoratedInterval(Interval(-1.2, -1.1), com), RoundDown) --> DecoratedInterval(Interval(-2.0, -2.0), com)
+    @fact decoration(round(DecoratedInterval(Interval(-1.2, -1.1), com), RoundDown)) --> decoration(DecoratedInterval(Interval(-2.0, -2.0), com))
+    @fact floor(DecoratedInterval(Interval(-1.1, -0.4), def)) --> DecoratedInterval(Interval(-2.0, -1.0), def)
+    @fact decoration(floor(DecoratedInterval(Interval(-1.1, -0.4), def))) --> decoration(DecoratedInterval(Interval(-2.0, -1.0), def))
+    @fact round(DecoratedInterval(Interval(-1.1, -0.4), def), RoundDown) --> DecoratedInterval(Interval(-2.0, -1.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(-1.1, -0.4), def), RoundDown)) --> decoration(DecoratedInterval(Interval(-2.0, -1.0), def))
+    @fact floor(DecoratedInterval(Interval(-1.9, 2.2), com)) --> DecoratedInterval(Interval(-2.0, 2.0), def)
+    @fact decoration(floor(DecoratedInterval(Interval(-1.9, 2.2), com))) --> decoration(DecoratedInterval(Interval(-2.0, 2.0), def))
+    @fact round(DecoratedInterval(Interval(-1.9, 2.2), com), RoundDown) --> DecoratedInterval(Interval(-2.0, 2.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(-1.9, 2.2), com), RoundDown)) --> decoration(DecoratedInterval(Interval(-2.0, 2.0), def))
+    @fact floor(DecoratedInterval(Interval(-1.0, 2.2), trv)) --> DecoratedInterval(Interval(-1.0, 2.0), trv)
+    @fact decoration(floor(DecoratedInterval(Interval(-1.0, 2.2), trv))) --> decoration(DecoratedInterval(Interval(-1.0, 2.0), trv))
+    @fact round(DecoratedInterval(Interval(-1.0, 2.2), trv), RoundDown) --> DecoratedInterval(Interval(-1.0, 2.0), trv)
+    @fact decoration(round(DecoratedInterval(Interval(-1.0, 2.2), trv), RoundDown)) --> decoration(DecoratedInterval(Interval(-1.0, 2.0), trv))
+    @fact floor(DecoratedInterval(Interval(0.0, 2.2), trv)) --> DecoratedInterval(Interval(0.0, 2.0), trv)
+    @fact decoration(floor(DecoratedInterval(Interval(0.0, 2.2), trv))) --> decoration(DecoratedInterval(Interval(0.0, 2.0), trv))
+    @fact round(DecoratedInterval(Interval(0.0, 2.2), trv), RoundDown) --> DecoratedInterval(Interval(0.0, 2.0), trv)
+    @fact decoration(round(DecoratedInterval(Interval(0.0, 2.2), trv), RoundDown)) --> decoration(DecoratedInterval(Interval(0.0, 2.0), trv))
+    @fact floor(DecoratedInterval(Interval(-0.0, 2.2), com)) --> DecoratedInterval(Interval(0.0, 2.0), def)
+    @fact decoration(floor(DecoratedInterval(Interval(-0.0, 2.2), com))) --> decoration(DecoratedInterval(Interval(0.0, 2.0), def))
+    @fact round(DecoratedInterval(Interval(-0.0, 2.2), com), RoundDown) --> DecoratedInterval(Interval(0.0, 2.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(-0.0, 2.2), com), RoundDown)) --> decoration(DecoratedInterval(Interval(0.0, 2.0), def))
+    @fact floor(DecoratedInterval(Interval(-1.5, Inf), dac)) --> DecoratedInterval(Interval(-2.0, Inf), def)
+    @fact decoration(floor(DecoratedInterval(Interval(-1.5, Inf), dac))) --> decoration(DecoratedInterval(Interval(-2.0, Inf), def))
+    @fact round(DecoratedInterval(Interval(-1.5, Inf), dac), RoundDown) --> DecoratedInterval(Interval(-2.0, Inf), def)
+    @fact decoration(round(DecoratedInterval(Interval(-1.5, Inf), dac), RoundDown)) --> decoration(DecoratedInterval(Interval(-2.0, Inf), def))
+    @fact floor(DecoratedInterval(Interval(-Inf, 2.2), trv)) --> DecoratedInterval(Interval(-Inf, 2.0), trv)
+    @fact decoration(floor(DecoratedInterval(Interval(-Inf, 2.2), trv))) --> decoration(DecoratedInterval(Interval(-Inf, 2.0), trv))
+    @fact round(DecoratedInterval(Interval(-Inf, 2.2), trv), RoundDown) --> DecoratedInterval(Interval(-Inf, 2.0), trv)
+    @fact decoration(round(DecoratedInterval(Interval(-Inf, 2.2), trv), RoundDown)) --> decoration(DecoratedInterval(Interval(-Inf, 2.0), trv))
 end
 
 facts("minimal_trunc_test") do
@@ -3570,7 +4717,46 @@ facts("minimal_trunc_test") do
 end
 
 facts("minimal_trunc_dec_test") do
-
+    @fact trunc(DecoratedInterval(Interval(1.1, 2.1), com)) --> DecoratedInterval(Interval(1.0, 2.0), def)
+    @fact decoration(trunc(DecoratedInterval(Interval(1.1, 2.1), com))) --> decoration(DecoratedInterval(Interval(1.0, 2.0), def))
+    @fact round(DecoratedInterval(Interval(1.1, 2.1), com), RoundToZero) --> DecoratedInterval(Interval(1.0, 2.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(1.1, 2.1), com), RoundToZero)) --> decoration(DecoratedInterval(Interval(1.0, 2.0), def))
+    @fact trunc(DecoratedInterval(Interval(1.1, 1.9), com)) --> DecoratedInterval(Interval(1.0, 1.0), com)
+    @fact decoration(trunc(DecoratedInterval(Interval(1.1, 1.9), com))) --> decoration(DecoratedInterval(Interval(1.0, 1.0), com))
+    @fact round(DecoratedInterval(Interval(1.1, 1.9), com), RoundToZero) --> DecoratedInterval(Interval(1.0, 1.0), com)
+    @fact decoration(round(DecoratedInterval(Interval(1.1, 1.9), com), RoundToZero)) --> decoration(DecoratedInterval(Interval(1.0, 1.0), com))
+    @fact trunc(DecoratedInterval(Interval(-1.1, 2.0), dac)) --> DecoratedInterval(Interval(-1.0, 2.0), def)
+    @fact decoration(trunc(DecoratedInterval(Interval(-1.1, 2.0), dac))) --> decoration(DecoratedInterval(Interval(-1.0, 2.0), def))
+    @fact round(DecoratedInterval(Interval(-1.1, 2.0), dac), RoundToZero) --> DecoratedInterval(Interval(-1.0, 2.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(-1.1, 2.0), dac), RoundToZero)) --> decoration(DecoratedInterval(Interval(-1.0, 2.0), def))
+    @fact trunc(DecoratedInterval(Interval(-1.1, 0.0), trv)) --> DecoratedInterval(Interval(-1.0, 0.0), trv)
+    @fact decoration(trunc(DecoratedInterval(Interval(-1.1, 0.0), trv))) --> decoration(DecoratedInterval(Interval(-1.0, 0.0), trv))
+    @fact round(DecoratedInterval(Interval(-1.1, 0.0), trv), RoundToZero) --> DecoratedInterval(Interval(-1.0, 0.0), trv)
+    @fact decoration(round(DecoratedInterval(Interval(-1.1, 0.0), trv), RoundToZero)) --> decoration(DecoratedInterval(Interval(-1.0, 0.0), trv))
+    @fact trunc(DecoratedInterval(Interval(-1.1, -0.0), def)) --> DecoratedInterval(Interval(-1.0, 0.0), def)
+    @fact decoration(trunc(DecoratedInterval(Interval(-1.1, -0.0), def))) --> decoration(DecoratedInterval(Interval(-1.0, 0.0), def))
+    @fact round(DecoratedInterval(Interval(-1.1, -0.0), def), RoundToZero) --> DecoratedInterval(Interval(-1.0, 0.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(-1.1, -0.0), def), RoundToZero)) --> decoration(DecoratedInterval(Interval(-1.0, 0.0), def))
+    @fact trunc(DecoratedInterval(Interval(-1.1, -0.4), com)) --> DecoratedInterval(Interval(-1.0, 0.0), def)
+    @fact decoration(trunc(DecoratedInterval(Interval(-1.1, -0.4), com))) --> decoration(DecoratedInterval(Interval(-1.0, 0.0), def))
+    @fact round(DecoratedInterval(Interval(-1.1, -0.4), com), RoundToZero) --> DecoratedInterval(Interval(-1.0, 0.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(-1.1, -0.4), com), RoundToZero)) --> decoration(DecoratedInterval(Interval(-1.0, 0.0), def))
+    @fact trunc(DecoratedInterval(Interval(-1.9, 2.2), def)) --> DecoratedInterval(Interval(-1.0, 2.0), def)
+    @fact decoration(trunc(DecoratedInterval(Interval(-1.9, 2.2), def))) --> decoration(DecoratedInterval(Interval(-1.0, 2.0), def))
+    @fact round(DecoratedInterval(Interval(-1.9, 2.2), def), RoundToZero) --> DecoratedInterval(Interval(-1.0, 2.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(-1.9, 2.2), def), RoundToZero)) --> decoration(DecoratedInterval(Interval(-1.0, 2.0), def))
+    @fact trunc(DecoratedInterval(Interval(-1.0, 2.2), dac)) --> DecoratedInterval(Interval(-1.0, 2.0), def)
+    @fact decoration(trunc(DecoratedInterval(Interval(-1.0, 2.2), dac))) --> decoration(DecoratedInterval(Interval(-1.0, 2.0), def))
+    @fact round(DecoratedInterval(Interval(-1.0, 2.2), dac), RoundToZero) --> DecoratedInterval(Interval(-1.0, 2.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(-1.0, 2.2), dac), RoundToZero)) --> decoration(DecoratedInterval(Interval(-1.0, 2.0), def))
+    @fact trunc(DecoratedInterval(Interval(-1.5, Inf), dac)) --> DecoratedInterval(Interval(-1.0, Inf), def)
+    @fact decoration(trunc(DecoratedInterval(Interval(-1.5, Inf), dac))) --> decoration(DecoratedInterval(Interval(-1.0, Inf), def))
+    @fact round(DecoratedInterval(Interval(-1.5, Inf), dac), RoundToZero) --> DecoratedInterval(Interval(-1.0, Inf), def)
+    @fact decoration(round(DecoratedInterval(Interval(-1.5, Inf), dac), RoundToZero)) --> decoration(DecoratedInterval(Interval(-1.0, Inf), def))
+    @fact trunc(DecoratedInterval(Interval(-Inf, 2.2), trv)) --> DecoratedInterval(Interval(-Inf, 2.0), trv)
+    @fact decoration(trunc(DecoratedInterval(Interval(-Inf, 2.2), trv))) --> decoration(DecoratedInterval(Interval(-Inf, 2.0), trv))
+    @fact round(DecoratedInterval(Interval(-Inf, 2.2), trv), RoundToZero) --> DecoratedInterval(Interval(-Inf, 2.0), trv)
+    @fact decoration(round(DecoratedInterval(Interval(-Inf, 2.2), trv), RoundToZero)) --> decoration(DecoratedInterval(Interval(-Inf, 2.0), trv))
 end
 
 facts("minimal_roundTiesToEven_test") do
@@ -3631,7 +4817,42 @@ facts("minimal_roundTiesToEven_test") do
 end
 
 facts("minimal_roundTiesToEven_dec_test") do
-
+    @fact round(DecoratedInterval(Interval(1.1, 2.1), com)) --> DecoratedInterval(Interval(1.0, 2.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(1.1, 2.1), com))) --> decoration(DecoratedInterval(Interval(1.0, 2.0), def))
+    @fact round(DecoratedInterval(Interval(1.1, 2.1), com), RoundNearest) --> DecoratedInterval(Interval(1.0, 2.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(1.1, 2.1), com), RoundNearest)) --> decoration(DecoratedInterval(Interval(1.0, 2.0), def))
+    @fact round(DecoratedInterval(Interval(1.1, 2.1), com), RoundTiesToEven) --> DecoratedInterval(Interval(1.0, 2.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(1.1, 2.1), com), RoundTiesToEven)) --> decoration(DecoratedInterval(Interval(1.0, 2.0), def))
+    @fact round(DecoratedInterval(Interval(-1.1, 2.0), trv)) --> DecoratedInterval(Interval(-1.0, 2.0), trv)
+    @fact decoration(round(DecoratedInterval(Interval(-1.1, 2.0), trv))) --> decoration(DecoratedInterval(Interval(-1.0, 2.0), trv))
+    @fact round(DecoratedInterval(Interval(-1.1, 2.0), trv), RoundNearest) --> DecoratedInterval(Interval(-1.0, 2.0), trv)
+    @fact decoration(round(DecoratedInterval(Interval(-1.1, 2.0), trv), RoundNearest)) --> decoration(DecoratedInterval(Interval(-1.0, 2.0), trv))
+    @fact round(DecoratedInterval(Interval(-1.1, 2.0), trv), RoundTiesToEven) --> DecoratedInterval(Interval(-1.0, 2.0), trv)
+    @fact decoration(round(DecoratedInterval(Interval(-1.1, 2.0), trv), RoundTiesToEven)) --> decoration(DecoratedInterval(Interval(-1.0, 2.0), trv))
+    @fact round(DecoratedInterval(Interval(-1.6, -1.5), com)) --> DecoratedInterval(Interval(-2.0, -2.0), dac)
+    @fact decoration(round(DecoratedInterval(Interval(-1.6, -1.5), com))) --> decoration(DecoratedInterval(Interval(-2.0, -2.0), dac))
+    @fact round(DecoratedInterval(Interval(-1.6, -1.5), com), RoundNearest) --> DecoratedInterval(Interval(-2.0, -2.0), dac)
+    @fact decoration(round(DecoratedInterval(Interval(-1.6, -1.5), com), RoundNearest)) --> decoration(DecoratedInterval(Interval(-2.0, -2.0), dac))
+    @fact round(DecoratedInterval(Interval(-1.6, -1.5), com), RoundTiesToEven) --> DecoratedInterval(Interval(-2.0, -2.0), dac)
+    @fact decoration(round(DecoratedInterval(Interval(-1.6, -1.5), com), RoundTiesToEven)) --> decoration(DecoratedInterval(Interval(-2.0, -2.0), dac))
+    @fact round(DecoratedInterval(Interval(-1.6, -1.4), com)) --> DecoratedInterval(Interval(-2.0, -1.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(-1.6, -1.4), com))) --> decoration(DecoratedInterval(Interval(-2.0, -1.0), def))
+    @fact round(DecoratedInterval(Interval(-1.6, -1.4), com), RoundNearest) --> DecoratedInterval(Interval(-2.0, -1.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(-1.6, -1.4), com), RoundNearest)) --> decoration(DecoratedInterval(Interval(-2.0, -1.0), def))
+    @fact round(DecoratedInterval(Interval(-1.6, -1.4), com), RoundTiesToEven) --> DecoratedInterval(Interval(-2.0, -1.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(-1.6, -1.4), com), RoundTiesToEven)) --> decoration(DecoratedInterval(Interval(-2.0, -1.0), def))
+    @fact round(DecoratedInterval(Interval(-1.5, Inf), dac)) --> DecoratedInterval(Interval(-2.0, Inf), def)
+    @fact decoration(round(DecoratedInterval(Interval(-1.5, Inf), dac))) --> decoration(DecoratedInterval(Interval(-2.0, Inf), def))
+    @fact round(DecoratedInterval(Interval(-1.5, Inf), dac), RoundNearest) --> DecoratedInterval(Interval(-2.0, Inf), def)
+    @fact decoration(round(DecoratedInterval(Interval(-1.5, Inf), dac), RoundNearest)) --> decoration(DecoratedInterval(Interval(-2.0, Inf), def))
+    @fact round(DecoratedInterval(Interval(-1.5, Inf), dac), RoundTiesToEven) --> DecoratedInterval(Interval(-2.0, Inf), def)
+    @fact decoration(round(DecoratedInterval(Interval(-1.5, Inf), dac), RoundTiesToEven)) --> decoration(DecoratedInterval(Interval(-2.0, Inf), def))
+    @fact round(DecoratedInterval(Interval(-Inf, 2.2), trv)) --> DecoratedInterval(Interval(-Inf, 2.0), trv)
+    @fact decoration(round(DecoratedInterval(Interval(-Inf, 2.2), trv))) --> decoration(DecoratedInterval(Interval(-Inf, 2.0), trv))
+    @fact round(DecoratedInterval(Interval(-Inf, 2.2), trv), RoundNearest) --> DecoratedInterval(Interval(-Inf, 2.0), trv)
+    @fact decoration(round(DecoratedInterval(Interval(-Inf, 2.2), trv), RoundNearest)) --> decoration(DecoratedInterval(Interval(-Inf, 2.0), trv))
+    @fact round(DecoratedInterval(Interval(-Inf, 2.2), trv), RoundTiesToEven) --> DecoratedInterval(Interval(-Inf, 2.0), trv)
+    @fact decoration(round(DecoratedInterval(Interval(-Inf, 2.2), trv), RoundTiesToEven)) --> decoration(DecoratedInterval(Interval(-Inf, 2.0), trv))
 end
 
 facts("minimal_roundTiesToAway_test") do
@@ -3674,7 +4895,34 @@ facts("minimal_roundTiesToAway_test") do
 end
 
 facts("minimal_roundTiesToAway_dec_test") do
-
+    @fact round(DecoratedInterval(Interval(1.1, 2.1), com), RoundNearestTiesAway) --> DecoratedInterval(Interval(1.0, 2.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(1.1, 2.1), com), RoundNearestTiesAway)) --> decoration(DecoratedInterval(Interval(1.0, 2.0), def))
+    @fact round(DecoratedInterval(Interval(1.1, 2.1), com), RoundTiesToAway) --> DecoratedInterval(Interval(1.0, 2.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(1.1, 2.1), com), RoundTiesToAway)) --> decoration(DecoratedInterval(Interval(1.0, 2.0), def))
+    @fact round(DecoratedInterval(Interval(-1.9, 2.2), com), RoundNearestTiesAway) --> DecoratedInterval(Interval(-2.0, 2.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(-1.9, 2.2), com), RoundNearestTiesAway)) --> decoration(DecoratedInterval(Interval(-2.0, 2.0), def))
+    @fact round(DecoratedInterval(Interval(-1.9, 2.2), com), RoundTiesToAway) --> DecoratedInterval(Interval(-2.0, 2.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(-1.9, 2.2), com), RoundTiesToAway)) --> decoration(DecoratedInterval(Interval(-2.0, 2.0), def))
+    @fact round(DecoratedInterval(Interval(1.9, 2.2), com), RoundNearestTiesAway) --> DecoratedInterval(Interval(2.0, 2.0), com)
+    @fact decoration(round(DecoratedInterval(Interval(1.9, 2.2), com), RoundNearestTiesAway)) --> decoration(DecoratedInterval(Interval(2.0, 2.0), com))
+    @fact round(DecoratedInterval(Interval(1.9, 2.2), com), RoundTiesToAway) --> DecoratedInterval(Interval(2.0, 2.0), com)
+    @fact decoration(round(DecoratedInterval(Interval(1.9, 2.2), com), RoundTiesToAway)) --> decoration(DecoratedInterval(Interval(2.0, 2.0), com))
+    @fact round(DecoratedInterval(Interval(-1.0, 2.2), trv), RoundNearestTiesAway) --> DecoratedInterval(Interval(-1.0, 2.0), trv)
+    @fact decoration(round(DecoratedInterval(Interval(-1.0, 2.2), trv), RoundNearestTiesAway)) --> decoration(DecoratedInterval(Interval(-1.0, 2.0), trv))
+    @fact round(DecoratedInterval(Interval(-1.0, 2.2), trv), RoundTiesToAway) --> DecoratedInterval(Interval(-1.0, 2.0), trv)
+    @fact decoration(round(DecoratedInterval(Interval(-1.0, 2.2), trv), RoundTiesToAway)) --> decoration(DecoratedInterval(Interval(-1.0, 2.0), trv))
+    @fact round(DecoratedInterval(Interval(2.5, 2.6), com), RoundNearestTiesAway) --> DecoratedInterval(Interval(3.0, 3.0), dac)
+    @fact decoration(round(DecoratedInterval(Interval(2.5, 2.6), com), RoundNearestTiesAway)) --> decoration(DecoratedInterval(Interval(3.0, 3.0), dac))
+    @fact round(DecoratedInterval(Interval(2.5, 2.6), com), RoundTiesToAway) --> DecoratedInterval(Interval(3.0, 3.0), dac)
+    @fact decoration(round(DecoratedInterval(Interval(2.5, 2.6), com), RoundTiesToAway)) --> decoration(DecoratedInterval(Interval(3.0, 3.0), dac))
+    @fact round(DecoratedInterval(Interval(-1.5, Inf), dac), RoundNearestTiesAway) --> DecoratedInterval(Interval(-2.0, Inf), def)
+    @fact decoration(round(DecoratedInterval(Interval(-1.5, Inf), dac), RoundNearestTiesAway)) --> decoration(DecoratedInterval(Interval(-2.0, Inf), def))
+    @fact round(DecoratedInterval(Interval(-1.5, Inf), dac), RoundTiesToAway) --> DecoratedInterval(Interval(-2.0, Inf), def)
+    @fact decoration(round(DecoratedInterval(Interval(-1.5, Inf), dac), RoundTiesToAway)) --> decoration(DecoratedInterval(Interval(-2.0, Inf), def))
+    @fact round(DecoratedInterval(Interval(-Inf, 2.2), def), RoundNearestTiesAway) --> DecoratedInterval(Interval(-Inf, 2.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(-Inf, 2.2), def), RoundNearestTiesAway)) --> decoration(DecoratedInterval(Interval(-Inf, 2.0), def))
+    @fact round(DecoratedInterval(Interval(-Inf, 2.2), def), RoundTiesToAway) --> DecoratedInterval(Interval(-Inf, 2.0), def)
+    @fact decoration(round(DecoratedInterval(Interval(-Inf, 2.2), def), RoundTiesToAway)) --> decoration(DecoratedInterval(Interval(-Inf, 2.0), def))
 end
 
 facts("minimal_abs_test") do
@@ -3693,7 +4941,22 @@ facts("minimal_abs_test") do
 end
 
 facts("minimal_abs_dec_test") do
-
+    @fact abs(DecoratedInterval(Interval(-1.1, 2.0), com)) --> DecoratedInterval(Interval(0.0, 2.0), com)
+    @fact decoration(abs(DecoratedInterval(Interval(-1.1, 2.0), com))) --> decoration(DecoratedInterval(Interval(0.0, 2.0), com))
+    @fact abs(DecoratedInterval(Interval(-1.1, 0.0), dac)) --> DecoratedInterval(Interval(0.0, 1.1), dac)
+    @fact decoration(abs(DecoratedInterval(Interval(-1.1, 0.0), dac))) --> decoration(DecoratedInterval(Interval(0.0, 1.1), dac))
+    @fact abs(DecoratedInterval(Interval(-1.1, -0.0), def)) --> DecoratedInterval(Interval(0.0, 1.1), def)
+    @fact decoration(abs(DecoratedInterval(Interval(-1.1, -0.0), def))) --> decoration(DecoratedInterval(Interval(0.0, 1.1), def))
+    @fact abs(DecoratedInterval(Interval(-1.1, -0.4), trv)) --> DecoratedInterval(Interval(0.4, 1.1), trv)
+    @fact decoration(abs(DecoratedInterval(Interval(-1.1, -0.4), trv))) --> decoration(DecoratedInterval(Interval(0.4, 1.1), trv))
+    @fact abs(DecoratedInterval(Interval(-1.9, 0.2), dac)) --> DecoratedInterval(Interval(0.0, 1.9), dac)
+    @fact decoration(abs(DecoratedInterval(Interval(-1.9, 0.2), dac))) --> decoration(DecoratedInterval(Interval(0.0, 1.9), dac))
+    @fact abs(DecoratedInterval(Interval(0.0, 0.2), def)) --> DecoratedInterval(Interval(0.0, 0.2), def)
+    @fact decoration(abs(DecoratedInterval(Interval(0.0, 0.2), def))) --> decoration(DecoratedInterval(Interval(0.0, 0.2), def))
+    @fact abs(DecoratedInterval(Interval(-0.0, 0.2), com)) --> DecoratedInterval(Interval(0.0, 0.2), com)
+    @fact decoration(abs(DecoratedInterval(Interval(-0.0, 0.2), com))) --> decoration(DecoratedInterval(Interval(0.0, 0.2), com))
+    @fact abs(DecoratedInterval(Interval(-1.5, Inf), dac)) --> DecoratedInterval(Interval(0.0, Inf), dac)
+    @fact decoration(abs(DecoratedInterval(Interval(-1.5, Inf), dac))) --> decoration(DecoratedInterval(Interval(0.0, Inf), dac))
 end
 
 facts("minimal_min_test") do
@@ -3715,7 +4978,14 @@ facts("minimal_min_test") do
 end
 
 facts("minimal_min_dec_test") do
-
+    @fact min(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(1.0, 2.0), com)) --> DecoratedInterval(Interval(-Inf, 2.0), def)
+    @fact decoration(min(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(1.0, 2.0), com))) --> decoration(DecoratedInterval(Interval(-Inf, 2.0), def))
+    @fact min(DecoratedInterval(Interval(-7.0, -5.0), trv), DecoratedInterval(Interval(2.0, 4.0), def)) --> DecoratedInterval(Interval(-7.0, -5.0), trv)
+    @fact decoration(min(DecoratedInterval(Interval(-7.0, -5.0), trv), DecoratedInterval(Interval(2.0, 4.0), def))) --> decoration(DecoratedInterval(Interval(-7.0, -5.0), trv))
+    @fact min(DecoratedInterval(Interval(-7.0, 0.0), dac), DecoratedInterval(Interval(2.0, 4.0), def)) --> DecoratedInterval(Interval(-7.0, 0.0), def)
+    @fact decoration(min(DecoratedInterval(Interval(-7.0, 0.0), dac), DecoratedInterval(Interval(2.0, 4.0), def))) --> decoration(DecoratedInterval(Interval(-7.0, 0.0), def))
+    @fact min(DecoratedInterval(Interval(-7.0, -0.0), com), DecoratedInterval(Interval(2.0, 4.0), com)) --> DecoratedInterval(Interval(-7.0, 0.0), com)
+    @fact decoration(min(DecoratedInterval(Interval(-7.0, -0.0), com), DecoratedInterval(Interval(2.0, 4.0), com))) --> decoration(DecoratedInterval(Interval(-7.0, 0.0), com))
 end
 
 facts("minimal_max_test") do
@@ -3737,6 +5007,13 @@ facts("minimal_max_test") do
 end
 
 facts("minimal_max_dec_test") do
-
+    @fact max(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(1.0, 2.0), com)) --> DecoratedInterval(Interval(1.0, Inf), def)
+    @fact decoration(max(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(1.0, 2.0), com))) --> decoration(DecoratedInterval(Interval(1.0, Inf), def))
+    @fact max(DecoratedInterval(Interval(-7.0, -5.0), trv), DecoratedInterval(Interval(2.0, 4.0), def)) --> DecoratedInterval(Interval(2.0, 4.0), trv)
+    @fact decoration(max(DecoratedInterval(Interval(-7.0, -5.0), trv), DecoratedInterval(Interval(2.0, 4.0), def))) --> decoration(DecoratedInterval(Interval(2.0, 4.0), trv))
+    @fact max(DecoratedInterval(Interval(-7.0, 5.0), dac), DecoratedInterval(Interval(2.0, 4.0), def)) --> DecoratedInterval(Interval(2.0, 5.0), def)
+    @fact decoration(max(DecoratedInterval(Interval(-7.0, 5.0), dac), DecoratedInterval(Interval(2.0, 4.0), def))) --> decoration(DecoratedInterval(Interval(2.0, 5.0), def))
+    @fact max(DecoratedInterval(Interval(3.0, 3.5), com), DecoratedInterval(Interval(2.0, 4.0), com)) --> DecoratedInterval(Interval(3.0, 4.0), com)
+    @fact decoration(max(DecoratedInterval(Interval(3.0, 3.5), com), DecoratedInterval(Interval(2.0, 4.0), com))) --> decoration(DecoratedInterval(Interval(3.0, 4.0), com))
 end
 # FactCheck.exitstatus()
