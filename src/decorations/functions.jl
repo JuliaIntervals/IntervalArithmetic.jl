@@ -10,7 +10,7 @@ function decay(a::DECORATION)
     a == trv && return trv
     ill
 end
-decay(xx::DecoratedInterval, a::DECORATION) = min(decoration(xx), a)
+# decay(xx::DecoratedInterval, a::DECORATION) = min(decoration(xx), a)
 # decay(xx::DecoratedInterval, yy::DecoratedInterval) = min(decoration(xx), decoration(yy))
 export decay
 
@@ -29,7 +29,7 @@ bool_functions = (
 )
 
 bool_binary_functions = (
-    :<, :>, :(==), :!=, :⊆, :^, :<=,
+    :<, :>, :(==), :!=, :⊆, :<=,
     :interior, :isdisjoint, :precedes, :strictprecedes
 )
 
@@ -99,7 +99,47 @@ end
 
 
 # power function must be defined separately and carefully
+function ^{T}(xx::DecoratedInterval{T}, n::Integer)
+    x = interval(xx)
+    r = x^n
+    d = decay(decoration(xx), decoration(r))
+    n < 0 && zero(T) ∈ x && return DecoratedInterval(r, trv)
+    DecoratedInterval(r, d)
+end
 
+function ^{T}(xx::DecoratedInterval{T}, q::AbstractFloat)
+    x = interval(xx)
+    r = x^q
+    d = decay(decoration(xx), decoration(r))
+    if x > zero(T) || (x.lo ≥ zero(T) && q > zero(T)) ||
+            (isinteger(q) && zero(T) ∉ x)
+        return DecoratedInterval(r, d)
+    end
+    DecoratedInterval(r, trv)
+end
+
+function ^{T, S<:Integer}(xx::DecoratedInterval{T}, q::Rational{S})
+    x = interval(xx)
+    r = x^q
+    d = decay(decoration(xx), decoration(r))
+    if x > zero(T) || (x.lo ≥ zero(T) && q > zero(T)) || 
+            (isinteger(q) && zero(T) ∉ x)
+        return DecoratedInterval(r, d)
+    end
+    DecoratedInterval(r, trv)
+end
+
+function ^{T,S}(xx::DecoratedInterval{T}, qq::DecoratedInterval{S})
+    x = interval(xx)
+    q = interval(qq)
+    r = x^q
+    d = decay(decoration(xx), decoration(qq), decoration(r))
+    if x > zero(T) || (x.lo ≥ zero(T) && q.lo > zero(T)) ||
+            (isthin(q) && isinteger(q.lo) && zero(T) ∉ x)
+        return DecoratedInterval(r, d)
+    end
+    DecoratedInterval(r, trv)
+end
 
 ## Discontinuous functions (sign, ceil, floor, trunc) and round
 function sign{T}(xx::DecoratedInterval{T})
