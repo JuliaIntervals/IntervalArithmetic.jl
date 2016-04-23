@@ -63,7 +63,27 @@ decoration(I::Interval) =
         ifelse( isunbounded(I), dac, # unbounded
             com )) )                 # common
 
-Base.show(io::IO, x::DecoratedInterval) = print(io, x.interval, "_", x.decoration)
+# Promotion and conversion, and other constructors
+promote_rule{T<:Real, S<:Real}(::Type{DecoratedInterval{T}}, ::Type{S}) =
+    DecoratedInterval{promote_type(T, S)}
+promote_rule{T<:Real, S<:Real}(::Type{DecoratedInterval{T}}, ::Type{DecoratedInterval{S}}) =
+    DecoratedInterval{promote_type(T, S)}
+
+convert{T<:Real, S<:Real}(::Type{DecoratedInterval{T}}, x::S) =
+    DecoratedInterval( Interval(T(x, RoundDown), T(x, RoundUp)) )
+convert{T<:Real, S<:Integer}(::Type{DecoratedInterval{T}}, x::S) =
+    DecoratedInterval( Interval(T(x), T(x)) )
+# function convert{T<:AbstractFloat}(::Type{DecoratedInterval{T}}, x::Float64)
+#     convert(DecoratedInterval{T}, rationalize(x))
+# end
+function convert{T<:Real}(::Type{DecoratedInterval{T}}, xx::DecoratedInterval)
+    x = interval(xx)
+    x = convert(Interval{T},x)
+    DecoratedInterval( x, decoration(xx) )
+end
+
+
+show(io::IO, x::DecoratedInterval) = print(io, x.interval, "_", x.decoration)
 
 macro decorated(ex)
     :(DecoratedInterval($ex))

@@ -10,9 +10,6 @@ function decay(a::DECORATION)
     a == trv && return trv
     ill
 end
-# decay(xx::DecoratedInterval, a::DECORATION) = min(decoration(xx), a)
-# decay(xx::DecoratedInterval, yy::DecoratedInterval) = min(decoration(xx), decoration(yy))
-export decay
 
 # zero, one
 zero{T<:Real}(a::DecoratedInterval{T}) = DecoratedInterval(zero(T))
@@ -112,7 +109,7 @@ function ^{T}(xx::DecoratedInterval{T}, q::AbstractFloat)
     r = x^q
     d = decay(decoration(xx), decoration(r))
     if x > zero(T) || (x.lo ≥ zero(T) && q > zero(T)) ||
-            (isinteger(q) && zero(T) ∉ x)
+            (isinteger(q) && q > zero(q)) || (isinteger(q) && zero(T) ∉ x)
         return DecoratedInterval(r, d)
     end
     DecoratedInterval(r, trv)
@@ -122,8 +119,8 @@ function ^{T, S<:Integer}(xx::DecoratedInterval{T}, q::Rational{S})
     x = interval(xx)
     r = x^q
     d = decay(decoration(xx), decoration(r))
-    if x > zero(T) || (x.lo ≥ zero(T) && q > zero(T)) || 
-            (isinteger(q) && zero(T) ∉ x)
+    if x > zero(T) || (x.lo ≥ zero(T) && q > zero(T)) ||
+            (isinteger(q) && q > zero(q)) || (isinteger(q) && zero(T) ∉ x)
         return DecoratedInterval(r, d)
     end
     DecoratedInterval(r, trv)
@@ -135,6 +132,7 @@ function ^{T,S}(xx::DecoratedInterval{T}, qq::DecoratedInterval{S})
     r = x^q
     d = decay(decoration(xx), decoration(qq), decoration(r))
     if x > zero(T) || (x.lo ≥ zero(T) && q.lo > zero(T)) ||
+            (isthin(q) && isinteger(q.lo) && q.lo > zero(q)) ||
             (isthin(q) && isinteger(q.lo) && zero(T) ∉ x)
         return DecoratedInterval(r, d)
     end
@@ -198,7 +196,6 @@ function round(xx::DecoratedInterval, ::RoundingMode{:NearestTiesAway})
     end
     isthin(r) && return DecoratedInterval(r, d)
     DecoratedInterval(r, decay(d,def))
-    # DecoratedInterval(round(interval(xx)), decay(decoration(xx),def))
 end
 round(xx::DecoratedInterval) = round(xx, RoundNearest)
 round(xx::DecoratedInterval, ::RoundingMode{:ToZero}) = trunc(xx)
