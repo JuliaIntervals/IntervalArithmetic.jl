@@ -7,9 +7,10 @@ function decay(a::DECORATION)
     a == com && return dac
     a == dac && return def
     a == def && return trv
+    a == trv && return trv
     ill
 end
-# decay(xx::DecoratedInterval, a::DECORATION) = min(decoration(xx), a)
+decay(xx::DecoratedInterval, a::DECORATION) = min(decoration(xx), a)
 # decay(xx::DecoratedInterval, yy::DecoratedInterval) = min(decoration(xx), decoration(yy))
 export decay
 
@@ -53,6 +54,7 @@ for f in scalar_functions
     @eval $(f){T}(xx::DecoratedInterval{T}) = $f(interval(xx))
 end
 
+
 ## Arithmetic function; / is treated separately
 arithm_functions = ( :+, :-, :* )
 
@@ -95,7 +97,92 @@ function fma{T}(xx::DecoratedInterval{T}, yy::DecoratedInterval{T}, zz::Decorate
     DecoratedInterval(r, d)
 end
 
-# other related functions
+
+# power function must be defined separately and carefully
+
+
+## Discontinuous functions (sign, ceil, floor, trunc) and round
+function sign{T}(xx::DecoratedInterval{T})
+    r = sign(interval(xx))
+    d = decoration(xx)
+    isthin(r) && return DecoratedInterval(r, d)
+    DecoratedInterval(r, decay(d,def))
+end
+function ceil{T}(xx::DecoratedInterval{T})
+    x = interval(xx)
+    r = ceil(x)
+    d = decoration(xx)
+    if isinteger(x.hi)
+        d = decay(d, dac)
+    end
+    isthin(r) && return DecoratedInterval(r, d)
+    DecoratedInterval(r, decay(d,def))
+end
+function floor{T}(xx::DecoratedInterval{T})
+    x = interval(xx)
+    r = floor(x)
+    d = decoration(xx)
+    if isinteger(x.lo)
+        d = decay(d, dac)
+    end
+    isthin(r) && return DecoratedInterval(r, d)
+    DecoratedInterval(r, decay(d,def))
+end
+function trunc{T}(xx::DecoratedInterval{T})
+    x = interval(xx)
+    r = trunc(x)
+    d = decoration(xx)
+    if (isinteger(x.lo) && x.lo < zero(T)) || (isinteger(x.hi) && x.hi > zero(T))
+        d = decay(d, dac)
+    end
+    isthin(r) && return DecoratedInterval(r, d)
+    DecoratedInterval(r, decay(d,def))
+end
+
+function round(xx::DecoratedInterval, ::RoundingMode{:Nearest})
+    x = interval(xx)
+    r = round(x)
+    d = decoration(xx)
+    if isinteger(2*x.lo) || isinteger(2*x.hi)
+        d = decay(d, dac)
+    end
+    isthin(r) && return DecoratedInterval(r, d)
+    DecoratedInterval(r, decay(d,def))
+end
+function round(xx::DecoratedInterval, ::RoundingMode{:NearestTiesAway})
+    x = interval(xx)
+    r = round(x,RoundNearestTiesAway)
+    d = decoration(xx)
+    if isinteger(2*x.lo) || isinteger(2*x.hi)
+        d = decay(d, dac)
+    end
+    isthin(r) && return DecoratedInterval(r, d)
+    DecoratedInterval(r, decay(d,def))
+    # DecoratedInterval(round(interval(xx)), decay(decoration(xx),def))
+end
+round(xx::DecoratedInterval) = round(xx, RoundNearest)
+round(xx::DecoratedInterval, ::RoundingMode{:ToZero}) = trunc(xx)
+round(xx::DecoratedInterval, ::RoundingMode{:Up}) = ceil(xx)
+round(xx::DecoratedInterval, ::RoundingMode{:Down}) = floor(xx)
+
+
+## Define binary functions with no domain restrictions
+binary_functions = ( :min, :max )
+
+for f in binary_functions
+    @eval function $(f){T}(xx::DecoratedInterval{T}, yy::DecoratedInterval{T})
+        r = $f(interval(xx), interval(yy))
+        d = decay(decoration(r), decoration(xx), decoration(yy))
+        DecoratedInterval(r, d)
+    end
+end
+
+## abs
+abs{T}(xx::DecoratedInterval{T}) =
+    DecoratedInterval(abs(interval(xx)), decoration(xx))
+
+
+## Other (cancel and set) functions
 other_functions = ( :cancelplus, :cancelminus, :intersect, :hull, :union )
 
 for f in other_functions
@@ -103,12 +190,14 @@ for f in other_functions
         DecoratedInterval($(f)(interval(xx), interval(yy)), trv)
 end
 
+
 ## Functions on unrestricted domains; tan and atan2 are treated separately
 unrestricted_functions =(
     :exp, :exp2, :exp10,
     :sin, :cos,
     :atan,
-    :sinh, :cosh, :tanh)
+    :sinh, :cosh, :tanh,
+    :asinh )
 
 for f in unrestricted_functions
     @eval function $(f){T}(xx::DecoratedInterval{T})
@@ -146,73 +235,44 @@ function atan2{T}(yy::DecoratedInterval{T}, xx::DecoratedInterval{T})
 end
 
 
-#### HASTA AQUI
-
-# Define functions on decorated intervals
-function sign{T}(xx::DecoratedInterval{T})
-    x = interval(xx)
-
-    if zero(T) ∉ x
-        return DecoratedInterval(sign(x), decay(xx, com))
-    end
-
-    return DecoratedInterval(sign(x), decay(xx, def))
-
-end
-
-
 # For domains, cf. table 9.1 on page 28 of the standard
-
 # Functions with restricted domains:
-restricted_functions = Dict(
-    :sqrt => [0, ∞],
-    :log => [0, ∞],
-    :log2 => [0, ∞],
+
+# The function is unbounded at the bounded edges of the domain
+restricted_functions1 = Dict(
+    :log   => [0, ∞],
+    :log2  => [0, ∞],
     :log10 => [0, ∞],
-    :asin => [-1, 1],
-    :acos => [-1, 1],
-    :acosh => [1, ∞],
     :atanh => [-1, 1]
 )
 
-# power function must be defined separately and carefully
-
-# Discontinuous like sign:  floor, ceil, trunc, RoundTiesToEven, RoundTiesToAway
-
+# The function is bounded at the bounded edge(s) of the domain
+restricted_functions2 = Dict(
+    :sqrt  => [0, ∞],
+    :asin  => [-1, 1],
+    :acos  => [-1, 1],
+    :acosh => [1, ∞]
+)
 
 # Define functions with restricted domains on DecoratedInterval's:
-for (f, domain) in restricted_functions
-
+for (f, domain) in restricted_functions1
     domain = Interval(domain...)
-
     @eval function Base.$(f){T}(xx::DecoratedInterval{T})
         x = interval(xx)
-
-        if x ⊆ $(domain)
-
-            if isunbounded(x)  # unnecessary if domain is bounded
-                return DecoratedInterval($(f)(x), decay(xx, dac))
-            else
-                return DecoratedInterval($(f)(x), decay(xx, com))
-            end
-
-        end
-
-        DecoratedInterval($f(x ∩ $(domain)), decay(xx, trv))
+        r = $(f)(x)
+        d = decay(decoration(xx), decoration(r))
+        x ⪽ $(domain) && return DecoratedInterval(r, d)
+        DecoratedInterval(r, trv)
     end
 end
 
-
-# Define unary functions with no domain restrictions
-
-binary_functions = ( :min, :max )
-
-for f in binary_functions
-
-    @eval function Base.$(f){T}(xx::DecoratedInterval{T}, yy::DecoratedInterval{T})
+for (f, domain) in restricted_functions2
+    domain = Interval(domain...)
+    @eval function Base.$(f){T}(xx::DecoratedInterval{T})
         x = interval(xx)
-        y = interval(yy)
-
-        DecoratedInterval($f(x, y), decay(xx, com))
+        r = $(f)(x)
+        d = decay(decoration(xx), decoration(r))
+        x ⊆ $(domain) && return DecoratedInterval(r, d)
+        DecoratedInterval(r, trv)
     end
 end
