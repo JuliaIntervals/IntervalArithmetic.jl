@@ -2,7 +2,7 @@
 
 Decorations are flags or labels attached to intervals to indicate the status of a given interval as the product of a function evaluation on a given initial interval.
 
-The possible decorations and there ordering are as follows (pg. 46):
+The possible decorations and their ordering are as follows (pg. 46):
 `com` > `dac` > `def` > `trv` > `ill`.
 
 
