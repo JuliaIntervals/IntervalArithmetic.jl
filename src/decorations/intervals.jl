@@ -9,14 +9,14 @@ Enumeration constant for the types of interval decorations.
 The nomenclature of the follows the IEEE-1788 (2015) standard
 (sect 11.2):
 
-- `com -> 4`: common: bounded non-empty
+- `com -> 4`: common: bounded, non-empty
 - `dac -> 3`: defined (nonempty) and continuous
 - `def -> 2`: defined (nonempty)
-- `trv -> 1`: always true
-- `ill -> 0`: nai
+- `trv -> 1`: always true (no information)
+- `ill -> 0`: nai ("not an interval")
 """
 @enum DECORATION ill=0 trv=1 def=2 dac=3 com=4
-# < and min work automatically for enums
+# Note that `isless`, and hence ``<` and `min`, are automatically defined for enums
 
 """
 DecoratedInterval
