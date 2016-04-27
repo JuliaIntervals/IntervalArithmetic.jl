@@ -26,9 +26,6 @@ import Base:
     isfinite, isnan
 
 export
-    @I_str
-
-export
     Interval, AbstractInterval,
     @interval, @biginterval, @floatinterval, @make_interval,
     diam, radius, mid, mag, mig, hull,
@@ -71,6 +68,7 @@ export
     find_roots,
     find_roots_midpoint
 
+
 function __init__()
     setrounding(BigFloat, RoundNearest)
     setrounding(Float64, RoundNearest)
@@ -85,14 +83,9 @@ end
 include("intervals/intervals.jl")
 include("multidim/multidim.jl")
 include("decorations/decorations.jl")
-include("decorations/functions.jl")
 
 include("root_finding/root_finding.jl")
 
-# notation I"[3,4]"
-macro I_str(ex)
-    @interval ex
-end
 
 
 end # module ValidatedNumerics
