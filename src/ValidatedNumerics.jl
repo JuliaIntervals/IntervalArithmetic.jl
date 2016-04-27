@@ -74,7 +74,6 @@ end
 
 ## Includes
 
-include("misc.jl")
 include("intervals/intervals.jl")
 include("multidim/multidim.jl")
 

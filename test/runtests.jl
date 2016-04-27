@@ -8,9 +8,6 @@ using Compat
 FactCheck.roughly(a::Interval) = b -> (dist(a, b) < 2*max(eps(a), eps(b)))
 roughly = FactCheck.roughly
 
-include("misc_tests.jl")
-
-
 # Interval tests:
 
 include("interval_tests/intervals.jl")
