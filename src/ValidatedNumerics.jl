@@ -38,7 +38,7 @@ export
     midpoint_radius, interval_from_midpoint_radius,
     RoundTiesToEven, RoundTiesToAway,
     cancelminus, cancelplus, isunbounded,
-    .., @I_str
+    .., @I_str, ±
 
 if VERSION >= v"0.5.0-dev+1182"
     import Base: rounding, setrounding, setprecision

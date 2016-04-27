@@ -58,6 +58,8 @@ macro I_str(ex)  # I"[3,4]"
     @interval(ex)
 end
 
+a ± b = (a-b)..(a+b)  
+
 
 ## Output
 

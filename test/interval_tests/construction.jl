@@ -172,3 +172,11 @@ facts("Complex intervals") do
     @fact real(b) --> Interval(-13.12878308146216, -13.128783081462153)
     @fact imag(b) --> Interval(-15.200784463067956, -15.20078446306795)
 end
+
+facts("± tests") do
+    setprecision(Interval, Float64)
+    
+    @fact 3 ± 0.5 --> Interval(2.5, 3.5)
+    @fact 3 ± 0.1 --> Interval(2.9, 3.1)
+    @fact 0.5 ± 1 --> Interval(-0.5, 1.5)
+end
