@@ -18,7 +18,7 @@ The aim of the package is correctness over speed, although performance considera
 - [Multi-dimensional](multidim.md)
 - [Root finding](root_finding.md)
 - [Rounding](rounding.md)
-
+- [Decorations](decorations.md)
 
 ## Bibliography
 

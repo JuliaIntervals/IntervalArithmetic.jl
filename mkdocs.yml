@@ -10,6 +10,7 @@ pages:
     - 'Multi-dimensional': 'multidim.md'
     - 'Root finding': 'root_finding.md'
     - 'Rounding': 'rounding.md'
+    - 'Decorations': 'decorations.md'
 
 #theme: readthedocs
 
