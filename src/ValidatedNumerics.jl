@@ -25,11 +25,10 @@ import Base:
     precision,
     isfinite, isnan
 
-
 export
-    Interval,
+    Interval, AbstractInterval,
     @interval, @biginterval, @floatinterval, @make_interval,
-    diam, radius, mid, mag, mig, hull, isinside,
+    diam, radius, mid, mag, mig, hull,
     emptyinterval, ∅, ∞, isempty, interior, isdisjoint, ⪽,
     precedes, strictprecedes, ≺,
     entireinterval, isentire, nai, isnai, isthin, iscommon,
@@ -55,6 +54,12 @@ end
 export
     IntervalBox, @intervalbox
 
+## Decorations
+export
+    @decorated,
+    interval_part, decoration, DecoratedInterval,
+    com, dac, def, trv, ill
+
 ## Root finding
 export
     newton, krawczyk,
@@ -62,6 +67,7 @@ export
     Root, is_unique,
     find_roots,
     find_roots_midpoint
+
 
 function __init__()
     setrounding(BigFloat, RoundNearest)
@@ -76,6 +82,7 @@ end
 
 include("intervals/intervals.jl")
 include("multidim/multidim.jl")
+include("decorations/decorations.jl")
 
 include("root_finding/root_finding.jl")
 

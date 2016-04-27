@@ -1,6 +1,12 @@
 # This file is part of the ValidatedNumerics.jl package; MIT licensed
 
-doc"""`in(x, a::Interval)` (also written ∈, obtained with `\in<TAB>`). [corresponds to `isMember`] checks if the number `x` is a member of the interval `a`, treated as a set."""
+"""
+    in(x, a)
+    ∈(x, a)
+
+Checks if the number `x` is a member of the interval `a`, treated as a set.
+Corresponds to `isMember` in the ITF-1788 Standard.
+"""
 function in{T<:Real}(x::T, a::Interval)
     isinf(x) && return false
     a.lo <= x <= a.hi
@@ -9,15 +15,23 @@ end
 
 ## Comparisons
 
-doc"`a == b` checks if the intervals `a` and `b` are equal."
+"""
+    ==(a,b)
+
+Checks if the intervals `a` and `b` are equal.
+"""
 function ==(a::Interval, b::Interval)
     isempty(a) && isempty(b) && return true
     a.lo == b.lo && a.hi == b.hi
 end
 !=(a::Interval, b::Interval) = !(a==b)
 
-doc"`a ⊆ b` (written `\subseteq<TAB>`) checks if the interval `a` is a subset
-of the interval `b`."
+"""
+    issubset(a,b)
+    ⊆(a,b)
+
+Checks if all the points of the interval `a` are within the interval `b`.
+"""
 function ⊆(a::Interval, b::Interval)
     isempty(a) && return true
     b.lo ≤ a.lo && a.hi ≤ b.hi
@@ -254,17 +268,40 @@ end
 
 
 ## Set operations
+"""
+    intersect(a, b)
+    ∩(a,b)
 
+Returns the intersection of the intervals `a` and `b`, considered as
+(extended) sets of real numbers. That is, the set that contains
+the points common in `a` and `b`.
+"""
 function intersect{T}(a::Interval{T}, b::Interval{T})
     isdisjoint(a,b) && return emptyinterval(T)
 
     Interval(max(a.lo, b.lo), min(a.hi, b.hi))
 end
-
 # Specific promotion rule for intersect:
 intersect{T,S}(a::Interval{T}, b::Interval{S}) = intersect(promote(a,b)...)
 
+
+## Hull
+"""
+    hull(a, b)
+
+Returns the "convex hull" of the intervals `a` and `b`, considered as
+(extended) sets of real numbers. That is, the minimum set that contains
+all points in `a` and `b`.
+"""
 hull{T}(a::Interval{T}, b::Interval{T}) = Interval(min(a.lo, b.lo), max(a.hi, b.hi))
+
+"""
+    union(a, b)
+    ∪(a,b)
+
+Returns the union (convex hull) of the intervals `a` and `b`; it is equivalent
+to `hull(a,b)`.
+"""
 union(a::Interval, b::Interval) = hull(a, b)
 
 
@@ -307,14 +344,14 @@ const RoundTiesToEven = RoundNearest
 # RoundTiesToAway is an alias of `RoundNearestTiesAway`
 const RoundTiesToAway = RoundNearestTiesAway
 
-doc"""
-    round(a::Interval, RoundingMode)
+"""
+    round(a::Interval[, RoundingMode])
 
-Returns the interval with rounded limits.
+Returns the interval with rounded to an interger limits.
 
 For compliance with the IEEE Std 1788-2015, "roundTiesToEven" corresponds
-to `round(a)` or `round(a, RoundTiesToEven)`, and "roundTiesToAway"
-to `round(a, RoundTiesToAway)`.
+to `round(a)` or `round(a, RoundNearest)`, and "roundTiesToAway"
+to `round(a, RoundNearestTiesAway)`.
 """
 round(a::Interval) = round(a, RoundNearest)
 round(a::Interval, ::RoundingMode{:ToZero}) = trunc(a)
@@ -350,7 +387,11 @@ function radius(a::Interval)
 end
 
 # cancelplus and cancelminus
-doc"`cancelminus(a, b)` returns the unique interval `c` such that `b+c=a`."
+"""
+    cancelminus(a, b)
+
+Return the unique interval `c` such that `b+c=a`.
+"""
 function cancelminus(a::Interval, b::Interval)
     T = promote_type(eltype(a), eltype(b))
 
@@ -373,8 +414,12 @@ function cancelminus(a::Interval, b::Interval)
     @round(T, a.lo - b.lo, a.hi - b.hi)
 end
 
-doc"`cancelplus(a, b)` returns the unique interval `c` such that `b-c=a`;
-it is equivalent to `cancelminus(a, −b)`."
+"""
+    cancelplus(a, b)
+
+Returns the unique interval `c` such that `b-c=a`;
+it is equivalent to `cancelminus(a, −b)`.
+"""
 cancelplus(a::Interval, b::Interval) = cancelminus(a, -b)
 
 
