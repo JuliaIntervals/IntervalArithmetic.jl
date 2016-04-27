@@ -10,9 +10,6 @@ facts("Tests with rational intervals") do
 
     @fact sqrt(a + b) --> Interval(0.9636241116594314, 1.2247448713915892)
 
-    @fact rationalize(1//2) --> 1//2
-    @fact rationalize(BigInt, 1//2) --> BigInt(1)//2
-
     X = Interval(1//3)
     @fact sqrt(X) --> Interval(0.5773502691896257, 0.5773502691896258)
 
