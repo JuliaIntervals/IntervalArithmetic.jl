@@ -2,8 +2,8 @@
 
 # Decorated intervals, following the IEEE 1758-2015 standard
 
-doc"""
-DECORATION
+"""
+    DECORATION
 
 Enumeration constant for the types of interval decorations.
 The nomenclature of the follows the IEEE-1788 (2015) standard
@@ -18,7 +18,7 @@ The nomenclature of the follows the IEEE-1788 (2015) standard
 @enum DECORATION ill=0 trv=1 def=2 dac=3 com=4
 # < and min work automatically for enums
 
-doc"""
+"""
 DecoratedInterval
 
 A `DecoratedInterval` is an interval, together with a *decoration*, i.e.
@@ -31,8 +31,8 @@ type DecoratedInterval{T<:Real} <: AbstractInterval
 
     function DecoratedInterval(I::Interval, d::DECORATION)
         dd = decoration(I)
-        Int(dd) < 2 && return new(I, dd)
-        Int(d) == 0 && return new(nai(I), d)
+        dd <= trv && return new(I, dd)
+        d == ill && return new(nai(I), d)
         return new(I, d)
     end
 end
@@ -53,15 +53,16 @@ DecoratedInterval{T<:Real}(a::T) = DecoratedInterval(Interval(a,a))
 DecoratedInterval(a::Tuple) = DecoratedInterval(Interval(a...))
 DecoratedInterval{T<:Real, S<:Real}(a::T, b::S) = DecoratedInterval(Interval(a,b))
 
-interval(x::DecoratedInterval) = x.interval
+interval_part(x::DecoratedInterval) = x.interval
 decoration(x::DecoratedInterval) = x.decoration
 
-# Automatic decorations for an interval
-decoration(I::Interval) =
-    ifelse( isnai(I), ill,           # nai()
-        ifelse( isempty(I), trv,     # emptyinterval
-        ifelse( isunbounded(I), dac, # unbounded
-            com )) )                 # common
+# Automatic decorations for an Interval
+function decoration(I::Interval)
+    isnai(I) && return ill           # nai()
+    isempty(I) && return trv         # emptyinterval
+    isunbounded(I) && return dac     # unbounded
+    com                              # common
+end
 
 # Promotion and conversion, and other constructors
 promote_rule{T<:Real, S<:Real}(::Type{DecoratedInterval{T}}, ::Type{S}) =
@@ -77,7 +78,7 @@ convert{T<:Real, S<:Integer}(::Type{DecoratedInterval{T}}, x::S) =
 #     convert(DecoratedInterval{T}, rationalize(x))
 # end
 function convert{T<:Real}(::Type{DecoratedInterval{T}}, xx::DecoratedInterval)
-    x = interval(xx)
+    x = interval_part(xx)
     x = convert(Interval{T},x)
     DecoratedInterval( x, decoration(xx) )
 end
