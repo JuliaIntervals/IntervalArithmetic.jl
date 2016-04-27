@@ -86,6 +86,14 @@ end
 
 show(io::IO, x::DecoratedInterval) = print(io, x.interval, "_", x.decoration)
 
-macro decorated(ex)
-    :(DecoratedInterval($ex))
+macro decorated(ex...)
+    local x
+
+    if length(ex) == 1
+        x = :(@interval($(esc(ex[1]))))
+    else
+        x = :(@interval($(esc(ex[1])), $(esc(ex[2]))))
+    end
+
+    :(DecoratedInterval($x))
 end
