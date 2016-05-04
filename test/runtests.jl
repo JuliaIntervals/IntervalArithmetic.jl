@@ -14,11 +14,13 @@ include("interval_tests/intervals.jl")
 include("multidim_tests/multidim.jl")
 include("decoration_tests/decoration_tests.jl")
 
+# Display tests:
+include("display_tests/display.jl")
+
 # Root-finding tests:
 
 include("root_finding_tests/root_finding.jl")
 
-# Multidimensional boxes tests:
 
 # ITF1788 tests
 

@@ -19,7 +19,7 @@ The nomenclature of the follows the IEEE-1788 (2015) standard
 # Note that `isless`, and hence ``<` and `min`, are automatically defined for enums
 
 """
-DecoratedInterval
+    DecoratedInterval
 
 A `DecoratedInterval` is an interval, together with a *decoration*, i.e.
 a flag that records the status of the interval when thought of as the result
@@ -84,7 +84,7 @@ function convert{T<:Real}(::Type{DecoratedInterval{T}}, xx::DecoratedInterval)
 end
 
 
-show(io::IO, x::DecoratedInterval) = print(io, x.interval, "_", x.decoration)
+# show(io::IO, x::DecoratedInterval) = print(io, x.interval, "_", x.decoration)
 
 macro decorated(ex...)
     local x
