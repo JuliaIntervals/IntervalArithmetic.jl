@@ -47,5 +47,4 @@ Departamento de Física, Facultad de Ciencias, Universidad Nacional Autónoma de
 This project was developed in a masters' course in the postgraduate programs in Physics and in Mathematics at UNAM during the second semester of 2013 and the first semester of 2015. We thank the participants of the courses for putting up with the half-baked material and contributing energy and ideas.
 
 Financial support is acknowledged from DGAPA-UNAM PAPIME grants PE-105911 and PE-107114, and DGAPA-UNAM PAPIIT grant IN-117214. LB acknowledges support through a *Cátedra Moshinsky* (2013).
-DPS acknowledges a sabbatical fellowship from CONACYT and Alan Edelman and the Julia group
-at MIT for hosting his sabbatical visit.
+DPS acknowledges a sabbatical fellowship from CONACYT and thanks Alan Edelman and the Julia group at MIT for hosting his sabbatical visit.

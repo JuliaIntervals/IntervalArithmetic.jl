@@ -23,37 +23,45 @@ $$[a, b] := \{ a \le x \le b \} \subseteq \mathbb{R}.$$
 
 ## Creating intervals
 Intervals are created using the `@interval` macro, which takes one or two expressions:
-```julia
+```
 julia> using ValidatedNumerics
 
 julia> a = @interval(1)
-[1.0, 1.0]
+[1, 1]
 
 julia> typeof(ans)
 Interval{Float64} (constructor with 1 method)
 
-julia>
-
 julia> b = @interval(1, 2)
-[1.0, 2.0]
+[1, 2]
 ```
 
 These return objects of the parametrised type `Interval`, the basic object in the package.
+By default, `Interval` objects contain `Float64`s, but the library also allows using
+`BigFloat`s, for example:
+```
+julia> @biginterval(1, 2)
+[1, 2]₂₅₆
+
+julia> showall(ans)
+Interval(1.000000000000000000000000000000000000000000000000000000000000000000000000000000, 2.000000000000000000000000000000000000000000000000000000000000000000000000000000)
+```
 
 The constructor of the `Interval` type may be used directly, but this is generally not recommended, for the following reason:
 
-```julia
+```
 julia> a = Interval(0.1, 0.3)
 [0.1, 0.3]
 
 julia> b = @interval(0.1, 0.3)
-[0.09999999999999999, 0.30000000000000004]
+[0.0999999, 0.300001]
 ```
 
 What is going on here?
 
 Due to the way floating-point arithmetic works, the interval
-`a` created directly by the constructor *contains neither the true real number 0.1, nor 0.3*.
+`a` created directly by the constructor turns out to contain
+*neither the true real number 0.1, nor 0.3*.
 The `@interval` macro, however, uses [**directed rounding**](rounding.md) to *guarantee*
 that the true 0.1 and 0.3 are included in the result.
 
@@ -61,88 +69,105 @@ Behind the scenes, the `@interval` macro rewrites the expression(s) passed to it
 function.
 
 This allows us to write, for example
-```julia
-julia> @interval sin(0.1) + cos(0.2)
+
 ```
-and get a result that is equivalent to
-```julia
+julia> @interval sin(0.1) + cos(0.2)
+[1.07989, 1.0799]
+```
+which is equivalent to
+```
 julia> sin(@interval(0.1)) + cos(@interval(0.2))
+[1.07989, 1.0799]
 ```
 
-This can also be used with user-defined functions:
-```julia
+This can be used together with user-defined functions:
+```
 julia> f(x) = 2x
 f (generic function with 1 method)
 
 julia> f(@interval(0.1))
-[0.19999999999999998, 0.2]
-
+[0.199999, 0.200001]
 julia> @interval f(0.1)
-[0.19999999999999998, 0.2]
+[0.199999, 0.200001]
 ```
 
 ### $\pi$
 You can create correctly-rounded intervals containing $\pi$:
-```julia
+```
 julia> @interval(pi)
-[3.141592653589793, 3.1415926535897936]
+[3.14159, 3.1416]
 ```
 and embed it in expressions:
-```julia
+```
 julia> @interval(3*pi/2 + 1)
-[5.71238898038469, 5.712388980384691]
+[5.71238, 5.71239]
 
 julia> @interval 3π/2 + 1
-[5.71238898038469, 5.712388980384691]
+[5.71238, 5.71239]
 ```
 
-## Examples
+## Constructing intervals
 Intervals may be constructed using rationals:
-```julia
+```
 julia> @interval(1//10)
-[0.09999999999999999, 0.1]
+[0.0999999, 0.100001]
 ```
 
 Real literals are handled by internally converting them
-to rationals using `rationalize`. This is produces
+to rationals (using the Julia function `rationalize`). This gives
 a result that contains the computer's "best guess" for
 the real number the user "had in mind":
-```julia
+```
 julia> @interval(0.1)
-[0.09999999999999999, 0.1]
+[0.0999999, 0.100001]
 ```
-If you know exactly which floating-point number you need and really
-want to make a thin interval (i.e., an interval of the form $[a,a]$), you can just
-use the `Interval` constructor:
+If you instead know which exactly-representable floating-point number $a$ you need and really
+want to make a *thin interval*, i.e., an interval of the form $[a, a]$,
+containing precisely one float, then you can
+use the `Interval` constructor directly:
 ```
-julia> Interval(0.1)
-[0.1, 0.1]
-```
+julia> a = Interval(0.1)
+[0.1, 0.100001]
 
-Strings may be used:
-```julia
-julia> @interval("0.1"*"2")
-[0.19999999999999998, 0.2]
+julia> showall(a)
+Interval(0.1, 0.1)
+```
+Here, the `showall` function shows the internal representation of the interval,
+in a reproducible form that may be copied and pasted directly. It uses Julia's
+internal function (which, in turn, uses the so-called Grisu algorithm) to show
+exactly as many digits are required to give an unambiguous floating-point number.
+
+Strings may be used inside `@interval`:
+```
+julia> @interval "0.1"*2
+[0.199999, 0.200001]
+
+julia> @biginterval "0.1"*2
+[0.199999, 0.200001]₂₅₆
+
+julia> showall(ans)
+Interval(1.999999999999999999999999999999999999999999999999999999999999999999999999999983e-01, 2.000000000000000000000000000000000000000000000000000000000000000000000000000004e-01)
+
 ```
 
 Strings in the form of intervals may also be used:
-```julia
+```
 julia> @interval "[1.2, 3.4]"
-[1.2, 3.4000000000000004]
+[1.19999, 3.40001]
 ```
 
 Intervals can be created from variables:
-```julia
+```
 julia> a = 3.6
 3.6
 
 julia> b = @interval(a)
-[3.5999999999999996, 3.6]
+[3.59999, 3.60001]
 ```
 
 The upper and lower bounds of the interval may be accessed using the fields
 `lo` and `hi`:
-```julia
+```
 julia> b.lo
 3.5999999999999996
 
@@ -151,11 +176,11 @@ julia> b.hi
 ```
 
 The diameter (length) of an interval is obtained using `diam(b)`;
-for numbers that cannot be represented in base 2
+for numbers that cannot be represented exactly in base 2
 (i.e., whose *binary* expansion is infinite or exceeds the current precision),
- the diameter of newly-created thin intervals corresponds to the local machine epsilon (`eps`) in the `:narrow` interval-rounding mode:
+ the diameter of intervals created by `@interval` with a single argument corresponds to the local machine epsilon (`eps`) in the `:narrow` interval-rounding mode:
 
-```julia
+```
 julia> diam(b)
 4.440892098500626e-16
 
@@ -165,18 +190,25 @@ julia> eps(b.lo)
 
 Starting with v0.3, you can use additional syntax for creating intervals more easily:
 the `..` operator,
-```julia
+```
 julia> 0.1..0.3
-[0.09999999999999999, 0.30000000000000004]
+[0.0999999, 0.300001]
 ```
 and the `@I_str` string macro:
-```julia
+```
 julia> I"3.1"
-[3.0999999999999996, 3.1]
+[3.09999, 3.10001]
 
 julia> I"[3.1, 3.2]"
-[3.0999999999999996, 3.2]
+[3.09999, 3.20001]
 ```
+
+From v0.4, you can also use the `±` operator:
+```
+julia> 1.5 ± 0.1
+[1.39999, 1.60001]
+```
+
 
 ## Arithmetic
 
@@ -184,58 +216,66 @@ Basic arithmetic operations (`+`, `-`, `*`, `/`, `^`) are defined for pairs of i
 $$X \circ Y := \{ x \circ y: x \in X \text{ and } y \in Y \}.$$  Again, directed rounding is used if necessary.
 
 For example:
-```julia
+```
 julia> a = @interval(0.1, 0.3)
-[0.09999999999999999, 0.30000000000000004]
+[0.0999999, 0.300001]
 
 julia> b = @interval(0.3, 0.6)
-[0.3, 0.6000000000000001]
+[0.299999, 0.600001]
 
 julia> a + b
-[0.39999999999999997, 0.9000000000000001]
+[0.399999, 0.900001]
 ```
 
 However, subtraction of two intervals gives an initially unexpected result, due to the above definition:
-```julia
+```
 julia> a = @interval(0, 1)
-[0.0, 1.0]
+[0, 1]
 
 julia> a - a
-[-1.0, 1.0]
+[-1, 1]
 ```
 
 
 ## Changing the precision
 By default, the `@interval` macro creates intervals of `Float64`s.
-This may be changed using the `setprecision` function:
+This may be changed globally using the `setprecision` function:
 
-```julia
+```
+julia> @interval 3π/2 + 1
+[5.71238, 5.71239]
+
+julia> showall(ans)
+Interval(5.71238898038469, 5.712388980384691)
 julia> setprecision(Interval, 256)
 256
 
 julia> @interval 3π/2 + 1
-[5.712388980384689857693965074919254326295754099062658731462416888461724609429262e+00, 5.712388980384689857693965074919254326295754099062658731462416888461724609429401e+00]₂₅₆
+[5.71238, 5.71239]₂₅₆
+
+julia> showall(ans)
+Interval(5.712388980384689857693965074919254326295754099062658731462416888461724609429262, 5.712388980384689857693965074919254326295754099062658731462416888461724609429401)
 ```
 The subscript `256` at the end denotes the precision.
 
 To change back to `Float64`s, use
-```julia
+```
 julia> setprecision(Interval, Float64)
 Float64
 
 julia> @interval(pi)
-[3.141592653589793, 3.1415926535897936]
+[3.14159, 3.1416]
 ```
 
 To check which mode is currently set, use
-```julia
+```
 julia> precision(Interval)
 (Float64,256)
 ```
 The result is a tuple of the type (currently `Float64` or `BigFloat`) and the current `BigFloat` precision.
 
 Note that the `BigFloat` precision is set internally by `setprecision(Interval)`.
-You should not use `setprecision(BigFloat)` directly,  
+You should *not* use `setprecision(BigFloat)` directly,  
 since the package carries out additional steps to ensure internal
 consistency of operations involving π, in particular
 trigonometric functions.
@@ -243,11 +283,10 @@ trigonometric functions.
 
 ## Elementary functions
 
-The main elementary functions are implemented, acting on both
+The main elementary functions are implemented, for both
 `Interval{Float64}` and `Interval{BigFloat}`.
 
-The functions that act on `Interval{Float64}` internally use routines the [`CRlibm` library](https://github.com/dpsanders/CRlibm.jl) where possible, i.e. for the following
-functions defined in that library:
+The functions for `Interval{Float64}` internally use routines from the correctly-rounded [`CRlibm` library](https://github.com/dpsanders/CRlibm.jl) where possible, i.e. for the following functions defined in that library:
 
 - `exp`, `expm1`
 - `log`, `log1p`, `log2`, `log10`
@@ -256,7 +295,7 @@ functions defined in that library:
 - `sinh`, `cosh`
 
 Other functions that are implemented for `Interval{Float64}` internally convert
-to a `Interval{BigFloat}`, which then use routines from the `MPFR` library
+to an `Interval{BigFloat}`, and then use routines from the `MPFR` library
 (`BigFloat` in Julia):
 
 - `^`
@@ -268,51 +307,100 @@ intervals are converted to and from `BigFloat`; this implies a significant slow-
 
 Examples:
 
-```julia
+```
 julia> a = @interval(1)
-[1.0, 1.0]
+[1, 1]
 
 julia> sin(a)
-[0.8414709848078965, 0.8414709848078966]
+[0.84147, 0.841471]
 
 julia> cos(cosh(a))
-[0.027712143770207736, 0.02771214377020796]
+[0.0277121, 0.0277122]
 ```
 
-```julia
+```
 julia> setprecision(Interval, 53)
 53
 
 julia> sin(@interval(1))
-[8.414709848078965e-01, 8.4147098480789662e-01]₅₃
+[0.84147, 0.841471]₅₃
 
 julia> @interval sin(0.1) + cos(0.2)
-[1.0798999944880696e+00, 1.0798999944880701e+00]₅₃
+[1.07989, 1.0799]₅₃
 ```
 
-```julia
+```
 julia> setprecision(Interval, 128)
 128
 
 julia> @interval sin(1)
-[8.41470984807896506652502321630298999621e-01, 8.414709848078965066525023216302989996239e-01]₁₂₈
+[0.84147, 0.841471]₁₂₈
 ```
 
 
 ## Interval rounding modes
 By default, the directed rounding used corresponds to using the `RoundDown` and `RoundUp` rounding modes when performing calculations; this gives the narrowest resulting intervals, and is set by
 
-```julia
+```
 setrounding(Interval, :narrow)
 ```
 
 An alternative rounding method is to perform calculations using the (standard) `RoundNearest` rounding mode, and then widen the result by one machine epsilon in each direction using `prevfloat` and `nextfloat`. This is achived by
-```julia
+```
 setrounding(Interval, :wide)
 ```
 It generally results in wider intervals, but seems to be significantly faster.
 
 The current interval rounding mode may be obtained by
-```julia
+```
 rounding(Interval)
+```
+
+## Display modes
+There are several useful output representations for intervals, some of which we have already touched on. The display is controlled globally by the `displaymode` function, which has
+the following options, specified by keyword arguments (type `?displaymode` to get help at the REPL):
+
+- `format`: interval output format
+
+    - `:standard`: output of the form `[1.09999, 1.30001]`, rounded to the current number of significant figures
+
+    - `:full`: output of the form `Interval(1.0999999999999999, 1.3)`, as in the `showall` function
+
+    - `:midpoint`: output in the midpoint-radius form, e.g. `1.2 ± 0.100001`
+
+- `sigfigs`: number of significant figures to show in standard mode
+
+- `decorations` (boolean): whether to show [decorations](decorations.md) or not
+
+### Examples:
+```
+julia> a = @interval(1.1, pi)
+[1.09999, 3.1416]
+
+julia> displaymode(sigfigs=10)
+10
+
+julia> a
+[1.099999999, 3.141592654]
+
+julia> displaymode(format=:full)
+
+julia> a
+Interval(1.0999999999999999, 3.1415926535897936)
+
+julia> displaymode(format=:midpoint)
+
+julia> a
+2.120796327 ± 1.020796327
+
+julia> displaymode(format=:midpoint, sigfigs=4)
+4
+
+julia> a
+2.121 ± 1.021
+
+julia> displaymode(format=:standard)
+
+julia> a
+[1.099, 3.142]
 ```

@@ -10,17 +10,17 @@ often convenient to use the `..` notation:
 
 ```julia
 julia> X = IntervalBox(1..3, 2..4)
-[1.0, 3.0] × [2.0, 4.0]
+[1, 3] × [2, 4]
 
-julia> Y = IntervalBox(2..4, 3..5)
-[2.0, 4.0] × [3.0, 5.0]
+julia> Y = IntervalBox(2.1..2.9, 3.1..4.9)
+[2.09999, 2.90001] × [3.09999, 4.90001]
 ```
 
 Several operations are defined on `IntervalBox`es, for example:
 
 ```
 julia> X ∩ Y
-[2.0, 3.0] × [3.0, 4.0]
+[2.09999, 2.90001] × [3.09999, 4]
 
 julia> X ⊆ Y
 false
