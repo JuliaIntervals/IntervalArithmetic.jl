@@ -53,6 +53,8 @@ DecoratedInterval{T<:Real}(a::T) = DecoratedInterval(Interval(a,a))
 DecoratedInterval(a::Tuple) = DecoratedInterval(Interval(a...))
 DecoratedInterval{T<:Real, S<:Real}(a::T, b::S) = DecoratedInterval(Interval(a,b))
 
+DecoratedInterval(I::DecoratedInterval, dec::DECORATION) = DecoratedInterval(I.interval, dec)
+
 interval_part(x::DecoratedInterval) = x.interval
 decoration(x::DecoratedInterval) = x.decoration
 

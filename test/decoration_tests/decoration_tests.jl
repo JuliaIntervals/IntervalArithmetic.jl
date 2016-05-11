@@ -15,4 +15,7 @@ facts("DecoratedInterval tests") do
     @fact interval_part(b) --> sqrt(Interval(0, 1))
     @fact decoration(b) --> trv
 
+    d = DecoratedInterval(a, dac)
+    @fact decoration(d) --> dac
+
 end
