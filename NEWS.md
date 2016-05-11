@@ -1,5 +1,13 @@
 # What's new in ValidatedNumerics.jl
 
+# v0.4
+- Added decorated intervals [#112](https://github.com/dpsanders/ValidatedNumerics.jl/pull/112)
+
+- Added `displaymode` function for modifying how intervals are displayed [#115](https://github.com/dpsanders/ValidatedNumerics.jl/pull/115)
+
+- Added `±` syntax for creating intervals as e.g. `1.3 ± 0.1` [#116](https://github.com/dpsanders/ValidatedNumerics.jl/pull/116)
+
+
 # v0.3
 
 - [Added `IntervalBox` type](https://github.com/dpsanders/ValidatedNumerics.jl/pull/88), representing a multi-dimensional (hyper-)box as a `FixedSizeArray` of `Interval`s.
