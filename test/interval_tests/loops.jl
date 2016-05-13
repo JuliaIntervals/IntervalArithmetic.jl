@@ -28,7 +28,7 @@ function calc_pi1(N)
     for i in 1:N
         S1 += @interval(1/i^2)
     end
-    S1 += @interval(1/N, 1/(N+1))
+    S1 += @interval(1/(N+1), 1/N)
 
     sqrt(6*S1)
 end
@@ -40,7 +40,7 @@ function calc_pi2(N)
     for i in 1:N
         S2 += 1/i^2
     end
-    S2 += @interval(1/N, 1/(N+1))
+    S2 += @interval(1/(N+1), 1/N)
 
     sqrt(6*S2)
 end
@@ -52,7 +52,7 @@ function calc_pi3(N)
     for i in 1:N
         S3 += 1/i^2
     end
-    S3 += @floatinterval(1/N, 1/(N+1))
+    S3 += @floatinterval(1/(N+1), 1/N)
 
     sqrt(6*S3)
 end

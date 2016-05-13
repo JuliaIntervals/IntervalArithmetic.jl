@@ -126,5 +126,6 @@ function make_interval(T, expr1, expr2)
 
     expr2 = transform(expr2[1], :convert, :(Interval{$T}))
 
-    :(hull($expr1, $expr2))
+    # :(hull($expr1, $expr2))
+    :(Interval(($expr1).lo, ($expr2).hi))
 end

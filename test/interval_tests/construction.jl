@@ -44,6 +44,11 @@ facts("Constructing intervals") do
     @fact_throws ArgumentError Interval(1, 0.1)
     @fact_throws ArgumentError Interval(big(1), big(0.1))
 
+    @fact_throws ArgumentError @interval(2, 1)
+    @fact_throws ArgumentError @interval(big(2), big(1))
+    @fact_throws ArgumentError @interval(big(1), 1//10)
+    @fact_throws ArgumentError @interval(1, 0.1)
+    @fact_throws ArgumentError @interval(big(1), big(0.1))
 
     # Conversions; may involve rounding
     # @fact convert(Interval, 1) --> Interval(1.0)

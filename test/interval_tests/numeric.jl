@@ -9,7 +9,7 @@ setrounding(Interval, :narrow)
 
 facts("Numeric tests") do
 
-    a = @interval(1.1, 0.1)
+    a = @interval(0.1, 1.1)
     b = @interval(0.9, 2.0)
     c = @interval(0.25, 4.0)
 

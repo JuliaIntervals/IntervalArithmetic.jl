@@ -27,7 +27,7 @@ isunbounded(x::Interval) = x.lo == -Inf || x.hi == Inf
 
 # NaI: not-an-interval
 doc"""`NaI` not-an-interval: [NaN, NaN]."""
-nai{T<:Real}(::Type{T}) = Interval{T}(NaN, NaN)
+nai{T<:Real}(::Type{T}) = Interval{T}(convert(T, NaN), convert(T, NaN))
 nai{T<:Real}(x::Interval{T}) = nai(T)
 nai() = nai(precision(Interval)[1])
 

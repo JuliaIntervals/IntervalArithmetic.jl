@@ -39,19 +39,25 @@ end
 
 DecoratedInterval{T<:AbstractFloat}(I::Interval{T}, d::DECORATION) =
     DecoratedInterval{T}(I, d)
-DecoratedInterval{T<:Real}(a::T, b::T, d::DECORATION) =
+function DecoratedInterval{T<:Real}(a::T, b::T, d::DECORATION)
+    a > b && return DecoratedInterval(nai(T), ill)
     DecoratedInterval(Interval(a,b), d)
+end
 DecoratedInterval{T<:Real}(a::T, d::DECORATION) = DecoratedInterval(Interval(a,a), d)
-DecoratedInterval(a::Tuple, d::DECORATION) = DecoratedInterval(Interval(a...), d)
+DecoratedInterval(a::Tuple, d::DECORATION) = DecoratedInterval(a..., d)
 DecoratedInterval{T<:Real, S<:Real}(a::T, b::S, d::DECORATION) =
-    DecoratedInterval(Interval(promote(a,b)...), d)
+    DecoratedInterval(promote(a,b)..., d)
 
 # Automatic decorations for an interval
 DecoratedInterval(I::Interval) = DecoratedInterval(I, decoration(I))
-DecoratedInterval{T<:Real}(a::T, b::T) = DecoratedInterval(Interval(a,b))
+function DecoratedInterval{T<:Real}(a::T, b::T)
+    a > b && return DecoratedInterval(nai(T), ill)
+    DecoratedInterval(Interval(a,b))
+end
+DecoratedInterval{T<:Integer}(a::T, b::T) = DecoratedInterval(float(a),float(b))
 DecoratedInterval{T<:Real}(a::T) = DecoratedInterval(Interval(a,a))
-DecoratedInterval(a::Tuple) = DecoratedInterval(Interval(a...))
-DecoratedInterval{T<:Real, S<:Real}(a::T, b::S) = DecoratedInterval(Interval(a,b))
+DecoratedInterval{T<:Real, S<:Real}(a::T, b::S) = DecoratedInterval(promote(a, b)...)
+DecoratedInterval(a::Tuple) = DecoratedInterval(a...)
 
 DecoratedInterval(I::DecoratedInterval, dec::DECORATION) = DecoratedInterval(I.interval, dec)
 
@@ -94,7 +100,7 @@ macro decorated(ex...)
     if length(ex) == 1
         x = :(@interval($(esc(ex[1]))))
     else
-        x = :(@interval($(esc(ex[1])), $(esc(ex[2]))))
+        x = :($(esc(ex[1])), $(esc(ex[2])))
     end
 
     :(DecoratedInterval($x))
