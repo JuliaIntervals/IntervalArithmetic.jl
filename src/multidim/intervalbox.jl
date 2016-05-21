@@ -5,18 +5,18 @@ doc"""An `IntervalBox` is a Cartesian product of an arbitrary number of `Interva
 representing an $N$-dimensional rectangular IntervalBox."""
 
 immutable IntervalBox{N, T} <: FixedVector{N, Interval{T}} # uses FixedSizeArrays package
-    intervals :: NTuple{N, Interval{T}}
+    _ :: NTuple{N, Interval{T}}
 end
 
 IntervalBox(x::Interval) = IntervalBox( (x,) )  # single interval treated as tuple with one element
 
 
-mid(X::IntervalBox) = [mid(x) for x in X.intervals]
+mid(X::IntervalBox) = [mid(x) for x in X]
 
-⊆(X::IntervalBox, Y::IntervalBox) = all([x ⊆ y for (x,y) in zip(X.intervals, Y.intervals)])
+⊆(X::IntervalBox, Y::IntervalBox) = all([x ⊆ y for (x,y) in zip(X, Y)])
 
-∩(X::IntervalBox, Y::IntervalBox) = IntervalBox([x ∩ y for (x,y) in zip(X.intervals, Y.intervals)]...)
-isempty(X::IntervalBox) = any(map(isempty, X.intervals))
+∩(X::IntervalBox, Y::IntervalBox) = IntervalBox([x ∩ y for (x,y) in zip(X, Y)]...)
+isempty(X::IntervalBox) = any([isempty(x) for x in X])
 
 
 function show(io::IO, X::IntervalBox)
