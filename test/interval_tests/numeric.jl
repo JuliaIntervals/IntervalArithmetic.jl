@@ -34,6 +34,9 @@ facts("Numeric tests") do
     @fact Interval(0.0, 1.0)/Interval(0.0,1.0) --> Interval(0.0, Inf)
     @fact Interval(-1.0, 1.0)/Interval(0.0,1.0) --> entireinterval(c)
     @fact Interval(-1.0, 1.0)/Interval(-1.0,1.0) --> entireinterval(c)
+    a = @interval(1.e-20)
+    @fact a --> Interval(1.0e-20, 1.0000000000000001e-20)
+    @fact diam(a) --> eps(1.e-20)
 end
 
 facts("Power tests") do
