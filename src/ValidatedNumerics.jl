@@ -24,7 +24,8 @@ import Base:
     expm1, log1p,
     precision,
     isfinite, isnan,
-    show, showall
+    show, showall,
+    isinteger
 
 export
     Interval, AbstractInterval,
