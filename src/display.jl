@@ -98,6 +98,14 @@ function representation(a::Interval, format=nothing)
     output
 end
 
+
+
+function subscriptify(n::Int)
+    dig = reverse(digits(n))
+    subscript_0 = Int('₀')    # 0x2080
+    join( [Char(subscript_0 + i) for i in dig])
+end
+
 function representation(a::Interval{BigFloat})
     if display_params.format == :standard
         string( invoke(representation, (Interval,), a),
@@ -128,9 +136,3 @@ show(io::IO, a::Interval) = print(io, representation(a))
 show(io::IO, a::DecoratedInterval) = print(io, representation(a))
 
 showall(io::IO, a::Interval) = print(io, representation(a, :full))
-
-function subscriptify(n::Int)
-    subscript_digits = [c for c in "₀₁₂₃₄₅₆₇₈₉"]
-    dig = reverse(digits(n))
-    join([subscript_digits[i+1] for i in dig])
-end
