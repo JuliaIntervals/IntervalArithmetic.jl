@@ -1,5 +1,9 @@
 # What's new in ValidatedNumerics.jl
 
+## v0.4.1
+- Fixes incompatibility for `IntervalBox` with latest tagged versions of `FixedSizeArrays.jl`
+- Adds `setdiff` for 2D `IntervalBox`es
+
 # v0.4
 - Added decorated intervals [#112](https://github.com/dpsanders/ValidatedNumerics.jl/pull/112)
 
