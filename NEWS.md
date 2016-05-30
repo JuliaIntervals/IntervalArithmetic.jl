@@ -1,8 +1,12 @@
 # What's new in ValidatedNumerics.jl
 
+## v0.4.2
+- Add `setdiff` for n-dimensional `IntervalBox`es; [#144](https://github.com/dpsanders/ValidatedNumerics.jl/pull/144)
+
 ## v0.4.1
-- Fixes incompatibility for `IntervalBox` with latest tagged versions of `FixedSizeArrays.jl`
-- Adds `setdiff` for 2D `IntervalBox`es
+- Fix incompatibility for `IntervalBox` with latest tagged versions of `FixedSizeArrays.jl`
+- Add `setdiff` for 2D `IntervalBox`es  [#143](https://github.com/dpsanders/ValidatedNumerics.jl/pull/143)
+- Make integer powers of complex intervals work [#142](https://github.com/dpsanders/ValidatedNumerics.jl/pull/142)
 
 # v0.4
 - Added decorated intervals [#112](https://github.com/dpsanders/ValidatedNumerics.jl/pull/112)
