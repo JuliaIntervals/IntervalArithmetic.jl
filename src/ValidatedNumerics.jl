@@ -25,7 +25,7 @@ import Base:
     precision,
     isfinite, isnan,
     show, showall,
-    isinteger
+    isinteger, setdiff
 
 export
     Interval, AbstractInterval,

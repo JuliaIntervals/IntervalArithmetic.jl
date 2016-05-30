@@ -155,9 +155,6 @@ function ^(a::Interval{BigFloat}, x::Interval)
 end
 
 
-Base.inf(x::Rational) = 1//0  # to allow sqrt()
-
-
 function sqrt{T}(a::Interval{T})
     domain = Interval(zero(T), convert(T, Inf))
     a = a ∩ domain

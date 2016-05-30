@@ -35,6 +35,54 @@ facts("@intervalbox tests") do
 
     @intervalbox g(x, y) = x - y
     @fact isa(g(X), IntervalBox) --> true
+end
+
+facts("setdiff for IntervalBox") do
+    X = IntervalBox(2..4, 3..5)
+    Y = IntervalBox(3..5, 4..6)
+    @fact setdiff(X, Y) --> [ IntervalBox(3..4, 3..4),
+                              IntervalBox(2..3, 3..5) ]
+
+
+    X = IntervalBox(2..5, 3..6)
+    Y = IntervalBox(-10..10, 4..5)
+    @fact setdiff(X, Y) --> [ IntervalBox(2..5, 3..4),
+                              IntervalBox(2..5, 5..6) ]
+
+
+    X = IntervalBox(2..5, 3..6)
+    Y = IntervalBox(4..6, 4..5)
+    @fact setdiff(X, Y) --> [ IntervalBox(4..5, 3..4),
+                              IntervalBox(4..5, 5..6),
+                              IntervalBox(2..4, 3..6) ]
+
+
+    X = IntervalBox(2..5, 3..6)
+    Y = IntervalBox(3..4, 4..5)
+    @fact setdiff(X, Y) --> [ IntervalBox(3..4, 3..4),
+                              IntervalBox(3..4, 5..6),
+                              IntervalBox(2..3, 3..6),
+                              IntervalBox(4..5, 3..6) ]
+
+
+    X = IntervalBox(2..5, 3..6)
+    Y = IntervalBox(2..4, 10..20)
+    @fact setdiff(X, Y) --> typeof(X)[X]
+
+
+    X = IntervalBox(2..5, 3..6)
+    Y = IntervalBox(-10..10, -10..10)
+    @fact setdiff(X, Y) --> typeof(X)[]
+
+
+    X = IntervalBox(1..4, 3..6, 7..10)
+    Y = IntervalBox(2..3, 4..5, 8..9)
+    @fact setdiff(X, Y) --> [ IntervalBox(2..3, 4..5, 7..8),
+                              IntervalBox(2..3, 4..5, 9..10),
+                              IntervalBox(2..3, 3..4, 7..10),
+                              IntervalBox(2..3, 5..6, 7..10),
+                              IntervalBox(1..2, 3..6, 7..10),
+                              IntervalBox(3..4, 3..6, 7..10) ]
 
 
 end

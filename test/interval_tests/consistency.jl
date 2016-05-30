@@ -288,7 +288,3 @@ facts("Interval power of an interval") do
     @fact b^@interval(0.3) == Interval(1.3903891703159093, 1.5157165665103982) --> true
 
 end
-
-facts("Rational infinity") do
-    @fact inf(3//4) == 1//0 --> true
-end
