@@ -74,14 +74,50 @@ facts("displaymode tests") do
 
     end
 
+
+    setprecision(Interval, 128)
+
+    context("BigFloat intervals") do
+        displaymode(format=:standard, decorations=false)
+
+        a = @interval big(1)
+        @fact string(a) --> "[1, 1]₁₂₈"
+
+        displaymode(format=:full)
+        @fact string(a) --> "Interval(1.000000000000000000000000000000000000000, 1.000000000000000000000000000000000000000)"
+
+
+        a = DecoratedInterval(big(2), big(3), com)
+
+        displaymode(format=:standard, decorations=false)
+        @fact string(a) --> "[2, 3]₁₂₈"
+
+        displaymode(format=:standard, decorations=true)
+        @fact string(a) --> "[2, 3]₁₂₈_com"
+
+        displaymode(format=:full)
+        @fact string(a) --> "DecoratedInterval(Interval(2.000000000000000000000000000000000000000, 3.000000000000000000000000000000000000000), com)"
+
+    end
+
+
+    setprecision(Interval, Float64)
+
     context("IntervalBox") do
-        displaymode(sigfigs=6)
+
+        displaymode(format=:standard, sigfigs=6)
 
         X = IntervalBox(1..2, 3..4)
         @fact string(X) --> "[1, 2] × [3, 4]"
 
         X = IntervalBox(1.1..1.2, 2.1..2.2)
         @fact string(X) --> "[1.09999, 1.20001] × [2.09999, 2.20001]"
+
+        X = IntervalBox(-Inf..Inf, -Inf..Inf)
+        @fact string(X) --> "[-∞, ∞] × [-∞, ∞]"
+
+        displaymode(format=:full)
+        @fact string(X) --> "IntervalBox(Interval(-Inf, Inf), Interval(-Inf, Inf))"
 
     end
 end

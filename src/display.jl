@@ -106,23 +106,35 @@ function subscriptify(n::Int)
     join( [Char(subscript_0 + i) for i in dig])
 end
 
-function representation(a::Interval{BigFloat})
-    if display_params.format == :standard
-        string( invoke(representation, (Interval,), a),
+
+function representation(a::Interval{BigFloat}, format=nothing)
+
+    if format == nothing
+        format = display_params.format  # default
+    end
+
+
+    if format == :standard
+        string( invoke(representation, (Interval, Symbol), a, format),
                     subscriptify(precision(a.lo)) )
 
-    elseif display_params.format == :full
-        invoke(representation, (Interval,), a)
+    elseif format == :full
+        invoke(representation, (Interval, Symbol), a, format)
     end
 end
 
-function representation(a::DecoratedInterval)
 
-    if display_params.format==:full
-        return "DecoratedInterval($(interval_part(a)), $(decoration(a)))"
+function representation(a::DecoratedInterval, format=nothing)
+
+    if format == nothing
+        format = display_params.format  # default
     end
 
-    interval = representation(interval_part(a))
+    if format==:full
+        return "DecoratedInterval($(representation(interval_part(a), format)), $(decoration(a)))"
+    end
+
+    interval = representation(interval_part(a), format)
 
     if display_params.decorations
         string(interval, "_", decoration(a))
@@ -132,7 +144,38 @@ function representation(a::DecoratedInterval)
 
 end
 
-show(io::IO, a::Interval) = print(io, representation(a))
-show(io::IO, a::DecoratedInterval) = print(io, representation(a))
 
-showall(io::IO, a::Interval) = print(io, representation(a, :full))
+function representation(X::IntervalBox, format=nothing)
+
+    if format == nothing
+        format = display_params.format  # default
+    end
+
+    buffer = IOBuffer()
+
+    if display_params.format==:full
+        print(buffer, "IntervalBox(")
+
+        for i in 1:length(X)-1
+            print(buffer, X[i], ", ")
+        end
+        print(buffer, X[end], ")")
+
+
+    else
+
+        for i in 1:length(X)-1
+            print(buffer, X[i], " × ")
+        end
+        print(buffer, X[end])
+
+    end
+
+    return takebuf_string(buffer)
+end
+
+
+for T in (Interval, DecoratedInterval, IntervalBox)
+    @eval show(io::IO, a::$T) = print(io, representation(a))
+    @eval showall(io::IO, a::$T) = print(io, representation(a, :full))
+end
