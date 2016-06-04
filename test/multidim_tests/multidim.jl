@@ -35,6 +35,9 @@ facts("@intervalbox tests") do
 
     @intervalbox g(x, y) = x - y
     @fact isa(g(X), IntervalBox) --> true
+
+    @fact emptyinterval(X) --> IntervalBox(∅, ∅)
+
 end
 
 facts("setdiff for IntervalBox") do
