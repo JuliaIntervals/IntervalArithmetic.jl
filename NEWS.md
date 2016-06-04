@@ -1,5 +1,10 @@
 # What's new in ValidatedNumerics.jl
 
+## v0.4.3
+- Fix display of intervals with different displaymode options; [#146](https://github.com/dpsanders/ValidatedNumerics.jl/pull/146)
+
+- Add emptyinterval(x::IntervalBox); [#145](https://github.com/dpsanders/ValidatedNumerics.jl/pull/145)
+
 ## v0.4.2
 - Add `setdiff` for n-dimensional `IntervalBox`es; [#144](https://github.com/dpsanders/ValidatedNumerics.jl/pull/144)
 
