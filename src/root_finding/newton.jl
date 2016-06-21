@@ -134,19 +134,15 @@ end
 
 
 # use automatic differentiation if no derivative function given:
-newton{T}(f::Function, x::Interval{T};  args...) = newton(f, D(f), x; args...)
-
-
+newton{T}(f::Function, x::Interval{T};  args...) =
+    newton(f, x->D(f,x), x; args...)
 
 # newton for vector of intervals:
 newton{T}(f::Function, f_prime::Function, xx::Vector{Interval{T}}; args...) =
-
     vcat([newton(f, f_prime, @interval(x); args...) for x in xx]...)
 
 newton{T}(f::Function,  xx::Vector{Interval{T}}, level; args...) =
-
-    newton(f, D(f), xx, 0, args...)
+    newton(f, x->D(f,x), xx, 0, args...)
 
 newton{T}(f::Function,  xx::Vector{Root{T}}; args...) =
-
-    newton(f, D(f), [x.interval for x in xx], args...)
+    newton(f, x->D(f,x), [x.interval for x in xx], args...)

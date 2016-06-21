@@ -41,11 +41,11 @@ three_halves_pi = 3*big_pi/2
 # Format:  (function, derivative, lower_bound, upper_bound, [true_roots])
 function_list = [
                     (sin, cos,    -5,  5,    [ -big_pi, @interval(0), big_pi ] ) ,
-                    (cos, D(cos), -7.5, 7.5, [ -three_halves_pi, -half_pi, half_pi, three_halves_pi ] ),
-                    (W₃, D(W₃),   -10, 10,   [ @interval(1), @interval(2), @interval(3) ] ),
-                    (W₇, D(W₇),   -10, 10,   [ @interval(i) for i in 1:7 ] ),
-                    (x->exp(x)-2, D(x->exp(x)),  -20, 20,  [log(@biginterval(2))] ),
-                    (x->asin(sin(x)) - 0.1, D(x->asin(sin(x))), 0, 1, [@biginterval(0.1)])
+                    (cos, x->D(cos, x), -7.5, 7.5, [ -three_halves_pi, -half_pi, half_pi, three_halves_pi ] ),
+                    (W₃, x->D(W₃, x),   -10, 10,   [ @interval(1), @interval(2), @interval(3) ] ),
+                    (W₇, x->D(W₇, x),   -10, 10,   [ @interval(i) for i in 1:7 ] ),
+                    (x->exp(x)-2, y->D(x->exp(x),y),  -20, 20,  [log(@biginterval(2))] ),
+                    (x->asin(sin(x)) - 0.1, y->D(x->asin(sin(x)),y), 0, 1, [@biginterval(0.1)])
                 ]
 
 

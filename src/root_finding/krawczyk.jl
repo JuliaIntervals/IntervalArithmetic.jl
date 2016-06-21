@@ -96,17 +96,14 @@ end
 
 # use automatic differentiation if no derivative function given
 krawczyk{T}(f::Function,x::Interval{T}; args...) =
-    krawczyk(f, D(f), x; args...)
+    krawczyk(f, x->D(f,x), x; args...)
 
 # krawczyk for vector of intervals:
 krawczyk{T}(f::Function, f_prime::Function, xx::Vector{Interval{T}}; args...) =
-
     vcat([krawczyk(f, f_prime, @interval(x); args...) for x in xx]...)
 
 krawczyk{T}(f::Function,  xx::Vector{Interval{T}}, level; args...) =
-
-    krawczyk(f, D(f), xx; args...)
+    krawczyk(f, x->D(f,x), xx; args...)
 
 krawczyk{T}(f::Function,  xx::Vector{Root{T}}; args...) =
-
-    krawczyk(f, D(f), [x.interval for x in xx]; args...)
+    krawczyk(f, x->D(f,x), [x.interval for x in xx]; args...)

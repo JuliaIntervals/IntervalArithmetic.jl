@@ -2,7 +2,8 @@
 
 using ForwardDiff
 
-const D = ForwardDiff.derivative
+const derivative = ForwardDiff.derivative
+const D = derivative
 
 immutable Root{T<:Real}
     interval::Interval{T}
