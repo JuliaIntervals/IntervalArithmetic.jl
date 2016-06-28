@@ -1,7 +1,5 @@
 # This file is part of the ValidatedNumerics.jl package; MIT licensed
 
-using ForwardDiff
-
 const derivative = ForwardDiff.derivative
 const D = derivative
 

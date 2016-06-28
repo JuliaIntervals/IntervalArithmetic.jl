@@ -3,6 +3,7 @@
 using ValidatedNumerics
 using FactCheck
 
+const FD = ForwardDiff
 
 facts("Constructing intervals") do
     setprecision(Interval, 53)
@@ -63,6 +64,14 @@ facts("Constructing intervals") do
     @fact convert(Interval{Rational{Int}}, 0.1) --> Interval(1//10)
     # @fact convert(Interval{Rational{BigInt}}, pi) --> Interval{Rational{BigInt}}(pi)
 
+    # Promotion
+    @fact promote(Interval(2,3), FD.Dual(2, 1)) --> (FD.Dual(Interval(2,3), Interval(0)),
+        FD.Dual(Interval(2.0), Interval(1.0)))
+    @fact promote(Interval(2//1,3//1), Interval(1, 2)) -->
+        (Interval(2.0,3.0), Interval(1.0,2.0))
+    @fact promote(Interval(1.5), parse(BigFloat,"2.1")) -->
+        (Interval(BigFloat(1.5)), Interval(BigFloat(2.1)))
+    @fact promote(Interval(1.0), pi) --> (Interval(1.0), @interval(pi))
 
     # Constructors from the macros @interval, @floatinterval @biginterval
     setprecision(Interval, 53)
@@ -180,7 +189,7 @@ end
 
 facts("± tests") do
     setprecision(Interval, Float64)
-    
+
     @fact 3 ± 0.5 --> Interval(2.5, 3.5)
     @fact 3 ± 0.1 --> Interval(2.9, 3.1)
     @fact 0.5 ± 1 --> Interval(-0.5, 1.5)

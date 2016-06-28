@@ -7,6 +7,7 @@ module ValidatedNumerics
 using CRlibm
 using Compat
 using FixedSizeArrays
+using ForwardDiff
 
 import Base:
     +, -, *, /, //, fma,
