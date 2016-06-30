@@ -34,6 +34,10 @@ function sin{T}(a::Interval{T})
     lo_quadrant = minimum(find_quadrants(a.lo))
     hi_quadrant = maximum(find_quadrants(a.hi))
 
+    if hi_quadrant - lo_quadrant > 4  # close to limits
+        return Interval(-one(T), one(T))
+    end
+
     lo_quadrant = mod(lo_quadrant, 4)
     hi_quadrant = mod(hi_quadrant, 4)
 
@@ -71,6 +75,10 @@ function cos{T}(a::Interval{T})
 
     lo_quadrant = minimum(find_quadrants(a.lo))
     hi_quadrant = maximum(find_quadrants(a.hi))
+
+    if hi_quadrant - lo_quadrant > 4  # close to limits
+        return Interval(-one(T), one(T))
+    end
 
     lo_quadrant = mod(lo_quadrant, 4)
     hi_quadrant = mod(hi_quadrant, 4)

@@ -168,4 +168,8 @@ facts("Trig tests") do
         @fact tan(a) ⊆ sin(a)/cos(a) --> true
     end
 
+    @fact sin(Interval(-pi/2, 3pi/2)) --> Interval(-1, 1)
+    @fact cos(Interval(-pi/2, 3pi/2)) --> Interval(-1, 1)
+
+
 end
