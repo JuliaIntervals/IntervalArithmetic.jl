@@ -1,5 +1,9 @@
 # What's new in ValidatedNumerics.jl
 
+
+- Root finding is now in a separate submodule, `ValidatedNumerics.RootFinding`
+
+
 ## v0.4.3
 - Fix display of intervals with different displaymode options; [#146](https://github.com/dpsanders/ValidatedNumerics.jl/pull/146)
 

@@ -73,8 +73,9 @@ function decoration(I::Interval)
 end
 
 # Promotion and conversion, and other constructors
+
 promote_rule{T<:Real, N, R<:Real}(::Type{DecoratedInterval{T}},
-    ::Type{ForwardDiff.Dual{N,R}}) = ForwardDiff.Dual{N,DecoratedInterval{promote_type(T,R)}}
+    ::Type{ForwardDiff.Dual{N,R}}) = ForwardDiff.Dual{N, DecoratedInterval{promote_type(T,R)}}
 
 promote_rule{T<:Real, S<:Real}(::Type{DecoratedInterval{T}}, ::Type{S}) =
     DecoratedInterval{promote_type(T, S)}

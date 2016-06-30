@@ -66,13 +66,7 @@ export
     interval_part, decoration, DecoratedInterval,
     com, dac, def, trv, ill
 
-## Root finding
-export
-    newton, krawczyk,
-    derivative, jacobian,  # reexport derivative from ForwardDiff
-    Root, is_unique,
-    find_roots,
-    find_roots_midpoint
+
 
 
 function __init__()

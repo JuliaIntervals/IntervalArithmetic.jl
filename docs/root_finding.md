@@ -62,6 +62,12 @@ for example at a multiple root); see Tucker's book for more details.
 
 ## Usage of the interval Newton method
 
+Root-finding routines are in a separate `RootFinding` submodule of `ValidatedNumerics.jl`, 
+which must be loaded with
+```julia
+julia> using ValidatedNumerics, ValidatedNumerics.RootFinding
+```
+
 The interval Newton method is implemented for real functions of a single
 variable as the function `newton`. For example, we can calculate rigorously the square roots of 2:
 
@@ -175,4 +181,3 @@ julia> a = @interval(0.1, 0.2)
 julia> midpoint_radius(a)
 (0.15,0.05000000000000002)
 ```
-

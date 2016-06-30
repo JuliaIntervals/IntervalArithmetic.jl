@@ -3,8 +3,6 @@
 using ValidatedNumerics
 using FactCheck
 
-const FD = ForwardDiff
-
 facts("Constructing intervals") do
     setprecision(Interval, 53)
     @fact ValidatedNumerics.parameters.precision --> 53
@@ -64,12 +62,10 @@ facts("Constructing intervals") do
     @fact convert(Interval{Rational{Int}}, 0.1) --> Interval(1//10)
     # @fact convert(Interval{Rational{BigInt}}, pi) --> Interval{Rational{BigInt}}(pi)
 
-    # Promotion
-    @fact promote(Interval(2,3), FD.Dual(2, 1)) --> (FD.Dual(Interval(2,3), Interval(0)),
-        FD.Dual(Interval(2.0), Interval(1.0)))
+    ## promotion
     @fact promote(Interval(2//1,3//1), Interval(1, 2)) -->
         (Interval(2.0,3.0), Interval(1.0,2.0))
-    @fact promote(Interval(1.5), parse(BigFloat,"2.1")) -->
+    @fact promote(Interval(1.5), parse(BigFloat, "2.1")) -->
         (Interval(BigFloat(1.5)), Interval(BigFloat(2.1)))
     @fact promote(Interval(1.0), pi) --> (Interval(1.0), @interval(pi))
 
@@ -159,7 +155,7 @@ facts("Constructing intervals") do
 
     setprecision(Interval, 53)
     a = big(1)//3
-    @pending @interval(a) --> Interval(3.3333333333333331e-01, 3.3333333333333337e-01)
+    @fact @interval(a) --> Interval(big(3.3333333333333331e-01), big(3.3333333333333337e-01))
 
 end
 

@@ -1,5 +1,20 @@
 # This file is part of the ValidatedNumerics.jl package; MIT licensed
 
+module RootFinding
+
+using ValidatedNumerics
+using ForwardDiff
+
+## Root finding
+export
+    newton, krawczyk,
+    derivative, jacobian,  # reexport derivative from ForwardDiff
+    Root, is_unique,
+    find_roots,
+    find_roots_midpoint
+
+import Base: ⊆
+
 const derivative = ForwardDiff.derivative
 const D = derivative
 
@@ -15,6 +30,12 @@ is_unique{T}(root::Root{T}) = root.root_type == :unique
 ⊆(a::Interval, b::Root) = a ⊆ b.interval   # the Root object has the interval in the first entry
 ⊆(a::Root, b::Root) = a.interval ⊆ b.interval
 
+
+promote_rule{T<:AbstractInterval, N, R<:Real}(::Type{DecoratedInterval{T}},
+    ::Type{ForwardDiff.Dual{N,R}}) = ForwardDiff.Dual{N, DecoratedInterval{promote_type(T,R)}}
+
+promote_rule{T<:Real, N, R<:Real}(::Type{Interval{T}},
+    ::Type{ForwardDiff.Dual{N,R}}) = ForwardDiff.Dual{N, Interval{promote_type(T,R)}}
 
 # include("automatic_differentiation.jl")
 include("newton.jl")
@@ -95,3 +116,5 @@ function Base.lexcmp{T}(a::Interval{T}, b::Interval{T})
 end
 
 Base.lexcmp{T}(a::Root{T}, b::Root{T}) = lexcmp(a.interval, b.interval)
+
+end
