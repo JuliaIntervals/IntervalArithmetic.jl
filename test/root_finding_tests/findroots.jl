@@ -138,6 +138,21 @@ facts("find_roots tests") do
 
 end
 
+facts("Multiple roots") do
+    setprecision(Interval, Float64)
+    let
+        f(x) = (x-1) * (x^2 - 2)^3 * (x^3 - 2)^4
+
+        roots = newton(f, -5..5.1, maxlevel=1000)
+
+        @fact length(roots) --> 4
+        @fact roots[1].status --> :unknown
+        @fact roots[1].interval --> Interval(-1.4142135623730954, -1.414213562373095)
+        @fact roots[3].interval --> Interval(1.259921049894873, 1.2599210498948734)
+
+    end
+end
+
 
 
 # Example of a function with a double root at 0 from Burden & Faires, 9th ed, p.84

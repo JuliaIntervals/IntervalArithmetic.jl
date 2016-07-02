@@ -63,7 +63,7 @@ function krawczyk{T}(f::Function, f_prime::Function, x::Interval{T}, level::Int=
     debug && (print("Entering krawczyk:"); @show(level); @show(x))
 
     # Maximum level of bisection
-    level >= maxlevel && return [(x, :unknown)]
+    level >= maxlevel && return [Root(x, :unknown)]
 
     isempty(x) && return Root{T}[]  # [(x, :none)]
     Kx = K(f, f_prime, x) ∩ x
@@ -79,18 +79,20 @@ function krawczyk{T}(f::Function, f_prime::Function, x::Interval{T}, level::Int=
 
     debug && @show(x,m)
 
-    isthin(x) && return [(x, :unknown)]
+    isthin(x) && return [Root(x, :unknown)]
 
     # bisecting
     roots = vcat(
         krawczyk(f, f_prime, Interval(x.lo, m), level+1,
                  tolerance=tolerance, debug=debug, maxlevel=maxlevel),
-        krawczyk(f, f_prime, Interval(nextfloat(m), x.hi), level+1,
+        krawczyk(f, f_prime, Interval(m, x.hi), level+1,
                  tolerance=tolerance, debug=debug, maxlevel=maxlevel)
         )
 
-    #sort!(roots, lt=lexless)
-    roots
+
+    roots = clean_roots(f, roots)
+
+    return roots
 end
 
 

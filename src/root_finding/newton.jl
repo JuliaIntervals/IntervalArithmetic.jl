@@ -93,7 +93,7 @@ function newton{T}(f::Function, f_prime::Function, x::Interval{T}, level::Int=0;
         roots = vcat(
             newton(f, f_prime, Interval(x.lo, m), level+1,
                    tolerance=tolerance, debug=debug, maxlevel=maxlevel),
-            newton(f, f_prime, Interval(nextfloat(m), x.hi), level+1,
+            newton(f, f_prime, Interval(m, x.hi), level+1,
                    tolerance=tolerance, debug=debug, maxlevel=maxlevel)
             # note the nextfloat here to prevent repetition
             )
@@ -128,8 +128,10 @@ function newton{T}(f::Function, f_prime::Function, x::Interval{T}, level::Int=0;
     end
 
 
-    sort!(roots, lt=lexless)
-    roots
+    roots = clean_roots(f, roots)
+
+    return roots
+
 end
 
 
