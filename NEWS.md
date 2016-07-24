@@ -1,7 +1,21 @@
 # What's new in ValidatedNumerics.jl
 
 
-- Root finding is now in a separate submodule, `ValidatedNumerics.RootFinding`
+## v0.5
+- Root finding has been moved into a separate submodule
+[#154](https://github.com/dpsanders/ValidatedNumerics.jl/pull/154).
+
+New usage:
+
+    using ValidatedNumerics
+    RootFinding.newton(...)
+
+or
+    using ValidatedNumerics
+    using ValidatedNumerics.RootFinding
+    newton(...)
+
+- Neighbouring root intervals are merged in the Newton and Krawczyk methods: [#156](https://github.com/dpsanders/ValidatedNumerics.jl/pull/156)
 
 
 ## v0.4.3
