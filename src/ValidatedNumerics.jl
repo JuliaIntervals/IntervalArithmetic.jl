@@ -46,6 +46,9 @@ export
 export
     displaymode
 
+export RootFinding
+
+
 if VERSION >= v"0.5.0-dev+1182"
     import Base: rounding, setrounding, setprecision
 else
