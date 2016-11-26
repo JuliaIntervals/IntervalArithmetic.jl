@@ -98,7 +98,31 @@ function representation(a::Interval, format=nothing)
     output
 end
 
+function representation{T<:Integer}(a::Interval{Rational{T}},
+    format=nothing)
 
+    if isempty(a)
+        return "∅"
+    end
+
+    if format == nothing
+        format = display_params.format  # default
+    end
+    
+    local output
+
+    if format == :standard
+        output = "[$(a.lo), $(a.hi)]"
+    elseif format == :full
+        output = "Interval($(a.lo), $(a.hi))"
+    elseif format == :midpoint
+        m = mid(a)
+        r = radius(a)
+        output = "$m ± $r"
+    end
+
+    output
+end
 
 function subscriptify(n::Int)
     dig = reverse(digits(n))

@@ -61,6 +61,18 @@ facts("displaymode tests") do
 
     end
 
+    context("Interval{Rational{T}}") do
+        a = Interval(1//3, 5//4)
+        displaymode(format=:standard)
+        @fact string(a) --> "[1//3, 5//4]"
+
+        displaymode(format=:full)
+        @fact string(a) --> "Interval(1//3, 5//4)"
+
+        displaymode(format=:midpoint)
+        @fact string(a) --> "19//24 ± 11//24"
+    end
+
     context("DecoratedInterval") do
         a = @decorated(1, 2)
 
