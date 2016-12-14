@@ -1,5 +1,10 @@
 # What's new in ValidatedNumerics.jl
 
+## v0.6
+- Add a plot recipe for (only) 2D `IntervalBox`es using `RecipesBase.jl`.
+This enables plotting using `Plots.jl` via `plot(X)` or `plot([X, Y])`,
+i.e. individual `IntervalBox`es or of a `Vector` of `IntervalBox`es.
+
 
 ## v0.5
 - Root finding has been moved into a separate submodule

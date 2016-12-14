@@ -91,6 +91,9 @@ include("display.jl")
 
 include("root_finding/root_finding.jl")
 
+#if VERSION >= v"0.5"
+include("plot_recipes/plot_recipes.jl")
+#end
 
 
 end # module ValidatedNumerics
