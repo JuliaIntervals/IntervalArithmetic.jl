@@ -128,6 +128,8 @@ function ^{T,S}(xx::DecoratedInterval{T}, qq::DecoratedInterval{S})
     DecoratedInterval(r, trv)
 end
 
+^{T,S}(xx::DecoratedInterval{T}, q::Interval{S}) = xx^DecoratedInterval(q)
+
 ## Discontinuous functions (sign, ceil, floor, trunc) and round
 function sign{T}(xx::DecoratedInterval{T})
     r = sign(interval_part(xx))

@@ -32,4 +32,31 @@ facts("DecoratedInterval tests") do
     # Disabling the following tests, because Julia 0.5 has some strange behaviour here
     # @fact_throws ArgumentError DecoratedInterval(BigInt(1), 1//10)
     # @fact_throws ArgumentError @decorated(BigInt(1), 1//10)
+
+    # Tests related to powers of decorated Intervals
+    @fact @decorated(2,3) ^ 2 == DecoratedInterval(4, 9) --> true
+    @fact @decorated(2,3) ^ -2 == DecoratedInterval(1/9,1/4) --> true
+    @fact @decorated(-3,2) ^ 3 == DecoratedInterval(-27., 8.) --> true
+    @fact @decorated(-3,-2) ^ -3 ==
+        DecoratedInterval(-1/8.,-1/27) --> true
+    @fact @decorated(0,3) ^ 2 ==
+        DecoratedInterval(0, 9) --> true
+    @fact @decorated(0,3) ^ -2 ==
+        DecoratedInterval(1/9, Inf, trv) --> true
+    @fact @decorated(2,3)^Interval(0.0, 1.0) ==
+        DecoratedInterval(1.0,3.0) --> true
+    @fact @decorated(2,3)^@decorated(0.0, 1.0) ==
+        DecoratedInterval(1.0,3.0) --> true
+    @fact @decorated(0, 2)^Interval(0.0, 1.0) ==
+        DecoratedInterval(0.0,2.0, trv) --> true
+    @fact @decorated(0, 2)^@decorated(0.0, 1.0) ==
+        DecoratedInterval(0.0,2.0, trv) --> true
+    @fact @decorated(-3, 2)^Interval(0.0, 1.0) ==
+        DecoratedInterval(0.0,2.0, trv) --> true
+    @fact @decorated(-3, 2)^@decorated(0.0, 1.0) ==
+        DecoratedInterval(0.0,2.0, trv) --> true
+    @fact @decorated(-3, 2)^Interval(-1.0, 1.0) ==
+        DecoratedInterval(0.0,Inf, trv) --> true
+    @fact @decorated(-3, 2)^@decorated(-1.0, 1.0) ==
+        DecoratedInterval(0.0,Inf, trv) --> true
 end
