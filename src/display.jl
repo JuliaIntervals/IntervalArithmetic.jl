@@ -48,11 +48,13 @@ end
 ## Output
 
 # round to given number of signficant digits
-# basic structure taken from base/mpfr.jl
+# basic structure taken from string(x::BigFloat) in base/mpfr.jl
 function round_string(x::BigFloat, digits::Int, r::RoundingMode)
 
     lng = digits + Int32(8)
-    buf = Array(UInt8, lng + 1)
+    # buf = Array(UInt8, lng + 1)
+    # @compat buf = Base.StringVector(lng + 1)
+    buf = Array{UInt8}(lng + 1)
 
     lng = ccall((:mpfr_snprintf,:libmpfr), Int32,
     (Ptr{UInt8}, Culong,  Ptr{UInt8}, Int32, Ptr{BigFloat}...),
@@ -139,11 +141,11 @@ function representation(a::Interval{BigFloat}, format=nothing)
 
 
     if format == :standard
-        string( invoke(representation, (Interval, Symbol), a, format),
+        @compat string( invoke(representation, Tuple{Interval,Symbol}, a, format),
                     subscriptify(precision(a.lo)) )
 
     elseif format == :full
-        invoke(representation, (Interval, Symbol), a, format)
+        @compat invoke(representation, Tuple{Interval, Symbol}, a, format)
     end
 end
 
@@ -175,27 +177,13 @@ function representation(X::IntervalBox, format=nothing)
         format = display_params.format  # default
     end
 
-    buffer = IOBuffer()
-
-    if display_params.format==:full
-        print(buffer, "IntervalBox(")
-
-        for i in 1:length(X)-1
-            print(buffer, X[i], ", ")
-        end
-        print(buffer, X[end], ")")
-
+    if display_params.format == :full
+        return string("IntervalBox(", join(X, ", "), ")")
 
     else
-
-        for i in 1:length(X)-1
-            print(buffer, X[i], " × ")
-        end
-        print(buffer, X[end])
-
+        return join(X, " × ")
     end
 
-    return takebuf_string(buffer)
 end
 
 

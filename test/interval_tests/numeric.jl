@@ -88,7 +88,7 @@ facts("Power tests") do
     @fact (0 < diam(y) < 1e-76) --> true
     y = x^(1/3)
     @fact (0 < diam(y) < 1e-76) --> true
-    @fact x^(1//3) --> x^(1/3)
+
 end
 
 setprecision(Interval, Float64)
@@ -184,10 +184,10 @@ facts("Floor etc. tests") do
 
     a = @interval(-3.0, 2.0)
     @fact a --> Interval(-3.0, 2.0)
-    @fact a^3 --> Interval(-27.000000000000004, 8.000000000000002)
-    @fact Interval(-3,2)^3 --> Interval(-27.000000000000004, 8.000000000000002)
+    @fact a^3 --> Interval(-27, 8)
+    @fact Interval(-3,2)^3 --> Interval(-27, 8)
 
-    @fact Interval(-27.0, 8.0)^(1//3) --> Interval(-5.0e-324, 2.0000000000000004)
+    @fact Interval(-27.0, 8.0)^(1//3) --> Interval(0, 2.0000000000000004)
 
     setrounding(Interval, :narrow)
 end

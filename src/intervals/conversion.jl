@@ -24,12 +24,12 @@ promote_rule{T<:Real}(::Type{BigFloat}, ::Type{Interval{T}}) =
 
 # convert{T<:Real}(::Type{Interval}, x::T) = convert(Interval{Float64}, x)
 
-doc"""`split_interval_string` deals with strings of the form
-\"[3.5, 7.2]\""""
-
+doc"""
+`split_interval_string` deals with strings of the form `"[3.5, 7.2]"`
+"""
 function split_interval_string(T, x::AbstractString)
     if !(contains(x, "["))  # string like "3.1"
-        return @thin_round(T, parse(T, x))
+        return @round(parse(T, x), parse(T, x))
     end
 
     m = match(r"\[(.*),(.*)\]", x)  # string like "[1, 2]"
@@ -38,7 +38,7 @@ function split_interval_string(T, x::AbstractString)
         throw(ArgumentError("Unable to process string $x as interval"))
     end
 
-    @round(T, parse(T, m.captures[1]), parse(T, m.captures[2]))
+    @round(parse(T, m.captures[1]), parse(T, m.captures[2]))
 end
 
 

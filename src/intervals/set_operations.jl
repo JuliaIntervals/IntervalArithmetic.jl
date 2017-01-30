@@ -56,18 +56,20 @@ function intersect{T}(a::Interval{T}, b::Interval{T})
     Interval(max(a.lo, b.lo), min(a.hi, b.hi))
 end
 # Specific promotion rule for intersect:
-intersect{T,S}(a::Interval{T}, b::Interval{S}) = intersect(promote(a,b)...)
+intersect{T,S}(a::Interval{T}, b::Interval{S}) = intersect(promote(a, b)...)
 
 
 ## Hull
 """
     hull(a, b)
 
-Returns the "convex hull" of the intervals `a` and `b`, considered as
-(extended) sets of real numbers. That is, the minimum set that contains
-all points in `a` and `b`.
+Returns the "interval hull" of the intervals `a` and `b`, considered as
+(extended) sets of real numbers, i.e. the smallest interval that contains
+all of `a` and `b`.
 """
-hull{T}(a::Interval{T}, b::Interval{T}) = Interval(min(a.lo, b.lo), max(a.hi, b.hi))
+hull{T}(a::Interval{T}, b::Interval{T}) = Interval{T}(min(a.lo, b.lo), max(a.hi, b.hi))
+
+hull(a, b) = hull(promote(a, b)...)
 
 """
     union(a, b)
@@ -76,9 +78,9 @@ hull{T}(a::Interval{T}, b::Interval{T}) = Interval(min(a.lo, b.lo), max(a.hi, b.
 Returns the union (convex hull) of the intervals `a` and `b`; it is equivalent
 to `hull(a,b)`.
 """
-union(a::Interval, b::Interval) = hull(a, b)
+union{T}(a::Interval{T}, b::Interval{T}) = hull(a, b)
 
-
+union(a, b) = union(promote(a, b)...)
 
 
 doc"""

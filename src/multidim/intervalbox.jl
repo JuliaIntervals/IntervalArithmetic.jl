@@ -28,3 +28,10 @@ isempty(X::IntervalBox) = any(isempty, X)
 diam(X::IntervalBox) = maximum([diam(x) for x in X])
 
 emptyinterval(X::IntervalBox) = IntervalBox(map(emptyinterval, X))
+
+
+import Base.×
+×(a::Interval...) = IntervalBox(a...)
+×(a::Interval, b::IntervalBox) = IntervalBox(a, b...)
+×(a::IntervalBox, b::Interval) = IntervalBox(a..., b)
+×(a::IntervalBox, b::IntervalBox) = IntervalBox(a..., b...)

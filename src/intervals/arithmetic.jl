@@ -64,12 +64,12 @@ one{T<:Real}(::Type{Interval{T}}) = Interval(one(T))
 
 function +{T<:Real}(a::Interval{T}, b::Interval{T})
     (isempty(a) || isempty(b)) && return emptyinterval(T)
-    @round(T, a.lo + b.lo, a.hi + b.hi)
+    @round(a.lo + b.lo, a.hi + b.hi)
 end
 
 function -{T<:Real}(a::Interval{T}, b::Interval{T})
     (isempty(a) || isempty(b)) && return emptyinterval(T)
-    @round(T, a.lo - b.hi, a.hi - b.lo)
+    @round(a.lo - b.hi, a.hi - b.lo)
 end
 
 
@@ -81,17 +81,17 @@ function *{T<:Real}(a::Interval{T}, b::Interval{T})
     (a == zero(a) || b == zero(b)) && return zero(a)
 
     if b.lo >= zero(T)
-        a.lo >= zero(T) && return @round(T, a.lo*b.lo, a.hi*b.hi)
-        a.hi <= zero(T) && return @round(T, a.lo*b.hi, a.hi*b.lo)
-        return @round(T, a.lo*b.hi, a.hi*b.hi)   # zero(T) ∈ a
+        a.lo >= zero(T) && return @round(a.lo*b.lo, a.hi*b.hi)
+        a.hi <= zero(T) && return @round(a.lo*b.hi, a.hi*b.lo)
+        return @round(a.lo*b.hi, a.hi*b.hi)   # zero(T) ∈ a
     elseif b.hi <= zero(T)
-        a.lo >= zero(T) && return @round(T, a.hi*b.lo, a.lo*b.hi)
-        a.hi <= zero(T) && return @round(T, a.hi*b.hi, a.lo*b.lo)
-        return @round(T, a.hi*b.lo, a.lo*b.lo)   # zero(T) ∈ a
+        a.lo >= zero(T) && return @round(a.hi*b.lo, a.lo*b.hi)
+        a.hi <= zero(T) && return @round(a.hi*b.hi, a.lo*b.lo)
+        return @round(a.hi*b.lo, a.lo*b.lo)   # zero(T) ∈ a
     else
-        a.lo > zero(T) && return @round(T, a.hi*b.lo, a.hi*b.hi)
-        a.hi < zero(T) && return @round(T, a.lo*b.hi, a.lo*b.lo)
-        return @round(T, min(a.lo*b.hi, a.hi*b.lo), max(a.lo*b.lo, a.hi*b.hi))
+        a.lo > zero(T) && return @round(a.hi*b.lo, a.hi*b.hi)
+        a.hi < zero(T) && return @round(a.lo*b.hi, a.lo*b.lo)
+        return @round(min(a.lo*b.hi, a.hi*b.lo), max(a.lo*b.lo, a.hi*b.hi))
     end
 end
 
@@ -102,13 +102,13 @@ function inv{T<:Real}(a::Interval{T})
     isempty(a) && return emptyinterval(a)
 
     if zero(T) ∈ a
-        a.lo < zero(T) == a.hi && return @round(T, -Inf, inv(a.lo))
-        a.lo == zero(T) < a.hi && return @round(T, inv(a.hi), Inf)
+        a.lo < zero(T) == a.hi && return @round(-Inf, inv(a.lo))
+        a.lo == zero(T) < a.hi && return @round(inv(a.hi), Inf)
         a.lo < zero(T) < a.hi && return entireinterval(T)
         a == zero(a) && return emptyinterval(T)
     end
 
-    @round(T, inv(a.hi), inv(a.lo))
+    @round(inv(a.hi), inv(a.lo))
 end
 
 function /{T<:Real}(a::Interval{T}, b::Interval{T})
@@ -119,15 +119,15 @@ function /{T<:Real}(a::Interval{T}, b::Interval{T})
 
     if b.lo > zero(T) # b strictly positive
 
-        a.lo >= zero(T) && return @round(S, a.lo/b.hi, a.hi/b.lo)
-        a.hi <= zero(T) && return @round(S, a.lo/b.lo, a.hi/b.hi)
-        return @round(S, a.lo/b.lo, a.hi/b.lo)  # zero(T) ∈ a
+        a.lo >= zero(T) && return @round(a.lo/b.hi, a.hi/b.lo)
+        a.hi <= zero(T) && return @round(a.lo/b.lo, a.hi/b.hi)
+        return @round(a.lo/b.lo, a.hi/b.lo)  # zero(T) ∈ a
 
     elseif b.hi < zero(T) # b strictly negative
 
-        a.lo >= zero(T) && return @round(S, a.hi/b.hi, a.lo/b.lo)
-        a.hi <= zero(T) && return @round(S, a.hi/b.lo, a.lo/b.hi)
-        return @round(S, a.hi/b.hi, a.lo/b.hi)  # zero(T) ∈ a
+        a.lo >= zero(T) && return @round(a.hi/b.hi, a.lo/b.lo)
+        a.hi <= zero(T) && return @round(a.hi/b.lo, a.lo/b.hi)
+        return @round(a.hi/b.hi, a.lo/b.hi)  # zero(T) ∈ a
 
     else   # b contains zero, but is not zero(b)
 
@@ -135,14 +135,14 @@ function /{T<:Real}(a::Interval{T}, b::Interval{T})
 
         if b.lo == zero(T)
 
-            a.lo >= zero(T) && return @round(S, a.lo/b.hi, Inf)
-            a.hi <= zero(T) && return @round(S, -Inf, a.hi/b.hi)
+            a.lo >= zero(T) && return @round(a.lo/b.hi, Inf)
+            a.hi <= zero(T) && return @round(-Inf, a.hi/b.hi)
             return entireinterval(S)
 
         elseif b.hi == zero(T)
 
-            a.lo >= zero(T) && return @round(S, -Inf, a.lo/b.lo)
-            a.hi <= zero(T) && return @round(S, a.hi/b.lo, Inf)
+            a.lo >= zero(T) && return @round(-Inf, a.lo/b.lo)
+            a.hi <= zero(T) && return @round(a.hi/b.lo, Inf)
             return entireinterval(S)
 
         else
@@ -155,6 +155,25 @@ end
 
 //(a::Interval, b::Interval) = a / b    # to deal with rationals
 
+if VERSION >= v"0.6.0-dev"
+    const filter = Iterators.filter
+end
+
+if VERSION < v"0.5"
+    min(x) = x
+    max(x) = x
+end
+
+
+function min_ignore_nans(args...)
+    min(filter(x->!isnan(x), args)...)
+end
+
+function max_ignore_nans(args...)
+    max(filter(x->!isnan(x), args)...)
+end
+
+
 
 ## fma: fused multiply-add
 function fma{T}(a::Interval{T}, b::Interval{T}, c::Interval{T})
@@ -165,9 +184,11 @@ function fma{T}(a::Interval{T}, b::Interval{T}, c::Interval{T})
     if isentire(a)
         b == zero(b) && return c
         return entireinterval(T)
+
     elseif isentire(b)
         a == zero(a) && return c
         return entireinterval(T)
+
     end
 
     lo = setrounding(T, RoundDown) do
@@ -175,15 +196,17 @@ function fma{T}(a::Interval{T}, b::Interval{T}, c::Interval{T})
         lo2 = fma(a.lo, b.hi, c.lo)
         lo3 = fma(a.hi, b.lo, c.lo)
         lo4 = fma(a.hi, b.hi, c.lo)
-        min(lo1, lo2, lo3, lo4)
+        min_ignore_nans(lo1, lo2, lo3, lo4)
     end
+
     hi = setrounding(T, RoundUp) do
         hi1 = fma(a.lo, b.lo, c.hi)
         hi2 = fma(a.lo, b.hi, c.hi)
         hi3 = fma(a.hi, b.lo, c.hi)
         hi4 = fma(a.hi, b.hi, c.hi)
-        max(hi1, hi2, hi3, hi4)
+        max_ignore_nans(hi1, hi2, hi3, hi4)
     end
+
     Interval(lo, hi)
 end
 
@@ -304,7 +327,7 @@ end
 
 function diam{T<:Real}(a::Interval{T})
     isempty(a) && return convert(T, NaN)
-    @setrounding(T, a.hi - a.lo, RoundUp) #cf page 64 of IEEE1788
+    @round_up(a.hi - a.lo) # cf page 64 of IEEE1788
 end
 
 # Should `radius` this yield diam(a)/2? This affects other functions!
@@ -339,7 +362,7 @@ function cancelminus(a::Interval, b::Interval)
     end
     ans && return entireinterval(T)
 
-    @round(T, a.lo - b.lo, a.hi - b.hi)
+    @round(a.lo - b.lo, a.hi - b.hi)
 end
 
 """

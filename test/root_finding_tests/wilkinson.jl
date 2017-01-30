@@ -45,7 +45,9 @@ end
 
 # Generate Wilkinson functions W₃ etc.:
 for n in 1:15
+
     fn_name = Symbol("W", subscriptify(n))
+    
     expr = generate_wilkinson_horner(n)
 
     @eval $(fn_name)(x) = $(expr)

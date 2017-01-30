@@ -31,46 +31,6 @@ macro biginterval(expr1, expr2...)
 end
 
 
-# Macros for directed rounding:
-
-macro setrounding(T, expr, rounding_mode)
-    quote
-        setrounding($T, $rounding_mode) do
-            $expr
-        end
-    end
-end
-
-
-doc"""The `@round` macro creates a rounded interval according to the current
-interval rounding mode. It is the main function used to create intervals in the
-library (e.g. when adding two intervals, etc.). It uses the interval rounding mode (see rounding(Interval))"""
-macro round(T, expr1, expr2)
-    #@show "round", expr1, expr2
-    quote
-        mode = rounding(Interval)
-
-        if mode == :wide  #works with any rounding mode set, but the result will depend on the rounding mode
-            # we assume RoundNearest
-            Interval(prevfloat($expr1), nextfloat($expr2))
-
-        else # mode == :narrow
-            lo = @setrounding($T, $expr1, RoundDown)
-            hi = @setrounding($T, $expr2, RoundUp)
-            Interval(lo, hi)
-        end
-    end
-end
-
-
-doc"""`@thin_round` possibly saves one operation compared to `@round`."""
-macro thin_round(T, expr)
-    quote
-        @round($T, $expr, $expr)
-    end
-end
-
-
 
 doc"""`transform` transforms a string by applying the function `f` and type
 `T` to each argument, i.e. `:(x+y)` is transformed to `:(f(T, x) + f(T, y))`
@@ -80,7 +40,7 @@ transform(x, f, T) = :($f($(esc(T)), $(esc(x))))   # use if x is not an expressi
 function transform(expr::Expr, f::Symbol, T)
 
     if expr.head in ( :(.), :ref )   # of form  a.lo  or  a[i]
-        return :($f($(esc(T)), $(esc(expr))))
+        return :($f(esc(T)), $(esc(expr)))
     end
 
     new_expr = copy(expr)
@@ -121,11 +81,10 @@ function make_interval(T, expr1, expr2)
     expr1 = transform(expr1, :convert, :(Interval{$T}))
 
     if isempty(expr2)  # only one argument
-        return expr1
+        return :(Interval($expr1))
     end
 
     expr2 = transform(expr2[1], :convert, :(Interval{$T}))
 
-    # :(hull($expr1, $expr2))
     :(Interval(($expr1).lo, ($expr2).hi))
 end

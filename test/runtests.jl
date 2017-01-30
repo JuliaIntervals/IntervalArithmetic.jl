@@ -10,6 +10,8 @@ roughly = FactCheck.roughly
 
 # Interval tests:
 
+displaymode(format=:full)
+
 include("interval_tests/intervals.jl")
 include("multidim_tests/multidim.jl")
 include("decoration_tests/decoration_tests.jl")
