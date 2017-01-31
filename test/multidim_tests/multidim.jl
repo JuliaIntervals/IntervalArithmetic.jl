@@ -10,11 +10,18 @@ facts("Operations on boxes") do
     @fact dot(A, B) --> @interval(9, 28)
 
     @fact A ⊆ B --> true
+    @fact A ∩ B --> A
+    @fact A ∪ B --> B
 
     X = IntervalBox(1..2, 3..4)
     Y = IntervalBox(3..4, 3..4)
 
     @fact isempty(X ∩ Y) --> true
+    @fact X ∪ Y --> IntervalBox(1..4, 3..4)
+
+    X = IntervalBox(2..4, 3..5)
+    Y = IntervalBox(3..5, 4..17)
+    @fact X ∩ Y --> IntervalBox(3..4, 4..5)
 
     v = [@interval(i, i+1) for i in 1:10]
     V = IntervalBox(v...)

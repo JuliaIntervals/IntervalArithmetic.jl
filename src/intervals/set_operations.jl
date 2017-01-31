@@ -69,7 +69,7 @@ all of `a` and `b`.
 """
 hull{T}(a::Interval{T}, b::Interval{T}) = Interval{T}(min(a.lo, b.lo), max(a.hi, b.hi))
 
-hull(a, b) = hull(promote(a, b)...)
+hull{T,S}(a::Interval{T}, b::Interval{S}) = hull(promote(a, b)...)
 
 """
     union(a, b)
@@ -80,7 +80,7 @@ to `hull(a,b)`.
 """
 union{T}(a::Interval{T}, b::Interval{T}) = hull(a, b)
 
-union(a, b) = union(promote(a, b)...)
+union{T,S}(a::Interval{T}, b::Interval{S}) = union(promote(a, b)...)
 
 
 doc"""

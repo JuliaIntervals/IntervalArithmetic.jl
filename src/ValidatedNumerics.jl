@@ -20,7 +20,7 @@ import Base:
     union, intersect, isempty,
     convert, promote_rule, eltype,
     BigFloat, float, widen, big,
-    ∩, ⊆, eps,
+    ∩, ∪, ⊆, eps,
     floor, ceil, trunc, sign, round,
     expm1, log1p,
     precision,
