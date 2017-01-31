@@ -2,8 +2,17 @@
 
 ## v0.6
 - Add a plot recipe for (only) 2D `IntervalBox`es using `RecipesBase.jl`.
-This enables plotting using `Plots.jl` via `plot(X)` or `plot([X, Y])`,
-i.e. individual `IntervalBox`es or of a `Vector` of `IntervalBox`es.
+This enables plotting using `Plots.jl`: an individual `IntervalBox` `X` using `plot(X)`,
+and a `Vector` of them using `plot([X, Y])`
+
+- Rewritten rounding functionality which gives type-stable interval functions, and hence
+better performance
+
+- `(1..2) × (3..4)` syntax for constructing `IntervalBox`es
+
+- `@interval` now always returns an `Interval`.
+Before e.g. `@interval mid(X)` for `X` an interval returned a number instead.
+
 
 
 ## v0.5
