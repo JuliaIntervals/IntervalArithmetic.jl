@@ -276,18 +276,9 @@ function trunc(a::Interval)
     Interval(trunc(a.lo), trunc(a.hi))
 end
 
-function sign{T<:Real}(a::Interval{T})
+function sign(a::Interval)
     isempty(a) && return emptyinterval(a)
-
-    a == zero(a) && return a
-    if a ≤ zero(a)
-        zero(T) ∈ a && return Interval(-one(T), zero(T))
-        return Interval(-one(T))
-    elseif a ≥ zero(a)
-        zero(T) ∈ a && return Interval(zero(T), one(T))
-        return Interval(one(T))
-    end
-    return Interval(-one(T), one(T))
+    return Interval(sign(a.lo), sign(a.hi))
 end
 
 # RoundTiesToEven is an alias of `RoundNearest`
