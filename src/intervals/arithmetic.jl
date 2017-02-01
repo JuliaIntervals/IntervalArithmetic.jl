@@ -155,11 +155,11 @@ end
 
 //(a::Interval, b::Interval) = a / b    # to deal with rationals
 
-if VERSION >= v"0.6.0-dev"
+if VERSION >= v"0.6.0-dev.1024"
     const filter = Iterators.filter
 end
 
-if VERSION < v"0.5"
+if VERSION < v"0.5.0-dev+1279"
     min(x) = x
     max(x) = x
 end
