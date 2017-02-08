@@ -3,8 +3,7 @@
 # Some, like sin(a, RoundDown)  are already defined in CRlibm
 
 
-# import Base: +, -, *, /, sin, sqrt, inv, ^, zero, convert, parse
-
+import Base: +, -, *, /, sin, sqrt, inv, ^, zero, convert, parse
 
 # unary minus:
 -{T<:AbstractFloat}(a::T, ::RoundingMode) = -a  # ignore rounding

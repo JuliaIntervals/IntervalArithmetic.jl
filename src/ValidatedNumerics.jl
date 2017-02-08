@@ -79,8 +79,6 @@ function __init__()
 
     setprecision(Interval, 256)  # set up pi
     setprecision(Interval, Float64)
-
-    CRlibm.setup()
 end
 
 
