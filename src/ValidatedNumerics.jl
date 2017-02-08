@@ -47,6 +47,9 @@ export
 export
     displaymode
 
+export
+    setindex
+
 export RootFinding
 
 
