@@ -1,18 +1,23 @@
+if VERSION >= v"0.5.0-dev+7720"
+    using Base.Test
+else
+    using BaseTestNext
+    const Test = BaseTestNext
+end
 using ValidatedNumerics
-using FactCheck
 
 
 
-facts("Interval loop tests") do
+@testset "Interval loop tests" begin
     i = 1
 
-    @fact Interval(i,i).lo --> 1
-    @fact @interval(i).lo --> 1
+    @test Interval(i,i).lo == 1
+    @test @interval(i).lo == 1
 
 
     for i in 1:10
         a = @interval(i)
-        @fact a.lo --> i
+        @test a.lo == i
     end
 
 end
@@ -82,7 +87,7 @@ function calc_pi5(N)
 end
 
 
-facts("Pi tests") do
+@testset "Pi tests" begin
 
     big_pi = setprecision(256) do
         big(pi)
@@ -96,13 +101,15 @@ facts("Pi tests") do
     pi5 = calc_pi5(N)
 
 
-    @fact big_pi ∈ pi1 --> true
-    @fact big_pi ∈ pi2 --> true
-    @fact big_pi ∈ pi3 --> true
-    @fact big_pi ∈ pi4 --> true
-    @fact big_pi ∈ pi5 --> true
+    @test big_pi ∈ pi1
+    @test big_pi ∈ pi2
+    @test big_pi ∈ pi3
+    @test big_pi ∈ pi4
+    @test big_pi ∈ pi5
 
-    @pending pi1 == pi2 --> true
-    @pending pi2 == pi3 --> true
+    @test pi1 == pi2
+    @test pi2 == pi3
 
 end
+
+setprecision(Interval, Float64)

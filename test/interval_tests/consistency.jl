@@ -1,7 +1,12 @@
 # This file is part of the ValidatedNumerics.jl package; MIT licensed
 
+if VERSION >= v"0.5.0-dev+7720"
+    using Base.Test
+else
+    using BaseTestNext
+    const Test = BaseTestNext
+end
 using ValidatedNumerics
-using FactCheck
 
 setprecision(Interval, Float64)
 
@@ -9,294 +14,287 @@ a = @interval(0.1, 1.1)
 b = @interval(0.9, 2.0)
 c = @interval(0.25, 4.0)
 
-facts("Consistency tests") do
+@testset "Consistency tests" begin
 
-    @fact isa( @interval(1,2), Interval ) --> true
-    @fact isa( @interval(0.1), Interval ) --> true
-    @fact isa( zero(b), Interval ) --> true
+    @testset "Interval types and constructors" begin
 
-    @fact zero(b) --> 0.0
-    @fact zero(b) == zero(typeof(b)) --> true
-    @fact one(a) --> 1.0
-    @fact one(a) == one(typeof(a)) --> true
-    @fact one(a) --> big(1.0)
-    @fact a == b --> false
-    @fact a != b --> true
+        @test isa( @interval(1,2), Interval )
+        @test isa( @interval(0.1), Interval )
+        @test isa( zero(b), Interval )
 
-    @fact a --> Interval(a.lo, a.hi)
-    @fact @interval(1, Inf) --> Interval(1.0, Inf)
-    @fact @interval(-Inf, 1) --> Interval(-Inf, 1.0)
-    @fact @biginterval(1, Inf) --> Interval{BigFloat}(1.0, Inf)
-    @fact @biginterval(-Inf, 1) --> Interval{BigFloat}(-Inf, 1.0)
-    @fact @interval(-Inf, Inf) --> entireinterval(Float64)
-    @fact emptyinterval(Rational{Int}) --> ∅
+        @test zero(b) == 0.0
+        @test zero(b) == zero(typeof(b))
+        @test one(a) == 1.0
+        @test one(a) == one(typeof(a))
+        @test one(a) == big(1.0)
+        @test !(a == b)
+        @test a != b
 
-    @fact 1 == zero(a)+one(b) --> true
-    @fact Interval(0,1) + emptyinterval(a) --> emptyinterval(a)
-    @fact @interval(0.25) - one(c)/4 --> zero(c)
-    @fact emptyinterval(a) - Interval(0,1) --> emptyinterval(a)
-    @fact Interval(0,1) - emptyinterval(a) --> emptyinterval(a)
-    @fact a*b --> Interval(a.lo*b.lo, a.hi*b.hi)
-    @fact Interval(0,1) * emptyinterval(a) --> emptyinterval(a)
-    @fact a * Interval(0) --> zero(a)
-end
+        @test a == Interval(a.lo, a.hi)
+        @test @interval(1, Inf) == Interval(1.0, Inf)
+        @test @interval(-Inf, 1) == Interval(-Inf, 1.0)
+        @test @biginterval(1, Inf) == Interval{BigFloat}(1.0, Inf)
+        @test @biginterval(-Inf, 1) == Interval{BigFloat}(-Inf, 1.0)
+        @test @interval(-Inf, Inf) == entireinterval(Float64)
+        @test emptyinterval(Rational{Int}) == ∅
 
-facts("inv") do
-
-    @fact inv( zero(a) ) --> emptyinterval()
-    @fact inv( @interval(0, 1) ) --> Interval(1, Inf)
-    @fact inv( @interval(1, Inf) ) --> Interval(0, 1)
-    @fact inv(c) --> c
-    @fact one(b)/b --> inv(b)
-    @fact a/emptyinterval(a) --> emptyinterval(a)
-    @fact emptyinterval(a)/a --> emptyinterval(a)
-    @fact inv(@interval(-4.0,0.0)) --> @interval(-Inf, -0.25)
-    @fact inv(@interval(0.0,4.0)) --> @interval(0.25, Inf)
-    @fact inv(@interval(-4.0,4.0)) --> entireinterval(Float64)
-    @fact @interval(0)/@interval(0) --> emptyinterval()
-    @fact typeof(emptyinterval()) --> Interval{Float64}
-end
-
-facts("fma consistency") do
-    @fact fma(emptyinterval(), a, b) --> emptyinterval()
-    @fact fma(entireinterval(), zero(a), b) --> b
-    @fact fma(entireinterval(), one(a), b) --> entireinterval()
-    @fact fma(zero(a), entireinterval(), b) --> b
-    @fact fma(one(a), entireinterval(), b) --> entireinterval()
-    @fact fma(a, zero(a), c) --> c
-    @fact fma(Interval(1//2), Interval(1//3), Interval(1//12)) --> Interval(3//12)
-end
-
-facts("∈ tests") do
-    @fact Inf ∈ entireinterval() --> false
-    @fact 0.1 ∈ @interval(0.1) --> true
-    @fact 0.1 in @interval(0.1) --> true
-    @fact -Inf ∈ entireinterval() --> false
-    @fact Inf ∈ entireinterval() --> false
-end
-
-facts("Inclusion tests") do
-    @fact b ⊆ c --> true
-    @fact emptyinterval(c) ⊆ c --> true
-    @fact c ⊆ emptyinterval(c) --> false
-    @fact interior(b,c) --> true
-    @fact b ⪽ emptyinterval(b) --> false
-    @fact emptyinterval(c) ⪽ c --> true
-    @fact emptyinterval(c) ⪽ emptyinterval(c) --> true
-    @fact isdisjoint(a, @interval(2.1)) --> true
-    @fact isdisjoint(a, b) --> false
-    @fact isdisjoint(emptyinterval(a), a) --> true
-    @fact isdisjoint(emptyinterval(), emptyinterval()) --> true
-
-end
-
-facts("Comparison tests") do
-    @fact ValidatedNumerics.islessprime(a.lo, b.lo) --> a.lo < b.lo
-    @fact ValidatedNumerics.islessprime(Inf, Inf) --> true
-    @fact ∅ <= ∅ --> true
-    @fact Interval(1.0,2.0) <= ∅ --> false
-    @fact Interval(-Inf,Inf) <= Interval(-Inf,Inf) --> true
-    @fact Interval(-0.0,2.0) ≤ Interval(-Inf,Inf) --> false
-    @fact precedes(∅,∅) --> true
-    @fact precedes(Interval(3.0,4.0),∅) --> true
-    @fact precedes(Interval(0.0,2.0),Interval(-Inf,Inf)) --> false
-    @fact precedes(Interval(1.0,3.0),Interval(3.0,4.0)) --> true
-    @fact strictprecedes(Interval(3.0,4.0),∅) --> true
-    @fact strictprecedes(Interval(-3.0,-1.0),Interval(-1.0,0.0)) --> false
-    @fact iscommon(emptyinterval()) --> false
-    @fact iscommon(entireinterval()) --> false
-    @fact iscommon(a) --> true
-    @fact isunbounded(emptyinterval()) --> false
-    @fact isunbounded(entireinterval()) --> true
-    @fact isunbounded(Interval(-Inf, 0.0)) --> true
-    @fact isunbounded(Interval(0.0, Inf)) --> true
-    @fact isunbounded(a) --> false
-end
-
-facts("Intersection tests") do
-    @fact emptyinterval() --> Interval(Inf, -Inf)
-    @fact a ∩ @interval(-1) --> emptyinterval(a)
-    @fact isempty(a ∩ @interval(-1) ) --> true
-    @fact isempty(a) --> false
-    @fact emptyinterval(a) == a --> false
-    @fact emptyinterval() == emptyinterval() --> true
-
-    @fact intersect(a, hull(a,b)) --> a
-    @fact union(a,b) --> Interval(a.lo, b.hi)
-end
-
-facts("Hull and union tests") do
-    @fact hull(1..2, 3..4) --> Interval(1, 4)
-    @fact hull(Interval(1//3, 3//4), Interval(3, 4)) --> @interval(1/3, 4)
-
-    @fact union(1..2, 3..4) --> Interval(1, 4)
-    @fact union(Interval(1//3, 3//4), Interval(3, 4)) --> @interval(1/3, 4)
-
-end
-
-facts("Special interval tests") do
-
-    @fact entireinterval(Float64) --> Interval(-Inf, Inf)
-    @fact isentire(entireinterval(a)) --> true
-    @fact isentire(Interval(-Inf, Inf)) --> true
-    @fact isentire(a) --> false
-    @fact Interval(-Inf, Inf) ⪽ Interval(-Inf, Inf) --> true
-
-    @fact nai(a) == nai(a) --> false
-    @fact nai(a) === nai(a) --> true
-    @fact nai(Float64) === Interval(NaN) --> true
-    @fact isnan(nai(BigFloat).lo) --> true
-    @fact isnai(nai()) --> true
-    @fact isnai(a) --> false
-
-    @fact infimum(a) == a.lo --> true
-    @fact supremum(a) == a.hi --> true
-    @fact infimum(emptyinterval(a)) --> Inf
-    @fact supremum(emptyinterval(a)) --> -Inf
-    @fact infimum(entireinterval(a)) --> -Inf
-    @fact supremum(entireinterval(a)) --> Inf
-    @fact isnan(supremum(nai(BigFloat))) --> true
-end
-
-facts("mid etc.") do
-
-    @fact mid( Interval(1//2) ) --> 1//2
-    @fact diam( Interval(1//2) ) --> 0//1
-    @fact diam( @interval(1//10) ) --> eps(0.1)
-    @fact diam( @interval(0.1) ) --> eps(0.1)
-    @fact isnan(diam(emptyinterval())) --> true
-    @fact mig(@interval(-2,2)) --> BigFloat(0.0)
-    @fact mig( Interval(1//2) ) --> 1//2
-    @fact isnan(mig(emptyinterval())) --> true
-    @fact mag(-b) --> b.hi
-    @fact mag( Interval(1//2) ) --> 1//2
-    @fact isnan(mag(emptyinterval())) --> true
-    @fact diam(a) --> 1.0000000000000002
-end
-
-facts("cancelplus tests") do
-
-    x = Interval(-2.0, 4.440892098500622e-16)
-    y = Interval(-4.440892098500624e-16, 2.0)
-    @fact cancelminus(x, y) --> entireinterval(Float64)
-    @fact cancelplus(x, y) --> entireinterval(Float64)
-    x = Interval(-big(1.0), eps(big(1.0))/4)
-    y = Interval(-eps(big(1.0))/2, big(1.0))
-    @fact cancelminus(x, y) --> entireinterval(BigFloat)
-    @fact cancelplus(x, y) --> entireinterval(BigFloat)
-    x = Interval(-big(1.0), eps(big(1.0))/2)
-    y = Interval(-eps(big(1.0))/2, big(1.0))
-    @fact cancelminus(x, y) ⊆ Interval(-one(BigFloat), one(BigFloat)) --> true
-    @fact cancelplus(x, y) --> Interval(zero(BigFloat), zero(BigFloat))
-    @fact cancelminus(emptyinterval(), emptyinterval()) --> emptyinterval()
-    @fact cancelplus(emptyinterval(), emptyinterval()) --> emptyinterval()
-    @fact cancelminus(emptyinterval(), Interval(0.0, 5.0)) --> emptyinterval()
-    @fact cancelplus(emptyinterval(), Interval(0.0, 5.0)) --> emptyinterval()
-    @fact cancelminus(entireinterval(), Interval(0.0, 5.0)) --> entireinterval()
-    @fact cancelplus(entireinterval(), Interval(0.0, 5.0)) --> entireinterval()
-    @fact cancelminus(Interval(5.0), Interval(-Inf, 0.0)) --> entireinterval()
-    @fact cancelplus(Interval(5.0), Interval(-Inf, 0.0)) --> entireinterval()
-    @fact cancelminus(Interval(0.0, 5.0), emptyinterval()) --> entireinterval()
-    @fact cancelplus(Interval(0.0, 5.0), emptyinterval()) --> entireinterval()
-    @fact cancelminus(Interval(0.0), Interval(0.0, 1.0)) --> entireinterval()
-    @fact cancelplus(Interval(0.0), Interval(0.0, 1.0)) --> entireinterval()
-    @fact cancelminus(Interval(0.0), Interval(1.0)) --> Interval(-1.0)
-    @fact cancelplus(Interval(0.0), Interval(1.0)) --> Interval(1.0)
-    @fact cancelminus(Interval(-5.0, 0.0), Interval(0.0, 5.0)) --> Interval(-5.0)
-    @fact cancelplus(Interval(-5.0, 0.0), Interval(0.0, 5.0)) --> Interval(0.0)
-end
-
-facts("mid and radius") do
-
-    # NOTE: By some strange reason radius is not recognized here
-    @fact ValidatedNumerics.radius(Interval(-1//10,1//10)) -->
-        diam(Interval(-1//10,1//10))/2
-    @fact isnan(ValidatedNumerics.radius(emptyinterval())) --> true
-    @fact mid(c) == 2.125 --> true
-    @fact isnan(mid(emptyinterval())) --> true
-    @fact mid(entireinterval()) == 0.0 --> true
-    @fact isnan(mid(nai())) --> true
-    # In v0.3 it corresponds to AssertionError
-    @fact_throws ArgumentError nai(Interval(1//2))
-end
-
-facts("abs, min, max, sign") do
-
-    @fact abs(entireinterval()) --> Interval(0.0, Inf)
-    @fact abs(emptyinterval()) --> emptyinterval()
-    @fact abs(Interval(-3.0,1.0)) --> Interval(0.0, 3.0)
-    @fact abs(Interval(-3.0,-1.0)) --> Interval(1.0, 3.0)
-    @fact min(entireinterval(), Interval(3.0,4.0)) --> Interval(-Inf, 4.0)
-    @fact min(emptyinterval(), Interval(3.0,4.0)) --> emptyinterval()
-    @fact min(Interval(-3.0,1.0), Interval(3.0,4.0)) --> Interval(-3.0, 1.0)
-    @fact min(Interval(-3.0,-1.0), Interval(3.0,4.0)) --> Interval(-3.0, -1.0)
-    @fact max(entireinterval(), Interval(3.0,4.0)) --> Interval(3.0, Inf)
-    @fact max(emptyinterval(), Interval(3.0,4.0)) --> emptyinterval()
-    @fact max(Interval(-3.0,1.0), Interval(3.0,4.0)) --> Interval(3.0, 4.0)
-    @fact max(Interval(-3.0,-1.0), Interval(3.0,4.0)) --> Interval(3.0, 4.0)
-    @fact sign(entireinterval()) --> Interval(-1.0, 1.0)
-    @fact sign(emptyinterval()) --> emptyinterval()
-    @fact sign(Interval(-3.0,1.0)) --> Interval(-1.0, 1.0)
-    @fact sign(Interval(-3.0,-1.0)) --> Interval(-1.0, -1.0)
-
-    @fact log(@interval(-2,5)) --> @interval(-Inf,log(5.0))
-
-    # Test putting functions in @interval:
-    @fact @interval(sin(0.1) + cos(0.2)) --> sin(@interval(0.1)) + cos(@interval(0.2))
-
-    f(x) = 2x
-    @fact @interval(f(0.1)) --> f(@interval(0.1))
-
-    # midpoint-radius representation
-    a = @interval(0.1)
-    midpoint, radius = midpoint_radius(a)
-
-    @fact interval_from_midpoint_radius(midpoint, radius) -->
-        Interval(0.09999999999999999, 0.10000000000000002)
-
-end
-
-facts("Precision tests") do
-    setprecision(Interval, 100)
-    @fact precision(Interval) == (BigFloat, 100) --> true
-
-    setprecision(Interval, Float64)
-    @fact precision(Interval) == (Float64, 100) --> true
-
-    a = @interval(0.1, 0.3)
-
-    b = setprecision(Interval, 64) do
-        @interval(0.1, 0.3)
+        @test 1 == zero(a)+one(b)
+        @test Interval(0,1) + emptyinterval(a) == emptyinterval(a)
+        @test @interval(0.25) - one(c)/4 == zero(c)
+        @test emptyinterval(a) - Interval(0,1) == emptyinterval(a)
+        @test Interval(0,1) - emptyinterval(a) == emptyinterval(a)
+        @test a*b == Interval(a.lo*b.lo, a.hi*b.hi)
+        @test Interval(0,1) * emptyinterval(a) == emptyinterval(a)
+        @test a * Interval(0) == zero(a)
     end
 
-    @fact b ⊆ a --> true
+    @testset "inv" begin
 
-    @fact precision(Interval) == (Float64, 100) --> true
+        @test inv( zero(a) ) == emptyinterval()
+        @test inv( @interval(0, 1) ) == Interval(1, Inf)
+        @test inv( @interval(1, Inf) ) == Interval(0, 1)
+        @test inv(c) == c
+        @test one(b)/b == inv(b)
+        @test a/emptyinterval(a) == emptyinterval(a)
+        @test emptyinterval(a)/a == emptyinterval(a)
+        @test inv(@interval(-4.0,0.0)) == @interval(-Inf, -0.25)
+        @test inv(@interval(0.0,4.0)) == @interval(0.25, Inf)
+        @test inv(@interval(-4.0,4.0)) == entireinterval(Float64)
+        @test @interval(0)/@interval(0) == emptyinterval()
+        @test typeof(emptyinterval()) == Interval{Float64}
+    end
 
-end
+    @testset "fma consistency" begin
+        @test fma(emptyinterval(), a, b) == emptyinterval()
+        @test fma(entireinterval(), zero(a), b) == b
+        @test fma(entireinterval(), one(a), b) == entireinterval()
+        @test fma(zero(a), entireinterval(), b) == b
+        @test fma(one(a), entireinterval(), b) == entireinterval()
+        @test fma(a, zero(a), c) == c
+        @test fma(Interval(1//2), Interval(1//3), Interval(1//12)) == Interval(3//12)
+    end
 
-facts("Interval rounding tests") do
-    setrounding(Interval, :wide)
-    @fact rounding(Interval) == :wide --> true
+    @testset "∈ tests" begin
+        @test !(Inf ∈ entireinterval())
+        @test 0.1 ∈ @interval(0.1)
+        @test 0.1 in @interval(0.1)
+        @test !(-Inf ∈ entireinterval())
+        @test !(Inf ∈ entireinterval())
+    end
 
-    @fact_throws ArgumentError setrounding(Interval, :hello)
+    @testset "Inclusion tests" begin
+        @test b ⊆ c
+        @test emptyinterval(c) ⊆ c
+        @test !(c ⊆ emptyinterval(c))
+        @test interior(b,c)
+        @test !(b ⪽ emptyinterval(b))
+        @test emptyinterval(c) ⪽ c
+        @test emptyinterval(c) ⪽ emptyinterval(c)
+        @test isdisjoint(a, @interval(2.1))
+        @test !(isdisjoint(a, b))
+        @test isdisjoint(emptyinterval(a), a)
+        @test isdisjoint(emptyinterval(), emptyinterval())
+    end
 
-    setrounding(Interval, :narrow)
-    @fact rounding(Interval) == :narrow --> true
+    @testset "Comparison tests" begin
+        @test ValidatedNumerics.islessprime(a.lo, b.lo) == (a.lo < b.lo)
+        @test ValidatedNumerics.islessprime(Inf, Inf)
+        @test ∅ <= ∅
+        @test !(Interval(1.0,2.0) <= ∅)
+        @test Interval(-Inf,Inf) <= Interval(-Inf,Inf)
+        @test !(Interval(-0.0,2.0) ≤ Interval(-Inf,Inf))
+        @test precedes(∅,∅)
+        @test precedes(Interval(3.0,4.0),∅)
+        @test !(precedes(Interval(0.0,2.0),Interval(-Inf,Inf)))
+        @test precedes(Interval(1.0,3.0),Interval(3.0,4.0))
+        @test strictprecedes(Interval(3.0,4.0),∅)
+        @test !(strictprecedes(Interval(-3.0,-1.0),Interval(-1.0,0.0)))
+        @test !(iscommon(emptyinterval()))
+        @test !(iscommon(entireinterval()))
+        @test iscommon(a)
+        @test !(isunbounded(emptyinterval()))
+        @test isunbounded(entireinterval())
+        @test isunbounded(Interval(-Inf, 0.0))
+        @test isunbounded(Interval(0.0, Inf))
+        @test !(isunbounded(a))
+    end
 
-end
+    @testset "Intersection tests" begin
+        @test emptyinterval() == Interval(Inf, -Inf)
+        @test (a ∩ @interval(-1)) == emptyinterval(a)
+        @test isempty(a ∩ @interval(-1) )
+        @test !(isempty(a))
+        @test !(emptyinterval(a) == a)
+        @test emptyinterval() == emptyinterval()
 
-facts("Interval power of an interval") do
+        @test intersect(a, hull(a,b)) == a
+        @test union(a,b) == Interval(a.lo, b.hi)
+    end
 
-    setprecision(Interval, Float64)
+    @testset "Hull and union tests" begin
+        @test hull(1..2, 3..4) == Interval(1, 4)
+        @test hull(Interval(1//3, 3//4), Interval(3, 4)) == @interval(1/3, 4)
 
-    a = @interval(1, 2)
-    b = @interval(3, 4)
+        @test union(1..2, 3..4) == Interval(1, 4)
+        @test union(Interval(1//3, 3//4), Interval(3, 4)) == @interval(1/3, 4)
+    end
 
-    @fact a^b --> @interval(1, 16)
-    @fact a^@interval(0.5, 1) --> a
-    @fact a^@interval(0.3, 0.5) --> @interval(1, sqrt(2))
+    @testset "Special interval tests" begin
 
-    @fact b^@interval(0.3) == Interval(1.3903891703159093, 1.5157165665103982) --> true
+        @test entireinterval(Float64) == Interval(-Inf, Inf)
+        @test isentire(entireinterval(a))
+        @test isentire(Interval(-Inf, Inf))
+        @test !(isentire(a))
+        @test Interval(-Inf, Inf) ⪽ Interval(-Inf, Inf)
+
+        @test !(nai(a) == nai(a))
+        @test nai(a) === nai(a)
+        @test nai(Float64) === Interval(NaN)
+        @test isnan(nai(BigFloat).lo)
+        @test isnai(nai())
+        @test !(isnai(a))
+
+        @test infimum(a) == a.lo
+        @test supremum(a) == a.hi
+        @test infimum(emptyinterval(a)) == Inf
+        @test supremum(emptyinterval(a)) == -Inf
+        @test infimum(entireinterval(a)) == -Inf
+        @test supremum(entireinterval(a)) == Inf
+        @test isnan(supremum(nai(BigFloat)))
+    end
+
+    @testset "mid etc." begin
+
+        @test mid( Interval(1//2) ) == 1//2
+        @test diam( Interval(1//2) ) == 0//1
+        @test diam( @interval(1//10) ) == eps(0.1)
+        @test diam( @interval(0.1) ) == eps(0.1)
+        @test isnan(diam(emptyinterval()))
+        @test mig(@interval(-2,2)) == BigFloat(0.0)
+        @test mig( Interval(1//2) ) == 1//2
+        @test isnan(mig(emptyinterval()))
+        @test mag(-b) == b.hi
+        @test mag( Interval(1//2) ) == 1//2
+        @test isnan(mag(emptyinterval()))
+        @test diam(a) == 1.0000000000000002
+    end
+
+    @testset "cancelplus tests" begin
+
+        x = Interval(-2.0, 4.440892098500622e-16)
+        y = Interval(-4.440892098500624e-16, 2.0)
+        @test cancelminus(x, y) == entireinterval(Float64)
+        @test cancelplus(x, y) == entireinterval(Float64)
+        x = Interval(-big(1.0), eps(big(1.0))/4)
+        y = Interval(-eps(big(1.0))/2, big(1.0))
+        @test cancelminus(x, y) == entireinterval(BigFloat)
+        @test cancelplus(x, y) == entireinterval(BigFloat)
+        x = Interval(-big(1.0), eps(big(1.0))/2)
+        y = Interval(-eps(big(1.0))/2, big(1.0))
+        @test cancelminus(x, y) ⊆ Interval(-one(BigFloat), one(BigFloat))
+        @test cancelplus(x, y) == Interval(zero(BigFloat), zero(BigFloat))
+        @test cancelminus(emptyinterval(), emptyinterval()) == emptyinterval()
+        @test cancelplus(emptyinterval(), emptyinterval()) == emptyinterval()
+        @test cancelminus(emptyinterval(), Interval(0.0, 5.0)) == emptyinterval()
+        @test cancelplus(emptyinterval(), Interval(0.0, 5.0)) == emptyinterval()
+        @test cancelminus(entireinterval(), Interval(0.0, 5.0)) == entireinterval()
+        @test cancelplus(entireinterval(), Interval(0.0, 5.0)) == entireinterval()
+        @test cancelminus(Interval(5.0), Interval(-Inf, 0.0)) == entireinterval()
+        @test cancelplus(Interval(5.0), Interval(-Inf, 0.0)) == entireinterval()
+        @test cancelminus(Interval(0.0, 5.0), emptyinterval()) == entireinterval()
+        @test cancelplus(Interval(0.0, 5.0), emptyinterval()) == entireinterval()
+        @test cancelminus(Interval(0.0), Interval(0.0, 1.0)) == entireinterval()
+        @test cancelplus(Interval(0.0), Interval(0.0, 1.0)) == entireinterval()
+        @test cancelminus(Interval(0.0), Interval(1.0)) == Interval(-1.0)
+        @test cancelplus(Interval(0.0), Interval(1.0)) == Interval(1.0)
+        @test cancelminus(Interval(-5.0, 0.0), Interval(0.0, 5.0)) == Interval(-5.0)
+        @test cancelplus(Interval(-5.0, 0.0), Interval(0.0, 5.0)) == Interval(0.0)
+    end
+
+    @testset "mid and radius" begin
+        @test radius(Interval(-1//10,1//10)) == diam(Interval(-1//10,1//10))/2
+        @test isnan(ValidatedNumerics.radius(emptyinterval()))
+        @test mid(c) == 2.125
+        @test isnan(mid(emptyinterval()))
+        @test mid(entireinterval()) == 0.0
+        @test isnan(mid(nai()))
+        @test_throws ArgumentError nai(Interval(1//2))
+    end
+
+    @testset "abs, min, max, sign" begin
+
+        @test abs(entireinterval()) == Interval(0.0, Inf)
+        @test abs(emptyinterval()) == emptyinterval()
+        @test abs(Interval(-3.0,1.0)) == Interval(0.0, 3.0)
+        @test abs(Interval(-3.0,-1.0)) == Interval(1.0, 3.0)
+        @test min(entireinterval(), Interval(3.0,4.0)) == Interval(-Inf, 4.0)
+        @test min(emptyinterval(), Interval(3.0,4.0)) == emptyinterval()
+        @test min(Interval(-3.0,1.0), Interval(3.0,4.0)) == Interval(-3.0, 1.0)
+        @test min(Interval(-3.0,-1.0), Interval(3.0,4.0)) == Interval(-3.0, -1.0)
+        @test max(entireinterval(), Interval(3.0,4.0)) == Interval(3.0, Inf)
+        @test max(emptyinterval(), Interval(3.0,4.0)) == emptyinterval()
+        @test max(Interval(-3.0,1.0), Interval(3.0,4.0)) == Interval(3.0, 4.0)
+        @test max(Interval(-3.0,-1.0), Interval(3.0,4.0)) == Interval(3.0, 4.0)
+        @test sign(entireinterval()) == Interval(-1.0, 1.0)
+        @test sign(emptyinterval()) == emptyinterval()
+        @test sign(Interval(-3.0,1.0)) == Interval(-1.0, 1.0)
+        @test sign(Interval(-3.0,-1.0)) == Interval(-1.0, -1.0)
+
+        # Test putting functions in @interval:
+        @test log(@interval(-2,5)) == @interval(-Inf,log(5.0))
+        @test @interval(sin(0.1) + cos(0.2)) == sin(@interval(0.1)) + cos(@interval(0.2))
+
+        f(x) = 2x
+        @test @interval(f(0.1)) == f(@interval(0.1))
+
+        # midpoint-radius representation
+        a = @interval(0.1)
+        midpoint, radius = midpoint_radius(a)
+
+        @test interval_from_midpoint_radius(midpoint, radius) ==
+            Interval(0.09999999999999999, 0.10000000000000002)
+    end
+
+    @testset "Precision tests" begin
+        setprecision(Interval, 100)
+        @test precision(Interval) == (BigFloat, 100)
+
+        setprecision(Interval, Float64)
+        @test precision(Interval) == (Float64, 100)
+
+        a = @interval(0.1, 0.3)
+
+        b = setprecision(Interval, 64) do
+            @interval(0.1, 0.3)
+        end
+
+        @test b ⊆ a
+
+        @test precision(Interval) == (Float64, 100)
+    end
+
+    @testset "Interval rounding tests" begin
+        setrounding(Interval, :wide)
+        @test rounding(Interval) == :wide
+
+        @test_throws ArgumentError setrounding(Interval, :hello)
+
+        setrounding(Interval, :narrow)
+        @test rounding(Interval) == :narrow
+    end
+
+    @testset "Interval power of an interval" begin
+
+        setprecision(Interval, Float64)
+
+        a = @interval(1, 2)
+        b = @interval(3, 4)
+
+        @test a^b == @interval(1, 16)
+        @test a^@interval(0.5, 1) == a
+        @test a^@interval(0.3, 0.5) == @interval(1, sqrt(2))
+
+        @test b^@interval(0.3) == Interval(1.3903891703159093, 1.5157165665103982)
+    end
 
 end

@@ -37,7 +37,7 @@ export
     precedes, strictprecedes, ≺,
     entireinterval, isentire, nai, isnai, isthin, iscommon,
     widen, infimum, supremum,
-    parameters, eps, dist, roughly,
+    parameters, eps, dist, 
     pi_interval,
     midpoint_radius, interval_from_midpoint_radius,
     RoundTiesToEven, RoundTiesToAway,

@@ -1,12 +1,11 @@
-#module ValidatedNumericsTests
-
+if VERSION >= v"0.5.0-dev+7720"
+    using Base.Test
+else
+    using BaseTestNext
+    const Test = BaseTestNext
+end
 using ValidatedNumerics
-using FactCheck
-using Compat
 
-
-FactCheck.roughly(a::Interval) = b -> (dist(a, b) < 2*max(eps(a), eps(b)))
-roughly = FactCheck.roughly
 
 # Interval tests:
 
@@ -27,7 +26,3 @@ include("root_finding_tests/root_finding.jl")
 # ITF1788 tests
 
 include("ITF1788_tests/ITF1788_tests.jl")
-
-FactCheck.exitstatus()
-
-#end
