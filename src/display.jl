@@ -6,12 +6,11 @@ end
 
 const display_params = DisplayParameters(:standard, false, 6)
 
-const display_options = [:standard, :full, :midpoint]
 
 doc"""
-    displaymode(;kw)
+    setdisplay(;kw)
 
-`displaymode` changes how intervals are displayed using keyword arguments.
+`setdisplay` changes how intervals are displayed using keyword arguments.
 The following options are available:
 
 - `format`: interval output format
@@ -20,28 +19,34 @@ The following options are available:
     - `:full`: `Interval(1, 2)`
     - `:midpoint`: 1.5 ± 0.5
 
-- `sigfigs`: number of significant figures to show in `standard` mode
+- `sigfigs`: number of significant figures to show in `standard` mode; the default is 6
 
 - `decorations` (boolean):  show decorations or not
+
+Example:
+```
+julia> setdisplay(:full, decorations=true)
+```
 """
-function displaymode(;decorations=nothing, format=nothing, sigfigs=-1)
-    if format != nothing
+function setdisplay(format = display_params.format;
+                    decorations = display_params.decorations, sigfigs::Integer = display_params.sigfigs)
 
-        if format in display_options
-            display_params.format = format
-        else
-            throw(ArgumentError("Allowed format option is one of  $display_options."))
-        end
-
+    if format ∉ (:standard, :full, :midpoint)
+        throw(ArgumentError("Allowed format option is one of  $display_options."))
     end
 
-    if decorations != nothing
-        display_params.decorations = decorations
+    if decorations ∉ (true, false)
+        throw(ArgumentError("`decorations` must be `true` or `false`"))
     end
 
-    if sigfigs >= 0
-        display_params.sigfigs = sigfigs
+    if sigfigs < 1
+        throw(ArgumentError("`sigfigs` must be `>= 1`"))
     end
+
+    # update values in display_params:
+    display_params.format = format
+    display_params.decorations = decorations
+    display_params.sigfigs = sigfigs
 end
 
 
@@ -66,7 +71,7 @@ end
 round_string(x::Real, digits::Int, r::RoundingMode) = round_string(big(x), digits, r)
 
 
-function representation(a::Interval, format=nothing)
+function basic_representation(a::Interval, format=nothing)
     if isempty(a)
         return "∅"
     end
@@ -100,7 +105,7 @@ function representation(a::Interval, format=nothing)
     output
 end
 
-function representation{T<:Integer}(a::Interval{Rational{T}},
+function basic_representation{T<:Integer}(a::Interval{Rational{T}},
     format=nothing)
 
     if isempty(a)
@@ -110,13 +115,15 @@ function representation{T<:Integer}(a::Interval{Rational{T}},
     if format == nothing
         format = display_params.format  # default
     end
-    
+
     local output
 
     if format == :standard
         output = "[$(a.lo), $(a.hi)]"
+
     elseif format == :full
         output = "Interval($(a.lo), $(a.hi))"
+
     elseif format == :midpoint
         m = mid(a)
         r = radius(a)
@@ -133,6 +140,9 @@ function subscriptify(n::Int)
 end
 
 
+# fall-back:
+representation{T}(a::Interval{T}, format=nothing) = basic_representation(a, format)
+
 function representation(a::Interval{BigFloat}, format=nothing)
 
     if format == nothing
@@ -141,16 +151,18 @@ function representation(a::Interval{BigFloat}, format=nothing)
 
 
     if format == :standard
-        @compat string( invoke(representation, Tuple{Interval,Symbol}, a, format),
-                    subscriptify(precision(a.lo)) )
 
-    elseif format == :full
-        @compat invoke(representation, Tuple{Interval, Symbol}, a, format)
+        return string(basic_representation(a, format), subscriptify(precision(a.lo)))
+
+    else
+
+        return basic_representation(a, format)
+
     end
 end
 
 
-function representation(a::DecoratedInterval, format=nothing)
+function representation{T}(a::DecoratedInterval{T}, format=nothing)
 
     if format == nothing
         format = display_params.format  # default
@@ -187,7 +199,11 @@ function representation(X::IntervalBox, format=nothing)
 end
 
 
-for T in (Interval, DecoratedInterval, IntervalBox)
-    @eval show(io::IO, a::$T) = print(io, representation(a))
-    @eval showall(io::IO, a::$T) = print(io, representation(a, :full))
+for T in (Interval, DecoratedInterval)
+    @eval show{S}(io::IO, a::$T{S}) = print(io, representation(a))
+    @eval showall{S}(io::IO, a::$T{S}) = print(io, representation(a, :full))
 end
+
+T = IntervalBox
+@eval show(io::IO, a::$T) = print(io, representation(a))
+@eval showall(io::IO, a::$T) = print(io, representation(a, :full))

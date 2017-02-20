@@ -9,7 +9,7 @@ using ValidatedNumerics
 
 # Interval tests:
 
-displaymode(format=:full)
+setdisplay(:full)
 
 include("interval_tests/intervals.jl")
 include("multidim_tests/multidim.jl")
