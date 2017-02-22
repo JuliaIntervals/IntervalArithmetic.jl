@@ -197,3 +197,25 @@ end
 
     setrounding(Interval, :narrow)
 end
+
+@testset "Fast power" begin
+    x = 1..2
+    @test pow(x, 2) == pow(-x, 2) == Interval(1, 4)
+    @test pow(-x, 3) == Interval(-8.0, -1.0)
+
+    @test pow(-1..2, 2) == 0..4
+    @test pow(-1..2, 3) == -1..8
+    @test pow(-1..2, 4) == 0..16
+
+    @test pow(@biginterval(-1, 2), 2) == 0..4
+    @test pow(@biginterval(-1, 2), 3) == -1..8
+    @test pow(@biginterval(1, 2), 2) == 1..4
+
+
+    x = @interval(pi)
+    @test x^100 ⊆ pow(x, 100)
+    @test x^50 ⊆ pow(x, 50)
+    @test interior(x^50, pow(x, 50))
+
+
+end

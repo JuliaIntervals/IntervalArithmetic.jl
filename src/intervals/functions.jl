@@ -167,6 +167,35 @@ function sqrt{T}(a::Interval{T})
     @round(sqrt(a.lo), sqrt(a.hi))  # `sqrt` is correctly-rounded
 end
 
+doc"""
+    pow(x::Interval, n::Integer)
+
+A faster implementation of `x^n` using `power_by_squaring`.
+`pow(x, n) will usually return an interval that is slightly larger than that calculated by `x^n`, but is guaranteed to be a correct
+enclosure when using multiplication with correct rounding.
+"""
+function pow{T}(x::Interval{T}, n::Integer)  # fast integer power
+
+    isempty(x) && return x
+
+    if iseven(n) && zero(T) ∈ x
+
+        return hull(zero(x),
+                    hull(Base.power_by_squaring(Interval(mig(x)), n),
+                        Base.power_by_squaring(Interval(mag(x)), n))
+            )
+
+    else
+
+      return hull( Base.power_by_squaring(Interval(x.lo), n),
+                    Base.power_by_squaring(Interval(x.hi), n) )
+
+    end
+
+end
+
+
+
 
 for f in (:exp, :expm1)
     @eval begin

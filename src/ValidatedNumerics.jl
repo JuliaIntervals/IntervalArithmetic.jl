@@ -42,7 +42,8 @@ export
     midpoint_radius, interval_from_midpoint_radius,
     RoundTiesToEven, RoundTiesToAway,
     cancelminus, cancelplus, isunbounded,
-    .., @I_str, ±
+    .., @I_str, ±,
+    pow
 
 export
     setdisplay
