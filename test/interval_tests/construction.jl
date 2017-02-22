@@ -189,12 +189,53 @@ end
     # @test imag(b) == Interval(-15.200784463067956, -15.20078446306795)
 end
 
+@testset ".. tests" begin
+
+
+    a = 0.1..0.3
+    @test big"0.1" ∈ a
+    @test big"0.3" ∈ a
+
+    # part of issue #172:
+
+    a = big(0.1)..2
+    @test typeof(a) == Interval{BigFloat}
+end
+
 @testset "± tests" begin
     setprecision(Interval, Float64)
 
     @test 3 ± 0.5 == Interval(2.5, 3.5)
     @test 3 ± 0.1 == Interval(2.9, 3.1)
     @test 0.5 ± 1 == Interval(-0.5, 1.5)
+
+    # issue 172:
+    a = @interval(1) ± 1
+    @test a == Interval(-0.0, 2.0)
+    @test typeof(a) == Interval{Float64}
+
+    a =  @biginterval(1) ± 1
+    @test a == Interval(big(-0.0), big(2.0))
+    @test typeof(a) == Interval{BigFloat}
+
+end
+
+@testset "Conversions between different types of interval" begin
+    a = convert(Interval{BigFloat}, 3..4)
+    @test typeof(a) == Interval{BigFloat}
+
+    a = convert(Interval{Float64}, @biginterval(3, 4))
+    @test typeof(a) == Interval{Float64}
+end
+
+@testset "Conversion to Interval" begin
+    a = convert(Interval, 3)
+    @test a == Interval(3.0)
+    @test typeof(a) == Interval{Float64}
+
+    a = convert(Interval, big(3))
+    @test typeof(a) == Interval{BigFloat}
+
 end
 
 @testset "Interval{T} constructor" begin

@@ -59,7 +59,7 @@ include("hyperbolic.jl")
 
 # Syntax for intervals
 
-a..b = @interval(a, b)
+a..b = Interval(convert(Interval, a).lo, convert(Interval, b).hi)
 
 macro I_str(ex)  # I"[3,4]"
     @interval(ex)
