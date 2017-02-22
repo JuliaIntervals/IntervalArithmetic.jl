@@ -15,7 +15,6 @@ using ValidatedNumerics
     setprecision(Interval, Float64)
     @test ValidatedNumerics.parameters.precision == 53
 
-    # There is an inexplicable error on 0.5 with the following:
     @test precision(BigFloat) == 53
     @test precision(Interval) == (Float64, 53)
 
@@ -36,9 +35,9 @@ using ValidatedNumerics
     @test Interval{Rational{Int}}(1) == Interval(1//1)
     #@test Interval{Rational{Int}}(pi) == Interval(rationalize(1.0*pi))
 
-    @test Interval{BigFloat}(1) == Interval{BigFloat}(big(1.0),big(1.0))
-    @test Interval{BigFloat}(pi) ==
-        Interval{BigFloat}(big(3.1415926535897931), big(3.1415926535897936))
+    @test Interval{Float64}(pi) == Interval(float(pi))
+    @test Interval{BigFloat}(1) == Interval{BigFloat}(big(1.0), big(1.0))
+    @test Interval{BigFloat}(pi) == Interval{BigFloat}(big(pi), big(pi))
 
     # Disallowed conversions with a > b
 
@@ -53,6 +52,7 @@ using ValidatedNumerics
     @test_throws ArgumentError @interval(big(1), 1//10)
     @test_throws ArgumentError @interval(1, 0.1)
     @test_throws ArgumentError @interval(big(1), big(0.1))
+
 
     # Conversions; may involve rounding
     # @test convert(Interval, 1) == Interval(1.0)
@@ -195,4 +195,12 @@ end
     @test 3 ± 0.5 == Interval(2.5, 3.5)
     @test 3 ± 0.1 == Interval(2.9, 3.1)
     @test 0.5 ± 1 == Interval(-0.5, 1.5)
+end
+
+@testset "Interval{T} constructor" begin
+    @test Interval{Float64}(1) == 1..1
+    @test Interval{Float64}(1.1) == Interval(1.1, 1.1)  # no rounding
+
+    @test Interval{BigFloat}(1) == @biginterval(1, 1)
+    @test Interval{BigFloat}(big"1.1") == Interval(big"1.1", big"1.1")
 end

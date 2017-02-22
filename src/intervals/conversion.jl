@@ -49,14 +49,15 @@ convert{T<:AbstractFloat}(::Type{Interval{T}}, x::AbstractString) =
 
 function convert{T<:AbstractFloat, S<:Real}(::Type{Interval{T}}, x::S)
     Interval{T}( T(x, RoundDown), T(x, RoundUp) )
-    # the rounding up could be down as nextfloat of the rounded down one
+    # the rounding up could be done as nextfloat of the rounded down one?
+    # use @round_up and @round_down here?
 end
 
 function convert{T<:AbstractFloat}(::Type{Interval{T}}, x::Float64)
     II = convert(Interval{T}, rationalize(x))
     # This prevents that rationalize(x) returns a zero when x is very small
     if x != zero(x) && II == zero(Interval{T})
-        II = Interval{T}(string(x))
+        II = convert(Interval{T}, string(x))
     end
     II
 end
