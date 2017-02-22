@@ -13,11 +13,17 @@ immutable Interval{T<:Real} <: AbstractInterval
 
     function Interval(a::Real, b::Real)
 
+        if isnan(a) || isnan(b)
+            return new(NaN, NaN)  # nai
+        end
+
         if a > b
             (isinf(a) && isinf(b)) && return new(a, b)  # empty interval = [∞,-∞]
 
             throw(ArgumentError("Must have a ≤ b to construct Interval(a, b)."))
         end
+
+
 
         new(a, b)
     end

@@ -65,7 +65,11 @@ function round_string(x::BigFloat, digits::Int, r::RoundingMode)
     (Ptr{UInt8}, Culong,  Ptr{UInt8}, Int32, Ptr{BigFloat}...),
     buf, lng + 1, "%.$(digits)R*g", Base.MPFR.to_mpfr(r), &x)
 
-    return unsafe_string(pointer(buf))
+    repr = unsafe_string(pointer(buf))
+
+    repr = replace(repr, "nan", "NaN")
+
+    return repr
 end
 
 round_string(x::Real, digits::Int, r::RoundingMode) = round_string(big(x), digits, r)
