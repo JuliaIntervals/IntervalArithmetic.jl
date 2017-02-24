@@ -1,7 +1,5 @@
 # This file is part of the ValidatedNumerics.jl package; MIT licensed
 
-## Promotion
-
 ## Promotion rules
 
 # Avoid ambiguity with ForwardDiff:
@@ -20,32 +18,11 @@ promote_rule{T<:Real}(::Type{BigFloat}, ::Type{Interval{T}}) =
     Interval{promote_type(T, BigFloat)}
 
 
-## Conversion rules
-
-# convert{T<:Real}(::Type{Interval}, x::T) = convert(Interval{Float64}, x)
-
-doc"""
-`split_interval_string` deals with strings of the form `"[3.5, 7.2]"`
-"""
-function split_interval_string(T, x::AbstractString)
-    if !(contains(x, "["))  # string like "3.1"
-        return @round(parse(T, x), parse(T, x))
-    end
-
-    m = match(r"\[(.*),(.*)\]", x)  # string like "[1, 2]"
-
-    if m == nothing
-        throw(ArgumentError("Unable to process string $x as interval"))
-    end
-
-    @round(parse(T, m.captures[1]), parse(T, m.captures[2]))
-end
-
 
 # Floating point intervals:
 
 convert{T<:AbstractFloat}(::Type{Interval{T}}, x::AbstractString) =
-    split_interval_string(T, x)
+    parse(Interval{T}, x)
 
 function convert{T<:AbstractFloat, S<:Real}(::Type{Interval{T}}, x::S)
     Interval{T}( T(x, RoundDown), T(x, RoundUp) )
@@ -57,7 +34,8 @@ function convert{T<:AbstractFloat}(::Type{Interval{T}}, x::Float64)
     II = convert(Interval{T}, rationalize(x))
     # This prevents that rationalize(x) returns a zero when x is very small
     if x != zero(x) && II == zero(Interval{T})
-        II = convert(Interval{T}, string(x))
+        return Interval(parse(T, string(x), RoundDown),
+                        parse(T, string(x), RoundUp))
     end
     II
 end

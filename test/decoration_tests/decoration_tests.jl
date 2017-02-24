@@ -51,5 +51,14 @@ using ValidatedNumerics
     @test @decorated(-3, 2)^Interval(0.0, 1.0) == DecoratedInterval(0.0,2.0, trv)
     @test @decorated(-3, 2)^@decorated(0.0, 1.0) == DecoratedInterval(0.0,2.0, trv)
     @test @decorated(-3, 2)^Interval(-1.0, 1.0) == DecoratedInterval(0.0,Inf, trv)
-    @test @decorated(-3, 2)^@decorated(-1.0, 1.0) == DecoratedInterval(0.0,Inf, trv)
+    @test @decorated(-3, 2)^@decorated(-1.0, 1.0) == DecoratedInterval(0.0, Inf, trv)
+end
+
+@testset "Convert string to DecoratedInterval" begin
+    @test convert(DecoratedInterval{Float64}, "[1,2]") ==
+                    DecoratedInterval(Interval(1, 2), com)
+
+    @test convert(DecoratedInterval{Float64}, "[1,2]_dac") ==
+                        DecoratedInterval(Interval(1, 2), dac)
+
 end

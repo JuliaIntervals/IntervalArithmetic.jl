@@ -35,12 +35,13 @@ end
 doc"""`transform` transforms a string by applying the function `f` and type
 `T` to each argument, i.e. `:(x+y)` is transformed to `:(f(T, x) + f(T, y))`
 """
-transform(x, f, T) = :($f($(esc(T)), $(esc(x))))   # use if x is not an expression
+transform(x::Symbol, f, T) = :($f($T, $(esc(x))))   # use if x is not an expression
+transform(x, f, T) = :($f($T, $x))   # use if x is not an
 
 function transform(expr::Expr, f::Symbol, T)
 
     if expr.head in ( :(.), :ref )   # of form  a.lo  or  a[i]
-        return :($f(esc(T)), $(esc(expr)))
+        return :($f($T, $(esc(expr))))
     end
 
     new_expr = copy(expr)
@@ -58,7 +59,7 @@ function transform(expr::Expr, f::Symbol, T)
     end
 
     if expr.head == :macrocall  # handles BigInts etc.
-        return :($f($(esc(T)), $(esc(expr))))  # hack: pass straight through
+        return :($f($T, $(esc(expr))))  # hack: pass straight through
     end
 
     for (i, arg) in enumerate(expr.args)
@@ -78,6 +79,8 @@ and making each literal (0.1, 1, etc.) into a corresponding interval constructio
 by calling `transform`."""
 
 function make_interval(T, expr1, expr2)
+    # @show expr1, expr2
+    
     expr1 = transform(expr1, :convert, :(Interval{$T}))
 
     if isempty(expr2)  # only one argument
