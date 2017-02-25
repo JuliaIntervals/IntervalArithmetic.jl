@@ -11,8 +11,7 @@ export
     derivative, jacobian,  # reexport derivative from ForwardDiff
     Root, is_unique,
     find_roots,
-    find_roots_midpoint,
-    bisect
+    find_roots_midpoint
 
 import Base: ⊆
 
@@ -32,7 +31,7 @@ is_unique{T}(root::Root{T}) = root.status == :unique
 ⊆(a::Root, b::Root) = a.interval ⊆ b.interval
 
 
-include("bisect.jl")
+# include("automatic_differentiation.jl")
 include("newton.jl")
 include("krawczyk.jl")
 

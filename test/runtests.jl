@@ -20,7 +20,6 @@ include("display_tests/display.jl")
 
 # Root-finding tests:
 
-using ValidatedNumerics.RootFinding
 include("root_finding_tests/root_finding.jl")
 
 
