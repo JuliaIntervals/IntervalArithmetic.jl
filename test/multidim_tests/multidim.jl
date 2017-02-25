@@ -101,3 +101,18 @@ end
 
 
 end
+
+@testset "mid, diam, × for IntervalBox" begin
+    X = (0..2) × (3..5)
+    @test length(X) == 2
+    @test X == IntervalBox(Interval(0, 2), Interval(3, 5))
+
+    @test diam(X) == 2
+    @test mid(X) == [1, 4]
+
+    Y = X × (4..8)
+    @test isa(Y, IntervalBox)
+    @test length(Y) == 3
+    @test Y == IntervalBox(Interval(0, 2), Interval(3, 5), Interval(4, 8))
+    @test diam(Y) == 4
+end

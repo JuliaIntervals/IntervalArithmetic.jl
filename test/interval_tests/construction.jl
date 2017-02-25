@@ -54,14 +54,14 @@ using ValidatedNumerics
     @test_throws ArgumentError @interval(big(1), big(0.1))
 
 
-    # Conversions; may involve rounding
-    # @test convert(Interval, 1) == Interval(1.0)
-    # @test convert(Interval, pi) == @interval(pi)
-    # @test convert(Interval, eu) == @interval(eu)
-    # @test convert(Interval, BigInt(1)) == Interval(BigInt(1))
-    # @test convert(Interval, 1//10) == @interval(1//10)
-    # @test convert(Interval, 0.1) == Interval(0.09999999999999999, 0.1)
-    # @test convert(Interval, BigFloat(0.1)) == Interval(big(0.1))
+    # Conversion to Interval without type
+    @test convert(Interval, 1) == Interval(1.0)
+    @test convert(Interval, pi) == @interval(pi)
+    @test convert(Interval, eu) == @interval(eu)
+    @test convert(Interval, BigInt(1)) == Interval(BigInt(1))
+    @test convert(Interval, 1//10) == @interval(1//10)
+    @test convert(Interval, 0.1) == Interval(0.09999999999999999, 0.1)
+    @test convert(Interval, BigFloat(0.1)) == Interval(big(0.1))
 
 
     @test convert(Interval{Rational{Int}}, 0.1) == Interval(1//10)
@@ -264,4 +264,19 @@ setprecision(Interval, Float64)
     @test I"[2/3, 1.1]" == @interval("[2/3, 1.1]") == Interval(0.6666666666666666, 1.1)
     @test I"[1]" == @interval("[1]") == Interval(1.0, 1.0)
     @test I"[-0x1.3p-1, 2/3]" == @interval("[-0x1.3p-1, 2/3]") == Interval(-0.59375, 0.6666666666666667)
+end
+
+@testset "setdiff tests" begin
+    x = 1..3
+    y = 2..4
+    @test setdiff(x, y) == [1..2]
+    @test setdiff(y, x) == [3..4]
+
+    @test setdiff(x, x) == Interval{Float64}[]
+
+    @test setdiff(x, emptyinterval(x)) == [x]
+
+    z = 0..5
+    @test setdiff(x, z) == Interval{Float64}[]
+    @test setdiff(z, x) == [0..1, 3..5]
 end
