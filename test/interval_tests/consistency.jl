@@ -86,7 +86,7 @@ c = @interval(0.25, 4.0)
         @test b ⊆ c
         @test emptyinterval(c) ⊆ c
         @test !(c ⊆ emptyinterval(c))
-        @test interior(b,c)
+        @test isinterior(b,c)
         @test !(b ⪽ emptyinterval(b))
         @test emptyinterval(c) ⪽ c
         @test emptyinterval(c) ⪽ emptyinterval(c)

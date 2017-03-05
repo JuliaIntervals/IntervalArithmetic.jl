@@ -27,12 +27,12 @@ function ⊆(a::Interval, b::Interval)
 end
 
 
-# Interior
-function interior(a::Interval, b::Interval)
+# isinterior
+function isinterior(a::Interval, b::Interval)
     isempty(a) && return true
     islessprime(b.lo, a.lo) && islessprime(a.hi, b.hi)
 end
-const ⪽ = interior  # \subsetdot
+const ⪽ = isinterior  # \subsetdot
 
 # Disjoint:
 function isdisjoint(a::Interval, b::Interval)

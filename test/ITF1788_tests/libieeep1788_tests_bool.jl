@@ -375,74 +375,74 @@ facts("minimal_precedes_dec_test") do
     @fact precedes(DecoratedInterval(Interval(0.0, -0.0), trv), DecoratedInterval(Interval(-0.0, 0.0), trv)) --> true
 end
 
-facts("minimal_interior_test") do
+facts("minimal_isinterior_test") do
     @fact ∅ ⪽ ∅ --> true
-    @fact interior(∅, ∅) --> true
+    @fact isinterior(∅, ∅) --> true
     @fact ∅ ⪽ Interval(0.0, 4.0) --> true
-    @fact interior(∅, Interval(0.0, 4.0)) --> true
+    @fact isinterior(∅, Interval(0.0, 4.0)) --> true
     @fact Interval(0.0, 4.0) ⪽ ∅ --> false
-    @fact interior(Interval(0.0, 4.0), ∅) --> false
+    @fact isinterior(Interval(0.0, 4.0), ∅) --> false
     @fact Interval(-Inf, Inf) ⪽ Interval(-Inf, Inf) --> true
-    @fact interior(Interval(-Inf, Inf), Interval(-Inf, Inf)) --> true
+    @fact isinterior(Interval(-Inf, Inf), Interval(-Inf, Inf)) --> true
     @fact Interval(0.0, 4.0) ⪽ Interval(-Inf, Inf) --> true
-    @fact interior(Interval(0.0, 4.0), Interval(-Inf, Inf)) --> true
+    @fact isinterior(Interval(0.0, 4.0), Interval(-Inf, Inf)) --> true
     @fact ∅ ⪽ Interval(-Inf, Inf) --> true
-    @fact interior(∅, Interval(-Inf, Inf)) --> true
+    @fact isinterior(∅, Interval(-Inf, Inf)) --> true
     @fact Interval(-Inf, Inf) ⪽ Interval(0.0, 4.0) --> false
-    @fact interior(Interval(-Inf, Inf), Interval(0.0, 4.0)) --> false
+    @fact isinterior(Interval(-Inf, Inf), Interval(0.0, 4.0)) --> false
     @fact Interval(0.0, 4.0) ⪽ Interval(0.0, 4.0) --> false
-    @fact interior(Interval(0.0, 4.0), Interval(0.0, 4.0)) --> false
+    @fact isinterior(Interval(0.0, 4.0), Interval(0.0, 4.0)) --> false
     @fact Interval(1.0, 2.0) ⪽ Interval(0.0, 4.0) --> true
-    @fact interior(Interval(1.0, 2.0), Interval(0.0, 4.0)) --> true
+    @fact isinterior(Interval(1.0, 2.0), Interval(0.0, 4.0)) --> true
     @fact Interval(-2.0, 2.0) ⪽ Interval(-2.0, 4.0) --> false
-    @fact interior(Interval(-2.0, 2.0), Interval(-2.0, 4.0)) --> false
+    @fact isinterior(Interval(-2.0, 2.0), Interval(-2.0, 4.0)) --> false
     @fact Interval(-0.0, -0.0) ⪽ Interval(-2.0, 4.0) --> true
-    @fact interior(Interval(-0.0, -0.0), Interval(-2.0, 4.0)) --> true
+    @fact isinterior(Interval(-0.0, -0.0), Interval(-2.0, 4.0)) --> true
     @fact Interval(0.0, 0.0) ⪽ Interval(-2.0, 4.0) --> true
-    @fact interior(Interval(0.0, 0.0), Interval(-2.0, 4.0)) --> true
+    @fact isinterior(Interval(0.0, 0.0), Interval(-2.0, 4.0)) --> true
     @fact Interval(0.0, 0.0) ⪽ Interval(-0.0, -0.0) --> false
-    @fact interior(Interval(0.0, 0.0), Interval(-0.0, -0.0)) --> false
+    @fact isinterior(Interval(0.0, 0.0), Interval(-0.0, -0.0)) --> false
     @fact Interval(0.0, 4.4) ⪽ Interval(0.0, 4.0) --> false
-    @fact interior(Interval(0.0, 4.4), Interval(0.0, 4.0)) --> false
+    @fact isinterior(Interval(0.0, 4.4), Interval(0.0, 4.0)) --> false
     @fact Interval(-1.0, -1.0) ⪽ Interval(0.0, 4.0) --> false
-    @fact interior(Interval(-1.0, -1.0), Interval(0.0, 4.0)) --> false
+    @fact isinterior(Interval(-1.0, -1.0), Interval(0.0, 4.0)) --> false
     @fact Interval(2.0, 2.0) ⪽ Interval(-2.0, -1.0) --> false
-    @fact interior(Interval(2.0, 2.0), Interval(-2.0, -1.0)) --> false
+    @fact isinterior(Interval(2.0, 2.0), Interval(-2.0, -1.0)) --> false
 end
 
-facts("minimal_interior_dec_test") do
+facts("minimal_isinterior_dec_test") do
     @fact DecoratedInterval(∅, trv) ⪽ DecoratedInterval(Interval(0.0, 4.0), trv) --> true
-    @fact interior(DecoratedInterval(∅, trv), DecoratedInterval(Interval(0.0, 4.0), trv)) --> true
+    @fact isinterior(DecoratedInterval(∅, trv), DecoratedInterval(Interval(0.0, 4.0), trv)) --> true
     @fact DecoratedInterval(Interval(0.0, 4.0), def) ⪽ DecoratedInterval(∅, trv) --> false
-    @fact interior(DecoratedInterval(Interval(0.0, 4.0), def), DecoratedInterval(∅, trv)) --> false
+    @fact isinterior(DecoratedInterval(Interval(0.0, 4.0), def), DecoratedInterval(∅, trv)) --> false
     @fact DecoratedInterval(Interval(0.0, 4.0), trv) ⪽ DecoratedInterval(∅, trv) --> false
-    @fact interior(DecoratedInterval(Interval(0.0, 4.0), trv), DecoratedInterval(∅, trv)) --> false
+    @fact isinterior(DecoratedInterval(Interval(0.0, 4.0), trv), DecoratedInterval(∅, trv)) --> false
     @fact DecoratedInterval(Interval(-Inf, Inf), trv) ⪽ DecoratedInterval(Interval(-Inf, Inf), trv) --> true
-    @fact interior(DecoratedInterval(Interval(-Inf, Inf), trv), DecoratedInterval(Interval(-Inf, Inf), trv)) --> true
+    @fact isinterior(DecoratedInterval(Interval(-Inf, Inf), trv), DecoratedInterval(Interval(-Inf, Inf), trv)) --> true
     @fact DecoratedInterval(Interval(0.0, 4.0), trv) ⪽ DecoratedInterval(Interval(-Inf, Inf), trv) --> true
-    @fact interior(DecoratedInterval(Interval(0.0, 4.0), trv), DecoratedInterval(Interval(-Inf, Inf), trv)) --> true
+    @fact isinterior(DecoratedInterval(Interval(0.0, 4.0), trv), DecoratedInterval(Interval(-Inf, Inf), trv)) --> true
     @fact DecoratedInterval(∅, trv) ⪽ DecoratedInterval(Interval(-Inf, Inf), trv) --> true
-    @fact interior(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-Inf, Inf), trv)) --> true
+    @fact isinterior(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-Inf, Inf), trv)) --> true
     @fact DecoratedInterval(Interval(-Inf, Inf), trv) ⪽ DecoratedInterval(Interval(0.0, 4.0), trv) --> false
-    @fact interior(DecoratedInterval(Interval(-Inf, Inf), trv), DecoratedInterval(Interval(0.0, 4.0), trv)) --> false
+    @fact isinterior(DecoratedInterval(Interval(-Inf, Inf), trv), DecoratedInterval(Interval(0.0, 4.0), trv)) --> false
     @fact DecoratedInterval(Interval(0.0, 4.0), trv) ⪽ DecoratedInterval(Interval(0.0, 4.0), trv) --> false
-    @fact interior(DecoratedInterval(Interval(0.0, 4.0), trv), DecoratedInterval(Interval(0.0, 4.0), trv)) --> false
+    @fact isinterior(DecoratedInterval(Interval(0.0, 4.0), trv), DecoratedInterval(Interval(0.0, 4.0), trv)) --> false
     @fact DecoratedInterval(Interval(1.0, 2.0), def) ⪽ DecoratedInterval(Interval(0.0, 4.0), trv) --> true
-    @fact interior(DecoratedInterval(Interval(1.0, 2.0), def), DecoratedInterval(Interval(0.0, 4.0), trv)) --> true
+    @fact isinterior(DecoratedInterval(Interval(1.0, 2.0), def), DecoratedInterval(Interval(0.0, 4.0), trv)) --> true
     @fact DecoratedInterval(Interval(-2.0, 2.0), trv) ⪽ DecoratedInterval(Interval(-2.0, 4.0), def) --> false
-    @fact interior(DecoratedInterval(Interval(-2.0, 2.0), trv), DecoratedInterval(Interval(-2.0, 4.0), def)) --> false
+    @fact isinterior(DecoratedInterval(Interval(-2.0, 2.0), trv), DecoratedInterval(Interval(-2.0, 4.0), def)) --> false
     @fact DecoratedInterval(Interval(-0.0, -0.0), trv) ⪽ DecoratedInterval(Interval(-2.0, 4.0), trv) --> true
-    @fact interior(DecoratedInterval(Interval(-0.0, -0.0), trv), DecoratedInterval(Interval(-2.0, 4.0), trv)) --> true
+    @fact isinterior(DecoratedInterval(Interval(-0.0, -0.0), trv), DecoratedInterval(Interval(-2.0, 4.0), trv)) --> true
     @fact DecoratedInterval(Interval(0.0, 0.0), def) ⪽ DecoratedInterval(Interval(-2.0, 4.0), trv) --> true
-    @fact interior(DecoratedInterval(Interval(0.0, 0.0), def), DecoratedInterval(Interval(-2.0, 4.0), trv)) --> true
+    @fact isinterior(DecoratedInterval(Interval(0.0, 0.0), def), DecoratedInterval(Interval(-2.0, 4.0), trv)) --> true
     @fact DecoratedInterval(Interval(0.0, 0.0), trv) ⪽ DecoratedInterval(Interval(-0.0, -0.0), trv) --> false
-    @fact interior(DecoratedInterval(Interval(0.0, 0.0), trv), DecoratedInterval(Interval(-0.0, -0.0), trv)) --> false
+    @fact isinterior(DecoratedInterval(Interval(0.0, 0.0), trv), DecoratedInterval(Interval(-0.0, -0.0), trv)) --> false
     @fact DecoratedInterval(Interval(0.0, 4.4), trv) ⪽ DecoratedInterval(Interval(0.0, 4.0), trv) --> false
-    @fact interior(DecoratedInterval(Interval(0.0, 4.4), trv), DecoratedInterval(Interval(0.0, 4.0), trv)) --> false
+    @fact isinterior(DecoratedInterval(Interval(0.0, 4.4), trv), DecoratedInterval(Interval(0.0, 4.0), trv)) --> false
     @fact DecoratedInterval(Interval(-1.0, -1.0), trv) ⪽ DecoratedInterval(Interval(0.0, 4.0), def) --> false
-    @fact interior(DecoratedInterval(Interval(-1.0, -1.0), trv), DecoratedInterval(Interval(0.0, 4.0), def)) --> false
+    @fact isinterior(DecoratedInterval(Interval(-1.0, -1.0), trv), DecoratedInterval(Interval(0.0, 4.0), def)) --> false
     @fact DecoratedInterval(Interval(2.0, 2.0), def) ⪽ DecoratedInterval(Interval(-2.0, -1.0), trv) --> false
-    @fact interior(DecoratedInterval(Interval(2.0, 2.0), def), DecoratedInterval(Interval(-2.0, -1.0), trv)) --> false
+    @fact isinterior(DecoratedInterval(Interval(2.0, 2.0), def), DecoratedInterval(Interval(-2.0, -1.0), trv)) --> false
 end
 
 facts("minimal_strictLess_test") do

@@ -215,7 +215,7 @@ end
     x = @interval(pi)
     @test x^100 ⊆ pow(x, 100)
     @test x^50 ⊆ pow(x, 50)
-    @test interior(x^50, pow(x, 50))
+    @test isinterior(x^50, pow(x, 50))
 
 
 end

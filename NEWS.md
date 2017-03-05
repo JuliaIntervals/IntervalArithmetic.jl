@@ -101,7 +101,7 @@ the interval, e.g. `convert(Interval{Float64}, 0.1)`
  - New `special_intervals.jl` file, with definitions of `emptyinterval`, `entireinterval`, `nai` and related functions. Add new interval functions (`<=`, `radius`, `precedes`, `strictprecedes`, `≺`, etc).
 
  - Control rounding tighter for arithmetic operations; `*`, `inv` and `/` have been rewritten; this includes changes in `make_interval` and `convert` to get consistent behavior. These functions pass the corresponding tests in the [ITF1788](https://github.com/oheim/ITF1788) test suite.
-- Deprecate the use of `⊊` in favor of `interior` (`⪽`).
+- Deprecate the use of `⊊` in favor of `isinterior` (`⪽`).
 
 **Important notice:** This is the **last version** of the package that
 supports Julia v0.3.
