@@ -41,6 +41,14 @@ Parse a string as an interval. Formats allowed include:
 function parse{T}(::Type{Interval{T}}, s::AbstractString)
     if !(contains(s, "["))  # string like "3.1"
 
+        m = match(r"(.*)±(.*)", s)
+        if m != nothing
+            a = parse(T, strip(m.captures[1]))
+            b = parse(T, strip(m.captures[2]))
+
+            return a ± b
+        end
+
         expr = parse(s)
 
         # after removing support for Julia 0.4, can simplify
@@ -62,6 +70,10 @@ function parse{T}(::Type{Interval{T}}, s::AbstractString)
 
         if m == nothing
             throw(ArgumentError("Unable to process string $s as interval"))
+        end
+
+        if m.captures[1] == "Empty"
+            return emptyinterval(T)
         end
 
         lo = m.captures[1]
