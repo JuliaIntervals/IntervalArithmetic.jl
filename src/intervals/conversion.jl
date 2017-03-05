@@ -40,6 +40,9 @@ function convert{T<:AbstractFloat}(::Type{Interval{T}}, x::Float64)
     II
 end
 
+
+convert{T<:AbstractFloat}(::Type{Interval{T}}, x::Interval{T}) = x
+
 function convert{T<:AbstractFloat}(::Type{Interval{T}}, x::Interval)
     Interval{T}( T(x.lo, RoundDown), T(x.hi, RoundUp) )
 end

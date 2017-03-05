@@ -47,7 +47,9 @@ eltype{T<:Real}(x::Interval{T}) = T
 Interval(x::Interval) = x
 Interval(x::Complex) = Interval(real(x)) + im*Interval(imag(x))
 
-@compat (::Type{Interval{T}}){T}(arg) = Interval(convert(T, arg))
+@compat (::Type{Interval{T}}){T}(x) = Interval(convert(T, x))
+
+@compat (::Type{Interval{T}}){T}(x::Interval) = convert(Interval{T}, x)
 
 ## Include files
 include("special.jl")

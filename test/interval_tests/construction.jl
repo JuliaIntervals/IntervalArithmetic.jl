@@ -219,6 +219,14 @@ end
 
 end
 
+@testset "Conversion to interval of same type" begin
+    x = 3..4
+    @test convert(Interval{Float64}, x) === x
+
+    x = big(3)..big(4)
+    @test convert(Interval{BigFloat}, x) === x
+end
+
 @testset "Conversions between different types of interval" begin
     a = convert(Interval{BigFloat}, 3..4)
     @test typeof(a) == Interval{BigFloat}
@@ -279,4 +287,9 @@ end
     z = 0..5
     @test setdiff(x, z) == Interval{Float64}[]
     @test setdiff(z, x) == [0..1, 3..5]
+end
+
+@testset "Interval{T}(x::Interval)" begin
+    @test Interval{Float64}(3..4) == Interval(3.0, 4.0)
+    @test Interval{BigFloat}(3..4) == Interval{BigFloat}(3, 4)
 end
