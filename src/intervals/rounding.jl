@@ -72,4 +72,9 @@ for mode in (:Down, :Up)
         end
     end
 
+
+    for f in CRlibm.functions
+        @eval $f{T<:AbstractFloat}(a::T, $mode1) = CRlibm.$f(a, $mode2)
+    end
+
 end
