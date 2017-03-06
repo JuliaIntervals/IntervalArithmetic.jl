@@ -293,3 +293,9 @@ end
     @test Interval{Float64}(3..4) == Interval(3.0, 4.0)
     @test Interval{BigFloat}(3..4) == Interval{BigFloat}(3, 4)
 end
+
+@testset "@interval with fields" begin
+    a = 3..4
+    x = @interval(a.lo, 2*a.hi)
+    @test x == Interval(3, 8)
+end
