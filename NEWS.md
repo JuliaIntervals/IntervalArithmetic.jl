@@ -1,5 +1,25 @@
 # What's new in ValidatedNumerics.jl
 
+## v0.7
+
+### End of support for Julia v0.4
+- v0.7 is the last version to include support for Julia v0.4
+
+### Breaking API changes
+- Deprecate `displaymode`, replacing it with `setdisplay`, with simplified syntax #210:
+```
+setdisplay(:full)
+```
+
+### Added features
+- Fast integer power function `pow` #208
+- `parse(Interval, string)` (extends and exports previously internal function) #215
+- `bisect` function in `ValidatedNumerics.RootFinding` for bisecting `Interval`s and `IntervalBox`es #217
+
+### Other
+- Many tests use `Base.Test` instead of `FactCheck` #205
+- Miscellaneous bugfixes
+
 ## v0.6
 - Add a plot recipe for (only) 2D `IntervalBox`es using `RecipesBase.jl`.
 This enables plotting using `Plots.jl`: an individual `IntervalBox` `X` using `plot(X)`,
