@@ -13,7 +13,7 @@ function round_expr(ex::Expr, rounding_mode::RoundingMode)
         op = ex.args[1]
 
         if op ∈ (:min, :max)
-            @compat mapped_args = round_expr.(ex.args[2:end], [rounding_mode]) # only in 0.5 and 0.6; in 0.6, can remove [...] around rounding_mode
+            mapped_args = round_expr.(ex.args[2:end], [rounding_mode]) # only in 0.5 and 0.6; in 0.6, can remove [...] around rounding_mode
             return :($op($(mapped_args...)))
         end
 
@@ -46,14 +46,14 @@ The macro uses the internal `round_expr` function to transform e.g.
 
 The user-facing equivalent is `@interval`, which can handle much more general cases.
 """
-@compat macro round(ex1, ex2)
+macro round(ex1, ex2)
      :(Interval($(round_expr(ex1, RoundDown)), $(round_expr(ex2, RoundUp))))
 end
 
-@compat macro round_down(ex1)
+macro round_down(ex1)
      round_expr(ex1, RoundDown)
 end
 
-@compat macro round_up(ex1)
+macro round_up(ex1)
      round_expr(ex1, RoundUp)
 end

@@ -54,14 +54,8 @@ export
 export RootFinding
 
 
-if VERSION >= v"0.5.0-dev+1182"
-    import Base: rounding, setrounding, setprecision
-else
-    import Compat:
-        rounding, setrounding, setprecision
+import Base: rounding, setrounding, setprecision
 
-    export rounding, setrounding, setprecision  # reexport
-end
 
 
 ## Multidimensional

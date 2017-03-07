@@ -1,4 +1,5 @@
 using ValidatedNumerics
+using Base.Test
 
 setdisplay(:standard, decorations=true, sigfigs=6)
 
