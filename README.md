@@ -7,7 +7,7 @@ https://codecov.io/gh/dpsanders/ValidatedNumerics.jl/branch/master/graph/badge.s
 (https://codecov.io/gh/dpsanders/ValidatedNumerics.jl)
 [![Join the chat at https://gitter.im/dpsanders/ValidatedNumerics.jl](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dpsanders/ValidatedNumerics.jl?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-https://github.com/ipython-contrib/jupyter_contrib_nbextensions`ValidatedNumerics.jl` is a Julia package for performing *Validated Numerics* in Julia, i.e. *rigorous* computations with finite-precision floating-point arithmetic.
+`ValidatedNumerics.jl` is a Julia package for performing *Validated Numerics* in Julia, i.e. *rigorous* computations with finite-precision floating-point arithmetic.
 
 
 
