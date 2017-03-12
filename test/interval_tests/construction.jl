@@ -295,3 +295,10 @@ end
     x = @interval(a.lo, 2*a.hi)
     @test x == Interval(3, 8)
 end
+
+@testset "@interval with user-defined function" begin
+    f(x) = x==Inf ? one(x) : x/(1+x)  # monotonic
+
+    x = 3..4
+    @test @interval(f(x.lo), f(x.hi)) == Interval(0.75, 0.8)
+end
