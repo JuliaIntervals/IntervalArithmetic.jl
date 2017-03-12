@@ -6,7 +6,7 @@ module ValidatedNumerics
 
 using CRlibm
 using Compat
-using FixedSizeArrays
+using StaticArrays
 using ForwardDiff
 
 import Base:
@@ -43,13 +43,11 @@ export
     RoundTiesToEven, RoundTiesToAway,
     cancelminus, cancelplus, isunbounded,
     .., @I_str, ±,
-    pow
-
-export
+    pow,
     setdisplay
 
 export
-    setindex
+    setindex   # re-export from StaticArrays for IntervalBox
 
 export RootFinding
 
