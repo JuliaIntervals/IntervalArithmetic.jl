@@ -9,7 +9,7 @@ immutable IntervalBox{N,T} <: StaticVector{Interval{T}}
     data::NTuple{N,Interval{T}}
 end
 
-IntervalBox{N,T}(x::NTuple{N,Interval{T}}) = IntervalBox{N,T}(x)
+# IntervalBox{N,T}(x::NTuple{N,Interval{T}}) = IntervalBox{N,T}(x)
 
 StaticArrays.Size{N,T}(::Type{IntervalBox{N,T}}) = StaticArrays.Size(N) # @pure not needed, I think...
 Base.getindex(a::IntervalBox, i::Int) = a.data[i]

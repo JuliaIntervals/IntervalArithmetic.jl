@@ -145,6 +145,9 @@ setprecision(Interval, Float64)
         @test typeof(X) == IntervalBox{2,Float64}
         @test string(X) == "[1, 2] × [3, 4]"
 
+        s = sprint(show, MIME("text/plain"), X)
+        @test s == "[1, 2] × [3, 4]"
+
         X = IntervalBox(1.1..1.2, 2.1..2.2)
         @test string(X) == "[1.09999, 1.20001] × [2.09999, 2.20001]"
 

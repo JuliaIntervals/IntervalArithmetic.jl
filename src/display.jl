@@ -210,4 +210,5 @@ end
 
 T = IntervalBox
 @eval show(io::IO, a::$T) = print(io, representation(a))
+@eval show(io::IO, ::MIME"text/plain", a::$T) = print(io, representation(a))
 @eval showall(io::IO, a::$T) = print(io, representation(a, :full))
