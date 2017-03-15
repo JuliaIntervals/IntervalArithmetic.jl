@@ -159,20 +159,34 @@ c = @interval(0.25, 4.0)
         @test isnan(supremum(nai(BigFloat)))
     end
 
-    @testset "mid etc." begin
+    @testset "mid" begin
 
-        @test mid( Interval(1//2) ) == 1//2
+        @test mid(Interval(1//2)) == 1//2
+        @test mid(1..2) == 1.5
+        @test mid(0.1..0.3) == 0.2
+        @test mid(-10..5) == -2.5
+        @test mid(-∞..1) == -1.7976931348623157e308
+        @test mid(1..∞) == 1.7976931348623157e308
+        @test isnan(mid(emptyinterval()))
+    end
+
+    @testset "diam" begin
+
         @test diam( Interval(1//2) ) == 0//1
         @test diam( @interval(1//10) ) == eps(0.1)
         @test diam( @interval(0.1) ) == eps(0.1)
         @test isnan(diam(emptyinterval()))
+        @test diam(a) == 1.0000000000000002
+    end
+
+    @testset "mig and mag" begin
+
         @test mig(@interval(-2,2)) == BigFloat(0.0)
         @test mig( Interval(1//2) ) == 1//2
         @test isnan(mig(emptyinterval()))
         @test mag(-b) == b.hi
         @test mag( Interval(1//2) ) == 1//2
         @test isnan(mag(emptyinterval()))
-        @test diam(a) == 1.0000000000000002
     end
 
     @testset "cancelplus tests" begin

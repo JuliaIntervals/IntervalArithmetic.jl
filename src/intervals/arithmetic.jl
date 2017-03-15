@@ -311,9 +311,16 @@ function round(a::Interval, ::RoundingMode{:NearestTiesAway})
 end
 
 # mid, diam, radius
-function mid(a::Interval)
+
+# Compare pg. 64 of the IEEE 1788-2015 standard:
+function mid{T}(a::Interval{T})
+    isempty(a) && return convert(T, NaN)
     isentire(a) && return zero(a.lo)
-    (a.lo + a.hi) / 2
+
+    a.lo == -∞ && return nextfloat(a.lo)
+    a.hi == +∞ && return prevfloat(a.hi)
+    
+    (a.lo + a.hi) / 2  # rounds to nearest
 end
 
 function diam{T<:Real}(a::Interval{T})
