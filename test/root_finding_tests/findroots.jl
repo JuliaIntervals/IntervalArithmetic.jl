@@ -55,7 +55,7 @@ function_list = [
 
     for rounding_type in (:wide, :narrow)
         @testset "Interval rounding: $rounding_type" begin
-            setrounding(Interval, rounding_type)
+            # setrounding(Interval, rounding_type)
 
             for prec in ( (BigFloat,53), (BigFloat,256), (Float64,64) )
                 @testset "Precision: $prec" begin

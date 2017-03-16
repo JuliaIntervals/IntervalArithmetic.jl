@@ -159,12 +159,6 @@ if VERSION >= v"0.6.0-dev.1024"
     const filter = Iterators.filter
 end
 
-if VERSION < v"0.5.0-dev+1279"
-    min(x) = x
-    max(x) = x
-end
-
-
 function min_ignore_nans(args...)
     min(filter(x->!isnan(x), args)...)
 end
@@ -319,7 +313,7 @@ function mid{T}(a::Interval{T})
 
     a.lo == -∞ && return nextfloat(a.lo)
     a.hi == +∞ && return prevfloat(a.hi)
-    
+
     (a.lo + a.hi) / 2  # rounds to nearest
 end
 

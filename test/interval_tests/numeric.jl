@@ -4,7 +4,7 @@ using ValidatedNumerics
 using Base.Test
 
 setprecision(Interval, Float64)
-setrounding(Interval, :narrow)
+# # setrounding(Interval, :narrow)
 
 
 @testset "Numeric tests" begin
@@ -179,18 +179,18 @@ end
     @test round(@interval(-1.5, 0.1), RoundTiesToAway) == Interval(-2.0, 0.0)
     @test round(@interval(-2.5, 0.1), RoundTiesToAway) == Interval(-3.0, 0.0)
 
-    # :wide tests
-    setrounding(Interval, :wide)
-    setprecision(Interval, Float64)
-
-    a = @interval(-3.0, 2.0)
-    @test a == Interval(-3.0, 2.0)
-    @test a^3 == Interval(-27, 8)
-    @test Interval(-3,2)^3 == Interval(-27, 8)
-
-    @test Interval(-27.0, 8.0)^(1//3) == Interval(0, 2.0000000000000004)
-
-    setrounding(Interval, :narrow)
+    # # :wide tests
+    # # setrounding(Interval, :wide)
+    # setprecision(Interval, Float64)
+    #
+    # a = @interval(-3.0, 2.0)
+    # @test a == Interval(-3.0, 2.0)
+    # @test a^3 == Interval(-27, 8)
+    # @test Interval(-3,2)^3 == Interval(-27, 8)
+    #
+    # @test Interval(-27.0, 8.0)^(1//3) == Interval(0, 2.0000000000000004)
+    #
+    # # setrounding(Interval, :narrow)
 end
 
 @testset "Fast power" begin

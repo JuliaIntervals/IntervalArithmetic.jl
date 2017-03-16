@@ -28,7 +28,7 @@ using ValidatedNumerics
 #Preamble
 setprecision(53)
 setprecision(Interval, Float64)
-setrounding(Interval, :narrow)
+# setrounding(Interval, :narrow)
 
 facts("minimal_empty_test") do
     @fact isempty(∅) --> true

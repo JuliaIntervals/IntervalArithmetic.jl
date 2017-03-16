@@ -28,7 +28,7 @@ using ValidatedNumerics
 #Preamble
 setprecision(53)
 setprecision(Interval, Float64)
-setrounding(Interval, :narrow)
+# setrounding(Interval, :narrow)
 
 facts("minimal_isCommonInterval_test") do
     @fact iscommon(Interval(-27.0, -27.0)) --> true

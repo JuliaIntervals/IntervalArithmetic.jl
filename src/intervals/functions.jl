@@ -14,6 +14,9 @@ end
 
 # Integer power:
 
+# overwrite new behaviour for small integer powers:
+# ^{p}(x::ValidatedNumerics.Interval, ::Type{Val{p}}) = x^p
+
 function ^(a::Interval{BigFloat}, n::Integer)
     isempty(a) && return a
     n == 0 && return one(a)

@@ -4,7 +4,7 @@ __precompile__(true)
 
 module ValidatedNumerics
 
-using CRlibm
+import CRlibm
 using Compat
 using StaticArrays
 using ForwardDiff

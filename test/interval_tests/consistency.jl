@@ -283,15 +283,15 @@ c = @interval(0.25, 4.0)
         @test precision(Interval) == (Float64, 100)
     end
 
-    @testset "Interval rounding tests" begin
-        setrounding(Interval, :wide)
-        @test rounding(Interval) == :wide
-
-        @test_throws ArgumentError setrounding(Interval, :hello)
-
-        setrounding(Interval, :narrow)
-        @test rounding(Interval) == :narrow
-    end
+    # @testset "Interval rounding tests" begin
+    #     # setrounding(Interval, :wide)
+    #     @test rounding(Interval) == :wide
+    #
+    #     @test_throws ArgumentError # setrounding(Interval, :hello)
+    #
+    #     # setrounding(Interval, :narrow)
+    #     @test rounding(Interval) == :narrow
+    # end
 
     @testset "Interval power of an interval" begin
 

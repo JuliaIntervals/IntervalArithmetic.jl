@@ -22,6 +22,14 @@ function big53(a::Interval{Float64})
     end
 end
 
+function big53(x::Float64)
+    # BigFloat(x, 53)  # in Julia v0.6
+
+    setprecision(53) do
+        BigFloat(x)
+    end
+end
+
 
 setprecision(::Type{Interval}, ::Type{Float64}) = parameters.precision_type = Float64
 # does not change the BigFloat precision
@@ -77,44 +85,13 @@ Base.float{T}(::Type{Rational{T}}) = typeof(float(one(Rational{T})))
 
 # Use that type for rounding with rationals, e.g. for sqrt:
 
-if VERSION < v"0.5.0-dev+1182"
-
-    function Base.with_rounding{T}(f::Function, ::Type{Rational{T}},
-        rounding_mode::RoundingMode)
-        setrounding(f, float(Rational{T}), rounding_mode)
-    end
-
-else
-    function Base.setrounding{T}(f::Function, ::Type{Rational{T}},
-        rounding_mode::RoundingMode)
-        setrounding(f, float(Rational{T}), rounding_mode)
-    end
+function Base.setrounding{T}(f::Function, ::Type{Rational{T}},
+    rounding_mode::RoundingMode)
+    setrounding(f, float(Rational{T}), rounding_mode)
 end
+
 
 
 float{T}(x::Interval{T}) = convert(Interval{float(T)}, x)  # https://github.com/dpsanders/ValidatedNumerics.jl/issues/174
-
-## Change type of interval rounding:
-
-
-doc"""`rounding(Interval)` returns the current interval rounding mode.
-There are two possible rounding modes:
-
-- :narrow  -- changes the floating-point rounding mode to `RoundUp` and `RoundDown`.
-This gives the narrowest possible interval.
-
-- :wide -- Leaves the floating-point rounding mode in `RoundNearest` and uses
-`prevfloat` and `nextfloat` to achieve directed rounding. This creates an interval of width 2`eps`.
-"""
-
-rounding(::Type{Interval}) = parameters.rounding
-
-function setrounding(::Type{Interval}, mode)
-    if mode ∉ [:wide, :narrow]
-        throw(ArgumentError("Only possible interval rounding modes are `:wide` and `:narrow`"))
-    end
-
-    parameters.rounding = mode  # a symbol
-end
 
 big{T}(x::Interval{T}) = convert(Interval{BigFloat}, x)
