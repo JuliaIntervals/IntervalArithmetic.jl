@@ -4,7 +4,7 @@ using Base.Test
 
 # Interval tests:
 
-setdisplay(:full)
+setformat(:full)
 
 include("interval_tests/intervals.jl")
 include("multidim_tests/multidim.jl")

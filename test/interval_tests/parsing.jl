@@ -1,7 +1,7 @@
 using ValidatedNumerics
 using Base.Test
 
-setdisplay(:standard, decorations=true, sigfigs=6)
+setformat(:standard, decorations=true, sigfigs=6)
 
 setprecision(128)
 

@@ -8,9 +8,9 @@ const display_params = DisplayParameters(:standard, false, 6)
 
 
 doc"""
-    setdisplay(;kw)
+    setformat(;kw)
 
-`setdisplay` changes how intervals are displayed using keyword arguments.
+`setformat` changes how intervals are displayed using keyword arguments.
 The following options are available:
 
 - `format`: interval output format
@@ -25,10 +25,10 @@ The following options are available:
 
 Example:
 ```
-julia> setdisplay(:full, decorations=true)
+julia> setformat(:full, decorations=true)
 ```
 """
-function setdisplay(format = display_params.format;
+function setformat(format = display_params.format;
                     decorations = display_params.decorations, sigfigs::Integer = display_params.sigfigs)
 
     if format ∉ (:standard, :full, :midpoint)
@@ -47,6 +47,58 @@ function setdisplay(format = display_params.format;
     display_params.format = format
     display_params.decorations = decorations
     display_params.sigfigs = sigfigs
+end
+
+doc"""
+    @format [style::Symbol] [decorations::Bool] [sigfigs::Integer]
+
+The `@format` macro provides a simple interface to control the output format
+for intervals. These options are passed to the `setformat` function.
+
+The arguments may be in any order and of type:
+
+- `Symbol`: the output format (`:full`, `:standard` or `:midpoint`)
+- `Bool`: whether to display decorations
+- `Integer`: the number of significant figures
+
+E.g.
+```
+julia> x = 0.1..0.3
+@[0.0999999, 0.300001]
+
+julia> @format full
+
+julia> x
+Interval(0.09999999999999999, 0.30000000000000004)
+
+julia> @format standard 3
+
+julia> x
+[0.0999, 0.301]
+```
+"""
+macro format(expr...)
+
+    format = Meta.quot(display_params.format)
+    decorations = display_params.decorations
+    sigfigs = display_params.sigfigs
+
+    for ex in expr
+
+        if isa(ex, Symbol)
+            format = Meta.quot(ex)
+
+        elseif isa(ex, Integer)
+            sigfigs = ex
+
+        elseif isa(ex, Bool)
+            decorations = ex
+        end
+    end
+
+    format_code = :(setformat($format, decorations=$decorations, sigfigs=$sigfigs))
+
+    return format_code
 end
 
 

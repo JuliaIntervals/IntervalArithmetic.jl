@@ -357,8 +357,8 @@ rounding(Interval)
 ```
 
 ## Display modes
-There are several useful output representations for intervals, some of which we have already touched on. The display is controlled globally by the `setdisplay` function, which has
-the following options, specified by keyword arguments (type `?setdisplay` to get help at the REPL):
+There are several useful output representations for intervals, some of which we have already touched on. The display is controlled globally by the `setformat` function, which has
+the following options, specified by keyword arguments (type `?setformat` to get help at the REPL):
 
 - `format`: interval output format
 
@@ -377,29 +377,29 @@ the following options, specified by keyword arguments (type `?setdisplay` to get
 julia> a = @interval(1.1, pi)
 [1.09999, 3.1416]
 
-julia> setdisplay(sigfigs=10)
+julia> setformat(sigfigs=10)
 10
 
 julia> a
 [1.099999999, 3.141592654]
 
-julia> setdisplay(:full)
+julia> setformat(:full)
 
 julia> a
 Interval(1.0999999999999999, 3.1415926535897936)
 
-julia> setdisplay(:midpoint)
+julia> setformat(:midpoint)
 
 julia> a
 2.120796327 ± 1.020796327
 
-julia> setdisplay(:midpoint, sigfigs=4)
+julia> setformat(:midpoint, sigfigs=4)
 4
 
 julia> a
 2.121 ± 1.021
 
-julia> setdisplay(:standard)
+julia> setformat(:standard)
 
 julia> a
 [1.099, 3.142]

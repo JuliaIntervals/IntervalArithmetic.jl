@@ -6,9 +6,9 @@
 - v0.7 is the last version to include support for Julia v0.4
 
 ### Breaking API changes
-- Deprecate `displaymode`, replacing it with `setdisplay`, with simplified syntax #210:
+- Deprecate `displaymode`, replacing it with `setformat`, with simplified syntax #210:
 ```
-setdisplay(:full)
+setformat(:full)
 ```
 
 ### Added features
@@ -53,7 +53,7 @@ or
 
 
 ## v0.4.3
-- Fix display of intervals with different setdisplay options; [#146](https://github.com/dpsanders/ValidatedNumerics.jl/pull/146)
+- Fix display of intervals with different setformat options; [#146](https://github.com/dpsanders/ValidatedNumerics.jl/pull/146)
 
 - Add emptyinterval(x::IntervalBox); [#145](https://github.com/dpsanders/ValidatedNumerics.jl/pull/145)
 
@@ -68,7 +68,7 @@ or
 # v0.4
 - Added decorated intervals [#112](https://github.com/dpsanders/ValidatedNumerics.jl/pull/112)
 
-- Added `setdisplay` function for modifying how intervals are displayed [#115](https://github.com/dpsanders/ValidatedNumerics.jl/pull/115)
+- Added `setformat` function for modifying how intervals are displayed [#115](https://github.com/dpsanders/ValidatedNumerics.jl/pull/115)
 
 - Added `±` syntax for creating intervals as e.g. `1.3 ± 0.1` [#116](https://github.com/dpsanders/ValidatedNumerics.jl/pull/116)
 

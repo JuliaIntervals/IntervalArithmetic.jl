@@ -44,7 +44,7 @@ export
     cancelminus, cancelplus, isunbounded,
     .., @I_str, ±,
     pow,
-    setdisplay
+    setformat, @format
 
 export
     setindex   # re-export from StaticArrays for IntervalBox

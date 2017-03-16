@@ -52,7 +52,7 @@ julia> X = DecoratedInterval(3, 4)
 
 By default, decorations are not displayed. The following turns on display of decorations:
 ```
-julia> setdisplay(decorations=true)
+julia> setformat(decorations=true)
 
 julia> X
 [3, 4]_com
