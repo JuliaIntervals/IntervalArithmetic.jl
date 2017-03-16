@@ -3,7 +3,7 @@ using Base.Test
 
 # using Suppressor
 
-setdisplay(:full)
+setformat(:full)
 
 # @suppress begin
 
@@ -32,7 +32,7 @@ setrounding(Interval, :correct)
     @test sin(x) == Interval(0.47942553860420295, 0.479425538604203)
 end
 
-setdisplay(:standard)
+setformat(:standard)
 
 # end
 # end

@@ -1,4 +1,24 @@
-# What's new in ValidatedNumerics.jl
+# What's new in `ValidatedNumerics.jl`
+
+## v0.8
+
+### Supported versions of Julia
+- Julia v0.5 onwards are supported; `IntervalBox` on Julia v0.6 is waiting on upstream changes to `StaticArrays` (https://github.com/JuliaArrays/StaticArrays.jl/issues/113)
+
+### Breaking API changes
+- **Only on Julia 0.6**, it is now possible to change the interval rounding type again, using `setrounding(Interval, :fast)`; #220
+
+- Changed `setdisplay` to `setformat`. Added `@format` macro to simplify interface, e.g.
+`@format standard 5 true`; #251
+
+- `mid` is now IEEE-1788 compliant, which changes the behaviour for semi-infinite intervals #253
+
+### Other
+- Changed from using `FixedSizeArrays.jl` to `StaticArrays.jl` for `IntervalBox`;
+this should be invisible to the end user #245
+
+- Fixed a bug in 1D interval Newton;  #254
+
 
 ## v0.7
 
@@ -6,9 +26,9 @@
 - v0.7 is the last version to include support for Julia v0.4
 
 ### Breaking API changes
-- Deprecate `displaymode`, replacing it with `setformat`, with simplified syntax #210:
+- Deprecate `displaymode`, replacing it with `setdisplay`, with simplified syntax #210:
 ```
-setformat(:full)
+setdisplay(:full)
 ```
 
 ### Added features
@@ -52,28 +72,28 @@ or
 - Neighbouring root intervals are merged in the Newton and Krawczyk methods: [#156](https://github.com/dpsanders/ValidatedNumerics.jl/pull/156)
 
 
-## v0.4.3
-- Fix display of intervals with different setformat options; [#146](https://github.com/dpsanders/ValidatedNumerics.jl/pull/146)
+### v0.4.3
+- Fix display of intervals with different setdisplay options; [#146](https://github.com/dpsanders/ValidatedNumerics.jl/pull/146)
 
 - Add emptyinterval(x::IntervalBox); [#145](https://github.com/dpsanders/ValidatedNumerics.jl/pull/145)
 
-## v0.4.2
+### v0.4.2
 - Add `setdiff` for n-dimensional `IntervalBox`es; [#144](https://github.com/dpsanders/ValidatedNumerics.jl/pull/144)
 
-## v0.4.1
+### v0.4.1
 - Fix incompatibility for `IntervalBox` with latest tagged versions of `FixedSizeArrays.jl`
 - Add `setdiff` for 2D `IntervalBox`es  [#143](https://github.com/dpsanders/ValidatedNumerics.jl/pull/143)
 - Make integer powers of complex intervals work [#142](https://github.com/dpsanders/ValidatedNumerics.jl/pull/142)
 
-# v0.4
+## v0.4
 - Added decorated intervals [#112](https://github.com/dpsanders/ValidatedNumerics.jl/pull/112)
 
-- Added `setformat` function for modifying how intervals are displayed [#115](https://github.com/dpsanders/ValidatedNumerics.jl/pull/115)
+- Added `setdisplay` function for modifying how intervals are displayed [#115](https://github.com/dpsanders/ValidatedNumerics.jl/pull/115)
 
 - Added `±` syntax for creating intervals as e.g. `1.3 ± 0.1` [#116](https://github.com/dpsanders/ValidatedNumerics.jl/pull/116)
 
 
-# v0.3
+## v0.3
 
 - [Added `IntervalBox` type](https://github.com/dpsanders/ValidatedNumerics.jl/pull/88), representing a multi-dimensional (hyper-)box as a `FixedSizeArray` of `Interval`s.
 
@@ -99,7 +119,7 @@ performance regression in parsing long test suites.
 - `convert(Interval, x)` has been removed. You must specify the element type of
 the interval, e.g. `convert(Interval{Float64}, 0.1)`
 
-# v0.2
+## v0.2
 
 - Significant progress has been made towards conformance with the [IEEE 1788-2015 - IEEE Standard for Interval Arithmetic] (https://standards.ieee.org/findstds/standard/1788-2015.html), with many functions added, including hyperbolic functions (`cosh`, etc.)
 
@@ -114,7 +134,7 @@ the interval, e.g. `convert(Interval{Float64}, 0.1)`
 - Changes are detailed in [issue #31](https://github.com/dpsanders/ValidatedNumerics.jl/issues/31)
 
 
-## 0.1.3
+### 0.1.3
 
 - Improvements towards conformance with the [IEEE-1788](https://standards.ieee.org/findstds/standard/1788-2015.html) standard for Interval Arithmetic:
 
@@ -126,16 +146,16 @@ the interval, e.g. `convert(Interval{Float64}, 0.1)`
 **Important notice:** This is the **last version** of the package that
 supports Julia v0.3.
 
-## 0.1.2
+### 0.1.2
 
 - Increase test coverage and corresponding bug fixes
 - Enable pre-compilation for Julia v0.4
 
-## 0.1.1
+### 0.1.1
 
 - Re-enable tests for `Interval{Float64}` (`e0f3c1506f`)
 
-# v0.1
+## v0.1
 
 v0.1 is the first public release of the package.
 
