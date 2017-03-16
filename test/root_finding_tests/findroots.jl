@@ -147,6 +147,24 @@ end
     end
 end
 
+@testset "Iterated logistic function fixed points" begin
+    ∘(f, g) = x -> f(g(x))
+    iterate(f, n) = n == 1 ? f : f ∘ iterate(f, n-1)
+
+    f(x) = 4x*(1-x)  # logistic map
+
+    for n in 1:10
+        g = x -> iterate(f, n)(x) - x  # look for fixed points of f^n
+
+        roots = newton(g, 0..1)
+        @test length(roots) == 2^n
+
+        roots = krawczyk(g, 0..1)
+        @test length(roots) == 2^n
+
+    end
+end
+
 
 
 # Example of a function with a double root at 0 from Burden & Faires, 9th ed, p.84

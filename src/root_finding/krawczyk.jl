@@ -10,13 +10,14 @@ does not contain zero, and the second is the inverse of its derivative"""
 function guarded_derivative_midpoint{T}(f::Function, f_prime::Function, x::Interval{T})
 
     α = convert(T, 0.46875)   # close to 0.5, but exactly representable as a floating point
-    m = Interval( guarded_mid(x) )
+    # m = Interval( guarded_mid(f, x) )
+    m = Interval(mid(x))
 
     C = inv(f_prime(m))
 
     # Check that 0 is not in C; if so, consider another point rather than m
     i = 0
-    while zero(T) ∈ C
+    while zero(T) ∈ C || isempty(C)
         m = Interval( α*x.lo + (one(T)-α)*x.hi )
         C = inv(f_prime(m))
 
@@ -70,12 +71,12 @@ function krawczyk{T}(f::Function, f_prime::Function, x::Interval{T}, level::Int=
 
     isempty(Kx ∩ x) && return Root{T}[]  # [(x, :none)]
 
-    if Kx ⪽ x
+    if Kx ⪽ x  # isinterior
         debug && (print("Refining "); @show(x))
         return krawczyk_refine(f, f_prime, Kx, tolerance=tolerance, debug=debug)
     end
 
-    m = guarded_mid(x)
+    m = guarded_mid(f, x)
 
     debug && @show(x,m)
 

@@ -4,10 +4,11 @@
 
 # What is this guarded_mid for? Shouldn't it be checking if f(m)==0?
 doc"""Returns the midpoint of the interval x, slightly shifted in case
-it is zero"""
-function guarded_mid{T}(x::Interval{T})
+the midpoint is an exact root"""
+function guarded_mid{T}(f, x::Interval{T})
     m = mid(x)
-    if m == zero(T)                     # midpoint exactly 0
+
+    if f(m) == 0                      # midpoint exactly a root
         α = convert(T, 0.46875)      # close to 0.5, but exactly representable as a floating point
         m = α*x.lo + (one(T)-α)*x.hi   # displace to another point in the interval
     end
@@ -19,7 +20,7 @@ end
 
 
 function N{T}(f::Function, x::Interval{T}, deriv::Interval{T})
-    m = guarded_mid(x)
+    m = guarded_mid(f, x)
     m = Interval(m)
 
     m - (f(m) / deriv)
@@ -85,7 +86,7 @@ function newton{T}(f::Function, f_prime::Function, x::Interval{T}, level::Int=0;
             return newton_refine(f, f_prime, Nx, tolerance=tolerance, debug=debug)
         end
 
-        m = guarded_mid(x)
+        m = guarded_mid(f, x)
 
         debug && @show(x,m)
 
