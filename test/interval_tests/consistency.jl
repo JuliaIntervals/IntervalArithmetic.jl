@@ -165,9 +165,15 @@ c = @interval(0.25, 4.0)
         @test mid(1..2) == 1.5
         @test mid(0.1..0.3) == 0.2
         @test mid(-10..5) == -2.5
-        @test mid(-∞..1) == -1.7976931348623157e308
-        @test mid(1..∞) == 1.7976931348623157e308
+        @test mid(-∞..1) == nextfloat(-∞)
+        @test mid(1..∞) == prevfloat(∞)
         @test isnan(mid(emptyinterval()))
+    end
+
+    @testset "mid with parameter" begin
+        @test mid(0..1, 0.75) == 0.75
+        @test mid(1..∞, 0.75) == prevfloat(∞)
+        @test mid(-∞..∞, 0.75) == 0
     end
 
     @testset "diam" begin

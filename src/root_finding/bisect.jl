@@ -6,17 +6,20 @@ Split the interval `X` at position α; α=0.5 corresponds to the midpoint.
 Returns a tuple of the new intervals.
 """
 function bisect(X::Interval, α=0.5)
-    m = (1-α) * X.lo + α * X.hi
-    return ( Interval(X.lo, m), Interval(m, X.hi) )
+    @assert 0 ≤ α ≤ 1
+
+    m = mid(X, α)
+
+    return (Interval(X.lo, m), Interval(m, X.hi))
 end
 
 doc"""
     bisect(X::IntervalBox, α=0.5)
 
-Bisect the `IntervalBox` in its longest side.
+Bisect the `IntervalBox` `X` at position α ∈ [0,1] along its longest side.
 """
 function bisect(X::IntervalBox, α=0.5)
-    i = findmax([diam(x) for x in X])[2]  # find longest side
+    i = indmax(diam.(X))  # find longest side
 
     return bisect(X, i, α)
 end

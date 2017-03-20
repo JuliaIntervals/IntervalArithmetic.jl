@@ -307,26 +307,54 @@ end
 # mid, diam, radius
 
 # Compare pg. 64 of the IEEE 1788-2015 standard:
-function mid{T}(a::Interval{T})
+doc"""
+    mid(a::Interval, α=0.5)
+
+Find the midpoint (or, in general, an intermediate point) at a distance α along the interval `a`. The default is the true midpoint at α=0.5.
+"""
+function mid{T}(a::Interval{T}, α=0.5)
+
     isempty(a) && return convert(T, NaN)
     isentire(a) && return zero(a.lo)
 
     a.lo == -∞ && return nextfloat(a.lo)
     a.hi == +∞ && return prevfloat(a.hi)
 
-    (a.lo + a.hi) / 2  # rounds to nearest
+    @assert 0 ≤ α ≤ 1
+
+    return (1-α) * a.lo + α * a.hi  # rounds to nearest
 end
 
+mid{T}(a::Interval{Rational{T}}) = (1//2) * (a.lo + a.hi)
+
+
+doc"""
+    diam(a::Interval)
+
+Return the diameter (length) of the `Interval` `a`.
+"""
 function diam{T<:Real}(a::Interval{T})
     isempty(a) && return convert(T, NaN)
+
     @round_up(a.hi - a.lo) # cf page 64 of IEEE1788
 end
 
+doc"""
+    radius(a::Interval)
+
+Return the radius of the `Interval` `a`, such that
+`a ⊆ m ± radius`, where `m = mid(a)` is the midpoint.
+"""
 # Should `radius` this yield diam(a)/2? This affects other functions!
 function radius(a::Interval)
     isempty(a) && return convert(eltype(a), NaN)
     m = mid(a)
-    max(m - a.lo, a.hi - m)
+    return max(m - a.lo, a.hi - m)
+end
+
+function radius{T}(a::Interval{Rational{T}})
+    m = (a.lo + a.hi) / 2
+    return max(m - a.lo, a.hi - m)
 end
 
 # cancelplus and cancelminus
