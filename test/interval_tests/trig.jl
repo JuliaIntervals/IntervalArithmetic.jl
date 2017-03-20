@@ -6,7 +6,7 @@ using Base.Test
 setprecision(Interval, 128)
 setprecision(Interval, Float64)
 
-@testset "Trig tests" begin
+@testset "sin" begin
     @test sin(@interval(0.5)) == Interval(0.47942553860420295, 0.47942553860420301)
     @test sin(@interval(0.5, 1.67)) == Interval(4.7942553860420295e-01, 1.0)
     @test sin(@interval(1.67, 3.2)) == Interval(-5.8374143427580093e-02, 9.9508334981018021e-01)
@@ -22,7 +22,9 @@ setprecision(Interval, Float64)
     @test sin(@biginterval(0.5, 8.5)) ⊆ sin(@interval(0.5, 8.5))
     @test sin(@biginterval(-4.5, 0.1)) ⊆ sin(@interval(-4.5, 0.1))
     @test sin(@biginterval(1.3, 6.3)) ⊆ sin(@interval(1.3, 6.3))
+end
 
+@testset "cos" begin
     @test cos(@interval(0.5)) == Interval(0.87758256189037265, 0.87758256189037276)
     @test cos(@interval(0.5, 1.67)) == Interval(-0.09904103659872825, 0.8775825618903728)
     @test cos(@interval(2.1, 5.6)) == Interval(-1.0, 0.77556587851025016)
@@ -36,7 +38,9 @@ setprecision(Interval, Float64)
     @test cos(@biginterval(0.5, 8.5)) ⊆ cos(@interval(0.5, 8.5))
     @test cos(@biginterval(-4.5, 0.1)) ⊆ cos(@interval(-4.5, 0.1))
     @test cos(@biginterval(1.3, 6.3)) ⊆ cos(@interval(1.3, 6.3))
+end
 
+@testset "tan" begin
     @test tan(@interval(0.5)) == Interval(0.54630248984379048, 0.5463024898437906)
     @test tan(@interval(0.5, 1.67)) == entireinterval()
     @test tan(@interval(1.67, 3.2)) == Interval(-10.047182299210307, 0.05847385445957865)
@@ -49,8 +53,9 @@ setprecision(Interval, Float64)
     @test tan(@biginterval(0.5, 8.5)) ⊆ tan(@interval(0.5, 8.5))
     @test tan(@biginterval(-4.5, 0.1)) ⊆ tan(@interval(-4.5, 0.1))
     @test tan(@biginterval(1.3, 6.3)) ⊆ tan(@interval(1.3, 6.3))
+end
 
-
+@testset "Inverse trig" begin
     @test asin(@interval(1)) == @interval(pi/2)#pi_interval(Float64)/2
     @test asin(@interval(0.9, 2)) == asin(@interval(0.9, 1))
     @test asin(@interval(3, 4)) == ∅
@@ -71,7 +76,9 @@ setprecision(Interval, Float64)
         Interval(-pi_interval(Float64).hi/4, pi_interval(Float64).hi/4)
     @test atan(@interval(0)) == Interval(0.0, 0.0)
     @test atan(@biginterval(-1, 1)) ⊆ atan(@interval(-1, 1))
+end
 
+@testset "atan2" begin
     @test atan2(∅, entireinterval()) == ∅
     @test atan2(entireinterval(), ∅) == ∅
     @test atan2(@interval(0.0, 1.0), @biginterval(0.0)) == @biginterval(pi/2)
@@ -163,11 +170,27 @@ setprecision(Interval, Float64)
         Interval(-1.5707963267948968, 1.5707963267948968)
     @test atan2(@biginterval(-0.1, 0.1), @biginterval(-0.0, 0.1)) ⊆
         atan2(@interval(-0.1, 0.1), @interval(0.0, 0.1))
+end
 
+@testset "Trig" begin
     for a in ( @interval(17, 19), @interval(0.5, 1.2) )
         @test tan(a) ⊆ sin(a)/cos(a)
     end
 
     @test sin(Interval(-pi/2, 3pi/2)) == Interval(-1, 1)
     @test cos(Interval(-pi/2, 3pi/2)) == Interval(-1, 1)
+end
+
+@testset "Trig with large arguments" begin 
+    x = Interval(2.)^1000   # this is a thin interval
+    @test diam(x) == 0.0
+
+    @test sin(x) == -1..1
+    @test cos(x) == -1..1
+    @test tan(x) == Interval(-0.16125837995065806, -0.16125837995065803)
+
+    x = Interval(prevfloat(∞), ∞)
+    @test sin(x) == -1..1
+    @test cos(x) == -1..1
+    @test tan(x) == -∞..∞
 end

@@ -21,7 +21,7 @@ Tucker, *Validated Numerics*."""
 
 function find_quadrants(x::AbstractFloat)
     temp = x / half_pi(x)
-    (floor(Int, temp.lo), floor(Int, temp.hi))
+    (floor(temp.lo), floor(temp.hi))
 end
 
 function sin{T}(a::Interval{T})
