@@ -49,9 +49,6 @@ export
 export
     setindex   # re-export from StaticArrays for IntervalBox
 
-export RootFinding
-
-
 import Base: rounding, setrounding, setprecision
 
 
@@ -86,8 +83,6 @@ include("decorations/decorations.jl")
 
 include("parsing.jl")
 include("display.jl")
-
-include("root_finding/root_finding.jl")
 
 include("plot_recipes/plot_recipes.jl")
 
