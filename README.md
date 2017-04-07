@@ -1,13 +1,13 @@
-# ValidatedNumerics.jl #
+# IntervalArithmetic.jl #
 
-[![Build Status](https://travis-ci.org/dpsanders/ValidatedNumerics.jl.svg?branch=master)](https://travis-ci.org/dpsanders/ValidatedNumerics.jl)
-[![Coverage Status](https://coveralls.io/repos/dpsanders/ValidatedNumerics.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/dpsanders/ValidatedNumerics.jl?branch=master)
+[![Build Status](https://travis-ci.org/dpsanders/IntervalArithmetic.jl.svg?branch=master)](https://travis-ci.org/dpsanders/IntervalArithmetic.jl)
+[![Coverage Status](https://coveralls.io/repos/dpsanders/IntervalArithmetic.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/dpsanders/IntervalArithmetic.jl?branch=master)
 [![codecov](
-https://codecov.io/gh/dpsanders/ValidatedNumerics.jl/branch/master/graph/badge.svg)]
-(https://codecov.io/gh/dpsanders/ValidatedNumerics.jl)
-[![Join the chat at https://gitter.im/dpsanders/ValidatedNumerics.jl](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dpsanders/ValidatedNumerics.jl?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+https://codecov.io/gh/dpsanders/IntervalArithmetic.jl/branch/master/graph/badge.svg)]
+(https://codecov.io/gh/dpsanders/IntervalArithmetic.jl)
+[![Join the chat at https://gitter.im/dpsanders/IntervalArithmetic.jl](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dpsanders/IntervalArithmetic.jl?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-`ValidatedNumerics.jl` is a Julia package for performing *Validated Numerics* in Julia, i.e. *rigorous* computations with finite-precision floating-point arithmetic.
+`IntervalArithmetic.jl` is a Julia package for performing *Validated Numerics* in Julia, i.e. *rigorous* computations with finite-precision floating-point arithmetic.
 
 
 
@@ -23,7 +23,7 @@ All calculations are carried out using **interval arithmetic**: all quantities a
 The aim of the package is correctness over speed, although performance considerations are also taken into account
 
 ## Documentation
-Documentation is available [**here**](http://dpsanders.github.io/ValidatedNumerics.jl/).
+Documentation is available [**here**](http://dpsanders.github.io/IntervalArithmetic.jl/).
 
 ## IEEE Standard 1788-2015 - IEEE Standard for Interval Arithmetic
 The IEEE Std 1788-2015 - IEEE Standard for Interval Arithmetic was [published](https://standards.ieee.org/findstds/standard/1788-2015.html) in June 2015. We are working towards having `ValidatedNumerics` be conformant with this standard.

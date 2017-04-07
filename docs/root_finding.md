@@ -62,7 +62,7 @@ for example at a multiple root); see Tucker's book for more details.
 
 ## Usage of the interval Newton method
 
-Root-finding routines are in a separate `RootFinding` submodule of `ValidatedNumerics.jl`, 
+Root-finding routines are in a separate `RootFinding` submodule of `IntervalArithmetic.jl`, 
 which must be loaded with
 ```julia
 julia> using ValidatedNumerics, ValidatedNumerics.RootFinding

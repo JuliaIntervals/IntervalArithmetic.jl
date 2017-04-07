@@ -1,4 +1,4 @@
-`ValidatedNumerics.jl` is licensed under the MIT "Expat" License:
+`IntervalArithmetic.jl` is licensed under the MIT "Expat" License:
 
 > Copyright (c) 2014-2017: David P. Sanders & Luis Benet
 >

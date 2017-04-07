@@ -1,4 +1,4 @@
-# This file is part of the ValidatedNumerics.jl package; MIT licensed
+# This file is part of the IntervalArithmetic.jl package; MIT licensed
 
 doc"""An `IntervalBox` is an $N$-dimensional rectangular box, given
 by a Cartesian product of $N$ `Interval`s.

@@ -1,4 +1,4 @@
-# This file is part of the ValidatedNumerics.jl package; MIT licensed
+# This file is part of the IntervalArithmetic.jl package; MIT licensed
 
 # The order in which files are included is important,
 # since certain things need to be defined before others use them

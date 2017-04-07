@@ -1,4 +1,4 @@
-# This file is part of the ValidatedNumerics.jl package; MIT licensed
+# This file is part of the IntervalArithmetic.jl package; MIT licensed
 
 half_pi{T}(::Type{T}) = pi_interval(T) / 2
 half_pi{T<:AbstractFloat}(x::T) = half_pi(T)
