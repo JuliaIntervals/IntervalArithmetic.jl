@@ -1,14 +1,13 @@
 site_name: 'IntervalArithmetic.jl'
 
-site_description: 'IntervalArithmetic.jl: A Julia package for rigorous numerics'
+site_description: 'IntervalArithmetic.jl: A Julia package for interval arithmetic'
 
-repo_url: https://github.com/dpsanders/IntervalArithmetic.jl
+repo_url: https://github.com/JuliaIntervals/IntervalArithmetic.jl
 
 pages:
     - 'Package': 'index.md'
     - 'Basic usage': 'usage.md'
     - 'Multi-dimensional': 'multidim.md'
-    - 'Root finding': 'root_finding.md'
     - 'Rounding': 'rounding.md'
     - 'Decorations': 'decorations.md'
 
@@ -16,4 +15,4 @@ pages:
 
 #markdown_extensions: [math]
 
-copyright: Copyright &copy; 2014, 2015, Luis Benet & David P. Sanders
+copyright: Copyright &copy; 2014-2017, Luis Benet & David P. Sanders
