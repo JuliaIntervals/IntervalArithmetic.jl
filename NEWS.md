@@ -1,4 +1,9 @@
-# What's new in `ValidatedNumerics.jl`
+# What's new in `IntervalArithmetic.jl`
+
+## v0.9
+- The former `ValidatedNumerics.jl` package has been split into `IntervalArithmetic.jl` and `IntervalRootFinding.jl`.
+
+`ValidatedNumerics.jl` will now be a meta-package that re-exports both of these packages.
 
 ## v0.8
 
@@ -57,7 +62,7 @@ Before e.g. `@interval mid(X)` for `X` an interval returned a number instead.
 
 ## v0.5
 - Root finding has been moved into a separate submodule
-[#154](https://github.com/dpsanders/ValidatedNumerics.jl/pull/154).
+[#154](https://github.com/dpsanders/ValidatedNumeris.jl/pull/154).
 
 New usage:
 

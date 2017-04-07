@@ -1,11 +1,11 @@
-# ValidatedNumerics.jl #
+# IntervalArithmetic.jl #
 
-`ValidatedNumerics.jl` is a Julia package for performing *Validated Numerics* in Julia, i.e. *rigorous* computations with finite-precision floating-point arithmetic.
+`IntervalArithmetic.jl` is a Julia package for performing *Validated Numerics* in Julia, i.e. *rigorous* computations with finite-precision floating-point arithmetic.
 
 ## Installation
 To install the package, from within Julia do
 
-    julia> Pkg.add("ValidatedNumerics")
+    julia> Pkg.add("IntervalArithmetic")
 
 
 ## Interval arithmetic
@@ -16,7 +16,6 @@ The aim of the package is correctness over speed, although performance considera
 ## Contents:
 - [Basic usage](usage.md)
 - [Multi-dimensional](multidim.md)
-- [Root finding](root_finding.md)
 - [Rounding](rounding.md)
 - [Decorations](decorations.md)
 

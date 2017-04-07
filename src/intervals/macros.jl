@@ -1,4 +1,4 @@
-# This file is part of the ValidatedNumerics.jl package; MIT licensed
+# This file is part of the IntervalArithmetic.jl package; MIT licensed
 
 doc"""The `@interval` macro is the main method to create an interval.
 It converts each expression into a narrow interval that is guaranteed to contain the true value passed by the user in the one or two expressions passed to it.

@@ -1,4 +1,4 @@
-# This file is part of the ValidatedNumerics.jl package; MIT licensed
+# This file is part of the IntervalArithmetic.jl package; MIT licensed
 
 type IntervalParameters
 
@@ -92,6 +92,6 @@ end
 
 
 
-float{T}(x::Interval{T}) = convert(Interval{float(T)}, x)  # https://github.com/dpsanders/ValidatedNumerics.jl/issues/174
+float{T}(x::Interval{T}) = convert(Interval{float(T)}, x)  # https://github.com/dpsanders/IntervalArithmetic.jl/issues/174
 
 big{T}(x::Interval{T}) = convert(Interval{BigFloat}, x)
