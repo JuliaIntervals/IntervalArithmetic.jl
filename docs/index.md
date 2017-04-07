@@ -5,7 +5,7 @@
 ## Installation
 To install the package, from within Julia do
 
-    julia> Pkg.add("ValidatedNumerics")
+    julia> Pkg.add("IntervalArithmetic")
 
 
 ## Interval arithmetic
@@ -16,7 +16,6 @@ The aim of the package is correctness over speed, although performance considera
 ## Contents:
 - [Basic usage](usage.md)
 - [Multi-dimensional](multidim.md)
-- [Root finding](root_finding.md)
 - [Rounding](rounding.md)
 - [Decorations](decorations.md)
 

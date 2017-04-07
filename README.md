@@ -14,7 +14,7 @@ https://codecov.io/gh/dpsanders/IntervalArithmetic.jl/branch/master/graph/badge.
 ## Installation
 To install the package, from within Julia do
 
-    julia> Pkg.add("ValidatedNumerics")
+    julia> Pkg.add("IntervalArithmetic")
 
 
 ## Interval arithmetic
@@ -23,10 +23,10 @@ All calculations are carried out using **interval arithmetic**: all quantities a
 The aim of the package is correctness over speed, although performance considerations are also taken into account
 
 ## Documentation
-Documentation is available [**here**](http://dpsanders.github.io/IntervalArithmetic.jl/).
+Documentation is available [**here**](http://dpsanders.github.io/ValdidatedNumerics.jl/).
 
 ## IEEE Standard 1788-2015 - IEEE Standard for Interval Arithmetic
-The IEEE Std 1788-2015 - IEEE Standard for Interval Arithmetic was [published](https://standards.ieee.org/findstds/standard/1788-2015.html) in June 2015. We are working towards having `ValidatedNumerics` be conformant with this standard.
+The IEEE Std 1788-2015 - IEEE Standard for Interval Arithmetic was [published](https://standards.ieee.org/findstds/standard/1788-2015.html) in June 2015. We are working towards having `IntervalArithmetic.jl` be conformant with this standard.
 
 To do so, we have incorporated tests from the excellent [ITF1788 test suite](https://github.com/oheim/ITF1788), originally written by Marco Nehmeier and Maximilian Kiesner, and converted to a common format and to output tests for Julia by Oliver Heimlich.
 
@@ -52,9 +52,9 @@ Departamento de Física, Facultad de Ciencias, Universidad Nacional Autónoma de
 
 
 ## History ##
-This project was begun during a masters' course in the postgraduate programs in Physics and in Mathematics at UNAM during the second semester of 2013 (in Python -- the [`ValidiPy` package](https://github.com/computo-fc/ValidiPy)), and was reinitiated -- now in Julia -- in the first semester of 2015. We thank the participants of the courses for putting up with the half-baked material and contributing energy and ideas.
+This project was begun during a masters' course in the postgraduate programs in Physics and in Mathematics at UNAM during the second semester of 2013 (in Python), and was reinitiated -- now in Julia -- in the first semester of 2015. We thank the participants of the courses for putting up with the half-baked material and contributing energy and ideas.
 
 
 ## Acknowledgements ##
 
-Financial support is acknowledged from DGAPA-UNAM PAPIME grants PE-105911 and PE-107114, and DGAPA-UNAM PAPIIT grant IN-117214. LB acknowledges support through a *Cátedra Moshinsky* (2013).
+Financial support is acknowledged from DGAPA-UNAM PAPIME grants PE-105911 and PE-107114, and DGAPA-UNAM PAPIIT grants IN-117214 and IN-117117. LB acknowledges support through a *Cátedra Moshinsky* (2013).

@@ -1,4 +1,4 @@
-# What's new in `ValidatedNumerics.jl`
+# What's new in `IntervalArithmetic.jl`
 
 ## v0.9
 - The former `ValidatedNumerics.jl` package has been split into `IntervalArithmetic.jl` and `IntervalRootFinding.jl`.
