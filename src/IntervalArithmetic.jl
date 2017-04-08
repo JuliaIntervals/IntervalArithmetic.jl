@@ -89,4 +89,4 @@ include("plot_recipes/plot_recipes.jl")
 include("deprecated.jl")
 
 
-end # module ValidatedNumerics
+end # module IntervalArithmetic

@@ -15,7 +15,7 @@ end
 # Integer power:
 
 # overwrite new behaviour for small integer powers:
-# ^{p}(x::ValidatedNumerics.Interval, ::Type{Val{p}}) = x^p
+# ^{p}(x::IntervalArithmetic.Interval, ::Type{Val{p}}) = x^p
 
 function ^(a::Interval{BigFloat}, n::Integer)
     isempty(a) && return a

@@ -24,7 +24,7 @@ $$[a, b] := \{ a \le x \le b \} \subseteq \mathbb{R}.$$
 ## Creating intervals
 Intervals are created using the `@interval` macro, which takes one or two expressions:
 ```
-julia> using ValidatedNumerics
+julia> using IntervalArithmetic
 
 julia> a = @interval(1)
 [1, 1]

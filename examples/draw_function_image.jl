@@ -1,4 +1,4 @@
-using ValidatedNumerics
+using IntervalArithmetic
 
 using PyCall
 using PyPlot

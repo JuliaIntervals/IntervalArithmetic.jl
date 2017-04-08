@@ -1,5 +1,5 @@
 
-using ValidatedNumerics
+using IntervalArithmetic
 using Base.Test
 
 # Interval tests:

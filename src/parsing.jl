@@ -23,7 +23,7 @@ function parse{T}(::Type{DecoratedInterval{T}}, s::AbstractString)
     end
 
     decoration_symbol = Symbol(decoration_string[2:end])
-    decoration = getfield(ValidatedNumerics, decoration_symbol)
+    decoration = getfield(IntervalArithmetic, decoration_symbol)
 
     return DecoratedInterval(interval, decoration)
 

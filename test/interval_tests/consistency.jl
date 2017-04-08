@@ -1,6 +1,6 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
-using ValidatedNumerics
+using IntervalArithmetic
 using Base.Test
 
 
@@ -93,8 +93,8 @@ c = @interval(0.25, 4.0)
     end
 
     @testset "Comparison tests" begin
-        @test ValidatedNumerics.islessprime(a.lo, b.lo) == (a.lo < b.lo)
-        @test ValidatedNumerics.islessprime(Inf, Inf)
+        @test IntervalArithmetic.islessprime(a.lo, b.lo) == (a.lo < b.lo)
+        @test IntervalArithmetic.islessprime(Inf, Inf)
         @test ∅ <= ∅
         @test !(Interval(1.0,2.0) <= ∅)
         @test Interval(-Inf,Inf) <= Interval(-Inf,Inf)
@@ -229,7 +229,7 @@ c = @interval(0.25, 4.0)
 
     @testset "mid and radius" begin
         @test radius(Interval(-1//10,1//10)) == diam(Interval(-1//10,1//10))/2
-        @test isnan(ValidatedNumerics.radius(emptyinterval()))
+        @test isnan(IntervalArithmetic.radius(emptyinterval()))
         @test mid(c) == 2.125
         @test isnan(mid(emptyinterval()))
         @test mid(entireinterval()) == 0.0

@@ -1,6 +1,6 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
-using ValidatedNumerics
+using IntervalArithmetic
 using Base.Test
 
 

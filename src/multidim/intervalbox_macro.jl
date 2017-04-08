@@ -1,4 +1,4 @@
-using ValidatedNumerics
+using IntervalArithmetic
 
 
 """Macro to make a version of a multidimensional function that acts on

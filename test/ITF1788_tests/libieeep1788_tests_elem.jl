@@ -23,7 +23,7 @@
 using FactCheck
 
 #Arithmetic library imports
-using ValidatedNumerics
+using IntervalArithmetic
 
 #Preamble
 setprecision(53)
