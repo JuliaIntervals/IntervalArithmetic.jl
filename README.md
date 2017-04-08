@@ -1,11 +1,11 @@
 # IntervalArithmetic.jl #
 
-[![Build Status](https://travis-ci.org/dpsanders/IntervalArithmetic.jl.svg?branch=master)](https://travis-ci.org/dpsanders/IntervalArithmetic.jl)
-[![Coverage Status](https://coveralls.io/repos/dpsanders/IntervalArithmetic.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/dpsanders/IntervalArithmetic.jl?branch=master)
+[![Build Status](https://travis-ci.org/JuliaIntervals/IntervalArithmetic.jl.svg?branch=master)](https://travis-ci.org/dpsanders/IntervalArithmetic.jl)
+[![Coverage Status](https://coveralls.io/repos/JuliaIntervals/IntervalArithmetic.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/JuliaIntervals/IntervalArithmetic.jl?branch=master)
 [![codecov](
-https://codecov.io/gh/dpsanders/IntervalArithmetic.jl/branch/master/graph/badge.svg)]
-(https://codecov.io/gh/dpsanders/IntervalArithmetic.jl)
-[![Join the chat at https://gitter.im/dpsanders/IntervalArithmetic.jl](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dpsanders/IntervalArithmetic.jl?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+https://codecov.io/gh/JuliaIntervals/IntervalArithmetic.jl/branch/master/graph/badge.svg)]
+(https://codecov.io/gh/JuliaIntervals/IntervalArithmetic.jl)
+[![Join the chat at https://gitter.im/JuliaIntervals/IntervalArithmetic.jl](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/JuliaIntervals/IntervalArithmetic.jl?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 `IntervalArithmetic.jl` is a Julia package for performing *Validated Numerics* in Julia, i.e. *rigorous* computations with finite-precision floating-point arithmetic.
 
