@@ -11,4 +11,4 @@ Then create the Julia tests with the following command; Python 3 must be install
 
     python3 -m itf1788 -c "(julia, *, *)"
 
-The resulting test files are generated in the `output/julia/FactCheck/ValidatedNumerics/` subdirectory.
+The resulting test files are generated in the `output/julia/FactCheck/IntervalArithmetic/` subdirectory.

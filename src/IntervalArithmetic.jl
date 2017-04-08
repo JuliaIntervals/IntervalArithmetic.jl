@@ -2,7 +2,7 @@
 
 __precompile__(true)
 
-module ValidatedNumerics
+module IntervalArithmetic
 
 import CRlibm
 using Compat
@@ -89,4 +89,4 @@ include("plot_recipes/plot_recipes.jl")
 include("deprecated.jl")
 
 
-end # module ValidatedNumerics
+end # module IntervalArithmetic

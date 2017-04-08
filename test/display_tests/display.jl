@@ -1,4 +1,4 @@
-using ValidatedNumerics
+using IntervalArithmetic
 using Base.Test
 
 setprecision(Interval, Float64)

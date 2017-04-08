@@ -1,14 +1,14 @@
 # What's new in `IntervalArithmetic.jl`
 
 ## v0.9
-- The former `ValidatedNumerics.jl` package has been split into `IntervalArithmetic.jl` and `IntervalRootFinding.jl`.
+- The former `ValidatedNumerics.jl` package has been split into `ValidatedNumerics.jl` and `IntervalRootFinding.jl`.
 
 `ValidatedNumerics.jl` will now be a meta-package that re-exports both of these packages.
 
 ## v0.8
 
 ### Supported versions of Julia
-- Julia v0.5 onwards are supported; `IntervalBox` on Julia v0.6 is waiting on upstream changes to `StaticArrays` (https://github.com/JuliaArrays/StaticArrays.jl/issues/113)
+- Julia v0.5 and higher are supported
 
 ### Breaking API changes
 - **Only on Julia 0.6**, it is now possible to change the interval rounding type again, using `setrounding(Interval, :fast)`; #220

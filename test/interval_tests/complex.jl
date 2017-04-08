@@ -1,9 +1,9 @@
-using ValidatedNumerics
+using IntervalArithmetic
 using Base.Test
 
 @testset "Complex interval operations" begin
     a = @interval 1im
-    @test typeof(a)== Complex{ValidatedNumerics.Interval{Float64}}
+    @test typeof(a)== Complex{IntervalArithmetic.Interval{Float64}}
     @test a ==  Interval(0) + Interval(1)*im
     @test a * a == Interval(-1)
     @test a + a == Interval(2)*im

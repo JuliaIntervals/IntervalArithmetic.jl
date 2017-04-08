@@ -1,24 +1,24 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
-using ValidatedNumerics
+using IntervalArithmetic
 using Base.Test
 
 
 @testset "Constructing intervals" begin
     setprecision(Interval, 53)
-    @test ValidatedNumerics.parameters.precision == 53
+    @test IntervalArithmetic.parameters.precision == 53
 
     setprecision(Interval, Float64)
-    @test ValidatedNumerics.parameters.precision == 53
+    @test IntervalArithmetic.parameters.precision == 53
 
     @test precision(BigFloat) == 53
     @test precision(Interval) == (Float64, 53)
 
     # Checks for parameters
-    @test ValidatedNumerics.parameters.precision_type == Float64
-    @test ValidatedNumerics.parameters.precision == 53
-    @test ValidatedNumerics.parameters.rounding == :narrow
-    @test ValidatedNumerics.parameters.pi == @biginterval(pi)
+    @test IntervalArithmetic.parameters.precision_type == Float64
+    @test IntervalArithmetic.parameters.precision == 53
+    @test IntervalArithmetic.parameters.rounding == :narrow
+    @test IntervalArithmetic.parameters.pi == @biginterval(pi)
 
     # Naive constructors, with no conversion involved
     @test Interval(1) == Interval(1.0, 1.0)
@@ -148,7 +148,7 @@ using Base.Test
 
     @test string(emptyinterval()) == "∅"
 
-    params = ValidatedNumerics.IntervalParameters()
+    params = IntervalArithmetic.IntervalParameters()
     @test params.precision_type == BigFloat
     @test params.precision == 256
     @test params.rounding == :narrow

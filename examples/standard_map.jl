@@ -1,4 +1,4 @@
-using ValidatedNumerics
+using IntervalArithmetic
 
 import Base.mod2pi
 
@@ -64,6 +64,6 @@ function mod(X::IntervalBox, width::Real)
 end
 
 
-mod2pi{T}(x::Interval{T}) = mod(x, ValidatedNumerics.two_pi(T))
+mod2pi{T}(x::Interval{T}) = mod(x, IntervalArithmetic.two_pi(T))
 
 mod2pi{T}(X::Vector{Interval{T}}) = vcat(map(mod2pi, X)...)
