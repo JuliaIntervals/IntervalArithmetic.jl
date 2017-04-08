@@ -1,9 +1,9 @@
 language: julia
-#
-# sudo: required
-#
-# services:
-#   - docker
+
+sudo: required
+
+services:
+  - docker
 
 os:
   - linux
