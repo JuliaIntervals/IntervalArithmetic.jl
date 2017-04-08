@@ -2,7 +2,7 @@
 
 __precompile__(true)
 
-module ValidatedNumerics
+module IntervalArithmetic
 
 import CRlibm
 using Compat
