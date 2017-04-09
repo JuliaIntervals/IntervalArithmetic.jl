@@ -5,7 +5,6 @@ __precompile__(true)
 module IntervalArithmetic
 
 import CRlibm
-using Compat
 using StaticArrays
 using ForwardDiff
 

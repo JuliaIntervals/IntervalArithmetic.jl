@@ -74,17 +74,6 @@ pi_interval(::Type{BigFloat}) = parameters.pi
 pi_interval(::Type{Float64})  = float_interval_pi
 
 
-# Rounding for rational intervals, e.g for sqrt of rational interval:
-# Find the corresponding AbstractFloat type for a given rational type
-
-Base.float{T}(::Type{Rational{T}}) = typeof(float(one(Rational{T})))
-
-# better to just do the following ?
-# Base.float(::Type{Rational{Int64}}) = Float64
-# Base.float(::Type{Rational{BigInt}}) = BigFloat
-
-# Use that type for rounding with rationals, e.g. for sqrt:
-
 function Base.setrounding{T}(f::Function, ::Type{Rational{T}},
     rounding_mode::RoundingMode)
     setrounding(f, float(Rational{T}), rounding_mode)
@@ -92,6 +81,6 @@ end
 
 
 
-float{T}(x::Interval{T}) = convert(Interval{float(T)}, x)  # https://github.com/dpsanders/IntervalArithmetic.jl/issues/174
+float{T}(x::Interval{T}) = convert( Interval{float(T)}, x)  # https://github.com/dpsanders/IntervalArithmetic.jl/issues/174
 
-big{T}(x::Interval{T}) = convert(Interval{BigFloat}, x)
+big(x::Interval) = convert(Interval{BigFloat}, x)
