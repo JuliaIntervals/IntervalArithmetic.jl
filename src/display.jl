@@ -109,8 +109,6 @@ end
 function round_string(x::BigFloat, digits::Int, r::RoundingMode)
 
     lng = digits + Int32(8)
-    # buf = Array(UInt8, lng + 1)
-    # @compat buf = Base.StringVector(lng + 1)
     buf = Array{UInt8}(lng + 1)
 
     lng = ccall((:mpfr_snprintf,:libmpfr), Int32,
