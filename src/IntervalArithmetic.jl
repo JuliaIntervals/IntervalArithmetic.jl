@@ -6,7 +6,7 @@ module IntervalArithmetic
 
 import CRlibm
 using StaticArrays
-
+using FastRounding
 
 import Base:
     +, -, *, /, //, fma,

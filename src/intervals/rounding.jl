@@ -9,6 +9,7 @@ interval rounding types, e.g.
 +(IntervalRounding{:none}, a, b, RoundDown)
 
 The current allowed rounding types are
+- :errorfree # use errorfree arithmetic via FastRounding.jl
 - :correct  # correct rounding (rounding to the nearest floating-point number)
 - :fast     # fast rounding by prevfloat and nextfloat  (slightly wider than needed)
 - :none     # no rounding at all (for speed, but forgoes any pretense at being rigorous)
@@ -59,6 +60,28 @@ for f in (:+, :-, :*, :/)
     @eval $f{T<:Rational}(a::T, b::T, ::RoundingMode) = $f(a, b)
 end
 
+# error-free arithmetic:
+
+const SystemFloat = Union{Float32, Float64}
+
++{T<:SystemFloat}(::Type{IntervalRounding{:errorfree}},
+                            a::T, b::T, r::RoundingMode) = add_round(a, b, r)
+
+-{T<:SystemFloat}(::Type{IntervalRounding{:errorfree}},
+                            a::T, b::T, r::RoundingMode) = sub_round(a, b, r)
+
+*{T<:SystemFloat}(::Type{IntervalRounding{:errorfree}},
+                            a::T, b::T, r::RoundingMode) = mul_round(a, b, r)
+
+/{T<:SystemFloat}(::Type{IntervalRounding{:errorfree}},
+                            a::T, b::T, r::RoundingMode) = div_round(a, b, r)
+
+inv{T<:SystemFloat}(::Type{IntervalRounding{:errorfree}},
+                            a::T, r::RoundingMode) = inv_round(a, b, r)
+
+sqrt{T<:SystemFloat}(::Type{IntervalRounding{:errorfree}},
+                            a::T, r::RoundingMode) = sqrt_round(a, b, r)
+
 
 # Define functions with different rounding types:
 for mode in (:Down, :Up)
@@ -74,7 +97,6 @@ for mode in (:Down, :Up)
         directed = :nextfloat
     end
 
-
     # binary functions:
     for f in (:+, :-, :*, :/, :atan2)
 
@@ -84,6 +106,13 @@ for mode in (:Down, :Up)
                         $f(a, b)
                     end
                 end
+
+        @eval function $f{T<:AbstractFloat}(::Type{IntervalRounding{:errorfree}},
+                                                    a::T, b::T, $mode1)
+                            setrounding(T, $mode2) do
+                                $f(a, b)
+                            end
+                        end
 
         @eval $f{T<:AbstractFloat}(::Type{IntervalRounding{:fast}},
                                     a::T, b::T, $mode1) = $directed($f(a, b))
@@ -160,15 +189,23 @@ function _setrounding(::Type{Interval}, rounding_type::Symbol)
         return  # no need to redefine anything
     end
 
-    if rounding_type ∉ (:correct, :fast, :none)
-        throw(ArgumentError("Rounding type must be one of `:correct`, `:fast`, `:none`"))
+    if rounding_type ∉ (:errorfree, :correct, :fast, :none)
+        throw(ArgumentError("Rounding type must be one of `:errorfree`, `:correct`, `:fast`, `:none`"))
     end
 
     roundtype = IntervalRounding{rounding_type}
 
 
     # binary functions:
-    for f in (:+, :-, :*, :/, :^, :atan2)
+    for f in (:+, :-, :*, :/)
+        @eval $f{T<:AbstractFloat}(a::T, b::T, r::RoundingMode) = $f($roundtype, a, b, r)
+    end
+
+    if rounding_type == :errorfree   # for remaining functions, use CRlibm
+        roundtype = IntervalRounding{:correct}
+    end
+
+    for f in (:^, :atan2)
 
         @eval $f{T<:AbstractFloat}(a::T, b::T, r::RoundingMode) = $f($roundtype, a, b, r)
     end
@@ -192,7 +229,7 @@ doc"""
     setrounding(Interval, rounding_type::Symbol)
 
 Set the rounding type used for all interval calculations on Julia v0.6 and above.
-Valid `rounding_type`s are `:correct`, `:fast` and `:none`.
+Valid `rounding_type`s are `:correct`, `:fast` and `:none`, `:errorfree`.
 """
 function setrounding(::Type{Interval}, rounding_type::Symbol)
 
@@ -228,4 +265,4 @@ end
 
 # default: correct rounding
 const current_rounding_type = Symbol[:undefined]
-setrounding(Interval, :correct)
+setrounding(Interval, :errorfree)
