@@ -57,6 +57,28 @@ Interval{T}(x) where T = Interval(convert(T, x))
 
 Interval{T}(x::Interval) where T = convert(Interval{T}, x)
 
+"""
+    interval(a, b)
+
+Construct a valid interval, checking the end points.
+"""
+
+function interval(a::Real, b::Real)
+
+    if isnan(a) || isnan(b)
+        return new(NaN, NaN)  # nai
+    end
+
+    if a > b
+        (isinf(a) && isinf(b)) && return Interval(a, b)  # empty interval = [∞,-∞]
+
+        throw(ArgumentError("Must have a ≤ b to construct interval(a, b)."))
+    end
+
+    Interval(a, b)
+end
+
+
 ## Include files
 include("special.jl")
 include("macros.jl")
