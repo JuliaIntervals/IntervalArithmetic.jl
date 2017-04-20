@@ -62,25 +62,38 @@ end
 
 # error-free arithmetic:
 
-const SystemFloat = Union{Float32, Float64}
+for (op, f) in ( (:+, :add), (:-, :sub), (:*, :mul), (:/, :div) )
+    ff = Symbol(f, "_round")
 
-+{T<:SystemFloat}(::Type{IntervalRounding{:errorfree}},
-                            a::T, b::T, r::RoundingMode) = add_round(a, b, r)
+    for T in (Float32, Float64)
+        for mode in (:Down, :Up)
 
--{T<:SystemFloat}(::Type{IntervalRounding{:errorfree}},
-                            a::T, b::T, r::RoundingMode) = sub_round(a, b, r)
+            mode1 = Expr(:quote, mode)
+            mode1 = :(::RoundingMode{$mode1})
 
-*{T<:SystemFloat}(::Type{IntervalRounding{:errorfree}},
-                            a::T, b::T, r::RoundingMode) = mul_round(a, b, r)
+            mode2 = Symbol("Round", mode)
 
-/{T<:SystemFloat}(::Type{IntervalRounding{:errorfree}},
-                            a::T, b::T, r::RoundingMode) = div_round(a, b, r)
+            @eval $op(::Type{IntervalRounding{:errorfree}},
+                                a::$T, b::$T, $mode1) = $ff(a, b, $mode2)
+        end
+    end
+end
 
-inv{T<:SystemFloat}(::Type{IntervalRounding{:errorfree}},
-                            a::T, r::RoundingMode) = inv_round(a, b, r)
+for T in (Float32, Float64)
+    for mode in (:Down, :Up)
 
-sqrt{T<:SystemFloat}(::Type{IntervalRounding{:errorfree}},
-                            a::T, r::RoundingMode) = sqrt_round(a, b, r)
+        mode1 = Expr(:quote, mode)
+        mode1 = :(::RoundingMode{$mode1})
+
+        mode2 = Symbol("Round", mode)
+
+        @eval inv(::Type{IntervalRounding{:errorfree}},
+                            a::$T, $mode1) = inv_round(a, $mode2)
+
+                @eval sqrt(::Type{IntervalRounding{:errorfree}},
+                            a::$T, $mode1) = sqrt_round(a, $mode2)
+        end
+end
 
 
 # Define functions with different rounding types:
