@@ -322,7 +322,8 @@ function mid{T}(a::Interval{T}, α)
 
     @assert 0 ≤ α ≤ 1
 
-    return (1-α) * a.lo + α * a.hi  # rounds to nearest
+    # return (1-α) * a.lo + α * a.hi  # rounds to nearest
+    return α*(a.hi - a.lo) + a.lo  # rounds to nearest
 end
 
 
