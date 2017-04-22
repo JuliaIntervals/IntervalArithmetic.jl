@@ -5,35 +5,32 @@
 
 ## Interval type
 
+<<<<<<< HEAD
 abstract type AbstractInterval{T} <: Real end
+=======
+const validity_check = false
+
+abstract AbstractInterval <: Real
+>>>>>>> Add boolean to add or remove validity check on Interval
 
 struct Interval{T<:Real} <: AbstractInterval{T}
     lo :: T
     hi :: T
 
-    function Interval{T}(a::Real, b::Real) where T
-
-        if isnan(a) || isnan(b)
-            return new(NaN, NaN)  # nai
+    function Interval(a::Real, b::Real)
+        if validity_check
+            if isvalid(a, b)
+                new(a, b)
+            else
+                throw(ArgumentError("Must have a ≤ b to construct interval(a, b)."))
+            end
         end
 
-        if a > b
-            # empty interval = [∞,-∞]
-            (isinf(a) && isinf(b)) && return new(a, b)
-            throw(ArgumentError("Must have a ≤ b to construct Interval(a, b)."))
-        end
-
-        # The IEEE Std 1788-2015 states that a < Inf and b > -Inf;
-        # see page 6, "bounds".
-        if a == Inf || b == -Inf
-            throw(ArgumentError(
-                "Must satisfy `a < Inf` and `b > -Inf` to construct Interval(a, b)."))
-        end
-
-        return new(a,b)
+        new(a, b)
 
     end
 end
+
 
 
 ## Outer constructors
@@ -58,24 +55,24 @@ Interval{T}(x) where T = Interval(convert(T, x))
 Interval{T}(x::Interval) where T = convert(Interval{T}, x)
 
 """
-    interval(a, b)
+    isvalid(a::Real, b::Real)
 
-Construct a valid interval, checking the end points.
+Check if `(a, b)` constitute a valid interval
 """
-
-function interval(a::Real, b::Real)
-
+function isvalid(a::Real, b::Real)
     if isnan(a) || isnan(b)
-        return new(NaN, NaN)  # nai
+        return true
     end
 
     if a > b
-        (isinf(a) && isinf(b)) && return Interval(a, b)  # empty interval = [∞,-∞]
-
-        throw(ArgumentError("Must have a ≤ b to construct interval(a, b)."))
+        if isinf(a) && isinf(b)
+            return true  # empty interval = [∞,-∞]
+        else
+            return false
+        end
     end
 
-    Interval(a, b)
+    return true
 end
 
 
