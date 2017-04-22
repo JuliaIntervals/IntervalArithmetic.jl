@@ -75,6 +75,14 @@ function isvalid(a::Real, b::Real)
     return true
 end
 
+function interval(a::Real, b::Real)
+    if !isvalid(a, b)
+        throw(ArgumentError("Must have a ≤ b to construct interval(a, b)."))
+    end
+
+    return Interval(a, b)
+end
+
 
 ## Include files
 include("special.jl")
