@@ -338,6 +338,9 @@ end
 
 mid(a::Interval{Rational{T}}) where T = (1//2) * (a.lo + a.hi)
 
+function simple_mid(a::Interval)
+    return 0.5*(a.lo + a.hi)
+end
 
 doc"""
     diam(a::Interval)
