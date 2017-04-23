@@ -35,7 +35,7 @@ type DecoratedInterval{T<:Real} <: AbstractInterval{T}
     interval::Interval{T}
     decoration::DECORATION
 
-    function DecoratedInterval(I::Interval, d::DECORATION)
+    function DecoratedInterval{T}(I::Interval, d::DECORATION) where T
         dd = decoration(I)
         dd <= trv && return new(I, dd)
         d == ill && return new(nai(I), d)

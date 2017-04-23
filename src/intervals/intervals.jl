@@ -11,7 +11,7 @@ immutable Interval{T<:Real} <: AbstractInterval{T}
     lo :: T
     hi :: T
 
-    function Interval(a::Real, b::Real)
+    @compat function Interval{T}(a::Real, b::Real) where T
 
         if isnan(a) || isnan(b)
             return new(NaN, NaN)  # nai
