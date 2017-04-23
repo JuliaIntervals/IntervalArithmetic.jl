@@ -4,3 +4,5 @@ StaticArrays 0.3
 FastRounding 0.0.4
 AdjacentFloats 0.0.4
 RecipesBase
+Compat 0.17.0
+
