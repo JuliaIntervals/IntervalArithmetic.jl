@@ -5,13 +5,7 @@
 
 ## Interval type
 
-<<<<<<< HEAD
 abstract type AbstractInterval{T} <: Real end
-=======
-const validity_check = false
-
-abstract AbstractInterval <: Real
->>>>>>> Add boolean to add or remove validity check on Interval
 
 struct Interval{T<:Real} <: AbstractInterval{T}
     lo :: T

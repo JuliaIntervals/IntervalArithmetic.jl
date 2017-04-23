@@ -43,11 +43,11 @@ using Base.Test
 
     # Disallowed conversions with a > b
 
-    @test_throws ArgumentError Interval(2, 1)
-    @test_throws ArgumentError Interval(big(2), big(1))
-    @test_throws ArgumentError Interval(BigInt(1), 1//10)
-    @test_throws ArgumentError Interval(1, 0.1)
-    @test_throws ArgumentError Interval(big(1), big(0.1))
+    @test_throws ArgumentError interval(2, 1)
+    @test_throws ArgumentError interval(big(2), big(1))
+    @test_throws ArgumentError interval(BigInt(1), 1//10)
+    @test_throws ArgumentError interval(1, 0.1)
+    @test_throws ArgumentError interval(big(1), big(0.1))
 
     @test_throws ArgumentError @interval(2, 1)
     @test_throws ArgumentError @interval(big(2), big(1))
@@ -253,14 +253,14 @@ end
 end
 
 # issue 192:
-@testset "Disallow a single NaN in an interval" begin
-    a = Interval(NaN, 2)
-    @test isnan(a.lo) && isnan(a.hi)
-
-    a = Interval(Inf, NaN)
-    @test isnan(a.lo) && isnan(a.hi)
-
-end
+# @testset "Disallow a single NaN in an interval" begin
+#     a = interval(NaN, 2)
+#     @test isnan(a.lo) && isnan(a.hi)
+#
+#     a = interval(Inf, NaN)
+#     @test isnan(a.lo) && isnan(a.hi)
+#
+# end
 
 # issue 206:
 
@@ -304,4 +304,8 @@ end
 
     x = 3..4
     @test @interval(f(x.lo), f(x.hi)) == Interval(0.75, 0.8)
+end
+
+@testset "a..b with a > b" begin
+    @test_throws ArgumentError 3..2
 end

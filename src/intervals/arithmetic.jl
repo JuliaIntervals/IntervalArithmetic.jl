@@ -308,16 +308,18 @@ doc"""
     mid(a::Interval, α=0.5)
 
 Find the midpoint (or, in general, an intermediate point) at a distance α along the interval `a`. The default is the true midpoint at α=0.5.
+
+Assumes 0 ≤ α ≤ 1.
 """
 function mid(a::Interval{T}, α) where T
 
     isempty(a) && return convert(T, NaN)
     isentire(a) && return zero(a.lo)
 
-    a.lo == -∞ && return nextfloat(a.lo)
-    a.hi == +∞ && return prevfloat(a.hi)
+    a.lo == -∞ && return nextfloat(-∞)
+    a.hi == +∞ && return prevfloat(+∞)
 
-    @assert 0 ≤ α ≤ 1
+    # @assert 0 ≤ α ≤ 1
 
     # return (1-α) * a.lo + α * a.hi  # rounds to nearest
     return α*(a.hi - a.lo) + a.lo  # rounds to nearest
