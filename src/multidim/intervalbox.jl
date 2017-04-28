@@ -5,7 +5,7 @@ by a Cartesian product of $N$ `Interval`s.
 """
 
 
-immutable IntervalBox{N,T} <: StaticVector{Interval{T}}
+immutable IntervalBox{N,T} <: StaticVector{N, Interval{T}}
     data::NTuple{N,Interval{T}}
 end
 
