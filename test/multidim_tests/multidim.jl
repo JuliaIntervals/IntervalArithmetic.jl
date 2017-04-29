@@ -35,18 +35,18 @@ using Base.Test
 
 end
 
-@testset "@intervalbox tests" begin
-    @intervalbox f(x, y) = (x + y, x - y)
-
-    X = IntervalBox(1..1, 2..2)
-    @test f(X) == IntervalBox(3..3, -1 .. -1)
-
-    @intervalbox g(x, y) = x - y
-    @test isa(g(X), IntervalBox)
-
-    @test emptyinterval(X) == IntervalBox(∅, ∅)
-
-end
+# @testset "@intervalbox tests" begin
+#     @intervalbox f(x, y) = (x + y, x - y)
+#
+#     X = IntervalBox(1..1, 2..2)
+#     @test f(X) == IntervalBox(3..3, -1 .. -1)
+#
+#     @intervalbox g(x, y) = x - y
+#     @test isa(g(X), IntervalBox)
+#
+#     @test emptyinterval(X) == IntervalBox(∅, ∅)
+#
+# end
 
 @testset "setdiff for IntervalBox" begin
     X = IntervalBox(2..4, 3..5)
