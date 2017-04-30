@@ -122,12 +122,15 @@ function tan{T}(a::Interval{T})
     hi_quadrant_mod = mod(hi_quadrant, 2)
 
     if lo_quadrant_mod == 0 && hi_quadrant_mod == 1
-        (half_pi(T) ⊆ a || -half_pi(T) ⊆ a) && return entireinterval(a)
+        return entireinterval(a)  # crosses singularity
 
     elseif lo_quadrant_mod == hi_quadrant_mod && hi_quadrant > lo_quadrant
-        hi_quadrant == lo_quadrant+2 && return entireinterval(a)
+        return entireinterval(a)
 
     end
+
+    # @show a.lo, a.hi
+    # @show tan(a.lo), tan(a.hi)
 
     return @round(tan(a.lo), tan(a.hi))
 end
