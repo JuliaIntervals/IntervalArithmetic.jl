@@ -122,9 +122,13 @@ function tan{T}(a::Interval{T})
     hi_quadrant_mod = mod(hi_quadrant, 2)
 
     if lo_quadrant_mod == 0 && hi_quadrant_mod == 1
-        return entireinterval(a)  # crosses singularity
+        # check if really contains singularity:
+        if hi_quadrant * half_pi(T) ⊆ a
+            return entireinterval(a)  # crosses singularity
+        end
 
     elseif lo_quadrant_mod == hi_quadrant_mod && hi_quadrant > lo_quadrant
+        # must cross singularity
         return entireinterval(a)
 
     end

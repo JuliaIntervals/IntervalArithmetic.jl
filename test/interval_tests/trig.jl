@@ -44,7 +44,7 @@ end
     @test tan(@interval(0.5)) == Interval(0.54630248984379048, 0.5463024898437906)
     @test tan(@interval(0.5, 1.67)) == entireinterval()
     @test tan(@interval(1.67, 3.2)) == Interval(-10.047182299210307, 0.05847385445957865)
-    @test tan(Interval(6.638314112824137, 8.38263151220128)) == entireinterval()
+    @test tan(Interval(6.638314112824137, 8.38263151220128)) == entireinterval()  # https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/20
 
     @test tan(@biginterval(0.5)) ⊆ tan(@interval(0.5))
     @test tan(@biginterval(0.5, 1.67)) == entireinterval(BigFloat)
