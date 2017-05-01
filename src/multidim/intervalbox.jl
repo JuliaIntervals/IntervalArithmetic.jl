@@ -5,9 +5,11 @@ if VERSION >= v"0.6.0-dev"
     doc"""An `IntervalBox` is an $N$-dimensional rectangular box, given
     by a Cartesian product of $N$ `Interval`s.
     """
+
     immutable IntervalBox{N,T} <: StaticVector{N, Interval{T}}
         data::NTuple{N,Interval{T}}
     end
+
 else
     doc"""An `IntervalBox` is an $N$-dimensional rectangular box, given
     by a Cartesian product of $N$ `Interval`s.
