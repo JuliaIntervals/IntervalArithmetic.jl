@@ -15,7 +15,6 @@ else
     immutable IntervalBox{N,T} <: StaticVector{Interval{T}}
         data::NTuple{N,Interval{T}}
     end
-
 end
 
 # IntervalBox{N,T}(x::NTuple{N,Interval{T}}) = IntervalBox{N,T}(x)
