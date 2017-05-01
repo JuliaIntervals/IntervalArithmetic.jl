@@ -4,9 +4,14 @@ doc"""An `IntervalBox` is an $N$-dimensional rectangular box, given
 by a Cartesian product of $N$ `Interval`s.
 """
 
-
-immutable IntervalBox{N,T} <: StaticVector{N, Interval{T}}
-    data::NTuple{N,Interval{T}}
+if VERSION >= v"0.6.0-dev"
+    immutable IntervalBox{N,T} <: StaticVector{N, Interval{T}}
+        data::NTuple{N,Interval{T}}
+    end
+else
+    immutable IntervalBox{N,T} <: StaticVector{Interval{T}}
+        data::NTuple{N,Interval{T}}
+    end
 end
 
 # IntervalBox{N,T}(x::NTuple{N,Interval{T}}) = IntervalBox{N,T}(x)
