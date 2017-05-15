@@ -1,7 +1,7 @@
 # Why is rounding necessary?
 
 What happens when we write the following Julia code?
-```
+```jldoctest
 julia> x = 0.1
 0.1
 ```
@@ -11,7 +11,7 @@ In fact, however, it stores a *slightly different* number, since `0.1` *cannot b
 
 The true value that is actually stored in the variable can be conveniently determined in Julia using arbitrary-precision arithmetic with `BigFloat`s:
 
-```
+```jldoctest
 julia> big(0.1)
 1.000000000000000055511151231257827021181583404541015625000000000000000000000000e-01
 ```
@@ -20,14 +20,16 @@ So, in fact, the Julia float `0.1` refers to a real number that is slightly grea
 
 [Recall that to get a `BigFloat` that is as close as possible to the true 0.1, you can use a special string macro:
 
-```
+```jldoctest
 julia> big"0.1"
 1.000000000000000000000000000000000000000000000000000000000000000000000000000002e-01
 ```
 ]
 
 Suppose that we create a thin interval, containing just the floating-point number `0.1`:
-```
+```jldoctest rounding
+julia> using IntervalArithmetic
+
 julia> II = Interval(0.1)
 [0.1, 0.100001]
 
@@ -39,18 +41,21 @@ It looks like `II` contains (the true) 0.1, but from the above discussion we see
 
 This rounding is handled by the `@interval`  macro, which generates correctly-rounded intervals:
 
-```julia
+```jldoctest rounding
 julia> a = @interval(0.1)
 [0.0999999, 0.100001]
+
 ```
 
 The true 0.1 is now correctly contained in the intervals, so that any calculations on these intervals will contain the true result of calculating with 0.1. For example, if we define
-```julia
+```jldoctest rounding
 julia> f(x) = 2x + 0.2
+f (generic function with 1 method)
+
 ```
 then we can apply the function `f` to the interval `a` to obtain
 
-```julia
+```jldoctest rounding
 julia> f(a)
 [0.399999, 0.400001]
 
@@ -62,7 +67,7 @@ The result correctly contains the true 0.4.
 ## More detail: the internal representation
 Let's look at the internal representation of the `Float64` number 0.1:
 
-```julia
+```jldoctest
 julia> bits(0.1)
 "0011111110111001100110011001100110011001100110011001100110011010"
 ```
