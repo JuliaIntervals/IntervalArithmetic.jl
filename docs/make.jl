@@ -9,7 +9,8 @@ makedocs(
         "Basic usage" => "usage.md",
         "Decorations" => "decorations.md",
         "Multi-dimensional boxes" => "multidim.md",
-        "Rounding" => "rounding.md"
+        "Rounding" => "rounding.md",
+        "API" => "api.md"
     ]
 )
 

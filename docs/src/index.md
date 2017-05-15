@@ -30,7 +30,9 @@ julia> Pkg.add("IntervalArithmetic")
 Pages = ["usage.md",
     "decorations.md",
     "multidim.md",
-    "rounding.md"]
+    "rounding.md",
+    "api.md"
+    ]
 ```
 
 ## Bibliography
