@@ -1,13 +1,13 @@
 # Basic usage
 
-The basic elements of the package are **intervals**, i.e. sets of real numbers (possibly including $\pm \infty$) of the form
+The basic elements of the package are **intervals**, i.e. sets of real numbers (possibly including `\pm \infty`) of the form
 
 ```math
 [a, b] := \{ a \le x \le b \} \subseteq \mathbb{R}.
 ```
 
 ## Creating intervals
-Intervals are created using the `@interval` macro, which takes one or two expressions:
+Intervals are created using the [`@interval`](@ref) macro, which takes one or two expressions:
 ```jldoctest usage
 julia> using IntervalArithmetic
 
@@ -22,8 +22,8 @@ julia> b = @interval(1, 2)
 ```
 
 The objects returned are of the parameterized type `Interval`, the basic object in the package.
-By default, `Interval` objects contain `Float64`s, but the library also allows using
-`BigFloat`s, for example:
+By default, `Interval` objects contain `Float64`s, but the library also allows using other types such as `Rational`s and
+`BigFloat`s; for example:
 ```jldoctest usage
 julia> @biginterval(1, 2)
 [1, 2]₂₅₆
@@ -49,10 +49,10 @@ Due to the way floating-point arithmetic works, the interval
 *neither the true real number 0.1, nor 0.3*, since the floating point
 number associated to 0.1 is actually rounded up, whereas the
 one associated to 0.3 is rounded down.
-The `@interval` macro, however, uses [**directed rounding**](rounding.md) to *guarantee*
+The [`@interval`](@ref) macro, however, uses [**directed rounding**](rounding.md) to *guarantee*
 that the true 0.1 and 0.3 are included in the result.
 
-Behind the scenes, the `@interval` macro rewrites the expression(s) passed to it, replacing the literals (0.1, 1, etc.) by calls to create correctly-rounded intervals, handled by the `convert`
+Behind the scenes, the [`@interval`(@ref)] macro rewrites the expression(s) passed to it, replacing the literals (0.1, 1, etc.) by calls to create correctly-rounded intervals, handled by the `convert`
 function.
 
 This allows us to write, for example
@@ -79,8 +79,8 @@ julia> @interval f(0.1)
 [0.199999, 0.200001]
 ```
 
-### $\pi$
-You can create correctly-rounded intervals containing $\pi$:
+### `\pi`
+You can create correctly-rounded intervals containing `\pi`:
 ```jldoctest usage
 julia> @interval(pi)
 [3.14159, 3.1416]
@@ -109,8 +109,8 @@ the real number the user "had in mind":
 julia> @interval(0.1)
 [0.0999999, 0.100001]
 ```
-If you instead know which exactly-representable floating-point number $a$ you need and really
-want to make a *thin interval*, i.e., an interval of the form $[a, a]$,
+If you instead know which exactly-representable floating-point number `a` you need and really
+want to make a *thin interval*, i.e., an interval of the form `[a, a]`,
 containing precisely one float, then you can
 use the `Interval` constructor directly:
 ```jldoctest usage
@@ -125,7 +125,7 @@ in a reproducible form that may be copied and pasted directly. It uses Julia's
 internal function (which, in turn, uses the so-called Grisu algorithm) to show
 exactly as many digits are required to give an unambiguous floating-point number.
 
-Strings may be used inside `@interval`:
+Strings may be used inside [`@interval`](@ref):
 ```jldoctest usage
 julia> @interval "0.1"*2
 [0.199999, 0.200001]
@@ -163,10 +163,10 @@ julia> b.hi
 3.6
 ```
 
-The diameter (length) of an interval is obtained using `diam(b)`;
+The diameter (length) of an interval is obtained using [`diam(b)`](@ref);
 for numbers that cannot be represented exactly in base 2
 (i.e., whose *binary* expansion is infinite or exceeds the current precision),
- the diameter of intervals created by `@interval` with a single argument corresponds to the local machine epsilon (`eps`) in the `:narrow` interval-rounding mode:
+ the diameter of intervals created by [`@interval`](@ref) with a single argument corresponds to the local machine epsilon (`eps`) in the `:narrow` interval-rounding mode:
 
  ```jldoctest usage
 julia> diam(b)
@@ -200,8 +200,11 @@ julia> 1.5 ± 0.1
 
 ## Arithmetic
 
-Basic arithmetic operations (`+`, `-`, `*`, `/`, `^`) are defined for pairs of intervals in a standard way (see, e.g., the book by Tucker): the result is the smallest interval containing the result of operating with each element of each interval. That is, for two intervals $X$ and $Y$ and an operation $\circ$, we define the operation on the two intervals by
-$$X \circ Y := \{ x \circ y: x \in X \text{ and } y \in Y \}.$$  Again, directed rounding is used if necessary.
+Basic arithmetic operations (`+`, `-`, `*`, `/`, `^`) are defined for pairs of intervals in a standard way (see, e.g., the book by Tucker): the result is the smallest interval containing the result of operating with each element of each interval. That is, for two intervals `X` and `Y` and an operation `\bigcirc`, we define the operation on the two intervals by
+```math
+\bigcirc Y := \{ x \bigcirc y: x \in X \text{ and } y \in Y \}.
+```
+Again, directed rounding is used if necessary.
 
 For example:
 ```jldoctest usage
@@ -226,7 +229,8 @@ julia> a - a
 
 
 ## Changing the precision
-By default, the `@interval` macro creates intervals of `Float64`s.
+
+By default, the [`@interval`](@ref) macro creates intervals of `Float64`s.
 This may be changed globally using the `setprecision` function:
 
 ```jldoctest usage
@@ -296,7 +300,7 @@ intervals are converted to and from `BigFloat`; this implies a significant slow-
 
 Examples:
 
-```
+```jldoctest usage
 julia> a = @interval(1)
 [1, 1]
 
@@ -307,7 +311,7 @@ julia> cos(cosh(a))
 [0.0277121, 0.0277122]
 ```
 
-```
+```jldoctest usage
 julia> setprecision(Interval, 53)
 53
 
@@ -318,7 +322,7 @@ julia> @interval sin(0.1) + cos(0.2)
 [1.07989, 1.0799]₅₃
 ```
 
-```
+```jldoctest usage
 julia> setprecision(Interval, 128)
 128
 
@@ -328,22 +332,21 @@ julia> @interval sin(1)
 
 
 ## Interval rounding modes
+
 By default, the directed rounding used corresponds to using the `RoundDown` and `RoundUp` rounding modes when performing calculations; this gives the narrowest resulting intervals, and is set by
 
-```
-setrounding(Interval, :narrow)
+```jldoctest usage
+julia> setrounding(Interval, :correct)
+
 ```
 
 An alternative rounding method is to perform calculations using the (standard) `RoundNearest` rounding mode, and then widen the result by one machine epsilon in each direction using `prevfloat` and `nextfloat`. This is achived by
 ```
-setrounding(Interval, :wide)
+julia> setrounding(Interval, :fast);
+
 ```
 It generally results in wider intervals, but seems to be significantly faster.
 
-The current interval rounding mode may be obtained by
-```
-rounding(Interval)
-```
 
 ## Display modes
 There are several useful output representations for intervals, some of which we have already touched on. The display is controlled globally by the `setformat` function, which has
@@ -361,8 +364,12 @@ the following options, specified by keyword arguments (type `?setformat` to get 
 
 - `decorations` (boolean): whether to show [decorations](decorations.md) or not
 
-### Examples:
-```
+### Examples
+
+```jldoctest usage
+julia> setprecision(Interval, Float64)
+Float64
+
 julia> a = @interval(1.1, pi)
 [1.09999, 3.1416]
 
@@ -373,11 +380,13 @@ julia> a
 [1.099999999, 3.141592654]
 
 julia> setformat(:full)
+10
 
 julia> a
 Interval(1.0999999999999999, 3.1415926535897936)
 
 julia> setformat(:midpoint)
+10
 
 julia> a
 2.120796327 ± 1.020796327
@@ -389,7 +398,11 @@ julia> a
 2.121 ± 1.021
 
 julia> setformat(:standard)
+4
 
 julia> a
 [1.099, 3.142]
+
+julia> setformat(:standard, sigfigs=6)
+6
 ```

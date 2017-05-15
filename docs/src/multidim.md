@@ -1,9 +1,3 @@
-```@meta
-DocTestSetup = quote
-    using IntervalArithmetic
-end
-```
-
 # Multi-dimensional boxes
 
 Starting with v0.3, multi-dimensional (hyper-)boxes are implemented in the
@@ -15,6 +9,8 @@ cuboids (in 3D), etc.
 often convenient to use the `..` notation:
 
 ```jldoctest multidim
+julia> using IntervalArithmetic # hide
+
 julia> X = IntervalBox(1..3, 2..4)
 [1, 3] × [2, 4]
 
