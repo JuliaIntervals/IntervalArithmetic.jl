@@ -14,7 +14,7 @@ cuboids (in 3D), etc.
 `IntervalBox`es are constructed from an array of `Interval`s; it is
 often convenient to use the `..` notation:
 
-```jldoctest
+```jldoctest multidim
 julia> X = IntervalBox(1..3, 2..4)
 [1, 3] × [2, 4]
 
@@ -24,7 +24,7 @@ julia> Y = IntervalBox(2.1..2.9, 3.1..4.9)
 
 Several operations are defined on `IntervalBox`es, for example:
 
-```
+```jldoctest multidim
 julia> X ∩ Y
 [2.09999, 2.90001] × [3.09999, 4]
 
@@ -32,26 +32,21 @@ julia> X ⊆ Y
 false
 ```
 
-To facilitate working with `IntervalBox`es, a macro `@intervalbox` is defined.
-Given a multi-dimensional function taking several inputs, this creates both the original form and a
-version that works with a single `IntervalBox` argument, e.g.
+Given a multi-dimensional function taking several inputs, and interval box can be constructed as follows:
 
-```jldoctest
-julia> @intervalbox f(x, y) = (x + y, x - y)
-f (generic function with 2 methods)
-
-julia> f(1..1, 2..2)  
-([3, 3],[-1, -1])
+```jldoctest multidim
+julia> f(x, y) = (x + y, x - y)
+f (generic function with 1 method)
 
 julia> X = IntervalBox(1..1, 2..2)
 [1, 1] × [2, 2]
 
-julia> f(X)
+julia> f(X...)  
+([3, 3],[-1, -1])
+
+julia> IntervalBox(f(X...))
 [3, 3] × [-1, -1]
 ```
-The first version takes a tuple of `Interval`s and returns another tuple of `Interval`s;
-the second version takes a single `IntervalBox` and automatically does the
-necessary unpacking and packing to return an `IntervalBox.`
 
 ```@meta
 DocTestSetup = nothing
