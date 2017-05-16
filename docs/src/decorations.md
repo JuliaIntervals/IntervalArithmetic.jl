@@ -1,19 +1,8 @@
-[I 160508 10:04:49 handlers:132] Browser Connected: http://127.0.0.1:8000/multid<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-    TeX: { equationNumbers: { autoNumber: "AMS" } }
-  });
-  MathJax.Hub.Config({
-    TeX: { extensions: ["AMSmath.js", "AMSsymbols.js", "autobold.js", "autoload-all.js"] }
-  });
-  MathJax.Hub.Config({
-    tex2jax: {
-      inlineMath: [['$','$']],
-      processEscapes: true
-    }
-  });
-</script>
-<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML">
-</script>
+```@meta
+DocTestSetup = quote
+    using IntervalArithmetic
+end
+```
 
 # Decorations
 
@@ -40,19 +29,20 @@ An example will be given at the end of this section.
 
 The simplest way to create a `DecoratedInterval` is with the `@decorated` macro,
 which does correct rounding:
-```
+```jldoctest decorations
 julia> @decorated(0.1, 0.3)
-[0.0999999, 0.300001]
+[0.1, 0.3]
 ```
 The `DecoratedInterval` constructor may also be used if necessary:
-```
+```jldoctest decorations
 julia> X = DecoratedInterval(3, 4)
 [3, 4]
 ```
 
 By default, decorations are not displayed. The following turns on display of decorations:
-```
+```jldoctest decorations
 julia> setformat(decorations=true)
+6
 
 julia> X
 [3, 4]_com
@@ -66,7 +56,7 @@ If no decoration is explicitly specified when a `DecoratedInterval` is created, 
 
 
 An explicit decoration may be provided for advanced use:
-```
+```jldoctest decorations
 julia> DecoratedInterval(3, 4, dac)
 [3, 4]_dac
 
@@ -79,7 +69,7 @@ Here, a new `DecoratedInterval` was created by extracting the interval from anot
 
 A decoration is the combination of an interval together with the sequence of functions that it has passed through. Here are some examples:
 
-```
+```jldoctest decorations
 julia> X1 = @decorated(0.5, 3)
 [0.5, 3]_com
 
@@ -88,7 +78,7 @@ julia> sqrt(X1)
 ```
 In this case, both input and output are "common" intervals, meaning that they are closed and bounded, and that the resulting function is continuous over the input interval, so that fixed-point theorems may be applied. Since `sqrt(X1) ⊆ X1`, we know that there must be a fixed point of the function inside the interval `X1` (in this case, `sqrt(1) == 1`).
 
-```
+```jldoctest decorations
 julia> X2 = DecoratedInterval(3, ∞)
 [3, ∞]_dac
 
@@ -97,7 +87,7 @@ julia> sqrt(X2)
 ```
 Since the intervals are unbounded here, the maximum decoration possible is `dac`.
 
-```
+```jldoctest decorations
 julia> X3 = @decorated(-3, 4)
 [-3, 4]_com
 
@@ -106,9 +96,9 @@ julia> sign(X3)
 ```
 The `sign` function is discontinuous at 0, but is defined everywhere on the input interval, so the decoration is `def`.
 
-```
+```jldoctest decorations
 julia> X4 = @decorated(-3.5, 4.1)
-[-3.5, 4.10001]_com
+[-3.5, 4.1]_com
 
 julia> sqrt(X4)
 [0, 2.02485]_trv
@@ -118,7 +108,7 @@ The negative part of `X` is discarded by the `sqrt` function, since its domain i
 
 In this case, we know why the decoration was reduced to `trv`. But if this were just a single step in a longer calculation, a resulting `trv` decoration shows only that something like this happened *at some step*. For example:
 
-```
+```jldoctest decorations
 julia> X5 = @decorated(-3, 3)
 [-3, 3]_com
 
@@ -133,7 +123,7 @@ julia> asin(sqrt(X6))
 ```
 In both cases, `asin(sqrt(X))` gives a result with a `trv` decoration, but
 we do not know at which step this happened, unless we break down the function into its constituent parts:
-```
+```jldoctest decorations
 julia> sqrt(X5)
 [0, 1.73206]_trv
 
@@ -143,3 +133,7 @@ julia> sqrt(X6)
 This shows that loose evaluation occurred in different parts of the expression in the two different cases.
 
 In general, the `trv` decoration is thus used only to signal that "something unexpected" happened during the calculation. Often this is later used to split up the original interval into pieces and reevaluate the function on each piece to refine the information that is obtained about the function.
+
+```@meta
+DocTestSetup = nothing
+```
