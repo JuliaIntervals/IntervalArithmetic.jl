@@ -32,7 +32,7 @@ julia> Pkg.add("IntervalArithmetic")
 
 ## Documentation
 
-Documentation is available [here](https://juliaintervals.github.io/IntervalArithmetic.jl/).
+Documentation is available [here](https://juliaintervals.github.io/IntervalArithmetic.jl/latest).
 
 ## Standard for Interval Arithmetic:  IEEE 1788-2015
 
