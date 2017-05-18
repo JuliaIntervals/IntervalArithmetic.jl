@@ -4,6 +4,9 @@
 [![Coverage Status](https://coveralls.io/repos/github/JuliaIntervals/IntervalArithmetic.jl/badge.svg?branch=master)](https://coveralls.io/github/JuliaIntervals/IntervalArithmetic.jl?branch=master)
 [![codecov](https://codecov.io/gh/JuliaIntervals/IntervalArithmetic.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaIntervals/IntervalArithmetic.jl)
 
+[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaIntervals.github.io/IntervalArithmetic.jl/stable)
+[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://JuliaIntervals.github.io/IntervalArithmetic.jl/latest)
+
 [![Join the chat at https://gitter.im/JuliaIntervals/IntervalArithmetic.jl](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/JuliaIntervals/IntervalArithmetic.jl?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 `IntervalArithmetic.jl` is a Julia package for performing *Validated Numerics* in Julia, i.e. *rigorous* computations with finite-precision floating-point arithmetic.
@@ -29,10 +32,6 @@ To install the package, from within Julia do
 ```julia
 julia> Pkg.add("IntervalArithmetic")
 ```
-
-## Documentation
-
-Documentation is available [here](https://juliaintervals.github.io/IntervalArithmetic.jl/latest).
 
 ## Standard for Interval Arithmetic:  IEEE 1788-2015
 
