@@ -1,5 +1,23 @@
 # What's new in `IntervalArithmetic.jl`
 
+### v0.9.1
+
+#### Docs
+
+- Docs have been moved to use `Documenter.jl` [#31](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/31)
+
+#### Bug fixes
+- Bug fix for `mid` [#24](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/24)
+
+- Bug fix for `tan` [#22](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/22)
+
+#### API changes
+
+- `mid` of `IntervalBox` now returns an `SVector`  [#30](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/30)
+
+#### Dependency changes
+- The dependency on `ForwardDiff` has been removed [#13](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/13)
+
 ## v0.9
 - The former `ValidatedNumerics.jl` package has been split into `ValidatedNumerics.jl` and `IntervalRootFinding.jl`.
 
