@@ -30,7 +30,7 @@ IntervalBox(x::Interval) = IntervalBox( (x,) )  # single interval treated as tup
 ## arithmetic operations
 # Note that standard arithmetic operations are implemented automatically by FixedSizeArrays.jl
 
-mid(X::IntervalBox) = [mid(x) for x in X]
+mid(X::IntervalBox) = mid.(X)
 
 
 ## set operations
