@@ -44,6 +44,7 @@ end
     @test tan(@interval(0.5)) == Interval(0.54630248984379048, 0.5463024898437906)
     @test tan(@interval(0.5, 1.67)) == entireinterval()
     @test tan(@interval(1.67, 3.2)) == Interval(-10.047182299210307, 0.05847385445957865)
+    @test tan(Interval(6.638314112824137, 8.38263151220128)) == entireinterval()  # https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/20
 
     @test tan(@biginterval(0.5)) ⊆ tan(@interval(0.5))
     @test tan(@biginterval(0.5, 1.67)) == entireinterval(BigFloat)
@@ -53,6 +54,7 @@ end
     @test tan(@biginterval(0.5, 8.5)) ⊆ tan(@interval(0.5, 8.5))
     @test tan(@biginterval(-4.5, 0.1)) ⊆ tan(@interval(-4.5, 0.1))
     @test tan(@biginterval(1.3, 6.3)) ⊆ tan(@interval(1.3, 6.3))
+
 end
 
 @testset "Inverse trig" begin
@@ -181,7 +183,7 @@ end
     @test cos(Interval(-pi/2, 3pi/2)) == Interval(-1, 1)
 end
 
-@testset "Trig with large arguments" begin 
+@testset "Trig with large arguments" begin
     x = Interval(2.)^1000   # this is a thin interval
     @test diam(x) == 0.0
 
