@@ -67,7 +67,13 @@ include("hyperbolic.jl")
 
 # Syntax for intervals
 
-a..b = Interval(convert(Interval, a).lo, convert(Interval, b).hi)
+# a..b = Interval(convert(Interval, a).lo, convert(Interval, b).hi)
+
+..(a::Integer, b::Integer) = Interval(a, b)
+..(a::Integer, b::Float64) = Interval(a, nextfloat(b))
+..(a::Float64, b::Int) = Interval(prevfloat(a), b)
+
+..(a::Float64, b::Float64) = Interval(prevfloat(a), nextfloat(b))
 
 macro I_str(ex)  # I"[3,4]"
     @interval(ex)
