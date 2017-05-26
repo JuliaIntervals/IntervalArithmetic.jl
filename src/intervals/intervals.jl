@@ -70,10 +70,10 @@ include("hyperbolic.jl")
 # a..b = Interval(convert(Interval, a).lo, convert(Interval, b).hi)
 
 ..(a::Integer, b::Integer) = Interval(a, b)
-..(a::Integer, b::Float64) = Interval(a, nextfloat(b))
-..(a::Float64, b::Int) = Interval(prevfloat(a), b)
+..(a::Integer, b::Real) = Interval(a, nextfloat(float(b)))
+..(a::Real, b::Int) = Interval(prevfloat(float(a)), b)
 
-..(a::Float64, b::Float64) = Interval(prevfloat(a), nextfloat(b))
+..(a::Real, b::Real) = Interval(prevfloat(float(a)), nextfloat(float(b)))
 
 macro I_str(ex)  # I"[3,4]"
     @interval(ex)
