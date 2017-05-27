@@ -16,10 +16,9 @@ setprecision(128)
     @test parse(Interval{Float64}, "[Empty]") == emptyinterval(Float64)
     @test parse(Interval{BigFloat}, "[Empty]") == emptyinterval(BigFloat)
 
-    @test parse(Interval{Float64}, "3 ±  4") == -1..7
-    @test parse(Interval{Float64}, "0.2 ± 0.1") == Interval(0.09999999999999999, 0.30000000000000004)
-    @test parse(Interval{BigFloat}, "3 ±  4") == -1..7
-    @test parse(Interval{BigFloat}, "0.2 ± 0.1") == Interval(big"1.000000000000000000000000000000000000001e-01", big"3.000000000000000000000000000000000000006e-01")
+    @test parse(Interval{Float64}, "3 ±  4") == Interval(-1.0000000000000002, 7.000000000000001)
+    @test parse(Interval{Float64}, "0.2 ± 0.1") == Interval(0.09999999999999999, 0.3000000000000001)
+    @test parse(Interval{BigFloat}, "0.2 ± 0.1") == Interval(big"9.999999999999999999999999999999999999971e-02", big"3.000000000000000000000000000000000000021e-01")
 end
 
 @testset "Parse string to DecoratedInterval" begin
