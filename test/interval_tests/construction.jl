@@ -186,8 +186,8 @@ end
 
 @testset ".. tests" begin
 
-
     a = 0.1..0.3
+    @test a == Interval(0.09999999999999999, 0.30000000000000004)
     @test big"0.1" ∈ a
     @test big"0.3" ∈ a
 
@@ -200,18 +200,14 @@ end
 @testset "± tests" begin
     setprecision(Interval, Float64)
 
-    @test 3 ± 0.5 == Interval(2.5, 3.5)
-    @test 3 ± 0.1 == Interval(2.9, 3.1)
+    @test 3 ± 1 == Interval(2.0, 4.0)
+    @test 3 ± 0.5 == Interval(2.4999999999999996, 3.5000000000000004)
+    @test 3 ± 0.1 == julia> 3 ± 0.1
+Interval(2.8999999999999995, 3.1000000000000005)
     @test 0.5 ± 1 == Interval(-0.5, 1.5)
 
     # issue 172:
-    a = @interval(1) ± 1
-    @test a == Interval(-0.0, 2.0)
-    @test typeof(a) == Interval{Float64}
-
-    a =  @biginterval(1) ± 1
-    @test a == Interval(big(-0.0), big(2.0))
-    @test typeof(a) == Interval{BigFloat}
+    @test_throws MethodError a = (1..1) ± 1
 
 end
 

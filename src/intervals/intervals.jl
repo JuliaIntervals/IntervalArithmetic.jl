@@ -71,7 +71,7 @@ include("hyperbolic.jl")
 
 ..(a::Integer, b::Integer) = Interval(a, b)
 ..(a::Integer, b::Real) = Interval(a, nextfloat(float(b)))
-..(a::Real, b::Int) = Interval(prevfloat(float(a)), b)
+..(a::Real, b::Integer) = Interval(prevfloat(float(a)), b)
 
 ..(a::Real, b::Real) = Interval(prevfloat(float(a)), nextfloat(float(b)))
 
