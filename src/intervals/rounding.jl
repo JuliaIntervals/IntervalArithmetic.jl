@@ -153,13 +153,8 @@ for mode in (:Down, :Up)
     end
 end
 
-doc"""
-    setrounding(Interval, rounding_type::Symbol)
 
-Set the rounding type used for all interval calculations on Julia v0.6 and above.
-Valid `rounding_type`s are `:correct`, `:fast` and `:none`.
-"""
-function setrounding(::Type{Interval}, rounding_type::Symbol)
+function _setrounding(::Type{Interval}, rounding_type::Symbol)
 
     if rounding_type == current_rounding_type[]
         return  # no need to redefine anything
@@ -192,6 +187,25 @@ function setrounding(::Type{Interval}, rounding_type::Symbol)
 
     current_rounding_type[] = rounding_type
 end
+
+doc"""
+    setrounding(Interval, rounding_type::Symbol)
+
+Set the rounding type used for all interval calculations on Julia v0.6 and above.
+Valid `rounding_type`s are `:correct`, `:fast` and `:none`.
+"""
+function setrounding(::Type{Interval}, rounding_type::Symbol)
+    original_STDERR = STDERR
+    (outread, outwrite) = redirect_stderr()
+
+    _setrounding(Interval, rounding_type)
+
+    redirect_stderr(original_STDERR)
+
+    return rounding_type
+
+end
+
 
 # default: correct rounding
 const current_rounding_type = Symbol[:undefined]
