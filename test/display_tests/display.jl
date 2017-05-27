@@ -43,7 +43,7 @@ setprecision(Interval, Float64)
             setformat(:full)
 
             @test string(a) == "Interval(1.0, 2.0)"
-            @test string(b) == "Interval(-1.1, 1.3)"
+            @test string(b) == "Interval(-1.1000000000000003, 1.3000000000000003)"
             @test string(c) == "Interval(3.141592653589793, 3.141592653589793)"
             @test string(d) == "Interval(3.141592653589793, 3.1415926535897936)"
         end
