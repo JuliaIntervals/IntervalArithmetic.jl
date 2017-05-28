@@ -213,7 +213,7 @@ end
     @test isinterior(x^50, pow(x, 50))
 end
 
-@testset "Behaviour near infinity"
+@testset "Behaviour near infinity" begin
     a = Interval(1e300)
     b = Interval(1e9)
 
