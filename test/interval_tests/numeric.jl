@@ -211,6 +211,15 @@ end
     @test x^100 ⊆ pow(x, 100)
     @test x^50 ⊆ pow(x, 50)
     @test isinterior(x^50, pow(x, 50))
+end
 
+@testset "Behaviour near infinity"
+    a = Interval(1e300)
+    b = Interval(1e9)
 
+    @test a * b == Interval(realmax(), Inf)
+
+    a = Interval{Float32}(1e38)
+    b = Interval{Float32}(1e2)
+    @test a * b == Interval{Float32}(realmax(Float32), Inf)
 end
