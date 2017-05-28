@@ -77,6 +77,8 @@ function interval(a::Real, b::Real)
     return Interval(a, b)
 end
 
+interval(a::Real) = interval(a, a)
+
 
 ## Include files
 include("special.jl")
