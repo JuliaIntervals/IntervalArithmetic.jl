@@ -379,7 +379,7 @@ Return the unique interval `c` such that `b+c=a`.
 See Section 12.12.5 of the IEEE-1788 Standard for
 Interval Arithmetic.
 """
-function cancelminus{T}(a::Interval{T}, b::Interval{T})
+function cancelminus{T<:Real}(a::Interval{T}, b::Interval{T})
     (isempty(a) && (isempty(b) || !isunbounded(b))) && return emptyinterval(T)
 
     (isunbounded(a) || isunbounded(b) || isempty(b)) && return entireinterval(T)
@@ -405,7 +405,7 @@ function cancelminus{T}(a::Interval{T}, b::Interval{T})
 
     return entireinterval(T)
 end
-cancelminus(a::Interval, b::Interval) = cancelminus(promote(a, b))
+cancelminus(a::Interval, b::Interval) = cancelminus(promote(a, b)...)
 
 """
     cancelplus(a, b)
