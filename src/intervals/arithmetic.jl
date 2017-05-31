@@ -379,9 +379,7 @@ Return the unique interval `c` such that `b+c=a`.
 See Section 12.12.5 of the IEEE-1788 Standard for
 Interval Arithmetic.
 """
-function cancelminus(a::Interval, b::Interval)
-    T = promote_type(eltype(a), eltype(b))
-
+function cancelminus{T}(a::Interval{T}, b::Interval{T})
     (isempty(a) && (isempty(b) || !isunbounded(b))) && return emptyinterval(T)
 
     (isunbounded(a) || isunbounded(b) || isempty(b)) && return entireinterval(T)
@@ -393,8 +391,8 @@ function cancelminus(a::Interval, b::Interval)
 
     c_lo > c_hi && return entireinterval(T)
 
-    c_lo == T(Inf) && return Interval(prevfloat(c_lo), c_hi)
-    c_hi == -T(Inf) && return Interval(c_lo, nextfloat(c_hi))
+    c_lo == Inf && return Interval(prevfloat(c_lo), c_hi)
+    c_hi == -Inf && return Interval(c_lo, nextfloat(c_hi))
 
     a_lo = @round_down(b.lo + c_lo)
     a_hi = @round_up(b.hi + c_hi)
@@ -407,6 +405,7 @@ function cancelminus(a::Interval, b::Interval)
 
     return entireinterval(T)
 end
+cancelminus(a::Interval, b::Interval) = cancelminus(promote(a, b))
 
 """
     cancelplus(a, b)
