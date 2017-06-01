@@ -54,7 +54,7 @@ import Base: rounding, setrounding, setprecision
 
 ## Multidimensional
 export
-    IntervalBox, @intervalbox
+    IntervalBox
 
 ## Decorations
 export
