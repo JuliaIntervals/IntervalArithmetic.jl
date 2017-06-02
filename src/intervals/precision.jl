@@ -35,7 +35,7 @@ setprecision(::Type{Interval}, ::Type{Float64}) = parameters.precision_type = Fl
 # does not change the BigFloat precision
 
 
-function setprecision{T<:AbstractFloat}(::Type{Interval}, ::Type{T}, prec::Integer)
+function setprecision(::Type{Interval}, ::Type{T}, prec::Integer) where T<:AbstractFloat
     #println("SETTING BIGFLOAT PRECISION TO $precision")
     setprecision(BigFloat, prec)
 
@@ -46,7 +46,8 @@ function setprecision{T<:AbstractFloat}(::Type{Interval}, ::Type{T}, prec::Integ
     prec
 end
 
-setprecision{T<:AbstractFloat}(::Type{Interval{T}}, prec) = setprecision(Interval, T, prec)
+setprecision(::Type{Interval{T}}, prec) where T<:AbstractFloat =
+    setprecision(Interval, T, prec)
 
 setprecision(::Type{Interval}, prec::Integer) = setprecision(Interval, BigFloat, prec)
 
@@ -74,13 +75,13 @@ pi_interval(::Type{BigFloat}) = parameters.pi
 pi_interval(::Type{Float64})  = float_interval_pi
 
 
-function Base.setrounding{T}(f::Function, ::Type{Rational{T}},
-    rounding_mode::RoundingMode)
+function Base.setrounding(f::Function, ::Type{Rational{T}},
+    rounding_mode::RoundingMode) where T
     setrounding(f, float(Rational{T}), rounding_mode)
 end
 
 
 
-float{T}(x::Interval{T}) = convert( Interval{float(T)}, x)  # https://github.com/dpsanders/IntervalArithmetic.jl/issues/174
+float(x::Interval{T}) where T = convert( Interval{float(T)}, x)  # https://github.com/dpsanders/IntervalArithmetic.jl/issues/174
 
 big(x::Interval) = convert(Interval{BigFloat}, x)

@@ -16,7 +16,7 @@ end
 
 
 # Auxiliary functions: equivalent to </<=, but Inf <,<= Inf returning true
-function islessprime{T<:Real}(a::T, b::T)
+function islessprime(a::T, b::T) where T<:Real
     (isinf(a) || isinf(b)) && a==b && return true
     a < b
 end
@@ -51,10 +51,10 @@ const ≺ = strictprecedes # \prec
 
 
 # zero, one
-zero{T<:Real}(a::Interval{T}) = Interval(zero(T))
-zero{T<:Real}(::Type{Interval{T}}) = Interval(zero(T))
-one{T<:Real}(a::Interval{T}) = Interval(one(T))
-one{T<:Real}(::Type{Interval{T}}) = Interval(one(T))
+zero(a::Interval{T}) where T<:Real = Interval(zero(T))
+zero(::Type{Interval{T}}) where T<:Real = Interval(zero(T))
+one(a::Interval{T}) where T<:Real = Interval(one(T))
+one(::Type{Interval{T}}) where T<:Real = Interval(one(T))
 
 
 ## Addition and subtraction
@@ -62,12 +62,12 @@ one{T<:Real}(::Type{Interval{T}}) = Interval(one(T))
 +(a::Interval) = a
 -(a::Interval) = Interval(-a.hi, -a.lo)
 
-function +{T<:Real}(a::Interval{T}, b::Interval{T})
+function +(a::Interval{T}, b::Interval{T}) where T<:Real
     (isempty(a) || isempty(b)) && return emptyinterval(T)
     @round(a.lo + b.lo, a.hi + b.hi)
 end
 
-function -{T<:Real}(a::Interval{T}, b::Interval{T})
+function -(a::Interval{T}, b::Interval{T}) where T<:Real
     (isempty(a) || isempty(b)) && return emptyinterval(T)
     @round(a.lo - b.hi, a.hi - b.lo)
 end
@@ -75,7 +75,7 @@ end
 
 ## Multiplication
 
-function *{T<:Real}(a::Interval{T}, b::Interval{T})
+function *(a::Interval{T}, b::Interval{T}) where T<:Real
     (isempty(a) || isempty(b)) && return emptyinterval(T)
 
     (a == zero(a) || b == zero(b)) && return zero(a)
@@ -98,7 +98,7 @@ end
 
 ## Division
 
-function inv{T<:Real}(a::Interval{T})
+function inv(a::Interval{T}) where T<:Real
     isempty(a) && return emptyinterval(a)
 
     if zero(T) ∈ a
@@ -111,7 +111,7 @@ function inv{T<:Real}(a::Interval{T})
     @round(inv(a.hi), inv(a.lo))
 end
 
-function /{T<:Real}(a::Interval{T}, b::Interval{T})
+function /(a::Interval{T}, b::Interval{T}) where T<:Real
 
     S = typeof(a.lo / b.lo)
     (isempty(a) || isempty(b)) && return emptyinterval(S)
@@ -167,7 +167,7 @@ end
 
 
 ## fma: fused multiply-add
-function fma{T}(a::Interval{T}, b::Interval{T}, c::Interval{T})
+function fma(a::Interval{T}, b::Interval{T}, c::Interval{T}) where T
     #T = promote_type(eltype(a), eltype(b), eltype(c))
 
     (isempty(a) || isempty(b) || isempty(c)) && return emptyinterval(T)
@@ -204,7 +204,7 @@ end
 
 ## Scalar functions on intervals (no directed rounding used)
 
-function mag{T<:Real}(a::Interval{T})
+function mag(a::Interval{T}) where T<:Real
     isempty(a) && return convert(eltype(a), NaN)
     # r1, r2 = setrounding(T, RoundUp) do
     #     abs(a.lo), abs(a.hi)
@@ -212,7 +212,7 @@ function mag{T<:Real}(a::Interval{T})
     max( abs(a.lo), abs(a.hi) )
 end
 
-function mig{T<:Real}(a::Interval{T})
+function mig(a::Interval{T}) where T<:Real
     isempty(a) && return convert(eltype(a), NaN)
     zero(a.lo) ∈ a && return zero(a.lo)
     r1, r2 = setrounding(T, RoundDown) do
@@ -309,7 +309,7 @@ doc"""
 
 Find the midpoint (or, in general, an intermediate point) at a distance α along the interval `a`. The default is the true midpoint at α=0.5.
 """
-function mid{T}(a::Interval{T}, α)
+function mid(a::Interval{T}, α) where T
 
     isempty(a) && return convert(T, NaN)
     isentire(a) && return zero(a.lo)
@@ -323,7 +323,7 @@ function mid{T}(a::Interval{T}, α)
     return α*(a.hi - a.lo) + a.lo  # rounds to nearest
 end
 
-function mid{T}(a::Interval{T})
+function mid(a::Interval{T}) where T
 
     isempty(a) && return convert(T, NaN)
     isentire(a) && return zero(a.lo)
@@ -336,7 +336,7 @@ function mid{T}(a::Interval{T})
     return 0.5 * (a.lo + a.hi)
 end
 
-mid{T}(a::Interval{Rational{T}}) = (1//2) * (a.lo + a.hi)
+mid(a::Interval{Rational{T}}) where T = (1//2) * (a.lo + a.hi)
 
 
 doc"""
@@ -344,7 +344,7 @@ doc"""
 
 Return the diameter (length) of the `Interval` `a`.
 """
-function diam{T<:Real}(a::Interval{T})
+function diam(a::Interval{T}) where T<:Real
     isempty(a) && return convert(T, NaN)
 
     @round_up(a.hi - a.lo) # cf page 64 of IEEE1788
@@ -363,7 +363,7 @@ function radius(a::Interval)
     return max(m - a.lo, a.hi - m)
 end
 
-function radius{T}(a::Interval{Rational{T}})
+function radius(a::Interval{Rational{T}}) where T
     m = (a.lo + a.hi) / 2
     return max(m - a.lo, a.hi - m)
 end
@@ -377,7 +377,7 @@ Return the unique interval `c` such that `b+c=a`.
 See Section 12.12.5 of the IEEE-1788 Standard for
 Interval Arithmetic.
 """
-function cancelminus{T<:Real}(a::Interval{T}, b::Interval{T})
+function cancelminus(a::Interval{T}, b::Interval{T}) where T<:Real
     (isempty(a) && (isempty(b) || !isunbounded(b))) && return emptyinterval(T)
 
     (isunbounded(a) || isunbounded(b) || isempty(b)) && return entireinterval(T)

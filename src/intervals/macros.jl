@@ -80,7 +80,7 @@ by calling `transform`."""
 
 function make_interval(T, expr1, expr2)
     # @show expr1, expr2
-    
+
     expr1 = transform(expr1, :convert, :(Interval{$T}))
 
     if isempty(expr2)  # only one argument

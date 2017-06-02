@@ -7,7 +7,6 @@
 
 # Write explicitly like this to avoid ambiguity warnings:
 for T in (:Integer, :Rational, :Float64, :BigFloat, :Interval)
-
     @eval ^(a::Interval{Float64}, x::$T) = convert(Interval{Float64}, big53(a)^x)
 end
 
@@ -67,7 +66,7 @@ function ^(a::Interval{BigFloat}, n::Integer)
     end
 end
 
-function sqr{T<:Real}(a::Interval{T})
+function sqr(a::Interval{T}) where T<:Real
     return a^2
     # isempty(a) && return a
     # if a.lo ≥ zero(T)
@@ -133,14 +132,14 @@ function ^(a::Interval{BigFloat}, x::BigFloat)
     return hull(lo, hi)
 end
 
-function ^{T<:Integer,}(a::Interval{Rational{T}}, x::AbstractFloat)
+function ^(a::Interval{Rational{T}}, x::AbstractFloat) where T<:Integer
     a = Interval(a.lo.num/a.lo.den, a.hi.num/a.hi.den)
     a = a^x
     convert(Interval{Rational{T}}, a)
 end
 
 # Rational power
-function ^{S<:Integer}(a::Interval{BigFloat}, r::Rational{S})
+function ^(a::Interval{BigFloat}, r::Rational{S}) where S<:Integer
     T = BigFloat
     domain = Interval{T}(0, Inf)
 
@@ -182,7 +181,7 @@ function ^(a::Interval{BigFloat}, x::Interval)
 end
 
 
-function sqrt{T}(a::Interval{T})
+function sqrt(a::Interval{T}) where T
     domain = Interval{T}(0, Inf)
     a = a ∩ domain
 
@@ -194,7 +193,7 @@ end
 """
     pow(x::Interval, n::Integer)
 
-A faster implementation of ``x^n``, currently using `power_by_squaring`.
+A faster implementation of `x^n`, currently using `power_by_squaring`.
 `pow(x, n)` will usually return an interval that is slightly larger than that calculated by `x^n`, but is guaranteed to be a correct
 enclosure when using multiplication with correct rounding.
 """
@@ -231,7 +230,7 @@ end
 
 for f in (:exp, :expm1)
     @eval begin
-        function ($f){T}(a::Interval{T})
+        function ($f)(a::Interval{T}) where T
             isempty(a) && return a
             @round( ($f)(a.lo), ($f)(a.hi) )
         end
@@ -257,7 +256,7 @@ end
 
 for f in (:log, :log2, :log10, :log1p)
 
-    @eval function ($f){T}(a::Interval{T})
+    @eval function ($f)(a::Interval{T}) where T
             domain = Interval{T}(0, Inf)
             a = a ∩ domain
 

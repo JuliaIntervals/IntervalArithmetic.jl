@@ -1,13 +1,13 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
 
-function sinh{T}(a::Interval{T})
+function sinh(a::Interval)
     isempty(a) && return a
 
     return @round(sinh(a.lo), sinh(a.hi))
 end
 
-function cosh{T}(a::Interval{T})
+function cosh(a::Interval)
     isempty(a) && return a
 
     return @round(cosh(mig(a)), cosh(mag(a)))
