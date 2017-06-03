@@ -64,12 +64,12 @@ function ^(a::Interval{Float64}, n::Integer)
             if a.lo ≥ 0
                 c_lo = @round_down(a.hi^n)
                 c_hi = @round_up(a.lo^n)
-                iszero(c_hi) && return Interval(c_lo, nextfloat(c_hi))
+                c_hi == 0 && return Interval(c_lo, nextfloat(c_hi))
                 return Interval(c_lo, c_hi)
             elseif a.hi ≤ 0
                 c_lo = @round_down(a.lo^n)
                 c_hi = @round_up(a.hi^n)
-                iszero(c_hi) && return Interval(c_lo, nextfloat(c_hi))
+                c_hi == 0 && return Interval(c_lo, nextfloat(c_hi))
                 return Interval(c_lo, c_hi)
             else
                 return @round(mag(a)^n, mig(a)^n)
