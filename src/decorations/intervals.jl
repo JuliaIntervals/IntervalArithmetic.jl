@@ -37,37 +37,50 @@ struct DecoratedInterval{T<:Real} <: AbstractInterval{T}
 
     function DecoratedInterval{T}(I::Interval, d::DECORATION) where T
         dd = decoration(I)
-        dd <= trv && return new(I, dd)
-        d == ill && return new(nai(I), d)
-        return new(I, d)
+        dd <= trv && return new{T}(I, dd)
+        d == ill && return new{T}(nai(I), d)
+        return new{T}(I, d)
     end
 end
 
-DecoratedInterval{T<:AbstractFloat}(I::Interval{T}, d::DECORATION) =
+DecoratedInterval(I::Interval{T}, d::DECORATION) where T<:AbstractFloat =
     DecoratedInterval{T}(I, d)
-function DecoratedInterval{T<:Real}(a::T, b::T, d::DECORATION)
+
+function DecoratedInterval(a::T, b::T, d::DECORATION) where T<:Real
     a > b && return DecoratedInterval(nai(T), ill)
     DecoratedInterval(Interval(a,b), d)
 end
-DecoratedInterval{T<:Real}(a::T, d::DECORATION) = DecoratedInterval(Interval(a,a), d)
+
+DecoratedInterval(a::T, d::DECORATION) where T<:Real =
+    DecoratedInterval(Interval(a,a), d)
+
 DecoratedInterval(a::Tuple, d::DECORATION) = DecoratedInterval(a..., d)
-DecoratedInterval{T<:Real, S<:Real}(a::T, b::S, d::DECORATION) =
+
+DecoratedInterval(a::T, b::S, d::DECORATION) where {T<:Real, S<:Real} =
     DecoratedInterval(promote(a,b)..., d)
 
 # Automatic decorations for an interval
 DecoratedInterval(I::Interval) = DecoratedInterval(I, decoration(I))
-function DecoratedInterval{T<:Real}(a::T, b::T)
+
+function DecoratedInterval(a::T, b::T) where T<:Real
     a > b && return DecoratedInterval(nai(T), ill)
     DecoratedInterval(Interval(a,b))
 end
-DecoratedInterval{T<:Integer}(a::T, b::T) = DecoratedInterval(float(a),float(b))
-DecoratedInterval{T<:Real}(a::T) = DecoratedInterval(Interval(a,a))
-DecoratedInterval{T<:Real, S<:Real}(a::T, b::S) = DecoratedInterval(promote(a, b)...)
+
+DecoratedInterval(a::T, b::T) where T<:Integer =
+    DecoratedInterval(float(a),float(b))
+
+DecoratedInterval(a::T) where T<:Real = DecoratedInterval(Interval(a,a))
+
+DecoratedInterval(a::T, b::S) where {T<:Real, S<:Real} =
+    DecoratedInterval(promote(a, b)...)
+
 DecoratedInterval(a::Tuple) = DecoratedInterval(a...)
 
 DecoratedInterval(I::DecoratedInterval, dec::DECORATION) = DecoratedInterval(I.interval, dec)
 
 interval_part(x::DecoratedInterval) = x.interval
+
 decoration(x::DecoratedInterval) = x.decoration
 
 # Automatic decorations for an Interval
@@ -83,25 +96,27 @@ end
 # promote_rule{T<:Real, N, R<:Real}(::Type{DecoratedInterval{T}},
 #     ::Type{ForwardDiff.Dual{N,R}}) = ForwardDiff.Dual{N, DecoratedInterval{promote_type(T,R)}}
 
-promote_rule{T<:Real, S<:Real}(::Type{DecoratedInterval{T}}, ::Type{S}) =
-    DecoratedInterval{promote_type(T, S)}
-promote_rule{T<:Real, S<:Real}(::Type{DecoratedInterval{T}}, ::Type{DecoratedInterval{S}}) =
+promote_rule(::Type{DecoratedInterval{T}}, ::Type{S}) where {T<:Real, S<:Real} =
     DecoratedInterval{promote_type(T, S)}
 
-convert{T<:Real, S<:Real}(::Type{DecoratedInterval{T}}, x::S) =
+promote_rule(::Type{DecoratedInterval{T}}, ::Type{DecoratedInterval{S}}) where
+    {T<:Real, S<:Real} = DecoratedInterval{promote_type(T, S)}
+
+convert(::Type{DecoratedInterval{T}}, x::S) where {T<:Real, S<:Real} =
     DecoratedInterval( Interval(T(x, RoundDown), T(x, RoundUp)) )
-convert{T<:Real, S<:Integer}(::Type{DecoratedInterval{T}}, x::S) =
+
+convert(::Type{DecoratedInterval{T}}, x::S) where {T<:Real, S<:Integer} =
     DecoratedInterval( Interval(T(x), T(x)) )
 # function convert{T<:AbstractFloat}(::Type{DecoratedInterval{T}}, x::Float64)
 #     convert(DecoratedInterval{T}, rationalize(x))
 # end
-function convert{T<:Real}(::Type{DecoratedInterval{T}}, xx::DecoratedInterval)
+function convert(::Type{DecoratedInterval{T}}, xx::DecoratedInterval) where T<:Real
     x = interval_part(xx)
     x = convert(Interval{T},x)
     DecoratedInterval( x, decoration(xx) )
 end
 
-convert{T<:AbstractFloat}(::Type{DecoratedInterval{T}}, x::AbstractString) =
+convert(::Type{DecoratedInterval{T}}, x::AbstractString) where T<:AbstractFloat =
     parse(DecoratedInterval{T}, x)
 
 big(x::DecoratedInterval) = DecoratedInterval(big(interval_part(x)),
