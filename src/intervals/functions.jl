@@ -6,9 +6,76 @@
 # Use the BigFloat version from MPFR instead, which is correctly-rounded:
 
 # Write explicitly like this to avoid ambiguity warnings:
-for T in (:Integer, :Rational, :Float64, :BigFloat, :Interval)
-
+for T in (:Rational, :Float64, :BigFloat, :Interval)
     @eval ^(a::Interval{Float64}, x::$T) = convert(Interval{Float64}, big53(a)^x)
+end
+
+function ^(a::Interval{Float64}, n::Integer)
+    isempty(a) && return a
+    n == 0 && return one(a)
+    n == 1 && return a
+    n == -1 && return inv(a)
+    n < 0 && a == zero(a) && return emptyinterval(a)
+
+    if isodd(n) # odd power
+        isentire(a) && return a
+        if n > 0
+            c_lo = @round_down(a.lo^n)
+            c_hi = @round_up(a.hi^n)
+            a.lo == 0 && return Interval(0, c_hi)
+            a.hi == 0 && return Interval(c_lo, 0)
+            c_lo == Inf && return Interval(prevfloat(c_lo), c_hi)
+            c_hi == -Inf && return Interval(c_lo, nextfloat(c_hi))
+            return Interval(c_lo, c_hi)
+        else
+            c_lo = IntervalArithmetic.@round_down(a.hi^n)
+            c_hi = IntervalArithmetic.@round_up(a.lo^n)
+            if a.lo ≥ 0
+                c_hi == 0 && return Interval(c_lo, nextfloat(c_hi))
+                a.lo == 0 && return Interval(c_lo, Inf)
+                return Interval(c_lo, c_hi)
+
+            elseif a.hi ≤ 0
+                c_lo == 0 && return Interval(prevfloat(c_lo), c_hi)
+                a.hi == 0 && return Interval(-Inf,c_hi)
+                return Interval(c_lo, c_hi)
+            else
+                return entireinterval(a)
+            end
+        end
+
+    else # even power
+        if n > 0
+            if a.lo ≥ 0
+                c_lo = @round_down(a.lo^n)
+                c_hi = @round_up(a.hi^n)
+                c_lo == Inf && return Interval(prevfloat(c_lo), c_hi)
+                return Interval(c_lo, c_hi)
+            elseif a.hi ≤ 0
+                c_lo = IntervalArithmetic.@round_down(a.hi^n)
+                c_hi = IntervalArithmetic.@round_up(a.lo^n)
+                c_lo == Inf && return Interval(prevfloat(c_lo), c_hi)
+                return Interval(c_lo, c_hi)
+            else
+                return @round(mig(a)^n, mag(a)^n)
+            end
+
+        else
+            if a.lo ≥ 0
+                c_lo = @round_down(a.hi^n)
+                c_hi = @round_up(a.lo^n)
+                iszero(c_hi) && return Interval(c_lo, nextfloat(c_hi))
+                return Interval(c_lo, c_hi)
+            elseif a.hi ≤ 0
+                c_lo = @round_down(a.lo^n)
+                c_hi = @round_up(a.hi^n)
+                iszero(c_hi) && return Interval(c_lo, nextfloat(c_hi))
+                return Interval(c_lo, c_hi)
+            else
+                return @round(mag(a)^n, mig(a)^n)
+            end
+        end
+    end
 end
 
 
