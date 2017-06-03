@@ -4,7 +4,7 @@ label is 1 if the interval is *excluded* from the setdiff
 label is 0 if the interval is included in the setdiff
 label is -1 if the intersection of the two intervals was empty
 """
-function labelled_setdiff{T}(x::Interval{T}, y::Interval{T})
+function labelled_setdiff(x::Interval{T}, y::Interval{T}) where T
     intersection = x ∩ y
 
     isempty(intersection) && return [(x, -1)]
@@ -42,7 +42,7 @@ i.e. the set of `x` that are in `A` but not in `B`.
 Algorithm: Start from the total overlap (in all directions);
 expand each direction in turn.
 """
-function setdiff{N,T}(A::IntervalBox{N,T}, B::IntervalBox{N,T})
+function setdiff(A::IntervalBox{N,T}, B::IntervalBox{N,T}) where {N,T}
     X = [labelled_setdiff(a,b) for (a, b) in zip(A, B)]
     # ordered such that the first in each is the excluded interval
 

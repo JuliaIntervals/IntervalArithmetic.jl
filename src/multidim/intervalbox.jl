@@ -24,11 +24,14 @@ mid(X::IntervalBox) = mid.(X)
 ## set operations
 
 # TODO: Update to use generator
-⊆{N,T}(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) = all(i->(X[i] ⊆ Y[i]), 1:N)
+⊆(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) where {N,T} =
+    all(i->(X[i] ⊆ Y[i]), 1:N)
 # all(X[i] ⊆ Y[i] for i in 1:N)  # on Julia 0.6
 
-∩{N,T}(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) = IntervalBox(ntuple(i -> X[i] ∩ Y[i], Val{N}))
-∪{N,T}(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) = IntervalBox(ntuple(i -> X[i] ∪ Y[i], Val{N}))
+∩(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) where {N,T} =
+    IntervalBox(ntuple(i -> X[i] ∩ Y[i], Val{N}))
+∪(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) where {N,T} =
+    IntervalBox(ntuple(i -> X[i] ∪ Y[i], Val{N}))
 
 #=
 On Julia 0.6 can now write
@@ -41,7 +44,8 @@ isempty(X::IntervalBox) = any(isempty, X)
 # TODO: Replace with generator in 0.5:
 diam(X::IntervalBox) = maximum([diam(x) for x in X])
 
-emptyinterval{N,T}(X::IntervalBox{N,T}) = IntervalBox(ntuple(i->emptyinterval(T), Val{N}))
+emptyinterval(X::IntervalBox{N,T}) where {N,T} =
+    IntervalBox(ntuple(i->emptyinterval(T), Val{N}))
 
 
 import Base.×
