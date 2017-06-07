@@ -35,6 +35,10 @@ using Base.Test
     @test Interval{BigFloat}(1) == Interval{BigFloat}(big(1.0), big(1.0))
     @test Interval{BigFloat}(pi) == Interval{BigFloat}(big(pi), big(pi))
 
+    # a < Inf and b > -Inf
+    @test Interval(Inf, Inf) == Interval(prevfloat(Inf), Inf)
+    @test Interval(-Inf, -Inf) == Interval(-Inf, nextfloat(-Inf))
+
     # Disallowed conversions with a > b
 
     @test_throws ArgumentError Interval(2, 1)
