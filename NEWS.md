@@ -1,5 +1,10 @@
 # What's new in `IntervalArithmetic.jl`
 
+## Latest
+
+- Rename `infimum` -> `inf` and `supremum` -> `sup`
+
+
 ### v0.9.1
 
 #### Docs
