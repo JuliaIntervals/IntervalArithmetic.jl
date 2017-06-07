@@ -74,7 +74,7 @@ for (op, f) in ( (:+, :add), (:-, :sub), (:*, :mul), (:/, :div) )
 
             mode2 = Symbol("Round", mode)
 
-            @eval $op(::Type{IntervalRounding{:errorfree}},
+            @eval $op(::IntervalRounding{:errorfree},
                                 a::$T, b::$T, $mode1) = $ff(a, b, $mode2)
         end
     end
@@ -88,10 +88,10 @@ for T in (Float32, Float64)
 
         mode2 = Symbol("Round", mode)
 
-        @eval inv(::Type{IntervalRounding{:errorfree}},
+        @eval inv(::IntervalRounding{:errorfree},
                             a::$T, $mode1) = inv_round(a, $mode2)
 
-                @eval sqrt(::Type{IntervalRounding{:errorfree}},
+                @eval sqrt(::IntervalRounding{:errorfree},
                             a::$T, $mode1) = sqrt_round(a, $mode2)
         end
 end
@@ -114,24 +114,24 @@ for mode in (:Down, :Up)
     # binary functions:
     for f in (:+, :-, :*, :/, :atan2)
 
-        @eval function $f{T<:AbstractFloat}(::Type{IntervalRounding{:correct}},
+        @eval function $f{T<:AbstractFloat}(::IntervalRounding{:correct},
                                             a::T, b::T, $mode1)
                     setrounding(T, $mode2) do
                         $f(a, b)
                     end
                 end
 
-        @eval function $f{T<:AbstractFloat}(::Type{IntervalRounding{:errorfree}},
+        @eval function $f{T<:AbstractFloat}(::IntervalRounding{:errorfree},
                                                     a::T, b::T, $mode1)
                             setrounding(T, $mode2) do
                                 $f(a, b)
                             end
                         end
 
-        @eval $f{T<:AbstractFloat}(::Type{IntervalRounding{:fast}},
+        @eval $f{T<:AbstractFloat}(::IntervalRounding{:fast},
                                     a::T, b::T, $mode1) = $directed($f(a, b))
 
-        @eval $f{T<:AbstractFloat}(::Type{IntervalRounding{:none}},
+        @eval $f{T<:AbstractFloat}(::IntervalRounding{:none},
                                     a::T, b::T, $mode1) = $f(a, b)
 
     end
@@ -139,7 +139,7 @@ for mode in (:Down, :Up)
 
     # power:
 
-    @eval function ^{S<:Real}(::Type{IntervalRounding{:correct}},
+    @eval function ^{S<:Real}(::IntervalRounding{:correct},
                                         a::BigFloat, b::S, $mode1)
                   setrounding(BigFloat, $mode2) do
                       ^(a, b)
@@ -147,23 +147,23 @@ for mode in (:Down, :Up)
            end
 
     # for correct rounding for Float64, must pass through BigFloat:
-    @eval function ^{S<:Real}(::Type{IntervalRounding{:correct}}, a::Float64, b::S, $mode1)
+    @eval function ^{S<:Real}(::IntervalRounding{:correct}, a::Float64, b::S, $mode1)
         setprecision(BigFloat, 53) do
             Float64(^(IntervalRounding{:correct}, BigFloat(a), b, $mode2))
         end
     end
 
-    @eval ^{T<:AbstractFloat,S<:Real}(::Type{IntervalRounding{:fast}},
+    @eval ^{T<:AbstractFloat,S<:Real}(::IntervalRounding{:fast},
                                 a::T, b::S, $mode1) = $directed(a^b)
 
-    @eval ^{T<:AbstractFloat,S<:Real}(::Type{IntervalRounding{:none}},
+    @eval ^{T<:AbstractFloat,S<:Real}(::IntervalRounding{:none},
                                 a::T, b::S, $mode1) = a^b
 
 
     # functions not in CRlibm:
     for f in (:sqrt, :inv, :tanh, :asinh, :acosh, :atanh)
 
-        @eval function $f{T<:AbstractFloat}(::Type{IntervalRounding{:correct}},
+        @eval function $f{T<:AbstractFloat}(::IntervalRounding{:correct},
                                             a::T, $mode1)
                             setrounding(T, $mode2) do
                                 $f(a)
@@ -171,10 +171,10 @@ for mode in (:Down, :Up)
                end
 
 
-        @eval $f{T<:AbstractFloat}(::Type{IntervalRounding{:fast}},
+        @eval $f{T<:AbstractFloat}(::IntervalRounding{:fast},
                                     a::T, $mode1) = $directed($f(a))
 
-        @eval $f{T<:AbstractFloat}(::Type{IntervalRounding{:none}},
+        @eval $f{T<:AbstractFloat}(::IntervalRounding{:none},
                                     a::T, $mode1) = $f(a)
 
 
@@ -184,13 +184,13 @@ for mode in (:Down, :Up)
     # Functions defined in CRlibm
 
     for f in CRlibm.functions
-        @eval $f{T<:AbstractFloat}(::Type{IntervalRounding{:correct}},
+        @eval $f{T<:AbstractFloat}(::IntervalRounding{:correct},
                                 a::T, $mode1) = CRlibm.$f(a, $mode2)
 
-        @eval $f{T<:AbstractFloat}(::Type{IntervalRounding{:fast}},
+        @eval $f{T<:AbstractFloat}(::IntervalRounding{:fast},
                                     a::T, $mode1) = $directed($f(a))
 
-        @eval $f{T<:AbstractFloat}(::Type{IntervalRounding{:none}},
+        @eval $f{T<:AbstractFloat}(::IntervalRounding{:none},
                                     a::T, $mode1) = $f(a)
 
     end
@@ -207,7 +207,7 @@ function _setrounding(::Type{Interval}, rounding_type::Symbol)
         throw(ArgumentError("Rounding type must be one of `:errorfree`, `:correct`, `:fast`, `:none`"))
     end
 
-    roundtype = IntervalRounding{rounding_type}
+    roundtype = IntervalRounding{rounding_type}()
 
 
     # binary functions:
@@ -216,7 +216,7 @@ function _setrounding(::Type{Interval}, rounding_type::Symbol)
     end
 
     if rounding_type == :errorfree   # for remaining functions, use CRlibm
-        roundtype = IntervalRounding{:correct}
+        roundtype = IntervalRounding{:correct}()
     end
 
     for f in (:^, :atan2)

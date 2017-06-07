@@ -17,3 +17,7 @@ include("display_tests/display.jl")
 include("ITF1788_tests/ITF1788_tests.jl")
 
 include("multidim_tests/multidim.jl")
+
+if VERSION >= v"0.6.0-dev.1671"  # PR https://github.com/JuliaLang/julia/pull/17057 fixing issue #265
+    include("interval_tests/rounding.jl")
+end
