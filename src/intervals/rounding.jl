@@ -4,15 +4,16 @@ This is a so-called "traits-based" design, as follows.
 
 The main body of the file defines versions of elementary functions with all allowed
 interval rounding types, e.g.
-+(IntervalRounding{:correct}, a, b, RoundDown)
 +(IntervalRounding{:fast}, a, b, RoundDown)
++(IntervalRounding{:tight}, a, b, RoundDown)
++(IntervalRounding{:accurate}, a, b, RoundDown)
 +(IntervalRounding{:none}, a, b, RoundDown)
 
 The current allowed rounding types are
-- :errorfree # use errorfree arithmetic via FastRounding.jl
-- :correct  # correct rounding (rounding to the nearest floating-point number)
-- :fast     # fast rounding by prevfloat and nextfloat  (slightly wider than needed)
-- :none     # no rounding at all (for speed, but forgoes any pretense at being rigorous)
+- :fast     # fast, tight (correct) rounding with errorfree arithmetic via FastRounding.jl
+- :tight    # tight (correct) rounding by changing rounding mode (slow)
+- :accurate # fast "accurate" rounding using prevfloat and nextfloat  (slightly wider than needed)
+- :none     # no rounding (for speed comparisons; no enclosure is guaranteed)
 
 The function `setrounding(Interval, rounding_type)` then defines rounded
  functions *without* an explicit rounding type, e.g.
@@ -21,7 +22,7 @@ sin(x, r::RoundingMode) = sin(IntervalRounding{:correct}, x, r)
 
 These are overwritten when `setrounding(Interval, rounding_type)` is called again.
 
-In Julia v0.6, but *not* in Julia v0.5, this will automatically redefine all relevant functions, in particular those used in +(a::Interval, b::Interval) etc., so that all interval functions will automatically work with the correct interval rounding type.
+In Julia v0.6 and later (but *not* in Julia v0.5), this automatically redefines all relevant functions, in particular those used in +(a::Interval, b::Interval) etc., so that all interval functions automatically use the correct interval rounding type from then on.
 =#
 
 
