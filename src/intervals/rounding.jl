@@ -153,13 +153,8 @@ for mode in (:Down, :Up)
     end
 end
 
-doc"""
-    setrounding(Interval, rounding_type::Symbol)
 
-Set the rounding type used for all interval calculations on Julia v0.6 and above.
-Valid `rounding_type`s are `:correct`, `:fast` and `:none`.
-"""
-function setrounding(::Type{Interval}, rounding_type::Symbol)
+function _setrounding(::Type{Interval}, rounding_type::Symbol)
 
     if rounding_type == current_rounding_type[]
         return  # no need to redefine anything
@@ -192,6 +187,44 @@ function setrounding(::Type{Interval}, rounding_type::Symbol)
 
     current_rounding_type[] = rounding_type
 end
+
+doc"""
+    setrounding(Interval, rounding_type::Symbol)
+
+Set the rounding type used for all interval calculations on Julia v0.6 and above.
+Valid `rounding_type`s are `:correct`, `:fast` and `:none`.
+"""
+function setrounding(::Type{Interval}, rounding_type::Symbol)
+
+    # suppress redefinition warnings:
+    # modified from OhMyREPL.jl
+
+    # dump the warnings to a file, and check the file to make
+    # sure they are only redefinition warnings
+
+    path, io = mktemp()
+
+    old_stderr = STDERR
+    redirect_stderr(io)
+
+    _setrounding(Interval, rounding_type)
+
+    redirect_stderr(old_stderr)
+
+    close(io)
+
+    # check
+    lines = readlines(path)
+    for line in lines
+        if !startswith(line, "WARNING: Method definition")
+            error(line)
+        end
+    end
+
+    return rounding_type
+
+end
+
 
 # default: correct rounding
 const current_rounding_type = Symbol[:undefined]
