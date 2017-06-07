@@ -336,7 +336,7 @@ julia> @interval sin(1)
 By default, the directed rounding used corresponds to using the `RoundDown` and `RoundUp` rounding modes when performing calculations; this gives the narrowest resulting intervals, and is set by
 
 ```jldoctest usage
-julia> setrounding(Interval, :tight)
+julia> setrounding(Interval, :slow)
 
 ```
 

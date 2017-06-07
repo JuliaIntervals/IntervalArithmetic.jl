@@ -4,21 +4,21 @@ This is a so-called "traits-based" design, as follows.
 
 The main body of the file defines versions of elementary functions with all allowed
 interval rounding types, e.g.
-+(IntervalRounding{:accurate}, a, b, RoundDown)
 +(IntervalRounding{:tight}, a, b, RoundDown)
 +(IntervalRounding{:accurate}, a, b, RoundDown)
++(IntervalRounding{:slow}, a, b, RoundDown)
 +(IntervalRounding{:none}, a, b, RoundDown)
 
 The current allowed rounding types are
-- :accurate     # fast, tight (correct) rounding with errorfree arithmetic via FastRounding.jl
-- :tight    # tight (correct) rounding by changing rounding mode (slow)
+- :tight     # fast, tight (correct) rounding with errorfree arithmetic via FastRounding.jl
 - :accurate # fast "accurate" rounding using prevfloat and nextfloat  (slightly wider than needed)
+- :slow    # tight (correct) rounding by changing rounding mode (slow)
 - :none     # no rounding (for speed comparisons; no enclosure is guaranteed)
 
 The function `setrounding(Interval, rounding_type)` then defines rounded
  functions *without* an explicit rounding type, e.g.
 
-sin(x, r::RoundingMode) = sin(IntervalRounding{:tight}, x, r)
+sin(x, r::RoundingMode) = sin(IntervalRounding{:slow}, x, r)
 
 These are overwritten when `setrounding(Interval, rounding_type)` is called again.
 
@@ -74,7 +74,7 @@ for (op, f) in ( (:+, :add), (:-, :sub), (:*, :mul), (:/, :div) )
 
             mode2 = Symbol("Round", mode)
 
-            @eval $op(::IntervalRounding{:fast},
+            @eval $op(::IntervalRounding{:tight},
                                 a::$T, b::$T, $mode1) = $ff(a, b, $mode2)
         end
     end
@@ -88,10 +88,10 @@ for T in (Float32, Float64)
 
         mode2 = Symbol("Round", mode)
 
-        @eval inv(::IntervalRounding{:fast},
+        @eval inv(::IntervalRounding{:tight},
                             a::$T, $mode1) = inv_round(a, $mode2)
 
-                @eval sqrt(::IntervalRounding{:fast},
+                @eval sqrt(::IntervalRounding{:tight},
                             a::$T, $mode1) = sqrt_round(a, $mode2)
         end
 end
@@ -106,22 +106,22 @@ for mode in (:Down, :Up)
     mode2 = Symbol("Round", mode)
 
     if mode == :Down
-        directed = :prevfloat
+        directed = :prev_float
     else
-        directed = :nextfloat
+        directed = :next_float
     end
 
     # binary functions:
     for f in (:+, :-, :*, :/, :atan2)
 
-        @eval function $f{T<:AbstractFloat}(::IntervalRounding{:tight},
+        @eval function $f{T<:AbstractFloat}(::IntervalRounding{:slow},
                                             a::T, b::T, $mode1)
                     setrounding(T, $mode2) do
                         $f(a, b)
                     end
                 end
 
-        @eval function $f{T<:AbstractFloat}(::IntervalRounding{:fast},
+        @eval function $f{T<:AbstractFloat}(::IntervalRounding{:tight},
                                                     a::T, b::T, $mode1)
                             setrounding(T, $mode2) do
                                 $f(a, b)
@@ -139,7 +139,7 @@ for mode in (:Down, :Up)
 
     # power:
 
-    @eval function ^{S<:Real}(::IntervalRounding{:tight},
+    @eval function ^{S<:Real}(::IntervalRounding{:slow},
                                         a::BigFloat, b::S, $mode1)
                   setrounding(BigFloat, $mode2) do
                       ^(a, b)
@@ -147,9 +147,9 @@ for mode in (:Down, :Up)
            end
 
     # for correct rounding for Float64, must pass through BigFloat:
-    @eval function ^{S<:Real}(::IntervalRounding{:tight}, a::Float64, b::S, $mode1)
+    @eval function ^{S<:Real}(::IntervalRounding{:slow}, a::Float64, b::S, $mode1)
         setprecision(BigFloat, 53) do
-            Float64(^(IntervalRounding{:tight}, BigFloat(a), b, $mode2))
+            Float64(^(IntervalRounding{:slow}, BigFloat(a), b, $mode2))
         end
     end
 
@@ -163,7 +163,7 @@ for mode in (:Down, :Up)
     # functions not in CRlibm:
     for f in (:sqrt, :inv, :tanh, :asinh, :acosh, :atanh)
 
-        @eval function $f{T<:AbstractFloat}(::IntervalRounding{:tight},
+        @eval function $f{T<:AbstractFloat}(::IntervalRounding{:slow},
                                             a::T, $mode1)
                             setrounding(T, $mode2) do
                                 $f(a)
@@ -184,7 +184,7 @@ for mode in (:Down, :Up)
     # Functions defined in CRlibm
 
     for f in CRlibm.functions
-        @eval $f{T<:AbstractFloat}(::IntervalRounding{:tight},
+        @eval $f{T<:AbstractFloat}(::IntervalRounding{:slow},
                                 a::T, $mode1) = CRlibm.$f(a, $mode2)
 
         @eval $f{T<:AbstractFloat}(::IntervalRounding{:accurate},
@@ -197,14 +197,16 @@ for mode in (:Down, :Up)
 end
 
 
+const rounding_types = (:tight, :accurate, :slow, :none)
+
 function _setrounding(::Type{Interval}, rounding_type::Symbol)
 
     if rounding_type == current_rounding_type[]
         return  # no need to redefine anything
     end
 
-    if rounding_type ∉ (:fast, :tight, :accurate, :none)
-        throw(ArgumentError("Rounding type must be one of `:fast`, `:tight`, `:accurate`, `:none`"))
+    if rounding_type ∉ rounding_types
+        throw(ArgumentError("Rounding type must be one of $rounding_types"))
     end
 
     roundtype = IntervalRounding{rounding_type}()
@@ -215,8 +217,8 @@ function _setrounding(::Type{Interval}, rounding_type::Symbol)
         @eval $f{T<:AbstractFloat}(a::T, b::T, r::RoundingMode) = $f($roundtype, a, b, r)
     end
 
-    if rounding_type == :fast   # for remaining functions, use CRlibm
-        roundtype = IntervalRounding{:tight}()
+    if rounding_type == :tight   # for remaining functions, use CRlibm
+        roundtype = IntervalRounding{:slow}()
     end
 
     for f in (:^, :atan2)
@@ -243,7 +245,7 @@ doc"""
     setrounding(Interval, rounding_type::Symbol)
 
 Set the rounding type used for all interval calculations on Julia v0.6 and above.
-Valid `rounding_type`s are `:tight`, `:accurate` and `:none`, `:fast`.
+Valid `rounding_type`s are $rounding_types.
 """
 function setrounding(::Type{Interval}, rounding_type::Symbol)
 
@@ -279,4 +281,4 @@ end
 
 # default: correct rounding
 const current_rounding_type = Symbol[:undefined]
-setrounding(Interval, :fast)
+setrounding(Interval, :tight)

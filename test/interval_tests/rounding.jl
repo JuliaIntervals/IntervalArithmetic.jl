@@ -8,7 +8,7 @@ setformat(:full)
 
 # NB: Due to "world age" problems, the following is not a @testset
 
-setrounding(Interval, :tight)
+setrounding(Interval, :slow)
 x = Interval(0.5)
 @testset "Correct rounding" begin
     @test sin(x) == Interval(0.47942553860420295, 0.479425538604203)
@@ -24,12 +24,12 @@ setrounding(Interval, :none)
     @test sin(x) == Interval(0.479425538604203, 0.479425538604203)
 end
 
-setrounding(Interval, :tight)
+setrounding(Interval, :slow)
 @testset "Back to correct rounding" begin
     @test sin(x) == Interval(0.47942553860420295, 0.479425538604203)
 end
 
-setrounding(Interval, :fast)
+setrounding(Interval, :tight)
 @testset "Back to error-free rounding" begin
     @test sin(x) == Interval(0.47942553860420295, 0.479425538604203)
 end
