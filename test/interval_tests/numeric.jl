@@ -230,7 +230,7 @@ end
         y = -2..3
         @test pow(y, 2.1) == Interval(0.0, 10.045108566305146)
         @test pow(y, 2.1) != y^2.1
-        @test pow(y, 2.1) ⊇ y^2.1
+        @test y^2.1 ⊆ pow(y, 2.1)
     end
 
     @testset "Fast interval powers" begin
