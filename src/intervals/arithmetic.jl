@@ -336,14 +336,11 @@ function mid{T}(a::Interval{T})
 
     # @assert 0 ≤ α ≤ 1
 
-    return simple_mid(a)
+    return 0.5 * (a.lo + a.hi)
 end
 
 mid{T}(a::Interval{Rational{T}}) = (1//2) * (a.lo + a.hi)
 
-function simple_mid(a::Interval)
-    return 0.5*(a.lo + a.hi)
-end
 
 doc"""
     diam(a::Interval)
