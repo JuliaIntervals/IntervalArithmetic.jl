@@ -1,11 +1,8 @@
 using IntervalArithmetic
 using Base.Test
 
-# using Suppressor
 
 setformat(:full)
-
-# @suppress begin
 
 # @testset "Interval rounding" begin
 
