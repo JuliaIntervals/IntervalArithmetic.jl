@@ -24,9 +24,12 @@ function convert{T<:AbstractFloat, S<:Real}(::Type{Interval{T}}, x::S)
     # use @round_up and @round_down here?
 end
 
-convert{T<:AbstractFloat}(::Type{Interval{T}}, x::Float64) =
-    Interval(parse(T, string(x), RoundDown), parse(T, string(x), RoundUp))
-
+function convert{T<:AbstractFloat}(::Type{Interval{T}}, x::Float64)
+    isinf(x) && return Interval{T}(x)
+    x_str = string(x)
+    return Interval{T}(parse(T, x_str, RoundDown),
+        parse(T, x_str, RoundUp))
+end
 
 convert{T<:AbstractFloat}(::Type{Interval{T}}, x::Interval{T}) = x
 
