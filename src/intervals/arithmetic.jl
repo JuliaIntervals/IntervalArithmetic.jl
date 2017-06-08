@@ -392,6 +392,9 @@ function cancelminus{T<:Real}(a::Interval{T}, b::Interval{T})
 
     c_lo > c_hi && return entireinterval(T)
 
+    c_lo == Inf && return Interval(prevfloat(c_lo), c_hi)
+    c_hi == -Inf && return Interval(c_lo, nextfloat(c_hi))
+
     a_lo = @round_down(b.lo + c_lo)
     a_hi = @round_up(b.hi + c_hi)
 
