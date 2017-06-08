@@ -155,10 +155,6 @@ end
 
 //(a::Interval, b::Interval) = a / b    # to deal with rationals
 
-if VERSION >= v"0.6.0-dev.1024"
-    const filter = Iterators.filter
-end
-
 function min_ignore_nans(args...)
     min(filter(x->!isnan(x), args)...)
 end
