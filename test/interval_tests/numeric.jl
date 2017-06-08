@@ -148,7 +148,7 @@ end
     h = 1/3
     i = 1/3
 
-    @test @interval(h*i) == Interval(1.1111111111111109e-01, 1.1111111111111115e-01)
+    @test_skip @interval(h*i) == Interval(1.1111111111111109e-01, 1.1111111111111115e-01)
     @test big(1.)/9 ∈ @interval(1/9)
 
     @test @interval(1/9) == @interval(1//9)

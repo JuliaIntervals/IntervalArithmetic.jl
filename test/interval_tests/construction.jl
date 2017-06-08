@@ -36,8 +36,10 @@ using Base.Test
     @test Interval{BigFloat}(pi) == Interval{BigFloat}(big(pi), big(pi))
 
     # a < Inf and b > -Inf
-    @test Interval(Inf, Inf) == Interval(prevfloat(Inf), Inf)
-    @test Interval(-Inf, -Inf) == Interval(-Inf, nextfloat(-Inf))
+    @test @interval(1e300) == Interval(9.999999999999999e299, 1.0e300)
+    @test @interval(-1e307) == Interval(-1.0000000000000001e307, -1.0e307)
+    @test @interval(Inf) == Interval(realmax(), Inf)
+    @test Interval(-Inf, -Inf) == Interval(-Inf, -realmax())
 
     # Disallowed conversions with a > b
 

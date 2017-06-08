@@ -2,12 +2,6 @@
 
 ## Promotion rules
 
-# Avoid ambiguity with ForwardDiff:
-
-# promote_rule{T<:Real, N, R<:Real}(::Type{Interval{T}},
-#     ::Type{ForwardDiff.Dual{N,R}}) = ForwardDiff.Dual{N, Interval{promote_type(T,R)}}
-
-
 promote_rule{T<:Real, S<:Real}(::Type{Interval{T}}, ::Type{Interval{S}}) =
     Interval{promote_type(T, S)}
 
@@ -30,15 +24,8 @@ function convert{T<:AbstractFloat, S<:Real}(::Type{Interval{T}}, x::S)
     # use @round_up and @round_down here?
 end
 
-function convert{T<:AbstractFloat}(::Type{Interval{T}}, x::Float64)
-    II = convert(Interval{T}, rationalize(x))
-    # This prevents that rationalize(x) returns a zero when x is very small
-    if x != zero(x) && II == zero(Interval{T})
-        return Interval(parse(T, string(x), RoundDown),
-                        parse(T, string(x), RoundUp))
-    end
-    II
-end
+convert{T<:AbstractFloat}(::Type{Interval{T}}, x::Float64) =
+    Interval(parse(T, string(x), RoundDown), parse(T, string(x), RoundUp))
 
 
 convert{T<:AbstractFloat}(::Type{Interval{T}}, x::Interval{T}) = x
