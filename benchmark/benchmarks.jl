@@ -11,7 +11,6 @@
 =#
 
 
-
 using IntervalArithmetic
 
 @benchgroup "Constructor" begin
