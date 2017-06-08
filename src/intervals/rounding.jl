@@ -4,23 +4,25 @@ This is a so-called "traits-based" design, as follows.
 
 The main body of the file defines versions of elementary functions with all allowed
 interval rounding types, e.g.
-+(IntervalRounding{:correct}, a, b, RoundDown)
-+(IntervalRounding{:fast}, a, b, RoundDown)
++(IntervalRounding{:tight}, a, b, RoundDown)
++(IntervalRounding{:accurate}, a, b, RoundDown)
++(IntervalRounding{:slow}, a, b, RoundDown)
 +(IntervalRounding{:none}, a, b, RoundDown)
 
 The current allowed rounding types are
-- :correct  # correct rounding (rounding to the nearest floating-point number)
-- :fast     # fast rounding by prevfloat and nextfloat  (slightly wider than needed)
-- :none     # no rounding at all (for speed, but forgoes any pretense at being rigorous)
+- :tight     # fast, tight (correct) rounding with errorfree arithmetic via FastRounding.jl
+- :accurate # fast "accurate" rounding using prevfloat and nextfloat  (slightly wider than needed)
+- :slow    # tight (correct) rounding by changing rounding mode (slow)
+- :none     # no rounding (for speed comparisons; no enclosure is guaranteed)
 
 The function `setrounding(Interval, rounding_type)` then defines rounded
  functions *without* an explicit rounding type, e.g.
 
-sin(x, r::RoundingMode) = sin(IntervalRounding{:correct}, x, r)
+sin(x, r::RoundingMode) = sin(IntervalRounding{:slow}, x, r)
 
 These are overwritten when `setrounding(Interval, rounding_type)` is called again.
 
-In Julia v0.6, but *not* in Julia v0.5, this will automatically redefine all relevant functions, in particular those used in +(a::Interval, b::Interval) etc., so that all interval functions will automatically work with the correct interval rounding type.
+In Julia v0.6 and later (but *not* in Julia v0.5), this automatically redefines all relevant functions, in particular those used in +(a::Interval, b::Interval) etc., so that all interval functions automatically use the correct interval rounding type from then on.
 =#
 
 
@@ -59,6 +61,41 @@ for f in (:+, :-, :*, :/)
     @eval $f{T<:Rational}(a::T, b::T, ::RoundingMode) = $f(a, b)
 end
 
+# error-free arithmetic:
+
+for (op, f) in ( (:+, :add), (:-, :sub), (:*, :mul), (:/, :div) )
+    ff = Symbol(f, "_round")
+
+    for T in (Float32, Float64)
+        for mode in (:Down, :Up)
+
+            mode1 = Expr(:quote, mode)
+            mode1 = :(::RoundingMode{$mode1})
+
+            mode2 = Symbol("Round", mode)
+
+            @eval $op(::IntervalRounding{:tight},
+                                a::$T, b::$T, $mode1) = $ff(a, b, $mode2)
+        end
+    end
+end
+
+for T in (Float32, Float64)
+    for mode in (:Down, :Up)
+
+        mode1 = Expr(:quote, mode)
+        mode1 = :(::RoundingMode{$mode1})
+
+        mode2 = Symbol("Round", mode)
+
+        @eval inv(::IntervalRounding{:tight},
+                            a::$T, $mode1) = inv_round(a, $mode2)
+
+                @eval sqrt(::IntervalRounding{:tight},
+                            a::$T, $mode1) = sqrt_round(a, $mode2)
+        end
+end
+
 
 # Define functions with different rounding types:
 for mode in (:Down, :Up)
@@ -69,26 +106,32 @@ for mode in (:Down, :Up)
     mode2 = Symbol("Round", mode)
 
     if mode == :Down
-        directed = :prevfloat
+        directed = :prev_float
     else
-        directed = :nextfloat
+        directed = :next_float
     end
-
 
     # binary functions:
     for f in (:+, :-, :*, :/, :atan2)
 
-        @eval function $f{T<:AbstractFloat}(::Type{IntervalRounding{:correct}},
+        @eval function $f{T<:AbstractFloat}(::IntervalRounding{:slow},
                                             a::T, b::T, $mode1)
                     setrounding(T, $mode2) do
                         $f(a, b)
                     end
                 end
 
-        @eval $f{T<:AbstractFloat}(::Type{IntervalRounding{:fast}},
+        @eval function $f{T<:AbstractFloat}(::IntervalRounding{:tight},
+                                                    a::T, b::T, $mode1)
+                            setrounding(T, $mode2) do
+                                $f(a, b)
+                            end
+                        end
+
+        @eval $f{T<:AbstractFloat}(::IntervalRounding{:accurate},
                                     a::T, b::T, $mode1) = $directed($f(a, b))
 
-        @eval $f{T<:AbstractFloat}(::Type{IntervalRounding{:none}},
+        @eval $f{T<:AbstractFloat}(::IntervalRounding{:none},
                                     a::T, b::T, $mode1) = $f(a, b)
 
     end
@@ -96,7 +139,7 @@ for mode in (:Down, :Up)
 
     # power:
 
-    @eval function ^{S<:Real}(::Type{IntervalRounding{:correct}},
+    @eval function ^{S<:Real}(::IntervalRounding{:slow},
                                         a::BigFloat, b::S, $mode1)
                   setrounding(BigFloat, $mode2) do
                       ^(a, b)
@@ -104,23 +147,23 @@ for mode in (:Down, :Up)
            end
 
     # for correct rounding for Float64, must pass through BigFloat:
-    @eval function ^{S<:Real}(::Type{IntervalRounding{:correct}}, a::Float64, b::S, $mode1)
+    @eval function ^{S<:Real}(::IntervalRounding{:slow}, a::Float64, b::S, $mode1)
         setprecision(BigFloat, 53) do
-            Float64(^(IntervalRounding{:correct}, BigFloat(a), b, $mode2))
+            Float64(^(IntervalRounding{:slow}, BigFloat(a), b, $mode2))
         end
     end
 
-    @eval ^{T<:AbstractFloat,S<:Real}(::Type{IntervalRounding{:fast}},
+    @eval ^{T<:AbstractFloat,S<:Real}(::IntervalRounding{:accurate},
                                 a::T, b::S, $mode1) = $directed(a^b)
 
-    @eval ^{T<:AbstractFloat,S<:Real}(::Type{IntervalRounding{:none}},
+    @eval ^{T<:AbstractFloat,S<:Real}(::IntervalRounding{:none},
                                 a::T, b::S, $mode1) = a^b
 
 
     # functions not in CRlibm:
     for f in (:sqrt, :inv, :tanh, :asinh, :acosh, :atanh)
 
-        @eval function $f{T<:AbstractFloat}(::Type{IntervalRounding{:correct}},
+        @eval function $f{T<:AbstractFloat}(::IntervalRounding{:slow},
                                             a::T, $mode1)
                             setrounding(T, $mode2) do
                                 $f(a)
@@ -128,10 +171,10 @@ for mode in (:Down, :Up)
                end
 
 
-        @eval $f{T<:AbstractFloat}(::Type{IntervalRounding{:fast}},
+        @eval $f{T<:AbstractFloat}(::IntervalRounding{:accurate},
                                     a::T, $mode1) = $directed($f(a))
 
-        @eval $f{T<:AbstractFloat}(::Type{IntervalRounding{:none}},
+        @eval $f{T<:AbstractFloat}(::IntervalRounding{:none},
                                     a::T, $mode1) = $f(a)
 
 
@@ -141,18 +184,20 @@ for mode in (:Down, :Up)
     # Functions defined in CRlibm
 
     for f in CRlibm.functions
-        @eval $f{T<:AbstractFloat}(::Type{IntervalRounding{:correct}},
+        @eval $f{T<:AbstractFloat}(::IntervalRounding{:slow},
                                 a::T, $mode1) = CRlibm.$f(a, $mode2)
 
-        @eval $f{T<:AbstractFloat}(::Type{IntervalRounding{:fast}},
+        @eval $f{T<:AbstractFloat}(::IntervalRounding{:accurate},
                                     a::T, $mode1) = $directed($f(a))
 
-        @eval $f{T<:AbstractFloat}(::Type{IntervalRounding{:none}},
+        @eval $f{T<:AbstractFloat}(::IntervalRounding{:none},
                                     a::T, $mode1) = $f(a)
 
     end
 end
 
+
+const rounding_types = (:tight, :accurate, :slow, :none)
 
 function _setrounding(::Type{Interval}, rounding_type::Symbol)
 
@@ -160,15 +205,23 @@ function _setrounding(::Type{Interval}, rounding_type::Symbol)
         return  # no need to redefine anything
     end
 
-    if rounding_type ∉ (:correct, :fast, :none)
-        throw(ArgumentError("Rounding type must be one of `:correct`, `:fast`, `:none`"))
+    if rounding_type ∉ rounding_types
+        throw(ArgumentError("Rounding type must be one of $rounding_types"))
     end
 
-    roundtype = IntervalRounding{rounding_type}
+    roundtype = IntervalRounding{rounding_type}()
 
 
     # binary functions:
-    for f in (:+, :-, :*, :/, :^, :atan2)
+    for f in (:+, :-, :*, :/)
+        @eval $f{T<:AbstractFloat}(a::T, b::T, r::RoundingMode) = $f($roundtype, a, b, r)
+    end
+
+    if rounding_type == :tight   # for remaining functions, use CRlibm
+        roundtype = IntervalRounding{:slow}()
+    end
+
+    for f in (:^, :atan2)
 
         @eval $f{T<:AbstractFloat}(a::T, b::T, r::RoundingMode) = $f($roundtype, a, b, r)
     end
@@ -192,7 +245,7 @@ doc"""
     setrounding(Interval, rounding_type::Symbol)
 
 Set the rounding type used for all interval calculations on Julia v0.6 and above.
-Valid `rounding_type`s are `:correct`, `:fast` and `:none`.
+Valid `rounding_type`s are $rounding_types.
 """
 function setrounding(::Type{Interval}, rounding_type::Symbol)
 
@@ -228,4 +281,4 @@ end
 
 # default: correct rounding
 const current_rounding_type = Symbol[:undefined]
-setrounding(Interval, :correct)
+setrounding(Interval, :tight)

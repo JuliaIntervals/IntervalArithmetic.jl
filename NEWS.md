@@ -29,7 +29,7 @@
 - Julia v0.5 and higher are supported
 
 ### Breaking API changes
-- **Only on Julia 0.6**, it is now possible to change the interval rounding type again, using `setrounding(Interval, :fast)`; #220
+- **Only on Julia 0.6**, it is now possible to change the interval rounding type again, using `setrounding(Interval, :accurate)`; #220
 
 - Changed `setdisplay` to `setformat`. Added `@format` macro to simplify interface, e.g.
 `@format standard 5 true`; #251

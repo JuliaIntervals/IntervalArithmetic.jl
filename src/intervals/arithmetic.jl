@@ -322,11 +322,11 @@ function mid{T}(a::Interval{T}, α)
 
     @assert 0 ≤ α ≤ 1
 
-    return (1-α) * a.lo + α * a.hi  # rounds to nearest
+    # return (1-α) * a.lo + α * a.hi  # rounds to nearest
+    return α*(a.hi - a.lo) + a.lo  # rounds to nearest
 end
 
-
-function mid{T}(a::Interval{T})  # specialized version for α=0.5
+function mid{T}(a::Interval{T})
 
     isempty(a) && return convert(T, NaN)
     isentire(a) && return zero(a.lo)
@@ -334,9 +334,10 @@ function mid{T}(a::Interval{T})  # specialized version for α=0.5
     a.lo == -∞ && return nextfloat(a.lo)
     a.hi == +∞ && return prevfloat(a.hi)
 
-    return 0.5 * (a.lo + a.hi)  # rounds to nearest
-end
+    # @assert 0 ≤ α ≤ 1
 
+    return 0.5 * (a.lo + a.hi)
+end
 
 mid{T}(a::Interval{Rational{T}}) = (1//2) * (a.lo + a.hi)
 

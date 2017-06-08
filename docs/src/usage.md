@@ -336,13 +336,13 @@ julia> @interval sin(1)
 By default, the directed rounding used corresponds to using the `RoundDown` and `RoundUp` rounding modes when performing calculations; this gives the narrowest resulting intervals, and is set by
 
 ```jldoctest usage
-julia> setrounding(Interval, :correct)
+julia> setrounding(Interval, :slow)
 
 ```
 
 An alternative rounding method is to perform calculations using the (standard) `RoundNearest` rounding mode, and then widen the result by one machine epsilon in each direction using `prevfloat` and `nextfloat`. This is achived by
 ```
-julia> setrounding(Interval, :fast);
+julia> setrounding(Interval, :accurate);
 
 ```
 It generally results in wider intervals, but seems to be significantly faster.
