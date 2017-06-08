@@ -6,16 +6,122 @@
 # Use the BigFloat version from MPFR instead, which is correctly-rounded:
 
 # Write explicitly like this to avoid ambiguity warnings:
-for T in (:Integer, :Rational, :Float64, :BigFloat, :Interval)
-
+for T in (:Rational, :BigFloat)
     @eval ^(a::Interval{Float64}, x::$T) = convert(Interval{Float64}, big53(a)^x)
+end
+
+function ^(a::Interval{Float64}, n::Integer)
+    isempty(a) && return a
+    n == 0 && return one(a)
+    n == 1 && return a
+    n == -1 && return inv(a)
+    n < 0 && a == zero(a) && return emptyinterval(a)
+
+    if isodd(n) # odd power
+        isentire(a) && return a
+        if n > 0
+            c_lo = @round_down(a.lo^n)
+            c_hi = @round_up(a.hi^n)
+            a.lo == 0 && return Interval(0, c_hi)
+            a.hi == 0 && return Interval(c_lo, 0)
+            return Interval(c_lo, c_hi)
+        else
+            c_lo = IntervalArithmetic.@round_down(a.hi^n)
+            c_hi = IntervalArithmetic.@round_up(a.lo^n)
+            if a.lo ≥ 0
+                c_hi == 0 && return Interval(c_lo, nextfloat(c_hi))
+                a.lo == 0 && return Interval(c_lo, Inf)
+                return Interval(c_lo, c_hi)
+
+            elseif a.hi ≤ 0
+                c_lo == 0 && return Interval(prevfloat(c_lo), c_hi)
+                a.hi == 0 && return Interval(-Inf,c_hi)
+                return Interval(c_lo, c_hi)
+            else
+                return entireinterval(a)
+            end
+        end
+
+    else # even power
+        if n > 0
+            if a.lo ≥ 0
+                c_lo = @round_down(a.lo^n)
+                c_hi = @round_up(a.hi^n)
+                return Interval(c_lo, c_hi)
+            elseif a.hi ≤ 0
+                c_lo = IntervalArithmetic.@round_down(a.hi^n)
+                c_hi = IntervalArithmetic.@round_up(a.lo^n)
+                return Interval(c_lo, c_hi)
+            else
+                return @round(mig(a)^n, mag(a)^n)
+            end
+
+        else
+            if a.lo ≥ 0
+                c_lo = @round_down(a.hi^n)
+                c_hi = @round_up(a.lo^n)
+                c_hi == 0 && return Interval(c_lo, nextfloat(c_hi))
+                return Interval(c_lo, c_hi)
+            elseif a.hi ≤ 0
+                c_lo = @round_down(a.lo^n)
+                c_hi = @round_up(a.hi^n)
+                c_hi == 0 && return Interval(c_lo, nextfloat(c_hi))
+                return Interval(c_lo, c_hi)
+            else
+                return @round(mag(a)^n, mig(a)^n)
+            end
+        end
+    end
+end
+
+function ^(a::Interval{Float64}, x::Float64)
+
+    domain = Interval(0, Inf)
+
+    if a == zero(a)
+        a = a ∩ domain
+        x > zero(x) && return zero(a)
+        return emptyinterval(a)
+    end
+
+    isinteger(x) && return a^(round(Int, x))
+    x == 0.5 && return sqrt(a)
+
+    a = a ∩ domain
+    (isnan(x) || isempty(a)) && return emptyinterval(a)
+
+    xx = @interval(x)
+    lo = @round(a.lo^xx.lo, a.lo^xx.lo)
+    lo1 = @round(a.lo^xx.hi, a.lo^xx.hi)
+    hi = @round(a.hi^xx.lo, a.hi^xx.lo)
+    hi1 = @round(a.hi^xx.hi, a.hi^xx.hi)
+
+    lo = hull(lo, lo1)
+    hi = hull(hi, hi1)
+
+    return hull(lo, hi)
+end
+
+function ^(a::Interval{Float64}, x::Interval)
+    domain = Interval(0, Inf)
+
+    a = a ∩ domain
+
+    (isempty(x) || isempty(a)) && return emptyinterval(a)
+
+    lo1 = a^x.lo
+    lo2 = a^x.hi
+    lo1 = hull(lo1, lo2)
+
+    hi1 = a^x.lo
+    hi2 = a^x.hi
+    hi1 = hull(hi1, hi2)
+
+    hull(lo1, hi1)
 end
 
 
 # Integer power:
-
-# overwrite new behaviour for small integer powers:
-# ^{p}(x::IntervalArithmetic.Interval, ::Type{Val{p}}) = x^p
 
 function ^(a::Interval{BigFloat}, n::Integer)
     isempty(a) && return a
@@ -174,7 +280,7 @@ doc"""
     pow(x::Interval, n::Integer)
 
 A faster implementation of `x^n` using `power_by_squaring`.
-`pow(x, n) will usually return an interval that is slightly larger than that calculated by `x^n`, but is guaranteed to be a correct
+`pow(x, n)` will usually return an interval that is slightly larger than that calculated by `x^n`, but is guaranteed to be a correct
 enclosure when using multiplication with correct rounding.
 """
 function pow{T}(x::Interval{T}, n::Integer)  # fast integer power

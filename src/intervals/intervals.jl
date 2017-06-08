@@ -23,7 +23,12 @@ immutable Interval{T<:Real} <: AbstractInterval
             throw(ArgumentError("Must have a ≤ b to construct Interval(a, b)."))
         end
 
-
+        # See Page 6 of ITF-1788, definition of "bounds"
+        if a == Inf
+            return new(prevfloat(a), b)
+        elseif b == -Inf
+            return new(a, nextfloat(b))
+        end
 
         new(a, b)
     end
