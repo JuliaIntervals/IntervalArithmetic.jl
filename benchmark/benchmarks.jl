@@ -34,13 +34,6 @@ end
     end
 end
 
-@benchgroup "Elementary functions" begin
-    a = Interval(1, 2)
-
-    for op in (exp, log, sin, tan)
-        @bench string(op) $(op)($a)
-    end
-end
 
 @benchgroup "Sum" begin
 
