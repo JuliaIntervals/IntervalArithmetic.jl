@@ -26,3 +26,12 @@ end
         @bench string(op) $(op)($a, $b)
     end
 end
+
+@benchgroup "Sum" begin
+
+    sum1(N) = sum(Interval(i, i+1) for i in 1:N)
+    sum2(N) = (one = Interval(1.0); sum(one / (i^2) for i in 1:N) )
+
+    @bench "Sum1" sum1(1000)
+    @bench "Sum2" sum2(1000)
+end
