@@ -39,7 +39,6 @@ using Base.Test
     @test @interval(1e300) == Interval(9.999999999999999e299, 1.0e300)
     @test @interval(-1e307) == Interval(-1.0000000000000001e307, -1.0e307)
     @test @interval(Inf) == Interval(realmax(), Inf)
-    @test Interval(-Inf, -Inf) == Interval(-Inf, -realmax())
 
     # Disallowed conversions with a > b
 
@@ -54,7 +53,9 @@ using Base.Test
     @test_throws ArgumentError @interval(big(1), 1//10)
     @test_throws ArgumentError @interval(1, 0.1)
     @test_throws ArgumentError @interval(big(1), big(0.1))
-
+    @test_throws ArgumentError Interval(Inf)
+    @test_throws ArgumentError Interval(-Inf, -Inf)
+    @test_throws ArgumentError Interval(Inf, Inf)
 
     # Conversion to Interval without type
     @test convert(Interval, 1) == Interval(1.0)

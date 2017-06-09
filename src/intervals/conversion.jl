@@ -25,10 +25,18 @@ function convert{T<:AbstractFloat, S<:Real}(::Type{Interval{T}}, x::S)
 end
 
 function convert{T<:AbstractFloat}(::Type{Interval{T}}, x::Float64)
-    isinf(x) && return Interval{T}(x)
-    x_str = string(x)
-    return Interval{T}(parse(T, x_str, RoundDown),
-        parse(T, x_str, RoundUp))
+    isinf(x) && return Interval{T}(prevfloat(x), nextfloat(x))
+
+    xrat = rationalize(x)
+
+    # This prevents that xrat returns a 0//1 when x is very small
+    # or 1//0 when x is too large but finite
+    if (x != zero(x) && xrat == 0) || isinf(xrat)
+        xstr = string(x)
+        return Interval(parse(T, xstr, RoundDown), parse(T, xstr, RoundUp))
+    end
+
+    return convert(Interval{T}, xrat)
 end
 
 convert{T<:AbstractFloat}(::Type{Interval{T}}, x::Interval{T}) = x

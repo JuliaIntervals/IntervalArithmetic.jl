@@ -25,13 +25,13 @@ immutable Interval{T<:Real} <: AbstractInterval
 
         # The IEEE Std 1788-2015 states that a < Inf and b > -Inf;
         # see page 6, "bounds".
-        if a == Inf
-            return new(prevfloat(a), b)
-        elseif b == -Inf
-            return new(a, nextfloat(b))
+        if a == Inf || b == -Inf
+            throw(ArgumentError(
+                "Must satisfy `a < Inf` and `b > -Inf` to construct Interval(a, b)."))
         end
 
-        new(a, b)
+        return new(a,b)
+
     end
 end
 
