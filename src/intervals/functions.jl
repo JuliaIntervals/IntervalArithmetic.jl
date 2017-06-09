@@ -101,10 +101,31 @@ function ^(a::Interval{BigFloat}, x::BigFloat)
 
     xx = convert(Interval{BigFloat}, x)
 
-    lo = @round(a.lo^xx.lo, a.lo^xx.lo)
-    lo1 = @round(a.lo^xx.hi, a.lo^xx.hi)
-    hi = @round(a.hi^xx.lo, a.hi^xx.lo)
-    hi1 = @round(a.hi^xx.hi, a.hi^xx.hi)
+    # @round() can't be used directly, because both arguments may
+    # Inf or -Inf, which throws an error
+    # lo = @round(a.lo^xx.lo, a.lo^xx.lo)
+    lolod = @round_down(a.lo^xx.lo)
+    lolou = @round_up(a.lo^xx.lo)
+    lo = (lolod == Inf || lolou == -Inf) ?
+        wideinterval(lolod) : Interval(lolod, lolou)
+
+    # lo1 = @round(a.lo^xx.hi, a.lo^xx.hi)
+    lohid = @round_down(a.lo^xx.hi)
+    lohiu = @round_up(a.lo^xx.hi)
+    lo1 = (lohid == Inf || lohiu == -Inf) ?
+        wideinterval(lohid) : Interval(lohid, lohiu)
+
+    # hi = @round(a.hi^xx.lo, a.hi^xx.lo)
+    hilod = @round_down(a.hi^xx.lo)
+    hilou = @round_up(a.hi^xx.lo)
+    hi = (hilod == Inf || hilou == -Inf) ?
+        wideinterval(hilod) : Interval(hilod, hilou)
+
+    # hi1 = @round(a.hi^xx.hi, a.hi^xx.hi)
+    hihid = @round_down(a.hi^xx.hi)
+    hihiu = @round_up(a.hi^xx.hi)
+    hi1 = (hihid == Inf || hihiu == -Inf) ?
+        wideinterval(hihid) : Interval(hihid, hihiu)
 
     lo = hull(lo, lo1)
     hi = hull(hi, hi1)

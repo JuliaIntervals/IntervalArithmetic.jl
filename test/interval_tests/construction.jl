@@ -38,7 +38,8 @@ using Base.Test
     # a < Inf and b > -Inf
     @test @interval(1e300) == Interval(9.999999999999999e299, 1.0e300)
     @test @interval(-1e307) == Interval(-1.0000000000000001e307, -1.0e307)
-    @test @interval(Inf) == Interval(realmax(), Inf)
+    @test @interval(Inf) == IntervalArithmetic.wideinterval(Inf)
+    @test IntervalArithmetic.wideinterval(-big(Inf)) == Interval(-Inf, nextfloat(big(-Inf)))
 
     # Disallowed conversions with a > b
 

@@ -19,13 +19,17 @@ convert{T<:AbstractFloat}(::Type{Interval{T}}, x::AbstractString) =
     parse(Interval{T}, x)
 
 function convert{T<:AbstractFloat, S<:Real}(::Type{Interval{T}}, x::S)
+    isinf(x) && return wideinterval(T(x))
+    # isinf(x) && return Interval{T}(prevfloat(T(x)), nextfloat(T(x)))
+
     Interval{T}( T(x, RoundDown), T(x, RoundUp) )
     # the rounding up could be done as nextfloat of the rounded down one?
     # use @round_up and @round_down here?
 end
 
 function convert{T<:AbstractFloat}(::Type{Interval{T}}, x::Float64)
-    isinf(x) && return Interval{T}(prevfloat(x), nextfloat(x))
+    isinf(x) && return wideinterval(x)#Interval{T}(prevfloat(T(x)), nextfloat(T(x)))
+    # isinf(x) && return Interval{T}(prevfloat(x), nextfloat(x))
 
     xrat = rationalize(x)
 
