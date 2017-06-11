@@ -194,33 +194,63 @@ end
 end
 
 @testset "Fast power" begin
-    x = 1..2
-    @test pow(x, 2) == pow(-x, 2) == Interval(1, 4)
-    @test pow(-x, 3) == Interval(-8.0, -1.0)
 
-    @test pow(-1..2, 2) == 0..4
-    @test pow(-1..2, 3) == -1..8
-    @test pow(-1..2, 4) == 0..16
+    @testset "Fast integer powers" begin
+        x = 1..2
+        @test pow(x, 2) == pow(-x, 2) == Interval(1, 4)
+        @test pow(-x, 3) == Interval(-8.0, -1.0)
 
-    @test pow(@biginterval(-1, 2), 2) == 0..4
-    @test pow(@biginterval(-1, 2), 3) == -1..8
-    @test pow(@biginterval(1, 2), 2) == 1..4
+        @test pow(-1..2, 2) == 0..4
+        @test pow(-1..2, 3) == -1..8
+        @test pow(-1..2, 4) == 0..16
 
+        @test pow(@biginterval(-1, 2), 2) == 0..4
+        @test pow(@biginterval(-1, 2), 3) == -1..8
+        @test pow(@biginterval(1, 2), 2) == 1..4
 
-    x = @interval(pi)
-    @test x^100 ⊆ pow(x, 100)
-    @test x^50 ⊆ pow(x, 50)
-    @test isinterior(x^50, pow(x, 50))
-end
+        x = @interval(pi)
+        @test x^100 ⊆ pow(x, 100)
+        @test x^50 ⊆ pow(x, 50)
+        @test isinterior(x^50, pow(x, 50))
 
-@testset "Behaviour near infinity" begin
-    a = Interval(1e300)
-    b = Interval(1e9)
+        x = Interval(2)
+        @test pow(x, 2000) == Interval(realmax(), Inf)
+    end
 
-    @test a * b == Interval(realmax(), Inf)
+    @testset "Fast real powers" begin
+        x = 1..2
+        @test pow(x, 0.5) == Interval(1.0, 1.4142135623730951)
+        @test pow(x, 0.5) == x^0.5
+
+        @test pow(x, 17.3) != x^17.3
+
+        y = 2..3
+        @test pow(y, -0.5) == Interval(0.5773502691896257, 0.7071067811865476)
+
+        y = -2..3
+        @test pow(y, 2.1) == Interval(0.0, 10.045108566305146)
+        @test pow(y, 2.1) != y^2.1
+        @test y^2.1 ⊆ pow(y, 2.1)
+    end
+
+    @testset "Fast interval powers" begin
+        x = 1..2
+        @test x^Interval(-1.5, 2.5) == Interval(0.35355339059327373, 5.656854249492381)
+
+        y = -2..3
+        @test pow(y, 2.1) == Interval(0.0, 10.045108566305146)
+        @test pow(y, Interval(-2, 3)) == Interval(0, Inf)
+
+        @test pow(y, @interval(2.1)) == Interval(0.0, 10.045108566305146)
+    end
 
     # comment out for now:
-    # a = Interval{Float32}(1e38)
-    # b = Interval{Float32}(1e2)
-    # @test a * b == Interval{Float32}(realmax(Float32), Inf)
+    #=
+    @testset "Float32 intervals" begin
+
+        a = Interval{Float32}(1e38)
+        b = Interval{Float32}(1e2)
+        @test a * b == Interval{Float32}(realmax(Float32), Inf)
+    end
+    =#
 end
