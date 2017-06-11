@@ -35,7 +35,7 @@ export
     diam, radius, mid, mag, mig, hull,
     emptyinterval, ∅, ∞, isempty, isinterior, isdisjoint, ⪽,
     precedes, strictprecedes, ≺,
-    entireinterval, isentire, nai, isnai, isthin, iscommon,
+    entireinterval, isentire, nai, isnai, isthin, iscommon, isatomic,
     widen, inf, sup,
     parameters, eps, dist,
     pi_interval,

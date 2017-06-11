@@ -57,3 +57,5 @@ widen{T<:AbstractFloat}(x::Interval{T}) = Interval(prevfloat(x.lo), nextfloat(x.
 Returns the interval Interval( prevfloat(x), nextfloat(x) ).
 """
 wideinterval{T<:AbstractFloat}(x::T) = Interval( prevfloat(x), nextfloat(x) )
+
+isatomic(x::Interval) = isempty(x) || (x.hi == x.lo) || (x.hi == nextfloat(x.lo))
