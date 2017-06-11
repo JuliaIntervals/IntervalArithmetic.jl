@@ -50,3 +50,10 @@ end
 
 doc"`widen(x)` widens the lowest and highest bounds of `x` to the previous and next representable floating-point numbers, respectively."
 widen{T<:AbstractFloat}(x::Interval{T}) = Interval(prevfloat(x.lo), nextfloat(x.hi))
+
+"""
+    wideinterval(x::AbstractFloat)
+
+Returns the interval Interval( prevfloat(x), nextfloat(x) ).
+"""
+wideinterval{T<:AbstractFloat}(x::T) = Interval( prevfloat(x), nextfloat(x) )

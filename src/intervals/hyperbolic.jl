@@ -48,11 +48,14 @@ function atanh(a::Interval{BigFloat})
 
     isempty(a) && return a
 
-    result = @round(atanh(a.lo), atanh(a.hi))
+    res_lo = @round_down(atanh(a.lo))
+    res_hi = @round_up(atanh(a.hi))
 
-    (isinf(result.lo) && isinf(result.hi) && isnan(diam(result))) && return emptyinterval(a)  # IEEE 1788-2015 does not allow intervals consisting only of ∞, i.e. Interval(∞,∞) and Interval(-∞,-∞)
+    # The IEEE Std 1788-2015 does not allow intervals like of the
+    # form Interval(∞,∞) and Interval(-∞,-∞)
+    (res_lo == res_hi == Inf || res_lo == res_hi == -Inf) && return emptyinterval(a)  # IEEE 1788-2015 does not allow intervals consisting only of ∞, i.e. Interval(∞,∞) and Interval(-∞,-∞)
 
-    return result
+    return Interval(res_lo, res_hi)
 end
 
 # Float64 versions of functions missing from CRlibm:

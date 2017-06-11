@@ -18,14 +18,20 @@ immutable Interval{T<:Real} <: AbstractInterval
         end
 
         if a > b
-            (isinf(a) && isinf(b)) && return new(a, b)  # empty interval = [∞,-∞]
-
+            # empty interval = [∞,-∞]
+            (isinf(a) && isinf(b)) && return new(a, b)
             throw(ArgumentError("Must have a ≤ b to construct Interval(a, b)."))
         end
 
+        # The IEEE Std 1788-2015 states that a < Inf and b > -Inf;
+        # see page 6, "bounds".
+        if a == Inf || b == -Inf
+            throw(ArgumentError(
+                "Must satisfy `a < Inf` and `b > -Inf` to construct Interval(a, b)."))
+        end
 
+        return new(a,b)
 
-        new(a, b)
     end
 end
 

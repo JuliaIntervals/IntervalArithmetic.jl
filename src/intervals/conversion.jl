@@ -2,12 +2,6 @@
 
 ## Promotion rules
 
-# Avoid ambiguity with ForwardDiff:
-
-# promote_rule{T<:Real, N, R<:Real}(::Type{Interval{T}},
-#     ::Type{ForwardDiff.Dual{N,R}}) = ForwardDiff.Dual{N, Interval{promote_type(T,R)}}
-
-
 promote_rule{T<:Real, S<:Real}(::Type{Interval{T}}, ::Type{Interval{S}}) =
     Interval{promote_type(T, S)}
 
@@ -25,21 +19,29 @@ convert{T<:AbstractFloat}(::Type{Interval{T}}, x::AbstractString) =
     parse(Interval{T}, x)
 
 function convert{T<:AbstractFloat, S<:Real}(::Type{Interval{T}}, x::S)
+    isinf(x) && return wideinterval(T(x))
+    # isinf(x) && return Interval{T}(prevfloat(T(x)), nextfloat(T(x)))
+
     Interval{T}( T(x, RoundDown), T(x, RoundUp) )
     # the rounding up could be done as nextfloat of the rounded down one?
     # use @round_up and @round_down here?
 end
 
 function convert{T<:AbstractFloat}(::Type{Interval{T}}, x::Float64)
-    II = convert(Interval{T}, rationalize(x))
-    # This prevents that rationalize(x) returns a zero when x is very small
-    if x != zero(x) && II == zero(Interval{T})
-        return Interval(parse(T, string(x), RoundDown),
-                        parse(T, string(x), RoundUp))
-    end
-    II
-end
+    isinf(x) && return wideinterval(x)#Interval{T}(prevfloat(T(x)), nextfloat(T(x)))
+    # isinf(x) && return Interval{T}(prevfloat(x), nextfloat(x))
 
+    xrat = rationalize(x)
+
+    # This prevents that xrat returns a 0//1 when x is very small
+    # or 1//0 when x is too large but finite
+    if (x != zero(x) && xrat == 0) || isinf(xrat)
+        xstr = string(x)
+        return Interval(parse(T, xstr, RoundDown), parse(T, xstr, RoundUp))
+    end
+
+    return convert(Interval{T}, xrat)
+end
 
 convert{T<:AbstractFloat}(::Type{Interval{T}}, x::Interval{T}) = x
 
