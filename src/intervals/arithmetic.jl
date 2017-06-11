@@ -226,8 +226,8 @@ end
 
 
 # Infimum and supremum of an interval
-infimum(a::Interval) = a.lo
-supremum(a::Interval) = a.hi
+inf(a::Interval) = a.lo
+sup(a::Interval) = a.hi
 
 
 ## Functions needed for generic linear algebra routines to work

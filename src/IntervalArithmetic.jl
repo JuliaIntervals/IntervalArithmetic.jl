@@ -36,7 +36,7 @@ export
     emptyinterval, ∅, ∞, isempty, isinterior, isdisjoint, ⪽,
     precedes, strictprecedes, ≺,
     entireinterval, isentire, nai, isnai, isthin, iscommon,
-    widen, infimum, supremum,
+    widen, inf, sup,
     parameters, eps, dist,
     pi_interval,
     midpoint_radius, interval_from_midpoint_radius,

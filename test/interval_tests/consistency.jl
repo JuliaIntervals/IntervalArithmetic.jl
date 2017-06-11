@@ -150,13 +150,13 @@ c = @interval(0.25, 4.0)
         @test isnai(nai())
         @test !(isnai(a))
 
-        @test infimum(a) == a.lo
-        @test supremum(a) == a.hi
-        @test infimum(emptyinterval(a)) == Inf
-        @test supremum(emptyinterval(a)) == -Inf
-        @test infimum(entireinterval(a)) == -Inf
-        @test supremum(entireinterval(a)) == Inf
-        @test isnan(supremum(nai(BigFloat)))
+        @test inf(a) == a.lo
+        @test sup(a) == a.hi
+        @test inf(emptyinterval(a)) == Inf
+        @test sup(emptyinterval(a)) == -Inf
+        @test inf(entireinterval(a)) == -Inf
+        @test sup(entireinterval(a)) == Inf
+        @test isnan(sup(nai(BigFloat)))
     end
 
     @testset "mid" begin
