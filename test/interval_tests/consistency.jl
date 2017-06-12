@@ -313,4 +313,15 @@ c = @interval(0.25, 4.0)
         @test b^@interval(0.3) == Interval(1.3903891703159093, 1.5157165665103982)
     end
 
+    @testset "isatomic" begin
+        @test isatomic(Interval(1))
+        @test isatomic(Interval(2.3, 2.3))
+        @test isatomic(emptyinterval())
+        @test isatomic(@interval(∞))  # Interval(realmax(), Inf)
+
+        @test !isatomic(1..2)
+        @test !isatomic(Interval(1, nextfloat(1.0, 2)))
+
+    end
+
 end
