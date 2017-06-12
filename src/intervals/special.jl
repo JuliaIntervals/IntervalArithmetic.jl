@@ -61,7 +61,7 @@ wideinterval{T<:AbstractFloat}(x::T) = Interval( prevfloat(x), nextfloat(x) )
 """
     isatomic(x::Interval)
 
-Check is an interval `x` is an *atomic* interval, i.e. is unable to be split.
-This happens when the interval is empty, or when the upper bound equals the lower bound or the `nextfloat` of the lower bound.
+Check whether an interval `x` is *atomic*, i.e. is unable to be split.
+This occurs when the interval is empty, or when the upper bound equals the lower bound or the `nextfloat` of the lower bound.
 """
 isatomic(x::Interval) = isempty(x) || (x.hi == x.lo) || (x.hi == nextfloat(x.lo))

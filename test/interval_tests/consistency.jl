@@ -317,7 +317,7 @@ c = @interval(0.25, 4.0)
         @test isatomic(Interval(1))
         @test isatomic(Interval(2.3, 2.3))
         @test isatomic(emptyinterval())
-        @test isatomic(Interval(realmax(), ∞))
+        @test isatomic(@interval(∞))  # Interval(realmax(), Inf)
 
         @test !isatomic(1..2)
         @test !isatomic(Interval(1, nextfloat(1.0, 2)))
