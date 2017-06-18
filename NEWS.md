@@ -7,9 +7,9 @@
 
 ### Performance
 
-- Between 2x and 3x speedup for basic arithmetic operations, using [FastRounding.jl](https://github.com/JeffreySarnoff/FastRounding.jl) [#25] (https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/48)
+- Between 2x and 3x speedup for basic arithmetic operations, using [FastRounding.jl](https://github.com/JeffreySarnoff/FastRounding.jl) [#25](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/48)
 
-- A fast version of the power function is available, with the name `pow` [#42] https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/42
+- A fast version of the power function is available, with the name `pow` [#42] (https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/42)
 
 
 ### API changes:
