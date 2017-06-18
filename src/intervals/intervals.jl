@@ -5,9 +5,9 @@
 
 ## Interval type
 
-abstract AbstractInterval <: Real
+abstract AbstractInterval{T<:Real} <: Real
 
-immutable Interval{T<:Real} <: AbstractInterval
+immutable Interval{T<:Real} <: AbstractInterval{T}
     lo :: T
     hi :: T
 
