@@ -7,7 +7,7 @@
 
 ### Performance
 
-- Between 2x and 3x speedup for basic arithmetic operations, using [FastRounding.jl](https://github.com/JeffreySarnoff/FastRounding.jl) [#25](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/48)
+- Between 2x and 3x speedup for basic arithmetic operations, using [FastRounding.jl](https://github.com/JeffreySarnoff/FastRounding.jl) [#25](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/25)
 
 - A fast version of the power function is available, with the name `pow` 
 [#42](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/42)
@@ -16,11 +16,13 @@
 ### API changes:
 
 - The `Interval` rounding mode may be changed *only on Julia 0.6 and later* using e.g.
-`setrounding(Interval, :accurate)`. The mode on Julia 0.5 is fixed to `:tight`.
+`setrounding(Interval, :accurate)`. The mode on Julia 0.5 is fixed to `:tight` 
+[#25](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/25)
 
 - Renamed `infimum` -> `inf` and `supremum` -> `sup` [#48](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/48)
 
-- The operators `..` and `±` for interval creation are now fast, but may give results that are slightly wider.
+- The operators `..` and `±` for interval creation are now fast, but may give results that are slightly wider 
+[#37]([#30](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/30)
 
 ### v0.9.1
 
