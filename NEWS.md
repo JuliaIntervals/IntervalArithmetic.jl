@@ -2,6 +2,9 @@
 
 ## v0.10
 
+### Supported versions of Julia
+- This is the last version that will support Julia v0.5.
+
 ### Performance
 
 - Between 2x and 3x speedup for basic arithmetic operations, using [FastRounding.jl](https://github.com/JeffreySarnoff/FastRounding.jl) [#25] (https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/48)
