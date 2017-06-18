@@ -1,6 +1,6 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
-type IntervalParameters
+mutable struct IntervalParameters
 
     precision_type::Type
     precision::Int

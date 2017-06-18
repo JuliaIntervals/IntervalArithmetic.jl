@@ -1,4 +1,4 @@
-type DisplayParameters
+mutable struct DisplayParameters
     format::Symbol
     decorations::Bool
     sigfigs::Int
