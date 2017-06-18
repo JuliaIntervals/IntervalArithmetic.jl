@@ -13,8 +13,15 @@
 
 using IntervalArithmetic
 
-@benchgroup "Constructor" begin
+@benchgroup "Constructors" begin
     @bench "Interval" Interval(1, 2)
+end
+
+@benchgroup "@interval" begin
+
+    @bench "@interval" @interval(0.1)
+    @bench "pi" @interval(pi)
+    @bench "expression" @interval(sin(0.1) + cos(0.2))
 end
 
 @benchgroup "Arithmetic" begin
@@ -24,6 +31,14 @@ end
 
     for op in (+, -, *, /)
         @bench string(op) $(op)($a, $b)
+    end
+end
+
+@benchgroup "Elementary functions" begin
+    a = Interval(1, 2)
+
+    for op in (exp, log, sin, tan)
+        @bench string(op) $(op)($a)
     end
 end
 
