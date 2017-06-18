@@ -11,7 +11,7 @@ struct Interval{T<:Real} <: AbstractInterval{T}
     lo :: T
     hi :: T
 
-    @compat function Interval{T}(a::Real, b::Real) where T
+    function Interval{T}(a::Real, b::Real) where T
 
         if isnan(a) || isnan(b)
             return new(NaN, NaN)  # nai
