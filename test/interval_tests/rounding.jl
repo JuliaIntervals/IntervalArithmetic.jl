@@ -4,33 +4,31 @@ using Base.Test
 
 setformat(:full)
 
-# @testset "Interval rounding" begin
-
-# NB: Due to "world age" problems, the following is not a @testset
+# NB: Due to "world age" problems, do *not* wrap everything in another @testset
+# The `setrounding` commands must be at top level
 
 setrounding(Interval, :slow)
 x = Interval(0.5)
-@testset "Correct rounding" begin
+@testset "Tight, slow rounding by changing rounding mode" begin
+    @test rounding(Interval) == :slow
     @test sin(x) == Interval(0.47942553860420295, 0.479425538604203)
 end
 
 setrounding(Interval, :accurate)
-@testset "Fast rounding" begin
+@testset "Accurate, fast rounding using prevfloat and nextfloat" begin
+    @test rounding(Interval) == :accurate
     @test sin(x) == Interval(0.47942553860420295, 0.47942553860420306)
 end
 
 setrounding(Interval, :none)
 @testset "No rounding" begin
+    @test rounding(Interval) == :none
     @test sin(x) == Interval(0.479425538604203, 0.479425538604203)
 end
 
-setrounding(Interval, :slow)
-@testset "Back to correct rounding" begin
-    @test sin(x) == Interval(0.47942553860420295, 0.479425538604203)
-end
-
 setrounding(Interval, :tight)
-@testset "Back to error-free rounding" begin
+@testset "Tight, fast rounding using FastRounding.jl" begin
+    @test rounding(Interval) == :tight
     @test sin(x) == Interval(0.47942553860420295, 0.479425538604203)
 end
 

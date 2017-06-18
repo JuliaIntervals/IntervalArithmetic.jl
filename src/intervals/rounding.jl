@@ -278,6 +278,8 @@ function setrounding(::Type{Interval}, rounding_type::Symbol)
 
 end
 
+rounding(Interval) = current_rounding_type[]
+
 
 # default: correct rounding
 const current_rounding_type = Symbol[:undefined]
