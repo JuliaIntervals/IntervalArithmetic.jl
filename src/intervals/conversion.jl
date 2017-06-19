@@ -2,32 +2,31 @@
 
 ## Promotion rules
 
-promote_rule{T<:Real, S<:Real}(::Type{Interval{T}}, ::Type{Interval{S}}) =
+promote_rule(::Type{Interval{T}}, ::Type{Interval{S}}) where {T<:Real, S<:Real} =
     Interval{promote_type(T, S)}
 
-promote_rule{T<:Real, S<:Real}(::Type{Interval{T}}, ::Type{S}) =
+promote_rule(::Type{Interval{T}}, ::Type{S}) where {T<:Real, S<:Real} =
     Interval{promote_type(T, S)}
 
-promote_rule{T<:Real}(::Type{BigFloat}, ::Type{Interval{T}}) =
+promote_rule(::Type{BigFloat}, ::Type{Interval{T}}) where T<:Real =
     Interval{promote_type(T, BigFloat)}
 
 
 
 # Floating point intervals:
 
-convert{T<:AbstractFloat}(::Type{Interval{T}}, x::AbstractString) =
+convert(::Type{Interval{T}}, x::AbstractString) where T<:AbstractFloat =
     parse(Interval{T}, x)
 
-function convert{T<:AbstractFloat, S<:Real}(::Type{Interval{T}}, x::S)
+function convert(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:Real}
     isinf(x) && return wideinterval(T(x))
-    # isinf(x) && return Interval{T}(prevfloat(T(x)), nextfloat(T(x)))
 
     Interval{T}( T(x, RoundDown), T(x, RoundUp) )
     # the rounding up could be done as nextfloat of the rounded down one?
     # use @round_up and @round_down here?
 end
 
-function convert{T<:AbstractFloat}(::Type{Interval{T}}, x::Float64)
+function convert(::Type{Interval{T}}, x::Float64) where T<:AbstractFloat
     isinf(x) && return wideinterval(x)#Interval{T}(prevfloat(T(x)), nextfloat(T(x)))
     # isinf(x) && return Interval{T}(prevfloat(x), nextfloat(x))
 
@@ -43,16 +42,16 @@ function convert{T<:AbstractFloat}(::Type{Interval{T}}, x::Float64)
     return convert(Interval{T}, xrat)
 end
 
-convert{T<:AbstractFloat}(::Type{Interval{T}}, x::Interval{T}) = x
+convert(::Type{Interval{T}}, x::Interval{T}) where T<:AbstractFloat = x
 
-function convert{T<:AbstractFloat}(::Type{Interval{T}}, x::Interval)
+function convert(::Type{Interval{T}}, x::Interval) where T<:AbstractFloat
     Interval{T}( T(x.lo, RoundDown), T(x.hi, RoundUp) )
 end
 
 
 # Complex numbers:
-convert{T<:AbstractFloat}(::Type{Interval{T}}, x::Complex{Bool}) = (x == im) ?
-    one(T)*im : throw(ArgumentError("Complex{Bool} not equal to im"))
+convert(::Type{Interval{T}}, x::Complex{Bool}) where T<:AbstractFloat =
+    (x == im) ? one(T)*im : throw(ArgumentError("Complex{Bool} not equal to im"))
 
 
 # Rational intervals
@@ -66,16 +65,16 @@ function convert(::Type{Interval{Rational{BigInt}}}, x::Irrational)
     convert(Interval{Rational{BigInt}}, a)
 end
 
-convert{T<:Integer, S<:Integer}(::Type{Interval{Rational{T}}}, x::S) =
+convert(::Type{Interval{Rational{T}}}, x::S) where {T<:Integer, S<:Integer} =
     Interval(x*one(Rational{T}))
 
-convert{T<:Integer, S<:Integer}(::Type{Interval{Rational{T}}}, x::Rational{S}) =
-    Interval(x*one(Rational{T}))
+convert(::Type{Interval{Rational{T}}}, x::Rational{S}) where
+    {T<:Integer, S<:Integer} = Interval(x*one(Rational{T}))
 
-convert{T<:Integer, S<:Float64}(::Type{Interval{Rational{T}}}, x::S) =
+convert(::Type{Interval{Rational{T}}}, x::S) where {T<:Integer, S<:Float64} =
     Interval(rationalize(T, x))
 
-convert{T<:Integer, S<:BigFloat}(::Type{Interval{Rational{T}}}, x::S) =
+convert(::Type{Interval{Rational{T}}}, x::S) where {T<:Integer, S<:BigFloat} =
     Interval(rationalize(T, x))
 
 

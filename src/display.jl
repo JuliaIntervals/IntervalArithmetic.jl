@@ -1,4 +1,4 @@
-type DisplayParameters
+mutable struct DisplayParameters
     format::Symbol
     decorations::Bool
     sigfigs::Int
@@ -159,8 +159,8 @@ function basic_representation(a::Interval, format=nothing)
     output
 end
 
-function basic_representation{T<:Integer}(a::Interval{Rational{T}},
-    format=nothing)
+function basic_representation(a::Interval{Rational{T}}, format=nothing) where
+        T<:Integer
 
     if isempty(a)
         return "∅"
@@ -195,7 +195,8 @@ end
 
 
 # fall-back:
-representation{T}(a::Interval{T}, format=nothing) = basic_representation(a, format)
+representation(a::Interval{T}, format=nothing) where T =
+    basic_representation(a, format)
 
 function representation(a::Interval{BigFloat}, format=nothing)
 
@@ -216,7 +217,7 @@ function representation(a::Interval{BigFloat}, format=nothing)
 end
 
 
-function representation{T}(a::DecoratedInterval{T}, format=nothing)
+function representation(a::DecoratedInterval{T}, format=nothing) where T
 
     if format == nothing
         format = display_params.format  # default
@@ -254,8 +255,8 @@ end
 
 
 for T in (Interval, DecoratedInterval)
-    @eval show{S}(io::IO, a::$T{S}) = print(io, representation(a))
-    @eval showall{S}(io::IO, a::$T{S}) = print(io, representation(a, :full))
+    @eval show(io::IO, a::$T{S}) where S = print(io, representation(a))
+    @eval showall(io::IO, a::$T{S}) where S = print(io, representation(a, :full))
 end
 
 T = IntervalBox

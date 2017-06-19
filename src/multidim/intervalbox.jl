@@ -1,27 +1,14 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
-if VERSION >= v"0.6.0-dev"
 
-    doc"""An `IntervalBox` is an $N$-dimensional rectangular box, given
-    by a Cartesian product of $N$ `Interval`s.
-    """
-    immutable IntervalBox{N,T} <: StaticVector{N, Interval{T}}
-        data::NTuple{N,Interval{T}}
-    end
-
-else
-    doc"""An `IntervalBox` is an $N$-dimensional rectangular box, given
-    by a Cartesian product of $N$ `Interval`s.
-    """
-    immutable IntervalBox{N,T} <: StaticVector{Interval{T}}
-        data::NTuple{N,Interval{T}}
-    end
-
+doc"""An `IntervalBox` is an $N$-dimensional rectangular box, given
+by a Cartesian product of $N$ `Interval`s.
+"""
+struct IntervalBox{N,T} <: StaticVector{N, Interval{T}}
+    data::NTuple{N,Interval{T}}
 end
 
-# IntervalBox{N,T}(x::NTuple{N,Interval{T}}) = IntervalBox{N,T}(x)
-
-StaticArrays.Size{N,T}(::Type{IntervalBox{N,T}}) = StaticArrays.Size(N) # @pure not needed, I think...
+# StaticArrays.Size{N,T}(::Type{IntervalBox{N,T}}) = StaticArrays.Size(N) # @pure not needed, I think...
 Base.getindex(a::IntervalBox, i::Int) = a.data[i]
 
 
@@ -37,11 +24,14 @@ mid(X::IntervalBox) = mid.(X)
 ## set operations
 
 # TODO: Update to use generator
-⊆{N,T}(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) = all(i->(X[i] ⊆ Y[i]), 1:N)
+⊆(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) where {N,T} =
+    all(i->(X[i] ⊆ Y[i]), 1:N)
 # all(X[i] ⊆ Y[i] for i in 1:N)  # on Julia 0.6
 
-∩{N,T}(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) = IntervalBox(ntuple(i -> X[i] ∩ Y[i], Val{N}))
-∪{N,T}(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) = IntervalBox(ntuple(i -> X[i] ∪ Y[i], Val{N}))
+∩(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) where {N,T} =
+    IntervalBox(ntuple(i -> X[i] ∩ Y[i], Val{N}))
+∪(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) where {N,T} =
+    IntervalBox(ntuple(i -> X[i] ∪ Y[i], Val{N}))
 
 #=
 On Julia 0.6 can now write
@@ -54,7 +44,8 @@ isempty(X::IntervalBox) = any(isempty, X)
 # TODO: Replace with generator in 0.5:
 diam(X::IntervalBox) = maximum([diam(x) for x in X])
 
-emptyinterval{N,T}(X::IntervalBox{N,T}) = IntervalBox(ntuple(i->emptyinterval(T), Val{N}))
+emptyinterval(X::IntervalBox{N,T}) where {N,T} =
+    IntervalBox(ntuple(i->emptyinterval(T), Val{N}))
 
 
 import Base.×

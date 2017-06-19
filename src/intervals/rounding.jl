@@ -27,7 +27,7 @@ In Julia v0.6 and later (but *not* in Julia v0.5), this automatically redefines 
 
 
 doc"""Interval rounding trait type"""
-immutable IntervalRounding{T} end
+struct IntervalRounding{T} end
 
 # Functions that are the same for all rounding types:
 @eval begin

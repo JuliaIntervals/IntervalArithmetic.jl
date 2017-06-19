@@ -50,13 +50,14 @@ Returns the intersection of the intervals `a` and `b`, considered as
 (extended) sets of real numbers. That is, the set that contains
 the points common in `a` and `b`.
 """
-function intersect{T}(a::Interval{T}, b::Interval{T})
+function intersect(a::Interval{T}, b::Interval{T}) where T
     isdisjoint(a,b) && return emptyinterval(T)
 
     Interval(max(a.lo, b.lo), min(a.hi, b.hi))
 end
 # Specific promotion rule for intersect:
-intersect{T,S}(a::Interval{T}, b::Interval{S}) = intersect(promote(a, b)...)
+intersect(a::Interval{T}, b::Interval{S}) where {T,S} =
+    intersect(promote(a, b)...)
 
 
 ## Hull
@@ -67,9 +68,9 @@ Returns the "interval hull" of the intervals `a` and `b`, considered as
 (extended) sets of real numbers, i.e. the smallest interval that contains
 all of `a` and `b`.
 """
-hull{T}(a::Interval{T}, b::Interval{T}) = Interval{T}(min(a.lo, b.lo), max(a.hi, b.hi))
-
-hull{T,S}(a::Interval{T}, b::Interval{S}) = hull(promote(a, b)...)
+hull(a::Interval, b::Interval) = Interval(min(a.lo, b.lo), max(a.hi, b.hi))
+# 
+# hull{T,S}(a::Interval{T}, b::Interval{S}) = hull(promote(a, b)...)
 
 """
     union(a, b)
@@ -78,9 +79,9 @@ hull{T,S}(a::Interval{T}, b::Interval{S}) = hull(promote(a, b)...)
 Returns the union (convex hull) of the intervals `a` and `b`; it is equivalent
 to `hull(a,b)`.
 """
-union{T}(a::Interval{T}, b::Interval{T}) = hull(a, b)
-
-union{T,S}(a::Interval{T}, b::Interval{S}) = union(promote(a, b)...)
+union(a::Interval, b::Interval) = hull(a, b)
+#
+# union(a::Interval, b::Interval) = union(promote(a, b)...)
 
 
 doc"""

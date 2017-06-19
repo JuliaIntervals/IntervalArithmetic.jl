@@ -1,9 +1,9 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
-half_pi{T}(::Type{T}) = pi_interval(T) / 2
-half_pi{T<:AbstractFloat}(x::T) = half_pi(T)
+half_pi(::Type{T}) where T = pi_interval(T) / 2
+half_pi(x::T) where T<:AbstractFloat = half_pi(T)
 
-two_pi{T}(::Type{T})  = pi_interval(T) * 2
+two_pi(::Type{T})  where T = pi_interval(T) * 2
 
 range_atan2{T<:Real}(::Type{T}) = Interval(-(pi_interval(T).hi), pi_interval(T).hi)
 half_range_atan2{T}(::Type{T}) = (temp = half_pi(T); Interval(-(temp.hi), temp.hi) )
@@ -24,7 +24,7 @@ function find_quadrants(x::AbstractFloat)
     (floor(temp.lo), floor(temp.hi))
 end
 
-function sin{T}(a::Interval{T})
+function sin(a::Interval{T}) where T
     isempty(a) && return a
 
     whole_range = Interval{T}(-1, 1)
@@ -68,7 +68,7 @@ function sin{T}(a::Interval{T})
 end
 
 
-function cos{T}(a::Interval{T})
+function cos(a::Interval{T}) where T
     isempty(a) && return a
 
     whole_range = Interval(-one(T), one(T))
@@ -110,7 +110,7 @@ function cos{T}(a::Interval{T})
 end
 
 
-function tan{T}(a::Interval{T})
+function tan(a::Interval{T}) where T
     isempty(a) && return a
 
     diam(a) > pi_interval(T).lo && return entireinterval(a)
@@ -139,7 +139,7 @@ function tan{T}(a::Interval{T})
     return @round(tan(a.lo), tan(a.hi))
 end
 
-function asin{T}(a::Interval{T})
+function asin(a::Interval{T}) where T
 
     domain = Interval(-one(T), one(T))
     a = a ∩ domain
@@ -149,7 +149,7 @@ function asin{T}(a::Interval{T})
     return @round(asin(a.lo), asin(a.hi))
 end
 
-function acos{T}(a::Interval{T})
+function acos(a::Interval{T}) where T
 
     domain = Interval(-one(T), one(T))
     a = a ∩ domain
@@ -160,7 +160,7 @@ function acos{T}(a::Interval{T})
 end
 
 
-function atan{T}(a::Interval{T})
+function atan(a::Interval{T}) where T
     isempty(a) && return a
 
     return @round(atan(a.lo), atan(a.hi))

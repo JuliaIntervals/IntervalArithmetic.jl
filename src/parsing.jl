@@ -6,7 +6,7 @@ doc"""
 Parse a string of the form `"[a, b]_dec"` as a `DecoratedInterval`
 with decoration `dec`.
 """
-function parse{T}(::Type{DecoratedInterval{T}}, s::AbstractString)
+function parse(::Type{DecoratedInterval{T}}, s::AbstractString) where T
     m = match(r"(\[.*\])(\_.*)?", s)
 
     if m == nothing  # matched
@@ -38,7 +38,7 @@ Parse a string as an interval. Formats allowed include:
 - "[3.5, 7.2]"
 - "[-0x1.3p-1, 2/3]"  # use numerical expressions
 """
-function parse{T}(::Type{Interval{T}}, s::AbstractString)
+function parse(::Type{Interval{T}}, s::AbstractString) where T
     if !(contains(s, "["))  # string like "3.1"
 
         m = match(r"(.*)±(.*)", s)

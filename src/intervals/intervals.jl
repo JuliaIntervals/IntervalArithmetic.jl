@@ -5,13 +5,13 @@
 
 ## Interval type
 
-abstract AbstractInterval{T<:Real} <: Real
+abstract type AbstractInterval{T} <: Real end
 
-immutable Interval{T<:Real} <: AbstractInterval{T}
+struct Interval{T<:Real} <: AbstractInterval{T}
     lo :: T
     hi :: T
 
-    function Interval(a::Real, b::Real)
+    function Interval{T}(a::Real, b::Real) where T
 
         if isnan(a) || isnan(b)
             return new(NaN, NaN)  # nai
@@ -38,24 +38,24 @@ end
 
 ## Outer constructors
 
-Interval{T<:Real}(a::T, b::T) = Interval{T}(a, b)
-Interval{T<:Real}(a::T) = Interval(a, a)
+Interval(a::T, b::T) where T<:Real = Interval{T}(a, b)
+Interval(a::T) where T<:Real = Interval(a, a)
 Interval(a::Tuple) = Interval(a...)
-Interval{T<:Real, S<:Real}(a::T, b::S) = Interval(promote(a,b)...)
+Interval(a::T, b::S) where {T<:Real, S<:Real} = Interval(promote(a,b)...)
 
 ## Concrete constructors for Interval, to effectively deal only with Float64,
 # BigFloat or Rational{Integer} intervals.
-Interval{T<:Integer}(a::T, b::T) = Interval(float(a), float(b))
-Interval{T<:Irrational}(a::T, b::T) = Interval(float(a), float(b))
+Interval(a::T, b::T) where T<:Integer = Interval(float(a), float(b))
+Interval(a::T, b::T) where T<:Irrational = Interval(float(a), float(b))
 
-eltype{T<:Real}(x::Interval{T}) = T
+eltype(x::Interval{T}) where T<:Real = T
 
 Interval(x::Interval) = x
 Interval(x::Complex) = Interval(real(x)) + im*Interval(imag(x))
 
-(::Type{Interval{T}}){T}(x) = Interval(convert(T, x))
+Interval{T}(x) where T = Interval(convert(T, x))
 
-(::Type{Interval{T}}){T}(x::Interval) = convert(Interval{T}, x)
+Interval{T}(x::Interval) where T = convert(Interval{T}, x)
 
 ## Include files
 include("special.jl")

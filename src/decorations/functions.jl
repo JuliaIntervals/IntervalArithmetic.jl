@@ -1,10 +1,10 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
 # zero, one
-zero{T<:Real}(a::DecoratedInterval{T}) = DecoratedInterval(zero(T))
-zero{T<:Real}(::Type{DecoratedInterval{T}}) = DecoratedInterval(zero(T))
-one{T<:Real}(a::DecoratedInterval{T}) = DecoratedInterval(one(T))
-one{T<:Real}(::Type{DecoratedInterval{T}}) = DecoratedInterval(one(T))
+zero(a::DecoratedInterval{T}) where T<:Real = DecoratedInterval(zero(T))
+zero(::Type{DecoratedInterval{T}}) where T<:Real = DecoratedInterval(zero(T))
+one(a::DecoratedInterval{T}) where T<:Real = DecoratedInterval(one(T))
+one(::Type{DecoratedInterval{T}}) where T<:Real = DecoratedInterval(one(T))
 
 
 ## Bool functions
@@ -28,7 +28,7 @@ for f in bool_binary_functions
         $(f)(interval_part(xx), interval_part(yy))
 end
 
-in{T<:Real}(x::T, a::DecoratedInterval) = in(x, interval_part(a))
+in(x::T, a::DecoratedInterval) where T<:Real = in(x, interval_part(a))
 
 
 ## scalar functions: mig, mag and friends
@@ -37,7 +37,7 @@ scalar_functions = (
 )
 
 for f in scalar_functions
-    @eval $(f){T}(xx::DecoratedInterval{T}) = $f(interval_part(xx))
+    @eval $(f)(xx::DecoratedInterval{T}) where T = $f(interval_part(xx))
 end
 
 
@@ -47,7 +47,7 @@ arithm_functions = ( :+, :-, :* )
 +(xx::DecoratedInterval) =  xx
 -(xx::DecoratedInterval) =  DecoratedInterval(-interval_part(xx), decoration(xx))
 for f in arithm_functions
-    @eval function $(f){T}(xx::DecoratedInterval{T}, yy::DecoratedInterval{T})
+    @eval function $(f)(xx::DecoratedInterval{T}, yy::DecoratedInterval{T}) where T
         x = interval_part(xx)
         y = interval_part(yy)
         r = $f(x, y)
@@ -57,7 +57,7 @@ for f in arithm_functions
 end
 
 # Division
-function inv{T}(xx::DecoratedInterval{T})
+function inv(xx::DecoratedInterval{T}) where T
     x = interval_part(xx)
     dx = decoration(xx)
     dx = zero(T) ∈ x ? min(dx,trv) : dx
@@ -65,7 +65,7 @@ function inv{T}(xx::DecoratedInterval{T})
     dx = min(decoration(r), dx)
     DecoratedInterval( r, dx )
 end
-function /{T}(xx::DecoratedInterval{T}, yy::DecoratedInterval{T})
+function /(xx::DecoratedInterval{T}, yy::DecoratedInterval{T}) where T
     x = interval_part(xx)
     y = interval_part(yy)
     r = x / y
@@ -76,7 +76,7 @@ function /{T}(xx::DecoratedInterval{T}, yy::DecoratedInterval{T})
 end
 
 ## fma
-function fma{T}(xx::DecoratedInterval{T}, yy::DecoratedInterval{T}, zz::DecoratedInterval{T})
+function fma(xx::DecoratedInterval{T}, yy::DecoratedInterval{T}, zz::DecoratedInterval{T}) where T
     r = fma(interval_part(xx), interval_part(yy), interval_part(zz))
     d = min(decoration(xx), decoration(yy), decoration(zz))
     d = min(decoration(r), d)
@@ -85,7 +85,7 @@ end
 
 
 # power function must be defined separately and carefully
-function ^{T}(xx::DecoratedInterval{T}, n::Integer)
+function ^(xx::DecoratedInterval{T}, n::Integer) where T
     x = interval_part(xx)
     r = x^n
     d = min(decoration(xx), decoration(r))
@@ -93,7 +93,7 @@ function ^{T}(xx::DecoratedInterval{T}, n::Integer)
     DecoratedInterval(r, d)
 end
 
-function ^{T}(xx::DecoratedInterval{T}, q::AbstractFloat)
+function ^(xx::DecoratedInterval{T}, q::AbstractFloat) where T
     x = interval_part(xx)
     r = x^q
     d = min(decoration(xx), decoration(r))
@@ -104,7 +104,7 @@ function ^{T}(xx::DecoratedInterval{T}, q::AbstractFloat)
     DecoratedInterval(r, trv)
 end
 
-function ^{T, S<:Integer}(xx::DecoratedInterval{T}, q::Rational{S})
+function ^(xx::DecoratedInterval{T}, q::Rational{S}) where {T, S<:Integer}
     x = interval_part(xx)
     r = x^q
     d = min(decoration(xx), decoration(r))
@@ -115,7 +115,7 @@ function ^{T, S<:Integer}(xx::DecoratedInterval{T}, q::Rational{S})
     DecoratedInterval(r, trv)
 end
 
-function ^{T,S}(xx::DecoratedInterval{T}, qq::DecoratedInterval{S})
+function ^(xx::DecoratedInterval{T}, qq::DecoratedInterval{S}) where {T,S}
     x = interval_part(xx)
     q = interval_part(qq)
     r = x^q
@@ -128,16 +128,17 @@ function ^{T,S}(xx::DecoratedInterval{T}, qq::DecoratedInterval{S})
     DecoratedInterval(r, trv)
 end
 
-^{T,S}(xx::DecoratedInterval{T}, q::Interval{S}) = xx^DecoratedInterval(q)
+^(xx::DecoratedInterval{T}, q::Interval{S}) where {T,S} =
+    xx^DecoratedInterval(q)
 
 ## Discontinuous functions (sign, ceil, floor, trunc) and round
-function sign{T}(xx::DecoratedInterval{T})
+function sign(xx::DecoratedInterval{T}) where T
     r = sign(interval_part(xx))
     d = decoration(xx)
     isthin(r) && return DecoratedInterval(r, d)
     DecoratedInterval(r, min(d,def))
 end
-function ceil{T}(xx::DecoratedInterval{T})
+function ceil(xx::DecoratedInterval{T}) where T
     x = interval_part(xx)
     r = ceil(x)
     d = decoration(xx)
@@ -147,7 +148,7 @@ function ceil{T}(xx::DecoratedInterval{T})
     isthin(r) && return DecoratedInterval(r, d)
     DecoratedInterval(r, min(d,def))
 end
-function floor{T}(xx::DecoratedInterval{T})
+function floor(xx::DecoratedInterval{T}) where T
     x = interval_part(xx)
     r = floor(x)
     d = decoration(xx)
@@ -157,7 +158,7 @@ function floor{T}(xx::DecoratedInterval{T})
     isthin(r) && return DecoratedInterval(r, d)
     DecoratedInterval(r, min(d,def))
 end
-function trunc{T}(xx::DecoratedInterval{T})
+function trunc(xx::DecoratedInterval{T}) where T
     x = interval_part(xx)
     r = trunc(x)
     d = decoration(xx)
@@ -198,7 +199,7 @@ round(xx::DecoratedInterval, ::RoundingMode{:Down}) = floor(xx)
 binary_functions = ( :min, :max )
 
 for f in binary_functions
-    @eval function $(f){T}(xx::DecoratedInterval{T}, yy::DecoratedInterval{T})
+    @eval function $(f)(xx::DecoratedInterval{T}, yy::DecoratedInterval{T}) where T
         r = $f(interval_part(xx), interval_part(yy))
         d = min(decoration(r), decoration(xx), decoration(yy))
         DecoratedInterval(r, d)
@@ -206,7 +207,7 @@ for f in binary_functions
 end
 
 ## abs
-abs{T}(xx::DecoratedInterval{T}) =
+abs(xx::DecoratedInterval{T}) where T =
     DecoratedInterval(abs(interval_part(xx)), decoration(xx))
 
 
@@ -214,7 +215,7 @@ abs{T}(xx::DecoratedInterval{T}) =
 other_functions = ( :cancelplus, :cancelminus, :intersect, :hull, :union )
 
 for f in other_functions
-    @eval $(f){T}(xx::DecoratedInterval{T}, yy::DecoratedInterval{T}) =
+    @eval $(f)(xx::DecoratedInterval{T}, yy::DecoratedInterval{T}) where T =
         DecoratedInterval($(f)(interval_part(xx), interval_part(yy)), trv)
 end
 
@@ -263,7 +264,7 @@ unrestricted_functions =(
     :asinh )
 
 for f in unrestricted_functions
-    @eval function $(f){T}(xx::DecoratedInterval{T})
+    @eval function $(f)(xx::DecoratedInterval{T}) where T
         x = interval_part(xx)
         r = $f(x)
         d = min(decoration(r), decoration(xx))
@@ -271,7 +272,7 @@ for f in unrestricted_functions
     end
 end
 
-function tan{T}(xx::DecoratedInterval{T})
+function tan(xx::DecoratedInterval{T}) where T
     x = interval_part(xx)
     r = tan(x)
     d = min(decoration(r), decoration(xx))
@@ -289,7 +290,7 @@ function decay(a::DECORATION)
     ill
 end
 
-function atan2{T}(yy::DecoratedInterval{T}, xx::DecoratedInterval{T})
+function atan2(yy::DecoratedInterval{T}, xx::DecoratedInterval{T}) where T
     x = interval_part(xx)
     y = interval_part(yy)
     r = atan2(y, x)
@@ -328,7 +329,7 @@ restricted_functions2 = Dict(
 # Define functions with restricted domains on DecoratedInterval's:
 for (f, domain) in restricted_functions1
     domain = Interval(domain...)
-    @eval function Base.$(f){T}(xx::DecoratedInterval{T})
+    @eval function Base.$(f)(xx::DecoratedInterval{T}) where T
         x = interval_part(xx)
         r = $(f)(x)
         d = min(decoration(xx), decoration(r))
@@ -339,7 +340,7 @@ end
 
 for (f, domain) in restricted_functions2
     domain = Interval(domain...)
-    @eval function Base.$(f){T}(xx::DecoratedInterval{T})
+    @eval function Base.$(f)(xx::DecoratedInterval{T}) where T
         x = interval_part(xx)
         r = $(f)(x)
         d = min(decoration(xx), decoration(r))
