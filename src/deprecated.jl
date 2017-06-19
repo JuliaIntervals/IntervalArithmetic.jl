@@ -9,3 +9,6 @@ function displaymode(; format = display_params.format,
 
     setformat(format; decorations=decorations, sigfigs=sigfigs)
 end
+
+@deprecate infimum inf
+@deprecate supremum sup 
