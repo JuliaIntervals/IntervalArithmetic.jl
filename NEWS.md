@@ -4,6 +4,8 @@
 
 ### Supported versions of Julia
 - The package now supports only Julia v0.6 and later.
+The only change in this version is to remove code supporting previous versions and
+update syntax, e.g. `immutable` -> `struct`.
 
 ## v0.10
 
