@@ -5,7 +5,11 @@
 
 ## Interval type
 
-const validity_check = false
+if haskey(ENV, "IA_VALID")
+    const validity_check = true
+else
+    const validity_check = false
+end
 
 abstract type AbstractInterval{T} <: Real end
 
@@ -21,7 +25,7 @@ struct Interval{T<:Real} <: AbstractInterval{T}
                 new(a, b)
 
             else
-                throw(ArgumentError("Must have a ≤ b to construct interval(a, b)."))
+                throw(ArgumentError("Interval of form [$a, $b] not allowed. Must have a ≤ b to construct interval(a, b)."))
             end
 
         end
@@ -60,6 +64,9 @@ Interval{T}(x::Interval) where T = convert(Interval{T}, x)
 Check if `(a, b)` constitute a valid interval
 """
 function isvalid(a::Real, b::Real)
+
+    # println("isvalid()")
+
     if isnan(a) || isnan(b)
         return true
     end
@@ -70,6 +77,10 @@ function isvalid(a::Real, b::Real)
         else
             return false
         end
+    end
+
+    if a == Inf || b == -Inf
+        return false
     end
 
     return true
