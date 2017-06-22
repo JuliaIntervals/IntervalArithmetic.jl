@@ -80,17 +80,18 @@ function *(a::Interval{T}, b::Interval{T}) where T<:Real
 
     (a == zero(a) || b == zero(b)) && return zero(a)
 
-    if b.lo >= zero(T)
-        a.lo >= zero(T) && return @round(a.lo*b.lo, a.hi*b.hi)
-        a.hi <= zero(T) && return @round(a.lo*b.hi, a.hi*b.lo)
+    if !signbit(b.lo)
+        !signbit(a.lo) && return @round(a.lo*b.lo, a.hi*b.hi)
+        signbit(a.hi) && return @round(a.lo*b.hi, a.hi*b.lo)
         return @round(a.lo*b.hi, a.hi*b.hi)   # zero(T) ∈ a
-    elseif b.hi <= zero(T)
-        a.lo >= zero(T) && return @round(a.hi*b.lo, a.lo*b.hi)
-        a.hi <= zero(T) && return @round(a.hi*b.hi, a.lo*b.lo)
+
+    elseif signbit(b.hi)
+        !signbit(a.lo) && return @round(a.hi*b.lo, a.lo*b.hi)
+        signbit(a.hi) && return @round(a.hi*b.hi, a.lo*b.lo)
         return @round(a.hi*b.lo, a.lo*b.lo)   # zero(T) ∈ a
     else
-        a.lo > zero(T) && return @round(a.hi*b.lo, a.hi*b.hi)
-        a.hi < zero(T) && return @round(a.lo*b.hi, a.lo*b.lo)
+        !signbit(a.lo) && return @round(a.hi*b.lo, a.hi*b.hi)
+        signbit(a.hi) && return @round(a.lo*b.hi, a.lo*b.lo)
         return @round(min(a.lo*b.hi, a.hi*b.lo), max(a.lo*b.lo, a.hi*b.hi))
     end
 end
