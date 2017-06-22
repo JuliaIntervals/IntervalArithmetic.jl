@@ -5,19 +5,25 @@
 
 ## Interval type
 
+const validity_check = false
+
 abstract type AbstractInterval{T} <: Real end
 
 struct Interval{T<:Real} <: AbstractInterval{T}
     lo :: T
     hi :: T
 
-    function Interval(a::Real, b::Real)
+    function Interval{T}(a::T, b::T) where T<:Real
+
         if validity_check
+
             if isvalid(a, b)
                 new(a, b)
+
             else
                 throw(ArgumentError("Must have a ≤ b to construct interval(a, b)."))
             end
+
         end
 
         new(a, b)

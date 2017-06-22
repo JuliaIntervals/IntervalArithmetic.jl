@@ -1,22 +1,5 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
-if VERSION >= v"0.6.0-dev"
-
-    doc"""An `IntervalBox` is an $N$-dimensional rectangular box, given
-    by a Cartesian product of $N$ `Interval`s.
-    """
-    immutable IntervalBox{N,T} <: StaticVector{N, Interval{T}}
-        data::NTuple{N,Interval{T}}
-    end
-
-else
-    doc"""An `IntervalBox` is an $N$-dimensional rectangular box, given
-    by a Cartesian product of $N$ `Interval`s.
-    """
-    immutable IntervalBox{N,T} <: StaticVector{Interval{T}}
-        data::NTuple{N,Interval{T}}
-    end
-
 doc"""An `IntervalBox` is an $N$-dimensional rectangular box, given
 by a Cartesian product of $N$ `Interval`s.
 """
