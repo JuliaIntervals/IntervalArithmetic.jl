@@ -17,7 +17,7 @@ struct Interval{T<:Real} <: AbstractInterval{T}
     lo :: T
     hi :: T
 
-    function Interval{T}(a::T, b::T) where T<:Real
+    function Interval{T}(a::Real, b::Real) where T<:Real
 
         if validity_check
 
