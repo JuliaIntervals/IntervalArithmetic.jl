@@ -32,11 +32,6 @@ setrounding(Interval, :tight)
     @test sin(x) == Interval(0.47942553860420295, 0.479425538604203)
 end
 
-setrounding(Interval, :errorfree)
-@testset "Back to error-free rounding" begin
-    @test sin(x) == Interval(0.47942553860420295, 0.479425538604203)
-end
-
 setformat(:standard)
 
 # end
