@@ -78,8 +78,6 @@ end
 function *(a::Interval{T}, b::Interval{T}) where T<:Real
     (isempty(a) || isempty(b)) && return emptyinterval(T)
 
-    (a == zero(a) || b == zero(b)) && return zero(a)
-
     if b.lo >= zero(T)
         a.lo >= zero(T) && return @round(a.lo*b.lo, a.hi*b.hi)
         a.hi <= zero(T) && return @round(a.lo*b.hi, a.hi*b.lo)
