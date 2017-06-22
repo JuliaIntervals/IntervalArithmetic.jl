@@ -326,7 +326,7 @@ c = @interval(0.25, 4.0)
 
     @testset "iszero" begin
         @test iszero(Interval(0))
-        @test iszero(Interval(0//0))
+        @test iszero(Interval(0//1))
         @test iszero(Interval(big(0)))
         @test iszero(Interval(-0.0))
         @test iszero(Interval(-0.0, 0.0))
