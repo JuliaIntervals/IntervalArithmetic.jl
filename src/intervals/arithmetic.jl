@@ -113,7 +113,7 @@ function /(a::Interval{T}, b::Interval{T}) where T<:Real
 
     S = typeof(a.lo / b.lo)
     (isempty(a) || isempty(b)) && return emptyinterval(S)
-    b == zero(b) && return emptyinterval(S)
+    iszero(b) && return emptyinterval(S)
 
     if b.lo > zero(T) # b strictly positive
 
@@ -129,15 +129,15 @@ function /(a::Interval{T}, b::Interval{T}) where T<:Real
 
     else   # b contains zero, but is not zero(b)
 
-        a == zero(a) && return zero(Interval{S})
+        iszero(a) && return zero(Interval{S})
 
-        if b.lo == zero(T)
+        if iszero(b.lo)
 
             a.lo >= zero(T) && return @round(a.lo/b.hi, Inf)
             a.hi <= zero(T) && return @round(-Inf, a.hi/b.hi)
             return entireinterval(S)
 
-        elseif b.hi == zero(T)
+        elseif iszero(b.hi)
 
             a.lo >= zero(T) && return @round(-Inf, a.lo/b.lo)
             a.hi <= zero(T) && return @round(a.hi/b.lo, Inf)
