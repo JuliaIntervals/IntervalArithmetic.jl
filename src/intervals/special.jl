@@ -75,6 +75,8 @@ This occurs when the interval is empty, or when the upper bound equals the lower
 """
 isatomic(x::Interval) = isempty(x) || (x.hi == x.lo) || (x.hi == nextfloat(x.lo))
 
+Base.iszero(x::Interval) = iszero(x.lo) && iszero(x.hi)
+
 # doc"""
 #     widen(x)
 #
