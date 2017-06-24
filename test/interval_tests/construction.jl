@@ -54,9 +54,9 @@ using Base.Test
     @test_throws ArgumentError @interval(big(1), 1//10)
     @test_throws ArgumentError @interval(1, 0.1)
     @test_throws ArgumentError @interval(big(1), big(0.1))
-    @test_throws ArgumentError Interval(Inf)
-    @test_throws ArgumentError Interval(-Inf, -Inf)
-    @test_throws ArgumentError Interval(Inf, Inf)
+    @test_throws ArgumentError interval(Inf)
+    @test_throws ArgumentError interval(-Inf, -Inf)
+    @test_throws ArgumentError interval(Inf, Inf)
 
     # Conversion to Interval without type
     @test convert(Interval, 1) == Interval(1.0)
