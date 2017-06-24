@@ -34,6 +34,11 @@ end
     end
 end
 
+@benchgroup "Elementary functions" begin
+    for op in (exp, log, sin, tan)
+        @bench string(op) $(op)($a)
+    end
+end
 
 @benchgroup "Sum" begin
 
