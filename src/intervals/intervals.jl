@@ -5,7 +5,7 @@
 
 ## Interval type
 
-if haskey(ENV, "IA_VALID") || haskey(ENV, "CI") == true  # CI is for Travis
+if haskey(ENV, "IA_VALID") == true
     const validity_check = true
 else
     const validity_check = false

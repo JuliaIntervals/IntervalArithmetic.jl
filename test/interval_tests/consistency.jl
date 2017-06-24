@@ -335,4 +335,15 @@ c = @interval(0.25, 4.0)
         @test !iszero(Interval(0.0, nextfloat(0.0)))
     end
 
+    @testset "Difference between Interval and interval" begin
+        @test interval(1, 2) == Interval(1, 2)
+
+        @test inf(Interval(3, 2)) == 3
+        @test_throws ArgumentError interval(3, 2)
+
+        @test sup(Interval(Inf, Inf)) == Inf
+        @test_throws ArgumentError interval(Inf, Inf)
+
+    end
+
 end
