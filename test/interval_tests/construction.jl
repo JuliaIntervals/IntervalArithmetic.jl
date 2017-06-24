@@ -253,14 +253,10 @@ end
 end
 
 # issue 192:
-# @testset "Disallow a single NaN in an interval" begin
-#     a = interval(NaN, 2)
-#     @test isnan(a.lo) && isnan(a.hi)
-#
-#     a = interval(Inf, NaN)
-#     @test isnan(a.lo) && isnan(a.hi)
-#
-# end
+@testset "Disallow a single NaN in an interval" begin
+    @test_throws ArgumentError interval(NaN, 2)
+    @test_throws ArgumentError interval(Inf, NaN)
+end
 
 # issue 206:
 
