@@ -2,6 +2,8 @@
 using IntervalArithmetic
 using Base.Test
 
+const Interval = IntervalArithmetic.Interval
+
 # Interval tests:
 
 setformat(:full)

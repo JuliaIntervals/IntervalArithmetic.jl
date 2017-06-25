@@ -89,5 +89,5 @@ function make_interval(T, expr1, expr2)
 
     expr2 = transform(expr2[1], :convert, :(Interval{$T}))
 
-    :(Interval(($expr1).lo, ($expr2).hi))
+    :(interval(($expr1).lo, ($expr2).hi))
 end
