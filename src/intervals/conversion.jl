@@ -18,6 +18,7 @@ promote_rule(::Type{BigFloat}, ::Type{Interval{T}}) where T<:Real =
 convert(::Type{Interval{T}}, x::AbstractString) where T<:AbstractFloat =
     parse(Interval{T}, x)
 
+
 function convert(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:Real}
     isinf(x) && return wideinterval(T(x))
 
@@ -27,19 +28,7 @@ function convert(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:Real}
 end
 
 function convert(::Type{Interval{T}}, x::Float64) where T<:AbstractFloat
-    isinf(x) && return wideinterval(x)#Interval{T}(prevfloat(T(x)), nextfloat(T(x)))
-    # isinf(x) && return Interval{T}(prevfloat(x), nextfloat(x))
-
-    xrat = rationalize(x)
-
-    # This prevents that xrat returns a 0//1 when x is very small
-    # or 1//0 when x is too large but finite
-    if (x != zero(x) && xrat == 0) || isinf(xrat)
-        xstr = string(x)
-        return Interval(parse(T, xstr, RoundDown), parse(T, xstr, RoundUp))
-    end
-
-    return convert(Interval{T}, xrat)
+    return x..x
 end
 
 convert(::Type{Interval{T}}, x::Interval{T}) where T<:AbstractFloat = x
