@@ -176,8 +176,8 @@ julia> eps(b.lo)
 4.440892098500626e-16
 ```
 
-Starting with v0.3, you can use additional syntax for creating intervals more easily:
-the `..` operator,
+You can use additional syntax for creating intervals more easily.
+The for example, the `..` operator is equivalent to using the macro:
 ```jldoctest usage
 julia> 0.1..0.3
 [0.0999999, 0.300001]
@@ -191,7 +191,7 @@ julia> I"[3.1, 3.2]"
 [3.09999, 3.20001]
 ```
 
-From v0.4, you can also use the `±` operator:
+You can also use the `±` operator:
 ```jldoctest usage
 julia> 1.5 ± 0.1
 [1.39999, 1.60001]
