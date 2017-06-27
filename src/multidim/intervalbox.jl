@@ -53,9 +53,4 @@ import Base.×
 ×(a::IntervalBox, b::Interval) = IntervalBox(a..., b)
 ×(a::IntervalBox, b::IntervalBox) = IntervalBox(a..., b...)
 
-function IntervalBox(x::Interval, n::Integer)
-    n < 0 && throw(ArgumentError("Dimension must be ≥ 0"))
-    n == 1 && IntervalBox(x)
-
-    return IntervalBox(x, n-1) × x
-end
+IntervalBox{n}(x::Interval, ::Type{Val{n}}) = IntervalBox(SVector(ntuple(i->x, Val{n})))
