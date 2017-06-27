@@ -1,6 +1,6 @@
 # Multi-dimensional boxes
 
-Starting with v0.3, multi-dimensional (hyper-)boxes are implemented in the
+Multi-dimensional (hyper-)boxes are implemented in the
 `IntervalBox` type.
 These represent Cartesian products of intervals, i.e. rectangles (in 2D),
 cuboids (in 3D), etc.
