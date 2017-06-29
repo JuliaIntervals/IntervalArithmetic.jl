@@ -74,7 +74,7 @@ for (op, f) in ( (:+, :add), (:-, :sub), (:*, :mul), (:/, :div) )
 
             mode2 = Symbol("Round", mode)
 
-            @eval $op(::IntervalRounding{:tight},
+            @eval @inline $op(::IntervalRounding{:tight},
                                 a::$T, b::$T, $mode1) = $ff(a, b, $mode2)
         end
     end
@@ -91,9 +91,9 @@ for T in (Float32, Float64)
         @eval inv(::IntervalRounding{:tight},
                             a::$T, $mode1) = inv_round(a, $mode2)
 
-                @eval sqrt(::IntervalRounding{:tight},
-                            a::$T, $mode1) = sqrt_round(a, $mode2)
-        end
+        @eval sqrt(::IntervalRounding{:tight},
+                    a::$T, $mode1) = sqrt_round(a, $mode2)
+    end
 end
 
 
@@ -214,7 +214,7 @@ function _setrounding(::Type{Interval}, rounding_type::Symbol)
 
     # binary functions:
     for f in (:+, :-, :*, :/)
-        @eval $f{T<:AbstractFloat}(a::T, b::T, r::RoundingMode) = $f($roundtype, a, b, r)
+        @eval @inline $f{T<:AbstractFloat}(a::T, b::T, r::RoundingMode) = $f($roundtype, a, b, r)
     end
 
     if rounding_type == :tight   # for remaining functions, use CRlibm
