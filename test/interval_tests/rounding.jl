@@ -24,6 +24,8 @@ setrounding(Interval, :none)
 @testset "No rounding" begin
     @test rounding(Interval) == :none
     @test sin(x) == Interval(0.479425538604203, 0.479425538604203)
+    w = 0 ± big(1)
+    @test isa(w+w, Interval)
 end
 
 setrounding(Interval, :tight)
