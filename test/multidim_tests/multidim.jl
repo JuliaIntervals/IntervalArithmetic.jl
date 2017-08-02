@@ -118,4 +118,6 @@ end
     @test IntervalBox(1..2, Val{2}) == (1..2) × (1..2)
     @test IntervalBox(1..2, Val{5}) == (1..2) × (1..2) × (1..2) × (1..2) × (1..2)
 
+    @test IntervalBox(1..2, 3) == IntervalBox(1..2, Val{3})
+
 end
