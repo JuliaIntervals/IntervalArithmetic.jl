@@ -268,9 +268,24 @@ function setrounding(::Type{Interval}, rounding_type::Symbol)
 
     # check
     lines = readlines(path)
+
+    # print(lines)
+
     for line in lines
+
+        if line == ""
+            continue
+        end
+
         if !startswith(line, "WARNING: Method definition")
-            error(line)
+
+            if startswith(line, "WARNING") || startswith(line, "Use")
+                warn(line)
+
+            else
+                println("Error on line: ", line)
+                error(line)
+            end
         end
     end
 
@@ -279,6 +294,7 @@ function setrounding(::Type{Interval}, rounding_type::Symbol)
 end
 
 rounding(Interval) = current_rounding_type[]
+
 
 
 # default: correct rounding
