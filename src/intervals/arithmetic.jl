@@ -424,3 +424,36 @@ isinteger(a::Interval) = (a.lo == a.hi) && isinteger(a.lo)
 
 convert(::Type{Integer}, a::Interval) = isinteger(a) ?
         convert(Integer, a.lo) : throw(ArgumentError("Cannot convert $a to integer"))
+
+        doc"""
+        	a⊖b
+        Returns the gH(generalized Hukuhara) difference of the compact `Interval`s `a` and `b`
+        Note that in general if x<:Interval, x-x ≠ 0, but x⊖x = 0
+        """
+        function ⊖(A::Interval{T}, B::Interval{T}) where T
+        	return Interval(minmax(A.lo - B.lo,B.hi - B.hi))
+        end
+
+
+        doc"""
+        	a⨸b
+        Returns the gH(generalized Hukuhara) division result of the compact `Interval`s `a` and `b`
+        Note that in general if x<:Interval and 0 ∉ x,then x÷x ≠ 1, but x⨸x = 1
+        """
+        function ⨸(A::Interval{T}, B::Interval{T}) where T
+        	if 0 ∈ B
+        		if A == B
+        			return 1
+        		else
+        			return error("gH Divison is undefined. Denominator contains 0")
+        		end
+        	elseif (A<0 && B<0) | (A>0 && B>0)
+        		return Interval(minmax(A.lo/B.lo,A.hi/B.hi))
+        	elseif (A<0 && B>0) | (A>0 && B<0)
+        		return Interval(minmax(A.lo/B.hi,A.hi/B.lo))
+        	elseif 0 ∈ A && B<0
+        		return Interval(A.lo/B.lo,A.hi/B.lo)
+        	else
+        		return Interval(A.lo/B.hi,A.hi/B.hi)
+        	end
+        end
