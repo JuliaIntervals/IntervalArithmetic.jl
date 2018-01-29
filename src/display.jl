@@ -112,8 +112,8 @@ function round_string(x::BigFloat, digits::Int, r::RoundingMode)
     buf = Array{UInt8}(lng + 1)
 
     lng = ccall((:mpfr_snprintf,:libmpfr), Int32,
-    (Ptr{UInt8}, Culong,  Ptr{UInt8}, Int32, Ptr{BigFloat}...),
-    buf, lng + 1, "%.$(digits)R*g", Base.MPFR.to_mpfr(r), &x)
+    (Ptr{UInt8}, Culong,  Ptr{UInt8}, Int32, Ref{BigFloat}...),
+    buf, lng + 1, "%.$(digits)R*g", Base.MPFR.to_mpfr(r), x)
 
     repr = unsafe_string(pointer(buf))
 
