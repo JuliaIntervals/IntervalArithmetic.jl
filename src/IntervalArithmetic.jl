@@ -30,7 +30,7 @@ import Base:
     parse
 
 export
-    AbstractInterval, # Interval
+    AbstractInterval, Interval,
     interval,
     @interval, @biginterval, @floatinterval, @make_interval,
     diam, radius, mid, mag, mig, hull,
