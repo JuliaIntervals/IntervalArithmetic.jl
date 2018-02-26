@@ -18,6 +18,8 @@ promote_rule(::Type{BigFloat}, ::Type{Interval{T}}) where T<:Real =
 convert(::Type{Interval{T}}, x::AbstractString) where T<:AbstractFloat =
     parse(Interval{T}, x)
 
+convert(::Type{Interval}, x::AbstractString) = convert(Interval{Float64}, x)
+
 function convert(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:Real}
     isinf(x) && return wideinterval(T(x))
 
