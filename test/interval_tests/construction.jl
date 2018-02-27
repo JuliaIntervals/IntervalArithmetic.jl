@@ -208,13 +208,14 @@ end
 @testset "± tests" begin
     setprecision(Interval, Float64)
 
-    @test 3 ± 1 == Interval(2.0, 4.0)
-    @test 3 ± 0.5 == Interval(2.4999999999999996, 3.5000000000000004)
-    @test 3 ± 0.1 == Interval(2.8999999999999995, 3.1000000000000005)
-    @test 0.5 ± 1 == Interval(-0.5000000000000001, 1.5000000000000002)
+    @test 3 ± 1 == 2..4
+    @test 3 ± 0.5 == 2.5..3.5
+    @test 3 ± 0.1 == 2.9..3.1
+    @test 0.5 ± 1 == -0.5..1.5
+    @test 0.2 ± 0.1 == Interval(0.09999999999999999, 0.30000000000000004)
 
     # issue 172:
-    @test_throws MethodError a = (1..1) ± 1
+    @test (1..1) ± 1 == 0..2
 
 end
 

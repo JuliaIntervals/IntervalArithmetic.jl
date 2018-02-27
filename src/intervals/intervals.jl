@@ -122,7 +122,7 @@ include("hyperbolic.jl")
 
 # Syntax for intervals
 
-a..b = Interval(convert(Interval, a).lo, convert(Interval, b).hi)
+a..b = interval(convert(Interval, a).lo, convert(Interval, b).hi)
 
 # ..(a::Integer, b::Integer) = interval(a, b)
 # ..(a::Integer, b::Real) = interval(a, nextfloat(float(b)))
