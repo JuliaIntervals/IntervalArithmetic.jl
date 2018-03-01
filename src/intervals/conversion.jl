@@ -28,7 +28,7 @@ function convert(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:Real}
     # use @round_up and @round_down here?
 end
 
-function convert(::Type{Interval{T}}, x::Float64) where T<:AbstractFloat
+function convert(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:AbstractFloat}
     isinf(x) && return wideinterval(x)#Interval{T}(prevfloat(T(x)), nextfloat(T(x)))
     # isinf(x) && return Interval{T}(prevfloat(x), nextfloat(x))
 
