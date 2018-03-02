@@ -49,13 +49,11 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
             return a ± b
         end
 
-        expr = parse(s)
+        a = parse(T, s, RoundDown)
+        b = parse(T, s, RoundUp)
 
-        # after removing support for Julia 0.4, can simplify
-        # make_interval to just accept two expressions
+        return Interval(a, b)
 
-        val = make_interval(T, expr, [expr])   # use tryparse?
-        return eval(val)
     end
 
     # match string of form [a, b]_dec:
