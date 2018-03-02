@@ -1,4 +1,4 @@
-julia 0.6-pre
+julia 0.6
 CRlibm 0.5
 StaticArrays 0.5
 FastRounding 0.0.4
