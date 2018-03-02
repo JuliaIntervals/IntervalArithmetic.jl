@@ -16,7 +16,7 @@ function make_rectangle(x, y, xwidth, ywidth, color="grey", alpha=0.5)
 end
 
 import PyPlot.draw
-function draw{T<:IntervalBox}(box_list::Vector{T}, color="grey", alpha=0.5)
+function draw(box_list::Vector{T}, color="grey", alpha=0.5) where T<:IntervalBox
     patch_list = []
     for box in box_list
         x, y = box

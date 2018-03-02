@@ -8,7 +8,7 @@
 Checks if the number `x` is a member of the interval `a`, treated as a set.
 Corresponds to `isMember` in the ITF-1788 Standard.
 """
-function in{T<:Real}(x::T, a::Interval)
+function in(x::T, a::Interval) where T<:Real
     isinf(x) && return false
     a.lo <= x <= a.hi
 end

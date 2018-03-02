@@ -16,7 +16,7 @@ function standard_map(X::IntervalBox, k = 1.0)
     IntervalBox(p′, θ′)
 end
 
-function IntervalBox{T}(X::Vector{Interval{T}}, Y::Vector{Interval{T}})
+function IntervalBox(X::Vector{Interval{T}}, Y::Vector{Interval{T}}) where T
     vec([IntervalBox(x, y) for x in X, y in Y])
 end
 
@@ -64,6 +64,6 @@ function mod(X::IntervalBox, width::Real)
 end
 
 
-mod2pi{T}(x::Interval{T}) = mod(x, IntervalArithmetic.two_pi(T))
+mod2pi(x::Interval{T}) where {T} = mod(x, IntervalArithmetic.two_pi(T))
 
-mod2pi{T}(X::Vector{Interval{T}}) = vcat(map(mod2pi, X)...)
+mod2pi(X::Vector{Interval{T}}) where {T} = vcat(map(mod2pi, X)...)
