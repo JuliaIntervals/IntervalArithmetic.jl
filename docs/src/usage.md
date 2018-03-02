@@ -1,6 +1,6 @@
 # Basic usage
 
-The basic elements of the package are **intervals**, i.e. sets of real numbers (possibly including `\pm \infty`) of the form
+The basic elements of the package are **intervals**, i.e. sets of real numbers (possibly including $\pm \infty$) of the form
 
 ```math
 [a, b] := \{ a \le x \le b \} \subseteq \mathbb{R}.
