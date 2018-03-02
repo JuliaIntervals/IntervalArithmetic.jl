@@ -1,5 +1,16 @@
 # What's new in `IntervalArithmetic.jl`
 
+## v0.12
+
+### API changes:
+
+- The constructor `Interval(a, b)` has **had checks removed**, so **should not be used directly**; use `interval(a, b)` instead. This is for performance reasons. [#26](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/26)
+
+- The changes to `a..b` and `a±b` were reverted; these operations are now slow again, but give the narrowest possible interval when interpreting `a` and `b` as the human version (rather than the machine version). E.g. `0.3` is treated as `3/10`, not the exactly-representable floating-point number closest to 0.3.  [#97](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/97)
+
+- Constructor `IntervalBox(II, Val{n})` added to easily make `IntervalBox`es that are `n` copies of a given interval [#79](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/79)
+
+
 ## v0.11
 
 ### Supported versions of Julia
