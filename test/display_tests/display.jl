@@ -34,7 +34,7 @@ setprecision(Interval, Float64)
             setformat(sigfigs=20)
 
             @test string(a) == "[1, 2]"
-            @test string(b) == "[-1.1000000000000003109, 1.3000000000000002665]"
+            @test string(b) == "[-1.1000000000000000889, 1.3000000000000000445]"
             @test string(c) == "[3.1415926535897931159, 3.141592653589793116]"
             @test string(d) == "[3.1415926535897931159, 3.1415926535897935601]"
         end
@@ -43,7 +43,7 @@ setprecision(Interval, Float64)
             setformat(:full)
 
             @test string(a) == "Interval(1.0, 2.0)"
-            @test string(b) == "Interval(-1.1000000000000003, 1.3000000000000003)"
+            @test string(b) == "Interval(-1.1, 1.3)"
             @test string(c) == "Interval(3.141592653589793, 3.141592653589793)"
             @test string(d) == "Interval(3.141592653589793, 3.1415926535897936)"
         end
