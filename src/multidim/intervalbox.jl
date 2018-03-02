@@ -53,6 +53,6 @@ import Base.×
 ×(a::IntervalBox, b::Interval) = IntervalBox(a..., b)
 ×(a::IntervalBox, b::IntervalBox) = IntervalBox(a..., b...)
 
-IntervalBox{n}(x::Interval, ::Type{Val{n}}) = IntervalBox(SVector(ntuple(i->x, Val{n})))
+IntervalBox(x::Interval, ::Type{Val{n}}) where {n} = IntervalBox(SVector(ntuple(i->x, Val{n})))
 
 IntervalBox(x::Interval, n::Int) = IntervalBox(x, Val{n})

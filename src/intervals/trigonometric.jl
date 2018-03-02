@@ -5,9 +5,9 @@ half_pi(x::T) where T<:AbstractFloat = half_pi(T)
 
 two_pi(::Type{T})  where T = pi_interval(T) * 2
 
-range_atan2{T<:Real}(::Type{T}) = Interval(-(pi_interval(T).hi), pi_interval(T).hi)
-half_range_atan2{T}(::Type{T}) = (temp = half_pi(T); Interval(-(temp.hi), temp.hi) )
-pos_range_atan2{T<:Real}(::Type{T}) = Interval(zero(T), pi_interval(T).hi)
+range_atan2(::Type{T}) where {T<:Real} = Interval(-(pi_interval(T).hi), pi_interval(T).hi)
+half_range_atan2(::Type{T}) where {T} = (temp = half_pi(T); Interval(-(temp.hi), temp.hi) )
+pos_range_atan2(::Type{T}) where {T<:Real} = Interval(zero(T), pi_interval(T).hi)
 
 
 doc"""Finds the quadrant(s) corresponding to a given floating-point

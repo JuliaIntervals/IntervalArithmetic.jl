@@ -15,7 +15,7 @@ using RecipesBase
 end
 
 # Plot a vector of 2D IntervalBoxes:
-@recipe function f{T<:IntervalBox{2}}(v::Vector{T})
+@recipe function f(v::Vector{T}) where T<:IntervalBox{2}
 
     seriestype := :shape
 
