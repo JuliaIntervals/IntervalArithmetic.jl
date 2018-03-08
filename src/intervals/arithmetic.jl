@@ -235,6 +235,10 @@ function abs(a::Interval)
     Interval(mig(a), mag(a))
 end
 
+function abs2(a::Interval)
+    sqr(a)
+end
+
 function min(a::Interval, b::Interval)
     (isempty(a) || isempty(b)) && return emptyinterval(a)
     Interval( min(a.lo, b.lo), min(a.hi, b.hi))
