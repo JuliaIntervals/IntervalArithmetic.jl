@@ -28,6 +28,7 @@ julia> Pkg.add("IntervalArithmetic")
 
 ```@contents
 Pages = ["usage.md",
+    "intro.md",
     "decorations.md",
     "multidim.md",
     "rounding.md",
