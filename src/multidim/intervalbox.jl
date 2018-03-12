@@ -24,13 +24,12 @@ mid(X::IntervalBox) = mid.(X)
 
 # TODO: Update to use generator
 ⊆(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) where {N,T} =
-    all(i->(X[i] ⊆ Y[i]), 1:N)
-# all(X[i] ⊆ Y[i] for i in 1:N)  # on Julia 0.6
+    all(X .⊆ Y)
 
 ∩(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) where {N,T} =
-    IntervalBox(ntuple(i -> X[i] ∩ Y[i], Val{N}))
+    IntervalBox(X .∩ Y)
 ∪(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) where {N,T} =
-    IntervalBox(ntuple(i -> X[i] ∪ Y[i], Val{N}))
+    IntervalBox(X .∪ Y)
 
 #=
 On Julia 0.6 can now write
@@ -40,11 +39,9 @@ On Julia 0.6 can now write
 
 isempty(X::IntervalBox) = any(isempty, X)
 
-# TODO: Replace with generator in 0.5:
-diam(X::IntervalBox) = maximum([diam(x) for x in X])
+diam(X::IntervalBox) = maximum(diam.(XX))
 
-emptyinterval(X::IntervalBox{N,T}) where {N,T} =
-    IntervalBox(ntuple(i->emptyinterval(T), Val{N}))
+emptyinterval(X::IntervalBox{N,T}) where {N,T} = IntervalBox(emptyinterval.(X))
 
 
 import Base.×
