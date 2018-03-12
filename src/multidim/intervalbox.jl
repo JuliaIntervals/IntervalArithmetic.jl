@@ -39,7 +39,7 @@ On Julia 0.6 can now write
 
 isempty(X::IntervalBox) = any(isempty, X)
 
-diam(X::IntervalBox) = maximum(diam.(XX))
+diam(X::IntervalBox) = maximum(diam.(X))
 
 emptyinterval(X::IntervalBox{N,T}) where {N,T} = IntervalBox(emptyinterval.(X))
 
