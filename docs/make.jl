@@ -6,6 +6,7 @@ makedocs(
     sitename = "IntervalArithmetic",
     pages = [
         "Package" => "index.md",
+        "Interval Arithmetic" => "intro.md",
         "Basic usage" => "usage.md",
         "Decorations" => "decorations.md",
         "Multi-dimensional boxes" => "multidim.md",
