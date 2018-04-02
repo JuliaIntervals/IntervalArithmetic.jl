@@ -25,6 +25,13 @@ c = @interval(0.25, 4.0)
         @test one(a) == big(1.0)
         @test !(a == b)
         @test a != b
+        @test eps(typeof(a)) === eps(one(typeof(a)))
+        @test typemin(typeof(a)) === Interval(-Inf)
+        @test typemax(typeof(a)) === Interval(Inf)
+        @test typemin(a) === Interval(-Inf)
+        @test typemax(a) === Interval(Inf)
+        @test typemin(Interval{Int64}) === Interval(typemin(Int64))
+        @test typemax(Interval{Int64}) === Interval(typemax(Int64))
 
         @test a == Interval(a.lo, a.hi)
         @test @interval(1, Inf) == Interval(1.0, Inf)

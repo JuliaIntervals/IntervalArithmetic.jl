@@ -50,12 +50,13 @@ end
 const ≺ = strictprecedes # \prec
 
 
-# zero, one
+# zero, one, typemin, typemax
 zero(a::Interval{T}) where T<:Real = Interval(zero(T))
 zero(::Type{Interval{T}}) where T<:Real = Interval(zero(T))
 one(a::Interval{T}) where T<:Real = Interval(one(T))
 one(::Type{Interval{T}}) where T<:Real = Interval(one(T))
-
+typemin(::Type{Interval{T}}) where {T} = Interval(typemin(T))
+typemax(::Type{Interval{T}}) where {T} = Interval(typemax(T))
 
 ## Addition and subtraction
 
@@ -253,7 +254,7 @@ end
 
 dist(a::Interval, b::Interval) = max(abs(a.lo-b.lo), abs(a.hi-b.hi))
 eps(a::Interval) = max(eps(a.lo), eps(a.hi))
-
+eps(::Type{Interval{T}}) where T<:Real = eps(T)
 
 ## floor, ceil, trunc, sign, roundTiesToEven, roundTiesToAway
 function floor(a::Interval)
