@@ -407,7 +407,7 @@ Return the diameter (length) of the `Interval` `a`.
 function diam(a::Interval{T}) where T<:Real
     isempty(a) && return convert(T, NaN)
 
-    Interval_up(a.hi - a.lo) # cf page 64 of IEEE1788
+    @round_up(a.hi - a.lo) # cf page 64 of IEEE1788
 end
 
 doc"""
