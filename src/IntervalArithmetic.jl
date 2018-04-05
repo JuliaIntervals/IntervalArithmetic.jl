@@ -44,7 +44,7 @@ export
     RoundTiesToEven, RoundTiesToAway,
     cancelminus, cancelplus, isunbounded,
     .., @I_str, ±,
-    pow,
+    pow, extended_div,
     setformat, @format
 
 export

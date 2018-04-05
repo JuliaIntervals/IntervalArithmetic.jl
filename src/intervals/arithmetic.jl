@@ -153,6 +153,61 @@ function /(a::Interval{T}, b::Interval{T}) where T<:Real
     end
 end
 
+function extended_div(a::Interval{T}, b::Interval{T}) where T<:Real
+
+    S = typeof(a.lo / b.lo)
+    (isempty(a) || isempty(b)) && return emptyinterval(S)
+    iszero(b) && return emptyinterval(S)
+
+    if b.lo > 0 # b strictly positive
+
+        a.lo >= 0 && return Interval(a.lo/b.hi, a.hi/b.lo)
+        a.hi <= 0 && return Interval(a.lo/b.lo, a.hi/b.hi)
+        return Interval(a.lo/b.lo, a.hi/b.lo)  # 0 ∈ a
+
+    elseif b.hi < 0 # b strictly negative
+
+        a.lo >= 0 && return Interval(a.hi/b.hi, a.lo/b.lo)
+        a.hi <= 0 && return Interval(a.hi/b.lo, a.lo/b.hi)
+        return Interval(a.hi/b.hi, a.lo/b.hi)  # 0 ∈ a
+
+    elseif 0 < b.hi && 0 > b.lo && 0 ∉ a
+        L = Interval{T}[]
+        if a.hi < 0
+            push!(L, Interval(-Inf, a.hi / b.hi))
+            push!(L, Interval(a.hi / b.lo, Inf))
+
+        elseif a.lo > 0
+            push!(L, Interval(-Inf, a.lo / b.lo))
+            push!(L, Interval(a.lo / b.hi, Inf))
+
+        end
+        return L
+
+    else   # b contains zero, but is not zero(b)
+
+        iszero(a) && return zero(Interval{S})
+
+        if iszero(b.lo)
+
+            a.lo >= 0 && return Interval(a.lo/b.hi, Inf)
+            a.hi <= 0 && return Interval(-Inf, a.hi/b.hi)
+            return entireinterval(S)
+
+        elseif iszero(b.hi)
+
+            a.lo >= 0 && return Interval(-Inf, a.lo/b.lo)
+            a.hi <= 0 && return Interval(a.hi/b.lo, Inf)
+            return entireinterval(S)
+
+        else
+
+            return entireinterval(S)
+
+        end
+    end
+end
+
 //(a::Interval, b::Interval) = a / b    # to deal with rationals
 
 
@@ -352,7 +407,7 @@ Return the diameter (length) of the `Interval` `a`.
 function diam(a::Interval{T}) where T<:Real
     isempty(a) && return convert(T, NaN)
 
-    @round_up(a.hi - a.lo) # cf page 64 of IEEE1788
+    Interval_up(a.hi - a.lo) # cf page 64 of IEEE1788
 end
 
 doc"""

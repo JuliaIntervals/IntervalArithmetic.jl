@@ -34,6 +34,19 @@ setprecision(Interval, Float64)
     @test Interval(0.0, 1.0)/Interval(0.0,1.0) == Interval(0.0, Inf)
     @test Interval(-1.0, 1.0)/Interval(0.0,1.0) == entireinterval(c)
     @test Interval(-1.0, 1.0)/Interval(-1.0,1.0) == entireinterval(c)
+
+    @test extended_div(Interval(-30.0,-15.0), Interval(-5.0,-3.0)) == Interval(3.0, 10.0)
+    @test extended_div(@interval(-30,-15) , @interval(-5,-3)) == Interval(3.0, 10.0)
+    @test extended_div(1.0..2.0, 0.1..1.0) == Interval(1, 20)
+    @test extended_div(a, c) == Interval(2.5e-02, 4.4e+00)
+    @test extended_div(c, Interval(4.0)) == Interval(6.25e-02, 1e+00)
+    @test extended_div(c, zero(c)) == emptyinterval(c)
+    @test extended_div(Interval( 0.0, 1.0), Interval(0.0,1.0)) == Interval(0.0, Inf)
+    @test extended_div(Interval(-1.0, 1.0), Interval(0.0,1.0)) == entireinterval(c)
+    @test extended_div(Interval(-1.0, 1.0), Interval(-1.0,1.0)) == entireinterval(c)
+    @test extended_div(Interval(1.0, 2.0), Interval(-4.0, 4.0)) == [(-∞.. -0.25), (0.25..∞)]
+    @test extended_div(Interval(-1.0, -2.0), Interval(-2.0, 4.0)) == [(-∞.. -0.5), (1.0..∞)]
+
     a = @interval(1.e-20)
     @test a == Interval(1.0e-20, 1.0000000000000001e-20)
     @test diam(a) == eps(1.e-20)
