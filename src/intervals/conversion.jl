@@ -12,15 +12,24 @@ promote_rule(::Type{BigFloat}, ::Type{Interval{T}}) where T<:Real =
     Interval{promote_type(T, BigFloat)}
 
 
+# convert methods:
+convert(::Type{Interval{T}}, x) where {T} = closure(Interval{T}, x)
+convert(::Type{Interval{T}}, x::T) where {T} = Interval{T}(x)
+convert(::Type{Interval{T}}, x::Interval{T}) where {T} = x
+convert(::Type{Interval{T}}, x::Interval) where {T} = closure(Interval{T}, x)
+
+convert(::Type{Interval}, x) = closure(Interval, x)
+convert(::Type{Interval}, x::Real) = (T = typeof(float(x)); convert(Interval{T}, x))
+convert(::Type{Interval}, x::Interval) = x
+
+# Integer intervals:
+closure(::Type{Interval{T}}, x::T) where {T<:Integer} = Interval{T}(x)
 
 # Floating point intervals:
-
-convert(::Type{Interval{T}}, x::AbstractString) where T<:AbstractFloat =
+closure(::Type{Interval{T}}, x::AbstractString) where T<:AbstractFloat =
     parse(Interval{T}, x)
 
-convert(::Type{Interval}, x::AbstractString) = convert(Interval{Float64}, x)
-
-function convert(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:Real}
+function closure(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:Real}
     isinf(x) && return wideinterval(T(x))
 
     Interval{T}( T(x, RoundDown), T(x, RoundUp) )
@@ -28,7 +37,7 @@ function convert(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:Real}
     # use @round_up and @round_down here?
 end
 
-function convert(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:AbstractFloat}
+function closure(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:AbstractFloat}
     isinf(x) && return wideinterval(x)#Interval{T}(prevfloat(T(x)), nextfloat(T(x)))
     # isinf(x) && return Interval{T}(prevfloat(x), nextfloat(x))
 
@@ -41,50 +50,37 @@ function convert(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:Abstract
         return Interval(parse(T, xstr, RoundDown), parse(T, xstr, RoundUp))
     end
 
-    return convert(Interval{T}, xrat)
+    return closure(Interval{T}, xrat)
 end
 
-convert(::Type{Interval{T}}, x::Interval{T}) where T<:AbstractFloat = x
-
-function convert(::Type{Interval{T}}, x::Interval) where T<:AbstractFloat
+function closure(::Type{Interval{T}}, x::Interval) where T<:AbstractFloat
     Interval{T}( T(x.lo, RoundDown), T(x.hi, RoundUp) )
 end
 
-
 # Complex numbers:
-convert(::Type{Interval{T}}, x::Complex{Bool}) where T<:AbstractFloat =
+closure(::Type{Interval{T}}, x::Complex{Bool}) where T<:AbstractFloat =
     (x == im) ? one(T)*im : throw(ArgumentError("Complex{Bool} not equal to im"))
 
 
 # Rational intervals
-function convert(::Type{Interval{Rational{Int}}}, x::Irrational)
-    a = float(convert(Interval{BigFloat}, x))
-    convert(Interval{Rational{Int}}, a)
+function closure(::Type{Interval{Rational{Int}}}, x::Irrational)
+    a = float(closure(Interval{BigFloat}, x))
+    closure(Interval{Rational{Int}}, a)
 end
 
-function convert(::Type{Interval{Rational{BigInt}}}, x::Irrational)
-    a = convert(Interval{BigFloat}, x)
-    convert(Interval{Rational{BigInt}}, a)
+function closure(::Type{Interval{Rational{BigInt}}}, x::Irrational)
+    a = closure(Interval{BigFloat}, x)
+    closure(Interval{Rational{BigInt}}, a)
 end
 
-convert(::Type{Interval{Rational{T}}}, x::S) where {T<:Integer, S<:Integer} =
+closure(::Type{Interval{Rational{T}}}, x::S) where {T<:Integer, S<:Integer} =
     Interval(x*one(Rational{T}))
 
-convert(::Type{Interval{Rational{T}}}, x::Rational{S}) where
+closure(::Type{Interval{Rational{T}}}, x::Rational{S}) where
     {T<:Integer, S<:Integer} = Interval(x*one(Rational{T}))
 
-convert(::Type{Interval{Rational{T}}}, x::S) where {T<:Integer, S<:Float64} =
+closure(::Type{Interval{Rational{T}}}, x::S) where {T<:Integer, S<:Float64} =
     Interval(rationalize(T, x))
 
-convert(::Type{Interval{Rational{T}}}, x::S) where {T<:Integer, S<:BigFloat} =
+closure(::Type{Interval{Rational{T}}}, x::S) where {T<:Integer, S<:BigFloat} =
     Interval(rationalize(T, x))
-
-
-# conversion to Interval without explicit type:
-function convert(::Type{Interval}, x::Real)
-    T = typeof(float(x))
-
-    return convert(Interval{T}, x)
-end
-
-convert(::Type{Interval}, x::Interval) = x

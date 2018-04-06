@@ -18,7 +18,7 @@ const parameters = IntervalParameters()
 doc"`big53` creates an equivalent `BigFloat` interval to a given `Float64` interval."
 function big53(a::Interval{Float64})
     setprecision(Interval, 53) do  # precision of Float64
-        convert(Interval{BigFloat}, a)
+        closure(Interval{BigFloat}, a)
     end
 end
 
@@ -41,7 +41,7 @@ function setprecision(::Type{Interval}, ::Type{T}, prec::Integer) where T<:Abstr
 
     parameters.precision_type = T
     parameters.precision = prec
-    parameters.pi = convert(Interval{BigFloat}, pi)
+    parameters.pi = closure(Interval{BigFloat}, pi)
 
     prec
 end
@@ -69,7 +69,7 @@ setprecision(::Type{Interval}, t::Tuple) = setprecision(Interval, t...)
 precision(::Type{Interval}) = (parameters.precision_type, parameters.precision)
 
 
-const float_interval_pi = convert(Interval{Float64}, pi)  # does not change
+const float_interval_pi = closure(Interval{Float64}, pi)  # does not change
 
 pi_interval(::Type{BigFloat}) = parameters.pi
 pi_interval(::Type{Float64})  = float_interval_pi
@@ -82,6 +82,6 @@ end
 
 
 
-float(x::Interval{T}) where T = convert( Interval{float(T)}, x)  # https://github.com/dpsanders/IntervalArithmetic.jl/issues/174
+float(x::Interval{T}) where T = closure( Interval{float(T)}, x)  # https://github.com/dpsanders/IntervalArithmetic.jl/issues/174
 
-big(x::Interval) = convert(Interval{BigFloat}, x)
+big(x::Interval) = closure(Interval{BigFloat}, x)

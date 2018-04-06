@@ -64,8 +64,8 @@ using Base.Test
     @test convert(Interval, eu) == @interval(eu)
     @test convert(Interval, BigInt(1)) == Interval(BigInt(1))
     @test convert(Interval, 1//10) == @interval(1//10)
-    @test convert(Interval, 0.1) == Interval(0.09999999999999999, 0.1)
-    @test convert(Interval, big"0.1") == big"0.1"..big"0.1"
+    # @test convert(Interval, 0.1) == Interval(0.09999999999999999, 0.1) # This behavior is undesired.
+    # @test convert(Interval, big"0.1") == big"0.1"..big"0.1" # This behavior is undesired.
 
     @test convert(Interval{Rational{Int}}, 0.1) == Interval(1//10)
     # @test convert(Interval{Rational{BigInt}}, pi) == Interval{Rational{BigInt}}(pi)
@@ -73,8 +73,8 @@ using Base.Test
     ## promotion
     @test promote(Interval(2//1,3//1), Interval(1, 2)) ==
         (Interval(2.0,3.0), Interval(1.0,2.0))
-    @test promote(Interval(1.5), parse(BigFloat, "2.1")) ==
-        (Interval(BigFloat(1.5)), big"2.1"..big"2.1")
+    # @test promote(Interval(1.5), parse(BigFloat, "2.1")) ==
+    #     (Interval(BigFloat(1.5)), big"2.1"..big"2.1") # This behavior is undesired.
     @test promote(Interval(1.0), pi) == (Interval(1.0), @interval(pi))
 
     # Constructors from the macros @interval, @floatinterval @biginterval

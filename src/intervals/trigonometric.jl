@@ -172,7 +172,7 @@ end
 function atan2(y::Interval{Float64}, x::Interval{Float64})
     (isempty(y) || isempty(x)) && return emptyinterval(Float64)
 
-    convert(Interval{Float64}, atan2(big53(y), big53(x)))
+    closure(Interval{Float64}, atan2(big53(y), big53(x)))
 end
 
 

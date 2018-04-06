@@ -64,6 +64,6 @@ for f in (:tanh, :asinh, :acosh, :atanh)
     @eval function ($f)(a::Interval{Float64})
         isempty(a) && return a
 
-        convert(Interval{Float64}, ($f)(big53(a)) )
+        closure(Interval{Float64}, ($f)(big53(a)) )
     end
 end

@@ -56,7 +56,7 @@ Interval(x::Complex) = Interval(real(x)) + im*Interval(imag(x))
 
 Interval{T}(x) where T = Interval(convert(T, x))
 
-Interval{T}(x::Interval) where T = convert(Interval{T}, x)
+Interval{T}(x::Interval) where T = closure(Interval{T}, x)
 
 """
     is_valid_interval(a::Real, b::Real)
@@ -122,7 +122,9 @@ include("hyperbolic.jl")
 
 # Syntax for intervals
 
-a..b = interval(convert(Interval, a).lo, convert(Interval, b).hi)
+function ..(a::T, b::S) where {T, S}
+    interval(closure(Interval{T}, a).lo, closure(Interval{S}, b).hi)
+end
 
 # ..(a::Integer, b::Integer) = interval(a, b)
 # ..(a::Integer, b::Real) = interval(a, nextfloat(float(b)))
@@ -135,3 +137,4 @@ macro I_str(ex)  # I"[3,4]"
 end
 
 a ± b = (a-b)..(a+b)
+±(a::Interval, b) = (a.lo - b)..(a.hi + b)
