@@ -22,6 +22,52 @@ convert(::Type{Interval}, x) = closure(Interval, x)
 convert(::Type{Interval}, x::Real) = (T = typeof(float(x)); convert(Interval{T}, x))
 convert(::Type{Interval}, x::Interval) = x
 
+"""
+    closure(::Type{<:Interval}, x)
+
+Construct the tightest interval of a given type that contains the value `x`.
+
+If `x` is an `AbstractString`, the interval will be created by calling `parse`.
+
+# Examples
+
+Construct an `Interval{Float64}` containing a given `BigFloat`:
+
+```julia
+julia> x = big"0.1"
+1.000000000000000000000000000000000000000000000000000000000000000000000000000002e-01
+
+julia> i = IntervalArithmetic.closure(Interval{Float64}, x)
+[0.0999999, 0.100001]
+
+julia> i isa Interval{Float64}
+true
+
+julia> i.lo <= x <= i.hi
+true
+
+julia> i.hi === nextfloat(i.lo)
+true
+```
+
+Construct an `Interval{Float32}` containing a the real number 0.1 in two ways:
+
+```julia
+julia> i1 = IntervalArithmetic.closure(Interval{Float32}, "0.1")
+[0.0999999, 0.100001]
+
+julia> i2 = IntervalArithmetic.closure(Interval{Float32}, 1//10)
+[0.0999999, 0.100001]
+
+julia> i1 === i2
+true
+
+julia> i.lo <= 1//10 <= i.hi
+true
+```
+"""
+function closure end
+
 # Integer intervals:
 closure(::Type{Interval{T}}, x::T) where {T<:Integer} = Interval{T}(x)
 
