@@ -18,7 +18,6 @@ convert(::Type{Interval{T}}, x::T) where {T} = Interval{T}(x)
 convert(::Type{Interval{T}}, x::Interval{T}) where {T} = x
 convert(::Type{Interval{T}}, x::Interval) where {T} = closure(Interval{T}, x)
 
-convert(::Type{Interval}, x) = closure(Interval, x)
 convert(::Type{Interval}, x::Real) = (T = typeof(float(x)); convert(Interval{T}, x))
 convert(::Type{Interval}, x::Interval) = x
 

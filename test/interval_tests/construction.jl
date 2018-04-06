@@ -64,6 +64,7 @@ using Base.Test
     @test convert(Interval, eu) == @interval(eu)
     @test convert(Interval, BigInt(1)) == Interval(BigInt(1))
     @test convert(Interval, 1//10) == @interval(1//10)
+    @test convert(Interval, Interval(0.1, 0.2)) === Interval(0.1, 0.2)
 
     @test convert(Interval{Rational{Int}}, 0.1) == Interval(1//10)
     # @test convert(Interval{Rational{BigInt}}, pi) == Interval{Rational{BigInt}}(pi)
