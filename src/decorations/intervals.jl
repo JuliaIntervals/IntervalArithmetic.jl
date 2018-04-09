@@ -112,7 +112,7 @@ convert(::Type{DecoratedInterval{T}}, x::S) where {T<:Real, S<:Integer} =
 # end
 function convert(::Type{DecoratedInterval{T}}, xx::DecoratedInterval) where T<:Real
     x = interval_part(xx)
-    x = closure(Interval{T},x)
+    x = atomic(Interval{T},x)
     DecoratedInterval( x, decoration(xx) )
 end
 
