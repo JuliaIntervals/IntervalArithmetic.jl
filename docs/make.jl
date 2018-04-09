@@ -7,6 +7,7 @@ makedocs(
     pages = [
         "Package" => "index.md",
         "Interval Arithmetic" => "intro.md",
+        "Constructing interals" => "construction.md"
         "Basic usage" => "usage.md",
         "Decorations" => "decorations.md",
         "Multi-dimensional boxes" => "multidim.md",
