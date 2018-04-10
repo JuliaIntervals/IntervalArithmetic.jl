@@ -1,6 +1,8 @@
 # Constructing intervals
 
-Constructing an interval is the most basic operation in the library. There are several methods to construct intervals:
+Constructing an interval is the most basic operation in the library. There are several methods to construct intervals listed below.
+
+Note that a valid interval `[a, b]` must have `a ≤ b`.
 
 - `interval(x)`
 
@@ -53,6 +55,11 @@ Constructing an interval is the most basic operation in the library. There are s
   Interval(0.09999999999999999, 0.1)
   ```
 
+- `m ± r`
+
+  This creates the interval with midpoint `m` and radius `r` as
+  `(m - r) .. (m + r)`.
+
 - `@interval expr`
 
   The `@interval` macro takes a Julia expression and calculates an interval that is guaranteed to contain the true result of the calculation, treating literals in the same way as the `..` operator, e.g.
@@ -67,4 +74,11 @@ Constructing an interval is the most basic operation in the library. There are s
 
   `Interval(x1, x2)`
 
-  `Interval` is the underlying interval constructor. Since v0.12 of the package, however, *for efficiency reasons this performs no tests on the validity of the interval*. As a result, we recommend that *this should not be used in user code*; it should only be used in library functions which guarantee that the interval is already of the correct form.
+  `Interval` is the underlying interval constructor. Since v0.12 of the package, however, *for efficiency reasons this performs no tests on the validity of the interval, and allows invalid intervals to be created*. As a result, we recommend that *this should not be used in user code*; it should only be used in library functions which guarantee that the interval is already of the correct form.
+
+  For example, the following creates an invalid interval which will cause problems later:
+
+  ```
+  julia> Interval(3, 2)  # do *not* do this
+  [3, 2]
+  ```
