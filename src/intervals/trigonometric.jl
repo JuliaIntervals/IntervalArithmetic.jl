@@ -14,7 +14,8 @@ half_pi(::Type{Float64}) = multiply_by_positive_constant(0.5, pi_interval(Float6
 half_pi(::Type{T}) where {T} = 0.5 * pi_interval(T)
 half_pi(x::T) where {T<:AbstractFloat} = half_pi(T)
 
-two_pi(::Type{T})  where {T} = multiply_by_positive_constant(2.0, pi_interval(T))
+two_pi(::Type{Float64}) = multiply_by_positive_constant(2.0, pi_interval(Float64))
+two_pi(::Type{T}) where {T} = 2 * pi_interval(T)
 
 range_atan2(::Type{T}) where {T<:Real} = Interval(-(pi_interval(T).hi), pi_interval(T).hi)
 half_range_atan2(::Type{T}) where {T} = (temp = half_pi(T); Interval(-(temp.hi), temp.hi) )
