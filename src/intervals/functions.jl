@@ -266,3 +266,22 @@ for f in (:log, :log2, :log10, :log1p)
 
         end
 end
+
+for f in (:erf, :erfc)
+    @eval function($f)(x::BigFloat, r::RoundingMode)
+        setrounding(BigFloat, r) do
+            ($f)(x)
+        end
+    end
+
+end
+
+function erf(a::Interval{T}) where T
+    isempty(a) && return a
+    @round( erf(a.lo), erf(a.hi) )
+end
+
+function erfc(a::Interval{T}) where T
+    isempty(a) && return a
+    @round( erf(a.hi), erfc(a.lo) )
+end
