@@ -19,8 +19,8 @@ This is a rather indirect way to determine if π/2 and 3π/2 are contained
 in the interval; cf. the formula for sine of an interval in
 Tucker, *Validated Numerics*."""
 
-function find_quadrants(x::AbstractFloat)
-    temp = x / half_pi(x)
+function find_quadrants(x::T) where {T<:AbstractFloat}
+    temp = atomic(Interval{T}, x) / half_pi(x)
     (floor(temp.lo), floor(temp.hi))
 end
 
@@ -172,7 +172,7 @@ end
 function atan2(y::Interval{Float64}, x::Interval{Float64})
     (isempty(y) || isempty(x)) && return emptyinterval(Float64)
 
-    convert(Interval{Float64}, atan2(big53(y), big53(x)))
+    atomic(Interval{Float64}, atan2(big53(y), big53(x)))
 end
 
 

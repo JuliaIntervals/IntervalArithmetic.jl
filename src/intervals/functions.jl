@@ -7,7 +7,7 @@
 
 # Write explicitly like this to avoid ambiguity warnings:
 for T in (:Integer, :Rational, :Float64, :BigFloat, :Interval)
-    @eval ^(a::Interval{Float64}, x::$T) = convert(Interval{Float64}, big53(a)^x)
+    @eval ^(a::Interval{Float64}, x::$T) = atomic(Interval{Float64}, big53(a)^x)
 end
 
 
@@ -98,7 +98,7 @@ function ^(a::Interval{BigFloat}, x::BigFloat)
     a = a ∩ domain
     (isempty(x) || isempty(a)) && return emptyinterval(a)
 
-    xx = convert(Interval{BigFloat}, x)
+    xx = atomic(Interval{BigFloat}, x)
 
     # @round() can't be used directly, because both arguments may
     # Inf or -Inf, which throws an error
@@ -135,7 +135,7 @@ end
 function ^(a::Interval{Rational{T}}, x::AbstractFloat) where T<:Integer
     a = Interval(a.lo.num/a.lo.den, a.hi.num/a.hi.den)
     a = a^x
-    convert(Interval{Rational{T}}, a)
+    atomic(Interval{Rational{T}}, a)
 end
 
 # Rational power
@@ -149,13 +149,13 @@ function ^(a::Interval{BigFloat}, r::Rational{S}) where S<:Integer
         return emptyinterval(a)
     end
 
-    isinteger(r) && return convert(Interval{T}, a^round(S,r))
+    isinteger(r) && return atomic(Interval{T}, a^round(S,r))
     r == one(S)//2 && return sqrt(a)
 
     a = a ∩ domain
     (isempty(r) || isempty(a)) && return emptyinterval(a)
 
-    y = convert(Interval{BigFloat}, r)
+    y = atomic(Interval{BigFloat}, r)
 
     a^y
 end
@@ -245,7 +245,7 @@ for f in (:exp2, :exp10)
             end
         end
 
-    @eval ($f)(a::Interval{Float64}) = convert(Interval{Float64}, $f(big53(a)))  # no CRlibm version
+    @eval ($f)(a::Interval{Float64}) = atomic(Interval{Float64}, $f(big53(a)))  # no CRlibm version
 
     @eval function ($f)(a::Interval{BigFloat})
             isempty(a) && return a

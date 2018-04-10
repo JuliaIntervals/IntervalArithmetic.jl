@@ -81,13 +81,13 @@ by calling `transform`."""
 function make_interval(T, expr1, expr2)
     # @show expr1, expr2
 
-    expr1 = transform(expr1, :convert, :(Interval{$T}))
+    expr1 = transform(expr1, :atomic, :(Interval{$T}))
 
     if isempty(expr2)  # only one argument
         return :(Interval($expr1))
     end
 
-    expr2 = transform(expr2[1], :convert, :(Interval{$T}))
+    expr2 = transform(expr2[1], :atomic, :(Interval{$T}))
 
     :(interval(($expr1).lo, ($expr2).hi))
 end

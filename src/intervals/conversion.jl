@@ -12,15 +12,69 @@ promote_rule(::Type{BigFloat}, ::Type{Interval{T}}) where T<:Real =
     Interval{promote_type(T, BigFloat)}
 
 
+# convert methods:
+convert(::Type{Interval{T}}, x) where {T} = atomic(Interval{T}, x)
+convert(::Type{Interval{T}}, x::T) where {T} = Interval{T}(x)
+convert(::Type{Interval{T}}, x::Interval{T}) where {T} = x
+convert(::Type{Interval{T}}, x::Interval) where {T} = atomic(Interval{T}, x)
+
+convert(::Type{Interval}, x::Real) = (T = typeof(float(x)); convert(Interval{T}, x))
+convert(::Type{Interval}, x::Interval) = x
+
+"""
+    atomic(::Type{<:Interval}, x)
+
+Construct the tightest interval of a given type that contains the value `x`.
+
+If `x` is an `AbstractString`, the interval will be created by calling `parse`.
+
+# Examples
+
+Construct an `Interval{Float64}` containing a given `BigFloat`:
+
+```julia
+julia> x = big"0.1"
+1.000000000000000000000000000000000000000000000000000000000000000000000000000002e-01
+
+julia> i = IntervalArithmetic.atomic(Interval{Float64}, x)
+[0.0999999, 0.100001]
+
+julia> i isa Interval{Float64}
+true
+
+julia> i.lo <= x <= i.hi
+true
+
+julia> i.hi === nextfloat(i.lo)
+true
+```
+
+Construct an `Interval{Float32}` containing a the real number 0.1 in two ways:
+
+```julia
+julia> i1 = IntervalArithmetic.atomic(Interval{Float32}, "0.1")
+[0.0999999, 0.100001]
+
+julia> i2 = IntervalArithmetic.atomic(Interval{Float32}, 1//10)
+[0.0999999, 0.100001]
+
+julia> i1 === i2
+true
+
+julia> i.lo <= 1//10 <= i.hi
+true
+```
+"""
+function atomic end
+
+# Integer intervals:
+atomic(::Type{Interval{T}}, x::T) where {T<:Integer} = Interval{T}(x)
 
 # Floating point intervals:
-
-convert(::Type{Interval{T}}, x::AbstractString) where T<:AbstractFloat =
+atomic(::Type{Interval{T}}, x::AbstractString) where T<:AbstractFloat =
     parse(Interval{T}, x)
 
-convert(::Type{Interval}, x::AbstractString) = convert(Interval{Float64}, x)
-
-function convert(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:Real}
+function atomic(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:Real}
     isinf(x) && return wideinterval(T(x))
 
     Interval{T}( T(x, RoundDown), T(x, RoundUp) )
@@ -28,7 +82,7 @@ function convert(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:Real}
     # use @round_up and @round_down here?
 end
 
-function convert(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:AbstractFloat}
+function atomic(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:AbstractFloat}
     isinf(x) && return wideinterval(x)#Interval{T}(prevfloat(T(x)), nextfloat(T(x)))
     # isinf(x) && return Interval{T}(prevfloat(x), nextfloat(x))
 
@@ -41,50 +95,37 @@ function convert(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:Abstract
         return Interval(parse(T, xstr, RoundDown), parse(T, xstr, RoundUp))
     end
 
-    return convert(Interval{T}, xrat)
+    return atomic(Interval{T}, xrat)
 end
 
-convert(::Type{Interval{T}}, x::Interval{T}) where T<:AbstractFloat = x
-
-function convert(::Type{Interval{T}}, x::Interval) where T<:AbstractFloat
+function atomic(::Type{Interval{T}}, x::Interval) where T<:AbstractFloat
     Interval{T}( T(x.lo, RoundDown), T(x.hi, RoundUp) )
 end
 
-
 # Complex numbers:
-convert(::Type{Interval{T}}, x::Complex{Bool}) where T<:AbstractFloat =
+atomic(::Type{Interval{T}}, x::Complex{Bool}) where T<:AbstractFloat =
     (x == im) ? one(T)*im : throw(ArgumentError("Complex{Bool} not equal to im"))
 
 
 # Rational intervals
-function convert(::Type{Interval{Rational{Int}}}, x::Irrational)
-    a = float(convert(Interval{BigFloat}, x))
-    convert(Interval{Rational{Int}}, a)
+function atomic(::Type{Interval{Rational{Int}}}, x::Irrational)
+    a = float(atomic(Interval{BigFloat}, x))
+    atomic(Interval{Rational{Int}}, a)
 end
 
-function convert(::Type{Interval{Rational{BigInt}}}, x::Irrational)
-    a = convert(Interval{BigFloat}, x)
-    convert(Interval{Rational{BigInt}}, a)
+function atomic(::Type{Interval{Rational{BigInt}}}, x::Irrational)
+    a = atomic(Interval{BigFloat}, x)
+    atomic(Interval{Rational{BigInt}}, a)
 end
 
-convert(::Type{Interval{Rational{T}}}, x::S) where {T<:Integer, S<:Integer} =
+atomic(::Type{Interval{Rational{T}}}, x::S) where {T<:Integer, S<:Integer} =
     Interval(x*one(Rational{T}))
 
-convert(::Type{Interval{Rational{T}}}, x::Rational{S}) where
+atomic(::Type{Interval{Rational{T}}}, x::Rational{S}) where
     {T<:Integer, S<:Integer} = Interval(x*one(Rational{T}))
 
-convert(::Type{Interval{Rational{T}}}, x::S) where {T<:Integer, S<:Float64} =
+atomic(::Type{Interval{Rational{T}}}, x::S) where {T<:Integer, S<:Float64} =
     Interval(rationalize(T, x))
 
-convert(::Type{Interval{Rational{T}}}, x::S) where {T<:Integer, S<:BigFloat} =
+atomic(::Type{Interval{Rational{T}}}, x::S) where {T<:Integer, S<:BigFloat} =
     Interval(rationalize(T, x))
-
-
-# conversion to Interval without explicit type:
-function convert(::Type{Interval}, x::Real)
-    T = typeof(float(x))
-
-    return convert(Interval{T}, x)
-end
-
-convert(::Type{Interval}, x::Interval) = x
