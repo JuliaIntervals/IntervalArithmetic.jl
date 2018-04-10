@@ -10,7 +10,7 @@ For efficiency, does not check that the constant is positive.
 """
 multiply_by_positive_constant(α, x::Interval) = @round(α*x.lo, α*x.hi)
 
-half_pi(::Type{Float64}) where {T} = multiply_by_positive_constant(0.5, pi_interval(T))
+half_pi(::Type{Float64}) = multiply_by_positive_constant(0.5, pi_interval(Float64))
 half_pi(::Type{T}) where {T} = 0.5 * pi_interval(T)
 half_pi(x::T) where {T<:AbstractFloat} = half_pi(T)
 
@@ -50,6 +50,8 @@ function sin(a::Interval{T}) where T
 
     diam(a) > two_pi(T).lo && return whole_range
 
+    # The following is equiavlent to doing temp = a / half_pi  and
+    # taking floor(a.lo), floor(a.hi)
     lo_quadrant = minimum(find_quadrants(a.lo))
     hi_quadrant = maximum(find_quadrants(a.hi))
 
