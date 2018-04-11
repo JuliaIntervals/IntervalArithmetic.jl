@@ -274,7 +274,7 @@ for f in (:erf, :erfc)
         end
     end
 
-    @eval ($f)(a::Interval{Float64}) = ($f)(big53(a))
+    @eval ($f)(a::Interval{Float64}) = convert(Interval{Float64}, ($f)(big53(a)))
 
 end
 
