@@ -274,7 +274,7 @@ for f in (:erf, :erfc)
         end
     end
 
-    # @eval ($f)(a::Interval{Float64}) = atomic(Interval{Float64}, $f(big53(a)))
+    @eval ($f)(a::Interval{Float64}) = ($f)(big53(a))
 
 end
 
