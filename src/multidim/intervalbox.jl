@@ -8,7 +8,7 @@ struct IntervalBox{N,T} <: StaticVector{N, Interval{T}}
 end
 
 # StaticArrays.Size{N,T}(::Type{IntervalBox{N,T}}) = StaticArrays.Size(N) # @pure not needed, I think...
-Base.getindex(a::IntervalBox, i::Int) = a.data[i]
+Base.@propagate_inbounds Base.getindex(a::IntervalBox, i::Int) = a.data[i]
 
 
 IntervalBox(x::Interval) = IntervalBox( (x,) )  # single interval treated as tuple with one element
