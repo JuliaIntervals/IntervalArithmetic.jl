@@ -131,14 +131,19 @@ function cos(a::Interval{T}) where T
     end
 end
 
+function find_quadrants_tan(x::T) where {T}
+    temp = atomic(Interval{T}, x) / half_pi(x)
+
+    return SVector(floor(temp.lo), floor(temp.hi))
+end
 
 function tan(a::Interval{T}) where T
     isempty(a) && return a
 
     diam(a) > pi_interval(T).lo && return entireinterval(a)
 
-    lo_quadrant = minimum(find_quadrants(a.lo))
-    hi_quadrant = maximum(find_quadrants(a.hi))
+    lo_quadrant = minimum(find_quadrants_tan(a.lo))
+    hi_quadrant = maximum(find_quadrants_tan(a.hi))
 
     lo_quadrant_mod = mod(lo_quadrant, 2)
     hi_quadrant_mod = mod(hi_quadrant, 2)
