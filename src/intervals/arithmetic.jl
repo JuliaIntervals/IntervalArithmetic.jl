@@ -55,8 +55,10 @@ zero(a::Interval{T}) where T<:Real = Interval(zero(T))
 zero(::Type{Interval{T}}) where T<:Real = Interval(zero(T))
 one(a::Interval{T}) where T<:Real = Interval(one(T))
 one(::Type{Interval{T}}) where T<:Real = Interval(one(T))
-typemin(::Type{Interval{T}}) where {T} = Interval(typemin(T))
-typemax(::Type{Interval{T}}) where {T} = Interval(typemax(T))
+typemin(::Type{Interval{T}}) where T<:AbstractFloat = wideinterval(typemin(T))
+typemax(::Type{Interval{T}}) where T<:AbstractFloat = wideinterval(typemax(T))
+typemin(::Type{Interval{T}}) where T<:Integer = Interval(typemin(T))
+typemax(::Type{Interval{T}}) where T<:Integer = Interval(typemax(T))
 
 ## Addition and subtraction
 
@@ -252,7 +254,7 @@ end
 
 
 
-dist(a::Interval, b::Interval) = Interval(max(abs(a.lo-b.lo), abs(a.hi-b.hi)))
+dist(a::Interval, b::Interval) = max(abs(a.lo-b.lo), abs(a.hi-b.hi))
 eps(a::Interval) = Interval(max(eps(a.lo), eps(a.hi)))
 eps(::Type{Interval{T}}) where T<:Real = Interval(eps(T))
 
