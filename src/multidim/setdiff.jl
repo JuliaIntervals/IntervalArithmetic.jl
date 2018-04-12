@@ -1,4 +1,4 @@
-doc"""
+"""
 Returns a list of pairs (interval, label)
 label is 1 if the interval is *excluded* from the setdiff
 label is 0 if the interval is included in the setdiff
@@ -33,7 +33,7 @@ end
 #
 #     end
 # end
-doc"""
+"""
     setdiff(A::IntervalBox{N,T}, B::IntervalBox{N,T})
 
 Returns a vector of `IntervalBox`es that are in the set difference `A \ B`,
@@ -70,7 +70,7 @@ function setdiff(A::IntervalBox{N,T}, B::IntervalBox{N,T}) where {N,T}
 end
 
 
-# doc"""
+# """
 #     setdiff(A::IntervalBox{2,T}, B::IntervalBox{2,T})
 #
 # Returns a vector of `IntervalBox`es that are in the set difference `A \ B`,

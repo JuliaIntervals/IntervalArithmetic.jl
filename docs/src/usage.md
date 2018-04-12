@@ -263,7 +263,7 @@ julia> @interval(pi)
 To check which mode is currently set, use
 ```jldoctest usage
 julia> precision(Interval)
-(Float64,256)
+(Float64, 256)
 ```
 The result is a tuple of the type (currently `Float64` or `BigFloat`) and the current `BigFloat` precision.
 
@@ -337,7 +337,7 @@ By default, the directed rounding used corresponds to using the `RoundDown` and 
 
 ```jldoctest usage
 julia> setrounding(Interval, :slow)
-
+:slow
 ```
 
 An alternative rounding method is to perform calculations using the (standard) `RoundNearest` rounding mode, and then widen the result by one machine epsilon in each direction using `prevfloat` and `nextfloat`. This is achived by

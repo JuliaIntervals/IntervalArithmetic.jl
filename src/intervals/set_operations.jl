@@ -69,7 +69,7 @@ Returns the "interval hull" of the intervals `a` and `b`, considered as
 all of `a` and `b`.
 """
 hull(a::Interval, b::Interval) = Interval(min(a.lo, b.lo), max(a.hi, b.hi))
-# 
+#
 # hull{T,S}(a::Interval{T}, b::Interval{S}) = hull(promote(a, b)...)
 
 """
@@ -84,7 +84,7 @@ union(a::Interval, b::Interval) = hull(a, b)
 # union(a::Interval, b::Interval) = union(promote(a, b)...)
 
 
-doc"""
+"""
     setdiff(x::Interval, y::Interval)
 
 Calculate the set difference `x \ y`, i.e. the set of values

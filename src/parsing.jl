@@ -1,6 +1,6 @@
 # Functions to parse strings to intervals
 
-doc"""
+"""
     parse{T}(DecoratedInterval{T}, s::AbstractString)
 
 Parse a string of the form `"[a, b]_dec"` as a `DecoratedInterval`
@@ -29,7 +29,7 @@ function parse(::Type{DecoratedInterval{T}}, s::AbstractString) where T
 
 end
 
-doc"""
+"""
     parse{T}(Interval{T}, s::AbstractString)
 
 Parse a string as an interval. Formats allowed include:
