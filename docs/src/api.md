@@ -13,6 +13,6 @@ Order = [:type, :macro, :function, :constant]
 ```
 
 ```@autodocs
-Modules = [IntervalArithmetic]
+Module = [IntervalArithmetic]
 Order   = [:type, :macro, :function, :constant]
 ```
