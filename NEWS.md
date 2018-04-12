@@ -9,7 +9,7 @@ the thin (zero-width) interval `[x, x]`. [#114](https://github.com/JuliaInterval
   Note that this implies that numbers are no longer rounded in operations combining them with intervals, such as `0.1 + interval(0.2, 0.3)`, since `0.1` is `convert`ed to an `Interval` by Julia's promotion machinery.
 
 ### New functions
-- `atomic(Interval{T}, x)` creates the smallest atomic interval obtained by directed rounding, treating `x` as representing a real number (the old behaviour
+- The unexported function `IntervalArithmetic.atomic(Interval{T}, x)` creates the smallest atomic interval obtained by directed rounding, treating `x` as representing a real number (the old behaviour
 of `convert`). [#114](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/114)
 
 ### Performance
