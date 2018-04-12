@@ -1,5 +1,32 @@
 # What's new in `IntervalArithmetic.jl`
 
+## v0.13
+
+### Breaking changes
+- `convert(Interval{T}, x::T)` no longer does any rounding: it creates
+the thin (zero-width) interval `[x, x]`. [#114](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/114)
+
+  Note that this implies that numbers are no longer rounded in operations combining them with intervals, such as `0.1 + interval(0.2, 0.3)`, since `0.1` is `convert`ed to an `Interval` by Julia's promotion machinery.
+
+### New functions
+- The unexported function `IntervalArithmetic.atomic(Interval{T}, x)` creates the smallest atomic interval obtained by directed rounding, treating `x` as representing a real number (the old behaviour
+of `convert`). [#114](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/114)
+
+### Performance
+- `sin` and `cos` are over 6 times faster.  [#117](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/117)
+
+- Various operations with `IntervalBox`es are faster, due to consistent use of
+broadcasting. [#106](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/114)
+
+
+### Documentation
+- Documentation about interval arithmetic in general and construction of intervals
+was improved.
+
+### First contributions
+- @tkoolen and @eeshan9815 made their first contributions to the package. Many thanks!
+
+
 ## v0.12
 
 ### API changes:
