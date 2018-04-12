@@ -1,6 +1,6 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
-doc"""The `@interval` macro is the main method to create an interval.
+"""The `@interval` macro is the main method to create an interval.
 It converts each expression into a narrow interval that is guaranteed to contain the true value passed by the user in the one or two expressions passed to it.
 When passed two expressions, it takes the hull of the resulting intervals
 to give a guaranteed containing interval.
@@ -20,19 +20,19 @@ macro interval(expr1, expr2...)
     make_interval(:(parameters.precision_type), expr1, expr2)
 end
 
-doc"The `@floatinterval` macro constructs an interval with `Float64` entries."
+"The `@floatinterval` macro constructs an interval with `Float64` entries."
 macro floatinterval(expr1, expr2...)
     make_interval(Float64, expr1, expr2)
 end
 
-doc"The `@biginterval` macro constructs an interval with `BigFloat` entries."
+"The `@biginterval` macro constructs an interval with `BigFloat` entries."
 macro biginterval(expr1, expr2...)
     make_interval(BigFloat, expr1, expr2)
 end
 
 
 
-doc"""`transform` transforms a string by applying the function `f` and type
+"""`transform` transforms a string by applying the function `f` and type
 `T` to each argument, i.e. `:(x+y)` is transformed to `:(f(T, x) + f(T, y))`
 """
 transform(x::Symbol, f, T) = :($f($T, $(esc(x))))   # use if x is not an expression
@@ -74,7 +74,7 @@ end
 
 
 # Called by interval and floatinterval macros
-doc"""`make_interval` does the hard work of taking expressions
+"""`make_interval` does the hard work of taking expressions
 and making each literal (0.1, 1, etc.) into a corresponding interval construction,
 by calling `transform`."""
 

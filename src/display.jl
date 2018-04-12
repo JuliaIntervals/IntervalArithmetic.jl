@@ -7,7 +7,7 @@ end
 const display_params = DisplayParameters(:standard, false, 6)
 
 
-doc"""
+"""
     setformat(;kw)
 
 `setformat` changes how intervals are displayed using keyword arguments.
@@ -49,7 +49,7 @@ function setformat(format = display_params.format;
     display_params.sigfigs = sigfigs
 end
 
-doc"""
+"""
     @format [style::Symbol] [decorations::Bool] [sigfigs::Integer]
 
 The `@format` macro provides a simple interface to control the output format

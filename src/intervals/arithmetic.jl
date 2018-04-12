@@ -311,7 +311,7 @@ end
 # mid, diam, radius
 
 # Compare pg. 64 of the IEEE 1788-2015 standard:
-doc"""
+"""
     mid(a::Interval, α=0.5)
 
 Find the midpoint (or, in general, an intermediate point) at a distance α along the interval `a`. The default is the true midpoint at α=0.5.
@@ -347,7 +347,7 @@ end
 
 mid(a::Interval{Rational{T}}) where T = (1//2) * (a.lo + a.hi)
 
-doc"""
+"""
     diam(a::Interval)
 
 Return the diameter (length) of the `Interval` `a`.
@@ -358,7 +358,7 @@ function diam(a::Interval{T}) where T<:Real
     @round_up(a.hi - a.lo) # cf page 64 of IEEE1788
 end
 
-doc"""
+"""
     radius(a::Interval)
 
 Return the radius of the `Interval` `a`, such that

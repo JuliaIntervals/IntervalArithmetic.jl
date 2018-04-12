@@ -22,7 +22,7 @@ half_range_atan2(::Type{T}) where {T} = (temp = half_pi(T); Interval(-(temp.hi),
 pos_range_atan2(::Type{T}) where {T<:Real} = Interval(zero(T), pi_interval(T).hi)
 
 
-doc"""Finds the quadrant(s) corresponding to a given floating-point
+"""Finds the quadrant(s) corresponding to a given floating-point
 number. The quadrants are labelled as 0 for x ∈ [0, π/2], etc.
 For numbers very near a boundary of the quadrant, a tuple of two quadrants
 is returned. The minimum or maximum must then be chosen appropriately.
