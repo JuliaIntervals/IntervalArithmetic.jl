@@ -65,6 +65,21 @@ typemax(::Type{Interval{T}}) where T<:Integer = Interval(typemax(T))
 +(a::Interval) = a
 -(a::Interval) = Interval(-a.hi, -a.lo)
 
+function +(a::Interval{T}, b::T) where {T<:Real}
+    isempty(a) && return emptyinterval(T)
+    @round(a.lo + b, a.hi + b)
+end
++(b::T, a::Interval{T}) where {T<:Real} = a+b
+
+function -(a::Interval{T}, b::T) where {T<:Real}
+    isempty(a) && return emptyinterval(T)
+    @round(a.lo - b, a.hi - b)
+end
+function -(b::T, a::Interval{T}) where {T<:Real}
+    isempty(a) && return emptyinterval(T)
+    @round(b - a.lo, b - a.hi)
+end
+
 function +(a::Interval{T}, b::Interval{T}) where T<:Real
     (isempty(a) || isempty(b)) && return emptyinterval(T)
     @round(a.lo + b.lo, a.hi + b.hi)
@@ -77,6 +92,17 @@ end
 
 
 ## Multiplication
+function *(x::T, a::Interval{T}) where {T<:Real}
+    isempty(a) && return emptyinterval(T)
+    (iszero(a) || iszero(x)) && return zero(Interval{T})
+
+    if x ≥ 0.0
+        return @round(a.lo*x, a.hi*x)
+    else
+        return @round(a.hi*x, a.lo*x)
+    end
+end
+*(a::Interval{T}, x::T) where {T<:Real} = x*a
 
 function *(a::Interval{T}, b::Interval{T}) where T<:Real
     (isempty(a) || isempty(b)) && return emptyinterval(T)
@@ -100,6 +126,17 @@ end
 
 
 ## Division
+function /(a::Interval{T}, x::T) where {T<:Real}
+    isempty(a) && return emptyinterval(T)
+    iszero(x) && return emptyinterval(T)
+    iszero(a) && return zero(Interval{T})
+
+    if x ≥ 0.0
+        return @round(a.lo/x, a.hi/x)
+    else
+        return @round(a.hi/x, a.lo/x)
+    end
+end
 
 function inv(a::Interval{T}) where T<:Real
     isempty(a) && return emptyinterval(a)

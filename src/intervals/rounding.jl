@@ -31,7 +31,8 @@ struct IntervalRounding{T} end
 
 # Functions that are the same for all rounding types:
 @eval begin
-    # unary minus:
+    # unary plus and minus:
+    +(a::T, ::RoundingMode) where {T<:AbstractFloat} =  a  # ignore rounding
     -(a::T, ::RoundingMode) where {T<:AbstractFloat} = -a  # ignore rounding
 
     # zero:
