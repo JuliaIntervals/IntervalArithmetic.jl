@@ -12,7 +12,7 @@ using AdjacentFloats
 import Base:
     +, -, *, /, //, fma,
     <, >, ==, !=, ⊆, ^, <=,
-    in, zero, one, abs, abs2, real, min, max,
+    in, zero, one, eps, typemin, typemax, abs, abs2, real, min, max,
     sqrt, exp, log, sin, cos, tan, inv,
     exp2, exp10, log2, log10,
     asin, acos, atan, atan2,
@@ -28,6 +28,9 @@ import Base:
     show, showall,
     isinteger, setdiff,
     parse
+
+import SpecialFunctions: 
+    erf, erfc
 
 export
     AbstractInterval, Interval,

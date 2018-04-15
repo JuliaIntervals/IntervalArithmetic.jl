@@ -26,12 +26,13 @@ In Julia v0.6 and later (but *not* in Julia v0.5), this automatically redefines 
 =#
 
 
-doc"""Interval rounding trait type"""
+"""Interval rounding trait type"""
 struct IntervalRounding{T} end
 
 # Functions that are the same for all rounding types:
 @eval begin
-    # unary minus:
+    # unary plus and minus:
+    +(a::T, ::RoundingMode) where {T<:AbstractFloat} =  a  # ignore rounding
     -(a::T, ::RoundingMode) where {T<:AbstractFloat} = -a  # ignore rounding
 
     # zero:
@@ -241,7 +242,7 @@ function _setrounding(::Type{Interval}, rounding_type::Symbol)
     current_rounding_type[] = rounding_type
 end
 
-doc"""
+"""
     setrounding(Interval, rounding_type::Symbol)
 
 Set the rounding type used for all interval calculations on Julia v0.6 and above.

@@ -50,17 +50,35 @@ end
 const ≺ = strictprecedes # \prec
 
 
-# zero, one
+# zero, one, typemin, typemax
 zero(a::Interval{T}) where T<:Real = Interval(zero(T))
 zero(::Type{Interval{T}}) where T<:Real = Interval(zero(T))
 one(a::Interval{T}) where T<:Real = Interval(one(T))
 one(::Type{Interval{T}}) where T<:Real = Interval(one(T))
-
+typemin(::Type{Interval{T}}) where T<:AbstractFloat = wideinterval(typemin(T))
+typemax(::Type{Interval{T}}) where T<:AbstractFloat = wideinterval(typemax(T))
+typemin(::Type{Interval{T}}) where T<:Integer = Interval(typemin(T))
+typemax(::Type{Interval{T}}) where T<:Integer = Interval(typemax(T))
 
 ## Addition and subtraction
 
 +(a::Interval) = a
 -(a::Interval) = Interval(-a.hi, -a.lo)
+
+function +(a::Interval{T}, b::T) where {T<:Real}
+    isempty(a) && return emptyinterval(T)
+    @round(a.lo + b, a.hi + b)
+end
++(b::T, a::Interval{T}) where {T<:Real} = a+b
+
+function -(a::Interval{T}, b::T) where {T<:Real}
+    isempty(a) && return emptyinterval(T)
+    @round(a.lo - b, a.hi - b)
+end
+function -(b::T, a::Interval{T}) where {T<:Real}
+    isempty(a) && return emptyinterval(T)
+    @round(b - a.lo, b - a.hi)
+end
 
 function +(a::Interval{T}, b::Interval{T}) where T<:Real
     (isempty(a) || isempty(b)) && return emptyinterval(T)
@@ -74,6 +92,17 @@ end
 
 
 ## Multiplication
+function *(x::T, a::Interval{T}) where {T<:Real}
+    isempty(a) && return emptyinterval(T)
+    (iszero(a) || iszero(x)) && return zero(Interval{T})
+
+    if x ≥ 0.0
+        return @round(a.lo*x, a.hi*x)
+    else
+        return @round(a.hi*x, a.lo*x)
+    end
+end
+*(a::Interval{T}, x::T) where {T<:Real} = x*a
 
 function *(a::Interval{T}, b::Interval{T}) where T<:Real
     (isempty(a) || isempty(b)) && return emptyinterval(T)
@@ -97,6 +126,17 @@ end
 
 
 ## Division
+function /(a::Interval{T}, x::T) where {T<:Real}
+    isempty(a) && return emptyinterval(T)
+    iszero(x) && return emptyinterval(T)
+    iszero(a) && return zero(Interval{T})
+
+    if x ≥ 0.0
+        return @round(a.lo/x, a.hi/x)
+    else
+        return @round(a.hi/x, a.lo/x)
+    end
+end
 
 function inv(a::Interval{T}) where T<:Real
     isempty(a) && return emptyinterval(a)
@@ -252,8 +292,8 @@ end
 
 
 dist(a::Interval, b::Interval) = max(abs(a.lo-b.lo), abs(a.hi-b.hi))
-eps(a::Interval) = max(eps(a.lo), eps(a.hi))
-
+eps(a::Interval) = Interval(max(eps(a.lo), eps(a.hi)))
+eps(::Type{Interval{T}}) where T<:Real = Interval(eps(T))
 
 ## floor, ceil, trunc, sign, roundTiesToEven, roundTiesToAway
 function floor(a::Interval)
@@ -308,7 +348,7 @@ end
 # mid, diam, radius
 
 # Compare pg. 64 of the IEEE 1788-2015 standard:
-doc"""
+"""
     mid(a::Interval, α=0.5)
 
 Find the midpoint (or, in general, an intermediate point) at a distance α along the interval `a`. The default is the true midpoint at α=0.5.
@@ -344,7 +384,7 @@ end
 
 mid(a::Interval{Rational{T}}) where T = (1//2) * (a.lo + a.hi)
 
-doc"""
+"""
     diam(a::Interval)
 
 Return the diameter (length) of the `Interval` `a`.
@@ -355,7 +395,7 @@ function diam(a::Interval{T}) where T<:Real
     @round_up(a.hi - a.lo) # cf page 64 of IEEE1788
 end
 
-doc"""
+"""
     radius(a::Interval)
 
 Return the radius of the `Interval` `a`, such that
