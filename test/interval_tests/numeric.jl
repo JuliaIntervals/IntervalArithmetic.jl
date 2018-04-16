@@ -46,7 +46,7 @@ end
     @test 3.0 - x == 1..2
     @test 3.1 - x == Interval(1.1, 2.1)
     @test 0.1 * (1..1) == Interval(0.1, 0.1)
-    @test julia> (1..1) / 10.0 == Interval(0.09999999999999999, 0.1)
+    @test (1..1) / 10.0 == Interval(0.09999999999999999, 0.1)
 
 end
 
