@@ -29,9 +29,6 @@ import Base:
     isinteger, setdiff,
     parse
 
-import SpecialFunctions: 
-    erf, erfc
-
 export
     AbstractInterval, Interval,
     interval,
