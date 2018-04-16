@@ -39,6 +39,17 @@ setprecision(Interval, Float64)
     @test diam(a) == eps(1.e-20)
 end
 
+@testset "Arithmetic with constants" begin
+    x = 1..2
+
+    @test 0.1 + x == Interval(1.0999999999999999, 2.1)
+    @test 3.0 - x == 1..2
+    @test 3.1 - x == Interval(1.1, 2.1)
+    @test 0.1 * (1..1) == Interval(0.1, 0.1)
+    @test (1..1) / 10.0 == Interval(0.09999999999999999, 0.1)
+
+end
+
 @testset "Power tests" begin
     @test @interval(0,3) ^ 2 == Interval(0, 9)
     @test @interval(2,3) ^ 2 == Interval(4, 9)

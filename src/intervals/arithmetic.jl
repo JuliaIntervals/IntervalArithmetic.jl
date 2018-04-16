@@ -77,7 +77,7 @@ function -(a::Interval{T}, b::T) where {T<:Real}
 end
 function -(b::T, a::Interval{T}) where {T<:Real}
     isempty(a) && return emptyinterval(T)
-    @round(b - a.lo, b - a.hi)
+    @round(b - a.hi, b - a.lo)
 end
 
 function +(a::Interval{T}, b::Interval{T}) where T<:Real
