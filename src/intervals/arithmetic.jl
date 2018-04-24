@@ -193,6 +193,23 @@ function /(a::Interval{T}, b::Interval{T}) where T<:Real
     end
 end
 
+function extended_div(a::Interval{T}, b::Interval{T}) where T<:Real
+
+    S = typeof(a.lo / b.lo)
+    if 0 < b.hi && 0 > b.lo && 0 ∉ a
+        if a.hi < 0
+            return (Interval(-Inf, a.hi / b.hi), Interval(a.hi / b.lo, Inf))
+
+        elseif a.lo > 0
+            return (Interval(-Inf, a.lo / b.lo), Interval(a.lo / b.hi, Inf))
+
+        end
+
+    else
+        return (a / b, emptyinterval(S))
+    end
+end
+
 //(a::Interval, b::Interval) = a / b    # to deal with rationals
 
 
