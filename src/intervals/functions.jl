@@ -266,3 +266,23 @@ for f in (:log, :log2, :log10, :log1p)
 
         end
 end
+
+# mod
+function mod(a::Interval, y::T) where {T<:Real}
+    yy = abs(y)
+    fld_lo = fld(a.lo, yy)
+    fld_hi = fld(a.hi, yy)
+    z = zero(fld_lo)
+
+    if fld_lo != fld_hi
+        # `a` includes a discontinuity of `mod`
+        if y > 0
+            return interval(z, y)
+        else
+            return interval(y, z)
+        end
+    else
+        # no discontinuity crossed within `a`
+        return interval(mod(a.lo, y), mod(a.hi, y))
+    end
+end
