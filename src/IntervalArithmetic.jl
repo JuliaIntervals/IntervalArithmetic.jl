@@ -29,9 +29,6 @@ import Base:
     isinteger, setdiff,
     parse
 
-import SpecialFunctions: 
-    erf, erfc
-
 export
     AbstractInterval, Interval,
     interval,
@@ -47,7 +44,7 @@ export
     RoundTiesToEven, RoundTiesToAway,
     cancelminus, cancelplus, isunbounded,
     .., @I_str, ±,
-    pow,
+    pow, extended_div,
     setformat, @format
 
 export
