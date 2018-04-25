@@ -187,7 +187,7 @@ function basic_representation(a::Interval{Rational{T}}, format=nothing) where
     output
 end
 
-function subscriptify(n::Int)
+function subscriptify(n::Integer)
     dig = reverse(digits(n))
     subscript_0 = Int('₀')    # 0x2080
     join( [Char(subscript_0 + i) for i in dig])
