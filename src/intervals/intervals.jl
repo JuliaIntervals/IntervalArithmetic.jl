@@ -126,6 +126,21 @@ function ..(a::T, b::S) where {T, S}
     interval(atomic(Interval{T}, a).lo, atomic(Interval{S}, b).hi)
 end
 
+function ..(a::T, b::Irrational{S}) where {T, S}
+    R = promote_type(T, Irrational{S})
+    interval(atomic(Interval{R}, a).lo, atomic(Interval{R}, b).hi)
+end
+
+function ..(a::Irrational{T}, b::S) where {T, S}
+    R = promote_type(Irrational{T}, S)
+    interval(atomic(Interval{R}, a).lo, atomic(Interval{R}, b).hi)
+end
+
+function ..(a::Irrational{T}, b::Irrational{S}) where {T, S}
+    R = promote_type(Irrational{T}, Irrational{S})
+    interval(atomic(Interval{R}, a).lo, atomic(Interval{R}, b).hi)
+end
+
 # ..(a::Integer, b::Integer) = interval(a, b)
 # ..(a::Integer, b::Real) = interval(a, nextfloat(float(b)))
 # ..(a::Real, b::Integer) = interval(prevfloat(float(a)), b)

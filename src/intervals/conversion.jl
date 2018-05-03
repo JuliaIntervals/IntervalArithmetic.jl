@@ -116,6 +116,9 @@ function atomic(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:AbstractF
     return atomic(Interval{T}, xrat)
 end
 
+atomic(::Type{Interval{Irrational{T}}}, x::Irrational{S}) where {T, S} =
+    float(atomic(Interval{Float64}, x))
+
 function atomic(::Type{Interval{T}}, x::Interval) where T<:AbstractFloat
     Interval{T}( T(x.lo, RoundDown), T(x.hi, RoundUp) )
 end
