@@ -284,3 +284,30 @@ end
     end
     =#
 end
+
+@testset "`mod`" begin
+    r = 0.0625
+    a = r..(1+r)
+    @test mod(a, 1) == mod(a, 1.0) == interval(0,1)
+    @test mod(a, 2) == mod(a, 2.0) == a
+    @test mod(a, 2.5) == a
+    @test mod(a, -1) == mod(a, -1.0) == interval(-1,0)
+    @test mod(a, -2) == mod(a, -2.0) == -2+a
+    @test mod(a, -2.5) == -2.5+a
+
+    a = (-1+r) .. -r
+    @test mod(a, 1) == mod(a, 1.0) == 1+a
+    @test mod(a, 2) == mod(a, 2.0) == 2+a
+    @test mod(a, 2.5) == 2.5+a
+    @test mod(a, -1) == mod(a, -1.0) == a
+    @test mod(a, -2) == mod(a, -2.0) == a
+    @test mod(a, -2.5) == a
+
+    a = -r .. 1-r
+    @test mod(a, 1) == mod(a, 1.0) == interval(0,1)
+    @test mod(a, 2) == mod(a, 2.0) == interval(0,2)
+    @test mod(a, 2.5) == interval(0,2.5)
+    @test mod(a, -1) == mod(a, -1.0) == interval(-1,0)
+    @test mod(a, -2) == mod(a, -2.0) == interval(-2,0)
+    @test mod(a, -2.5) == interval(-2.5,0)
+end
