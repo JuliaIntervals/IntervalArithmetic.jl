@@ -59,7 +59,7 @@ function parse(::Type{Float64}, s::AbstractString, r::RoundingMode)
             end
         end
 
-    return Float64(a)
+    return Float64(a, r)
 end
 
 
