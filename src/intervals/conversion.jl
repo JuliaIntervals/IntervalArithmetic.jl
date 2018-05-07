@@ -82,7 +82,7 @@ atomic(::Type{Interval{T}}, x::AbstractString) where T<:AbstractFloat =
                      parse(T, string(x), RoundUp) )
     end
 
-    function atomic(::Type{Interval{T}}, x::Irrational) where {T<:AbstractFloat}
+    function atomic(::Type{Interval{T}}, x::Union{Irrational,Rational}) where {T<:AbstractFloat}
         isinf(x) && return wideinterval(T(x))
 
         Interval{T}( T(x, RoundDown), T(x, RoundUp) )
