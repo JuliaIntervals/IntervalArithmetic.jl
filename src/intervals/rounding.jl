@@ -29,32 +29,43 @@ In Julia v0.6 and later (but *not* in Julia v0.5), this automatically redefines 
 """Interval rounding trait type"""
 struct IntervalRounding{T} end
 
+
+
+
 # Functions that are the same for all rounding types:
-@eval begin
-    # unary plus and minus:
-    +(a::T, ::RoundingMode) where {T<:AbstractFloat} =  a  # ignore rounding
-    -(a::T, ::RoundingMode) where {T<:AbstractFloat} = -a  # ignore rounding
 
-    # zero:
-    zero(a::Interval{T}, ::RoundingMode) where {T<:AbstractFloat} = zero(T)
-    zero(::Type{T}, ::RoundingMode) where {T<:AbstractFloat} = zero(T)
+# unary plus and minus:
++(a::T, ::RoundingMode) where {T<:AbstractFloat} =  a  # ignore rounding
+-(a::T, ::RoundingMode) where {T<:AbstractFloat} = -a  # ignore rounding
 
-    convert(::Type{BigFloat}, x, rounding_mode::RoundingMode) =
-        setrounding(BigFloat, rounding_mode) do
-            convert(BigFloat, x)
-        end
+# zero:
+zero(a::Interval{T}, ::RoundingMode) where {T<:AbstractFloat} = zero(T)
+zero(::Type{T}, ::RoundingMode) where {T<:AbstractFloat} = zero(T)
 
-    parse(::Type{T}, x, rounding_mode::RoundingMode) where {T} = setrounding(T, rounding_mode) do
-        parse(T, x)
+convert(::Type{BigFloat}, x, rounding_mode::RoundingMode) =
+    setrounding(BigFloat, rounding_mode) do
+        convert(BigFloat, x)
     end
 
-
-    sqrt(a::T, rounding_mode::RoundingMode) where {T<:Rational} = setrounding(float(T), rounding_mode) do
-        sqrt(float(a))
-    end
-
+parse(::Type{T}, x::AbstractString, rounding_mode::RoundingMode) where {T} = setrounding(T, rounding_mode) do
+    parse(T, x)
 end
 
+# use BigFloat parser to get round issues on Windows:
+function parse(::Type{Float64}, s::AbstractString, r::RoundingMode)
+    a = setprecision(BigFloat, 53) do
+            setrounding(BigFloat, r) do
+                parse(BigFloat, s)   # correctly takes account of rounding mode
+            end
+        end
+
+    return Float64(a, r)
+end
+
+
+sqrt(a::T, rounding_mode::RoundingMode) where {T<:Rational} = setrounding(float(T), rounding_mode) do
+    sqrt(float(a))
+end
 
 
 # no-ops for rational rounding:

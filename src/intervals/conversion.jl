@@ -74,12 +74,30 @@ atomic(::Type{Interval{T}}, x::T) where {T<:Integer} = Interval{T}(x)
 atomic(::Type{Interval{T}}, x::AbstractString) where T<:AbstractFloat =
     parse(Interval{T}, x)
 
-function atomic(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:Real}
-    isinf(x) && return wideinterval(T(x))
+@static if is_windows()  # Windows cannot round properly
+    function atomic(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:Real}
+        isinf(x) && return wideinterval(T(x))
 
-    Interval{T}( T(x, RoundDown), T(x, RoundUp) )
-    # the rounding up could be done as nextfloat of the rounded down one?
-    # use @round_up and @round_down here?
+        Interval{T}( parse(T, string(x), RoundDown),
+                     parse(T, string(x), RoundUp) )
+    end
+
+    function atomic(::Type{Interval{T}}, x::Union{Irrational,Rational}) where {T<:AbstractFloat}
+        isinf(x) && return wideinterval(T(x))
+
+        Interval{T}( T(x, RoundDown), T(x, RoundUp) )
+        # the rounding up could be done as nextfloat of the rounded down one?
+        # use @round_up and @round_down here?
+    end
+
+else
+    function atomic(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:Real}
+        isinf(x) && return wideinterval(T(x))
+
+        Interval{T}( T(x, RoundDown), T(x, RoundUp) )
+        # the rounding up could be done as nextfloat of the rounded down one?
+        # use @round_up and @round_down here?
+    end
 end
 
 function atomic(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:AbstractFloat}

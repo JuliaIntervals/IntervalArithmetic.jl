@@ -106,7 +106,7 @@ using Base.Test
     @test b == @floatinterval(pi)
     @test nextfloat(b.lo) == b.hi
     @test convert(Interval{Float64}, @biginterval(0.1)) == a
-    x = typemax(Int)
+    x = typemax(Int64)
     @test @interval(x) == @floatinterval(x)
     @test isthin(@interval(x)) == false
     x = rand()
