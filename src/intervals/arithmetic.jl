@@ -376,15 +376,21 @@ Assumes 0 ≤ α ≤ 1.
 function mid(a::Interval{T}, α) where T
 
     isempty(a) && return convert(T, NaN)
-    isentire(a) && return zero(a.lo)
+
+    if isentire(a)
+        α == 0.5 && return zero(a.lo)
+        # Shift center if α != 0.5
+        lo = nextfloat(-∞)
+        hi = prevfloat(+∞)
+        return (1-α) * lo + α * hi
+    end
 
     a.lo == -∞ && return nextfloat(-∞)
     a.hi == +∞ && return prevfloat(+∞)
 
-    # @assert 0 ≤ α ≤ 1
-
-    # return (1-α) * a.lo + α * a.hi  # rounds to nearest
-    return α*(a.hi - a.lo) + a.lo  # rounds to nearest
+    # α * (a.hi - a.lo) + a.lo  is one flop less, but overflow (giving +∞) if
+    # a.hi - a.lo > prevfloat(+∞)
+    return (1-α) * a.lo + α * a.hi  # rounds to nearest
 end
 
 function mid(a::Interval{T}) where T
@@ -397,7 +403,9 @@ function mid(a::Interval{T}) where T
 
     # @assert 0 ≤ α ≤ 1
 
-    return 0.5 * (a.lo + a.hi)
+    # 0.5 * (a.lo + a.hi) is one flop less, but overflow (giving +∞) if
+    # a.hi + a.lo > prevfloat(+∞)
+    return 0.5 * a.lo + 0.5 * a.hi
 end
 
 mid(a::Interval{Rational{T}}) where T = (1//2) * (a.lo + a.hi)
