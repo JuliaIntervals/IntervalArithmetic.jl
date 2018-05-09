@@ -369,9 +369,17 @@ end
 """
     mid(a::Interval, α=0.5)
 
-Find the midpoint (or, in general, an intermediate point) at a distance α along the interval `a`. The default is the true midpoint at α=0.5.
+Find the midpoint (or, in general, an intermediate point) at a distance α along
+the interval `a`. The default is the true midpoint at α=0.5.
 
 Assumes 0 ≤ α ≤ 1.
+
+Unbounded intervals are special cases which respect, for `x` arbitrary
+    - `mid(-∞..x, α) == nextfloat(-∞)` (`α` arbitrary)
+    - `mid(x..+∞, α) == prevfloat(+∞)` (`α` arbitrary)
+    - `mid(-∞..+∞, 0.5) == 0`
+    - `mid(-∞..+∞, α) == nextfloat(-∞)` (`α < 0.5`)
+    - `mid(-∞..+∞, α) == prevfloat(+∞)` (`α > 0.5`)
 """
 function mid(a::Interval{T}, α) where T
 
@@ -380,17 +388,17 @@ function mid(a::Interval{T}, α) where T
     if isentire(a)
         α == 0.5 && return zero(a.lo)
         # Shift center if α != 0.5
-        lo = nextfloat(-∞)
-        hi = prevfloat(+∞)
-        return (1-α) * lo + α * hi
+        α < 0.5 && return nextfloat(-∞)
+        α > 0.5 && return prevfloat(+∞)
     end
 
     a.lo == -∞ && return nextfloat(-∞)
     a.hi == +∞ && return prevfloat(+∞)
 
-    # α * (a.hi - a.lo) + a.lo  is one flop less, but overflow (giving +∞) if
-    # a.hi - a.lo > prevfloat(+∞)
-    return (1-α) * a.lo + α * a.hi  # rounds to nearest
+    midpoint = α * (a.hi - a.lo) + a.lo
+    isfinite(midpoint) && return midpoint
+    # Fallback in case of overflow: a.hi - a.lo == +∞
+    return (1-α) * a.lo + α * a.hi
 end
 
 function mid(a::Interval{T}) where T
@@ -401,10 +409,9 @@ function mid(a::Interval{T}) where T
     a.lo == -∞ && return nextfloat(a.lo)
     a.hi == +∞ && return prevfloat(a.hi)
 
-    # @assert 0 ≤ α ≤ 1
-
-    # 0.5 * (a.lo + a.hi) is one flop less, but overflow (giving +∞) if
-    # a.hi + a.lo > prevfloat(+∞)
+    midpoint = 0.5 * (a.lo + a.hi)
+    isfinite(midpoint) && return midpoint
+    # Fallback in case of overflow: a.hi + a.lo == +∞ or a.hi + a.lo == -∞
     return 0.5 * a.lo + 0.5 * a.hi
 end
 

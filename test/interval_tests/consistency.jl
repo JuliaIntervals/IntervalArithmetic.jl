@@ -192,7 +192,15 @@ c = @interval(0.25, 4.0)
     @testset "mid with parameter" begin
         @test mid(0..1, 0.75) == 0.75
         @test mid(1..∞, 0.75) == prevfloat(∞)
-        @test mid(-∞..∞, 0.75) == 0
+        @test mid(-∞..∞, 0.75) > 0
+        @test mid(-∞..∞, 0.25) < 0
+    end
+
+    @testset "mid with large floats" begin
+        @test mid(0.8e308..1.2e308) == 1e308
+        @test mid(-1e308..1e308) == 0
+        @test isfinite(mid(0.8e308..1.2e308, 0.75))
+        @test isfinite(mid(-1e308..1e308, 0.75))
     end
 
     @testset "diam" begin
