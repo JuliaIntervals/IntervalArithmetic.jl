@@ -16,8 +16,15 @@ IntervalBox(x::Interval) = IntervalBox( (x,) )  # single interval treated as tup
 
 ## arithmetic operations
 # Note that standard arithmetic operations are implemented automatically by FixedSizeArrays.jl
+"""
+    mid(X::IntervalBox, α=0.5)
 
-mid(X::IntervalBox) = mid.(X)
+Return a vector of the `mid` of each interval composing the `IntervalBox`.
+
+See `mid(X::Interval, α=0.5)` for more informations.
+"""
+mid(X::IntervalBox{T}, α) where T = mid.(X, α)
+mid(X::IntervalBox{T}) where T = mid.(X)
 
 
 ## set operations

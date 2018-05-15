@@ -64,6 +64,9 @@ export
     interval_part, decoration, DecoratedInterval,
     com, dac, def, trv, ill
 
+## Union type
+export
+    Region
 
 
 
@@ -89,5 +92,9 @@ include("plot_recipes/plot_recipes.jl")
 
 include("deprecated.jl")
 
+"""
+    Region{T} = Union{Interval{T}, IntervalBox{T}}
+"""
+Region{T} = Union{Interval{T}, IntervalBox{T}}
 
 end # module IntervalArithmetic
