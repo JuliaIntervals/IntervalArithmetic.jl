@@ -95,6 +95,6 @@ include("deprecated.jl")
 """
     Region{T} = Union{Interval{T}, IntervalBox{T}}
 """
-Region{T} = Union{Interval{T}, IntervalBox{T}}
+const Region{T} = Union{Interval{T}, IntervalBox{T}}
 
 end # module IntervalArithmetic
