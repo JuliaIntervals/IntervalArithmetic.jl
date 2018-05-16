@@ -7,6 +7,7 @@ using Base.Test
     B = IntervalBox(0..2, 3..6)
 
     @test 2*A == IntervalBox(2..4, 6..8)
+    @test typeof(2*A) == IntervalBox{2, Float64}
     @test A + B == IntervalBox(1..4, 6..10)
     @test dot(A, B) == @interval(9, 28)
 
@@ -32,7 +33,17 @@ using Base.Test
     @test isa(Y, IntervalBox)
     @test length(Y) == 1
     @test Y == IntervalBox( (Interval(1., 2.),) )
+    @test typeof(Y) == IntervalBox{1, Float64}
+end
 
+@testset "Functions on boxes" begin
+    A = IntervalBox(1..2, 3..4)
+
+    @test exp(A) == IntervalBox(exp(A[1]), exp(A[2]))
+    @test typeof(exp(A)) == IntervalBox{2,Float64}
+    @test log(A) == IntervalBox(log(A[1]), log(A[2]))
+    @test sqrt(A) == IntervalBox(sqrt(A[1]), sqrt(A[2]))
+    @test inv(A) == IntervalBox(inv(A[1]), inv(A[2]))
 end
 
 # @testset "@intervalbox tests" begin
