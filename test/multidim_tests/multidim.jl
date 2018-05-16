@@ -6,10 +6,21 @@ using Base.Test
     A = IntervalBox(1..2, 3..4)
     B = IntervalBox(0..2, 3..6)
 
-    @test 2*A == IntervalBox(2..4, 6..8)
+    @test 2*A == A*2 == IntervalBox(2..4, 6..8)
     @test typeof(2*A) == IntervalBox{2, Float64}
     @test A + B == IntervalBox(1..4, 6..10)
+    @test 2 + A == IntervalBox(3..4,5..6)
+    @test A + 2 == IntervalBox(3..4,5..6)
+    @test -A == IntervalBox((-2)..(-1), (-4)..(-3))
+    @test 2 - A == IntervalBox(0..1, (-2)..(-1))
+    @test B - 2 == IntervalBox((-2)..0, 1..4)
     @test dot(A, B) == @interval(9, 28)
+    @test A * B == IntervalBox(0..4, 9..24)
+    @test A / A == IntervalBox((0.5)..2, (0.75)..(4/3))
+    @test 1 / B == IntervalBox((0.5)..Inf, (1/6)..(1/3))
+    @test B / 1 == B
+    @test A^2 == IntervalBox(1..4, 9..16)
+    @test B^0.5 == IntervalBox(@interval(0,sqrt(2)), @interval(sqrt(3),sqrt(6)))
 
     @test A ⊆ B
     @test A ∩ B == A
