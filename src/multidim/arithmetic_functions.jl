@@ -9,16 +9,15 @@
 -(a::Real, b::IntervalBox) = IntervalBox( a .- b.v )
 -(a::IntervalBox) = IntervalBox( .- a.v )
 
-# broadcast(::typeof(*), a::IntervalBox, b::IntervalBox) = IntervalBox( a .* b )
+broadcast(::typeof(*), a::IntervalBox, b::IntervalBox) = IntervalBox( a.v .* b.v )
 *(a::IntervalBox, b::Real) = IntervalBox( a.v .* b )
 *(a::Real, b::IntervalBox) = IntervalBox( a .* b.v )
 
-# broadcast(::typeof(/), a::IntervalBox, b::IntervalBox) = IntervalBox( a ./ b )
+broadcast(::typeof(/), a::IntervalBox, b::IntervalBox) = IntervalBox( a.v ./ b.v )
 /(a::IntervalBox, b::Real) = IntervalBox( a.v ./ b )
-# broadcast(::typeof(/), a::Real, b::IntervalBox) = IntervalBox( a .* inv(b) )
+broadcast(::typeof(/), a::Real, b::IntervalBox) = IntervalBox( a ./ b.v )
 
-# ^(a::IntervalBox, r::Real) = IntervalBox( a .^ r )
-# ^(a::IntervalBox, n::Int) = IntervalBox( a .^ n )
+broadcast(::typeof(^), a::IntervalBox, r::Real) = IntervalBox( a.v .^ r )
 
 funcs = (:exp, :expm1, :exp2, :exp10, :log, :log2, :log10, :log1p,
         :sqrt, :pow, :sin, :cos, :tan, :asin, :acos, :atan, :atan2,

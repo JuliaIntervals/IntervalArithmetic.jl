@@ -53,3 +53,6 @@ import Base.×
 IntervalBox(x::Interval, ::Type{Val{n}}) where {n} = IntervalBox(SVector(ntuple(i->x, Val{n})))
 
 IntervalBox(x::Interval, n::Int) = IntervalBox(x, Val{n})
+
+dot(x::IntervalBox, y::IntervalBox) = dot(x.v, y.v)
+length(x::IntervalBox) = length(x.v)

@@ -28,7 +28,7 @@ import Base:
     show, showall,
     isinteger, setdiff,
     parse,
-    broadcast
+    broadcast, dot, length
 
 export
     AbstractInterval, Interval,
