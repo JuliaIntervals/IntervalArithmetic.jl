@@ -14,4 +14,5 @@
 
 /(a::IntervalBox, b::Real) = IntervalBox( a.v ./ b )
 
-broadcast(f, X::IntervalBox) = IntervalBox(f.(X.v))
+Base.broadcast(f, X::IntervalBox) = IntervalBox(f.(X.v))
+Base.broadcast(f, X::IntervalBox, Y::IntervalBox) = IntervalBox( f.(X.v, Y.v) )

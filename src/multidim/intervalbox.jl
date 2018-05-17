@@ -7,10 +7,10 @@ struct IntervalBox{N,T}
     v::SVector{N,Interval{T}}
 end
 
-IntervalBox(x::Interval) = IntervalBox( SVector(x) )  # single interval treated as tuple with one element
+# IntervalBox(x::Interval) = IntervalBox( SVector(x) )  # single interval treated as tuple with one element
 
-IntervalBox(x...) = IntervalBox(SVector(x))
-
+IntervalBox(x::Interval...) = IntervalBox(SVector(x))
+IntervalBox(x::Tuple{T}) where {T<:Interval} = IntervalBox(SVector(x))
 
 Base.getindex(X::IntervalBox, i) = X.v[i]
 
@@ -46,9 +46,9 @@ emptyinterval(X::IntervalBox{N,T}) where {N,T} = IntervalBox(emptyinterval.(X.v)
 
 import Base.×
 ×(a::Interval...) = IntervalBox(a...)
-×(a::Interval, b::IntervalBox) = IntervalBox(a, b...)
-×(a::IntervalBox, b::Interval) = IntervalBox(a..., b)
-×(a::IntervalBox, b::IntervalBox) = IntervalBox(a..., b...)
+×(a::Interval, b::IntervalBox) = IntervalBox(a, b.v...)
+×(a::IntervalBox, b::Interval) = IntervalBox(a.v..., b)
+×(a::IntervalBox, b::IntervalBox) = IntervalBox(a.v..., b.v...)
 
 IntervalBox(x::Interval, ::Type{Val{n}}) where {n} = IntervalBox(SVector(ntuple(i->x, Val{n})))
 

@@ -43,7 +43,7 @@ Algorithm: Start from the total overlap (in all directions);
 expand each direction in turn.
 """
 function setdiff(A::IntervalBox{N,T}, B::IntervalBox{N,T}) where {N,T}
-    X = [labelled_setdiff(a,b) for (a, b) in zip(A, B)]
+    X = [labelled_setdiff(a, b) for (a, b) in zip(A.v, B.v)]
     # ordered such that the first in each is the excluded interval
 
     first = [ i[1] for i in X ]
@@ -61,7 +61,7 @@ function setdiff(A::IntervalBox{N,T}, B::IntervalBox{N,T}) where {N,T}
         for which in X[dimension][2:end]
             excluded[dimension] = which[1]
             push!(result_list,
-                IntervalBox(excluded[1:dimension]..., A[dimension+1:end]...))
+                IntervalBox(excluded[1:dimension]..., A[dimension+1:N]...))
         end
     end
 
