@@ -245,10 +245,10 @@ function representation(X::IntervalBox, format=nothing)
     end
 
     if display_params.format == :full
-        return string("IntervalBox(", join(X, ", "), ")")
+        return string("IntervalBox(", join(X.v, ", "), ")")
 
     else
-        return join(X, " × ")
+        return join(X.v, " × ")
     end
 
 end
