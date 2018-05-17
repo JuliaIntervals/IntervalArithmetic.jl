@@ -35,7 +35,7 @@ export
     @interval, @biginterval, @floatinterval, @make_interval,
     diam, radius, mid, mag, mig, hull,
     emptyinterval, ∅, ∞, isempty, isinterior, isdisjoint, ⪽,
-    precedes, strictprecedes, ≺,
+    precedes, strictprecedes, ≺, ⊂, ⊃, ⊇,
     entireinterval, isentire, nai, isnai, isthin, iscommon, isatomic,
     widen, inf, sup,
     parameters, eps, dist,
