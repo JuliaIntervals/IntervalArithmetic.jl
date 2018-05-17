@@ -27,7 +27,8 @@ import Base:
     isfinite, isnan,
     show, showall,
     isinteger, setdiff,
-    parse
+    parse,
+    broadcast
 
 export
     AbstractInterval, Interval,
