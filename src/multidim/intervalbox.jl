@@ -3,33 +3,33 @@
 """An `IntervalBox` is an `N`-dimensional rectangular box, given
 by a Cartesian product of `N` `Interval`s.
 """
-struct IntervalBox{N,T} <: StaticVector{N, Interval{T}}
-    data::NTuple{N,Interval{T}}
+struct IntervalBox{N,T}
+    v::SVector{N,Interval{T}}
 end
 
-# StaticArrays.Size{N,T}(::Type{IntervalBox{N,T}}) = StaticArrays.Size(N) # @pure not needed, I think...
-Base.@propagate_inbounds Base.getindex(a::IntervalBox, i::Int) = a.data[i]
+IntervalBox(x::Interval) = IntervalBox( SVector(x) )  # single interval treated as tuple with one element
+
+IntervalBox(x...) = IntervalBox(SVector(x))
 
 
-IntervalBox(x::Interval) = IntervalBox( (x,) )  # single interval treated as tuple with one element
-
+Base.getindex(X::IntervalBox, i) = X.v[i]
 
 ## arithmetic operations
 # Note that standard arithmetic operations are implemented automatically by FixedSizeArrays.jl
 
-mid(X::IntervalBox) = mid.(X)
+mid(X::IntervalBox) = mid.(X.v)
 
 
 ## set operations
 
 # TODO: Update to use generator
 ⊆(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) where {N,T} =
-    all(X .⊆ Y)
+    all(X.v .⊆ Y.v)
 
 ∩(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) where {N,T} =
-    IntervalBox(X .∩ Y)
+    IntervalBox(X.v .∩ Y.v)
 ∪(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) where {N,T} =
-    IntervalBox(X .∪ Y)
+    IntervalBox(X.v .∪ Y.v)
 
 #=
 On Julia 0.6 can now write
@@ -37,11 +37,11 @@ On Julia 0.6 can now write
 =#
 
 
-isempty(X::IntervalBox) = any(isempty, X)
+isempty(X::IntervalBox) = any(isempty, X.v)
 
-diam(X::IntervalBox) = maximum(diam.(X))
+diam(X::IntervalBox) = maximum(diam.(X.v))
 
-emptyinterval(X::IntervalBox{N,T}) where {N,T} = IntervalBox(emptyinterval.(X))
+emptyinterval(X::IntervalBox{N,T}) where {N,T} = IntervalBox(emptyinterval.(X.v))
 
 
 import Base.×
