@@ -143,3 +143,9 @@ end
     @test IntervalBox(1..2, 3) == IntervalBox(1..2, Val{3})
 
 end
+
+@testset "Iteration"
+begin
+    X = IntervalBox(3..4, 5..6)
+    @test collect(X) == [3..4, 5..6]
+end

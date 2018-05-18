@@ -27,8 +27,12 @@ import Base:
     isfinite, isnan,
     show, showall,
     isinteger, setdiff,
-    parse,
-    broadcast, dot, length
+    parse
+
+import Base:  # for IntervalBox
+    broadcast, dot, length,
+    getindex, setindex,
+    start, next, done, eltype
 
 export
     AbstractInterval, Interval,
