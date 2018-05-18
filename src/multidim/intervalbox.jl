@@ -1,10 +1,10 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
 """An `IntervalBox` is an `N`-dimensional rectangular box, given
-by a Cartesian product of `N` `Interval`s.
+by a Cartesian product of a vector of `N` `Interval`s.
 """
 struct IntervalBox{N,T}
-    v::SVector{N,Interval{T}}
+    v::SVector{N, Interval{T}}
 end
 
 # IntervalBox(x::Interval) = IntervalBox( SVector(x) )  # single interval treated as tuple with one element
@@ -12,7 +12,9 @@ end
 IntervalBox(x::Interval...) = IntervalBox(SVector(x))
 IntervalBox(x::Tuple{T}) where {T<:Interval} = IntervalBox(SVector(x))
 
-Base.getindex(X::IntervalBox, i) = X.v[i]
+@propagate_inbounds Base.getindex(X::IntervalBox, i) = X.v[i]
+
+Base.setindex(X::IntervalBox, y, i) = IntervalBox( setindex(X.v, y, i) )
 
 ## arithmetic operations
 # Note that standard arithmetic operations are implemented automatically by FixedSizeArrays.jl
