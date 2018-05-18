@@ -144,8 +144,21 @@ end
 
 end
 
+@testset "getindex and setindex"
+begin
+    X = IntervalBox(3..4, 5..6)
+    @test X[1] == 3..4
+    @test X[2] == 5..6
+    @test_throws BoundsError X[3]
+
+    @test setindex(X, 5..5, 2) == IntervalBox(3..4, 5..5)
+    @test_throws BoundsError setindex(X, 5..5, 3)
+end
+
 @testset "Iteration"
 begin
     X = IntervalBox(3..4, 5..6)
-    @test collect(X) == [3..4, 5..6]
+    Y = collect(X)
+    @test Y == [3..4, 5..6]
+    @test eltype(Y) == Interval{Float64}
 end
