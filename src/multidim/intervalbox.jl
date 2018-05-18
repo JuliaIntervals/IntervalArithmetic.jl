@@ -12,7 +12,7 @@ end
 IntervalBox(x::Interval...) = IntervalBox(SVector(x))
 IntervalBox(x::Tuple{T}) where {T<:Interval} = IntervalBox(SVector(x))
 
-@propagate_inbounds Base.getindex(X::IntervalBox, i) = X.v[i]
+Base.@propagate_inbounds Base.getindex(X::IntervalBox, i) = X.v[i]
 
 Base.setindex(X::IntervalBox, y, i) = IntervalBox( setindex(X.v, y, i) )
 
