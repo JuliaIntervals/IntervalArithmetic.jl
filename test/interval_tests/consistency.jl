@@ -191,7 +191,7 @@ c = @interval(0.25, 4.0)
 
     @testset "mid with parameter" begin
         @test mid(0..1, 0.75) == 0.75
-        @test mid(1..∞, 0.75) == prevfloat(∞)
+        @test mid(1..∞, 0.75) > 0
         @test mid(-∞..∞, 0.75) > 0
         @test mid(-∞..∞, 0.25) < 0
     end

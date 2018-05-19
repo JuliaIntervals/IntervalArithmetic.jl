@@ -374,33 +374,31 @@ the interval `a`. The default is the true midpoint at α=0.5.
 
 Assumes 0 ≤ α ≤ 1.
 
-Unbounded intervals are special cases which respect, for `x` arbitrary
-    - `mid(-∞..x, α) == nextfloat(-∞)` (`α` arbitrary)
-    - `mid(x..+∞, α) == prevfloat(+∞)` (`α` arbitrary)
-    - `mid(-∞..+∞, 0.5) == 0`
-    - `mid(-∞..+∞, α) == nextfloat(-∞)` (`α < 0.5`)
-    - `mid(-∞..+∞, α) == prevfloat(+∞)` (`α > 0.5`)
+The infinite values `-∞` and `+∞` are replaced by respectively `nextfloat(-∞)`
+and `prevfloat(+∞)` for the sake of finding the shifted midpoint of the interval.
 """
 function mid(a::Interval{T}, α) where T
 
     isempty(a) && return convert(T, NaN)
 
-    if isentire(a)
-        α == 0.5 && return zero(a.lo)
-        # Shift center if α != 0.5
-        α < 0.5 && return nextfloat(-∞)
-        α > 0.5 && return prevfloat(+∞)
-    end
+    lo = (a.lo == -∞ ? nextfloat(-∞) : a.lo)
+    hi = (a.hi == +∞ ? prevfloat(+∞) : a.hi)
 
-    a.lo == -∞ && return nextfloat(-∞)
-    a.hi == +∞ && return prevfloat(+∞)
-
-    midpoint = α * (a.hi - a.lo) + a.lo
+    midpoint = α * (hi - lo) + lo
     isfinite(midpoint) && return midpoint
-    # Fallback in case of overflow: a.hi - a.lo == +∞
-    return (1-α) * a.lo + α * a.hi
+    # Fallback in case of overflow: hi - lo == +∞
+    return (1-α) * lo + α * hi
 end
 
+"""
+    mid(a::Interval)
+
+Find the midpoint of interval `a`.
+
+For intervals of the form `[-∞, x]` or `[x, +∞]` where `x` is finite, return
+respectively `nextfloat(-∞)` and `prevfloat(+∞)`. Note that it differs from the
+behavior of `mid(a, α=0.5)`.
+"""
 function mid(a::Interval{T}) where T
 
     isempty(a) && return convert(T, NaN)
