@@ -8,6 +8,15 @@ import CRlibm
 using StaticArrays
 using FastRounding
 using AdjacentFloats
+using Compat
+
+if VERSION <= v"0.7.0-DEV.2004"
+    import Base.×
+else
+    using Markdown
+    import LinearAlgebra.×
+end
+
 
 import Base:
     +, -, *, /, //, fma,

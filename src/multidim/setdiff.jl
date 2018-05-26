@@ -33,7 +33,8 @@ end
 #
 #     end
 # end
-"""
+
+@doc doc"""
     setdiff(A::IntervalBox{N,T}, B::IntervalBox{N,T})
 
 Returns a vector of `IntervalBox`es that are in the set difference `A ∖ B`,

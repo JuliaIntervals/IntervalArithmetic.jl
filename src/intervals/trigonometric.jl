@@ -29,8 +29,8 @@ is returned. The minimum or maximum must then be chosen appropriately.
 
 This is a rather indirect way to determine if π/2 and 3π/2 are contained
 in the interval; cf. the formula for sine of an interval in
-Tucker, *Validated Numerics*."""
-
+Tucker, *Validated Numerics*.
+"""
 function find_quadrants(x::T) where {T}
     temp = atomic(Interval{T}, x) / half_pi(x)
 

@@ -1,7 +1,13 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
 using IntervalArithmetic
-using Base.Test
+if VERSION < v"0.7.0-DEV.2004"
+    using Base.Test
+    const eeuler = Base.e
+else
+    using Test
+    const eeuler = Base.MathConstants.e
+end
 
 
 @testset "Constructing intervals" begin
@@ -24,7 +30,7 @@ using Base.Test
     @test Interval(1) == Interval(1.0, 1.0)
     @test size(Interval(1)) == (1,)
     @test Interval(big(1)) == Interval(1.0, 1.0)
-    @test Interval(eu) == Interval(1.0*eu)
+    @test Interval(eeuler) == Interval(1.0*eeuler)
     @test Interval(1//10) == Interval{Rational{Int}}(1//10, 1//10)
     @test Interval(BigInt(1)//10) == Interval{Rational{BigInt}}(1//10, 1//10)
     @test Interval( (1.0, 2.0) ) == Interval(1.0, 2.0)
@@ -69,7 +75,7 @@ using Base.Test
     # Conversion to Interval without type
     @test convert(Interval, 1) == Interval(1.0)
     @test convert(Interval, pi) == @interval(pi)
-    @test convert(Interval, eu) == @interval(eu)
+    @test convert(Interval, eeuler) == @interval(eeuler)
     @test convert(Interval, BigInt(1)) == Interval(BigInt(1))
     @test convert(Interval, 1//10) == @interval(1//10)
     @test convert(Interval, Interval(0.1, 0.2)) === Interval(0.1, 0.2)

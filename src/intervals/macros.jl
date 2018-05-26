@@ -77,7 +77,6 @@ end
 """`make_interval` does the hard work of taking expressions
 and making each literal (0.1, 1, etc.) into a corresponding interval construction,
 by calling `transform`."""
-
 function make_interval(T, expr1, expr2)
     # @show expr1, expr2
 

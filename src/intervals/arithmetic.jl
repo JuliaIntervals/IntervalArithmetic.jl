@@ -413,13 +413,13 @@ function diam(a::Interval{T}) where T<:Real
     @round_up(a.hi - a.lo) # cf page 64 of IEEE1788
 end
 
+# Should `radius` this yield diam(a)/2? This affects other functions!
 """
     radius(a::Interval)
 
 Return the radius of the `Interval` `a`, such that
 `a ⊆ m ± radius`, where `m = mid(a)` is the midpoint.
 """
-# Should `radius` this yield diam(a)/2? This affects other functions!
 function radius(a::Interval)
     isempty(a) && return convert(eltype(a), NaN)
     m = mid(a)

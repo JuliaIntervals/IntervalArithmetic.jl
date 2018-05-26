@@ -39,7 +39,9 @@ Parse a string as an interval. Formats allowed include:
 - "[-0x1.3p-1, 2/3]"  # use numerical expressions
 """
 function parse(::Type{Interval{T}}, s::AbstractString) where T
-    if !(contains(s, "["))  # string like "3.1"
+
+    # Check version!
+    if !(@compat occursin("[", s))  # string like "3.1"
 
         m = match(r"(.*)±(.*)", s)
         if m != nothing
@@ -79,8 +81,8 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
 
     end
 
-    expr1 = parse(lo)
-    expr2 = parse(hi)
+    @compat expr1 = Meta.parse(lo)
+    @compat expr2 = Meta.parse(hi)
 
     interval = eval(make_interval(T, expr1, [expr2]))
 

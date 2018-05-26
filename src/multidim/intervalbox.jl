@@ -80,7 +80,6 @@ isinterior(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) where {N,T} = all(isinterio
 contains_zero(X::SVector) = all(contains_zero.(X))
 contains_zero(X::IntervalBox) = all(contains_zero.(X))
 
-import Base.×
 ×(a::Interval...) = IntervalBox(a...)
 ×(a::Interval, b::IntervalBox) = IntervalBox(a, b.v...)
 ×(a::IntervalBox, b::Interval) = IntervalBox(a.v..., b)

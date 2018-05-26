@@ -15,7 +15,7 @@ const parameters = IntervalParameters()
 
 ## Precision:
 
-doc"`big53` creates an equivalent `BigFloat` interval to a given `Float64` interval."
+"`big53` creates an equivalent `BigFloat` interval to a given `Float64` interval."
 function big53(a::Interval{Float64})
     setprecision(Interval, 53) do  # precision of Float64
         atomic(Interval{BigFloat}, a)
