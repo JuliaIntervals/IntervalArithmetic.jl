@@ -13,7 +13,7 @@ promote_rule(::Type{BigFloat}, ::Type{Interval{T}}) where T<:Real =
 
 
 # convert methods:
-convert(::Type{Interval{T}}, x) where {T} = atomic(Interval{T}, x)
+convert(::Type{Interval{T}}, x::Real) where {T} = atomic(Interval{T}, x)
 convert(::Type{Interval{T}}, x::T) where {T} = Interval{T}(x)
 convert(::Type{Interval{T}}, x::Interval{T}) where {T} = x
 convert(::Type{Interval{T}}, x::Interval) where {T} = atomic(Interval{T}, x)
@@ -74,7 +74,7 @@ atomic(::Type{Interval{T}}, x::T) where {T<:Integer} = Interval{T}(x)
 atomic(::Type{Interval{T}}, x::AbstractString) where T<:AbstractFloat =
     parse(Interval{T}, x)
 
-@static if @compat Sys.iswindows()  # Windows cannot round properly
+@static if Sys.iswindows()  # Windows cannot round properly
     function atomic(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:Real}
         isinf(x) && return wideinterval(T(x))
 

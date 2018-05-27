@@ -12,6 +12,7 @@ using Compat
 
 if VERSION <= v"0.7.0-DEV.2004"
     import Base.×
+    import Compat.Sys
 else
     using Markdown
     import LinearAlgebra.×
