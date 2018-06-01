@@ -14,5 +14,12 @@
 
 /(a::IntervalBox, b::Real) = IntervalBox( a.v ./ b )
 
-Base.broadcast(f, X::IntervalBox) = IntervalBox(f.(X.v))
-Base.broadcast(f, X::IntervalBox, Y::IntervalBox) = IntervalBox( f.(X.v, Y.v) )
+
+# broadcasting:
+
+# wrap decides whether to wrap the result in an IntervalBox or not, based on the return type
+wrap(v::SVector{T}) where {T<:Interval} = IntervalBox(v)
+wrap(v) = v
+
+Base.broadcast(f, X::IntervalBox) = wrap(f.(X.v))
+Base.broadcast(f, X::IntervalBox, Y::IntervalBox) = wrap(f.(X.v, Y.v))

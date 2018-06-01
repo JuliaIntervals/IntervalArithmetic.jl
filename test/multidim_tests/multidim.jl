@@ -160,3 +160,11 @@ end
     @test Y == [3..4, 5..6]
     @test eltype(Y) == Interval{Float64}
 end
+
+@testset "Broadcasting" begin
+    X = IntervalBox(3..4, 5..6)
+
+    @test sin.(X) == IntervalBox(sin(X[1]), sin(X[2]))
+    @test mid.(X) == SVector(mid(X[1]), mid(X[2]))
+    @test diam.(X) == SVector(diam(X[1]), diam(X[2]))
+end
