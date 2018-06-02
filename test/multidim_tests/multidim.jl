@@ -1,5 +1,6 @@
 using IntervalArithmetic
 using Base.Test
+using StaticArrays
 
 
 @testset "Operations on boxes" begin

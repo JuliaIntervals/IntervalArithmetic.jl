@@ -18,7 +18,7 @@
 # broadcasting:
 
 # wrap decides whether to wrap the result in an IntervalBox or not, based on the return type
-wrap(v::SVector{T}) where {T<:Interval} = IntervalBox(v)
+wrap(v::SVector{N,T} where {N,T<:Interval}) = IntervalBox(v)
 wrap(v) = v
 
 Base.broadcast(f, X::IntervalBox) = wrap(f.(X.v))
