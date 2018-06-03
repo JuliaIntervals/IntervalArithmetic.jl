@@ -36,7 +36,7 @@ end
 """
     setdiff(A::IntervalBox{N,T}, B::IntervalBox{N,T})
 
-Returns a vector of `IntervalBox`es that are in the set difference `A \ B`,
+Returns a vector of `IntervalBox`es that are in the set difference `A ∖ B`,
 i.e. the set of `x` that are in `A` but not in `B`.
 
 Algorithm: Start from the total overlap (in all directions);
