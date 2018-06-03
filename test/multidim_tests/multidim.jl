@@ -1,14 +1,27 @@
 using IntervalArithmetic
 using Base.Test
+using StaticArrays
 
 
 @testset "Operations on boxes" begin
     A = IntervalBox(1..2, 3..4)
     B = IntervalBox(0..2, 3..6)
 
-    @test 2*A == IntervalBox(2..4, 6..8)
+    @test 2*A == A*2 == IntervalBox(2..4, 6..8)
+    @test typeof(2*A) == IntervalBox{2, Float64}
     @test A + B == IntervalBox(1..4, 6..10)
+    @test 2 + A == IntervalBox(3..4,5..6)
+    @test A + 2 == IntervalBox(3..4,5..6)
+    @test -A == IntervalBox((-2)..(-1), (-4)..(-3))
+    @test 2 - A == IntervalBox(0..1, (-2)..(-1))
+    @test B - 2 == IntervalBox((-2)..0, 1..4)
     @test dot(A, B) == @interval(9, 28)
+    @test A .* B == IntervalBox(0..4, 9..24)
+    @test A ./ A == IntervalBox((0.5)..2, (0.75)..(4/3))
+    @test 1 ./ B == IntervalBox((0.5)..Inf, (1/6)..(1/3))
+    @test B ./ 1 == B
+    @test A .^ 2 == IntervalBox(1..4, 9..16)
+    @test B .^ 0.5 == IntervalBox(@interval(0,sqrt(2)), @interval(sqrt(3),sqrt(6)))
 
     @test A ⊆ B
     @test A ∩ B == A
@@ -32,7 +45,17 @@ using Base.Test
     @test isa(Y, IntervalBox)
     @test length(Y) == 1
     @test Y == IntervalBox( (Interval(1., 2.),) )
+    @test typeof(Y) == IntervalBox{1, Float64}
+end
 
+@testset "Functions on boxes" begin
+    A = IntervalBox(1..2, 3..4)
+
+    @test exp.(A) == IntervalBox(exp(A[1]), exp(A[2]))
+    @test typeof(exp.(A)) == IntervalBox{2,Float64}
+    @test log.(A) == IntervalBox(log(A[1]), log(A[2]))
+    @test sqrt.(A) == IntervalBox(sqrt(A[1]), sqrt(A[2]))
+    @test inv.(A) == IntervalBox(inv(A[1]), inv(A[2]))
 end
 
 # @testset "@intervalbox tests" begin
@@ -120,4 +143,29 @@ end
 
     @test IntervalBox(1..2, 3) == IntervalBox(1..2, Val{3})
 
+end
+
+@testset "getindex and setindex" begin
+    X = IntervalBox(3..4, 5..6)
+    @test X[1] == 3..4
+    @test X[2] == 5..6
+    @test_throws BoundsError X[3]
+
+    @test setindex(X, 5..5, 2) == IntervalBox(3..4, 5..5)
+    @test_throws BoundsError setindex(X, 5..5, 3)
+end
+
+@testset "Iteration" begin
+    X = IntervalBox(3..4, 5..6)
+    Y = collect(X)
+    @test Y == [3..4, 5..6]
+    @test eltype(Y) == Interval{Float64}
+end
+
+@testset "Broadcasting" begin
+    X = IntervalBox(3..4, 5..6)
+
+    @test sin.(X) == IntervalBox(sin(X[1]), sin(X[2]))
+    @test mid.(X) == SVector(mid(X[1]), mid(X[2]))
+    @test diam.(X) == SVector(diam(X[1]), diam(X[2]))
 end

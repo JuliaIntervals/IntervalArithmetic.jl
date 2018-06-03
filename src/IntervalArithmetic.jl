@@ -29,6 +29,11 @@ import Base:
     isinteger, setdiff,
     parse
 
+import Base:  # for IntervalBox
+    broadcast, dot, length,
+    getindex, setindex,
+    start, next, done, eltype
+
 export
     AbstractInterval, Interval,
     interval,
