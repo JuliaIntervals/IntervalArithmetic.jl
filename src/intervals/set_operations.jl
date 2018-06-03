@@ -87,7 +87,7 @@ union(a::Interval, b::Interval) = hull(a, b)
 """
     setdiff(x::Interval, y::Interval)
 
-Calculate the set difference `x \ y`, i.e. the set of values
+Calculate the set difference `x ∖ y`, i.e. the set of values
 that are inside the interval `x` but not inside `y`.
 
 Returns an array of intervals.
