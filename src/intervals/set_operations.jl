@@ -96,7 +96,7 @@ union(a::Interval, b::Interval) = hull(a, b)
 # union(a::Interval, b::Interval) = union(promote(a, b)...)
 
 
-@doc doc"""
+"""
     setdiff(x::Interval, y::Interval)
 
 Calculate the set difference `x ∖ y`, i.e. the set of values
