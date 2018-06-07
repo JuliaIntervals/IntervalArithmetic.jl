@@ -26,6 +26,18 @@ function ⊆(a::Interval, b::Interval)
     b.lo ≤ a.lo && a.hi ≤ b.hi
 end
 
+function ⊂(a::Interval, b::Interval)
+    a == b && return false
+    a ⊆ b
+end
+
+function ⊇(a::Interval, b::Interval)
+    b ⊆ a
+end
+
+function ⊃(a::Interval, b::Interval)
+    b ⊂ a
+end
 
 # isinterior
 function isinterior(a::Interval, b::Interval)

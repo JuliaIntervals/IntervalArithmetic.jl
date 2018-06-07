@@ -93,6 +93,18 @@ c = @interval(0.25, 4.0)
         @test !(b ⪽ emptyinterval(b))
         @test emptyinterval(c) ⪽ c
         @test emptyinterval(c) ⪽ emptyinterval(c)
+        @test b ⊂ c
+        @test !(b ⊂ b)
+        @test emptyinterval(c) ⊂ c
+        @test !(c ⊂ emptyinterval(c))
+        @test c ⊃ b
+        @test !(b ⊃ b)
+        @test !(emptyinterval(c) ⊃ c)
+        @test c ⊃ emptyinterval(c)
+        @test c ⊇ b
+        @test b ⊇ b
+        @test !(emptyinterval(c) ⊇ c)
+        @test c ⊇ emptyinterval(c)
         @test isdisjoint(a, @interval(2.1))
         @test !(isdisjoint(a, b))
         @test isdisjoint(emptyinterval(a), a)
