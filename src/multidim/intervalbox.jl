@@ -31,11 +31,17 @@ eltype(::Type{IntervalBox{N,T}}) where {N,T} = Interval{T} # Note that this is d
 
 
 
+# IntervalBox(xx) = IntervalBox(Interval.(xx))
+# IntervalBox(xx::SVector) where {N,T} = IntervalBox(Interval.(xx))
+
 
 ## arithmetic operations
 # Note that standard arithmetic operations are implemented automatically by FixedSizeArrays.jl
 
-mid(X::IntervalBox) = mid.(X.v)
+mid(X::IntervalBox) = mid.(X)
+mid(X::IntervalBox, α) = mid.(X, α)
+
+big(X::IntervalBox) = big.(X)
 
 
 ## set operations
