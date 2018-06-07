@@ -134,6 +134,8 @@ end
     @test length(Y) == 3
     @test Y == IntervalBox(Interval(0, 2), Interval(3, 5), Interval(4, 8))
     @test diam(Y) == 4
+
+    @test mid(IntervalBox(0..1, 3), 0.75) == [0.75, 0.75, 0.75]
 end
 
 @testset "Constructing multidimensional IntervalBoxes" begin
