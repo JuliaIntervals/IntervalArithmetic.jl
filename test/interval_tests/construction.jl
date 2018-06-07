@@ -35,6 +35,13 @@ using Base.Test
     @test Interval{BigFloat}(1) == Interval{BigFloat}(big(1.0), big(1.0))
     @test Interval{BigFloat}(pi) == Interval{BigFloat}(big(pi), big(pi))
 
+    @test -pi..pi == @interval(-pi,pi)
+    @test 0..pi == hull(interval(0), pi_interval(Float64))
+    @test 1.2..pi == @interval(1.2, pi)
+    @test pi..big(4) == hull(pi_interval(BigFloat), interval(4))
+    @test pi..pi == pi_interval(Float64)
+    @test eu..pi == hull(@interval(eu), pi_interval(Float64))
+
     # a < Inf and b > -Inf
     @test @interval(1e300) == Interval(9.999999999999999e299, 1.0e300)
     @test @interval(-1e307) == Interval(-1.0000000000000001e307, -1.0e307)
