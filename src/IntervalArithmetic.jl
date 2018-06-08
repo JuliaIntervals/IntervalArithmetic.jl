@@ -13,8 +13,10 @@ using Compat
 if VERSION <= v"0.7.0-DEV.2004"
     import Base: ×, dot
     import Compat.Sys
+    export ⊇
 else
     using Markdown
+    import Base: ⊇
     import LinearAlgebra: ×, dot
 end
 
@@ -30,7 +32,7 @@ import Base:
     union, intersect, isempty,
     convert, promote_rule, eltype, size,
     BigFloat, float, widen, big,
-    ∩, ∪, ⊆, ⊇, eps,
+    ∩, ∪, ⊆, eps,
     floor, ceil, trunc, sign, round,
     expm1, log1p,
     precision,
