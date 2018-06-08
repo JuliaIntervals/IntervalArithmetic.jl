@@ -257,7 +257,11 @@ setprecision(Interval, Float64)
         @test isnan(mid(emptyinterval()))
         @test mid(entireinterval()) == 0.0
         @test isnan(mid(nai()))
-        @test_throws ArgumentError nai(Interval(1//2))
+        if VERSION < v"0.7.0-DEV"
+            @test_throws ArgumentError nai(Interval(1//2))
+        else
+            @test_throws InexactError nai(Interval(1//2))
+        end
     end
 
     @testset "abs, min, max, sign" begin

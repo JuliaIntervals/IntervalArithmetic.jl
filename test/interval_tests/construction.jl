@@ -47,7 +47,7 @@ end
     @test 1.2..pi == @interval(1.2, pi)
     @test pi..big(4) == hull(pi_interval(BigFloat), interval(4))
     @test pi..pi == pi_interval(Float64)
-    @test eu..pi == hull(@interval(eu), pi_interval(Float64))
+    @test eeuler..pi == hull(@interval(eeuler), pi_interval(Float64))
 
     # a < Inf and b > -Inf
     @test @interval(1e300) == Interval(9.999999999999999e299, 1.0e300)
