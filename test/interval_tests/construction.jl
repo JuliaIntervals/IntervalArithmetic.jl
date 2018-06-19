@@ -22,6 +22,7 @@ using Base.Test
 
     # Naive constructors, with no conversion involved
     @test Interval(1) == Interval(1.0, 1.0)
+    @test size(Interval(1)) == (1,)
     @test Interval(big(1)) == Interval(1.0, 1.0)
     @test Interval(eu) == Interval(1.0*eu)
     @test Interval(1//10) == Interval{Rational{Int}}(1//10, 1//10)
