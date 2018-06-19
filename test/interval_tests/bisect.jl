@@ -1,4 +1,4 @@
-using IntervalArithmetic, IntervalRootFinding
+using IntervalArithmetic
 using Base.Test
 
 
