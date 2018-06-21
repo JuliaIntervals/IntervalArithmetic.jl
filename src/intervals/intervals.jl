@@ -156,3 +156,5 @@ end
 
 a ± b = (a-b)..(a+b)
 ±(a::Interval, b) = (a.lo - b)..(a.hi + b)
+
+hash(x::Interval, h::UInt) = hash(x.hi, hash(x.lo, hash(:Interval, h)))

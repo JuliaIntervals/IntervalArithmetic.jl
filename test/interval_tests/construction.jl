@@ -311,3 +311,10 @@ end
 @testset "a..b with a > b" begin
     @test_throws ArgumentError 3..2
 end
+
+@testset "Hashing of Intervals" begin
+    x = Interval{Float64}(1, 2)
+    y = Interval{BigFloat}(1, 2)
+    @test isequal(x, y)
+    @test isequal(hash(x), hash(y))
+end
