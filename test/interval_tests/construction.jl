@@ -317,4 +317,15 @@ end
     y = Interval{BigFloat}(1, 2)
     @test isequal(x, y)
     @test isequal(hash(x), hash(y))
+
+    x = @interval(0.1)
+    y = IntervalArithmetic.big53(x)
+    @test isequal(x, y)
+    @test isequal(hash(x), hash(y))
+
+    x = interval(1, 2)
+    y = interval(1, 3)
+    @test !isequal(x, y)
+    @test !isequal(hash(x), hash(y))
+
 end
