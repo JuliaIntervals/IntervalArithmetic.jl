@@ -23,3 +23,4 @@ wrap(v) = v
 
 Base.broadcast(f, X::IntervalBox) = wrap(f.(X.v))
 Base.broadcast(f, X::IntervalBox, Y::IntervalBox) = wrap(f.(X.v, Y.v))
+Base.broadcast(f, X::IntervalBox, y) = wrap(f.(X.v, y))
