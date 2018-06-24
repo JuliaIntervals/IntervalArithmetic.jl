@@ -156,3 +156,8 @@ end
 
 a ± b = (a-b)..(a+b)
 ±(a::Interval, b) = (a.lo - b)..(a.hi + b)
+
+"""
+Computes the integer hash code for an `Interval` using the method for composite types used in `AutoHashEquals.jl`
+"""
+hash(x::Interval, h::UInt) = hash(x.hi, hash(x.lo, hash(:Interval, h)))

@@ -27,7 +27,7 @@ import Base:
     isfinite, isnan, isinf, iszero,
     show, showall,
     isinteger, setdiff,
-    parse
+    parse, hash
 
 import Base:  # for IntervalBox
     broadcast, dot, length,
