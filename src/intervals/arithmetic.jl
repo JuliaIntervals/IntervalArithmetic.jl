@@ -369,13 +369,15 @@ end
 """
     mid(a::Interval, α=0.5)
 
-Find the midpoint (or, in general, an intermediate point) at a distance α along
-the interval `a`. The default is the true midpoint at α=0.5.
+Find an intermediate point at a relative position `α`` in the interval `a`.
+The default is the true midpoint at `α = 0.5`.
 
 Assumes 0 ≤ α ≤ 1.
 
-The infinite values `-∞` and `+∞` are replaced by respectively `nextfloat(-∞)`
-and `prevfloat(+∞)` for the sake of finding the shifted midpoint of the interval.
+Warning: if the parameter `α = 0.5` is explicitely set, the behavior differs
+from the default case if the provided `Interval` is not finite, since when
+`α` is provided `mid` simply replaces `+∞` (respectively `-∞`) by `prevfloat(+∞)`
+(respecively `nextfloat(-∞)`) for the computation of the intermediate point.
 """
 function mid(a::Interval{T}, α) where T
 
@@ -386,7 +388,10 @@ function mid(a::Interval{T}, α) where T
 
     midpoint = α * (hi - lo) + lo
     isfinite(midpoint) && return midpoint
-    # Fallback in case of overflow: hi - lo == +∞
+    #= Fallback in case of overflow: hi - lo == +∞.
+       This case can not be the default one as it does not pass several
+       IEEE1788-2015 tests for small floats.
+    =#
     return (1-α) * lo + α * hi
 end
 
@@ -409,7 +414,10 @@ function mid(a::Interval{T}) where T
 
     midpoint = 0.5 * (a.lo + a.hi)
     isfinite(midpoint) && return midpoint
-    # Fallback in case of overflow: a.hi + a.lo == +∞ or a.hi + a.lo == -∞
+    #= Fallback in case of overflow: a.hi + a.lo == +∞ or a.hi + a.lo == -∞.
+       This case can not be the default one as it does not pass several
+       IEEE1788-2015 tests for small floats.
+    =#
     return 0.5 * a.lo + 0.5 * a.hi
 end
 
