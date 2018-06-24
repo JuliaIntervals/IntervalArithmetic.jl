@@ -18,13 +18,13 @@ import Base:
     asin, acos, atan, atan2,
     sinh, cosh, tanh, asinh, acosh, atanh,
     union, intersect, isempty,
-    convert, promote_rule, eltype,
+    convert, promote_rule, eltype, size,
     BigFloat, float, widen, big,
     ∩, ∪, ⊆, eps,
     floor, ceil, trunc, sign, round,
     expm1, log1p,
     precision,
-    isfinite, isnan,
+    isfinite, isnan, isinf, iszero,
     show, showall,
     isinteger, setdiff,
     parse
@@ -40,9 +40,9 @@ export
     @interval, @biginterval, @floatinterval, @make_interval,
     diam, radius, mid, mag, mig, hull,
     emptyinterval, ∅, ∞, isempty, isinterior, isdisjoint, ⪽,
-    precedes, strictprecedes, ≺, ⊂, ⊃, ⊇,
+    precedes, strictprecedes, ≺, ⊂, ⊃, ⊇, contains_zero,
     entireinterval, isentire, nai, isnai, isthin, iscommon, isatomic,
-    widen, inf, sup,
+    widen, inf, sup, bisect, 
     parameters, eps, dist,
     pi_interval,
     midpoint_radius, interval_from_midpoint_radius,
@@ -88,6 +88,7 @@ end
 
 include("intervals/intervals.jl")
 include("multidim/multidim.jl")
+include("bisect.jl")
 include("decorations/decorations.jl")
 
 include("parsing.jl")

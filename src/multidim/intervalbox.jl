@@ -73,6 +73,12 @@ diam(X::IntervalBox) = maximum(diam.(X.v))
 
 emptyinterval(X::IntervalBox{N,T}) where {N,T} = IntervalBox(emptyinterval.(X.v))
 
+isinf(X::IntervalBox) = any(isinf(X))
+
+isinterior(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) where {N,T} = all(isinterior.(X, Y))
+
+contains_zero(X::SVector) = all(contains_zero(X))
+contains_zero(X::IntervalBox) = all(contains_zero(X))
 
 import Base.×
 ×(a::Interval...) = IntervalBox(a...)

@@ -11,5 +11,5 @@ include("loops.jl")
 include("parsing.jl")
 include("rounding_macros.jl")
 include("rounding.jl")
-
-# include("complex.jl")
+include("bisect.jl")
+include("complex.jl")
