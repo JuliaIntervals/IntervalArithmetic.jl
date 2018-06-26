@@ -1,6 +1,12 @@
 using IntervalArithmetic
-using Base.Test
 using StaticArrays
+
+if VERSION < v"0.7.0-DEV.2004"
+    using Base.Test
+else
+    using Test
+    using LinearAlgebra: dot
+end
 
 
 @testset "Operations on boxes" begin

@@ -58,7 +58,7 @@ function iscommon(a::Interval)
     true
 end
 
-doc"`widen(x)` widens the lowest and highest bounds of `x` to the previous and next representable floating-point numbers, respectively."
+"`widen(x)` widens the lowest and highest bounds of `x` to the previous and next representable floating-point numbers, respectively."
 widen(x::Interval{T}) where {T<:AbstractFloat} = Interval(prevfloat(x.lo), nextfloat(x.hi))
 
 """

@@ -8,6 +8,18 @@ import CRlibm
 using StaticArrays
 using FastRounding
 using AdjacentFloats
+using Compat
+
+if VERSION <= v"0.7.0-DEV.2004"
+    import Base: ×, dot
+    import Compat.Sys
+    export ⊇
+else
+    using Markdown
+    import Base: ⊇
+    import LinearAlgebra: ×, dot
+end
+
 
 import Base:
     +, -, *, /, //, fma,
@@ -30,7 +42,7 @@ import Base:
     parse, hash
 
 import Base:  # for IntervalBox
-    broadcast, dot, length,
+    broadcast, length,
     getindex, setindex,
     start, next, done, eltype
 
@@ -42,7 +54,7 @@ export
     emptyinterval, ∅, ∞, isempty, isinterior, isdisjoint, ⪽,
     precedes, strictprecedes, ≺, ⊂, ⊃, ⊇, contains_zero,
     entireinterval, isentire, nai, isnai, isthin, iscommon, isatomic,
-    widen, inf, sup, bisect, 
+    widen, inf, sup, bisect,
     parameters, eps, dist,
     pi_interval,
     midpoint_radius, interval_from_midpoint_radius,
@@ -77,7 +89,10 @@ export
 
 function __init__()
     setrounding(BigFloat, RoundNearest)
-    setrounding(Float64, RoundNearest)
+    if VERSION < v"0.7.0-DEV"
+        ## deprecated in 0.7
+        setrounding(Float64, RoundNearest)
+    end
 
     setprecision(Interval, 256)  # set up pi
     setprecision(Interval, Float64)

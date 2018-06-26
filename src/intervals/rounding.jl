@@ -269,7 +269,7 @@ function setrounding(::Type{Interval}, rounding_type::Symbol)
 
     path, io = mktemp()
 
-    old_stderr = STDERR
+    old_stderr = stderr
     redirect_stderr(io)
 
     _setrounding(Interval, rounding_type)

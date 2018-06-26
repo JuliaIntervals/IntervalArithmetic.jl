@@ -1,16 +1,20 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
 using IntervalArithmetic
-using Base.Test
+if VERSION < v"0.7.0-DEV.2004"
+    using Base.Test
+else
+    using Test
+end
 
 
 setprecision(Interval, Float64)
 
-a = @interval(0.1, 1.1)
-b = @interval(0.9, 2.0)
-c = @interval(0.25, 4.0)
-
 @testset "Consistency tests" begin
+
+    a = @interval(0.1, 1.1)
+    b = @interval(0.9, 2.0)
+    c = @interval(0.25, 4.0)
 
     @testset "Interval types and constructors" begin
 
@@ -253,7 +257,11 @@ c = @interval(0.25, 4.0)
         @test isnan(mid(emptyinterval()))
         @test mid(entireinterval()) == 0.0
         @test isnan(mid(nai()))
-        @test_throws ArgumentError nai(Interval(1//2))
+        if VERSION < v"0.7.0-DEV"
+            @test_throws ArgumentError nai(Interval(1//2))
+        else
+            @test_throws InexactError nai(Interval(1//2))
+        end
     end
 
     @testset "abs, min, max, sign" begin
