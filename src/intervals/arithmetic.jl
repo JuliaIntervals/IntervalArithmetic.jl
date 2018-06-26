@@ -369,24 +369,41 @@ end
 """
     mid(a::Interval, α=0.5)
 
-Find the midpoint (or, in general, an intermediate point) at a distance α along the interval `a`. The default is the true midpoint at α=0.5.
+Find an intermediate point at a relative position `α`` in the interval `a`.
+The default is the true midpoint at `α = 0.5`.
 
 Assumes 0 ≤ α ≤ 1.
+
+Warning: if the parameter `α = 0.5` is explicitely set, the behavior differs
+from the default case if the provided `Interval` is not finite, since when
+`α` is provided `mid` simply replaces `+∞` (respectively `-∞`) by `prevfloat(+∞)`
+(respecively `nextfloat(-∞)`) for the computation of the intermediate point.
 """
 function mid(a::Interval{T}, α) where T
 
     isempty(a) && return convert(T, NaN)
-    isentire(a) && return zero(a.lo)
 
-    a.lo == -∞ && return nextfloat(-∞)
-    a.hi == +∞ && return prevfloat(+∞)
+    lo = (a.lo == -∞ ? nextfloat(-∞) : a.lo)
+    hi = (a.hi == +∞ ? prevfloat(+∞) : a.hi)
 
-    # @assert 0 ≤ α ≤ 1
-
-    # return (1-α) * a.lo + α * a.hi  # rounds to nearest
-    return α*(a.hi - a.lo) + a.lo  # rounds to nearest
+    midpoint = α * (hi - lo) + lo
+    isfinite(midpoint) && return midpoint
+    #= Fallback in case of overflow: hi - lo == +∞.
+       This case can not be the default one as it does not pass several
+       IEEE1788-2015 tests for small floats.
+    =#
+    return (1-α) * lo + α * hi
 end
 
+"""
+    mid(a::Interval)
+
+Find the midpoint of interval `a`.
+
+For intervals of the form `[-∞, x]` or `[x, +∞]` where `x` is finite, return
+respectively `nextfloat(-∞)` and `prevfloat(+∞)`. Note that it differs from the
+behavior of `mid(a, α=0.5)`.
+"""
 function mid(a::Interval{T}) where T
 
     isempty(a) && return convert(T, NaN)
@@ -395,9 +412,13 @@ function mid(a::Interval{T}) where T
     a.lo == -∞ && return nextfloat(a.lo)
     a.hi == +∞ && return prevfloat(a.hi)
 
-    # @assert 0 ≤ α ≤ 1
-
-    return 0.5 * (a.lo + a.hi)
+    midpoint = 0.5 * (a.lo + a.hi)
+    isfinite(midpoint) && return midpoint
+    #= Fallback in case of overflow: a.hi + a.lo == +∞ or a.hi + a.lo == -∞.
+       This case can not be the default one as it does not pass several
+       IEEE1788-2015 tests for small floats.
+    =#
+    return 0.5 * a.lo + 0.5 * a.hi
 end
 
 mid(a::Interval{Rational{T}}) where T = (1//2) * (a.lo + a.hi)
