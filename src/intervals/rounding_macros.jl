@@ -46,7 +46,7 @@ The macro uses the internal `round_expr` function to transform e.g.
 
 The user-facing equivalent is `@interval`, which can handle much more general cases.
 """
-macro round(ex1, ex2)
+macro round(ex1, digits=ex2)
      :(Interval($(round_expr(ex1, RoundDown)), $(round_expr(ex2, RoundUp))))
 end
 
