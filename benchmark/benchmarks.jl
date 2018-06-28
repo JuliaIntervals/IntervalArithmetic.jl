@@ -6,10 +6,12 @@
 - results = benchmarkpkg("IntervalArithmetic")
 - showall(results)
 
-- results = judge("IntervalArithmetic", "v0.9.1")  # compare current version to that tag
+To compare the current version with a given release use `judge`:
+
+- results = judge("IntervalArithmetic", tag)
 - showall(results)
 
-To export the benchmark results to a markdown file, do
+To export the benchmark results to a markdown file, do:
 
 - export_markdown("results.md", results)
 =#
