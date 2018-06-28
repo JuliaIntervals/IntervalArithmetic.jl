@@ -12,15 +12,18 @@ end
 @testset "Operations on boxes" begin
     A = IntervalBox(1..2, 3..4)
     B = IntervalBox(0..2, 3..6)
+    s = @SVector [1, 2]
 
     @test 2*A == A*2 == IntervalBox(2..4, 6..8)
     @test typeof(2*A) == IntervalBox{2, Float64}
     @test A + B == IntervalBox(1..4, 6..10)
     @test A + B.v == IntervalBox(1..4, 6..10)
     @test A.v + B == IntervalBox(1..4, 6..10)
+    @test A + s == IntervalBox(2..3, 5..6)
     @test A - B == IntervalBox(-1..2, -3..1)
     @test A.v - B == IntervalBox(-1..2, -3..1)
     @test A - B.v == IntervalBox(-1..2, -3..1)
+    @test A - s == IntervalBox(0..1, 1..2)
     @test 2 + A == IntervalBox(3..4,5..6)
     @test A + 2 == IntervalBox(3..4,5..6)
     @test -A == IntervalBox((-2)..(-1), (-4)..(-3))
@@ -193,6 +196,8 @@ end
     @test IntervalBox(1..2, Val{5}) == (1..2) × (1..2) × (1..2) × (1..2) × (1..2)
 
     @test IntervalBox(1..2, 3) == IntervalBox(1..2, Val{3})
+    @test IntervalBox((1..2, 2..3)) == IntervalBox(1..2, 2..3)
+    @test IntervalBox((1, 2)) == IntervalBox(1..1, 2..2)
 
 end
 
