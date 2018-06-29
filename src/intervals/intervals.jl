@@ -107,6 +107,7 @@ function interval(a::Real, b::Real)
 end
 
 interval(a::Real) = interval(a, a)
+interval(a::Interval) = a
 
 
 ## Include files

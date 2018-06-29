@@ -10,8 +10,8 @@ end
 # IntervalBox(x::Interval) = IntervalBox( SVector(x) )  # single interval treated as tuple with one element
 
 IntervalBox(x::Interval...) = IntervalBox(SVector(x))
-IntervalBox(x::NTuple{N, T}) where {N, T<:Interval} = IntervalBox(SVector(x))
-IntervalBox(x::NTuple{N, T}) where {N, T<:Real} = IntervalBox(SVector(interval.(x)))
+IntervalBox(x::SVector) = IntervalBox(interval.(x))
+IntervalBox(x::Tuple) = IntervalBox(SVector(x))
 
 Base.@propagate_inbounds Base.getindex(X::IntervalBox, i) = X.v[i]
 
