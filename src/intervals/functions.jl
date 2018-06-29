@@ -270,8 +270,8 @@ end
 # mod
 function mod(a::Interval, y::T) where {T<:Real}
     yy = abs(y)
-    fld_lo = fld(a.lo, yy)
-    fld_hi = fld(a.hi, yy)
+    fld_lo = floor(a.lo/yy)
+    fld_hi = floor(a.hi/yy)
     z = zero(fld_lo)
 
     if fld_lo != fld_hi
@@ -290,8 +290,8 @@ end
 
 function extended_mod(a::Interval, y::T) where {T<:Real}
     yy = abs(y)
-    fld_lo = fld(a.lo, yy)
-    fld_hi = fld(a.hi, yy)
+    fld_lo = floor(a.lo/yy)
+    fld_hi = floor(a.hi/yy)
     z = zero(fld_lo)
     S = typeof( z )
     ee = emptyinterval(S)
