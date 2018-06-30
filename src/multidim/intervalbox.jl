@@ -12,6 +12,9 @@ end
 IntervalBox(x::Interval...) = IntervalBox(SVector(x))
 IntervalBox(x::SVector) = IntervalBox(interval.(x))
 IntervalBox(x::Tuple) = IntervalBox(SVector(x))
+IntervalBox(x::Real) = IntervalBox(interval.(x))
+IntervalBox(x...) = IntervalBox(x)
+IntervalBox(x) = IntervalBox(x...)
 
 Base.@propagate_inbounds Base.getindex(X::IntervalBox, i) = X.v[i]
 

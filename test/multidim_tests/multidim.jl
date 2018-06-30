@@ -198,6 +198,13 @@ end
     @test IntervalBox(1..2, 3) == IntervalBox(1..2, Val{3})
     @test IntervalBox((1..2, 2..3)) == IntervalBox(1..2, 2..3)
     @test IntervalBox((1, 2)) == IntervalBox(1..1, 2..2)
+    @test IntervalBox( (1, 2, 3) ) == IntervalBox(1..1, 2..2, 3..3)
+    @test IntervalBox( (1, 2, 3.1) ) == IntervalBox(1..1, 2..2, interval(3.1))
+    @test IntervalBox( SVector(1, 2, 3.1) ) == IntervalBox(1..1, 2..2, interval(3.1))
+    @test IntervalBox( interval.(SVector(1, 2, 3.1)) ) == IntervalBox(1..1, 2..2, interval(3.1))
+    @test IntervalBox(3) == IntervalBox(3..3)
+    @test IntervalBox(1:5) == IntervalBox(1..1, 2..2, 3..3, 4..4, 5..5)
+    @test IntervalBox([1:5...]) == IntervalBox(1..1, 2..2, 3..3, 4..4, 5..5)
 
 end
 
