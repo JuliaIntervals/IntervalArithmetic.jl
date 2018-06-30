@@ -317,7 +317,7 @@ end
     @test mod(a, -2.5) == -2.5..0
     @test mod(a, -0.5) == -0.5..0
 
-    a = pi_interval()
+    a = pi_interval(Float64)
     @test mod(a, pi) == interval(0.0, a.hi-pi)
     @test mod(2a, pi) == interval(0.0, 2*(a.hi-pi))
     @test mod(1.5a, pi) == interval(0.5a.lo, 1.5a.hi-pi)
