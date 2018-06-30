@@ -205,6 +205,7 @@ end
     @test IntervalBox(3) == IntervalBox(3..3)
     @test IntervalBox(1:5) == IntervalBox(1..1, 2..2, 3..3, 4..4, 5..5)
     @test IntervalBox([1:5...]) == IntervalBox(1..1, 2..2, 3..3, 4..4, 5..5)
+    @test IntervalBox((1..2) × (2..3), 2) == IntervalBox((1..2) × (2..3) × (1..2) × (2..3))
 
 end
 

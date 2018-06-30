@@ -15,6 +15,7 @@ IntervalBox(x::Tuple) = IntervalBox(SVector(x))
 IntervalBox(x::Real) = IntervalBox(interval.(x))
 IntervalBox(x...) = IntervalBox(x)
 IntervalBox(x) = IntervalBox(x...)
+IntervalBox(X::IntervalBox, n) = foldl(×, Iterators.repeated(X, n))
 
 Base.@propagate_inbounds Base.getindex(X::IntervalBox, i) = X.v[i]
 
