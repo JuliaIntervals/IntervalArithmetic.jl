@@ -24,3 +24,11 @@ wrap(v) = v
 Base.broadcast(f, X::IntervalBox) = wrap(f.(X.v))
 Base.broadcast(f, X::IntervalBox, Y::IntervalBox) = wrap(f.(X.v, Y.v))
 Base.broadcast(f, X::IntervalBox, y) = wrap(f.(X.v, y))
+
+for op in (:+, :-, :∩, :∪, :⊆, :isinterior, :dot, :setdiff, :×)
+    @eval $(op)(a::SVector, b::IntervalBox) = $(op)(IntervalBox(a), b)
+end
+
+for op in (:+, :-, :∩, :∪, :⊆, :isinterior, :dot, :setdiff, :×)
+    @eval $(op)(a::IntervalBox, b::SVector) = $(op)(a, IntervalBox(b))
+end

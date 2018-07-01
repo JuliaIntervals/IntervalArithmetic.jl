@@ -12,16 +12,26 @@ end
 @testset "Operations on boxes" begin
     A = IntervalBox(1..2, 3..4)
     B = IntervalBox(0..2, 3..6)
+    s = @SVector [1, 2]
 
     @test 2*A == A*2 == IntervalBox(2..4, 6..8)
     @test typeof(2*A) == IntervalBox{2, Float64}
     @test A + B == IntervalBox(1..4, 6..10)
+    @test A + B.v == IntervalBox(1..4, 6..10)
+    @test A.v + B == IntervalBox(1..4, 6..10)
+    @test A + s == IntervalBox(2..3, 5..6)
+    @test A - B == IntervalBox(-1..2, -3..1)
+    @test A.v - B == IntervalBox(-1..2, -3..1)
+    @test A - B.v == IntervalBox(-1..2, -3..1)
+    @test A - s == IntervalBox(0..1, 1..2)
     @test 2 + A == IntervalBox(3..4,5..6)
     @test A + 2 == IntervalBox(3..4,5..6)
     @test -A == IntervalBox((-2)..(-1), (-4)..(-3))
     @test 2 - A == IntervalBox(0..1, (-2)..(-1))
     @test B - 2 == IntervalBox((-2)..0, 1..4)
     @test dot(A, B) == @interval(9, 28)
+    @test dot(A, B.v) == @interval(9, 28)
+    @test dot(A.v, B) == @interval(9, 28)
     @test A .* B == IntervalBox(0..4, 9..24)
     @test A ./ A == IntervalBox((0.5)..2, (0.75)..(4/3))
     @test 1 ./ B == IntervalBox((0.5)..Inf, (1/6)..(1/3))
@@ -30,8 +40,16 @@ end
     @test B .^ 0.5 == IntervalBox(@interval(0,sqrt(2)), @interval(sqrt(3),sqrt(6)))
 
     @test A ⊆ B
+    @test A.v ⊆ B
+    @test A ⊆ B.v
+
     @test A ∩ B == A
+    @test A.v ∩ B == A
+    @test A ∩ B.v == A
+
     @test A ∪ B == B
+    @test A.v ∪ B == B
+    @test A ∪ B.v == B
 
     X = IntervalBox(1..2, 3..4)
     Y = IntervalBox(3..4, 3..4)
@@ -88,6 +106,11 @@ end
     @test setdiff(X, Y) == [ IntervalBox(3..4, 3..4),
                               IntervalBox(2..3, 3..5) ]
 
+    @test setdiff(X.v, Y) == [ IntervalBox(3..4, 3..4),
+                              IntervalBox(2..3, 3..5) ]
+
+    @test setdiff(X, Y.v) == [ IntervalBox(3..4, 3..4),
+                              IntervalBox(2..3, 3..5) ]
 
     X = IntervalBox(2..5, 3..6)
     Y = IntervalBox(-10..10, 4..5)
@@ -146,6 +169,24 @@ end
     @test Y == IntervalBox(Interval(0, 2), Interval(3, 5), Interval(4, 8))
     @test diam(Y) == 4
 
+    Z = X × Y
+    @test isa(Z, IntervalBox)
+    @test length(Z) == 5
+    @test Z == IntervalBox(Interval(0, 2), Interval(3, 5), Interval(0, 2), Interval(3, 5), Interval(4, 8))
+    @test diam(Z) == 4
+
+    Z = X × Y.v
+    @test isa(Z, IntervalBox)
+    @test length(Z) == 5
+    @test Z == IntervalBox(Interval(0, 2), Interval(3, 5), Interval(0, 2), Interval(3, 5), Interval(4, 8))
+    @test diam(Z) == 4
+
+    Z = X.v × Y
+    @test isa(Z, IntervalBox)
+    @test length(Z) == 5
+    @test Z == IntervalBox(Interval(0, 2), Interval(3, 5), Interval(0, 2), Interval(3, 5), Interval(4, 8))
+    @test diam(Z) == 4
+
     @test mid(IntervalBox(0..1, 3), 0.75) == [0.75, 0.75, 0.75]
 end
 
@@ -155,6 +196,16 @@ end
     @test IntervalBox(1..2, Val{5}) == (1..2) × (1..2) × (1..2) × (1..2) × (1..2)
 
     @test IntervalBox(1..2, 3) == IntervalBox(1..2, Val{3})
+    @test IntervalBox((1..2, 2..3)) == IntervalBox(1..2, 2..3)
+    @test IntervalBox((1, 2)) == IntervalBox(1..1, 2..2)
+    @test IntervalBox( (1, 2, 3) ) == IntervalBox(1..1, 2..2, 3..3)
+    @test IntervalBox( (1, 2, 3.1) ) == IntervalBox(1..1, 2..2, interval(3.1))
+    @test IntervalBox( SVector(1, 2, 3.1) ) == IntervalBox(1..1, 2..2, interval(3.1))
+    @test IntervalBox( interval.(SVector(1, 2, 3.1)) ) == IntervalBox(1..1, 2..2, interval(3.1))
+    @test IntervalBox(3) == IntervalBox(3..3)
+    @test IntervalBox(1:5) == IntervalBox(1..1, 2..2, 3..3, 4..4, 5..5)
+    @test IntervalBox([1:5...]) == IntervalBox(1..1, 2..2, 3..3, 4..4, 5..5)
+    @test IntervalBox((1..2) × (2..3), 2) == IntervalBox((1..2) × (2..3) × (1..2) × (2..3))
 
 end
 
