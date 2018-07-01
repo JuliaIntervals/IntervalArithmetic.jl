@@ -284,3 +284,85 @@ end
     end
     =#
 end
+
+@testset "`mod`" begin
+    r = 0.0625
+    a = r..(1+r)
+    @test mod(a, 1) == mod(a, 1.0) == 0..1
+    @test mod(a, 2) == mod(a, 2.0) == a
+    @test mod(a, 2.5) == a
+    @test mod(a, 0.5) == 0..0.5
+    @test mod(a, -1) == mod(a, -1.0) == -1..0
+    @test mod(a, -2) == mod(a, -2.0) == -2+a
+    @test mod(a, -2.5) == -2.5+a
+    @test mod(a, -0.5) == -0.5..0
+
+    a = (-1+r) .. -r
+    @test mod(a, 1) == mod(a, 1.0) == 1+a
+    @test mod(a, 2) == mod(a, 2.0) == 2+a
+    @test mod(a, 2.5) == 2.5+a
+    @test mod(a, 0.5) == 0..0.5
+    @test mod(a, -1) == mod(a, -1.0) == a
+    @test mod(a, -2) == mod(a, -2.0) == a
+    @test mod(a, -2.5) == a
+    @test mod(a, -0.5) == -0.5..0
+
+    a = -r .. 1-r
+    @test mod(a, 1) == mod(a, 1.0) == 0..1
+    @test mod(a, 2) == mod(a, 2.0) == 0..2
+    @test mod(a, 2.5) == 0..2.5
+    @test mod(a, 0.5) == 0..0.5
+    @test mod(a, -1) == mod(a, -1.0) == -1..0
+    @test mod(a, -2) == mod(a, -2.0) == -2..0
+    @test mod(a, -2.5) == -2.5..0
+    @test mod(a, -0.5) == -0.5..0
+
+    a = pi_interval(Float64)
+    @test mod(a, pi) == interval(0.0, a.hi-pi)
+    @test mod(2a, pi) == interval(0.0, 2*(a.hi-pi))
+    @test mod(1.5a, pi) == interval(0.5a.lo, 1.5a.hi-pi)
+    @test mod(interval(0.25,3pi), pi) == interval(0.0, a.lo)
+end
+
+@testset "`extended_mod`" begin
+    r = 0.0625
+    a = r..(1+r)
+    ee = emptyinterval(Float64)
+    @test extended_mod(a, 1) == (r..1, 0..r, ee)
+    @test extended_mod(a, 2) == (a, ee, ee)
+    @test extended_mod(a, 2.5) == (a, ee, ee)
+    @test extended_mod(a, 0.5) == (r..0.5, 0..0.5, 0..r)
+    @test extended_mod(a, -1) == ((-1+r)..0, -1..(-1+r), ee)
+    @test extended_mod(a, -2) == ((-2+r)..(-1+r), ee, ee)
+    @test extended_mod(a, -2.5) == ((-2.5+r)..(-1.5+r), ee, ee)
+    @test extended_mod(a, -0.5) == ((-0.5+r)..0, -0.5..0, -0.5..(-0.5+r))
+
+    a = (-1+r) .. -r
+    @test extended_mod(a, 1) == (1+a, ee, ee)
+    @test extended_mod(a, 2) == (2+a, ee, ee)
+    @test extended_mod(a, 2.5) == (2.5+a, ee, ee)
+    @test extended_mod(a, 0.5) == (r..0.5, 0..(0.5-r), ee)
+    @test extended_mod(a, -1) == ((-1+r) .. -r, ee, ee)
+    @test extended_mod(a, -2) == ((-1+r) .. -r, ee, ee)
+    @test extended_mod(a, -2.5) == ((-1+r) .. -r, ee, ee)
+    @test extended_mod(a, -0.5) == ((-0.5+r)..0, -0.5 .. -r, ee)
+
+    a = -r .. 1-r
+    @test extended_mod(a, 1) == ((1-r)..1, 0..(1-r), ee)
+    @test extended_mod(a, 2) == ((2-r)..2, 0..(1-r), ee)
+    @test extended_mod(a, 2.5) == ((2.5-r)..2.5, 0..(1-r), ee)
+    @test extended_mod(a, 0.5) == ((0.5-r)..0.5, 0..0.5, 0..(0.5-r))
+    @test extended_mod(a, -1) == (-r..0, -1..(-r), ee)
+    @test extended_mod(a, -2) == (-r..0, -2..(-1-r), ee)
+    @test extended_mod(a, -2.5) == (-r..0, (-2.5)..(-1.5-r), ee)
+    @test extended_mod(a, -0.5) == (-r..0, -0.5..0, -0.5..(-r))
+
+    a = pi_interval(Float64)
+    @test extended_mod(a, pi) == (mod(a, pi), ee, ee)
+    @test extended_mod(2a, pi) == (interval(0.0, 2*(a.hi-pi)), ee, ee)
+    @test extended_mod(1.5a, pi) == (interval(0.5a.lo, 1.5a.hi-pi), ee, ee)
+    @test extended_mod(interval(0.25,3pi), pi) == (interval(0.25, a.lo),
+        interval(0.0, a.lo), interval(0.0))
+    @test extended_mod(@interval(0.25,3pi), pi) == (interval(0.25, a.lo),
+        interval(0.0, a.lo), mod(@interval(3pi), pi))
+end

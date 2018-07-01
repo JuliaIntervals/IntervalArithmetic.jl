@@ -269,3 +269,53 @@ for f in (:log, :log2, :log10, :log1p)
 
         end
 end
+
+# mod
+function mod(a::Interval, y::T) where {T<:Real}
+    yy = abs(y)
+    fld_lo = floor(a.lo/yy)
+    fld_hi = floor(a.hi/yy)
+    z = zero(fld_lo)
+
+    if fld_lo != fld_hi
+        # `a` includes a discontinuity of `mod`
+        if y > 0
+            return interval(z, y)
+        else
+            return interval(y, z)
+        end
+    else
+        # no discontinuity crossed within `a`
+        return interval(mod(a.lo, y), mod(a.hi, y))
+    end
+end
+
+
+function extended_mod(a::Interval, y::T) where {T<:Real}
+    yy = abs(y)
+    fld_lo = floor(a.lo/yy)
+    fld_hi = floor(a.hi/yy)
+    z = zero(fld_lo)
+    S = typeof( z )
+    ee = emptyinterval(S)
+
+    if fld_lo + 1 == fld_hi
+        # `a` includes one discontinuity
+        if y > 0
+            return interval(mod(a.lo, y), y), interval(z, mod(a.hi, y)), ee
+        else
+            return interval(mod(a.lo, y), z), interval(y, mod(a.hi, y)), ee
+        end
+    elseif fld_lo +1 < fld_hi
+        # `a` includes more discontinuities
+        if y > 0
+            return interval(mod(a.lo, y), y), interval(z, y), interval(z, mod(a.hi, y))
+        else
+            return interval(mod(a.lo, y), z), interval(y, z), interval(y, mod(a.hi, y))
+        end
+    else
+        # no discontinuity crossed within `a`
+        return interval(mod(a.lo, y), mod(a.hi, y)), ee, ee
+    end
+
+end
