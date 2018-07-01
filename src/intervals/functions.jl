@@ -13,8 +13,11 @@ end
 
 # Integer power:
 
-# overwrite new behaviour for small integer powers:
-# ^{p}(x::IntervalArithmetic.Interval, ::Type{Val{p}}) = x^p
+# overwrite new behaviour for small integer powers from
+# https://github.com/JuliaLang/julia/pull/24240:
+
+Base.literal_pow(::typeof(^), x::Interval{T}, ::Val{p}) where {T,p} = x^p
+
 
 function ^(a::Interval{BigFloat}, n::Integer)
     isempty(a) && return a
