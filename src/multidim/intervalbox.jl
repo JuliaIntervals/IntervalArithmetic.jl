@@ -26,13 +26,13 @@ setindex(X::IntervalBox, y, i) = IntervalBox( setindex(X.v, y, i) )
 
 start(X::IntervalBox{N,T}) where {N,T} = 1
 
-next(X::IntervalBox{N,T}, state) where {N,T} = (X[state], state+1)
+next(X::IntervalBox{N,T}, state) where {N,T} = @inbounds (X.v[state], state+1)
 
 done(X::IntervalBox{N,T}, state) where {N,T} = state > N
 
 eltype(::Type{IntervalBox{N,T}}) where {N,T} = Interval{T} # Note that this is defined for the type
 
-# length(X::IntervalBox{N,T}) where {N,T} = N
+length(X::IntervalBox{N,T}) where {N,T} = N
 
 
 
@@ -95,4 +95,3 @@ IntervalBox(x::Interval, ::Type{Val{n}}) where {n} = IntervalBox(SVector(ntuple(
 IntervalBox(x::Interval, n::Int) = IntervalBox(x, Val{n})
 
 dot(x::IntervalBox, y::IntervalBox) = dot(x.v, y.v)
-length(x::IntervalBox) = length(x.v)
