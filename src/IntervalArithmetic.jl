@@ -46,6 +46,8 @@ import Base:  # for IntervalBox
     getindex, setindex,
     start, next, done, eltype
 
+import .Broadcast: broadcasted
+
 export
     AbstractInterval, Interval,
     interval,
