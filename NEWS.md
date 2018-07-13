@@ -1,5 +1,22 @@
 # What's new in `IntervalArithmetic.jl`
 
+## v0.14
+
+### Breaking changes
+- `IntervalBox` is no longer a subtype of `StaticVector` or of `AbstractArray`,
+but rather contains an `SVector` of `Interval`s. The internal `SVector` of an `IntervalBox` `X` is available as `X.v`.  [#152](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/152)
+
+### New functions
+- Various functions, including `bisect`, were moved here from `IntervalRootFinding.jl`. [#160](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/160)
+
+- The set operations `⊂`, `⊃` and `⊇` were added [#154](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/154)
+
+### Supported versions of Julia
+- This is slated to be the last minor release supporting Julia 0.6.
+
+### First contributions
+- @mforets and @Kolaru made first contributions to the package. 
+
 ## v0.13
 
 ### Breaking changes
