@@ -21,11 +21,11 @@
 wrap(v::SVector{N,T} where {N,T<:Interval}) = IntervalBox(v)
 wrap(v) = v
 
-Base.size(X::IntervalBox{2,Float64}) = (2,)
+#Base.size(X::IntervalBox{2,Float64}) = (2,)
 #
-broadcasted(f, X::IntervalBox) = wrap(f.(X.v))
-broadcasted(f, X::IntervalBox, Y::IntervalBox) = wrap(f.(X.v, Y.v))
-broadcasted(f, X::IntervalBox, y) = wrap(f.(X.v, y))
+@inline broadcasted(f, X::IntervalBox) = wrap(f.(X.v))
+@inline broadcasted(f, X::IntervalBox, Y::IntervalBox) = wrap(f.(X.v, Y.v))
+@inline broadcasted(f, X::IntervalBox, y) = wrap(f.(X.v, y))
 
 for op in (:+, :-, :∩, :∪, :⊆, :isinterior, :dot, :setdiff, :×)
     @eval $(op)(a::SVector, b::IntervalBox) = $(op)(IntervalBox(a), b)
