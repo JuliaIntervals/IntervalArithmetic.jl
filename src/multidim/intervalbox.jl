@@ -26,7 +26,7 @@ setindex(X::IntervalBox, y, i) = IntervalBox( setindex(X.v, y, i) )
 
 start(X::IntervalBox{N,T}) where {N,T} = 1
 
-next(X::IntervalBox{N,T}, state) where {N,T} = @inbounds (X.v[state], state+1)
+next(X::IntervalBox{N,T}, state) where {N,T} = (X[state], state+1)
 
 done(X::IntervalBox{N,T}, state) where {N,T} = state > N
 
@@ -49,7 +49,7 @@ Return a vector of the `mid` of each interval composing the `IntervalBox`.
 
 See `mid(X::Interval, α=0.5)` for more informations.
 """
-mid(X::IntervalBox) = mid.(X)
+mid(X::IntervalBox) = mid.(X.v)
 mid(X::IntervalBox, α) = mid.(X.v, α)
 
 big(X::IntervalBox) = big.(X)
