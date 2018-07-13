@@ -32,7 +32,7 @@ done(X::IntervalBox{N,T}, state) where {N,T} = state > N
 
 eltype(::Type{IntervalBox{N,T}}) where {N,T} = Interval{T} # Note that this is defined for the type
 
-# length(X::IntervalBox{N,T}) where {N,T} = N
+length(X::IntervalBox{N,T}) where {N,T} = N
 
 
 
@@ -49,7 +49,7 @@ Return a vector of the `mid` of each interval composing the `IntervalBox`.
 
 See `mid(X::Interval, α=0.5)` for more informations.
 """
-mid(X::IntervalBox) = mid.(X)
+mid(X::IntervalBox) = mid.(X.v)
 mid(X::IntervalBox, α) = mid.(X.v, α)
 
 big(X::IntervalBox) = big.(X)
@@ -95,4 +95,3 @@ IntervalBox(x::Interval, ::Type{Val{n}}) where {n} = IntervalBox(SVector(ntuple(
 IntervalBox(x::Interval, n::Int) = IntervalBox(x, Val{n})
 
 dot(x::IntervalBox, y::IntervalBox) = dot(x.v, y.v)
-length(x::IntervalBox) = length(x.v)
