@@ -131,7 +131,7 @@ function setdiff(x::Interval, y::Interval)
     intersection = x ∩ y
 
     isempty(intersection) && return [x]
-    intersection == x && return typeof(x)[]  # x is subset of y; setdiff is empty
+    isequal(intersection, x) && return typeof(x)[]  # x is subset of y; setdiff is empty
 
     x.lo == intersection.lo && return [Interval(intersection.hi, x.hi)]
     x.hi == intersection.hi && return [Interval(x.lo, intersection.lo)]

@@ -20,7 +20,7 @@ const eeuler = Base.MathConstants.e
     @test IntervalArithmetic.parameters.precision_type == Float64
     @test IntervalArithmetic.parameters.precision == 53
     @test IntervalArithmetic.parameters.rounding == :narrow
-    @test IntervalArithmetic.parameters.pi == @biginterval(pi)
+    @test isequal(IntervalArithmetic.parameters.pi, @biginterval(pi))
 
     # Naive constructors, with no conversion involved
     @test Interval(1) == Interval(1.0, 1.0)
@@ -29,7 +29,7 @@ const eeuler = Base.MathConstants.e
     @test Interval(eeuler) == Interval(1.0*eeuler)
     @test Interval(1//10) == Interval{Rational{Int}}(1//10, 1//10)
     @test Interval(BigInt(1)//10) == Interval{Rational{BigInt}}(1//10, 1//10)
-    @test Interval( (1.0, 2.0) ) == Interval(1.0, 2.0)
+    @test isequal(Interval( (1.0, 2.0) ), Interval(1.0, 2.0))
 
     @test Interval{Rational{Int}}(1) == Interval(1//1)
     #@test Interval{Rational{Int}}(pi) == Interval(rationalize(1.0*pi))
@@ -38,18 +38,21 @@ const eeuler = Base.MathConstants.e
     @test Interval{BigFloat}(1) == Interval{BigFloat}(big(1.0), big(1.0))
     @test Interval{BigFloat}(pi) == Interval{BigFloat}(big(pi), big(pi))
 
-    @test -pi..pi == @interval(-pi,pi)
-    @test 0..pi == hull(interval(0), pi_interval(Float64))
-    @test 1.2..pi == @interval(1.2, pi)
-    @test pi..big(4) == hull(pi_interval(BigFloat), interval(4))
-    @test pi..pi == pi_interval(Float64)
-    @test eeuler..pi == hull(@interval(eeuler), pi_interval(Float64))
+    @test isequal(-pi..pi, @interval(-pi,pi))
+    @test isequal(0..pi, hull(interval(0), pi_interval(Float64)))
+    @test isequal(1.2..pi, @interval(1.2, pi))
+    @test isequal(pi..big(4), hull(pi_interval(BigFloat), interval(4)))
+    @test isequal(pi..pi, pi_interval(Float64))
+    @test isequal(eeuler..pi, hull(@interval(eeuler), pi_interval(Float64)))
 
     # a < Inf and b > -Inf
-    @test @interval(1e300) == Interval(9.999999999999999e299, 1.0e300)
-    @test @interval(-1e307) == Interval(-1.0000000000000001e307, -1.0e307)
-    @test @interval(Inf) == IntervalArithmetic.wideinterval(Inf)
-    @test IntervalArithmetic.wideinterval(-big(Inf)) == Interval(-Inf, nextfloat(big(-Inf)))
+    @test isequal(@interval(1e300),
+                  Interval(9.999999999999999e299, 1.0e300))
+    @test isequal(@interval(-1e307),
+                  Interval(-1.0000000000000001e307, -1.0e307))
+    @test isequal(@interval(Inf), IntervalArithmetic.wideinterval(Inf))
+    @test isequal(IntervalArithmetic.wideinterval(-big(Inf)),
+                  Interval(-Inf, nextfloat(big(-Inf))))
 
     # Disallowed conversions with a > b
 
@@ -70,19 +73,19 @@ const eeuler = Base.MathConstants.e
 
     # Conversion to Interval without type
     @test convert(Interval, 1) == Interval(1.0)
-    @test convert(Interval, pi) == @interval(pi)
-    @test convert(Interval, eeuler) == @interval(eeuler)
+    @test isequal(convert(Interval, pi), @interval(pi))
+    @test isequal(convert(Interval, eeuler), @interval(eeuler))
     @test convert(Interval, BigInt(1)) == Interval(BigInt(1))
-    @test convert(Interval, 1//10) == @interval(1//10)
+    @test isequal(convert(Interval, 1//10), @interval(1//10))
     @test convert(Interval, Interval(0.1, 0.2)) === Interval(0.1, 0.2)
 
     @test convert(Interval{Rational{Int}}, 0.1) == Interval(1//10)
     # @test convert(Interval{Rational{BigInt}}, pi) == Interval{Rational{BigInt}}(pi)
 
     ## promotion
-    @test promote(Interval(2//1,3//1), Interval(1, 2)) ==
-        (Interval(2.0,3.0), Interval(1.0,2.0))
-    @test promote(Interval(1.0), pi) == (Interval(1.0), @interval(pi))
+    @test isequal(promote(Interval(2//1,3//1), Interval(1, 2)),
+                  (Interval(2.0,3.0), Interval(1.0,2.0)))
+    @test isequal(promote(Interval(1.0), pi), (Interval(1.0), @interval(pi)))
 
     # Constructors from the macros @interval, @floatinterval @biginterval
     setprecision(Interval, 53)
@@ -92,13 +95,13 @@ const eeuler = Base.MathConstants.e
 
     @test nextfloat(a.lo) == a.hi
     @test typeof(a) == Interval{BigFloat}
-    @test a == @biginterval("0.1")
-    @test convert(Interval{Float64}, a) == @floatinterval(0.1)
+    @test isequal(a, @biginterval("0.1"))
+    @test isequal(convert(Interval{Float64}, a), @floatinterval(0.1))
     @test nextfloat(b.lo) == b.hi
 
-    @test b == @biginterval(pi)
+    @test isequal(b, @biginterval(pi))
     x = 10238971209348170283710298347019823749182374098172309487120398471029837409182374098127304987123049817032984712039487
-    @test @interval(x) == @biginterval(x)
+    @test isequal(@interval(x), @biginterval(x))
     @test isthin(@interval(x)) == false
 
     x = 0.1
@@ -110,14 +113,14 @@ const eeuler = Base.MathConstants.e
     a = @interval(0.1)
     b = @interval(pi)
 
-    @test a == @floatinterval("0.1")
+    @test isequal(a, @floatinterval("0.1"))
     @test typeof(a) == Interval{Float64}
     @test nextfloat(a.lo) == a.hi
-    @test b == @floatinterval(pi)
+    @test isequal(b, @floatinterval(pi))
     @test nextfloat(b.lo) == b.hi
-    @test convert(Interval{Float64}, @biginterval(0.1)) == a
+    @test isequal(convert(Interval{Float64}, @biginterval(0.1)), a)
     x = typemax(Int64)
-    @test @interval(x) == @floatinterval(x)
+    @test isequal(@interval(x), @floatinterval(x))
     @test isthin(@interval(x)) == false
     x = rand()
     c = @interval(x)
@@ -127,7 +130,7 @@ const eeuler = Base.MathConstants.e
     a = @interval("[0.1, 0.2]")
     b = @interval(0.1, 0.2)
 
-    @test a == b
+    @test isequal(a, b)
 
     @test_throws ArgumentError @interval("[0.1, 0.2")
 
@@ -169,7 +172,8 @@ const eeuler = Base.MathConstants.e
 
     setprecision(Interval, 53)
     a = big(1)//3
-    @test @interval(a) == Interval(big(3.3333333333333331e-01), big(3.3333333333333337e-01))
+    @test isequal(@interval(a),
+        Interval(big(3.3333333333333331e-01), big(3.3333333333333337e-01)))
 end
 
 @testset "Big intervals" begin
@@ -177,16 +181,19 @@ end
     @test typeof(a)== Interval{Float64}
     @test typeof(big(a)) == Interval{BigFloat}
 
-    @test @floatinterval(123412341234123412341241234) == Interval(1.234123412341234e26, 1.2341234123412342e26)
+    @test isequal(@floatinterval(123412341234123412341241234),
+                  Interval(1.234123412341234e26, 1.2341234123412342e26))
     @test @interval(big"3") == @floatinterval(3)
 
 
     @test_skip @floatinterval(big"1e10000") == Interval(1.7976931348623157e308, ∞)
 
     a = big(10)^10000
-    @test @floatinterval(a) == Interval(1.7976931348623157e308, ∞)
+    @test isequal(@floatinterval(a), Interval(1.7976931348623157e308, ∞))
     setprecision(Interval, 53)
-    @test @biginterval(a) == Interval(big"9.9999999999999994e+9999", big"1.0000000000000001e+10000")
+    @test isequal(@biginterval(a),
+                  Interval(big"9.9999999999999994e+9999",
+                           big"1.0000000000000001e+10000"))
 end
 
 @testset "Complex intervals" begin
@@ -203,7 +210,7 @@ end
 @testset ".. tests" begin
 
     a = 0.1..0.3
-    @test a == Interval(0.09999999999999999, 0.30000000000000004)
+    @test isequal(a, Interval(0.09999999999999999, 0.30000000000000004))
     @test big"0.1" ∈ a
     @test big"0.3" ∈ a
 
@@ -216,13 +223,13 @@ end
 @testset "± tests" begin
     setprecision(Interval, Float64)
 
-    @test 3 ± 1 == Interval(2.0, 4.0)
-    @test 3 ± 0.5 == 2.5..3.5
-    @test 3 ± 0.1 == 2.9..3.1
-    @test 0.5 ± 1 == -0.5..1.5
+    @test 3 ± 1 === Interval(2.0, 4.0)
+    @test 3 ± 0.5 === 2.5..3.5
+    @test 3 ± 0.1 === 2.9..3.1
+    @test 0.5 ± 1 === -0.5..1.5
 
     # issue 172:
-    @test (1..1) ± 1 == 0..2
+    @test (1..1) ± 1 === 0..2
 
 end
 
@@ -271,43 +278,43 @@ end
 setprecision(Interval, Float64)
 
 @testset "Interval strings" begin
-    @test I"[1, 2]" == @interval("[1, 2]")
-    @test I"[2/3, 1.1]" == @interval("[2/3, 1.1]") == Interval(0.6666666666666666, 1.1)
+    @test I"[1, 2]" === @interval("[1, 2]")
+    @test I"[2/3, 1.1]" === @interval("[2/3, 1.1]") === Interval(0.6666666666666666, 1.1)
     @test I"[1]" == @interval("[1]") == Interval(1.0, 1.0)
-    @test I"[-0x1.3p-1, 2/3]" == @interval("[-0x1.3p-1, 2/3]") == Interval(-0.59375, 0.6666666666666667)
+    @test I"[-0x1.3p-1, 2/3]" === @interval("[-0x1.3p-1, 2/3]") === Interval(-0.59375, 0.6666666666666667)
 end
 
 @testset "setdiff tests" begin
     x = 1..3
     y = 2..4
-    @test setdiff(x, y) == [1..2]
-    @test setdiff(y, x) == [3..4]
+    @test isequal(setdiff(x, y), [1..2])
+    @test isequal(setdiff(y, x), [3..4])
 
-    @test setdiff(x, x) == Interval{Float64}[]
+    @test isequal(setdiff(x, x), Interval{Float64}[])
 
-    @test setdiff(x, emptyinterval(x)) == [x]
+    @test isequal(setdiff(x, emptyinterval(x)), [x])
 
     z = 0..5
-    @test setdiff(x, z) == Interval{Float64}[]
-    @test setdiff(z, x) == [0..1, 3..5]
+    @test isequal(setdiff(x, z), Interval{Float64}[])
+    @test isequal(setdiff(z, x), [0..1, 3..5])
 end
 
 @testset "Interval{T}(x::Interval)" begin
-    @test Interval{Float64}(3..4) == Interval(3.0, 4.0)
-    @test Interval{BigFloat}(3..4) == Interval{BigFloat}(3, 4)
+    @test Interval{Float64}(3..4) === Interval(3.0, 4.0)
+    @test isequal(Interval{BigFloat}(3..4), Interval{BigFloat}(3, 4))
 end
 
 @testset "@interval with fields" begin
     a = 3..4
     x = @interval(a.lo, 2*a.hi)
-    @test x == Interval(3, 8)
+    @test isequal(x, Interval(3, 8))
 end
 
 @testset "@interval with user-defined function" begin
     f(x) = x==Inf ? one(x) : x/(1+x)  # monotonic
 
     x = 3..4
-    @test @interval(f(x.lo), f(x.hi)) == Interval(0.75, 0.8)
+    @test isequal(@interval(f(x.lo), f(x.hi)), Interval(0.75, 0.8))
 end
 
 @testset "a..b with a > b" begin

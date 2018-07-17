@@ -4,16 +4,14 @@
 ## Comparisons
 
 """
-    ==(a,b)
+    isequal(a,b)
 
 Checks if the intervals `a` and `b` are equal.
 """
-function ==(a::Interval, b::Interval)
+function isequal(a::Interval, b::Interval)
     isempty(a) && isempty(b) && return true
     a.lo == b.lo && a.hi == b.hi
 end
-!=(a::Interval, b::Interval) = !(a==b)
-
 
 # Auxiliary functions: equivalent to </<=, but Inf <,<= Inf returning true
 function islessprime(a::T, b::T) where T<:Real
@@ -22,14 +20,14 @@ function islessprime(a::T, b::T) where T<:Real
 end
 
 # Weakly less, \le, <=
-function <=(a::Interval, b::Interval)
+function isweaklyless(a::Interval, b::Interval)
     isempty(a) && isempty(b) && return true
     (isempty(a) || isempty(b)) && return false
     (a.lo ≤ b.lo) && (a.hi ≤ b.hi)
 end
 
 # Strict less: <
-function <(a::Interval, b::Interval)
+function isstrictlyless(a::Interval, b::Interval)
     isempty(a) && isempty(b) && return true
     (isempty(a) || isempty(b)) && return false
     islessprime(a.lo, b.lo) && islessprime(a.hi, b.hi)

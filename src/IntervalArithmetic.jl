@@ -19,7 +19,7 @@ export ×, dot
 
 import Base:
     +, -, *, /, //, fma,
-    <, >, ==, !=, ⊆, ^, <=,
+    <, >, ==, !=, ⊆, ^, <=, isequal,
     in, zero, one, eps, typemin, typemax, abs, abs2, real, min, max,
     sqrt, exp, log, sin, cos, tan, inv,
     exp2, exp10, log2, log10,
@@ -50,7 +50,7 @@ export
     @interval, @biginterval, @floatinterval, @make_interval,
     diam, radius, mid, mag, mig, hull,
     emptyinterval, ∅, ∞, isempty, isinterior, isdisjoint, ⪽,
-    precedes, strictprecedes, ≺, ⊂, ⊃, ⊇, contains_zero,
+    precedes, strictprecedes, ≺, ⊂, ⊃, ⊇, contains_zero, isequal,
     entireinterval, isentire, nai, isnai, isthin, iscommon, isatomic,
     widen, inf, sup, bisect,
     parameters, eps, dist,

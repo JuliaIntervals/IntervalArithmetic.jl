@@ -22,9 +22,8 @@ entireinterval(x::Interval{T}) where T<:Real = entireinterval(T)
 entireinterval() = entireinterval(precision(Interval)[1])
 
 isentire(x::Interval) = x.lo == -Inf && x.hi == Inf
-isinf(x::Interval) = isentire(x)
 isunbounded(x::Interval) = x.lo == -Inf || x.hi == Inf
-
+isbounded(x::Interval) = !isunbounded(x)
 
 # NaI: not-an-interval
 """`NaI` not-an-interval: [NaN, NaN]."""
@@ -33,9 +32,6 @@ nai(x::Interval{T}) where T<:Real = nai(T)
 nai() = nai(precision(Interval)[1])
 
 isnai(x::Interval) = isnan(x.lo) || isnan(x.hi)
-
-isfinite(x::Interval) = isfinite(x.lo) && isfinite(x.hi)
-isnan(x::Interval) = isnai(x)
 
 """
     isthin(x)
@@ -75,8 +71,6 @@ Check whether an interval `x` is *atomic*, i.e. is unable to be split.
 This occurs when the interval is empty, or when the upper bound equals the lower bound or the `nextfloat` of the lower bound.
 """
 isatomic(x::Interval) = isempty(x) || (x.hi == x.lo) || (x.hi == nextfloat(x.lo))
-
-iszero(x::Interval) = iszero(x.lo) && iszero(x.hi)
 
 contains_zero(X::Interval{T}) where {T} = zero(T) ∈ X
 
