@@ -11,27 +11,25 @@ else
     const validity_check = false
 end
 
+const IASupportedType = Union{Integer, Rational, Irrational, Float16, Float32,
+                              Float64, BigFloat}
+
 abstract type AbstractInterval{T} <: Real end
 
-struct Interval{T<:Real} <: AbstractInterval{T}
+struct Interval{T<:IASupportedType} <: AbstractInterval{T}
     lo :: T
     hi :: T
 
-    function Interval{T}(a::Real, b::Real) where T<:Real
-
+    function Interval{T}(a::Real, b::Real) where {T<:IASupportedType}
         if validity_check
 
             if is_valid_interval(a, b)
                 new(a, b)
-
             else
                 throw(ArgumentError("Interval of form [$a, $b] not allowed. Must have a ≤ b to construct interval(a, b)."))
             end
-
         end
-
         new(a, b)
-
     end
 end
 
