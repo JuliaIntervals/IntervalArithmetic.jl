@@ -339,11 +339,11 @@ setprecision(Interval, Float64)
         a = @interval(1, 2)
         b = @interval(3, 4)
 
-        @test a^b === @interval(1, 16)
-        @test a^@interval(0.5, 1) === a
-        @test a^@interval(0.3, 0.5) === @interval(1, sqrt(2))
+        @test a^b == @interval(1, 16)
+        @test a^@interval(0.5, 1) == a
+        @test a^@interval(0.3, 0.5) == @interval(1, sqrt(2))
 
-        @test b^@interval(0.3) === Interval(1.3903891703159093, 1.5157165665103982)
+        @test b^@interval(0.3) == Interval(1.3903891703159093, 1.5157165665103982)
     end
 
     @testset "isatomic" begin
@@ -365,11 +365,11 @@ setprecision(Interval, Float64)
         @test iszero(Interval(-0.0, 0.0))
 
         @test !iszero(1..2)
-        @test_throws IntervalArithmetic.UndecidableError !iszero(Interval(0.0, nextfloat(0.0)))
+        @test !iszero(Interval(0.0, nextfloat(0.0)))
     end
 
     @testset "Difference between Interval and interval" begin
-        @test interval(1, 2) === Interval(1, 2)
+        @test interval(1, 2) == Interval(1, 2)
 
         @test inf(Interval(3, 2)) == 3
         @test_throws ArgumentError interval(3, 2)
