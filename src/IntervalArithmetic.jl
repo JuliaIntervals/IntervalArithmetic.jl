@@ -45,7 +45,7 @@ import Base:  # for IntervalBox
 import .Broadcast: broadcasted
 
 export
-    AbstractInterval, Interval,
+    AbstractInterval, Interval, SetInterval, NumberInterval,
     interval,
     @interval, @biginterval, @floatinterval, @make_interval,
     diam, radius, mid, mag, mig, hull,

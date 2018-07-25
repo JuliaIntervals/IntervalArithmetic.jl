@@ -13,11 +13,16 @@ end
 
 abstract type AbstractInterval{T} <: Real end
 
-struct Interval{T<:Real} <: AbstractInterval{T}
+abstract type Behavior end
+struct SetLike <: Behavior end
+struct NumberLike <: Behavior end
+const DefaultBehavior = NumberLike
+
+struct Interval{T <: Real, B <: Behavior} <: AbstractInterval{T}
     lo :: T
     hi :: T
 
-    function Interval{T}(a::Real, b::Real) where T<:Real
+    function Interval{T, B}(a::Real, b::Real) where {T<:Real, B<: Behavior}
 
         if validity_check
 
@@ -35,14 +40,20 @@ struct Interval{T<:Real} <: AbstractInterval{T}
     end
 end
 
+const SetInterval{T} = Interval{T, SetLike}
+const NumberInterval{T} = Interval{T, NumberLike}
 
+SetInterval(x::NumberInterval{T}) where T = SetInterval{T}(x.lo, x.hi)
+NumberInterval(x::SetInterval{T}) where T = NumberInterval{T}(x.lo, x.hi)
 
 ## Outer constructors
 
-Interval(a::T, b::T) where T<:Real = Interval{T}(a, b)
+Interval(a::T, b::T) where {T<:Real} = Interval{T, DefaultBehavior}(a, b)
+#Interval(::Type{B}, a::T, b::T) where {B <: Behavior, T <: Real} =
+#    Interval{T, B}(a, b)
 Interval(a::T) where T<:Real = Interval(a, a)
 Interval(a::Tuple) = Interval(a...)
-Interval(a::T, b::S) where {T<:Real, S<:Real} = Interval(promote(a,b)...)
+Interval(a::T, b::S) where {T<:Real, S<:Real} = Interval(promote(a, b)...)
 
 ## Concrete constructors for Interval, to effectively deal only with Float64,
 # BigFloat or Rational{Integer} intervals.

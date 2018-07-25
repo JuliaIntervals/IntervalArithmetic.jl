@@ -3,15 +3,13 @@ struct UndecidableError <: Exception
     msg
 end
 
-function isfinite(x::Interval)
+function isfinite(x::NumberInterval)
     isbounded(x) && return true
     throw(UndecidableError("may represent a finite number (or not)"))
 end
-isinf(x::Interval) = !isfinite(x)
+isinf(x::NumberInterval) = !isfinite(x)
 
-isnan(x::Interval) = isnai(x)
-
-function iszero(x::Interval)
+function iszero(x::NumberInterval)
     if contains_zero(x)
         if isthin(x)
             return true
@@ -22,18 +20,23 @@ function iszero(x::Interval)
     return false
 end
 
-function ==(a::Interval, b::Interval)
+#isequal(a::NumberInterval{T}, b::NumberInterval{S}) where {T, S} =
+#    SetInterval{T}(a) == SetInterval{S}(b)
+isequal(a::NumberInterval, b::NumberInterval) =
+    SetInterval(a) == SetInterval(b)
+
+function ==(a::NumberInterval, b::NumberInterval)
     isthin(a) && isequal(a, b) && return true
     isempty(a ∩ b) && return false
     throw(UndecidableError("may represent equal numbers (or not)"))
 end
-!=(a::Interval, b::Interval) = !(a == b)
+!=(a::NumberInterval, b::NumberInterval) = !(a == b)
 
-function <(a::Interval, b::Interval)
+function <(a::NumberInterval, b::NumberInterval)
     strictprecedes(a, b) && return true
     precedes(b, a) && return false
     throw(UndecidableError("cannot compare represented numbers"))
 end
->(a::Interval, b::Interval) = b < a
-<=(a::Interval, b::Interval) = !(b < a)
-#>=(a::Interval, b::Interval) = b <= a
+>(a::NumberInterval, b::NumberInterval) = b < a
+<=(a::NumberInterval, b::NumberInterval) = !(b < a)
+#>=(a::NumberInterval, b::NumberInterval) = b <= a

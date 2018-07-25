@@ -6,8 +6,9 @@
 """`emptyinterval`s are represented as the interval [∞, -∞]; note
 that this interval is an exception to the fact that the lower bound is
 larger than the upper one."""
-emptyinterval(::Type{T}) where T<:Real = Interval{T}(Inf, -Inf)
-emptyinterval(x::Interval{T}) where T<:Real = emptyinterval(T)
+emptyinterval(::Type{T}) where {T<:Real} =
+    Interval(convert(T, Inf), convert(T, -Inf))
+emptyinterval(x::Interval{T}) where {T<:Real} = emptyinterval(T)
 emptyinterval() = emptyinterval(precision(Interval)[1])
 const ∅ = emptyinterval(Float64)
 
@@ -22,6 +23,7 @@ entireinterval(x::Interval{T}) where T<:Real = entireinterval(T)
 entireinterval() = entireinterval(precision(Interval)[1])
 
 isentire(x::Interval) = x.lo == -Inf && x.hi == Inf
+isinf(x::SetInterval) = isentire(x)
 isunbounded(x::Interval) = x.lo == -Inf || x.hi == Inf
 isbounded(x::Interval) = !isunbounded(x)
 
@@ -32,6 +34,9 @@ nai(x::Interval{T}) where T<:Real = nai(T)
 nai() = nai(precision(Interval)[1])
 
 isnai(x::Interval) = isnan(x.lo) || isnan(x.hi)
+
+isfinite(x::SetInterval) = isfinite(x.lo) && isfinite(x.hi)
+isnan(x::SetInterval) = isnai(x)
 
 """
     isthin(x)
@@ -71,6 +76,8 @@ Check whether an interval `x` is *atomic*, i.e. is unable to be split.
 This occurs when the interval is empty, or when the upper bound equals the lower bound or the `nextfloat` of the lower bound.
 """
 isatomic(x::Interval) = isempty(x) || (x.hi == x.lo) || (x.hi == nextfloat(x.lo))
+
+iszero(x::SetInterval) = iszero(x.lo) && iszero(x.hi)
 
 contains_zero(X::Interval{T}) where {T} = zero(T) ∈ X
 
