@@ -109,7 +109,7 @@ end
 function round_string(x::BigFloat, digits::Int, r::RoundingMode)
 
     lng = digits + Int32(8)
-    @compat buf = Array{UInt8}(undef, lng + 1)
+    buf = Array{UInt8}(undef, lng + 1)
 
     lng = ccall((:mpfr_snprintf,:libmpfr), Int32,
     (Ptr{UInt8}, Culong,  Ptr{UInt8}, Int32, Ref{BigFloat}...),
@@ -117,7 +117,7 @@ function round_string(x::BigFloat, digits::Int, r::RoundingMode)
 
     repr = unsafe_string(pointer(buf))
 
-    @compat repr = replace(repr, "nan" => "NaN")
+    repr = replace(repr, "nan" => "NaN")
 
     return repr
 end
@@ -144,8 +144,8 @@ function basic_representation(a::Interval, format=nothing)
         bb = round_string(a.hi, sigfigs, RoundUp)
 
         output = "[$aa, $bb]"
-        @compat output = replace(output, "inf" => "∞")
-        @compat output = replace(output, "Inf" => "∞")
+        output = replace(output, "inf" => "∞")
+        output = replace(output, "Inf" => "∞")
 
     elseif format == :full
         output = "Interval($(a.lo), $(a.hi))"
