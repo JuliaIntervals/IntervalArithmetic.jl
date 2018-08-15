@@ -17,9 +17,9 @@ half_pi(x::T) where {T<:AbstractFloat} = half_pi(T)
 two_pi(::Type{Float64}) = multiply_by_positive_constant(2.0, pi_interval(Float64))
 two_pi(::Type{T}) where {T} = 2 * pi_interval(T)
 
-range_atan2(::Type{T}) where {T<:Real} = Interval(-(pi_interval(T).hi), pi_interval(T).hi)
-half_range_atan2(::Type{T}) where {T} = (temp = half_pi(T); Interval(-(temp.hi), temp.hi) )
-pos_range_atan2(::Type{T}) where {T<:Real} = Interval(zero(T), pi_interval(T).hi)
+range_atan(::Type{T}) where {T<:Real} = Interval(-(pi_interval(T).hi), pi_interval(T).hi)
+half_range_atan(::Type{T}) where {T} = (temp = half_pi(T); Interval(-(temp.hi), temp.hi) )
+pos_range_atan(::Type{T}) where {T<:Real} = Interval(zero(T), pi_interval(T).hi)
 
 
 """Finds the quadrant(s) corresponding to a given floating-point
@@ -194,17 +194,16 @@ function atan(a::Interval{T}) where T
 end
 
 
-#atan2{T<:Real, S<:Real}(y::Interval{T}, x::Interval{S}) = atan2(promote(y, x)...)
+#atan{T<:Real, S<:Real}(y::Interval{T}, x::Interval{S}) = atan(promote(y, x)...)
 
-function atan2(y::Interval{Float64}, x::Interval{Float64})
+function atan(y::Interval{Float64}, x::Interval{Float64})
     (isempty(y) || isempty(x)) && return emptyinterval(Float64)
 
-    atomic(Interval{Float64}, atan2(big53(y), big53(x)))
+    atomic(Interval{Float64}, atan(big53(y), big53(x)))
 end
 
 
-
-function atan2(y::Interval{BigFloat}, x::Interval{BigFloat})
+function atan(y::Interval{BigFloat}, x::Interval{BigFloat})
     (isempty(y) || isempty(x)) && return emptyinterval(BigFloat)
 
     T = BigFloat
@@ -223,47 +222,47 @@ function atan2(y::Interval{BigFloat}, x::Interval{BigFloat})
         y == zero(y) && return emptyinterval(T)
         y.lo ≥ zero(T) && return half_pi(T)
         y.hi ≤ zero(T) && return -half_pi(T)
-        return half_range_atan2(T)
+        return half_range_atan(T)
 
     elseif x.lo > zero(T)
 
         y == zero(y) && return y
         y.lo ≥ zero(T) &&
-            return @round(atan2(y.lo, x.hi), atan2(y.hi, x.lo)) # refinement lo bound
+            return @round(atan(y.lo, x.hi), atan(y.hi, x.lo)) # refinement lo bound
         y.hi ≤ zero(T) &&
-            return @round(atan2(y.lo, x.lo), atan2(y.hi, x.hi))
-        return @round(atan2(y.lo, x.lo), atan2(y.hi, x.lo))
+            return @round(atan(y.lo, x.lo), atan(y.hi, x.hi))
+        return @round(atan(y.lo, x.lo), atan(y.hi, x.lo))
 
     elseif x.hi < zero(T)
 
         y == zero(y) && return pi_interval(T)
         y.lo ≥ zero(T) &&
-            return @round(atan2(y.hi, x.hi), atan2(y.lo, x.lo))
+            return @round(atan(y.hi, x.hi), atan(y.lo, x.lo))
         y.hi < zero(T) &&
-            return @round(atan2(y.hi, x.lo), atan2(y.lo, x.hi))
-        return range_atan2(T)
+            return @round(atan(y.hi, x.lo), atan(y.lo, x.hi))
+        return range_atan(T)
 
     else # zero(T) ∈ x
 
         if x.lo == zero(T)
             y == zero(y) && return y
 
-            y.lo ≥ zero(T) && return @round(atan2(y.lo, x.hi), half_range_atan2(BigFloat).hi)
+            y.lo ≥ zero(T) && return @round(atan(y.lo, x.hi), half_range_atan(BigFloat).hi)
 
-            y.hi ≤ zero(T) && return @round(half_range_atan2(BigFloat).lo, atan2(y.hi, x.hi))
-            return half_range_atan2(T)
+            y.hi ≤ zero(T) && return @round(half_range_atan(BigFloat).lo, atan(y.hi, x.hi))
+            return half_range_atan(T)
 
         elseif x.hi == zero(T)
             y == zero(y) && return pi_interval(T)
-            y.lo ≥ zero(T) && return @round(half_pi(BigFloat).lo, atan2(y.lo, x.lo))
-            y.hi < zero(T) && return @round(atan2(y.hi, x.lo), -(half_pi(BigFloat).lo))
-            return range_atan2(T)
+            y.lo ≥ zero(T) && return @round(half_pi(BigFloat).lo, atan(y.lo, x.lo))
+            y.hi < zero(T) && return @round(atan(y.hi, x.lo), -(half_pi(BigFloat).lo))
+            return range_atan(T)
         else
             y.lo ≥ zero(T) &&
-                return @round(atan2(y.lo, x.hi), atan2(y.lo, x.lo))
+                return @round(atan(y.lo, x.hi), atan(y.lo, x.lo))
             y.hi < zero(T) &&
-                return @round(atan2(y.hi, x.lo), atan2(y.hi, x.hi))
-            return range_atan2(T)
+                return @round(atan(y.hi, x.lo), atan(y.hi, x.hi))
+            return range_atan(T)
         end
 
     end
