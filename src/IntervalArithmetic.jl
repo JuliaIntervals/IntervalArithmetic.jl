@@ -8,17 +8,10 @@ import CRlibm
 using StaticArrays
 using FastRounding
 using AdjacentFloats
-using Compat
 
-if VERSION <= v"0.7.0-DEV.2004"
-    import Base: ×, dot
-    import Compat.Sys
-    export ⊇
-else
-    using Markdown
-    import Base: ⊇
-    import LinearAlgebra: ×, dot
-end
+using Markdown
+import Base: ⊇
+import LinearAlgebra: ×, dot
 
 
 import Base:
