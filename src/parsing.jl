@@ -41,7 +41,7 @@ Parse a string as an interval. Formats allowed include:
 function parse(::Type{Interval{T}}, s::AbstractString) where T
 
     # Check version!
-    if !(@compat occursin("[", s))  # string like "3.1"
+    if !(occursin("[", s))  # string like "3.1"
 
         m = match(r"(.*)±(.*)", s)
         if m != nothing
@@ -81,8 +81,8 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
 
     end
 
-    @compat expr1 = Meta.parse(lo)
-    @compat expr2 = Meta.parse(hi)
+    expr1 = Meta.parse(lo)
+    expr2 = Meta.parse(hi)
 
     interval = eval(make_interval(T, expr1, [expr2]))
 
