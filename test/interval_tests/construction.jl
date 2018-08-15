@@ -1,13 +1,8 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
 using IntervalArithmetic
-if VERSION < v"0.7.0-DEV.2004"
-    using Base.Test
-    const eeuler = Base.e
-else
-    using Test
-    const eeuler = Base.MathConstants.e
-end
+using Test
+const eeuler = Base.MathConstants.e
 
 
 @testset "Constructing intervals" begin

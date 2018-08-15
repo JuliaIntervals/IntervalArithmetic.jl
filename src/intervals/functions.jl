@@ -152,7 +152,7 @@ function ^(a::Interval{BigFloat}, r::Rational{S}) where S<:Integer
         return emptyinterval(a)
     end
 
-    isinteger(r) && return atomic(Interval{T}, a^round(S,r))
+    isinteger(r) && return atomic(Interval{T}, a^round(S, digits=r))
     r == one(S)//2 && return sqrt(a)
 
     a = a ∩ domain

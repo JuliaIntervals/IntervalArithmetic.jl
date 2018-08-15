@@ -21,7 +21,7 @@ end
 Bisect the `IntervalBox` `X` at position α ∈ [0,1] along its longest side.
 """
 function bisect(X::IntervalBox, α=where_bisect)
-    i = indmax(diam.(X))  # find longest side
+    i = argmax(diam.(X))  # find longest side
 
     return bisect(X, i, α)
 end

@@ -1,5 +1,5 @@
 using IntervalArithmetic
-using Base.Test
+using Test
 
 
 @testset "`bisect` function" begin
