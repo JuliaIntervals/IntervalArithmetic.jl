@@ -27,5 +27,5 @@ end
     @test sin(Z) == complex(sin(real(Z))*cosh(imag(Z)),sinh(imag(Z))*cos(real(Z)))
     @test exp(-im * Interval(π)) == Interval(-1.0, -0.9999999999999999) - Interval(1.224646799147353e-16, 1.2246467991473532e-16)*im
 
-    @test sqrt(Z) == Interval(1.9999999699999995,2.0000000300000007) + Interval(2.0000000300000007,1.0000000300000005)*im
+    @test sqrt(Z) == Interval(1.99999996999999951619,2.00000003000000070585) + Interval(0.99999996999999984926,1.00000003000000048381)*im
 end
