@@ -5,13 +5,16 @@ __precompile__(true)
 module IntervalArithmetic
 
 import CRlibm
+
 using StaticArrays
 using FastRounding
 using AdjacentFloats
 
 using Markdown
-import Base: ⊇
+
+using LinearAlgebra
 import LinearAlgebra: ×, dot
+export ×, dot
 
 
 import Base:
@@ -25,7 +28,7 @@ import Base:
     union, intersect, isempty,
     convert, promote_rule, eltype, size,
     BigFloat, float, widen, big,
-    ∩, ∪, ⊆, eps,
+    ∩, ∪, ⊆, ⊇, eps,
     floor, ceil, trunc, sign, round,
     expm1, log1p,
     precision,
