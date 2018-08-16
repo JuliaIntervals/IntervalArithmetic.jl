@@ -170,7 +170,7 @@ end
 
     x = @biginterval(0, 1)
     @test string(x) == "[0, 1]₁₂₈"
-    @test sprint(showall, x) == "Interval(0.000000000000000000000000000000000000000, 1.000000000000000000000000000000000000000)"
+    @test sprint(showall, x) == "Interval(0.0, 1.0)"
 
     x = DecoratedInterval(0, 1, dac)
     @test string(x) == "[0, 1]"
@@ -178,7 +178,7 @@ end
 
     x = DecoratedInterval(big(0), big(1), def)
     @test string(x) == "[0, 1]₁₂₈"
-    @test sprint(showall, x) == "DecoratedInterval(Interval(0.000000000000000000000000000000000000000, 1.000000000000000000000000000000000000000), def)"
+    @test sprint(showall, x) == "DecoratedInterval(Interval(0.0, 1.0), def)"
 
     setformat(decorations=true)
     @test string(x) == "[0, 1]₁₂₈_def"
