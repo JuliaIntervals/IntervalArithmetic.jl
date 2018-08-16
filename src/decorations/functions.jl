@@ -1,5 +1,8 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
+Base.literal_pow(::typeof(^), x::DecoratedInterval{T}, ::Val{p}) where {T,p} = x^p
+
+
 # zero, one
 zero(a::DecoratedInterval{T}) where T<:Real = DecoratedInterval(zero(T))
 zero(::Type{DecoratedInterval{T}}) where T<:Real = DecoratedInterval(zero(T))
