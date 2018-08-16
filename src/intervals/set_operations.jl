@@ -13,6 +13,8 @@ function in(x::T, a::Interval) where T<:Real
     a.lo <= x <= a.hi
 end
 
+in(x, a::Complex{<:Interval}) = real(x) ∈ real(a) && imag(x) ∈ imag(a)
+
 
 
 """
@@ -52,6 +54,10 @@ function isdisjoint(a::Interval, b::Interval)
     islessprime(b.hi, a.lo) || islessprime(a.hi, b.lo)
 end
 
+function isdisjoint(a::Complex{<:Interval}, b::Complex{<:Interval})
+    isdisjoint(real(a),real(b)) || isdisjoint(imag(a),imag(b))
+end
+
 
 # Intersection
 """
@@ -71,6 +77,14 @@ end
 intersect(a::Interval{T}, b::Interval{S}) where {T,S} =
     intersect(promote(a, b)...)
 
+function intersect(a::Complex{Interval{T}},b::Complex{Interval{T}}) where T
+    isdisjoint(a,b) && return complex(emptyinterval(T),emptyinterval(T)) # for type stability
+
+    complex(intersect(real(a),real(b)),intersect(imag(a),imag(b)))
+end
+intersect(a::Interval{Complex{T}}, b::Interval{Complex{S}}) where {T,S} =
+    intersect(promote(a, b)...)
+
 
 ## Hull
 """
@@ -83,6 +97,8 @@ all of `a` and `b`.
 hull(a::Interval, b::Interval) = Interval(min(a.lo, b.lo), max(a.hi, b.hi))
 #
 # hull{T,S}(a::Interval{T}, b::Interval{S}) = hull(promote(a, b)...)
+hull(a::Complex{<:Interval},b::Complex{<:Interval}) =
+    complex(hull(real(a),real(b)),hull(imag(a),imag(b)))
 
 """
     union(a, b)
@@ -94,6 +110,7 @@ to `hull(a,b)`.
 union(a::Interval, b::Interval) = hull(a, b)
 #
 # union(a::Interval, b::Interval) = union(promote(a, b)...)
+union(a::Complex{<:Interval},b::Complex{<:Interval}) = hull(a, b)
 
 
 """
