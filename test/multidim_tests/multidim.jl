@@ -1,12 +1,7 @@
 using IntervalArithmetic
 using StaticArrays
 
-if VERSION < v"0.7.0-DEV.2004"
-    using Test
-else
-    using Test
-    using LinearAlgebra: dot
-end
+using Test
 
 
 @testset "Operations on boxes" begin
