@@ -97,7 +97,7 @@ setprecision(Interval, Float64)
         @test string(a) == "[2, 3]₂₅₆_com"
 
         setformat(:full)
-        @test string(a) == "DecoratedInterval(Interval(2.000000000000000000000000000000000000000000000000000000000000000000000000000000, 3.000000000000000000000000000000000000000000000000000000000000000000000000000000), com)"
+        @test string(a) == "DecoratedInterval(Interval(2.0, 3.0), com)"
 
         setformat(:midpoint)
         @test string(a) == "2.5 ± 0.5_com"
@@ -118,7 +118,7 @@ setprecision(Interval, Float64)
         @test string(a) == "[1, 1]₁₂₈"
 
         setformat(:full)
-        @test string(a) == "Interval(1.000000000000000000000000000000000000000, 1.000000000000000000000000000000000000000)"
+        @test string(a) == "Interval(1.0, 1.0)"
 
 
         a = DecoratedInterval(big(2), big(3), com)
@@ -131,7 +131,7 @@ setprecision(Interval, Float64)
         @test string(a) == "[2, 3]₁₂₈_com"
 
         setformat(:full)
-        @test string(a) == "DecoratedInterval(Interval(2.000000000000000000000000000000000000000, 3.000000000000000000000000000000000000000), com)"
+        @test string(a) == "DecoratedInterval(Interval(2.0, 3.0), com)"
     end
 
 
