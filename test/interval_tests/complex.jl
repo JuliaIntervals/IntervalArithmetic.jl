@@ -8,7 +8,7 @@ end
 @testset "Complex interval operations" begin
     a = @interval 1im
     b = @interval 4im + 3
-    
+
     @test typeof(a)== Complex{IntervalArithmetic.Interval{Float64}}
     @test a ==  Interval(0) + Interval(1)*im
     @test a * a == Interval(-1)
@@ -18,7 +18,7 @@ end
     @test a^2 == -1
 
     @test a ∪ b == (@interval 0 3) + (@interval 1 4)*im
-    @test a ∩ b == ∅
+    @test a ∩ b == ∅ + ∅*im
     @test isdisjoint(a,b) == true
 end
 
