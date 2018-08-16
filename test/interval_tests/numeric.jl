@@ -244,7 +244,7 @@ end
         @test isinterior(x^50, pow(x, 50))
 
         x = Interval(2)
-        @test pow(x, 2000) == Interval(realmax(), Inf)
+        @test pow(x, 2000) == Interval(floatmax(), Inf)
     end
 
     @testset "Fast real powers" begin
@@ -280,7 +280,7 @@ end
 
         a = Interval{Float32}(1e38)
         b = Interval{Float32}(1e2)
-        @test a * b == Interval{Float32}(realmax(Float32), Inf)
+        @test a * b == Interval{Float32}(floatmax(Float32), Inf)
     end
     =#
 end

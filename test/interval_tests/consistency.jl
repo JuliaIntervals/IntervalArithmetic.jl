@@ -354,7 +354,7 @@ setprecision(Interval, Float64)
         @test isatomic(Interval(1))
         @test isatomic(Interval(2.3, 2.3))
         @test isatomic(emptyinterval())
-        @test isatomic(@interval(∞))  # Interval(realmax(), Inf)
+        @test isatomic(@interval(∞))  # Interval(floatmax(), Inf)
 
         @test !isatomic(1..2)
         @test !isatomic(Interval(1, nextfloat(1.0, 2)))
