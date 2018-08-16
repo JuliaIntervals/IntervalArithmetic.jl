@@ -1,6 +1,6 @@
 using IntervalArithmetic
 if VERSION < v"0.7.0-DEV.2004"
-    using Base.Test
+    using Test
 else
     using Test
     # using LinearAlgebra, SparseArrays
