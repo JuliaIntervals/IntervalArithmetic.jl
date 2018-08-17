@@ -3,6 +3,7 @@ using StaticArrays
 
 using Test
 
+let X  # avoid problems with global variables
 
 @testset "Operations on boxes" begin
     A = IntervalBox(1..2, 3..4)
@@ -82,18 +83,6 @@ end
     @test inv.(A) == IntervalBox(inv(A[1]), inv(A[2]))
 end
 
-# @testset "@intervalbox tests" begin
-#     @intervalbox f(x, y) = (x + y, x - y)
-#
-#     X = IntervalBox(1..1, 2..2)
-#     @test f(X) == IntervalBox(3..3, -1 .. -1)
-#
-#     @intervalbox g(x, y) = x - y
-#     @test isa(g(X), IntervalBox)
-#
-#     @test emptyinterval(X) == IntervalBox(∅, ∅)
-#
-# end
 
 @testset "setdiff for IntervalBox" begin
     X = IntervalBox(2..4, 3..5)
@@ -227,4 +216,6 @@ end
     @test sin.(X) == IntervalBox(sin(X[1]), sin(X[2]))
     @test mid.(X) == SVector(mid(X[1]), mid(X[2]))
     @test diam.(X) == SVector(diam(X[1]), diam(X[2]))
+end
+
 end
