@@ -23,12 +23,13 @@ setindex(X::IntervalBox, y, i) = IntervalBox( setindex(X.v, y, i) )
 
 # iteration:
 
+iterate(X::IntervalBox{N,T}) where {N, T} = (X[1], 1)
 
-start(X::IntervalBox{N,T}) where {N,T} = 1
+function iterate(X::IntervalBox{N,T}, state) where {N,T}
+    (state == N) && return nothing
 
-next(X::IntervalBox{N,T}, state) where {N,T} = (X[state], state+1)
-
-done(X::IntervalBox{N,T}, state) where {N,T} = state > N
+    return X[state+1], state+1
+end
 
 eltype(::Type{IntervalBox{N,T}}) where {N,T} = Interval{T} # Note that this is defined for the type
 

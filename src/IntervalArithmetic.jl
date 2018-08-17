@@ -39,7 +39,7 @@ import Base:
 import Base:  # for IntervalBox
     broadcast, length,
     getindex, setindex,
-    start, next, done, eltype
+    iterate, eltype
 
 import .Broadcast: broadcasted
 
