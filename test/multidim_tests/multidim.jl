@@ -3,7 +3,7 @@ using StaticArrays
 
 using Test
 
-let X  # avoid problems with global variables
+let X, A  # avoid problems with global variables
 
 @testset "Operations on boxes" begin
     A = IntervalBox(1..2, 3..4)

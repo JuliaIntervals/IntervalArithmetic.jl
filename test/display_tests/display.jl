@@ -1,6 +1,8 @@
 using IntervalArithmetic
 using Test
 
+let x, b
+
 setprecision(Interval, Float64)
 
 @testset "setformat tests" begin
@@ -196,4 +198,6 @@ end
 
     @format 10
     @test string(x) == "[0.09999999999, 0.3000000001]"
+end
+
 end

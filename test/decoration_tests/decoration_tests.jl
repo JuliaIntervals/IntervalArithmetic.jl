@@ -1,6 +1,8 @@
 using IntervalArithmetic
 using Test
 
+let b
+
 @testset "DecoratedInterval tests" begin
     a = DecoratedInterval(@interval(1, 2), com)
     @test decoration(a) == com
@@ -55,5 +57,7 @@ end
 
     @test convert(DecoratedInterval{Float64}, "[1,2]_dac") ==
                         DecoratedInterval(Interval(1, 2), dac)
+
+end
 
 end
