@@ -118,9 +118,9 @@ for mode in (:Down, :Up)
     mode2 = Symbol("Round", mode)
 
     if mode == :Down
-        directed = :prev_float
+        directed = :prevfloat
     else
-        directed = :next_float
+        directed = :nextfloat
     end
 
     # binary functions:
