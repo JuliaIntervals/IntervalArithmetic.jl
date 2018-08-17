@@ -8,7 +8,6 @@ import CRlibm
 
 using StaticArrays
 using FastRounding
-using AdjacentFloats
 
 using Markdown
 
