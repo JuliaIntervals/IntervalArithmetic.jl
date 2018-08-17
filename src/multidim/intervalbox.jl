@@ -90,7 +90,7 @@ contains_zero(X::IntervalBox) = all(contains_zero.(X))
 ×(a::IntervalBox, b::Interval) = IntervalBox(a.v..., b)
 ×(a::IntervalBox, b::IntervalBox) = IntervalBox(a.v..., b.v...)
 
-IntervalBox(x::Interval, ::Type{Val{n}}) where {n} = IntervalBox(SVector(ntuple(i->x, Val(n))))
+IntervalBox(x::Interval, ::Val{n}) where {n} = IntervalBox(SVector(ntuple( _ -> x, Val(n) )))
 
 IntervalBox(x::Interval, n::Int) = IntervalBox(x, Val(n))
 
