@@ -186,11 +186,11 @@ end
 end
 
 @testset "Constructing multidimensional IntervalBoxes" begin
-    @test IntervalBox(1..2, Val{1}) == IntervalBox(1..2)
-    @test IntervalBox(1..2, Val{2}) == (1..2) × (1..2)
-    @test IntervalBox(1..2, Val{5}) == (1..2) × (1..2) × (1..2) × (1..2) × (1..2)
+    @test IntervalBox(1..2, Val(1)) == IntervalBox(1..2)
+    @test IntervalBox(1..2, Val(2)) == (1..2) × (1..2)
+    @test IntervalBox(1..2, Val(5)) == (1..2) × (1..2) × (1..2) × (1..2) × (1..2)
 
-    @test IntervalBox(1..2, 3) == IntervalBox(1..2, Val{3})
+    @test IntervalBox(1..2, 3) == IntervalBox(1..2, Val(3))
     @test IntervalBox((1..2, 2..3)) == IntervalBox(1..2, 2..3)
     @test IntervalBox((1, 2)) == IntervalBox(1..1, 2..2)
     @test IntervalBox( (1, 2, 3) ) == IntervalBox(1..1, 2..2, 3..3)
