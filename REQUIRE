@@ -3,4 +3,4 @@ CRlibm 0.7
 StaticArrays 0.8
 FastRounding 0.1.2
 SetRounding 0.2
-RecipesBase
+RecipesBase 0.5
