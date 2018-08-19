@@ -33,7 +33,7 @@ import Base:
     expm1, log1p,
     precision,
     isfinite, isnan, isinf, iszero,
-    show, showall,
+    show,
     isinteger, setdiff,
     parse, hash
 
@@ -64,6 +64,13 @@ export
 
 export
     setindex   # re-export from StaticArrays for IntervalBox
+
+
+if VERSION < v"1.0-dev"
+    import Base.showall
+end
+
+export showall
 
 import Base: rounding, setrounding, setprecision
 
