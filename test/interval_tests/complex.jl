@@ -13,8 +13,6 @@ using Test
     @test a - a == 0
     @test a / a == 1
 
-    @test_broken a^2 == -1
-
     @test 3+2im ∈ c
     @test a ∪ b == (@interval 0 3) + (@interval 1 4)*im
     @test c ∩ (a ∪ b) == (@interval 0 3) + (@interval 1 2)*im
@@ -34,4 +32,15 @@ end
     @test sqrt((@interval -1 0) + (@interval 0)*im) .== (@interval 0 1)*im
     @test sqrt((@interval -1 1) + (@interval 0)*im) .== (@interval 0 1) + (@interval 0 1)*im
     @test sqrt((@interval -9//32 Inf)*im + (@interval 0)) .== (@interval 0 Inf) + (@interval -3//8 Inf)*im
+end
+
+
+@testset "Complex powers" begin
+    x = (3..3) + 4im
+    @test x^2 == -7 + 24im
+    @test sqrt(x) ⊆ x^0.5
+    @test x^-2 == inv(x)^2
+
+    a = -3.1
+    @test x ⊆ (x^a)^(1/a)
 end

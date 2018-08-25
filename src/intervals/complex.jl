@@ -6,10 +6,13 @@ function ^(x::Complex{Interval{T}}, n::Integer) where {T}
     return Base.power_by_squaring(x, n)
 end
 
-function ^(x::Complex{Interval{T}}, y::Union{Real,Complex}) where {T}
+function ^(x::Complex{Interval{T}}, y::Real) where {T}
     return exp(y*log(x))
 end
 
+function ^(x::Complex{Interval{T}}, y::Complex) where {T}
+    return exp(y*log(x))
+end
 
 
 function ssqs(x::T, y::T,RND::RoundingMode) where T<:AbstractFloat
