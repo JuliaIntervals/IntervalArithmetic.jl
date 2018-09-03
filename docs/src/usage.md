@@ -293,7 +293,7 @@ to an `Interval{BigFloat}`, and then use routines from the `MPFR` library
 
 - `^`
 - `exp2`, `exp10`
-- `atan`, `atanh`
+- `atan2`, `atanh`
 
 Note, in particular, that in order to obtain correct rounding for the power function (`^`),
 intervals are converted to and from `BigFloat`; this implies a significant slow-down in this case.

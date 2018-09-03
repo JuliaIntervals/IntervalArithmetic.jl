@@ -1,7 +1,9 @@
 using IntervalArithmetic
-using Test
-
-let x, b
+if VERSION < v"0.7.0-DEV.2004"
+    using Base.Test
+else
+    using Test
+end
 
 setprecision(Interval, Float64)
 
@@ -99,7 +101,7 @@ setprecision(Interval, Float64)
         @test string(a) == "[2, 3]₂₅₆_com"
 
         setformat(:full)
-        @test string(a) == "DecoratedInterval(Interval(2.0, 3.0), com)"
+        @test string(a) == "DecoratedInterval(Interval(2.000000000000000000000000000000000000000000000000000000000000000000000000000000, 3.000000000000000000000000000000000000000000000000000000000000000000000000000000), com)"
 
         setformat(:midpoint)
         @test string(a) == "2.5 ± 0.5_com"
@@ -120,7 +122,7 @@ setprecision(Interval, Float64)
         @test string(a) == "[1, 1]₁₂₈"
 
         setformat(:full)
-        @test string(a) == "Interval(1.0, 1.0)"
+        @test string(a) == "Interval(1.000000000000000000000000000000000000000, 1.000000000000000000000000000000000000000)"
 
 
         a = DecoratedInterval(big(2), big(3), com)
@@ -133,7 +135,7 @@ setprecision(Interval, Float64)
         @test string(a) == "[2, 3]₁₂₈_com"
 
         setformat(:full)
-        @test string(a) == "DecoratedInterval(Interval(2.0, 3.0), com)"
+        @test string(a) == "DecoratedInterval(Interval(2.000000000000000000000000000000000000000, 3.000000000000000000000000000000000000000), com)"
     end
 
 
@@ -172,7 +174,7 @@ end
 
     x = @biginterval(0, 1)
     @test string(x) == "[0, 1]₁₂₈"
-    @test sprint(showall, x) == "Interval(0.0, 1.0)"
+    @test sprint(showall, x) == "Interval(0.000000000000000000000000000000000000000, 1.000000000000000000000000000000000000000)"
 
     x = DecoratedInterval(0, 1, dac)
     @test string(x) == "[0, 1]"
@@ -180,7 +182,7 @@ end
 
     x = DecoratedInterval(big(0), big(1), def)
     @test string(x) == "[0, 1]₁₂₈"
-    @test sprint(showall, x) == "DecoratedInterval(Interval(0.0, 1.0), def)"
+    @test sprint(showall, x) == "DecoratedInterval(Interval(0.000000000000000000000000000000000000000, 1.000000000000000000000000000000000000000), def)"
 
     setformat(decorations=true)
     @test string(x) == "[0, 1]₁₂₈_def"
@@ -198,6 +200,4 @@ end
 
     @format 10
     @test string(x) == "[0.09999999999, 0.3000000001]"
-end
-
 end

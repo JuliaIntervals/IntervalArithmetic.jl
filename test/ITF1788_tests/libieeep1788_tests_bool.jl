@@ -20,7 +20,11 @@
 #Language imports
 
 #Test library imports
-using Test
+if VERSION < v"0.7.0-DEV.2004"
+    using Base.Test
+else
+    using Test
+end
 
 #Arithmetic library imports
 using IntervalArithmetic
