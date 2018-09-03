@@ -1,3 +1,20 @@
+function ^(x::Complex{Interval{T}}, n::Integer) where {T}
+    if n < 0
+        return inv(x)^n
+    end
+
+    return Base.power_by_squaring(x, n)
+end
+
+function ^(x::Complex{Interval{T}}, y::Real) where {T}
+    return exp(y*log(x))
+end
+
+function ^(x::Complex{Interval{T}}, y::Complex) where {T}
+    return exp(y*log(x))
+end
+
+
 function ssqs(x::T, y::T,RND::RoundingMode) where T<:AbstractFloat
     k::Int = 0
     ρ = +(*(x,x,RND),*(y,y,RND),RND)
@@ -74,4 +91,12 @@ function sqrt(z::Complex{Interval{T}}) where T<:AbstractFloat
     end
 
     Complex(ξ,η)
+end
+
+
+function log(z::Complex{T}) where T<:Interval
+    ρ = abs(z)
+    θ = angle(z)
+
+    return log(ρ) + im * θ
 end

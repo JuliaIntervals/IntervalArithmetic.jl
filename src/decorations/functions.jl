@@ -1,5 +1,8 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
+Base.literal_pow(::typeof(^), x::DecoratedInterval{T}, ::Val{p}) where {T,p} = x^p
+
+
 # zero, one
 zero(a::DecoratedInterval{T}) where T<:Real = DecoratedInterval(zero(T))
 zero(::Type{DecoratedInterval{T}}) where T<:Real = DecoratedInterval(zero(T))
@@ -255,7 +258,7 @@ following the IEEE-1788 Standard (see Sect. 11.7.1, pp 47).
 """ union
 
 
-## Functions on unrestricted domains; tan and atan2 are treated separately
+## Functions on unrestricted domains; tan and atan are treated separately
 unrestricted_functions =(
     :exp, :exp2, :exp10,
     :sin, :cos,
@@ -290,10 +293,10 @@ function decay(a::DECORATION)
     ill
 end
 
-function atan2(yy::DecoratedInterval{T}, xx::DecoratedInterval{T}) where T
+function atan(yy::DecoratedInterval{T}, xx::DecoratedInterval{T}) where T
     x = interval_part(xx)
     y = interval_part(yy)
-    r = atan2(y, x)
+    r = atan(y, x)
     d = decoration(r)
     d = min(d, decoration(xx), decoration(yy))
     # Check cases when decoration is trv and decays (from com or dac)
