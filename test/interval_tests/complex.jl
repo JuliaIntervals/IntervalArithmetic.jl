@@ -1,5 +1,9 @@
 using IntervalArithmetic
-using Test
+if VERSION < v"0.7.0-DEV.2004"
+    using Base.Test
+else
+    using Test
+end
 
 @testset "Complex interval operations" begin
     a = @interval 1im
@@ -12,8 +16,7 @@ using Test
     @test a + a == Interval(2)*im
     @test a - a == 0
     @test a / a == 1
-
-    @test_broken a^2 == -1
+    @test a^2 == -1
 
     @test 3+2im ∈ c
     @test a ∪ b == (@interval 0 3) + (@interval 1 4)*im
@@ -24,7 +27,7 @@ end
 
 @testset "Complex functions" begin
     Z = (3 ± 1e-7) + (4 ± 1e-7)*im
-    @test sin(Z) == complex(sin(real(Z)) * cosh(imag(Z)), sinh(imag(Z)) * cos(real(Z)))
+    @test sin(Z) == complex(sin(real(Z))*cosh(imag(Z)),sinh(imag(Z))*cos(real(Z)))
     @test exp(-im * Interval(π)) == Interval(-1.0, -0.9999999999999999) - Interval(1.224646799147353e-16, 1.2246467991473532e-16)*im
 
     sZ = sqrt(Z)

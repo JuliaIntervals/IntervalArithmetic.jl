@@ -1,7 +1,11 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
 using IntervalArithmetic
-using Test
+if VERSION < v"0.7.0-DEV.2004"
+    using Base.Test
+else
+    using Test
+end
 
 setprecision(Interval, 128)
 setprecision(Interval, Float64)
@@ -80,98 +84,98 @@ end
     @test atan(@biginterval(-1, 1)) ⊆ atan(@interval(-1, 1))
 end
 
-@testset "atan" begin
-    @test atan(∅, entireinterval()) == ∅
-    @test atan(entireinterval(), ∅) == ∅
-    @test atan(@interval(0.0, 1.0), @biginterval(0.0)) == @biginterval(pi/2)
-    @test atan(@interval(0.0, 1.0), @interval(0.0)) == @interval(pi/2)
-    @test atan(@interval(-1.0, -0.1), @interval(0.0)) == @interval(-pi/2)
-    @test atan(@interval(-1.0, 1.0), @interval(0.0)) == @interval(-pi/2, pi/2)
-    @test atan(@interval(0.0), @interval(0.1, 1.0)) == @interval(0.0)
-    @test atan(@biginterval(0.0, 0.1), @biginterval(0.1, 1.0)) ⊆
-        atan(@interval(0.0, 0.1), @interval(0.1, 1.0))
-    @test atan(@interval(0.0, 0.1), @interval(0.1, 1.0)) ==
+@testset "atan2" begin
+    @test atan2(∅, entireinterval()) == ∅
+    @test atan2(entireinterval(), ∅) == ∅
+    @test atan2(@interval(0.0, 1.0), @biginterval(0.0)) == @biginterval(pi/2)
+    @test atan2(@interval(0.0, 1.0), @interval(0.0)) == @interval(pi/2)
+    @test atan2(@interval(-1.0, -0.1), @interval(0.0)) == @interval(-pi/2)
+    @test atan2(@interval(-1.0, 1.0), @interval(0.0)) == @interval(-pi/2, pi/2)
+    @test atan2(@interval(0.0), @interval(0.1, 1.0)) == @interval(0.0)
+    @test atan2(@biginterval(0.0, 0.1), @biginterval(0.1, 1.0)) ⊆
+        atan2(@interval(0.0, 0.1), @interval(0.1, 1.0))
+    @test atan2(@interval(0.0, 0.1), @interval(0.1, 1.0)) ==
         Interval(0.0, 0.7853981633974484)
-    @test atan(@biginterval(-0.1, 0.0), @biginterval(0.1, 1.0)) ⊆
-        atan(@interval(-0.1, 0.0), @interval(0.1, 1.0))
-    @test atan(@interval(-0.1, 0.0), @interval(0.1, 1.0)) ==
+    @test atan2(@biginterval(-0.1, 0.0), @biginterval(0.1, 1.0)) ⊆
+        atan2(@interval(-0.1, 0.0), @interval(0.1, 1.0))
+    @test atan2(@interval(-0.1, 0.0), @interval(0.1, 1.0)) ==
         Interval(-0.7853981633974484, 0.0)
-    @test atan(@biginterval(-0.1, -0.1), @biginterval(0.1, Inf)) ⊆
-        atan(@interval(-0.1, -0.1), @interval(0.1, Inf))
-    @test atan(@interval(-0.1, 0.0), @interval(0.1, Inf)) ==
+    @test atan2(@biginterval(-0.1, -0.1), @biginterval(0.1, Inf)) ⊆
+        atan2(@interval(-0.1, -0.1), @interval(0.1, Inf))
+    @test atan2(@interval(-0.1, 0.0), @interval(0.1, Inf)) ==
         Interval(-0.7853981633974484, 0.0)
-    @test atan(@biginterval(0.0, 0.1), @biginterval(-2.0, -0.1)) ⊆
-        atan(@interval(0.0, 0.1), @interval(-2.0, -0.1))
-    @test atan(@interval(0.0, 0.1), @interval(-2.0, -0.1)) ==
+    @test atan2(@biginterval(0.0, 0.1), @biginterval(-2.0, -0.1)) ⊆
+        atan2(@interval(0.0, 0.1), @interval(-2.0, -0.1))
+    @test atan2(@interval(0.0, 0.1), @interval(-2.0, -0.1)) ==
         Interval(2.356194490192345, 3.1415926535897936)
-    @test atan(@biginterval(-0.1, 0.0), @biginterval(-2.0, -0.1)) ⊆
-        atan(@interval(-0.1, 0.0), @interval(-2.0, -0.1))
-    @test atan(@interval(-0.1, 0.0), @interval(-2.0, -0.1)) ==
+    @test atan2(@biginterval(-0.1, 0.0), @biginterval(-2.0, -0.1)) ⊆
+        atan2(@interval(-0.1, 0.0), @interval(-2.0, -0.1))
+    @test atan2(@interval(-0.1, 0.0), @interval(-2.0, -0.1)) ==
         @interval(-pi, pi)
-    @test atan(@biginterval(-0.1, 0.1), @biginterval(-Inf, -0.1)) ⊆
-        atan(@interval(-0.1, 0.1), @interval(-Inf, -0.1))
-    @test atan(@interval(-0.1, 0.1), @interval(-Inf, -0.1)) ==
-        @interval(-pi, pi)
-
-    @test atan(@biginterval(0.0, 0.0), @biginterval(-2.0, 0.0)) ⊆
-        atan(@interval(0.0, 0.0), @interval(-2.0, 0.0))
-    @test atan(@interval(-0.0, 0.0), @interval(-2.0, 0.0)) ==
-        Interval(3.141592653589793, 3.1415926535897936)
-    @test atan(@biginterval(0.0, 0.1), @biginterval(-0.1, 0.0)) ⊆
-        atan(@interval(0.0, 0.1), @interval(-0.1, 0.0))
-    @test atan(@interval(-0.0, 0.1), @interval(-0.1, 0.0)) ==
-        Interval(1.5707963267948966, 3.1415926535897936)
-    @test atan(@biginterval(-0.1, -0.1), @biginterval(-0.1, 0.0)) ⊆
-        atan(@interval(-0.1, -0.1), @interval(-0.1, 0.0))
-    @test atan(@interval(-0.1, -0.1), @interval(-0.1, 0.0)) ==
-        Interval(-2.3561944901923453, -1.5707963267948966)
-    @test atan(@biginterval(-0.1, 0.1), @biginterval(-2.0, 0.0)) ⊆
-        atan(@interval(-0.1, 0.1), @interval(-2.0, 0.0))
-    @test atan(@interval(-0.1, 0.1), @interval(-2.0, 0.0)) ==
+    @test atan2(@biginterval(-0.1, 0.1), @biginterval(-Inf, -0.1)) ⊆
+        atan2(@interval(-0.1, 0.1), @interval(-Inf, -0.1))
+    @test atan2(@interval(-0.1, 0.1), @interval(-Inf, -0.1)) ==
         @interval(-pi, pi)
 
-    @test atan(@biginterval(0.0, 0.0), @biginterval(-2.0, 0.0)) ⊆
-        atan(@interval(0.0, 0.0), @interval(-2.0, 0.0))
-    @test atan(@interval(-0.0, 0.0), @interval(-2.0, 0.0)) ==
+    @test atan2(@biginterval(0.0, 0.0), @biginterval(-2.0, 0.0)) ⊆
+        atan2(@interval(0.0, 0.0), @interval(-2.0, 0.0))
+    @test atan2(@interval(-0.0, 0.0), @interval(-2.0, 0.0)) ==
         Interval(3.141592653589793, 3.1415926535897936)
-    @test atan(@biginterval(0.0, 0.1), @biginterval(-0.1, 0.0)) ⊆
-        atan(@interval(0.0, 0.1), @interval(-0.1, 0.0))
-    @test atan(@interval(-0.0, 0.1), @interval(-0.1, 0.0)) ==
+    @test atan2(@biginterval(0.0, 0.1), @biginterval(-0.1, 0.0)) ⊆
+        atan2(@interval(0.0, 0.1), @interval(-0.1, 0.0))
+    @test atan2(@interval(-0.0, 0.1), @interval(-0.1, 0.0)) ==
         Interval(1.5707963267948966, 3.1415926535897936)
-    @test atan(@biginterval(-0.1, -0.1), @biginterval(-0.1, 0.0)) ⊆
-        atan(@interval(-0.1, -0.1), @interval(-0.1, 0.0))
-    @test atan(@interval(-0.1, -0.1), @interval(-0.1, 0.0)) ==
+    @test atan2(@biginterval(-0.1, -0.1), @biginterval(-0.1, 0.0)) ⊆
+        atan2(@interval(-0.1, -0.1), @interval(-0.1, 0.0))
+    @test atan2(@interval(-0.1, -0.1), @interval(-0.1, 0.0)) ==
         Interval(-2.3561944901923453, -1.5707963267948966)
-    @test atan(@biginterval(-0.1, 0.1), @biginterval(-2.0, 0.0)) ⊆
-        atan(@interval(-0.1, 0.1), @interval(-2.0, 0.0))
-    @test atan(@interval(-0.1, 0.1), @interval(-2.0, 0.0)) ==
+    @test atan2(@biginterval(-0.1, 0.1), @biginterval(-2.0, 0.0)) ⊆
+        atan2(@interval(-0.1, 0.1), @interval(-2.0, 0.0))
+    @test atan2(@interval(-0.1, 0.1), @interval(-2.0, 0.0)) ==
         @interval(-pi, pi)
-    @test atan(@biginterval(0.0, 0.1), @biginterval(-2.0, 0.1)) ⊆
-        atan(@interval(0.0, 0.1), @interval(-2.0, 0.1))
-    @test atan(@interval(-0.0, 0.1), @interval(-2.0, 0.1)) ==
+
+    @test atan2(@biginterval(0.0, 0.0), @biginterval(-2.0, 0.0)) ⊆
+        atan2(@interval(0.0, 0.0), @interval(-2.0, 0.0))
+    @test atan2(@interval(-0.0, 0.0), @interval(-2.0, 0.0)) ==
+        Interval(3.141592653589793, 3.1415926535897936)
+    @test atan2(@biginterval(0.0, 0.1), @biginterval(-0.1, 0.0)) ⊆
+        atan2(@interval(0.0, 0.1), @interval(-0.1, 0.0))
+    @test atan2(@interval(-0.0, 0.1), @interval(-0.1, 0.0)) ==
+        Interval(1.5707963267948966, 3.1415926535897936)
+    @test atan2(@biginterval(-0.1, -0.1), @biginterval(-0.1, 0.0)) ⊆
+        atan2(@interval(-0.1, -0.1), @interval(-0.1, 0.0))
+    @test atan2(@interval(-0.1, -0.1), @interval(-0.1, 0.0)) ==
+        Interval(-2.3561944901923453, -1.5707963267948966)
+    @test atan2(@biginterval(-0.1, 0.1), @biginterval(-2.0, 0.0)) ⊆
+        atan2(@interval(-0.1, 0.1), @interval(-2.0, 0.0))
+    @test atan2(@interval(-0.1, 0.1), @interval(-2.0, 0.0)) ==
+        @interval(-pi, pi)
+    @test atan2(@biginterval(0.0, 0.1), @biginterval(-2.0, 0.1)) ⊆
+        atan2(@interval(0.0, 0.1), @interval(-2.0, 0.1))
+    @test atan2(@interval(-0.0, 0.1), @interval(-2.0, 0.1)) ==
         Interval(0.0, 3.1415926535897936)
-    @test atan(@biginterval(-0.1, -0.1), @biginterval(-0.1, 0.1)) ⊆
-        atan(@interval(-0.1, -0.1), @interval(-0.1, 0.1))
-    @test atan(@interval(-0.1, -0.1), @interval(-0.1, 0.1)) ==
+    @test atan2(@biginterval(-0.1, -0.1), @biginterval(-0.1, 0.1)) ⊆
+        atan2(@interval(-0.1, -0.1), @interval(-0.1, 0.1))
+    @test atan2(@interval(-0.1, -0.1), @interval(-0.1, 0.1)) ==
         Interval(-2.3561944901923453, -0.7853981633974482)
-    @test atan(@biginterval(-0.1, 0.1), @biginterval(-2.0, 0.1)) ⊆
-        atan(@interval(-0.1, 0.1), @interval(-2.0, 0.1))
-    @test atan(@interval(-0.1, 0.1), @interval(-2.0, 0.1)) ==
+    @test atan2(@biginterval(-0.1, 0.1), @biginterval(-2.0, 0.1)) ⊆
+        atan2(@interval(-0.1, 0.1), @interval(-2.0, 0.1))
+    @test atan2(@interval(-0.1, 0.1), @interval(-2.0, 0.1)) ==
         @interval(-pi, pi)
 
-    @test atan(@interval(-0.1, 0.1), @interval(0.1, 0.1)) ==
+    @test atan2(@interval(-0.1, 0.1), @interval(0.1, 0.1)) ==
         Interval(-0.7853981633974484, 0.7853981633974484)
-    @test atan(@biginterval(-0.1, 0.1), @biginterval(0.1, 0.1)) ⊆
-        atan(@interval(-0.1, 0.1), @interval(0.1, 0.1))
-    @test atan(@interval(0.0), @interval(-0.0, 0.1)) == @interval(0.0)
-    @test atan(@interval(0.0, 0.1), @interval(-0.0, 0.1)) ==
+    @test atan2(@biginterval(-0.1, 0.1), @biginterval(0.1, 0.1)) ⊆
+        atan2(@interval(-0.1, 0.1), @interval(0.1, 0.1))
+    @test atan2(@interval(0.0), @interval(-0.0, 0.1)) == @interval(0.0)
+    @test atan2(@interval(0.0, 0.1), @interval(-0.0, 0.1)) ==
         Interval(0.0, 1.5707963267948968)
-    @test atan(@interval(-0.1, 0.0), @interval(0.0, 0.1)) ==
+    @test atan2(@interval(-0.1, 0.0), @interval(0.0, 0.1)) ==
         Interval(-1.5707963267948968, 0.0)
-    @test atan(@interval(-0.1, 0.1), @interval(-0.0, 0.1)) ==
+    @test atan2(@interval(-0.1, 0.1), @interval(-0.0, 0.1)) ==
         Interval(-1.5707963267948968, 1.5707963267948968)
-    @test atan(@biginterval(-0.1, 0.1), @biginterval(-0.0, 0.1)) ⊆
-        atan(@interval(-0.1, 0.1), @interval(0.0, 0.1))
+    @test atan2(@biginterval(-0.1, 0.1), @biginterval(-0.0, 0.1)) ⊆
+        atan2(@interval(-0.1, 0.1), @interval(0.0, 0.1))
 end
 
 @testset "Trig" begin

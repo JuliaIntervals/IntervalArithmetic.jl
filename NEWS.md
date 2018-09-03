@@ -146,7 +146,7 @@ setdisplay(:full)
 - `bisect` function in `ValidatedNumerics.RootFinding` for bisecting `Interval`s and `IntervalBox`es #217
 
 ### Other
-- Many tests use `Test` instead of `FactCheck` #205
+- Many tests use `Base.Test` instead of `FactCheck` #205
 - Miscellaneous bugfixes
 
 ## v0.6

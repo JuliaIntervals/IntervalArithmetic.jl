@@ -1,7 +1,9 @@
 using IntervalArithmetic
-using Test
-
-let b
+if VERSION < v"0.7.0-DEV.2004"
+    using Base.Test
+else
+    using Test
+end
 
 @testset "DecoratedInterval tests" begin
     a = DecoratedInterval(@interval(1, 2), com)
@@ -57,7 +59,5 @@ end
 
     @test convert(DecoratedInterval{Float64}, "[1,2]_dac") ==
                         DecoratedInterval(Interval(1, 2), dac)
-
-end
 
 end

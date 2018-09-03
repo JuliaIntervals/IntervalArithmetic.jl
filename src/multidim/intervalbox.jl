@@ -23,13 +23,12 @@ setindex(X::IntervalBox, y, i) = IntervalBox( setindex(X.v, y, i) )
 
 # iteration:
 
-iterate(X::IntervalBox{N,T}) where {N, T} = (X[1], 1)
 
-function iterate(X::IntervalBox{N,T}, state) where {N,T}
-    (state == N) && return nothing
+start(X::IntervalBox{N,T}) where {N,T} = 1
 
-    return X[state+1], state+1
-end
+next(X::IntervalBox{N,T}, state) where {N,T} = (X[state], state+1)
+
+done(X::IntervalBox{N,T}, state) where {N,T} = state > N
 
 eltype(::Type{IntervalBox{N,T}}) where {N,T} = Interval{T} # Note that this is defined for the type
 
@@ -91,8 +90,8 @@ contains_zero(X::IntervalBox) = all(contains_zero.(X))
 ×(a::IntervalBox, b::Interval) = IntervalBox(a.v..., b)
 ×(a::IntervalBox, b::IntervalBox) = IntervalBox(a.v..., b.v...)
 
-IntervalBox(x::Interval, ::Val{n}) where {n} = IntervalBox(SVector(ntuple( _ -> x, Val(n) )))
+IntervalBox(x::Interval, ::Type{Val{n}}) where {n} = IntervalBox(SVector(ntuple(i->x, Val{n})))
 
-IntervalBox(x::Interval, n::Int) = IntervalBox(x, Val(n))
+IntervalBox(x::Interval, n::Int) = IntervalBox(x, Val{n})
 
 dot(x::IntervalBox, y::IntervalBox) = dot(x.v, y.v)
