@@ -4,12 +4,12 @@
 - using PkgBenchmark
 
 - results = benchmarkpkg("IntervalArithmetic")
-- showall(results)
+- show(results)
 
 To compare the current version with a given release use `judge`:
 
 - results = judge("IntervalArithmetic", tag)
-- showall(results)
+- show(results)
 
 To export the benchmark results to a markdown file, do:
 
