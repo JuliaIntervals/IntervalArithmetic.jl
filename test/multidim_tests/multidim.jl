@@ -1,13 +1,9 @@
 using IntervalArithmetic
 using StaticArrays
 
-if VERSION < v"0.7.0-DEV.2004"
-    using Base.Test
-else
-    using Test
-    using LinearAlgebra: dot
-end
+using Test
 
+let X, A  # avoid problems with global variables
 
 @testset "Operations on boxes" begin
     A = IntervalBox(1..2, 3..4)
@@ -87,18 +83,6 @@ end
     @test inv.(A) == IntervalBox(inv(A[1]), inv(A[2]))
 end
 
-# @testset "@intervalbox tests" begin
-#     @intervalbox f(x, y) = (x + y, x - y)
-#
-#     X = IntervalBox(1..1, 2..2)
-#     @test f(X) == IntervalBox(3..3, -1 .. -1)
-#
-#     @intervalbox g(x, y) = x - y
-#     @test isa(g(X), IntervalBox)
-#
-#     @test emptyinterval(X) == IntervalBox(∅, ∅)
-#
-# end
 
 @testset "setdiff for IntervalBox" begin
     X = IntervalBox(2..4, 3..5)
@@ -191,11 +175,11 @@ end
 end
 
 @testset "Constructing multidimensional IntervalBoxes" begin
-    @test IntervalBox(1..2, Val{1}) == IntervalBox(1..2)
-    @test IntervalBox(1..2, Val{2}) == (1..2) × (1..2)
-    @test IntervalBox(1..2, Val{5}) == (1..2) × (1..2) × (1..2) × (1..2) × (1..2)
+    @test IntervalBox(1..2, Val(1)) == IntervalBox(1..2)
+    @test IntervalBox(1..2, Val(2)) == (1..2) × (1..2)
+    @test IntervalBox(1..2, Val(5)) == (1..2) × (1..2) × (1..2) × (1..2) × (1..2)
 
-    @test IntervalBox(1..2, 3) == IntervalBox(1..2, Val{3})
+    @test IntervalBox(1..2, 3) == IntervalBox(1..2, Val(3))
     @test IntervalBox((1..2, 2..3)) == IntervalBox(1..2, 2..3)
     @test IntervalBox((1, 2)) == IntervalBox(1..1, 2..2)
     @test IntervalBox( (1, 2, 3) ) == IntervalBox(1..1, 2..2, 3..3)
@@ -205,7 +189,7 @@ end
     @test IntervalBox(3) == IntervalBox(3..3)
     @test IntervalBox(1:5) == IntervalBox(1..1, 2..2, 3..3, 4..4, 5..5)
     @test IntervalBox([1:5...]) == IntervalBox(1..1, 2..2, 3..3, 4..4, 5..5)
-    @test IntervalBox((1..2) × (2..3), 2) == IntervalBox((1..2) × (2..3) × (1..2) × (2..3))
+    @test IntervalBox((1..2) × (2..3), 2) == (1..2) × (2..3) × (1..2) × (2..3)
 
 end
 
@@ -232,4 +216,6 @@ end
     @test sin.(X) == IntervalBox(sin(X[1]), sin(X[2]))
     @test mid.(X) == SVector(mid(X[1]), mid(X[2]))
     @test diam.(X) == SVector(diam(X[1]), diam(X[2]))
+end
+
 end

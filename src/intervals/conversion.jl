@@ -13,6 +13,7 @@ promote_rule(::Type{BigFloat}, ::Type{Interval{T}}) where T<:Real =
 
 
 # convert methods:
+convert(::Type{Interval{T}}, x::Bool) where {T} = convert(Interval{T}, Int(x))
 convert(::Type{Interval{T}}, x::Real) where {T} = atomic(Interval{T}, x)
 convert(::Type{Interval{T}}, x::T) where {T<:Real} = Interval{T}(x)
 convert(::Type{Interval{T}}, x::Interval{T}) where {T} = x

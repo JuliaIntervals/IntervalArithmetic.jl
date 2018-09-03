@@ -5,20 +5,16 @@ __precompile__(true)
 module IntervalArithmetic
 
 import CRlibm
+
 using StaticArrays
 using FastRounding
-using AdjacentFloats
-using Compat
+using SetRounding
 
-if VERSION <= v"0.7.0-DEV.2004"
-    import Base: ×, dot
-    import Compat.Sys
-    export ⊇
-else
-    using Markdown
-    import Base: ⊇
-    import LinearAlgebra: ×, dot
-end
+using Markdown
+
+using LinearAlgebra
+import LinearAlgebra: ×, dot
+export ×, dot
 
 
 import Base:
@@ -27,24 +23,26 @@ import Base:
     in, zero, one, eps, typemin, typemax, abs, abs2, real, min, max,
     sqrt, exp, log, sin, cos, tan, inv,
     exp2, exp10, log2, log10,
-    asin, acos, atan, atan2,
+    asin, acos, atan,
     sinh, cosh, tanh, asinh, acosh, atanh,
     union, intersect, isempty,
     convert, promote_rule, eltype, size,
     BigFloat, float, widen, big,
-    ∩, ∪, ⊆, eps,
+    ∩, ∪, ⊆, ⊇, eps,
     floor, ceil, trunc, sign, round,
     expm1, log1p,
     precision,
     isfinite, isnan, isinf, iszero,
-    show, showall,
+    show,
     isinteger, setdiff,
     parse, hash
 
 import Base:  # for IntervalBox
     broadcast, length,
     getindex, setindex,
-    start, next, done, eltype
+    iterate, eltype
+
+import .Broadcast: broadcasted
 
 export
     AbstractInterval, Interval,
@@ -66,6 +64,13 @@ export
 
 export
     setindex   # re-export from StaticArrays for IntervalBox
+
+
+if VERSION < v"1.0-dev"
+    import Base.showall
+end
+
+export showall
 
 import Base: rounding, setrounding, setprecision
 

@@ -10,17 +10,18 @@ os:
   - osx
 
 julia:
-  - 0.6
+  - 0.7
+  - 1.0
   - nightly
 
-matrix:
-   allow_failures:
-     - julia: nightly
+#matrix:
+#   allow_failures:
+#     - julia: nightly
 
 notifications:
   email: false
 
 after_success:
-  - julia -e 'Pkg.add("Documenter")'
+  - julia -e 'using Pkg; Pkg.add("Documenter")'
   - julia -e 'cd(Pkg.dir("IntervalArithmetic")); include(joinpath("docs", "make.jl"))'
   - julia -e 'cd(Pkg.dir("IntervalArithmetic")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder()); Codecov.submit(process_folder())'

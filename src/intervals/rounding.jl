@@ -118,13 +118,13 @@ for mode in (:Down, :Up)
     mode2 = Symbol("Round", mode)
 
     if mode == :Down
-        directed = :prev_float
+        directed = :prevfloat
     else
-        directed = :next_float
+        directed = :nextfloat
     end
 
     # binary functions:
-    for f in (:+, :-, :*, :/, :atan2)
+    for f in (:+, :-, :*, :/, :atan)
 
         @eval function $f(::IntervalRounding{:slow},
                           a::T, b::T, $mode1) where T<:AbstractFloat
@@ -233,7 +233,7 @@ function _setrounding(::Type{Interval}, rounding_type::Symbol)
         roundtype = IntervalRounding{:slow}()
     end
 
-    for f in (:^, :atan2)
+    for f in (:^, :atan)
 
         @eval $f(a::T, b::T, r::RoundingMode) where {T<:AbstractFloat} = $f($roundtype, a, b, r)
     end
