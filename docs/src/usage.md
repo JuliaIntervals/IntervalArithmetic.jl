@@ -28,7 +28,7 @@ By default, `Interval` objects contain `Float64`s, but the library also allows u
 julia> @biginterval(1, 2)
 [1, 2]₂₅₆
 
-julia> showall(ans)
+julia> showfull(ans)
 Interval(1.000000000000000000000000000000000000000000000000000000000000000000000000000000, 2.000000000000000000000000000000000000000000000000000000000000000000000000000000)
 ```
 
@@ -117,10 +117,10 @@ use the `Interval` constructor directly:
 julia> a = Interval(0.1)
 [0.1, 0.100001]
 
-julia> showall(a)
+julia> showfull(a)
 Interval(0.1, 0.1)
 ```
-Here, the `showall` function shows the internal representation of the interval,
+Here, the `showfull` function shows the internal representation of the interval,
 in a reproducible form that may be copied and pasted directly. It uses Julia's
 internal function (which, in turn, uses the so-called Grisu algorithm) to show
 exactly as many digits are required to give an unambiguous floating-point number.
@@ -133,7 +133,7 @@ julia> @interval "0.1"*2
 julia> @biginterval "0.1"*2
 [0.199999, 0.200001]₂₅₆
 
-julia> showall(ans)
+julia> showfull(ans)
 Interval(1.999999999999999999999999999999999999999999999999999999999999999999999999999983e-01, 2.000000000000000000000000000000000000000000000000000000000000000000000000000004e-01)
 
 ```
@@ -237,7 +237,7 @@ This may be changed globally using the `setprecision` function:
 julia> @interval 3π/2 + 1
 [5.71238, 5.71239]
 
-julia> showall(ans)
+julia> showfull(ans)
 Interval(5.71238898038469, 5.712388980384691)
 
 julia> setprecision(Interval, 256)
@@ -246,7 +246,7 @@ julia> setprecision(Interval, 256)
 julia> @interval 3π/2 + 1
 [5.71238, 5.71239]₂₅₆
 
-julia> showall(ans)
+julia> showfull(ans)
 Interval(5.712388980384689857693965074919254326295754099062658731462416888461724609429262, 5.712388980384689857693965074919254326295754099062658731462416888461724609429401)
 ```
 The subscript `256` at the end denotes the precision.
@@ -356,7 +356,7 @@ the following options, specified by keyword arguments (type `?setformat` to get 
 
     - `:standard`: output of the form `[1.09999, 1.30001]`, rounded to the current number of significant figures
 
-    - `:full`: output of the form `Interval(1.0999999999999999, 1.3)`, as in the `showall` function
+    - `:full`: output of the form `Interval(1.0999999999999999, 1.3)`, as in the `showfull` function
 
     - `:midpoint`: output in the midpoint-radius form, e.g. `1.2 ± 0.100001`
 

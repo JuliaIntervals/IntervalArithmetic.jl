@@ -67,10 +67,10 @@ export
 
 
 if VERSION < v"1.0-dev"
-    import Base.showall
+    import Base.showfull
 end
 
-export showall
+export showfull
 
 import Base: rounding, setrounding, setprecision
 

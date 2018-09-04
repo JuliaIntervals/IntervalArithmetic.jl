@@ -256,10 +256,10 @@ end
 
 for T in (Interval, DecoratedInterval)
     @eval show(io::IO, a::$T{S}) where S = print(io, representation(a))
-    @eval showall(io::IO, a::$T{S}) where S = print(io, representation(a, :full))
+    @eval showfull(io::IO, a::$T{S}) where S = print(io, representation(a, :full))
 end
 
 T = IntervalBox
 @eval show(io::IO, a::$T) = print(io, representation(a))
 @eval show(io::IO, ::MIME"text/plain", a::$T) = print(io, representation(a))
-@eval showall(io::IO, a::$T) = print(io, representation(a, :full))
+@eval showfull(io::IO, a::$T) = print(io, representation(a, :full))

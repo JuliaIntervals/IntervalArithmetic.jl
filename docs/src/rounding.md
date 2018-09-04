@@ -33,7 +33,7 @@ julia> using IntervalArithmetic
 julia> II = Interval(0.1)
 [0.1, 0.100001]
 
-julia> showall(II)
+julia> showfull(II)
 Interval(0.1, 0.1)
 ```
 
@@ -59,7 +59,7 @@ then we can apply the function `f` to the interval `a` to obtain
 julia> f(a)
 [0.399999, 0.400001]
 
-julia> showall(f(a))
+julia> showfull(f(a))
 Interval(0.39999999999999997, 0.4)
 ```
 The result correctly contains the true 0.4.
