@@ -1,5 +1,19 @@
 # What's new in `IntervalArithmetic.jl`
 
+## v0.15
+
+### Supported versions of Julia
+- Julia 0.6 is no longer supported. The package is now fully compatible with Julia 0.7 and 1.0. [#201](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/201)
+
+### Breaking changes
+- `showall` has been removed from Julia. We now export the function `showfull` instead. [#203](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/203
+
+- In keeping with the change to base Julia, `atan2` has been replaced by the 2-argument method of `atan`. [#192](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/192)
+
+### First contributions
+Caroline Wormell and Mohamed Tarek made first contributions to the package.
+
+
 ## v0.14
 
 ### Breaking changes
@@ -15,7 +29,7 @@ but rather contains an `SVector` of `Interval`s. The internal `SVector` of an `I
 - This is slated to be the last minor release supporting Julia 0.6.
 
 ### First contributions
-- @mforets and @Kolaru made first contributions to the package. 
+- @mforets and @Kolaru made first contributions to the package.
 
 ## v0.13
 
