@@ -1,7 +1,5 @@
 # power_by_squaring adapted from Base Julia
 
-using IntervalArithmetic
-
 function power_by_squaring(x::AbstractFloat, p::Integer, r::RoundingMode)
 
     if p == 1
@@ -31,9 +29,6 @@ function power_by_squaring(x::AbstractFloat, p::Integer, r::RoundingMode)
     end
     return y
 end
-
-using BenchmarkTools
-power_by_squaring(0.99, 8, RoundDown)
 
 
 function fast_sqrt(x::AbstractFloat, ::RoundingMode{:Down})
