@@ -206,15 +206,13 @@ function pow(x::Interval, n::Integer)  # fast integer power
 
     if iseven(n) && 0 ∈ x
 
-        return hull(zero(x),
-                    hull(Base.power_by_squaring(Interval(mig(x)), n),
-                        Base.power_by_squaring(Interval(mag(x)), n))
-            )
+        return Interval(zero(eltype(x)),
+                        power_by_squaring(mag(x), n, RoundUp))
 
     else
 
-      return hull( Base.power_by_squaring(Interval(x.lo), n),
-                    Base.power_by_squaring(Interval(x.hi), n) )
+        return Interval(power_by_squaring(x.lo, n, RoundDown),
+                        power_by_squaring(x.hi, n, RoundUp))
 
     end
 
