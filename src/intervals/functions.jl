@@ -211,9 +211,12 @@ function pow(x::Interval, n::Integer)  # fast integer power
 
     else
 
-        return Interval(power_by_squaring(x.lo, n, RoundDown),
-                        power_by_squaring(x.hi, n, RoundUp))
+        a = power_by_squaring(x.lo, n, RoundDown)
+        b = power_by_squaring(x.hi, n, RoundUp)
 
+        (a <= b) && return Interval(a, b)
+
+        return Interval(b, a)
     end
 
 end
