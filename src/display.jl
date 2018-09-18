@@ -4,8 +4,16 @@ mutable struct DisplayParameters
     sigfigs::Int
 end
 
+function Base.show(io::IO, params::DisplayParameters)
+    println(io, "Display parameters:")
+    println(io, "- format: $(params.format)")
+    println(io, "- display decorations: $(params.decorations)")
+    print(io, "- significant figures: $(params.sigfigs)")
+end
+
 const display_params = DisplayParameters(:standard, false, 6)
 
+const display_options = (:standard, :full, :midpoint)
 
 """
     setformat(;kw)
@@ -31,7 +39,7 @@ julia> setformat(:full, decorations=true)
 function setformat(format = display_params.format;
                     decorations = display_params.decorations, sigfigs::Integer = display_params.sigfigs)
 
-    if format ∉ (:standard, :full, :midpoint)
+    if format ∉ display_options
         throw(ArgumentError("Allowed format option is one of  $display_options."))
     end
 
@@ -47,6 +55,8 @@ function setformat(format = display_params.format;
     display_params.format = format
     display_params.decorations = decorations
     display_params.sigfigs = sigfigs
+
+    return display_params
 end
 
 """
