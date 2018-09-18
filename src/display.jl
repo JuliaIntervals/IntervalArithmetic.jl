@@ -88,12 +88,13 @@ macro format(expr...)
         if isa(ex, Symbol)
             format = Meta.quot(ex)
 
-        elseif isa(ex, Integer)
-            sigfigs = ex
-
         elseif isa(ex, Bool)
             decorations = ex
+
+        elseif isa(ex, Integer)
+            sigfigs = ex
         end
+
     end
 
     format_code = :(setformat($format, decorations=$decorations, sigfigs=$sigfigs))
