@@ -16,10 +16,16 @@ end
 # overwrite new behaviour for small integer powers from
 # https://github.com/JuliaLang/julia/pull/24240:
 
-Base.literal_pow(::typeof(^), x::Interval{T}, ::Val{p}) where {T,p} = x^p
+Base.literal_pow(::typeof(^), x::Interval{T}, ::Val{p}) where {T,p} = pow(x, p)
 
 
-function ^(a::Interval{BigFloat}, n::Integer)
+"""
+    pow(x::Interval, y)
+
+Slow, correctly-rounded calculation of `x^y`.
+This uses `BigFloat`s internally.
+"""
+function pow(a::Interval{BigFloat}, n::Integer)
     isempty(a) && return a
     n == 0 && return one(a)
     n == 1 && return a
@@ -82,10 +88,10 @@ function sqr(a::Interval{T}) where T<:Real
     # return @round(mig(a)^2, mag(a)^2)
 end
 
-^(a::Interval{BigFloat}, x::AbstractFloat) = a^big(x)
+pow(a::Interval{BigFloat}, x::AbstractFloat) = a^big(x)
 
 # Floating-point power of a BigFloat interval:
-function ^(a::Interval{BigFloat}, x::BigFloat)
+function pow(a::Interval{BigFloat}, x::BigFloat)
 
     domain = Interval{BigFloat}(0, Inf)
 
@@ -135,14 +141,14 @@ function ^(a::Interval{BigFloat}, x::BigFloat)
     return hull(lo, hi)
 end
 
-function ^(a::Interval{Rational{T}}, x::AbstractFloat) where T<:Integer
+function pow(a::Interval{Rational{T}}, x::AbstractFloat) where T<:Integer
     a = Interval(a.lo.num/a.lo.den, a.hi.num/a.hi.den)
     a = a^x
     atomic(Interval{Rational{T}}, a)
 end
 
 # Rational power
-function ^(a::Interval{BigFloat}, r::Rational{S}) where S<:Integer
+function pow(a::Interval{BigFloat}, r::Rational{S}) where S<:Integer
     T = BigFloat
     domain = Interval{T}(0, Inf)
 
@@ -164,7 +170,7 @@ function ^(a::Interval{BigFloat}, r::Rational{S}) where S<:Integer
 end
 
 # Interval power of an interval:
-function ^(a::Interval{BigFloat}, x::Interval)
+function pow(a::Interval{BigFloat}, x::Interval)
     T = BigFloat
     domain = Interval{T}(0, Inf)
 
@@ -194,13 +200,13 @@ function sqrt(a::Interval{T}) where T
 end
 
 """
-    pow(x::Interval, n::Integer)
+    ^(x::Interval, n::Integer)
 
-A faster implementation of `x^n`, currently using `power_by_squaring`.
-`pow(x, n)` will usually return an interval that is slightly larger than that calculated by `x^n`, but is guaranteed to be a correct
+A fast implementation of `x^n`, using `power_by_squaring`.
+`^(x, n)` will usually return an interval that is slightly larger than that calculated by `pow(x, n)`, but is guaranteed to be a correct
 enclosure when using multiplication with correct rounding.
 """
-function pow(x::Interval, n::Integer)  # fast integer power
+function ^(x::Interval, n::Integer)  # fast integer power
 
     isempty(x) && return x
 
@@ -221,7 +227,7 @@ function pow(x::Interval, n::Integer)  # fast integer power
 
 end
 
-function pow(x::Interval, y::Real)  # fast real power, including for y an Interval
+function ^(x::Interval, y::Real)  # fast real power, including for y an Interval
 
     isempty(x) && return x
 
