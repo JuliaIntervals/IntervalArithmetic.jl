@@ -34,6 +34,12 @@ let b
     # @test_throws ArgumentError DecoratedInterval(BigInt(1), 1//10)
     # @test_throws ArgumentError @decorated(BigInt(1), 1//10)
 
+    #Issue 219
+    @test ==(DecoratedInterval(2,3),Interval(1,2)) == false
+    @test ==(Interval(-1,5), DecoratedInterval(4,5)) == false
+    @test ==(nai(), DecoratedInterval(-1,∞)) == false
+    @test ==(DecoratedInterval(3,4),nai()) == false
+
     # Tests related to powers of decorated Intervals
     @test @decorated(2,3) ^ 2 == DecoratedInterval(4, 9)
     @test @decorated(2,3) ^ -2 == DecoratedInterval(1/9,1/4)

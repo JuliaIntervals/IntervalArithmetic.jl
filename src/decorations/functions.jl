@@ -33,6 +33,9 @@ end
 
 in(x::T, a::DecoratedInterval) where T<:Real = in(x, interval_part(a))
 
+==(xx::DecoratedInterval, yy::Interval) = false
+==(y::Interval, xx::DecoratedInterval) = false
+
 
 ## scalar functions: mig, mag and friends
 scalar_functions = (
