@@ -7,8 +7,14 @@ https://github.com/oheim/ITF1788
 See `NOTICE` for the copyright notice and `LICENSE` for the license for the `ITF1788` package.
 
 To generate the tests, clone the ITF1788 package and change to the directory.
-Then create the Julia tests with the following command; Python 3 must be installed:
+
+To use the package, Python 3 must be installed, and the following Python packages:
+
+    pip install ply
+    pip install pyyaml
+    
+To generate the tests, run
 
     python3 -m itf1788 -c "(julia, *, *)"
 
-The resulting test files are generated in the `output/julia/FactCheck/IntervalArithmetic/` subdirectory.
+The resulting test files are generated in the `output/julia/Test/IntervalArithmetic` subdirectory of the ITF1788 directory.
