@@ -6,8 +6,9 @@
 # Use the BigFloat version from MPFR instead, which is correctly-rounded:
 
 # Write explicitly like this to avoid ambiguity warnings:
+
 for T in (:Integer, :Rational, :Float64, :BigFloat, :Interval)
-    @eval ^(a::Interval{Float64}, x::$T) = atomic(Interval{Float64}, big53(a)^x)
+    @eval pow(a::Interval{Float64}, x::$T) = atomic(Interval{Float64}, big53(a)^x)
 end
 
 
@@ -16,7 +17,7 @@ end
 # overwrite new behaviour for small integer powers from
 # https://github.com/JuliaLang/julia/pull/24240:
 
-Base.literal_pow(::typeof(^), x::Interval{T}, ::Val{p}) where {T,p} = pow(x, p)
+Base.literal_pow(::typeof(^), x::Interval{T}, ::Val{p}) where {T,p} = ^(x, p)
 
 
 """
@@ -75,18 +76,7 @@ function pow(a::Interval{BigFloat}, n::Integer)
     end
 end
 
-function sqr(a::Interval{T}) where T<:Real
-    return a^2
-    # isempty(a) && return a
-    # if a.lo ≥ zero(T)
-    #     return @round(a.lo^2, a.hi^2)
-    #
-    # elseif a.hi ≤ zero(T)
-    #     return @round(a.hi^2, a.lo^2)
-    # end
-    #
-    # return @round(mig(a)^2, mag(a)^2)
-end
+sqr(a::Interval{T}) where {T<:Real} = a^2
 
 pow(a::Interval{BigFloat}, x::AbstractFloat) = a^big(x)
 
@@ -215,14 +205,18 @@ function ^(x::Interval, n::Integer)  # fast integer power
         return Interval(zero(eltype(x)),
                         power_by_squaring(mag(x), n, RoundUp))
 
-    else
+    elseif x.lo > 0
 
         a = power_by_squaring(x.lo, n, RoundDown)
         b = power_by_squaring(x.hi, n, RoundUp)
 
-        (a <= b) && return Interval(a, b)
+        return Interval(a, b)
 
-        return Interval(b, a)
+    else
+        a = power_by_squaring(x.hi, n, RoundDown)
+        b = power_by_squaring(x.lo, n, RoundUp)
+
+        return Interval(a, b)
     end
 
 end
@@ -230,6 +224,8 @@ end
 function ^(x::Interval, y::Real)  # fast real power, including for y an Interval
 
     isempty(x) && return x
+
+    isinteger(y) && return x^(convert(Integer, y))
 
     return exp(y * log(x))
 
