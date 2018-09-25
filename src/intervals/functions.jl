@@ -200,6 +200,10 @@ function ^(x::Interval, n::Integer)  # fast integer power
 
     isempty(x) && return x
 
+    if n < 0
+        return inv(x^(-n))
+    end
+
     if iseven(n) && 0 ∈ x
 
         return Interval(zero(eltype(x)),
