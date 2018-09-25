@@ -209,19 +209,23 @@ function ^(x::Interval, n::Integer)  # fast integer power
         return Interval(zero(eltype(x)),
                         power_by_squaring(mag(x), n, RoundUp))
 
-    elseif x.lo > 0
-
-        a = power_by_squaring(x.lo, n, RoundDown)
-        b = power_by_squaring(x.hi, n, RoundUp)
-
-        return Interval(a, b)
+    #elseif x.lo > 0
 
     else
-        a = power_by_squaring(x.hi, n, RoundDown)
-        b = power_by_squaring(x.lo, n, RoundUp)
+
+         a = power_by_squaring(x.lo, n, RoundDown)
+         b = power_by_squaring(x.hi, n, RoundUp)
 
         return Interval(a, b)
+
     end
+    #
+    # else  # completely negative interval
+    #     a = power_by_squaring(x.lo, n, RoundDown)
+    #     b = power_by_squaring(x.hi, n, RoundUp)
+    #
+    #     return Interval(a, b)
+    #end
 
 end
 
