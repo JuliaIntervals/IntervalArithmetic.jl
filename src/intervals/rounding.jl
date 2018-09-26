@@ -229,6 +229,12 @@ function _setrounding(::Type{Interval}, rounding_type::Symbol)
         @eval $f(a::T, b::T, r::RoundingMode) where {T<:AbstractFloat} = $f($roundtype, a, b, r)
     end
 
+    # unary functions:
+
+    for f in (:sqrt, :inv)
+        @eval $f(a::T, r::RoundingMode) where {T<:AbstractFloat} = $f($roundtype, a, r)
+    end
+
     if rounding_type == :tight   # for remaining functions, use CRlibm
         roundtype = IntervalRounding{:slow}()
     end
@@ -242,7 +248,7 @@ function _setrounding(::Type{Interval}, rounding_type::Symbol)
 
     # unary functions:
     for f in vcat(CRlibm.functions,
-                [:sqrt, :inv, :tanh, :asinh, :acosh, :atanh])
+                    [:tanh, :asinh, :acosh, :atanh])
 
         @eval $f(a::T, r::RoundingMode) where {T<:AbstractFloat} = $f($roundtype, a, r)
 
