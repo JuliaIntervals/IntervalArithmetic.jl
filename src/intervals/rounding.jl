@@ -248,7 +248,6 @@ function _setrounding(::Type{Interval}, rounding_type::Symbol)
         @eval $f(a::T, r::RoundingMode) where {T<:AbstractFloat} = $f($roundtype, a, r)
     end
 
-
     if rounding_type == :tight   # for remaining functions, use CRlibm
         roundtype = IntervalRounding{:slow}()
     end
