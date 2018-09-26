@@ -204,14 +204,22 @@ function ^(x::Interval, n::Integer)  # fast integer power
         return inv(x^(-n))
     end
 
-    if iseven(n) && 0 ∈ x
+    if iseven(n)
+        if 0 ∈ x
 
-        return Interval(zero(eltype(x)),
+            return Interval(zero(eltype(x)),
                         power_by_squaring(mag(x), n, RoundUp))
 
-    #elseif x.lo > 0
+        elseif x.lo > 0
+            return Interval(power_by_squaring(x.lo, n, RoundUp),
+                            power_by_squaring(x.hi, n, RoundUp))
 
-    else
+        else  # x.lo < x.hi < 0
+            return Interval(power_by_squaring(-x.hi, n, RoundUp),
+                            power_by_squaring(-x.lo, n, RoundUp))
+        end
+
+    else  # odd n
 
          a = power_by_squaring(x.lo, n, RoundDown)
          b = power_by_squaring(x.hi, n, RoundUp)
