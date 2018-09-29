@@ -16,11 +16,11 @@ const IASupportedType = Union{Integer, Rational, Irrational, Float16, Float32,
 
 abstract type AbstractInterval{T} <: Real end
 
-struct Interval{T<:IASupportedType} <: AbstractInterval{T}
+struct Interval{T<:Real} <: AbstractInterval{T}
     lo :: T
     hi :: T
 
-    function Interval{T}(a::Real, b::Real) where {T<:IASupportedType}
+    function Interval{T}(::Type{Val{true}}, a::Real, b::Real) where {T <: Real}
         if validity_check
 
             if is_valid_interval(a, b)
@@ -33,19 +33,27 @@ struct Interval{T<:IASupportedType} <: AbstractInterval{T}
     end
 end
 
-
+## Traits functions
+canBeIntervalBound(::Type{T}) where {T <: IASupportedType} = true
+canBeIntervalBound(T) = false  # Default case
 
 ## Outer constructors
+function Interval{T}(::Type{Val{false}}, ::Real, ::Real) where {T <: Real}
+    throw(ArgumentError("Type $T is not suitable to construct an interval. If it is a custom type and should be accepted, make sure to define `canBeIntervalBound($T) = true`"))
+end
 
-Interval(a::T, b::T) where T<:Real = Interval{T}(a, b)
-Interval(a::T) where T<:Real = Interval(a, a)
+Interval{T}(a::Real, b::Real) where {T <: Real} = Interval{T}(Val{canBeIntervalBound(T)}, a, b)
+Interval(a::T, b::T) where {T <: Real} = Interval{T}(Val{canBeIntervalBound(T)}, a, b)
+Interval(a::T) where {T <: Real} = Interval(a, a)
 Interval(a::Tuple) = Interval(a...)
-Interval(a::T, b::S) where {T<:Real, S<:Real} = Interval(promote(a,b)...)
+Interval(a::T, b::S) where {T <: Real, S <: Real} = Interval(promote(a,b)...)
 
 ## Concrete constructors for Interval, to effectively deal only with Float64,
 # BigFloat or Rational{Integer} intervals.
-Interval(a::T, b::T) where T<:Integer = Interval(float(a), float(b))
+Interval(a::T, b::T) where {T <: Integer} = Interval(float(a), float(b))
+Interval(a::T, b::T) where {T <: Irrational} = Interval(float(a), float(b))
 
+eltype(x::Interval{T}) where {T <: Real} = T
 # Constructors for Irrational
 # Single argument Irrational constructor are in IntervalArithmetic.jl
 # as generated functions need to be define last.
@@ -60,9 +68,9 @@ Interval(a::Real, b::Irrational) = Interval{Float64}(a, b)
 Interval(x::Interval) = x
 Interval(x::Complex) = Interval(real(x)) + im*Interval(imag(x))
 
-Interval{T}(x) where T = Interval(convert(T, x))
+Interval{T}(x) where {T} = Interval(convert(T, x))
 
-Interval{T}(x::Interval) where T = atomic(Interval{T}, x)
+Interval{T}(x::Interval) where {T} = atomic(Interval{T}, x)
 
 size(x::Interval) = (1,)
 
