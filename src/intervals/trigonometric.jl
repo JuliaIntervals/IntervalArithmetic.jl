@@ -32,18 +32,63 @@ This is a rather indirect way to determine if π/2 and 3π/2 are contained
 in the interval; cf. the formula for sine of an interval in
 Tucker, *Validated Numerics*.
 """
-# function find_quadrants(x::T) where {T}
-#     temp = atomic(Interval{T}, x) / half_pi(x)
-#
-#     return SVector(floor(temp.lo), floor(temp.hi))
-# end
-#
-# function find_quadrants(x::Float64)
-#     temp = multiply_by_positive_constant(x, one_over_half_pi_interval)
-#     # x / half_pi(Float64)
-#
-#     return SVector(floor(temp.lo), floor(temp.hi))
-# end
+function find_quadrants(x::T) where {T}
+    temp = atomic(Interval{T}, x) / half_pi(x)
+
+    return SVector(floor(temp.lo), floor(temp.hi))
+end
+
+function find_quadrants(x::Float64)
+    temp = multiply_by_positive_constant(x, one_over_half_pi_interval)
+    # x / half_pi(Float64)
+
+    return SVector(floor(temp.lo), floor(temp.hi))
+end
+
+function sin(a::Interval{T}) where T
+    isempty(a) && return a
+
+    whole_range = Interval{T}(-1, 1)
+
+    diam(a) > two_pi(T).lo && return whole_range
+
+    # The following is equiavlent to doing temp = a / half_pi  and
+    # taking floor(a.lo), floor(a.hi)
+    lo_quadrant = minimum(find_quadrants(a.lo))
+    hi_quadrant = maximum(find_quadrants(a.hi))
+
+    if hi_quadrant - lo_quadrant > 4  # close to limits
+        return whole_range
+    end
+
+    lo_quadrant = mod(lo_quadrant, 4)
+    hi_quadrant = mod(hi_quadrant, 4)
+
+    # Different cases depending on the two quadrants:
+    if lo_quadrant == hi_quadrant
+        a.hi - a.lo > pi_interval(T).lo && return whole_range  # in same quadrant but separated by almost 2pi
+        lo = @round(sin(a.lo), sin(a.lo)) # Interval(sin(a.lo, RoundDown), sin(a.lo, RoundUp))
+        hi = @round(sin(a.hi), sin(a.hi)) # Interval(sin(a.hi, RoundDown), sin(a.hi, RoundUp))
+        return hull(lo, hi)
+
+    elseif lo_quadrant==3 && hi_quadrant==0
+        return @round(sin(a.lo), sin(a.hi)) # Interval(sin(a.lo, RoundDown), sin(a.hi, RoundUp))
+
+    elseif lo_quadrant==1 && hi_quadrant==2
+        return @round(sin(a.hi), sin(a.lo)) # Interval(sin(a.hi, RoundDown), sin(a.lo, RoundUp))
+
+    elseif ( lo_quadrant == 0 || lo_quadrant==3 ) && ( hi_quadrant==1 || hi_quadrant==2 )
+        return @round(min(sin(a.lo), sin(a.hi)), 1)
+        # Interval(min(sin(a.lo, RoundDown), sin(a.hi, RoundDown)), one(T))
+
+    elseif ( lo_quadrant == 1 || lo_quadrant==2 ) && ( hi_quadrant==3 || hi_quadrant==0 )
+        return @round(-1, max(sin(a.lo), sin(a.hi)))
+        # Interval(-one(T), max(sin(a.lo, RoundUp), sin(a.hi, RoundUp)))
+
+    else #if( lo_quadrant == 0 && hi_quadrant==3 ) || ( lo_quadrant == 2 && hi_quadrant==1 )
+        return whole_range
+    end
+end
 
 function quadrant(x::Float64)
     x_mod2pi = rem2pi(x, RoundNearest)  # gives result in [-pi, pi]
@@ -56,7 +101,10 @@ function quadrant(x::Float64)
 end
 
 
-function sin(a::Interval{T}) where T
+function sin(a::Interval{Float64})
+
+    T = Float64
+
     isempty(a) && return a
 
     whole_range = Interval{T}(-1, 1)
