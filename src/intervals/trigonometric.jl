@@ -186,6 +186,7 @@ function cos(a::Interval{T}) where T
     end
 end
 
+
 function find_quadrants_tan(x::T) where {T}
     temp = atomic(Interval{T}, x) / half_pi(x)
 
@@ -193,6 +194,38 @@ function find_quadrants_tan(x::T) where {T}
 end
 
 function tan(a::Interval{T}) where T
+    isempty(a) && return a
+
+    diam(a) > pi_interval(T).lo && return entireinterval(a)
+
+    lo_quadrant = minimum(find_quadrants_tan(a.lo))
+    hi_quadrant = maximum(find_quadrants_tan(a.hi))
+
+    lo_quadrant_mod = mod(lo_quadrant, 2)
+    hi_quadrant_mod = mod(hi_quadrant, 2)
+
+    if lo_quadrant_mod == 0 && hi_quadrant_mod == 1
+        # check if really contains singularity:
+        if hi_quadrant * half_pi(T) ⊆ a
+            return entireinterval(a)  # crosses singularity
+        end
+
+    elseif lo_quadrant_mod == hi_quadrant_mod && hi_quadrant > lo_quadrant
+        # must cross singularity
+        return entireinterval(a)
+
+    end
+
+    # @show a.lo, a.hi
+    # @show tan(a.lo), tan(a.hi)
+
+    return @round(tan(a.lo), tan(a.hi))
+end
+
+function tan(a::Interval{Float64})
+
+    T = Float64
+
     isempty(a) && return a
 
     diam(a) > pi_interval(T).lo && return entireinterval(a)
@@ -211,9 +244,6 @@ function tan(a::Interval{T}) where T
         return entireinterval(a)
 
     end
-
-    # @show a.lo, a.hi
-    # @show tan(a.lo), tan(a.hi)
 
     return @round(tan(a.lo), tan(a.hi))
 end
