@@ -186,6 +186,49 @@ function cos(a::Interval{T}) where T
     end
 end
 
+function cos(a::Interval{Float64})
+
+    T = Float64
+
+    isempty(a) && return a
+
+    whole_range = Interval{Float64}(-one(T), one(T))
+
+    diam(a) > two_pi(T).lo && return whole_range
+
+    lo_quadrant, lo = quadrant(a.lo)
+    hi_quadrant, hi = quadrant(a.hi)
+
+    lo, hi = a.lo, a.hi
+
+    # Different cases depending on the two quadrants:
+    if lo_quadrant == hi_quadrant # Interval limits in the same quadrant
+        a.hi - a.lo > pi_interval(T).lo && return whole_range
+
+        if lo_quadrant == 2 || lo_quadrant == 3
+            # positive slope
+            return @round(cos(lo), cos(hi))
+        else
+            return @round(cos(hi), cos(lo))
+        end
+
+    elseif lo_quadrant == 2 && hi_quadrant==3
+        return @round(cos(a.lo), cos(a.hi))
+
+    elseif lo_quadrant == 0 && hi_quadrant==1
+        return @round(cos(a.hi), cos(a.lo))
+
+    elseif ( lo_quadrant == 2 || lo_quadrant==3 ) && ( hi_quadrant==0 || hi_quadrant==1 )
+        return @round(min(cos(a.lo), cos(a.hi)), 1)
+
+    elseif ( lo_quadrant == 0 || lo_quadrant==1 ) && ( hi_quadrant==2 || hi_quadrant==3 )
+        return @round(-1, max(cos(a.lo), cos(a.hi)))
+
+    else #if ( lo_quadrant == 3 && hi_quadrant==2 ) || ( lo_quadrant == 1 && hi_quadrant==0 )
+        return whole_range
+    end
+end
+
 
 function find_quadrants_tan(x::T) where {T}
     temp = atomic(Interval{T}, x) / half_pi(x)
