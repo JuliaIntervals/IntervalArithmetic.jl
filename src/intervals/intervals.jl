@@ -16,7 +16,7 @@ abstract type AbstractInterval{T} <: Real end
 abstract type Behavior end
 struct SetLike <: Behavior end
 struct NumberLike <: Behavior end
-const DefaultBehavior = NumberLike
+const DefaultBehavior = SetLike
 
 struct Interval{T <: Real, B <: Behavior} <: AbstractInterval{T}
     lo :: T
