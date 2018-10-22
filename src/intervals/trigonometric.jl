@@ -95,7 +95,7 @@ function quadrant(x::Float64)
 
     x_mod2pi < -halfpi && return (2, x_mod2pi)
     x_mod2pi < 0 && return (3, x_mod2pi)
-    x_mod2pi < halfpi && return (0, x_mod2pi)
+    x_mod2pi <= halfpi && return (0, x_mod2pi)
 
     return 1, x_mod2pi
 end
