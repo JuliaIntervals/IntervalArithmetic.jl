@@ -18,7 +18,14 @@ IntervalBox(x) = IntervalBox(x...)
 IntervalBox(X::IntervalBox, n) = foldl(×, Iterators.repeated(X, n))
 
 # construct from two vectors giving bottom and top corners
-IntervalBox(lo::SVector{N,T}, hi::SVector{N,T}) where {N,T} = IntervalBox(interval.(lo, hi))
+
+"Make an interval even if a > b"
+function force_interval(a, b)
+    a > b && return interval(b, a)
+    return interval(a, b)
+end
+
+IntervalBox(lo::SVector{N,T}, hi::SVector{N,T}) where {N,T} = IntervalBox(force_interval.(lo, hi))
 
 Base.@propagate_inbounds Base.getindex(X::IntervalBox, i) = X.v[i]
 
