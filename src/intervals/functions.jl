@@ -236,14 +236,17 @@ function ^(x::Interval, n::Integer)  # fast integer power
 
     isempty(x) && return x
 
+    negative_power = false
+
     if n < 0
-        return inv(x^(-n))
+        negative_power = true
+        n = -n
     end
 
     if iseven(n)
         if 0 ∈ x
 
-            return Interval(zero(eltype(x)),
+            result =  Interval(zero(eltype(x)),
                         power_by_squaring(mag(x), n, RoundUp))
 
         elseif x.lo > 0
@@ -260,7 +263,7 @@ function ^(x::Interval, n::Integer)  # fast integer power
          a = power_by_squaring(x.lo, n, RoundDown)
          b = power_by_squaring(x.hi, n, RoundUp)
 
-        return Interval(a, b)
+        result = Interval(a, b)
 
     end
     #
@@ -270,6 +273,12 @@ function ^(x::Interval, n::Integer)  # fast integer power
     #
     #     return Interval(a, b)
     #end
+
+    if negative_power
+        return inv(result)
+    else
+        return result
+    end
 
 end
 
