@@ -114,7 +114,7 @@ function sin(a::Interval{Float64})
     lo_quadrant, lo = quadrant(a.lo)
     hi_quadrant, hi = quadrant(a.hi)
 
-    lo, hi = a.lo, a.hi  # don't use the modulo version of a
+    lo, hi = a.lo, a.hi  # should be able to use the modulo version of a, but doesn't seem to work
 
     # Different cases depending on the two quadrants:
     if lo_quadrant == hi_quadrant
