@@ -52,6 +52,8 @@ setprecision(Interval, Float64)
     a = @interval(1.e-20)
     @test a == Interval(1.0e-20, 1.0000000000000001e-20)
     @test diam(a) == eps(1.e-20)
+
+    @test (0..∞) * (-1..∞) == -∞..∞
 end
 
 @testset "Arithmetic with constants" begin

@@ -114,7 +114,7 @@ function checked_mult(a::T, b::T, r::RoundingMode) where T
         return zero(T)
     end
 
-    return a * b
+    return *(a, b, r)
 end
 
 function mult(op, a::Interval{T}, b::Interval{T}) where T<:Real
