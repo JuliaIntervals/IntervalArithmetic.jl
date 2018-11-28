@@ -102,26 +102,46 @@ function *(x::T, a::Interval{T}) where {T<:Real}
         return @round(a.hi*x, a.lo*x)
     end
 end
+
 *(a::Interval{T}, x::T) where {T<:Real} = x*a
+
+"a * b where 0 * Inf is special-cased"
+function checked_mult(a::T, b::T, r::RoundingMode) where T
+
+    # println("checked_mult a=$a b=$b")
+
+    if (a == 0 && isinf(b)) || (isinf(a) && b == 0)
+        return zero(T)
+    end
+
+    return a * b
+end
+
+function mult(op, a::Interval{T}, b::Interval{T}) where T<:Real
+    if b.lo >= zero(T)
+        a.lo >= zero(T) && return @round( op(a.lo, b.lo), op(a.hi, b.hi) )
+        a.hi <= zero(T) && return @round( op(a.lo, b.hi), op(a.hi, b.lo) )
+        return @round(a.lo*b.hi, a.hi*b.hi)   # zero(T) ∈ a
+    elseif b.hi <= zero(T)
+        a.lo >= zero(T) && return @round( op(a.hi, b.lo), op(a.lo, b.hi) )
+        a.hi <= zero(T) && return @round( op(a.hi, b.hi), op(a.lo, b.lo) )
+        return @round(a.hi*b.lo, a.lo*b.lo)   # zero(T) ∈ a
+    else
+        a.lo > zero(T) && return @round( op(a.hi, b.lo), op(a.hi, b.hi) )
+        a.hi < zero(T) && return @round( op(a.lo, b.hi), op(a.lo, b.lo) )
+        return @round(min( op(a.lo, b.hi), op(a.hi, b.lo) ),
+                        max( op(a.lo, b.lo), op(a.hi, b.hi) ) )
+    end
+end
 
 function *(a::Interval{T}, b::Interval{T}) where T<:Real
     (isempty(a) || isempty(b)) && return emptyinterval(T)
 
     (iszero(a) || iszero(b)) && return zero(Interval{T})
 
-    if b.lo >= zero(T)
-        a.lo >= zero(T) && return @round(a.lo*b.lo, a.hi*b.hi)
-        a.hi <= zero(T) && return @round(a.lo*b.hi, a.hi*b.lo)
-        return @round(a.lo*b.hi, a.hi*b.hi)   # zero(T) ∈ a
-    elseif b.hi <= zero(T)
-        a.lo >= zero(T) && return @round(a.hi*b.lo, a.lo*b.hi)
-        a.hi <= zero(T) && return @round(a.hi*b.hi, a.lo*b.lo)
-        return @round(a.hi*b.lo, a.lo*b.lo)   # zero(T) ∈ a
-    else
-        a.lo > zero(T) && return @round(a.hi*b.lo, a.hi*b.hi)
-        a.hi < zero(T) && return @round(a.lo*b.hi, a.lo*b.lo)
-        return @round(min(a.lo*b.hi, a.hi*b.lo), max(a.lo*b.lo, a.hi*b.hi))
-    end
+    (isfinite(a) && isfinite(b)) && return mult(*, a, b)
+
+    return mult(checked_mult, a, b)
 end
 
 
