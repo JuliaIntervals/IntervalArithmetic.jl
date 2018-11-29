@@ -68,6 +68,8 @@ big(X::IntervalBox) = big.(X)
     IntervalBox(X.v .∪ Y.v)
 
 ∈(X::SVector{N}, Y::IntervalBox{N,T}) where {N,T} = all(X .∈ Y)
+∈(X, Y::IntervalBox{N,T}) where {N,T} = throw(ArgumentError("$X ∈ $Y is not defined"))
+
 
 #=
 On Julia 0.6 can now write
