@@ -202,7 +202,7 @@ julia> 1.5 ± 0.1
 
 Basic arithmetic operations (`+`, `-`, `*`, `/`, `^`) are defined for pairs of intervals in a standard way (see, e.g., the book by Tucker): the result is the smallest interval containing the result of operating with each element of each interval. That is, for two intervals `X` and `Y` and an operation `\bigcirc`, we define the operation on the two intervals by
 ```math
-\bigcirc Y := \{ x \bigcirc y: x \in X \text{ and } y \in Y \}.
+X \bigcirc Y := \{ x \bigcirc y: x \in X \text{ and } y \in Y \}.
 ```
 Again, directed rounding is used if necessary.
 
