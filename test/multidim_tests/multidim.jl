@@ -223,9 +223,7 @@ end
     @test mid(X) ∈ X
     @test mid(X, 0.75) ∈ X
 
-    @test (3..4) ∉ X
-
-
+    @test_throws ArgumentError (3..4) ∈ X
 
 end
 
