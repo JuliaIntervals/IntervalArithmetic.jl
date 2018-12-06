@@ -102,18 +102,24 @@ macro format(expr...)
 end
 
 
+if VERSION < v"1.1.0-DEV.683"
+    to_mpfr(r) = Base.MPFR.to_mpfr(r)
+else
+    to_mpfr(r) = convert(Base.MPFR.MPFRRoundingMode, r)
+end
+
 ## Output
 
-# round to given number of signficant digits
+# round to given number of significant digits
 # basic structure taken from string(x::BigFloat) in base/mpfr.jl
 function round_string(x::BigFloat, digits::Int, r::RoundingMode)
 
     lng = digits + Int32(8)
     buf = Array{UInt8}(undef, lng + 1)
 
-    lng = ccall((:mpfr_snprintf,:libmpfr), Int32,
+    lng = ccall((:mpfr_snprintf, :libmpfr), Int32,
     (Ptr{UInt8}, Culong,  Ptr{UInt8}, Int32, Ref{BigFloat}...),
-    buf, lng + 1, "%.$(digits)R*g", Base.MPFR.to_mpfr(r), x)
+    buf, lng + 1, "%.$(digits)R*g", to_mpfr(r), x)
 
     repr = unsafe_string(pointer(buf))
 
