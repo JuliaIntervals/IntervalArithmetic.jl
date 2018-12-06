@@ -19,7 +19,7 @@ function round_expr(ex::Expr, rounding_mode::RoundingMode)
 
 
         if length(ex.args) == 3  # binary operator
-            return :( $op( $(esc(ex.args[2])), $(esc(ex.args[3])), $rounding_mode) )
+            return :( $(esc(op))( $(esc(ex.args[2])), $(esc(ex.args[3])), $rounding_mode) )
 
         else  # unary operator
             return :( $op($(esc(ex.args[2])), $rounding_mode ) )
