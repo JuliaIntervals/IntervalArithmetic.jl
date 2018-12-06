@@ -13,6 +13,8 @@ function in(x::T, a::Interval) where T<:Real
     a.lo <= x <= a.hi
 end
 
+in(x::Interval, y::Interval) = throw(ArgumentError("$x ∈ $y is not defined"))
+
 in(x::T, a::Complex{<:Interval}) where T<:Real = x ∈ real(a) && 0 ∈ imag(a)
 in(x::Complex{T}, a::Complex{<:Interval}) where T<:Real = real(x) ∈ real(a) && imag(x) ∈ imag(a)
 
