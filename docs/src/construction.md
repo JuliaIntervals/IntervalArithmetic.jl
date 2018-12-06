@@ -15,6 +15,10 @@ Note that a valid interval `[a, b]` must have `a ≤ b`.
   julia> using IntervalArithmetic
 
   julia> @format full  # print out literal interval values in full
+  Display parameters:
+  - format: full
+  - decorations: false
+  - significant figures: 6
 
   julia> interval(0.1)
   Interval(0.1, 0.1)
