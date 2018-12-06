@@ -223,6 +223,9 @@ end
     @test mid(X) ∈ X
     @test mid(X, 0.75) ∈ X
 
+    @test (zero(mid(X)) ∈ X) == false
+    @test zero(mid(X)) ∉ X
+    
     @test_throws ArgumentError (3..4) ∈ X
 
 end
