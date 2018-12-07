@@ -21,6 +21,7 @@ range_atan(::Type{T}) where {T<:Real} = Interval(-(pi_interval(T).hi), pi_interv
 half_range_atan(::Type{T}) where {T} = (temp = half_pi(T); Interval(-(temp.hi), temp.hi) )
 pos_range_atan(::Type{T}) where {T<:Real} = Interval(zero(T), pi_interval(T).hi)
 
+const halfpi = pi / 2.0
 
 """Finds the quadrant(s) corresponding to a given floating-point
 number. The quadrants are labelled as 0 for x ∈ [0, π/2], etc.
@@ -33,13 +34,6 @@ Tucker, *Validated Numerics*.
 """
 function find_quadrants(x::T) where {T}
     temp = atomic(Interval{T}, x) / half_pi(x)
-
-    return SVector(floor(temp.lo), floor(temp.hi))
-end
-
-function find_quadrants(x::Float64)
-    temp = multiply_by_positive_constant(x, one_over_half_pi_interval)
-    # x / half_pi(Float64)
 
     return SVector(floor(temp.lo), floor(temp.hi))
 end
@@ -89,6 +83,60 @@ function sin(a::Interval{T}) where T
     end
 end
 
+function quadrant(x::Float64)
+    x_mod2pi = rem2pi(x, RoundNearest)  # gives result in [-pi, pi]
+
+    x_mod2pi < -halfpi && return (2, x_mod2pi)
+    x_mod2pi < 0 && return (3, x_mod2pi)
+    x_mod2pi <= halfpi && return (0, x_mod2pi)
+
+    return 1, x_mod2pi
+end
+
+
+function sin(a::Interval{Float64})
+
+    T = Float64
+
+    isempty(a) && return a
+
+    whole_range = Interval{T}(-1, 1)
+
+    diam(a) > two_pi(T).lo && return whole_range
+
+    lo_quadrant, lo = quadrant(a.lo)
+    hi_quadrant, hi = quadrant(a.hi)
+
+    lo, hi = a.lo, a.hi  # should be able to use the modulo version of a, but doesn't seem to work
+
+    # Different cases depending on the two quadrants:
+    if lo_quadrant == hi_quadrant
+        a.hi - a.lo > pi_interval(T).lo && return whole_range  #
+
+        if lo_quadrant == 1 || lo_quadrant == 2
+            # negative slope
+            return @round(sin(hi), sin(lo))
+        else
+            return @round(sin(lo), sin(hi))
+        end
+
+    elseif lo_quadrant==3 && hi_quadrant==0
+        return @round(sin(lo), sin(hi))
+
+    elseif lo_quadrant==1 && hi_quadrant==2
+        return @round(sin(hi), sin(lo))
+
+    elseif ( lo_quadrant == 0 || lo_quadrant==3 ) && ( hi_quadrant==1 || hi_quadrant==2 )
+        return @round(min(sin(lo), sin(hi)), 1)
+
+    elseif ( lo_quadrant == 1 || lo_quadrant==2 ) && ( hi_quadrant==3 || hi_quadrant==0 )
+        return @round(-1, max(sin(lo), sin(hi)))
+
+    else #if( lo_quadrant == 0 && hi_quadrant==3 ) || ( lo_quadrant == 2 && hi_quadrant==1 )
+        return whole_range
+    end
+end
+
 
 function cos(a::Interval{T}) where T
     isempty(a) && return a
@@ -131,6 +179,50 @@ function cos(a::Interval{T}) where T
     end
 end
 
+function cos(a::Interval{Float64})
+
+    T = Float64
+
+    isempty(a) && return a
+
+    whole_range = Interval{Float64}(-one(T), one(T))
+
+    diam(a) > two_pi(T).lo && return whole_range
+
+    lo_quadrant, lo = quadrant(a.lo)
+    hi_quadrant, hi = quadrant(a.hi)
+
+    lo, hi = a.lo, a.hi
+
+    # Different cases depending on the two quadrants:
+    if lo_quadrant == hi_quadrant # Interval limits in the same quadrant
+        a.hi - a.lo > pi_interval(T).lo && return whole_range
+
+        if lo_quadrant == 2 || lo_quadrant == 3
+            # positive slope
+            return @round(cos(lo), cos(hi))
+        else
+            return @round(cos(hi), cos(lo))
+        end
+
+    elseif lo_quadrant == 2 && hi_quadrant==3
+        return @round(cos(a.lo), cos(a.hi))
+
+    elseif lo_quadrant == 0 && hi_quadrant==1
+        return @round(cos(a.hi), cos(a.lo))
+
+    elseif ( lo_quadrant == 2 || lo_quadrant==3 ) && ( hi_quadrant==0 || hi_quadrant==1 )
+        return @round(min(cos(a.lo), cos(a.hi)), 1)
+
+    elseif ( lo_quadrant == 0 || lo_quadrant==1 ) && ( hi_quadrant==2 || hi_quadrant==3 )
+        return @round(-1, max(cos(a.lo), cos(a.hi)))
+
+    else #if ( lo_quadrant == 3 && hi_quadrant==2 ) || ( lo_quadrant == 1 && hi_quadrant==0 )
+        return whole_range
+    end
+end
+
+
 function find_quadrants_tan(x::T) where {T}
     temp = atomic(Interval{T}, x) / half_pi(x)
 
@@ -162,6 +254,32 @@ function tan(a::Interval{T}) where T
 
     # @show a.lo, a.hi
     # @show tan(a.lo), tan(a.hi)
+
+    return @round(tan(a.lo), tan(a.hi))
+end
+
+function tan(a::Interval{Float64})
+
+    T = Float64
+
+    isempty(a) && return a
+
+    diam(a) > pi_interval(T).lo && return entireinterval(a)
+
+    lo_quadrant, lo = quadrant(a.lo)
+    hi_quadrant, hi = quadrant(a.hi)
+
+    lo_quadrant_mod = mod(lo_quadrant, 2)
+    hi_quadrant_mod = mod(hi_quadrant, 2)
+
+    if lo_quadrant_mod == 0 && hi_quadrant_mod == 1
+        return entireinterval(a)  # crosses singularity
+
+    elseif lo_quadrant_mod == hi_quadrant_mod && hi_quadrant != lo_quadrant
+        # must cross singularity
+        return entireinterval(a)
+
+    end
 
     return @round(tan(a.lo), tan(a.hi))
 end
