@@ -1,3 +1,6 @@
+
+⊆(x::Complex{Interval{T}}, y::Complex{Interval{T}}) where T = real(x) ⊆ real(y) && imag(x) ⊆ imag(y)
+
 function ^(x::Complex{Interval{T}}, n::Integer) where {T}
     if n < 0
         return inv(x)^n
