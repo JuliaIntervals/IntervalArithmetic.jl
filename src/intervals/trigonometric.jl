@@ -38,13 +38,6 @@ function find_quadrants(x::T) where {T}
     return SVector(floor(temp.lo), floor(temp.hi))
 end
 
-function find_quadrants(x::Float64)
-    temp = multiply_by_positive_constant(x, one_over_half_pi_interval)
-    # x / half_pi(Float64)
-
-    return SVector(floor(temp.lo), floor(temp.hi))
-end
-
 function sin(a::Interval{T}) where T
     isempty(a) && return a
 
