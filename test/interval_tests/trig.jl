@@ -183,16 +183,16 @@ end
     @test cos(Interval(-pi/2, 3pi/2)) == Interval(-1, 1)
 end
 
-# @testset "Trig with large arguments" begin
-#     x = Interval(2.)^1000   # this is a thin interval
-#     @test diam(x) == 0.0
-#
-#     @test sin(x) == -1..1
-#     @test cos(x) == -1..1
-#     @test_skip tan(x) == Interval(-0.16125837995065806, -0.16125837995065803)
-#
-#     x = Interval(prevfloat(∞), ∞)
-#     @test sin(x) == -1..1
-#     @test cos(x) == -1..1
-#     @test tan(x) == -∞..∞
-# end
+@testset "Trig with large arguments" begin
+    x = Interval(2.)^1000   # this is a thin interval
+    @test diam(x) == 0.0
+
+    @test sin(x) == Interval(-0.15920170308624246, -0.15920170308624243)
+    @test cos(x) == Interval(0.9872460775989135, 0.9872460775989136)
+    @test tan(x) == Interval(-0.16125837995065806, -0.16125837995065803)
+
+    x = Interval(prevfloat(∞), ∞)
+    @test sin(x) == -1..1
+    @test cos(x) == -1..1
+    @test tan(x) == -∞..∞
+end
