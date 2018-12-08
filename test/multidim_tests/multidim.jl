@@ -218,4 +218,18 @@ end
     @test diam.(X) == SVector(diam(X[1]), diam(X[2]))
 end
 
+@testset "∈" begin
+    X = IntervalBox(3..4, 5..6)
+    @test mid(X) ∈ X
+    @test mid(X, 0.75) ∈ X
+
+    @test (zero(mid(X)) ∈ X) == false
+    @test zero(mid(X)) ∉ X
+
+    @test_throws ArgumentError (3..4) ∈ X
+
+    @test_throws ArgumentError [3..4, 5..6] ∈ X
+
+end
+
 end

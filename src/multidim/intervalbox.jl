@@ -67,6 +67,10 @@ big(X::IntervalBox) = big.(X)
 ∪(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) where {N,T} =
     IntervalBox(X.v .∪ Y.v)
 
+∈(X::AbstractVector, Y::IntervalBox{N,T}) where {N,T} = all(X .∈ Y)
+∈(X, Y::IntervalBox{N,T}) where {N,T} = throw(ArgumentError("$X ∈ $Y is not defined"))
+
+
 #=
 On Julia 0.6 can now write
 ∩{N,T}(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) = IntervalBox(NTuple{N, Interval{Float64}}( (X[i] ∩ Y[i]) for i in 1:N))

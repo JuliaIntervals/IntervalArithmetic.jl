@@ -83,6 +83,8 @@ setprecision(Interval, Float64)
         @test 0.1 in @interval(0.1)
         @test !(-Inf ∈ entireinterval())
         @test !(Inf ∈ entireinterval())
+
+        @test_throws ArgumentError (3..4) ∈ (3..4)
     end
 
     @testset "Inclusion tests" begin
