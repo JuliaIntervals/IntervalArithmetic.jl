@@ -109,6 +109,12 @@ end
 interval(a::Real) = interval(a, a)
 interval(a::Interval) = a
 
+"Make an interval even if a > b"
+function force_interval(a, b)
+    a > b && return interval(b, a)
+    return interval(a, b)
+end
+
 
 ## Include files
 include("special.jl")

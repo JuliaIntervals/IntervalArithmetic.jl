@@ -331,3 +331,12 @@ end
     @test !isequal(hash(x), hash(y))
 
 end
+
+import IntervalArithmetic: force_interval
+@testset "force_interval" begin
+    @test force_interval(4, 3) == Interval(3, 4)
+    @test force_interval(4, Inf) == Interval(4, Inf)
+    @test force_interval(Inf, 4) == Interval(4, Inf)
+    @test force_interval(Inf, -Inf) == Interval(-Inf, Inf)
+    @test_throws ArgumentError force_interval(NaN, 3)
+end

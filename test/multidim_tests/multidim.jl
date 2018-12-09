@@ -191,6 +191,10 @@ end
     @test IntervalBox([1:5...]) == IntervalBox(1..1, 2..2, 3..3, 4..4, 5..5)
     @test IntervalBox((1..2) × (2..3), 2) == (1..2) × (2..3) × (1..2) × (2..3)
 
+    # construct from corners:
+    @test IntervalBox(SVector(1, 2), SVector(3, 4)) == (1..3) × (2..4)
+    @test IntervalBox(SVector(3, 4), SVector(1, 2)) == (1..3) × (2..4)
+
 end
 
 @testset "getindex and setindex" begin
