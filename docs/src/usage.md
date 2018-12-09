@@ -374,35 +374,53 @@ julia> a = @interval(1.1, pi)
 [1.09999, 3.1416]
 
 julia> setformat(sigfigs=10)
-10
+Display parameters:
+- format: standard
+- decorations: false
+- significant figures: 10
 
 julia> a
 [1.099999999, 3.141592654]
 
 julia> setformat(:full)
-10
+Display parameters:
+- format: full
+- decorations: false
+- significant figures: 10
 
 julia> a
 Interval(1.0999999999999999, 3.1415926535897936)
 
 julia> setformat(:midpoint)
-10
+Display parameters:
+- format: midpoint
+- decorations: false
+- significant figures: 10
 
 julia> a
 2.120796327 ± 1.020796327
 
 julia> setformat(:midpoint, sigfigs=4)
-4
+Display parameters:
+- format: midpoint
+- decorations: false
+- significant figures: 4
 
 julia> a
 2.121 ± 1.021
 
 julia> setformat(:standard)
-4
+Display parameters:
+- format: standard
+- decorations: false
+- significant figures: 4
 
 julia> a
 [1.099, 3.142]
 
-julia> setformat(:standard, sigfigs=6)
-6
+julia> setformat(:standard, sigfigs=6)  # default values
+Display parameters:
+- format: standard
+- decorations: false
+- significant figures: 6
 ```

@@ -4,13 +4,25 @@ mutable struct DisplayParameters
     sigfigs::Int
 end
 
+function Base.show(io::IO, params::DisplayParameters)
+    println(io, "Display parameters:")
+    println(io, "- format: $(params.format)")
+    println(io, "- decorations: $(params.decorations)")
+    print(io, "- significant figures: $(params.sigfigs)")
+end
+
 const display_params = DisplayParameters(:standard, false, 6)
 
+const display_options = (:standard, :full, :midpoint)
 
 """
-    setformat(;kw)
+    setformat(format=none; decorations=none, sigfigs=none)
 
-`setformat` changes how intervals are displayed using keyword arguments.
+`setformat` changes how intervals are displayed.
+It returns the new `DisplayParameters` object.
+
+Note that The `@format` macro is more user-friendly.
+
 The following options are available:
 
 - `format`: interval output format
@@ -26,27 +38,44 @@ The following options are available:
 Example:
 ```
 julia> setformat(:full, decorations=true)
+Display parameters:
+- format: full
+- decorations: true
+- significant figures: 6
 ```
 """
-function setformat(format = display_params.format;
-                    decorations = display_params.decorations, sigfigs::Integer = display_params.sigfigs)
+function setformat(format = nothing;
+                    decorations = nothing,
+                    sigfigs = nothing)
 
-    if format ∉ (:standard, :full, :midpoint)
-        throw(ArgumentError("Allowed format option is one of  $display_options."))
+
+    if format != nothing
+        if format ∉ display_options
+            throw(ArgumentError("Allowed format option is one of  $display_options."))
+        else
+            display_params.format = format
+        end
     end
 
-    if decorations ∉ (true, false)
-        throw(ArgumentError("`decorations` must be `true` or `false`"))
+    if decorations !=  nothing
+        if decorations ∉ (true, false)
+            throw(ArgumentError("`decorations` must be `true` or `false`"))
+        end
+
+        display_params.decorations = decorations
+
     end
 
-    if sigfigs < 1
-        throw(ArgumentError("`sigfigs` must be `>= 1`"))
+    if sigfigs != nothing
+        if sigfigs < 1
+            throw(ArgumentError("`sigfigs` must be `>= 1`"))
+        end
+
+        display_params.sigfigs = sigfigs
+
     end
 
-    # update values in display_params:
-    display_params.format = format
-    display_params.decorations = decorations
-    display_params.sigfigs = sigfigs
+    return display_params
 end
 
 """
@@ -54,6 +83,7 @@ end
 
 The `@format` macro provides a simple interface to control the output format
 for intervals. These options are passed to the `setformat` function.
+It returns the new `DisplayParameters` object.
 
 The arguments may be in any order and of type:
 
@@ -67,11 +97,19 @@ julia> x = 0.1..0.3
 @[0.0999999, 0.300001]
 
 julia> @format full
+Display parameters:
+- format: full
+- decorations: false
+- significant figures: 6
 
 julia> x
 Interval(0.09999999999999999, 0.30000000000000004)
 
 julia> @format standard 3
+Display parameters:
+- format: standard
+- decorations: false
+- significant figures: 3
 
 julia> x
 [0.0999, 0.301]
@@ -88,12 +126,13 @@ macro format(expr...)
         if isa(ex, Symbol)
             format = Meta.quot(ex)
 
-        elseif isa(ex, Integer)
-            sigfigs = ex
-
         elseif isa(ex, Bool)
             decorations = ex
+
+        elseif isa(ex, Integer)
+            sigfigs = ex
         end
+
     end
 
     format_code = :(setformat($format, decorations=$decorations, sigfigs=$sigfigs))
