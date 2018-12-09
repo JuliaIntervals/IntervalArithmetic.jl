@@ -340,5 +340,3 @@ import IntervalArithmetic: force_interval
     @test force_interval(Inf, -Inf) == Interval(-Inf, Inf)
     @test_throws ArgumentError force_interval(NaN, 3)
 end
-
-end
