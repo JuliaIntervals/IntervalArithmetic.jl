@@ -25,7 +25,7 @@ function force_interval(a, b)
     return interval(a, b)
 end
 
-IntervalBox(lo::SVector{N,T}, hi::SVector{N,T}) where {N,T} = IntervalBox(force_interval.(lo, hi))
+IntervalBox(lo::AbstractVector, hi::AbstractVector) where {N,T} = IntervalBox(force_interval.(lo, hi))
 
 Base.@propagate_inbounds Base.getindex(X::IntervalBox, i) = X.v[i]
 
