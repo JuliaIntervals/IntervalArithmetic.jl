@@ -1,6 +1,8 @@
 using IntervalArithmetic
 using Test
 
+using LinearAlgebra
+
 @testset "Complex interval operations" begin
     a = @interval 1im
     b = @interval 4im + 3
@@ -48,5 +50,6 @@ end
 @testset "abs2 and abs" begin
     x = (0..0.01) + (0..1)*im
     @test abs2(x) == Interval(0.0, 1.0001000000000002)
-    @test abs(x) == Interval(0.0, 1.0000499987500626)
+    @test abs(x) == norm(x) == Interval(0.0, 1.0000499987500626)
+
 end
