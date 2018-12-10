@@ -54,5 +54,5 @@ end
 
     y = (-1..1) + (-2..2)*im
     @test abs(y).lo == 0.0
-    @test abs2(y).lo = 0.0
+    @test abs2(y).lo == 0.0
 end
