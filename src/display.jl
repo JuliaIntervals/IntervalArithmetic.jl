@@ -302,6 +302,7 @@ end
 for T in (Interval, DecoratedInterval)
     @eval show(io::IO, a::$T{S}) where S = print(io, representation(a))
     @eval showfull(io::IO, a::$T{S}) where S = print(io, representation(a, :full))
+    @eval showfull(a::$T{S}) where S = showfull(stdout, a)
 end
 
 T = IntervalBox
