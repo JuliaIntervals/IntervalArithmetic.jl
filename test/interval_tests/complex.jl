@@ -48,8 +48,11 @@ end
 end
 
 @testset "abs2 and abs" begin
-    x = (0..0.01) + (0..1)*im
-    @test abs2(x) == Interval(0.0, 1.0001000000000002)
-    @test abs(x) == norm(x) == Interval(0.0, 1.0000499987500626)
+    x = (0..3) + (0..4)*im
+    @test abs2(x) == 0..25
+    @test abs(x) == norm(x) == 0..5
 
+    y = (-1..1) + (-2..2)*im
+    @test abs(y).lo == 0.0
+    @test abs2(y).lo = 0.0
 end
