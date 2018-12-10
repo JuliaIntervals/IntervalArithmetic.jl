@@ -92,6 +92,7 @@ for (op, f) in ( (:+, :add), (:-, :sub), (:*, :mul), (:/, :div) )
     end
 end
 
+# inv and sqrt:
 for T in (Float32, Float64)
     for mode in (:Down, :Up)
 
@@ -103,7 +104,7 @@ for T in (Float32, Float64)
         @eval inv(::IntervalRounding{:tight},
                             a::$T, $mode1) = inv_round(a, $mode2)
 
-                @eval sqrt(::IntervalRounding{:tight},
+        @eval sqrt(::IntervalRounding{:tight},
                             a::$T, $mode1) = sqrt_round(a, $mode2)
         end
 end
@@ -231,12 +232,14 @@ function _setrounding(::Type{Interval}, rounding_type::Symbol)
 
     # unary functions:
 
-    for f in (:sqrt, :inv)
-        @eval $f(a::T, r::RoundingMode) where {T<:AbstractFloat} = $f($roundtype, a, r)
-    end
 
     if rounding_type == :tight   # for remaining functions, use CRlibm
         roundtype = IntervalRounding{:slow}()
+    end
+
+
+    for f in (:sqrt, :inv)
+        @eval $f(a::T, r::RoundingMode) where {T<:AbstractFloat} = $f($roundtype, a, r)
     end
 
     for f in (:^, :atan)
