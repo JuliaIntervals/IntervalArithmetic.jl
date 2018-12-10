@@ -13,7 +13,7 @@ using SetRounding
 using Markdown
 
 using LinearAlgebra
-import LinearAlgebra: ×, dot
+import LinearAlgebra: ×, dot, norm
 export ×, dot
 
 
@@ -33,6 +33,7 @@ import Base:
     expm1, log1p,
     precision,
     isfinite, isnan, isinf, iszero,
+    abs, abs2, 
     show,
     isinteger, setdiff,
     parse, hash
