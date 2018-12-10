@@ -272,13 +272,11 @@ end
         @test pow(y, @interval(2.1)) == Interval(0.0, 10.045108566305146)
     end
 
-    # comment out for now:
-    #=
     @testset "Float32 intervals" begin
 
         a = Interval{Float32}(1e38)
         b = Interval{Float32}(1e2)
         @test a * b == Interval{Float32}(floatmax(Float32), Inf)
     end
-    =#
+    
 end
