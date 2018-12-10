@@ -272,11 +272,24 @@ end
         @test pow(y, @interval(2.1)) == Interval(0.0, 10.045108566305146)
     end
 
+    @testset "sqrt" begin
+        @test sqrt(2..3) == Interval(1.414213562373095, 1.7320508075688774)
+
+        @test sqrt(big(2..3)) == Interval(big"1.414213562373095048801688724209698078569671875376948073176679737990732478462102", big"1.732050807568877293527446341505872366942805253810380628055806979451933016908815")
+    end
+
+    @testset "inv" begin
+        @test inv(2..3) == Interval(0.3333333333333333, 0.5)
+        @test inv(big(2..3)) == Interval(big"3.333333333333333333333333333333333333333333333333333333333333333333333333333305e-01", big"5.0e-01")
+    end
+
     @testset "Float32 intervals" begin
 
         a = Interval{Float32}(1e38)
         b = Interval{Float32}(1e2)
         @test a * b == Interval{Float32}(floatmax(Float32), Inf)
     end
-    
+
+
+
 end
