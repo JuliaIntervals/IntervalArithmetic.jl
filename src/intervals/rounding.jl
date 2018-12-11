@@ -92,6 +92,13 @@ for (op, f) in ( (:+, :add), (:-, :sub), (:*, :mul), (:/, :div) )
     end
 end
 
+# inv and sqrt:
+
+# inv(::IntervalRounding{:tight}, a::T, r::RoundingMode) where T<:Union{Float32, Float64} = inv_round(a, r)
+#
+# sqrt(::IntervalRounding{:tight}, a::T, r::RoundingMode) where T<:Union{Float32, Float64} = sqrt_round(a, r)
+
+
 for T in (Float32, Float64)
     for mode in (:Down, :Up)
 
@@ -103,7 +110,7 @@ for T in (Float32, Float64)
         @eval inv(::IntervalRounding{:tight},
                             a::$T, $mode1) = inv_round(a, $mode2)
 
-                @eval sqrt(::IntervalRounding{:tight},
+        @eval sqrt(::IntervalRounding{:tight},
                             a::$T, $mode1) = sqrt_round(a, $mode2)
         end
 end
@@ -175,12 +182,18 @@ for mode in (:Down, :Up)
     # functions not in CRlibm:
     for f in (:sqrt, :inv, :tanh, :asinh, :acosh, :atanh)
 
+
         @eval function $f(::IntervalRounding{:slow},
                           a::T, $mode1) where T<:AbstractFloat
                             setrounding(T, $mode2) do
                                 $f(a)
                             end
                end
+
+        @eval function $f(::IntervalRounding{:tight},
+                                 a::T, $mode1) where T<:AbstractFloat
+                                   $f(IntervalRounding{:slow}(), a, $mode2)
+                      end
 
 
         @eval $f(::IntervalRounding{:accurate},
@@ -229,9 +242,17 @@ function _setrounding(::Type{Interval}, rounding_type::Symbol)
         @eval $f(a::T, b::T, r::RoundingMode) where {T<:AbstractFloat} = $f($roundtype, a, b, r)
     end
 
+    # unary functions:
+
+    for f in (:sqrt, :inv)
+        @eval $f(a::T, r::RoundingMode) where {T<:AbstractFloat} = $f($roundtype, a, r)
+    end
+
+
     if rounding_type == :tight   # for remaining functions, use CRlibm
         roundtype = IntervalRounding{:slow}()
     end
+
 
     for f in (:^, :atan)
 
@@ -242,7 +263,7 @@ function _setrounding(::Type{Interval}, rounding_type::Symbol)
 
     # unary functions:
     for f in vcat(CRlibm.functions,
-                [:sqrt, :inv, :tanh, :asinh, :acosh, :atanh])
+                    [:tanh, :asinh, :acosh, :atanh])
 
         @eval $f(a::T, r::RoundingMode) where {T<:AbstractFloat} = $f($roundtype, a, r)
 
