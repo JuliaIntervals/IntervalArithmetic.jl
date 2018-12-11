@@ -103,3 +103,17 @@ function log(z::Complex{T}) where T<:Interval
 
     return log(ρ) + im * θ
 end
+
+
+function abs2(z::Complex{T}) where T<:Interval
+    return real(z)^2 + imag(z)^2
+end
+
+function abs(z::Complex{T}) where T<:Interval
+    return sqrt(abs2(z))
+end
+#
+# # \left( |x|^p \right)^{1/p}.
+# function norm(z::Complex{T}, p=2) where T<:Interval
+#     return (abs(z)^(p))^(1 / p)
+# end 

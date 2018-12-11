@@ -1,6 +1,8 @@
 using IntervalArithmetic
 using Test
 
+using LinearAlgebra
+
 @testset "Complex interval operations" begin
     a = @interval 1im
     b = @interval 4im + 3
@@ -43,4 +45,14 @@ end
 
     a = -3.1
     @test x ⊆ (x^a)^(1/a)
+end
+
+@testset "abs2 and abs" begin
+    x = (0..3) + (0..4)*im
+    @test abs2(x) == 0..25
+    @test abs(x) == norm(x) == 0..5
+
+    y = (-1..1) + (-2..2)*im
+    @test abs(y).lo == 0.0
+    @test abs2(y).lo == 0.0
 end
