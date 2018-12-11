@@ -236,4 +236,14 @@ end
 
 end
 
+@test "Multiplication by a matrix"
+    A = [1 2; 3 4]
+    X = IntervalBox(1..2, 3..4)
+
+    @test A * X == IntervalBox(7..10, 15..22)
+
+    B = SMatrix{2,2}(A)
+
+    @test B * X == IntervalBox(7..10, 15..22)
+
 end
