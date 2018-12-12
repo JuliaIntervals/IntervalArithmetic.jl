@@ -247,3 +247,5 @@ end
     @test B * X == IntervalBox(7..10, 15..22)
 
 end
+
+end
