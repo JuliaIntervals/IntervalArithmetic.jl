@@ -236,7 +236,7 @@ end
 
 end
 
-@test "Multiplication by a matrix"
+@testset "Multiplication by a matrix" begin
     A = [1 2; 3 4]
     X = IntervalBox(1..2, 3..4)
 
