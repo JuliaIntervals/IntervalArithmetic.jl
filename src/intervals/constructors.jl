@@ -1,7 +1,8 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
 """The `@interval` macro is the main method to create an interval.
-It converts each expression into a narrow interval that is guaranteed to contain the true value passed by the user in the one or two expressions passed to it.
+It converts each expression into a narrow interval that is guaranteed to contain
+the true value passed by the user in the one or two expressions passed to it.
 When passed two expressions, it takes the hull of the resulting intervals
 to give a guaranteed containing interval.
 
@@ -90,3 +91,30 @@ function make_interval(T, expr1, expr2)
 
     :(interval(($expr1).lo, ($expr2).hi))
 end
+
+
+function ..(a::T, b::S) where {T, S}
+    BaseInterval(atomic(BaseInterval{T}, a).lo, atomic(BaseInterval{S}, b).hi)
+end
+
+function ..(a::T, b::Irrational{S}) where {T, S}
+    R = promote_type(T, Irrational{S})
+    BaseInterval(atomic(BaseInterval{R}, a).lo, atomic(BaseInterval{R}, b).hi)
+end
+
+function ..(a::Irrational{T}, b::S) where {T, S}
+    R = promote_type(Irrational{T}, S)
+    BaseInterval(atomic(BaseInterval{R}, a).lo, atomic(BaseInterval{R}, b).hi)
+end
+
+function ..(a::Irrational{T}, b::Irrational{S}) where {T, S}
+    R = promote_type(Irrational{T}, Irrational{S})
+    BaseInterval(atomic(BaseInterval{R}, a).lo, atomic(BaseInterval{R}, b).hi)
+end
+
+macro I_str(ex)  # I"[3,4]"
+    @interval(ex)
+end
+
+a ± b = (a-b)..(a+b)
+±(a::BaseInterval, b) = (a.lo - b)..(a.hi + b)

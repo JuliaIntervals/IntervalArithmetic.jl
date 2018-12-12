@@ -1,41 +1,47 @@
-# This file is part of the IntervalArithmetic.jl package; MIT licensed
+# This file is part of the BaseIntervalArithmetic.jl package; MIT licensed
 
 ## Definitions of special intervals and associated functions
 
+const ∞ = Inf
+
 ## Empty interval:
-"""`emptyinterval`s are represented as the interval [∞, -∞]; note
+"""
+    emptyinterval(::Type{T})
+
+Return an `emptyinterval` with interval bounds of type `T`.
+
+`emptyinterval`s are represented as the interval [∞, -∞]; note
 that this interval is an exception to the fact that the lower bound is
 larger than the upper one."""
-emptyinterval(::Type{T}) where T<:Real = Interval{T}(Inf, -Inf)
-emptyinterval(x::Interval{T}) where T<:Real = emptyinterval(T)
-emptyinterval() = emptyinterval(precision(Interval)[1])
+emptyinterval(::Type{T}) where {T<:Real} = Interval{T}(Inf, -Inf)
+emptyinterval() = emptyinterval(precision(BaseInterval)[1])
 const ∅ = emptyinterval(Float64)
 
-isempty(x::Interval) = x.lo == Inf && x.hi == -Inf
+emptyinterval(x::IT) where {IT<:AnyInterval} = AnyInterval(Inf, -Inf)
 
-const ∞ = Inf
+isempty(x::BaseInterval) = x.lo == Inf && x.hi == -Inf
 
 ## Entire interval:
 """`entireinterval`s represent the whole Real line: [-∞, ∞]."""
-entireinterval(::Type{T}) where T<:Real = Interval{T}(-Inf, Inf)
-entireinterval(x::Interval{T}) where T<:Real = entireinterval(T)
-entireinterval() = entireinterval(precision(Interval)[1])
+entireinterval(::Type{T}) where T<:Real = BaseInterval{T}(-Inf, Inf)
+entireinterval(x::BaseInterval{T}) where T<:Real = entireinterval(T)
+entireinterval() = entireinterval(precision(BaseInterval)[1])
 
-isentire(x::Interval) = x.lo == -Inf && x.hi == Inf
-isinf(x::Interval) = isentire(x)
-isunbounded(x::Interval) = x.lo == -Inf || x.hi == Inf
+isentire(x::BaseInterval) = x.lo == -Inf && x.hi == Inf
+isinf(x::BaseInterval) = isentire(x)
+isunbounded(x::BaseInterval) = x.lo == -Inf || x.hi == Inf
 
 
 # NaI: not-an-interval
 """`NaI` not-an-interval: [NaN, NaN]."""
-nai(::Type{T}) where T<:Real = Interval{T}(convert(T, NaN), convert(T, NaN))
-nai(x::Interval{T}) where T<:Real = nai(T)
-nai() = nai(precision(Interval)[1])
+nai(::Type{T}) where T<:Real = BaseInterval{T}(convert(T, NaN), convert(T, NaN))
+nai(x::BaseInterval{T}) where T<:Real = nai(T)
+nai() = nai(precision(BaseInterval)[1])
 
-isnai(x::Interval) = isnan(x.lo) || isnan(x.hi)
+isnai(x::BaseInterval) = isnan(x.lo) || isnan(x.hi)
 
-isfinite(x::Interval) = isfinite(x.lo) && isfinite(x.hi)
-isnan(x::Interval) = isnai(x)
+isfinite(x::BaseInterval) = isfinite(x.lo) && isfinite(x.hi)
+isnan(x::BaseInterval) = isnai(x)
 
 """
     isthin(x)
@@ -45,7 +51,7 @@ representable float. Any float which is not exactly representable
 does *not* yield a thin interval. Corresponds to `isSingleton` of
 the standard.
 """
-isthin(x::Interval) = x.lo == x.hi
+isthin(x::BaseInterval) = x.lo == x.hi
 
 """
     iscommon(x)
@@ -53,32 +59,32 @@ isthin(x::Interval) = x.lo == x.hi
 Checks if `x` is a **common interval**, i.e. a non-empty,
 bounded, real interval.
 """
-function iscommon(a::Interval)
+function iscommon(a::BaseInterval)
     (isentire(a) || isempty(a) || isnai(a) || isunbounded(a)) && return false
     true
 end
 
 "`widen(x)` widens the lowest and highest bounds of `x` to the previous and next representable floating-point numbers, respectively."
-widen(x::Interval{T}) where {T<:AbstractFloat} = Interval(prevfloat(x.lo), nextfloat(x.hi))
+widen(x::BaseInterval{T}) where {T<:AbstractFloat} = BaseInterval(prevfloat(x.lo), nextfloat(x.hi))
 
 """
     wideinterval(x::AbstractFloat)
 
-Returns the interval Interval( prevfloat(x), nextfloat(x) ).
+Returns the interval BaseInterval( prevfloat(x), nextfloat(x) ).
 """
-wideinterval(x::T) where {T<:AbstractFloat} = Interval( prevfloat(x), nextfloat(x) )
+wideinterval(x::T) where {T<:AbstractFloat} = BaseInterval( prevfloat(x), nextfloat(x) )
 
 """
-    isatomic(x::Interval)
+    isatomic(x::BaseInterval)
 
 Check whether an interval `x` is *atomic*, i.e. is unable to be split.
 This occurs when the interval is empty, or when the upper bound equals the lower bound or the `nextfloat` of the lower bound.
 """
-isatomic(x::Interval) = isempty(x) || (x.hi == x.lo) || (x.hi == nextfloat(x.lo))
+isatomic(x::BaseInterval) = isempty(x) || (x.hi == x.lo) || (x.hi == nextfloat(x.lo))
 
-iszero(x::Interval) = iszero(x.lo) && iszero(x.hi)
+iszero(x::BaseInterval) = iszero(x.lo) && iszero(x.hi)
 
-contains_zero(X::Interval{T}) where {T} = zero(T) ∈ X
+contains_zero(X::BaseInterval{T}) where {T} = zero(T) ∈ X
 
 
 # """
@@ -87,5 +93,5 @@ contains_zero(X::Interval{T}) where {T} = zero(T) ∈ X
 # Widens the lowest and highest bounds of `x` to the previous
 # and next representable floating-point numbers, respectively.
 # """
-# widen(x::Interval{T}) where T<:AbstractFloat =
-#     Interval(prevfloat(x.lo), nextfloat(x.hi))
+# widen(x::BaseInterval{T}) where T<:AbstractFloat =
+#     BaseInterval(prevfloat(x.lo), nextfloat(x.hi))

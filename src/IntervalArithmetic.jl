@@ -45,22 +45,24 @@ import Base:  # for IntervalBox
 import .Broadcast: broadcasted
 
 export
-    AbstractInterval, Interval,
-    interval,
-    @interval, @biginterval, @floatinterval, @make_interval,
-    diam, radius, mid, mag, mig, hull,
-    emptyinterval, ∅, ∞, isempty, isinterior, isdisjoint, ⪽,
-    precedes, strictprecedes, ≺, ⊂, ⊃, ⊇, contains_zero,
-    entireinterval, isentire, nai, isnai, isthin, iscommon, isatomic,
-    widen, inf, sup, bisect,
-    parameters, eps, dist,
-    pi_interval,
-    midpoint_radius, interval_from_midpoint_radius,
-    RoundTiesToEven, RoundTiesToAway,
-    cancelminus, cancelplus, isunbounded,
-    .., @I_str, ±,
-    pow, extended_div,
-    setformat, @format
+    BaseInterval, SetInterval, RealSetInterval, PseudoNumberInterval, Interval,
+    hi, lo, in, iszero,
+    @interval_function
+    # interval,
+    # @interval, @biginterval, @floatinterval, @make_interval,
+    # diam, radius, mid, mag, mig, hull,
+    # emptyinterval, ∅, ∞, isempty, isinterior, isdisjoint, ⪽,
+    # precedes, strictprecedes, ≺, ⊂, ⊃, ⊇, contains_zero,
+    # entireinterval, isentire, nai, isnai, isthin, iscommon, isatomic,
+    # widen, inf, sup, bisect,
+    # parameters, eps, dist,
+    # pi_interval,
+    # midpoint_radius, interval_from_midpoint_radius,
+    # RoundTiesToEven, RoundTiesToAway,
+    # cancelminus, cancelplus, isunbounded,
+    # .., @I_str, ±,
+    # pow, extended_div,
+    # setformat, @format
 
 export
     setindex   # re-export from StaticArrays for IntervalBox
@@ -92,35 +94,35 @@ export
 
 
 
-function __init__()
-    setrounding(BigFloat, RoundNearest)
-    if VERSION < v"0.7.0-DEV"
-        ## deprecated in 0.7
-        setrounding(Float64, RoundNearest)
-    end
-
-    setprecision(Interval, 256)  # set up pi
-    setprecision(Interval, Float64)
-end
+# function __init__()
+#     setrounding(BigFloat, RoundNearest)
+#     if VERSION < v"0.7.0-DEV"
+#         ## deprecated in 0.7
+#         setrounding(Float64, RoundNearest)
+#     end
+#
+#     setprecision(Interval, 256)  # set up pi
+#     setprecision(Interval, Float64)
+# end
 
 
 ## Includes
 
 include("intervals/intervals.jl")
-include("multidim/multidim.jl")
-include("bisect.jl")
-include("decorations/decorations.jl")
-
-include("parsing.jl")
-include("display.jl")
-
-include("plot_recipes/plot_recipes.jl")
-
-include("deprecated.jl")
+# include("multidim/multidim.jl")
+# include("bisect.jl")
+# include("decorations/decorations.jl")
+#
+# include("parsing.jl")
+# include("display.jl")
+#
+# include("plot_recipes/plot_recipes.jl")
+#
+# include("deprecated.jl")
 
 """
     Region{T} = Union{Interval{T}, IntervalBox{T}}
 """
-const Region{T} = Union{Interval{T}, IntervalBox{T}}
+# const Region{T} = Union{Interval{T}, IntervalBox{T}}
 
 end # module IntervalArithmetic
