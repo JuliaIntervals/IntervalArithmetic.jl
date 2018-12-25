@@ -1,5 +1,6 @@
-import Base: !, &, |, convert
+import Base: !, &, |
 import Base: show
+import Base: convert, promote_rule
 
 # TODO: Check that both are not false
 struct IntervalBool
@@ -52,15 +53,37 @@ end
 function show(io::IO, b::IntervalBool)
     if b.can_be_true
         if b.can_be_false
-            print(io, "[true, false]")
+            print(io, "IntervalBool[ambiguous]")
         else
-            print(io, "[true]")
+            print(io, "IntervalBool[true]")
         end
     else
         if b.can_be_false
-            print(io, "[false]")
+            print(io, "IntervalBool[false]")
         else
-            print(io, "[]")
+            print(io, "IntervalBool[impossible]")
         end
     end
+end
+
+
+abstract type DisambiguationMode end
+struct NoDisambiguation <: DisambiguationMode end
+struct FalseOnAmbiguous <: DisambiguationMode end
+struct ErrorOnAmbiguous <: DisambiguationMode end
+
+promote_rule(::Type{ErrorOnAmbiguous}, ::Type{DM}) where {DM <: DisambiguationMode} = ErrorOnAmbiguous
+promote_rule(::Type{NoDisambiguation}, ::Type{FalseOnAmbiguous}) = FalseOnAmbiguous
+
+disambiguate(::Type{DM}, x, func_call) where {DM <: DisambiguationMode} = x
+disambiguate(::Type{NoDisambiguation}, b::IntervalBool, func_call) = b
+
+function disambiguate(::Type{FalseOnAmbiguous}, b::IntervalBool, func_call)
+    isambiguous(b) && return false
+    return convert(Bool, b)
+end
+
+function disambiguate(::Type{ErrorOnAmbiguous}, b::IntervalBool, func_call)
+    isambiguous(b) && throw(AmbiguousError(func_call))
+    return convert(Bool, b)
 end
