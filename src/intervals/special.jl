@@ -1,4 +1,4 @@
-# This file is part of the BaseIntervalArithmetic.jl package; MIT licensed
+# This file is part of the IntervalArithmetic.jl package; MIT licensed
 
 ## Definitions of special intervals and associated functions
 
