@@ -146,6 +146,10 @@ setprecision(Interval, Float64)
 
         @test intersect(a, hull(a,b)) == a
         @test union(a,b) == Interval(a.lo, b.hi)
+
+        # n-ary intersection
+        c = intersect(Interval(1.0, 2.0), Interval(-1.0, 5.0), Interval(1.8, 3.0))
+        @test c == Interval(1.8, 2.0)
     end
 
     @testset "Hull and union tests" begin
