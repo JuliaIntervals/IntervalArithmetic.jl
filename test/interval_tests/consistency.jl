@@ -148,8 +148,11 @@ setprecision(Interval, Float64)
         @test union(a,b) == Interval(a.lo, b.hi)
 
         # n-ary intersection
-        c = intersect(Interval(1.0, 2.0), Interval(-1.0, 5.0), Interval(1.8, 3.0))
-        @test c == Interval(1.8, 2.0)
+        @test intersect(Interval(1.0, 2.0),
+                        Interval(-1.0, 5.0),
+                        Interval(1.8, 3.0)) == Interval(1.8, 2.0)
+        @test intersect(a, emptyinterval(), b) == emptyinterval()
+        @test intersect(0..1, 3..4, 0..1, 0..1) == emptyinterval()
     end
 
     @testset "Hull and union tests" begin
