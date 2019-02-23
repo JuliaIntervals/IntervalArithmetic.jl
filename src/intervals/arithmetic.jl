@@ -162,8 +162,8 @@ function inv(a::Interval{T}) where T<:Real
     isempty(a) && return emptyinterval(a)
 
     if zero(T) ∈ a
-        a.lo < zero(T) == a.hi && return @round(-Inf, inv(a.lo))
-        a.lo == zero(T) < a.hi && return @round(inv(a.hi), Inf)
+        a.lo < zero(T) == a.hi && return @round(T(-Inf), inv(a.lo))
+        a.lo == zero(T) < a.hi && return @round(inv(a.hi), T(Inf))
         a.lo < zero(T) < a.hi && return entireinterval(T)
         a == zero(a) && return emptyinterval(T)
     end
@@ -195,14 +195,14 @@ function /(a::Interval{T}, b::Interval{T}) where T<:Real
 
         if iszero(b.lo)
 
-            a.lo >= zero(T) && return @round(a.lo/b.hi, Inf)
-            a.hi <= zero(T) && return @round(-Inf, a.hi/b.hi)
+            a.lo >= zero(T) && return @round(a.lo/b.hi, T(Inf))
+            a.hi <= zero(T) && return @round(T(-Inf), a.hi/b.hi)
             return entireinterval(S)
 
         elseif iszero(b.hi)
 
-            a.lo >= zero(T) && return @round(-Inf, a.lo/b.lo)
-            a.hi <= zero(T) && return @round(a.hi/b.lo, Inf)
+            a.lo >= zero(T) && return @round(T(-Inf), a.lo/b.lo)
+            a.hi <= zero(T) && return @round(a.hi/b.lo, T(Inf))
             return entireinterval(S)
 
         else
@@ -218,10 +218,10 @@ function extended_div(a::Interval{T}, b::Interval{T}) where T<:Real
     S = typeof(a.lo / b.lo)
     if 0 < b.hi && 0 > b.lo && 0 ∉ a
         if a.hi < 0
-            return (Interval(-Inf, a.hi / b.hi), Interval(a.hi / b.lo, Inf))
+            return (Interval(T(-Inf), a.hi / b.hi), Interval(a.hi / b.lo, T(Inf)))
 
         elseif a.lo > 0
-            return (Interval(-Inf, a.lo / b.lo), Interval(a.lo / b.hi, Inf))
+            return (Interval(T(-Inf), a.lo / b.lo), Interval(a.lo / b.hi, T(Inf)))
 
         end
     elseif 0 ∈ a && 0 ∈ b
@@ -432,13 +432,13 @@ function mid(a::Interval{T}) where T
     a.lo == -∞ && return nextfloat(a.lo)
     a.hi == +∞ && return prevfloat(a.hi)
 
-    midpoint = 0.5 * (a.lo + a.hi)
+    midpoint = (a.lo + a.hi) / 2
     isfinite(midpoint) && return midpoint
     #= Fallback in case of overflow: a.hi + a.lo == +∞ or a.hi + a.lo == -∞.
        This case can not be the default one as it does not pass several
        IEEE1788-2015 tests for small floats.
     =#
-    return 0.5 * a.lo + 0.5 * a.hi
+    return a.lo / 2 + a.hi / 2
 end
 
 mid(a::Interval{Rational{T}}) where T = (1//2) * (a.lo + a.hi)
