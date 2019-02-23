@@ -100,7 +100,8 @@ end
 """
 function interval(a::Real, b::Real)
     if !is_valid_interval(a, b)
-        throw(ArgumentError("`[$a, $b]` is not a valid interval. Need `a ≤ b` to construct `interval(a, b)`."))
+        # throw(ArgumentError("`[$a, $b]` is not a valid interval. Need `a ≤ b` to construct `interval(a, b)`."))
+        throw(ArgumentError("Invalid interval: need `a ≤ b` to construct `interval(a, b)`."))
     end
 
     return Interval(a, b)
