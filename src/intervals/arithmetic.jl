@@ -403,8 +403,8 @@ function mid(a::Interval{T}, α) where T
 
     isempty(a) && return convert(T, NaN)
 
-    lo = (a.lo == -∞ ? nextfloat(-∞) : a.lo)
-    hi = (a.hi == +∞ ? prevfloat(+∞) : a.hi)
+    lo = (a.lo == -∞ ? nextfloat(T(-∞)) : a.lo)
+    hi = (a.hi == +∞ ? prevfloat(T(+∞)) : a.hi)
 
     β = convert(T, α)
 
