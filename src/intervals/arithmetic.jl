@@ -394,7 +394,7 @@ The default is the true midpoint at `α = 0.5`.
 
 Assumes 0 ≤ α ≤ 1.
 
-Warning: if the parameter `α = 0.5` is explicitely set, the behavior differs
+Warning: if the parameter `α = 0.5` is explicitly set, the behavior differs
 from the default case if the provided `Interval` is not finite, since when
 `α` is provided `mid` simply replaces `+∞` (respectively `-∞`) by `prevfloat(+∞)`
 (respecively `nextfloat(-∞)`) for the computation of the intermediate point.
@@ -406,13 +406,15 @@ function mid(a::Interval{T}, α) where T
     lo = (a.lo == -∞ ? nextfloat(-∞) : a.lo)
     hi = (a.hi == +∞ ? prevfloat(+∞) : a.hi)
 
-    midpoint = α * (hi - lo) + lo
+    β = convert(T, α)
+
+    midpoint = β * (hi - lo) + lo
     isfinite(midpoint) && return midpoint
     #= Fallback in case of overflow: hi - lo == +∞.
        This case can not be the default one as it does not pass several
        IEEE1788-2015 tests for small floats.
     =#
-    return (1-α) * lo + α * hi
+    return (1 - β) * lo + β * hi
 end
 
 """
