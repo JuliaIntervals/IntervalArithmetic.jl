@@ -398,7 +398,7 @@ setprecision(Interval, Float64)
                 @inferred op(a, b)
             end
 
-            for op in (sin, cos, exp, log, tan, abs)
+            for op in (sin, cos, exp, log, tan, abs, mid, diam)
                 @inferred op(a)
             end
         end
