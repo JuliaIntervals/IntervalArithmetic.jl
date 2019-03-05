@@ -65,8 +65,9 @@ big(X::IntervalBox) = big.(X)
 ## set operations
 
 # TODO: Update to use generator
-⊆(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) where {N,T} =
-    all(X.v .⊆ Y.v)
+⊆(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) where {N,T} = all(X .⊆ Y)
+⊂(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) where {N,T} = all(X .⊂ Y)
+⊃(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) where {N,T} = all(X .⊃ Y)
 
 ∩(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) where {N,T} =
     IntervalBox(X.v .∩ Y.v)

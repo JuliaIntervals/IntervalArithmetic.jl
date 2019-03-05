@@ -37,7 +37,16 @@ let X, A  # avoid problems with global variables
 
     @test A ⊆ B
     @test A.v ⊆ B
+    @test A ⊂ B.v
+    @test A ⊂ B
+    @test A.v ⊂ B
     @test A ⊆ B.v
+    @test B ⊇ A
+    @test B.v ⊇ A
+    @test B ⊇ A.v
+    @test B ⊃ A
+    @test B.v ⊃ A
+    @test B ⊃ A.v
 
     @test A ∩ B == A
     @test A.v ∩ B == A
