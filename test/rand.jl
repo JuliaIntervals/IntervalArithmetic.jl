@@ -1,5 +1,6 @@
 using IntervalArithmetic
 using Test
+using StaticArrays
 
 @testset "rand tests" begin
 
