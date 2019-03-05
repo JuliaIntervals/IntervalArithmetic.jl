@@ -391,15 +391,21 @@ setprecision(Interval, Float64)
     @testset "Type stability" begin
         for T in (Float32, Float64, BigFloat)
 
-            x = Interval{T}(3, 4)
-            y = Interval{T}(5, 6)
+            xs = [3..4, 0..4, 0..0, -4..0, -4..4, -Inf..4, 4..Inf, -Inf..Inf]
 
-            for op in (+, -, *, /, atan)
-                @inferred op(a, b)
-            end
+            for x in xs
+                for y in xs
+                    xx = Interval{T}(x)
+                    yy = Interval{T}(y)
 
-            for op in (sin, cos, exp, log, tan, abs, mid, diam)
-                @inferred op(a)
+                    for op in (+, -, *, /, atan)
+                        @inferred op(x, y)
+                    end
+                end
+
+                for op in (sin, cos, exp, log, tan, abs, mid, diam)
+                    @inferred op(x)
+                end
             end
         end
     end
