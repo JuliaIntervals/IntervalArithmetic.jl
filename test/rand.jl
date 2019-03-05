@@ -9,9 +9,9 @@ using StaticArrays
         @test rand(X) ∈ X
     end
 
-    X = IntervalBox(3..4, 5..6)
+    Y = IntervalBox(3..4, 5..6)
     for i in 1:100
-        @test rand(X) ∈ X
+        @test rand(Y) ∈ Y
     end
 
     for T in (Float32, Float64, BigFloat)
@@ -19,7 +19,7 @@ using StaticArrays
         @test rand(X) isa T
 
         Y = IntervalBox(X, X)
-        @test rand(X) isa SVector{2,T}
+        @test rand(Y) isa SVector{2,T}
     end
 
 end
