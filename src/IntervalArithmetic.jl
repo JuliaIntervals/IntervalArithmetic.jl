@@ -33,7 +33,7 @@ import Base:
     expm1, log1p,
     precision,
     isfinite, isnan, isinf, iszero,
-    abs, abs2, 
+    abs, abs2,
     show,
     isinteger, setdiff,
     parse, hash
@@ -112,6 +112,7 @@ include("multidim/multidim.jl")
 include("bisect.jl")
 include("decorations/decorations.jl")
 
+include("rand.jl")
 include("parsing.jl")
 include("display.jl")
 

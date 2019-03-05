@@ -15,6 +15,8 @@ setformat(:full)
 include("interval_tests/intervals.jl")
 include("decoration_tests/decoration_tests.jl")
 
+include("rand.jl")
+
 # Display tests:
 include("display_tests/display.jl")
 
