@@ -18,6 +18,5 @@ function overlap(a::Interval, b::Interval)
 end
 
 function overlap_dec(xx::DecoratedInterval , yy::DecoratedInterval)
-    ==(xx ,yy) && return "equals"
     return overlap(interval_part(xx) , interval_part(yy))
 end
