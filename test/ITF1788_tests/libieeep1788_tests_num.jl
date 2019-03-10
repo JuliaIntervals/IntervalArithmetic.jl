@@ -136,6 +136,34 @@ end
     @test radius(DecoratedInterval(Interval(-Inf, 1.2), trv)) == Inf
 end
 
+@testset "minimal_mid_rad_test" begin
+    @test midpoint_radius(Interval(-Inf,Inf)) == (0, Inf)
+    @test midpoint_radius(Interval(-0x1.fffffffffffffp+1023,0x1.fffffffffffffp+1023)) == (0.0, 0x1.fffffffffffffp+1023)
+    @test midpoint_radius(Interval(0.0,2.0)) == (1.0, 1.0)
+    @test midpoint_radius(Interval(2.0,2.0)) == (2.0, 0.0)
+    @test midpoint_radius(Interval(-2.0,2.0)) == (0.0, 2.0)
+    @test midpoint_radius(Interval(0.0, Inf)) == (0x1.fffffffffffffp+1023, Inf)
+    @test midpoint_radius(Interval(-Inf,1.2)) == (-0x1.fffffffffffffp+1023, Inf)
+    @test midpoint_radius(Interval(-0x0.0000000000002p-1022,0x0.0000000000001p-1022)) == (0.0, 0x0.0000000000002p-1022)
+    @test midpoint_radius(Interval(-0x0.0000000000001p-1022,0x0.0000000000002p-1022)) == (0.0, 0x0.0000000000002p-1022)
+    @test midpoint_radius(Interval(0x1.fffffffffffffp+1022,0x1.fffffffffffffp+1023)) == (0x1.7ffffffffffffp+1023, 0x1.0p+1022)
+    @test midpoint_radius(Interval(0x0.0000000000001p-1022,0x0.0000000000003p-1022)) == (0x0.0000000000002p-1022, 0x0.0000000000001p-1022)
+end
+
+@testset "minimal_mid_rad_dec_test" begin
+    @test midpoint_radius(DecoratedInterval(Interval(-Inf,Inf),def)) ==(0.0, Inf)
+    @test midpoint_radius(DecoratedInterval(Interval(-0x1.fffffffffffffp+1023,0x1.fffffffffffffp+1023),trv)) == (0.0, 0x1.fffffffffffffp+1023)
+    @test midpoint_radius(DecoratedInterval(Interval(0.0,2.0),com)) ==(1.0, 1.0)
+    @test midpoint_radius(DecoratedInterval(Interval(2.0,2.0),dac)) ==(2.0, 0.0)
+    @test midpoint_radius(DecoratedInterval(Interval(-2.0,2.0),trv)) ==(0.0, 2.0)
+    @test midpoint_radius(DecoratedInterval(Interval(0.0,Inf),trv)) ==(0x1.fffffffffffffp+1023, Inf)
+    @test midpoint_radius(DecoratedInterval(Interval(-Inf,1.2),trv)) ==(-0x1.fffffffffffffp+1023, Inf)
+    @test midpoint_radius(DecoratedInterval(Interval(-0x0.0000000000002p-1022,0x0.0000000000001p-1022),trv)) == (0.0, 0x0.0000000000002p-1022)
+    @test midpoint_radius(DecoratedInterval(Interval(-0x0.0000000000001p-1022,0x0.0000000000002p-1022),trv)) == (0.0, 0x0.0000000000002p-1022)
+    @test midpoint_radius(DecoratedInterval(Interval(0x1.fffffffffffffp+1022,0x1.fffffffffffffp+1023),trv)) == (0x1.7ffffffffffffp+1023, 0x1.0p+1022)
+    @test midpoint_radius(DecoratedInterval(Interval(0x0.0000000000001p-1022,0x0.0000000000003p-1022),trv)) == (0x0.0000000000002p-1022, 0x0.0000000000001p-1022)
+end
+
 @testset "minimal_wid_test" begin
     @test diam(Interval(2.0, 2.0)) == 0.0
     @test diam(Interval(1.0, 2.0)) == 1.0

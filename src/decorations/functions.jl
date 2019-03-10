@@ -36,7 +36,7 @@ in(x::T, a::DecoratedInterval) where T<:Real = in(x, interval_part(a))
 
 ## scalar functions: mig, mag and friends
 scalar_functions = (
-    :mig, :mag, :inf, :sup, :mid, :diam, :radius, :dist, :eps
+    :mig, :mag, :inf, :sup, :mid, :diam, :radius, :midpoint_radius, :dist, :eps
 )
 
 for f in scalar_functions
