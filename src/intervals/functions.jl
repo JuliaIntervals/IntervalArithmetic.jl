@@ -219,6 +219,29 @@ function ^(a::Interval{BigFloat}, x::Interval)
     hull(lo1, hi1)
 end
 
+function nthroot(a::Interval{T}, n::Integer) where T
+    q = 1//n
+    n == 1 && return a
+    n < 0 && a == zero(a) && return emptyinterval(a)
+    iseven(n) && return(^(a, q))
+    # n is odd
+    isentire(a) && return a
+    isempty(a) && return a
+    if n > 0
+        a.lo ≥ 0 && return ^(a, q)
+        a.hi ≤ 0 && return -(^(-a,q))
+        a.lo < 0 && a.hi > 0 && return ∪(-(^(0 .. -a.lo , q)) , ^(0 .. a.hi , q)) 
+
+    else
+        if a.lo ≥ 0
+            return ^(a,q)
+        elseif a.hi ≤ 0
+            return -(^(-a,q))
+        else
+            return entireinterval(a)
+        end
+    end
+end
 
 function sqrt(a::Interval{T}) where T
     domain = Interval{T}(0, Inf)
