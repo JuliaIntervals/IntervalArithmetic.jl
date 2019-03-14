@@ -122,8 +122,6 @@ include("display.jl")
 
 include("plot_recipes/plot_recipes.jl")
 
-include("deprecated.jl")
-
 """
     Region{T} = Union{Interval{T}, IntervalBox{T}}
 """
