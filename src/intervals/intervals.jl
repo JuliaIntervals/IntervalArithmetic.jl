@@ -39,7 +39,7 @@ for (Flavor, Supertype) in [(:SetBasedFlavoredInterval, AbstractNonRealFlavor), 
             function $Flavor{T}(a::Real, b::Real) where {T<:Real}
                 !validity_check && return new(a, b)
                 !is_valid_interval(a, b) && throw(ArgumentError("Interval of form [$a, $b] not allowed. Must have a ≤ b to construct interval(a, b)."))
-                
+
                 new(a, b)
             end
         end
@@ -66,6 +66,7 @@ for (Flavor, Supertype) in [(:SetBasedFlavoredInterval, AbstractNonRealFlavor), 
     @eval $flavordef
 end
 
+# TODO Properly test that this works
 if haskey(ENV, "IA_DEFAULT_FLAVOR")
     @eval quote
         const Interval = $(ENV["IA_DEFAULT_FLAVOR"])
@@ -83,7 +84,6 @@ To change this set the environnment variable `ENV["IA_DEFAULT_FLAVOR"]` to a
 in a REPL in pkg mode).
 """
 @doc defaultdoc Interval
-# TODO Properly test that this works
 
 """
     is_valid_interval(a::Real, b::Real)
@@ -121,7 +121,7 @@ end
 if `-∞ <= a <= b <= ∞`, using the (non-exported) `is_valid_interval` function.
 If so, then an `Interval(a, b)` object is returned; if not, then an error is thrown.
 
-Not that the interval created is of the default interval type. See the documentation
+Note that the interval created is of the default interval type. See the documentation
 of `Interval` for more information about the default interval type.
 """
 function interval(a::Real, b::Real)

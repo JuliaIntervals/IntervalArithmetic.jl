@@ -116,4 +116,4 @@ end
 # # \left( |x|^p \right)^{1/p}.
 # function norm(z::Complex{T}, p=2) where T<:Interval
 #     return (abs(z)^(p))^(1 / p)
-# end 
+# end
