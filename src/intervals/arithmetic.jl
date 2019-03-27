@@ -354,9 +354,9 @@ function sign(a::Interval)
     return Interval(sign(a.lo), sign(a.hi))
 end
 
-copysign(a::Interval, b::Interval) = a*sign(b)
-copysign(a::Real, b::Interval) = a*sign(b)
-copysign(a::Signed, b::Interval) = a*sign(b)
+copysign(a::Interval, b::Interval) = abs(a)*sign(b)
+copysign(a::Real, b::Interval) = abs(a)*sign(b)
+copysign(a::Signed, b::Interval) = abs(a)*sign(b)
 
 # RoundTiesToEven is an alias of `RoundNearest`
 const RoundTiesToEven = RoundNearest
