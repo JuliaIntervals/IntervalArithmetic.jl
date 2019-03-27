@@ -66,6 +66,8 @@ for (Flavor, Supertype) in [(:SetBasedFlavoredInterval, AbstractNonRealFlavor), 
     @eval $flavordef
 end
 
+const supported_flavors = (SetBasedFlavoredInterval, GenericFlavoredInterval)
+
 # TODO Properly test that this works
 if haskey(ENV, "IA_DEFAULT_FLAVOR")
     @eval quote
