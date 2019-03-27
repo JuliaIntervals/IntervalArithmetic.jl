@@ -92,11 +92,7 @@ Check if `(a, b)` constitute a valid interval.
 """
 function is_valid_interval(a::Real, b::Real)
     if isnan(a) || isnan(b)
-        if isnan(a) && isnan(b)
-            return true
-        else
-            return false
-        end
+        return false
     end
 
     if a > b
@@ -107,6 +103,7 @@ function is_valid_interval(a::Real, b::Real)
         end
     end
 
+    # TODO Check if this is necessary
     if a == Inf || b == -Inf
         return false
     end
@@ -144,7 +141,9 @@ end
 
 
 ## Include files
-include("special.jl")
+include("common/special.jl")
+include("flavors/special.jl")
+
 include("macros.jl")
 include("rounding_macros.jl")
 include("rounding.jl")
@@ -163,7 +162,8 @@ include("complex.jl")
 
 Create the interval `[a, b]` of the default interval type.
 
-See the documentation of `Interval` for more information about the default interval type.
+See the documentation of `Interval` for more information about the default
+interval type.
 """
 function ..(a::T, b::S) where {T, S}
     interval(atomic(Interval{T}, a).lo, atomic(Interval{S}, b).hi)

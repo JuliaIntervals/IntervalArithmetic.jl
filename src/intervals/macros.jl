@@ -1,7 +1,12 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
-"""The `@interval` macro is the main method to create an interval.
-It converts each expression into a narrow interval that is guaranteed to contain the true value passed by the user in the one or two expressions passed to it.
+"""
+    @interval
+
+Macro creating an interval.
+
+It converts each expression into a narrow interval that is guaranteed to contain
+the true value passed by the user in the one or two expressions passed to it.
 When passed two expressions, it takes the hull of the resulting intervals
 to give a guaranteed containing interval.
 
@@ -15,28 +20,42 @@ Examples:
 
     @interval(1/3^2)
 ```
+
+Note that the returned interval is of the default flavor. See the documentation
+of `Interval` for more information about the defaul interval falvor.
 """
 macro interval(expr1, expr2...)
     make_interval(:(parameters.precision_type), expr1, expr2)
 end
 
-"The `@floatinterval` macro constructs an interval with `Float64` entries."
+"""
+    @floatinterval
+
+Construct an interval with `Float64` bounds from an expression.
+"""
 macro floatinterval(expr1, expr2...)
     make_interval(Float64, expr1, expr2)
 end
 
-"The `@biginterval` macro constructs an interval with `BigFloat` entries."
+"""
+    @biginterval
+
+Construct an interval with `BigFloat` bounds from an expression.
+"""
 macro biginterval(expr1, expr2...)
     make_interval(BigFloat, expr1, expr2)
 end
 
 
 
-"""`transform` transforms a string by applying the function `f` and type
+"""
+    transform(expr, f, T)
+
+Transform a string by applying the function `f` and type
 `T` to each argument, i.e. `:(x+y)` is transformed to `:(f(T, x) + f(T, y))`
 """
 transform(x::Symbol, f, T) = :($f($T, $(esc(x))))   # use if x is not an expression
-transform(x, f, T) = :($f($T, $x))   # use if x is not an
+transform(x, f, T) = :($f($T, $x))
 
 function transform(expr::Expr, f::Symbol, T)
 
@@ -73,20 +92,22 @@ function transform(expr::Expr, f::Symbol, T)
 end
 
 
-# Called by interval and floatinterval macros
-"""`make_interval` does the hard work of taking expressions
-and making each literal (0.1, 1, etc.) into a corresponding interval construction,
-by calling `transform`."""
+"""
+    make_interval(T, expr1, expr2)
+
+Take expressions and make each literal (0.1, 1, etc.) into a corresponding
+interval construction.
+"""
 function make_interval(T, expr1, expr2)
     # @show expr1, expr2
 
-    expr1 = transform(expr1, :atomic, :(Interval{$T}))
+    expr1 = transform(expr1, :atomic, :($Interval{$T}))
 
     if isempty(expr2)  # only one argument
         return :(Interval($expr1))
     end
 
-    expr2 = transform(expr2[1], :atomic, :(Interval{$T}))
+    expr2 = transform(expr2[1], :atomic, :($Interval{$T}))
 
-    :(interval(($expr1).lo, ($expr2).hi))
+    :(interval(inf($expr1), sup($expr2)))
 end
