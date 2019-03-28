@@ -3,4 +3,5 @@
 cases
 =#
 isfinite(x::Interval) = isfinite(x.lo) && isfinite(x.hi)
+isinf(x::Interval) = isentire(x)
 iszero(x::Interval) = iszero(x.lo) && iszero(x.hi)

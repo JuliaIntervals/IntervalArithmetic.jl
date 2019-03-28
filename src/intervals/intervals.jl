@@ -48,7 +48,7 @@ for (Flavor, Supertype) in [(:SetBasedFlavoredInterval, AbstractNonRealFlavor), 
         $Flavor(a::T, b::T) where {T<:Real} = $Flavor{T}(a, b)
         $Flavor(a::T) where {T<:Real} = $Flavor(a, a)
         $Flavor(a::Tuple) = $Flavor(a...)
-        $Flavor(a::T, b::S) where {T<:Real, S<:Real} = $Flavor(promote(a,b)...)
+        $Flavor(a::T, b::S) where {T<:Real, S<:Real} = $Flavor(promote(a, b)...)
 
         ## Concrete constructors for Interval, to effectively deal only with Float64,
         # BigFloat or Rational{Integer} intervals.
@@ -63,6 +63,7 @@ for (Flavor, Supertype) in [(:SetBasedFlavoredInterval, AbstractNonRealFlavor), 
         $Flavor{T}(x::$Flavor) where T = atomic($Flavor{T}, x)
     end
 
+    # TODO Add documentations for flavors
     @eval $flavordef
 end
 
