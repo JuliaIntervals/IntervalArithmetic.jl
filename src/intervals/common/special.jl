@@ -2,7 +2,6 @@
 
 ## Definitions of special intervals and associated functions
 
-## Empty interval:
 """
     `emptyinterval()`
 
@@ -14,16 +13,16 @@ Note that if the type of the returned interval can not be inferred from the
 argument given, the default interval flavor will be used. See the documentation
 of `Interval` for more information about the default interval falvor.
 """
-emptyinterval(::Type{F}) where {T, F <: AbstractFlavor{T}} = F{T}(Inf, -Inf)
+emptyinterval(::Type{F}) where {T, F <: AbstractFlavor{T}} = F(Inf, -Inf)
 emptyinterval(::F) where {T, F <: AbstractFlavor{T}} = emptyinterval(F)
 
-emptyinterval(::Type{T}) where T = emtpyinterval(Interval{T})
-emptyinterval() = emptyinterval(Interval{Float64}))
+emptyinterval(::Type{T}) where T = emptyinterval(Interval{T})
+emptyinterval() = emptyinterval(Interval{Float64})
+
 const ∅ = emptyinterval(Float64)
 
 const ∞ = Inf
 
-## Entire interval:
 """
     ℝ()
 
@@ -39,7 +38,7 @@ Note that if the type of the returned interval can not be inferred from the
 argument given, the default interval flavor will be used. See the documentation
 of `Interval` for more information about the default interval falvor.
 """
-ℝ(::Type{F}) where {T, F <: AbstractFlavor{T}} = F{T}(-Inf, Inf)
+ℝ(::Type{F}) where {T, F <: AbstractFlavor{T}} = F(-Inf, Inf)
 ℝ(::F) where {T, F <: AbstractFlavor{T}} = ℝ(F)
 
 ℝ(::Type{T}) where T = Interval{T}(-Inf, Inf)

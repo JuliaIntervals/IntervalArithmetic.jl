@@ -1,7 +1,6 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
 mutable struct IntervalParameters
-
     precision_type::Type
     precision::Int
     rounding::Symbol
@@ -23,8 +22,6 @@ function big53(a::Interval{Float64})
 end
 
 function big53(x::Float64)
-    # BigFloat(x, 53)  # in Julia v0.6
-
     setprecision(53) do
         BigFloat(x)
     end
@@ -32,7 +29,6 @@ end
 
 
 setprecision(::Type{Interval}, ::Type{Float64}) = parameters.precision_type = Float64
-# does not change the BigFloat precision
 
 
 function setprecision(::Type{Interval}, ::Type{T}, prec::Integer) where T<:AbstractFloat
@@ -73,6 +69,5 @@ function Base.setrounding(f::Function, ::Type{Rational{T}},
     setrounding(f, float(Rational{T}), rounding_mode)
 end
 
-float(x::Interval{T}) where T = atomic( Interval{float(T)}, x)  # https://github.com/dpsanders/IntervalArithmetic.jl/issues/174
-
+float(x::Interval{T}) where T = atomic( Interval{float(T)}, x)
 big(x::Interval) = atomic(Interval{BigFloat}, x)

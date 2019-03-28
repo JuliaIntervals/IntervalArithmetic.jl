@@ -20,11 +20,6 @@ convert(::Type{F}, x::T) where {T, F<:AbstractFlavor{T}} = F(x)
 convert(::Type{F}, x::F) where {F<:AbstractFlavor} = x
 convert(::Type{F}, x::G) where {F<:AbstractFlavor, G<:AbstractFlavor} = atomic(F, x)
 
-function convert(::Type{F}, x::Real) where {F<:AbstractFloat}
-    T = typeof(float(x))
-    convert(F{T}, x)
-end
-
 """
     atomic(::Type{<:Interval}, x)
 
@@ -114,8 +109,10 @@ function atomic(::Type{F}, x::S) where {T, S<:AbstractFloat, F<:AbstractFlavor{T
     return atomic(F, xrat)
 end
 
-# TODO Not sure that this is correct.
-atomic(::Type{F}, x::Irrational{S}) where {T, S, F<:AbstractFlavor{T}} = atomic(F, x)
+function atomic(::Type{F}, x::Irrational{S}) where {T, S, F<:AbstractFlavor{Irrational{T}}}
+    Flavor = flavortype(F)
+    return atomic(F{Float64}, x)
+end
 
 atomic(::Type{F}, x::AbstractFlavor) where {T, F<:AbstractFlavor{T}} =
     F( T(inf(x), RoundDown), T(sup(x), RoundUp) )
@@ -127,10 +124,9 @@ atomic(::Type{F}, x::AbstractFlavor) where {T, F<:AbstractFlavor{T}} =
 
 
 # Rational intervals
-# TODO for convenience the intermediate interval type is of default falvor
-# Maybe some sort of `BareInterval` could be good for such things
 function atomic(::Type{F}, x::Irrational) where {T<:Integer, F<:AbstractFlavor{Rational{T}}}
-    a = float(atomic(Interval{BigFloat}, x))
+    Flavor = flavortype(F)
+    a = float(atomic(Flavor{BigFloat}, x))
     atomic(F, a)
 end
 

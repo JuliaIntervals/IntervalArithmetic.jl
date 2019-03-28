@@ -61,6 +61,9 @@ for (Flavor, Supertype) in [(:SetBasedFlavoredInterval, AbstractNonRealFlavor), 
 
         $Flavor{T}(x) where T = $Flavor(convert(T, x))
         $Flavor{T}(x::$Flavor) where T = atomic($Flavor{T}, x)
+
+        # Flavor without parametrization, needed for conversion/promotion
+        flavortype(::Type{$Flavor{T}}) where T = $Flavor
     end
 
     # TODO Add documentations for flavors
