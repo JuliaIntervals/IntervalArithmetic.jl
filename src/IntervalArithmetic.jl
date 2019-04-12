@@ -62,7 +62,7 @@ export
     midpoint_radius, interval_from_midpoint_radius,
     RoundTiesToEven, RoundTiesToAway,
     cancelminus, cancelplus, isunbounded,
-    .., @I_str, ±, rsqrt,
+    .., @I_str, ±, reciprocal_sqrt,
     pow, extended_div,
     setformat, @format
 

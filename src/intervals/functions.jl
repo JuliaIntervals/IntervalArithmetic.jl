@@ -306,7 +306,8 @@ for f in (:log, :log2, :log10, :log1p)
         end
 end
 
-function rsqrt(a::Interval{T}) where T
+#computes the reciprocal of square root of an Interval
+function reciprocal_sqrt(a::Interval{T}) where T
     x = sqrt(a)
     isempty(x) && return emptyinterval(x)
     x.lo == zero(T) < x.hi && return @round(inv(x.hi), T(Inf))
