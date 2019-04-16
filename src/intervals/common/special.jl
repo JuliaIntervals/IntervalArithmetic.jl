@@ -13,8 +13,9 @@ Note that if the type of the returned interval can not be inferred from the
 argument given, the default interval flavor will be used. See the documentation
 of `Interval` for more information about the default interval falvor.
 """
-emptyinterval(::Type{F}) where {T, F <: AbstractFlavor{T}} = F(Inf, -Inf)
-emptyinterval(::F) where {T, F <: AbstractFlavor{T}} = emptyinterval(F)
+emptyinterval(::Type{F}) where {F <: AbstractFlavor} = F(Inf, -Inf)
+emptyinterval(::F) where {F <: AbstractFlavor} = emptyinterval(F)
+emptyinterval(::Type{Complex{F}}) where {F <: AbstractFlavor} = complex(emptyinterval(F), emptyinterval(F))
 
 emptyinterval(::Type{T}) where T = emptyinterval(Interval{T})
 emptyinterval() = emptyinterval(Interval{Float64})

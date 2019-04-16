@@ -1,6 +1,5 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
-
 """
     in(x, a)
     ∈(x, a)
@@ -8,15 +7,14 @@
 Checks if the number `x` is a member of the interval `a`, treated as a set.
 Corresponds to `isMember` in the ITF-1788 Standard.
 """
-function in(x::T, a::Interval) where T<:Real
+function in(x::Real, a::AbstractFlavor)
     isinf(x) && return false
     a.lo <= x <= a.hi
 end
 
-in(x::Interval, y::Interval) = throw(ArgumentError("$x ∈ $y is not defined"))
-
-in(x::T, a::Complex{<:Interval}) where T<:Real = x ∈ real(a) && 0 ∈ imag(a)
-in(x::Complex{T}, a::Complex{<:Interval}) where T<:Real = real(x) ∈ real(a) && imag(x) ∈ imag(a)
+in(x::AbstractFlavor, y::AbstractFlavor) = throw(ArgumentError("$x ∈ $y is not defined"))
+in(x::Real, a::Complex{F}) where {F <: AbstractFlavor} = x ∈ real(a) && 0 ∈ imag(a)
+in(x::Complex{T}, a::Complex{F}) where {T <: Real, F <: AbstractFlavor} = real(x) ∈ real(a) && imag(x) ∈ imag(a)
 
 
 
@@ -26,39 +24,34 @@ in(x::Complex{T}, a::Complex{<:Interval}) where T<:Real = real(x) ∈ real(a) &&
 
 Checks if all the points of the interval `a` are within the interval `b`.
 """
-function ⊆(a::Interval, b::Interval)
+function ⊆(a::AbstractFlavor, b::AbstractFlavor)
     isempty(a) && return true
     b.lo ≤ a.lo && a.hi ≤ b.hi
 end
 
-function ⊂(a::Interval, b::Interval)
+function ⊂(a::AbstractFlavor, b::AbstractFlavor)
     a == b && return false
-    a ⊆ b
+    return a ⊆ b
 end
 
-function ⊇(a::Interval, b::Interval)
-    b ⊆ a
-end
-
-function ⊃(a::Interval, b::Interval)
-    b ⊂ a
-end
+⊇(a::AbstractFlavor, b::AbstractFlavor) = b ⊆ a
+⊃(a::AbstractFlavor, b::AbstractFlavor) = b ⊂ a
 
 # isinterior
-function isinterior(a::Interval, b::Interval)
+function isinterior(a::AbstractFlavor, b::AbstractFlavor)
     isempty(a) && return true
-    islessprime(b.lo, a.lo) && islessprime(a.hi, b.hi)
+    return islessprime(b.lo, a.lo) && islessprime(a.hi, b.hi)
 end
 const ⪽ = isinterior  # \subsetdot
 
 # Disjoint:
-function isdisjoint(a::Interval, b::Interval)
+function isdisjoint(a::AbstractFlavor, b::AbstractFlavor)
     (isempty(a) || isempty(b)) && return true
-    islessprime(b.hi, a.lo) || islessprime(a.hi, b.lo)
+    return islessprime(b.hi, a.lo) || islessprime(a.hi, b.lo)
 end
 
-function isdisjoint(a::Complex{<:Interval}, b::Complex{<:Interval})
-    isdisjoint(real(a),real(b)) || isdisjoint(imag(a),imag(b))
+function isdisjoint(a::Complex{F}, b::Complex{F}) where {F <: AbstractFlavor}
+    return isdisjoint(real(a),real(b)) || isdisjoint(imag(a),imag(b))
 end
 
 
@@ -71,27 +64,18 @@ Returns the intersection of the intervals `a` and `b`, considered as
 (extended) sets of real numbers. That is, the set that contains
 the points common in `a` and `b`.
 """
-function intersect(a::Interval{T}, b::Interval{T}) where T
-
-    x = Interval(max(a.lo, b.lo), min(a.hi, b.hi))
-
-    if x.lo > x.hi
-        return emptyinterval(T)
-    end
-
-    return x
+function intersect(a::F, b::F) where {F <: AbstractFlavor}
+    isdisjoint(a, b) && return emptyinterval(F)
+    return Interval(max(a.lo, b.lo), min(a.hi, b.hi))
 end
 # Specific promotion rule for intersect:
-intersect(a::Interval{T}, b::Interval{S}) where {T,S} =
+intersect(a::F, b::G) where {F <: AbstractFlavor, G <: AbstractFlavor} =
     intersect(promote(a, b)...)
 
-function intersect(a::Complex{Interval{T}},b::Complex{Interval{T}}) where T
-    isdisjoint(a,b) && return complex(emptyinterval(T),emptyinterval(T)) # for type stability
-
-    complex(intersect(real(a),real(b)),intersect(imag(a),imag(b)))
+function intersect(a::Complex{F}, b::Complex{F}) where {F <: AbstractFlavor}
+    isdisjoint(a, b) && return emptyinterval(Complex{F})
+    return complex(intersect(real(a), real(b)), intersect(imag(a), imag(b)))
 end
-intersect(a::Interval{Complex{T}}, b::Interval{Complex{S}}) where {T,S} =
-    intersect(promote(a, b)...)
 
 """
     intersect(a::Interval{T}...) where T
@@ -103,11 +87,11 @@ This function is applicable to any number of input intervals, as in
 If your use case needs to splat the input, as in `intersect(a...)`, consider
 `reduce(intersect, a)` instead, because you save the cost of splatting.
 """
-function intersect(a::Interval{T}...) where T
+function intersect(a::F...) where {F <: AbstractFlavor}
     low = maximum(broadcast(ai -> ai.lo, a))
     high = minimum(broadcast(ai -> ai.hi, a))
 
-    !is_valid_interval(low, high) && return emptyinterval(T)
+    !is_valid_interval(low, high) && return emptyinterval(F)
     return Interval(low, high)
 end
 
@@ -119,13 +103,9 @@ Returns the "interval hull" of the intervals `a` and `b`, considered as
 (extended) sets of real numbers, i.e. the smallest interval that contains
 all of `a` and `b`.
 """
-hull(a::Interval, b::Interval) = Interval(min(a.lo, b.lo), max(a.hi, b.hi))
-#
-# hull{T,S}(a::Interval{T}, b::Interval{S}) = hull(promote(a, b)...)
-hull(a::Complex{<:Interval},b::Complex{<:Interval}) =
-    complex(hull(real(a),real(b)),hull(imag(a),imag(b)))
-hull(a...) = reduce(hull, a)
-hull(a::Vector{Interval{T}}) where {T} = reduce(hull, a)
+hull(a::F, b::F) where {F <: AbstractFlavor} = F(min(a.lo, b.lo), max(a.hi, b.hi))
+hull(a::Complex{F},b::Complex{F}) where {F <: AbstractFlavor} =
+    complex(hull(real(a), real(b)), hull(imag(a), imag(b)))
 
 """
     union(a, b)
@@ -134,10 +114,8 @@ hull(a::Vector{Interval{T}}) where {T} = reduce(hull, a)
 Returns the union (convex hull) of the intervals `a` and `b`; it is equivalent
 to `hull(a,b)`.
 """
-union(a::Interval, b::Interval) = hull(a, b)
-#
-# union(a::Interval, b::Interval) = union(promote(a, b)...)
-union(a::Complex{<:Interval},b::Complex{<:Interval}) = hull(a, b)
+union(a::AbstractFlavor, b::AbstractFlavor) = hull(a, b)
+union(a::Complex{<:AbstractFlavor},b::Complex{<:AbstractFlavor}) = hull(a, b)
 union(a...) = reduce(union, a)
 
 """
@@ -153,16 +131,15 @@ The array may:
 - contain a single interval, if `y` overlaps `x`
 - contain two intervals, if `y` is strictly contained within `x`.
 """
-function setdiff(x::Interval, y::Interval)
+function setdiff(x::F, y::F) where {F <: AbstractFlavor}
     intersection = x ∩ y
 
     isempty(intersection) && return [x]
-    intersection == x && return typeof(x)[]  # x is subset of y; setdiff is empty
+    intersection == x && return F[]  # x is subset of y; setdiff is empty
 
-    x.lo == intersection.lo && return [Interval(intersection.hi, x.hi)]
-    x.hi == intersection.hi && return [Interval(x.lo, intersection.lo)]
+    x.lo == intersection.lo && return [F(intersection.hi, x.hi)]
+    x.hi == intersection.hi && return [F(x.lo, intersection.lo)]
 
-    return [Interval(x.lo, y.lo),
-            Interval(y.hi, x.hi)]
+    return [F(x.lo, y.lo), F(y.hi, x.hi)]
 
 end
