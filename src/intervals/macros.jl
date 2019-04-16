@@ -25,7 +25,7 @@ Note that the returned interval is of the default flavor. See the documentation
 of `Interval` for more information about the defaul interval falvor.
 """
 macro interval(expr1, expr2...)
-    make_interval(:(parameters.precision_type), expr1, expr2)
+    make_interval(Float64, expr1, expr2)
 end
 
 """
