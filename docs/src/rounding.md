@@ -13,7 +13,7 @@ The true value that is actually stored in the variable can be conveniently deter
 
 ```jldoctest
 julia> big(0.1)
-1.000000000000000055511151231257827021181583404541015625000000000000000000000000e-01
+0.1000000000000000055511151231257827021181583404541015625
 ```
 
 So, in fact, the Julia float `0.1` refers to a real number that is slightly greater than 0.1. By default, such calculations are done in round-to-nearest mode (`RoundNearest`); i.e., the nearest representable floating-point number to 0.1 is used.
@@ -22,7 +22,7 @@ So, in fact, the Julia float `0.1` refers to a real number that is slightly grea
 
 ```jldoctest
 julia> big"0.1"
-1.000000000000000000000000000000000000000000000000000000000000000000000000000002e-01
+0.1000000000000000000000000000000000000000000000000000000000000000000000000000002
 ```
 ]
 
@@ -68,7 +68,7 @@ The result correctly contains the true 0.4.
 Let's look at the internal representation of the `Float64` number 0.1:
 
 ```jldoctest
-julia> bits(0.1)
+julia> bitstring(0.1)
 "0011111110111001100110011001100110011001100110011001100110011010"
 ```
 The last 53 bits of these 64 bits correspond to the binary expansion of 0.1, which is
