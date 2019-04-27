@@ -2,8 +2,9 @@ using Documenter, IntervalArithmetic
 
 makedocs(
     modules = [IntervalArithmetic],
-    format = :html,
+    format = Documenter.HTML(prettyurls = get(ENV, "CI", nothing) == "true"),
     sitename = "IntervalArithmetic",
+    authors = "David P. Sanders and Luis Benet",
     pages = [
         "Package" => "index.md",
         "Interval Arithmetic" => "intro.md",
@@ -19,8 +20,6 @@ makedocs(
 deploydocs(
     repo   = "github.com/JuliaIntervals/IntervalArithmetic.jl.git",
     target = "build",
-    julia  = "1.0",
-    osname = "linux",
     deps   = nothing,
     make   = nothing
 )
