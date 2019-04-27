@@ -42,7 +42,10 @@ julia> X = DecoratedInterval(3, 4)
 By default, decorations are not displayed. The following turns on display of decorations:
 ```jldoctest decorations
 julia> setformat(decorations=true)
-6
+Display parameters:
+- format: standard
+- decorations: true
+- significant figures: 6
 
 julia> X
 [3, 4]_com
