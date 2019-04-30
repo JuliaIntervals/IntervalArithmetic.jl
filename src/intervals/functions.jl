@@ -232,7 +232,7 @@ A fast implementation of `x^n`, using `power_by_squaring`.
 `^(x, n)` will usually return an interval that is slightly larger than that calculated by `pow(x, n)`, but is guaranteed to be a correct
 enclosure when using multiplication with correct rounding.
 """
-function ^(x::Interval, n::Integer)  # fast integer power
+function ^(x::Interval{T}, n::Integer) where {T} # fast integer power
 
     isempty(x) && return x
 
@@ -246,7 +246,7 @@ function ^(x::Interval, n::Integer)  # fast integer power
     if iseven(n)
         if 0 ∈ x
 
-            result =  Interval(zero(eltype(x)),
+            result =  Interval(zero(T),
                         power_by_squaring(mag(x), n, RoundUp))
 
         elseif x.lo > 0
