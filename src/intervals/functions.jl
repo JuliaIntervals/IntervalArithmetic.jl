@@ -250,11 +250,11 @@ function ^(x::Interval, n::Integer)  # fast integer power
                         power_by_squaring(mag(x), n, RoundUp))
 
         elseif x.lo > 0
-            return Interval(power_by_squaring(x.lo, n, RoundDown),
+            result = Interval(power_by_squaring(x.lo, n, RoundDown),
                             power_by_squaring(x.hi, n, RoundUp))
 
         else  # x.lo < x.hi < 0
-            return Interval(power_by_squaring(-x.hi, n, RoundDown),
+            result = Interval(power_by_squaring(-x.hi, n, RoundDown),
                             power_by_squaring(-x.lo, n, RoundUp))
         end
 
