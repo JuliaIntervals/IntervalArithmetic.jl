@@ -282,7 +282,7 @@ function ^(x::Interval{T}, n::Integer) where {T} # fast integer power
 
 end
 
-function ^(x::Interval, y::Real)  # fast real power, including for y an Interval
+function ^(x::Interval{T}, y::Real) where {T}  # fast real power, including for y an Interval
 
     isempty(x) && return x
 
