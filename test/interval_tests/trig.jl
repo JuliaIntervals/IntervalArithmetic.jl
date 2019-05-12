@@ -40,6 +40,22 @@ end
     @test cos(@biginterval(1.3, 6.3)) ⊆ cos(@interval(1.3, 6.3))
 end
 
+@testset "sinpi" begin
+    @test sinpi(∅) == ∅
+    @test sinpi(0.5 .. 1.5) == Interval(-1 , 1)
+    @test sinpi(1 .. 2) ⊇ Interval(-1 , 0)
+    @test sinpi(0.25 .. 0.75) ⊇ Interval(1/sqrt(2) , 1)
+    @test sinpi(-0.25 .. 0.25) ⊇ Interval(-1/sqrt(2) , 1/sqrt(2))
+end
+
+@testset "cospi" begin
+    @test cospi(∅) == ∅
+    @test cospi(1 .. 2) == Interval(-1 , 1)
+    @test cospi(0.5 .. 1.5) ⊇ Interval(-1 , 0)
+    @test cospi(0.25 .. 0.75) ⊇ Interval(-1/sqrt(2) , 1/sqrt(2))
+    @test cospi(-0.25 .. 0.25) == Interval(1/sqrt(2) , 1)
+end
+
 @testset "tan" begin
     @test tan(@interval(0.5)) == Interval(0.54630248984379048, 0.5463024898437906)
     @test tan(@interval(0.5, 1.67)) == entireinterval()
