@@ -24,7 +24,7 @@ import Base:
     sqrt, exp, log, sin, cos, tan, inv,
     exp2, exp10, log2, log10,
     asin, acos, atan,
-    sinh, cosh, tanh, asinh, acosh, atanh,
+    sinh, cosh, tanh, asinh, acosh, atanh, sinpi, cospi,
     union, intersect, isempty,
     convert, promote_rule, eltype, size,
     BigFloat, float, widen, big,

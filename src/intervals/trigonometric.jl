@@ -137,6 +137,11 @@ function sin(a::Interval{Float64})
     end
 end
 
+function sinpi(a::Interval{T}) where T
+    isempty(a) && return a
+    w = a * pi_interval(T)
+    return(sin(w))
+end
 
 function cos(a::Interval{T}) where T
     isempty(a) && return a
@@ -222,6 +227,11 @@ function cos(a::Interval{Float64})
     end
 end
 
+function cospi(a::Interval{T}) where T
+    isempty(a) && return a
+    w = a * pi_interval(T)
+    return(cos(w))
+end
 
 function find_quadrants_tan(x::T) where {T}
     temp = atomic(Interval{T}, x) / half_pi(x)
