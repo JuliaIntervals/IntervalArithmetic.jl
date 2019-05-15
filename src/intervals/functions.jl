@@ -6,7 +6,7 @@
 # Use the BigFloat version from MPFR instead, which is correctly-rounded:
 
 # Write explicitly like this to avoid ambiguity warnings:
-for T in (:Integer, :Rational, :Float64, :BigFloat, :Interval)
+for T in (:Integer, :Float64, :BigFloat, :Interval)
     @eval ^(a::Interval{Float64}, x::$T) = atomic(Interval{Float64}, big53(a)^x)
 end
 
@@ -142,25 +142,30 @@ function ^(a::Interval{Rational{T}}, x::AbstractFloat) where T<:Integer
 end
 
 # Rational power
-function ^(a::Interval{BigFloat}, r::Rational{S}) where S<:Integer
-    T = BigFloat
+function ^(a::Interval{T}, x::Rational) where T
     domain = Interval{T}(0, Inf)
+
+    a = a ∩ domain
+
+    isempty(a) && return emptyinterval(a)
 
     if a == zero(a)
         a = a ∩ domain
-        r > zero(r) && return zero(a)
+        x > zero(x) && return zero(a)
         return emptyinterval(a)
     end
 
-    isinteger(r) && return atomic(Interval{T}, a^round(S,r))
-    r == one(S)//2 && return sqrt(a)
-
-    a = a ∩ domain
-    (isempty(r) || isempty(a)) && return emptyinterval(a)
-
-    y = atomic(Interval{BigFloat}, r)
-
-    a^y
+    if x > 0
+        low = a.lo ^ BigFloat(x)
+        high = a.hi ^ BigFloat(x)
+        if isinteger(high) && isinteger(low)
+            return Interval(low, high)
+        end
+        return ^(a, BigFloat(x))
+    end
+    if x < 0
+        return inv(^(a, -x))
+    end
 end
 
 # Interval power of an interval:
