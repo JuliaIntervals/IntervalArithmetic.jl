@@ -159,8 +159,8 @@ function ^(a::Interval{T}, x::Rational) where T
     end
 
     if x > 0
-        low = a.lo ^ BigFloat(1//q)
-        high = a.hi ^ BigFloat(1//q)
+        low = a.lo ^ (1//q)
+        high = a.hi ^ (1//q)
         isinteger(high) && isinteger(low) && return ^(Interval(low, high) , p)
         b = @interval(low, high)
         return ^(b , p)
