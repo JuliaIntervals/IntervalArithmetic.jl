@@ -149,6 +149,9 @@ function ^(a::Interval{T}, x::Rational) where T
 
     isempty(a) && return emptyinterval(a)
 
+    p = x.num
+    q = x.den
+
     if a == zero(a)
         a = a ∩ domain
         x > zero(x) && return zero(a)
@@ -156,16 +159,13 @@ function ^(a::Interval{T}, x::Rational) where T
     end
 
     if x > 0
-        low = a.lo ^ BigFloat(x)
-        high = a.hi ^ BigFloat(x)
-        if isinteger(high) && isinteger(low)
-            return Interval(low, high)
-        end
-        return ^(a, BigFloat(x))
+        low = a.lo ^ BigFloat(1//q)
+        high = a.hi ^ BigFloat(1//q)
+        isinteger(high) && isinteger(low) && return ^(Interval(low, high) , p)
+        b = @interval(low, high)
+        return ^(b , p)
     end
-    if x < 0
-        return inv(^(a, -x))
-    end
+    x < 0 && inv(^(a, -x))
 end
 
 # Interval power of an interval:
