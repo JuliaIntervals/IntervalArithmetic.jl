@@ -153,19 +153,19 @@ function ^(a::Interval{T}, x::Rational) where T
     q = x.den
 
     if a == zero(a)
-        a = a ∩ domain
         x > zero(x) && return zero(a)
         return emptyinterval(a)
     end
 
     if x > 0
-        low = a.lo ^ (1//q)
-        high = a.hi ^ (1//q)
-        isinteger(high) && isinteger(low) && return ^(Interval(low, high) , p)
-        b = @interval(low, high)
-        return ^(b , p)
+        low = @round_down(a.lo ^ BigFloat(1//q)
+        high = @round_up(a.hi ^ BigFloat(1//q))
+        b = @interval(low , high)
+        return b^p
     end
-    x < 0 && inv(^(a, -x))
+    if x < 0
+        return inv(a^(-x))
+    end
 end
 
 # Interval power of an interval:
