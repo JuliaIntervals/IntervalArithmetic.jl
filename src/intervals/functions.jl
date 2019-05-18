@@ -145,27 +145,44 @@ end
 function ^(a::Interval{T}, x::Rational) where T
     domain = Interval{T}(0, Inf)
 
-    a = a ∩ domain
-
-    isempty(a) && return emptyinterval(a)
-
     p = x.num
     q = x.den
+
+    isempty(a) && return emptyinterval(a)
+    x == 0 && return one(a)
 
     if a == zero(a)
         x > zero(x) && return zero(a)
         return emptyinterval(a)
     end
 
-    if x > 0
-        low = @round_down(a.lo ^ BigFloat(1//q)
-        high = @round_up(a.hi ^ BigFloat(1//q))
-        b = @interval(low , high)
-        return b^p
+    if x >= 0
+        if a.lo ≥ 0
+            low = @round_down(a.lo ^ BigFloat(1//q))
+            high = @round_up(a.hi ^ BigFloat(1//q))
+            b = @interval(low , high)
+            return b^p
+        end
+
+        if a.lo < 0 && a.hi ≥ 0
+            iseven(q) && (a = a ∩ domain)
+            low = @round_down(a.lo ^ BigFloat(1//q))
+            high = @round_up(a.hi ^ BigFloat(1//q))
+            b = @interval(low , high)
+            return b^p
+        end
+
+        if a.hi < 0
+            iseven(q) && return emptyinterval(a)
+            return -((-a) ^ x)
+        end
+
     end
+
     if x < 0
         return inv(a^(-x))
     end
+
 end
 
 # Interval power of an interval:
