@@ -107,7 +107,7 @@ end
     @test dist(@interval(1,27)^@interval(1/3), Interval(1., 3.)) < 2*eps(Interval(1,3))
     @test dist(@interval(1,27)^(1/3), Interval(1., 3.)) < 2*eps(Interval(1,3))
     @test Interval(1., 3.) ⊆ @interval(1,27)^(1//3)
-    @test @interval(0.1,0.7)^(1//3) == Interval(0.46415888336127786, 0.8879040017426008)
+    @test @interval(0.1,0.7)^(1//3) ⊇  Interval(9^(-1//3), 2^(-1//3))
     @test dist(@interval(0.1,0.7)^(1/3),
         Interval(0.46415888336127786, 0.8879040017426008)) < 2*eps(@interval(0.1,0.7)^(1/3))
 

@@ -158,23 +158,27 @@ function ^(a::Interval{T}, x::Rational) where T
 
     if x >= 0
         if a.lo ≥ 0
-            low = @round_down(a.lo ^ BigFloat(1//q))
-            high = @round_up(a.hi ^ BigFloat(1//q))
-            b = @interval(low , high)
+            low = a.lo ^ (1/q)
+            high = a.hi ^ (1/q)
+            lo = BigFloat(low , RoundDown)
+            hi = BigFloat(high , RoundUp)
+            b = @interval(lo , hi)
             return b^p
         end
 
         if a.lo < 0 && a.hi ≥ 0
-            iseven(q) && (a = a ∩ domain)
-            low = @round_down(a.lo ^ BigFloat(1//q))
-            high = @round_up(a.hi ^ BigFloat(1//q))
-            b = @interval(low , high)
+            isinteger(x) && return a ^ Int64(x)
+            a = a ∩ domain
+            low = a.lo ^ (1/q)
+            high = a.hi ^ (1/q)
+            lo = BigFloat(low , RoundDown)
+            hi = BigFloat(high , RoundUp)
+            b = @interval(lo , hi)
             return b^p
         end
 
         if a.hi < 0
-            iseven(q) && return emptyinterval(a)
-            return -((-a) ^ x)
+            return emptyinterval(a)
         end
 
     end
