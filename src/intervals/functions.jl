@@ -6,8 +6,9 @@
 # Use the BigFloat version from MPFR instead, which is correctly-rounded:
 
 # Write explicitly like this to avoid ambiguity warnings:
+
 for T in (:Integer, :Rational, :Float64, :BigFloat, :Interval)
-    @eval ^(a::Interval{Float64}, x::$T) = atomic(Interval{Float64}, big53(a)^x)
+    @eval pow(a::Interval{Float64}, x::$T) = atomic(Interval{Float64}, big53(a)^x)
 end
 
 
@@ -16,10 +17,16 @@ end
 # overwrite new behaviour for small integer powers from
 # https://github.com/JuliaLang/julia/pull/24240:
 
-Base.literal_pow(::typeof(^), x::Interval{T}, ::Val{p}) where {T,p} = x^p
+Base.literal_pow(::typeof(^), x::Interval{T}, ::Val{p}) where {T,p} = ^(x, p)
 
 
-function ^(a::Interval{BigFloat}, n::Integer)
+"""
+    pow(x::Interval, y)
+
+Slow, correctly-rounded calculation of `x^y`.
+This uses `BigFloat`s internally.
+"""
+function pow(a::Interval{BigFloat}, n::Integer)
     isempty(a) && return a
     n == 0 && return one(a)
     n == 1 && return a
@@ -69,23 +76,12 @@ function ^(a::Interval{BigFloat}, n::Integer)
     end
 end
 
-function sqr(a::Interval{T}) where T<:Real
-    return a^2
-    # isempty(a) && return a
-    # if a.lo ≥ zero(T)
-    #     return @round(a.lo^2, a.hi^2)
-    #
-    # elseif a.hi ≤ zero(T)
-    #     return @round(a.hi^2, a.lo^2)
-    # end
-    #
-    # return @round(mig(a)^2, mag(a)^2)
-end
+sqr(a::Interval{T}) where {T<:Real} = a^2
 
-^(a::Interval{BigFloat}, x::AbstractFloat) = a^big(x)
+pow(a::Interval{BigFloat}, x::AbstractFloat) = a^big(x)
 
 # Floating-point power of a BigFloat interval:
-function ^(a::Interval{BigFloat}, x::BigFloat)
+function pow(a::Interval{BigFloat}, x::BigFloat)
 
     domain = Interval{BigFloat}(0, Inf)
 
@@ -135,14 +131,14 @@ function ^(a::Interval{BigFloat}, x::BigFloat)
     return hull(lo, hi)
 end
 
-function ^(a::Interval{Rational{T}}, x::AbstractFloat) where T<:Integer
+function pow(a::Interval{Rational{T}}, x::AbstractFloat) where T<:Integer
     a = Interval(a.lo.num/a.lo.den, a.hi.num/a.hi.den)
     a = a^x
     atomic(Interval{Rational{T}}, a)
 end
 
 # Rational power
-function ^(a::Interval{BigFloat}, r::Rational{S}) where S<:Integer
+function pow(a::Interval{BigFloat}, r::Rational{S}) where S<:Integer
     T = BigFloat
     domain = Interval{T}(0, Inf)
 
@@ -164,7 +160,7 @@ function ^(a::Interval{BigFloat}, r::Rational{S}) where S<:Integer
 end
 
 # Interval power of an interval:
-function ^(a::Interval{BigFloat}, x::Interval)
+function pow(a::Interval{BigFloat}, x::Interval)
     T = BigFloat
     domain = Interval{T}(0, Inf)
 
@@ -194,35 +190,58 @@ function sqrt(a::Interval{T}) where T
 end
 
 """
-    pow(x::Interval, n::Integer)
+    ^(x::Interval, n::Integer)
 
-A faster implementation of `x^n`, currently using `power_by_squaring`.
-`pow(x, n)` will usually return an interval that is slightly larger than that calculated by `x^n`, but is guaranteed to be a correct
+A fast implementation of `x^n`, using `power_by_squaring`.
+`^(x, n)` will usually return an interval that is slightly larger than that calculated by `pow(x, n)`, but is guaranteed to be a correct
 enclosure when using multiplication with correct rounding.
 """
-function pow(x::Interval, n::Integer)  # fast integer power
+function ^(x::Interval, n::Integer)  # fast integer power
 
     isempty(x) && return x
 
-    if iseven(n) && 0 ∈ x
+    if n < 0
+        return inv(x^(-n))
+    end
 
-        return hull(zero(x),
-                    hull(Base.power_by_squaring(Interval(mig(x)), n),
-                        Base.power_by_squaring(Interval(mag(x)), n))
-            )
+    if iseven(n)
+        if 0 ∈ x
 
-    else
+            return Interval(zero(eltype(x)),
+                        power_by_squaring(mag(x), n, RoundUp))
 
-      return hull( Base.power_by_squaring(Interval(x.lo), n),
-                    Base.power_by_squaring(Interval(x.hi), n) )
+        elseif x.lo > 0
+            return Interval(power_by_squaring(x.lo, n, RoundDown),
+                            power_by_squaring(x.hi, n, RoundUp))
+
+        else  # x.lo < x.hi < 0
+            return Interval(power_by_squaring(-x.hi, n, RoundDown),
+                            power_by_squaring(-x.lo, n, RoundUp))
+        end
+
+    else  # odd n
+
+         a = power_by_squaring(x.lo, n, RoundDown)
+         b = power_by_squaring(x.hi, n, RoundUp)
+
+        return Interval(a, b)
 
     end
+    #
+    # else  # completely negative interval
+    #     a = power_by_squaring(x.lo, n, RoundDown)
+    #     b = power_by_squaring(x.hi, n, RoundUp)
+    #
+    #     return Interval(a, b)
+    #end
 
 end
 
-function pow(x::Interval, y::Real)  # fast real power, including for y an Interval
+function ^(x::Interval, y::Real)  # fast real power, including for y an Interval
 
     isempty(x) && return x
+
+    isinteger(y) && return x^(convert(Integer, y))
 
     return exp(y * log(x))
 

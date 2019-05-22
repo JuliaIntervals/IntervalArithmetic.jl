@@ -49,7 +49,7 @@ Interval(a::T, b::S) where {T<:Real, S<:Real} = Interval(promote(a,b)...)
 Interval(a::T, b::T) where T<:Integer = Interval(float(a), float(b))
 Interval(a::T, b::T) where T<:Irrational = Interval(float(a), float(b))
 
-eltype(x::Interval{T}) where T<:Real = T
+eltype(x::Interval{T}) where T<:Real = typeof(x)
 
 Interval(x::Interval) = x
 Interval(x::Complex) = Interval(real(x)) + im*Interval(imag(x))
@@ -125,6 +125,7 @@ include("conversion.jl")
 include("precision.jl")
 include("set_operations.jl")
 include("arithmetic.jl")
+include("powers.jl")
 include("functions.jl")
 include("trigonometric.jl")
 include("hyperbolic.jl")
