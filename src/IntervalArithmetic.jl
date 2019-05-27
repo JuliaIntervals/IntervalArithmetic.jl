@@ -43,6 +43,9 @@ import Base:  # for IntervalBox
     getindex, setindex,
     iterate, eltype
 
+import Base.MPFR: MPFRRoundingMode
+import Base.MPFR: MPFRRoundUp, MPFRRoundDown, MPFRRoundNearest, MPFRRoundToZero, MPFRRoundFromZero
+
 import .Broadcast: broadcasted
 
 export

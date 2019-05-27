@@ -156,28 +156,32 @@ function ^(a::Interval{T}, x::Rational) where T
         return emptyinterval(a)
     end
 
+    x == (1//2) && return sqrt(a)
+
     if x >= 0
         if a.lo ≥ 0
-            low = a.lo ^ (1/q)
-            high = a.hi ^ (1/q)
-            lo = BigFloat(low , RoundDown)
-            hi = BigFloat(high , RoundUp)
-            b = @interval(lo , hi)
+            isinteger(x) && return a ^ Int64(x)
+            low = BigFloat()
+            high = BigFloat()
+            ccall((:mpfr_rootn_ui , :libmpfr) , BigFloat , (Ref{BigFloat}, Ref{T}, Ref{Int32}, MPFRRoundingMode) , low , a.lo , q, MPFRRoundDown)
+            ccall((:mpfr_rootn_ui , :libmpfr) , BigFloat , (Ref{BigFloat}, Ref{T}, Ref{Int32}, MPFRRoundingMode) , high , a.hi , q, MPFRRoundUp)
+            b = @interval(low , high)
             return b^p
         end
 
         if a.lo < 0 && a.hi ≥ 0
             isinteger(x) && return a ^ Int64(x)
-            a = a ∩ domain
-            low = a.lo ^ (1/q)
-            high = a.hi ^ (1/q)
-            lo = BigFloat(low , RoundDown)
-            hi = BigFloat(high , RoundUp)
-            b = @interval(lo , hi)
+            a = a ∩ Interval{T}(0, Inf)
+            low = BigFloat()
+            high = BigFloat()
+            ccall((:mpfr_rootn_ui , :libmpfr) , BigFloat , (Ref{BigFloat}, Ref{T}, Ref{Int32}, MPFRRoundingMode) , low , a.lo , q, MPFRRoundDown)
+            ccall((:mpfr_rootn_ui , :libmpfr) , BigFloat , (Ref{BigFloat}, Ref{T}, Ref{Int32}, MPFRRoundingMode) , high , a.hi , q, MPFRRoundUp)
+            b = @interval(low , high)
             return b^p
         end
 
         if a.hi < 0
+            isinteger(x) && return a ^ Int64(x)
             return emptyinterval(a)
         end
 

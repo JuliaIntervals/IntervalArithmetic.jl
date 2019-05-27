@@ -22,4 +22,6 @@ setrounding(Interval, :tight)
         @test ^(2 .. 9, -1//3) ⊇  Interval(9^(-1//3), 2^(-1//3))
         @test ^(-2 .. 4 , 1//2) == Interval(0, 2)
         @test ^(-2 .. 8 , 1//3) == Interval(0, 2)
+        @test ^(-8 .. -2 , 1//3) == ∅
+        @test ^(-8 .. -2 , 1//2) == ∅
 end
