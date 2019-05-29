@@ -64,7 +64,8 @@ export
     cancelminus, cancelplus, isunbounded,
     .., @I_str, ±,
     pow, extended_div,
-    setformat, @format
+    setformat, @format , mpfr_vector_sum, mpfr_vector_dot,
+    mpfr_vector_sumAbs, mpfr_vector_sumSquare
 
 export
     setindex   # re-export from StaticArrays for IntervalBox
@@ -77,7 +78,7 @@ end
 export showfull
 
 import Base: rounding, setrounding, setprecision
-
+import Base.MPFR: MPFRRoundUp, MPFRRoundDown, MPFRRoundNearest, MPFRRoundToZero, MPFRRoundFromZero, MPFRRoundingMode
 
 
 ## Multidimensional

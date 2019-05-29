@@ -129,6 +129,7 @@ include("functions.jl")
 include("trigonometric.jl")
 include("hyperbolic.jl")
 include("complex.jl")
+include("reduction.jl")
 
 # Syntax for intervals
 
