@@ -64,7 +64,8 @@ export
     cancelminus, cancelplus, isunbounded,
     .., @I_str, ±,
     pow, extended_div,
-    setformat, @format
+    setformat, @format , mpfr_vector_sum, mpfr_vector_dot,
+    mpfr_vector_sumAbs, mpfr_vector_sumSquare
 
 if VERSION >= v"1.5.0-DEV.124"
     import Base: isdisjoint
@@ -81,7 +82,7 @@ export
 export showfull
 
 import Base: rounding, setrounding, setprecision
-
+import Base.MPFR: MPFRRoundUp, MPFRRoundDown, MPFRRoundNearest, MPFRRoundToZero, MPFRRoundFromZero, MPFRRoundingMode
 
 
 ## Multidimensional
