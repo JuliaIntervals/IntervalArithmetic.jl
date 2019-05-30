@@ -62,9 +62,22 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
     m = match(r"\[(.*),(.*)\]", s)
 
     if m != nothing  # matched
+
+        m.captures[1] = strip(m.captures[1], [' '])
+        m.captures[2] = strip(m.captures[2], [' '])
         lo, hi = m.captures
 
-    else
+        if m.captures[2] == "+infinity" || m.captures[2] == ""
+            hi = "Inf"
+        end
+
+        if m.captures[1] == "-infinity" || m.captures[1] == ""
+            lo = "-Inf"
+        end
+
+    end
+
+    if m == nothing
 
         m = match(r"\[(.*)\]", s)  # string like "[1]"
 
@@ -72,8 +85,13 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
             throw(ArgumentError("Unable to process string $s as interval"))
         end
 
-        if m.captures[1] == "Empty"
+        m.captures[1] = strip(m.captures[1], [' '])
+
+        if m.captures[1] == "Empty" || m.captures[1] == ""
             return emptyinterval(T)
+        end
+        if m.captures[1] == "entire"
+            return entireinterval(T)
         end
 
         lo = m.captures[1]
@@ -83,6 +101,12 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
 
     expr1 = Meta.parse(lo)
     expr2 = Meta.parse(hi)
+    if lo == "-Inf"
+        expr1 = Base.parse(Float64, lo)
+    end
+    if hi == "Inf"
+        expr2 = Base.parse(Float64, hi)
+    end
 
     interval = eval(make_interval(T, expr1, [expr2]))
 

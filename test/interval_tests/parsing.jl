@@ -9,6 +9,11 @@ setprecision(128)
     @test parse(Interval{Float64}, "1") == Interval(1, 1)
     @test parse(Interval{Float64}, "[1, 2]") == Interval(1, 2)
     @test parse(Interval{Float64}, "[-0x1.3p-1, 2/3]") == @interval(-0x1.3p-1, 2/3)
+    @test parse(Interval{Float64}, "[1,+infinity]") == Interval(1.0, Inf)
+    @test parse(Interval{Float64}, "[1.234e5,Inf]") == Interval(123400.0, Inf)
+    @test parse(Interval{Float64}, "[]") == ∅
+    @test parse(Interval{Float64}, "[,]") == entireinterval(Float64)
+    @test parse(Interval{Float64}, "[ entire ]") == entireinterval(Float64)
 
     @test parse(Interval{BigFloat}, "1") == @biginterval(1)
     @test parse(Interval{BigFloat}, "[-0x1.3p-1, 2/3]") == @biginterval(-0x1.3p-1, 2/3)
@@ -27,4 +32,12 @@ end
     @test parse(DecoratedInterval{Float64}, "[3, 4]") == DecoratedInterval(3, 4)
 
     @test parse(DecoratedInterval{Float64}, "[3, 4]_dac") == DecoratedInterval(3, 4, dac)
+
+    @test parse(DecoratedInterval{Float64}, "[ ]") == DecoratedInterval(∅, trv)
+
+    @test parse(DecoratedInterval{Float64}, "[entire]") == DecoratedInterval(Interval(-Inf, Inf), dac)
+
+    @test parse(DecoratedInterval{Float64}, "[,]") == DecoratedInterval(entireinterval(Float64), dac)
+
+
 end
