@@ -10,7 +10,12 @@ function parse(::Type{DecoratedInterval{T}}, s::AbstractString) where T
     m = match(r"(\[.*\])(\_.*)?", s)
 
     if m == nothing  # matched
-        throw(ArgumentError("Unable to process string $x as decorated interval"))
+
+        m = match(r"(.*\?[a-z0-9]*)(\_.*)?", s)
+
+        if m == nothing
+            throw(ArgumentError("Unable to process string $x as decorated interval"))
+        end
 
     end
 
@@ -49,13 +54,109 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
             b = parse(T, strip(m.captures[2]))
 
             return a ± b
-        end
 
         a = parse(T, s, RoundDown)
         b = parse(T, s, RoundUp)
 
         return Interval(a, b)
 
+        end
+
+        if m == nothing
+
+            m = match(r"(\-?\d*)\.?(\d*)\?(\d*)(.*)", s)
+
+            if m != nothing
+                if m.captures[3] != "" && m.captures[4] == ""
+                    d = length(m.captures[2])
+                    x = Meta.parse(m.captures[3] * "e-$d")
+                    n = Meta.parse(m.captures[1]*"."*m.captures[2])
+                    lo = n - x
+                    hi = n + x
+                    interval = eval(make_interval(T, lo, [hi]))
+                    return interval
+                end
+
+                if m.captures[3] == "" && m.captures[4] == ""
+                    d = length(m.captures[2])
+                    x = Meta.parse("0.5" * "e-$d")
+                    n = Meta.parse(m.captures[1]*"."*m.captures[2])
+                    lo = n - x
+                    hi = n + x
+                    interval = eval(make_interval(T, lo, [hi]))
+                    return interval
+                end
+
+                if m.captures[3] == ""
+                    if m.captures[4] == "u"
+                        d = length(m.captures[2])
+                        x = Meta.parse("0.5" * "e-$d")
+                        n = Meta.parse(m.captures[1]*"."*m.captures[2])
+                        lo = n
+                        hi = n + x
+                        interval = eval(make_interval(T, lo, [hi]))
+                        return interval
+                    end
+
+                    m1 = match(r"(e\d*)", m.captures[4])
+                    if m1 != nothing
+                        d = length(m.captures[2])
+                        x = Meta.parse("0.5" * "e-$d")
+                        n = Meta.parse(m.captures[1]*"."*m.captures[2])
+                        lo = Meta.parse(string(n-x)*m1.captures[1])
+                        hi = Meta.parse(string(n+x)*m1.captures[1])
+                        interval = eval(make_interval(T, lo, [hi]))
+                        return interval
+                    end
+                end
+                if m.captures[3] != ""
+                    if m.captures[4] =="u"
+                        d = length(m.captures[2])
+                        x = Meta.parse(m.captures[3] * "e-$d")
+                        n = Meta.parse(m.captures[1]*"."*m.captures[2])
+                        lo = n
+                        hi = n + x
+                        interval = eval(make_interval(T, lo, [hi]))
+                        return interval
+                    end
+
+                    m1 = match(r"(e\d*)", m.captures[4])
+                    if m1 != nothing
+                        d = length(m.captures[2])
+                        x = Meta.parse(m.captures[3] * "e-$d")
+                        n = Meta.parse(m.captures[1]*"."*m.captures[2])
+                        lo = Meta.parse(string(n-x)*m1.captures[1])
+                        hi = Meta.parse(string(n+x)*m1.captures[1])
+                        interval = eval(make_interval(T, lo, [hi]))
+                        return interval
+                    end
+                end
+            end
+
+            m = match(r"(\-*\d*\.*\d*)\?\?(.*)", s)
+
+            if m!= nothing
+                if m.captures[2] == ""
+                    return entireinterval(T)
+                end
+                if m.captures[2] == "u"
+                    lo = Meta.parse(m.captures[1])
+                    hi = Inf
+                    interval = eval(make_interval(T, lo, [hi]))
+                    return interval
+                end
+            end
+
+            m = match(r"(\d*\.?\d*)", s)
+
+            if m != nothing
+                lo = Meta.parse(m.captures[1])
+                hi = lo
+            end
+
+            interval = eval(make_interval(T, lo, [hi]))
+            return interval
+        end
     end
 
     # match string of form [a, b]_dec:

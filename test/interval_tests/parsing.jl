@@ -14,6 +14,15 @@ setprecision(128)
     @test parse(Interval{Float64}, "[]") == ∅
     @test parse(Interval{Float64}, "[,]") == entireinterval(Float64)
     @test parse(Interval{Float64}, "[ entire ]") == entireinterval(Float64)
+    @test parse(Interval{Float64}, "3.56?1") == Interval(0x3.8ccccccccccccp+0, 0x3.91eb851eb8520p+0)
+    @test parse(Interval{Float64}, "3.56?1e2") == Interval(355.0, 357.0)
+    @test parse(Interval{Float64}, "3.560?2") == Interval(0x3.8ed916872b020p+0, 0x3.8fdf3b645a1ccp+0)
+    @test parse(Interval{Float64}, "3.56?") == Interval(0x3.8e147ae147ae0p+0, 0x3.90a3d70a3d70cp+0)
+    @test parse(Interval{Float64}, "3.560?2u") == Interval(0x3.8f5c28f5c28f4p+0, 0x3.8fdf3b645a1ccp+0)
+    @test parse(Interval{Float64}, "-10?") == Interval(-10.5, -9.5)
+    @test parse(Interval{Float64}, "-10?u") == Interval(-10.0, -9.5)
+    @test parse(Interval{Float64}, "-10?12") == Interval(-22.0, 2.0)
+    @test parse(Interval{Float64}, "3.1416?1") == Interval(0x3.24395810624dcp+0, 0x3.24467381d7dc0p+0)
 
     @test parse(Interval{BigFloat}, "1") == @biginterval(1)
     @test parse(Interval{BigFloat}, "[-0x1.3p-1, 2/3]") == @biginterval(-0x1.3p-1, 2/3)
@@ -38,6 +47,15 @@ end
     @test parse(DecoratedInterval{Float64}, "[entire]") == DecoratedInterval(Interval(-Inf, Inf), dac)
 
     @test parse(DecoratedInterval{Float64}, "[,]") == DecoratedInterval(entireinterval(Float64), dac)
-
-
+    @test parse(DecoratedInterval{Float64}, "3.56?1") == DecoratedInterval(Interval(0x3.8ccccccccccccp+0, 0x3.91eb851eb8520p+0), com)
+    @test parse(DecoratedInterval{Float64}, "3.56?1e2") == DecoratedInterval(Interval(355.0, 357.0), com)
+    @test parse(DecoratedInterval{Float64}, "3.560?2") == DecoratedInterval(Interval(0x3.8ed916872b020p+0, 0x3.8fdf3b645a1ccp+0), com)
+    @test parse(DecoratedInterval{Float64}, "3.56?") == DecoratedInterval(Interval(0x3.8e147ae147ae0p+0, 0x3.90a3d70a3d70cp+0), com)
+    @test parse(DecoratedInterval{Float64}, "3.560?2u") == DecoratedInterval(Interval(0x3.8f5c28f5c28f4p+0, 0x3.8fdf3b645a1ccp+0), com)
+    @test parse(DecoratedInterval{Float64}, "-10?") == DecoratedInterval(Interval(-10.5, -9.5), com)
+    @test parse(DecoratedInterval{Float64}, "-10?u") == DecoratedInterval(Interval(-10.0, -9.5), com)
+    @test parse(DecoratedInterval{Float64}, "-10?12") == DecoratedInterval(Interval(-22.0, 2.0), com)
+    @test parse(DecoratedInterval{Float64}, "-10??u") == DecoratedInterval(Interval(-10.0, Inf), dac)
+    @test parse(DecoratedInterval{Float64}, "-10??") == DecoratedInterval(Interval(-Inf, Inf), dac)
+    @test parse(DecoratedInterval{Float64}, "3.56?1_def") == DecoratedInterval(Interval(0x3.8ccccccccccccp+0, 0x3.91eb851eb8520p+0), def)
 end
