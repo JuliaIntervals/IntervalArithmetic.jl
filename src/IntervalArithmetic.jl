@@ -64,8 +64,8 @@ export
     cancelminus, cancelplus, isunbounded,
     .., @I_str, ±,
     pow, extended_div,
-    setformat, @format , mpfr_vector_sum, mpfr_vector_dot,
-    mpfr_vector_sumAbs, mpfr_vector_sumSquare
+    setformat, @format , vector_sum, vector_dot,
+    vector_sumAbs, vector_sumSquare
 
 export
     setindex   # re-export from StaticArrays for IntervalBox
