@@ -64,8 +64,8 @@ export
     cancelminus, cancelplus, isunbounded,
     .., @I_str, ±,
     pow, extended_div,
-    setformat, @format , mpfr_vector_sum, mpfr_vector_dot,
-    mpfr_vector_sumAbs, mpfr_vector_sumSquare
+    setformat, @format , vector_sum, vector_dot,
+    vector_sumAbs, vector_sumSquare
 
 if VERSION >= v"1.5.0-DEV.124"
     import Base: isdisjoint
