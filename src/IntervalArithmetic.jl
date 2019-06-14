@@ -77,7 +77,7 @@ end
 export showfull
 
 import Base: rounding, setrounding, setprecision
-
+import Base.string
 
 
 ## Multidimensional
