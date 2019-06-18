@@ -408,3 +408,16 @@ function string(x :: Interval{T}, low_fw :: Int64, high_fw :: Int64, low_precisi
     s_high = " "^(high_fw - length(string(high))) * string(high)
     return "["*s_low*","*s_high*"]"
 end
+
+function string(x :: Interval{T}, form :: Char) where T
+    form != '?' && return "Unrecognised form"
+    mid = (x.lo + x.hi) / 2
+    r = (x.hi - x.lo) / 2
+    r = Int64(trunc(r*10 + 1))
+    mid = Float64(trunc(mid * 10) / 10)
+    if r > 9
+        r = Int64(trunc(r / 10 + 1))
+        mid = Int64(trunc(mid))
+    end
+    return "$mid?$r"
+end
