@@ -165,9 +165,10 @@ function ^(a::Interval{T}, x::Rational) where T
             ui = convert(Culong, q)
             low = BigFloat()
             high = BigFloat()
-            ccall((:mpfr_rootn_ui , :libmpfr) , Int32 , (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode) , low , a.lo , ui, MPFRRoundDown)
-            ccall((:mpfr_rootn_ui , :libmpfr) , Int32 , (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode) , high , a.hi , ui, MPFRRoundUp)
-            b = @interval(low , high)
+            ccall((:mpfr_rootn_ui, :libmpfr) , Int32 , (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode) , low , a.lo , ui, MPFRRoundDown)
+            ccall((:mpfr_rootn_ui, :libmpfr) , Int32 , (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode) , high , a.hi , ui, MPFRRoundUp)
+            b = interval(low, high)
+            b = convert(Interval{T}, b)
             return b^p
         end
 
@@ -178,9 +179,10 @@ function ^(a::Interval{T}, x::Rational) where T
             ui = convert(Culong, q)
             low = BigFloat()
             high = BigFloat()
-            ccall((:mpfr_rootn_ui , :libmpfr) , Int32 , (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode) , low , a.lo , ui, MPFRRoundDown)
-            ccall((:mpfr_rootn_ui , :libmpfr) , Int32 , (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode) , high , a.hi , ui, MPFRRoundUp)
-            b = @interval(low , high)
+            ccall((:mpfr_rootn_ui, :libmpfr) , Int32 , (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode) , low , a.lo , ui, MPFRRoundDown)
+            ccall((:mpfr_rootn_ui, :libmpfr) , Int32 , (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode) , high , a.hi , ui, MPFRRoundUp)
+            b = interval(low, high)
+            b = convert(Interval{T}, b)
             return b^p
         end
 
