@@ -218,10 +218,10 @@ function extended_div(a::Interval{T}, b::Interval{T}) where T<:Real
     S = typeof(a.lo / b.lo)
     if 0 < b.hi && 0 > b.lo && 0 ∉ a
         if a.hi < 0
-            return (@round(T(-Inf), a.hi / b.hi), @round(a.hi / b.lo, T(Inf)))
+            return (a / interval(0, b.hi), a / interval(b.lo, 0))
 
         elseif a.lo > 0
-            return (@round(T(-Inf), a.lo / b.lo), @round(a.lo / b.hi, T(Inf)))
+            return (a / interval(b.lo, 0), a / interval(0, b.hi))
 
         end
     elseif 0 ∈ a && 0 ∈ b
