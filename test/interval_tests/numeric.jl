@@ -190,6 +190,33 @@ end
     @test @interval(1/9) == @interval(1//9)
 end
 
+@testset "nthroot test" begin
+    @test nthroot(∅, 3) == ∅
+    @test nthroot(∅, 4) == ∅
+    @test nthroot(∅, -3) == ∅
+    @test nthroot(∅, -4) == ∅
+    @test nthroot(Interval(8, 27), 3) == Interval(2, 3)
+    @test nthroot(Interval(0, 27), 3) == Interval(0, 3)
+    @test nthroot(Interval(-27, 0), 3) == Interval(-3, 0)
+    @test nthroot(Interval(-27, 27), 3) == Interval(-3, 3)
+    @test nthroot(Interval(-27, -8), 3) == Interval(-3, -2)
+    @test nthroot(Interval(16, 81), 4) == Interval(2, 3)
+    @test nthroot(Interval(0, 81), 4) == Interval(0, 3)
+    @test nthroot(Interval(-81, 0), 4) == Interval(0)
+    @test nthroot(Interval(-81, 81), 4) == Interval(0, 3)
+    @test nthroot(Interval(-81, -16), 4) == ∅
+    @test nthroot(Interval(8, 27), -3) == Interval(1/3, 1/2)
+    @test nthroot(Interval(0, 27), -3) == Interval(1/3, Inf)
+    @test nthroot(Interval(-27, 0), -3) == Interval(-Inf, -1/3)
+    @test nthroot(Interval(-27, 27), -3) == Interval(-Inf, Inf)
+    @test nthroot(Interval(-27, -8), -3) == Interval(-1/2, -1/3)
+    @test nthroot(Interval(16, 81), -4) == Interval(1/3, 1/2)
+    @test nthroot(Interval(0, 81), -4) == Interval(1/3, Inf)
+    @test nthroot(Interval(-81, 0), -4) == ∅
+    @test nthroot(Interval(-81, 81), -4) == Interval(1/3, Inf)
+    @test nthroot(Interval(-81, -16), -4) == ∅
+end
+
 @testset "Floor etc. tests" begin
     a = @interval(0.1)
     b = Interval(0.1, 0.1)
