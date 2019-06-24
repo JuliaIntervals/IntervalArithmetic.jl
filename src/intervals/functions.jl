@@ -6,7 +6,7 @@
 # Use the BigFloat version from MPFR instead, which is correctly-rounded:
 
 # Write explicitly like this to avoid ambiguity warnings:
-for T in (:Integer, :Rational, :Float64, :BigFloat, :Interval)
+for T in (:Integer, :Float64, :BigFloat, :Interval)
     @eval ^(a::Interval{Float64}, x::$T) = atomic(Interval{Float64}, big53(a)^x)
 end
 
@@ -142,25 +142,61 @@ function ^(a::Interval{Rational{T}}, x::AbstractFloat) where T<:Integer
 end
 
 # Rational power
-function ^(a::Interval{BigFloat}, r::Rational{S}) where S<:Integer
-    T = BigFloat
+function ^(a::Interval{T}, x::Rational) where T
     domain = Interval{T}(0, Inf)
 
+    p = x.num
+    q = x.den
+
+    isempty(a) && return emptyinterval(a)
+    x == 0 && return one(a)
+
     if a == zero(a)
-        a = a ∩ domain
-        r > zero(r) && return zero(a)
+        x > zero(x) && return zero(a)
         return emptyinterval(a)
     end
 
-    isinteger(r) && return atomic(Interval{T}, a^round(S,r))
-    r == one(S)//2 && return sqrt(a)
+    x == (1//2) && return sqrt(a)
 
-    a = a ∩ domain
-    (isempty(r) || isempty(a)) && return emptyinterval(a)
+    if x >= 0
+        if a.lo ≥ 0
+            isinteger(x) && return a ^ Int64(x)
+            a = @biginterval(a)
+            ui = convert(Culong, q)
+            low = BigFloat()
+            high = BigFloat()
+            ccall((:mpfr_rootn_ui, :libmpfr) , Int32 , (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode) , low , a.lo , ui, MPFRRoundDown)
+            ccall((:mpfr_rootn_ui, :libmpfr) , Int32 , (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode) , high , a.hi , ui, MPFRRoundUp)
+            b = interval(low, high)
+            b = convert(Interval{T}, b)
+            return b^p
+        end
 
-    y = atomic(Interval{BigFloat}, r)
+        if a.lo < 0 && a.hi ≥ 0
+            isinteger(x) && return a ^ Int64(x)
+            a = a ∩ Interval{T}(0, Inf)
+            a = @biginterval(a)
+            ui = convert(Culong, q)
+            low = BigFloat()
+            high = BigFloat()
+            ccall((:mpfr_rootn_ui, :libmpfr) , Int32 , (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode) , low , a.lo , ui, MPFRRoundDown)
+            ccall((:mpfr_rootn_ui, :libmpfr) , Int32 , (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode) , high , a.hi , ui, MPFRRoundUp)
+            b = interval(low, high)
+            b = convert(Interval{T}, b)
+            return b^p
+        end
 
-    a^y
+        if a.hi < 0
+            isinteger(x) && return a ^ Int64(x)
+            return emptyinterval(a)
+        end
+
+    end
+
+    if x < 0
+        return inv(a^(-x))
+    end
+
 end
 
 # Interval power of an interval:
