@@ -313,6 +313,19 @@ This function takes an interval and a conversion specifier as input and gives a 
     for cs equal to f, it outputs full interval [-Inf,Inf] instead of entire interval.
     for any other it outputs default string interval.
 ```
+
+function string(x :: Interval{T}, cs :: AbstractString)
+    m = match(r"(\d*)\s?\:\s?\[(.)\s?(\d*)\s?\.\s?(\d*)\s?\]", cs)
+    infsup_string(x, m)
+    if m == nothing
+        m = match(r"(\d*)\s?\:\s?(.)\s?(\d*)\s?\.\s?(\d*)\s?\?\s(\d*)\s", cs)
+        uncertain_string(x, m)
+        if m == nothing
+            throw(ArgumentError("Unable to process string $x as decorated interval"))
+        end
+    end
+end
+
 function string(x :: Interval{T}, cs :: Char) where T
     if cs == 'u'
         x == ∅ && return "[Empty]"
@@ -409,11 +422,15 @@ function string(x :: Interval{T}, low_fw :: Int64, high_fw :: Int64, low_precisi
     return "["*s_low*","*s_high*"]"
 end
 
-function string(x :: Interval{T}, form :: Char) where T
-    form != '?' && return "Unrecognised form"
+function uncertain_string(x :: Interval{T}, m :: RegexMatch) where T
+    overall_width = m.captures[1]
+    flag = m.captures[2]
+    width = m.captures[3]
+    precision = m.captures[4]
+    rad_width = m.captures[5]
     mid = (x.lo + x.hi) / 2
     r = (x.hi - x.lo) / 2
-    r = Int64(trunc(r*10 + 1))
+    r = Int32(trunc(r*10 + 1))
     mid = Float64(trunc(mid * 10) / 10)
     if r > 9
         r = Int64(trunc(r / 10 + 1))
