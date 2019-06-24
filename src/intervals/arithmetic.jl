@@ -218,10 +218,10 @@ function extended_div(a::Interval{T}, b::Interval{T}) where T<:Real
     S = typeof(a.lo / b.lo)
     if 0 < b.hi && 0 > b.lo && 0 ∉ a
         if a.hi < 0
-            return (Interval(T(-Inf), a.hi / b.hi), Interval(a.hi / b.lo, T(Inf)))
+            return (Interval(T(-Inf), /(a.hi, b.hi, RoundUp)), Interval(/(a.hi, b.lo, RoundDown), T(Inf)))
 
         elseif a.lo > 0
-            return (Interval(T(-Inf), a.lo / b.lo), Interval(a.lo / b.hi, T(Inf)))
+            return (Interval(T(-Inf), /(a.lo, b.lo, RoundUp)), Interval(/(a.lo, b.hi, RoundDown), T(Inf)))
 
         end
     elseif 0 ∈ a && 0 ∈ b
@@ -372,7 +372,7 @@ julia> signbit(@interval(-4,5))
 [0, 1]
 ```
 """
-function signbit(a::Interval) 
+function signbit(a::Interval)
     isempty(a) && return emptyinterval(a)
     return Interval(signbit(a.hi), signbit(a.lo))
 end
