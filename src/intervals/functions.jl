@@ -314,15 +314,17 @@ This function takes an interval and a conversion specifier as input and gives a 
     for any other it outputs default string interval.
 ```
 
-function string(x :: Interval{T}, cs :: AbstractString)
+function string(x :: Interval{T}, cs :: AbstractString) where T
     m = match(r"(\d*)\s?\:\s?\[(.)\s?(\d*)\s?\.\s?(\d*)\s?\]", cs)
-    infsup_string(x, m)
+    if m != nothing
+        infsup_string(x, m)
+    end
     if m == nothing
-        m = match(r"(\d*)\s?\:\s?(.)\s?(\d*)\s?\.\s?(\d*)\s?\?\s(\d*)\s", cs)
-        uncertain_string(x, m)
+        m = match(r"(\d*)\s?\:\s?(.)\s?(\d*)\s?\.\s?(\d*)\s?\?", cs)
         if m == nothing
-            throw(ArgumentError("Unable to process string $x as decorated interval"))
+            throw(ArgumentError("Unable to process string $x as an interval"))
         end
+        uncertain_string(x, m)
     end
 end
 
@@ -426,15 +428,52 @@ function uncertain_string(x :: Interval{T}, m :: RegexMatch) where T
     overall_width = m.captures[1]
     flag = m.captures[2]
     width = m.captures[3]
-    precision = m.captures[4]
-    rad_width = m.captures[5]
+    prec = m.captures[4]
+    x == ∅ && flag == "C" && return "[Empty]"
+    x == ∅ && flag == "c" && return "[empty]"
+    x == entireinterval(T) && flag == "C" && return "Entire"
+    x == entireinterval(T) && flag == "c" && return "Entire"
+    isnai(x) && flag == "C" && return "[Nai]"
+    isnai(x) && flag == "c" && return "[nai]"
     mid = (x.lo + x.hi) / 2
     r = (x.hi - x.lo) / 2
-    r = Int32(trunc(r*10 + 1))
-    mid = Float64(trunc(mid * 10) / 10)
-    if r > 9
-        r = Int64(trunc(r / 10 + 1))
-        mid = Int64(trunc(mid))
+    if prec != ""
+        prec = parse(Int64, prec)
+        if flag != "u" && flag != "d"
+            r = Int32(trunc(r * 10^prec + 1))
+            mid = Float64(trunc(mid * 10^prec) / 10^prec)
+        end
+        if flag == "u"
+            mid = Float64(trunc(x.lo * 10^prec) / 10^prec)
+            r = Int32(trunc((x.hi - x.lo) * 10^prec + 1))
+        end
+        if flag == "d"
+            mid = Float64(trunc(x.hi * 10^prec + 1) / 10^prec)
+            r = Int32(trunc((x.hi - x.lo) * 10^prec + 1))
+        end
+        if r > 9
+            throw(ArgumentError("Cannot output the interval as a string with given precision"))
+        end
+        mid = string(mid) * "0"^(prec - (length(string(mid)) - length(string(trunc(mid))) + 1))
+        if width != ""
+            if length(string(mid)) < parse(Int64, width)
+                if flag == "0"
+                    mid = "0"^(width - length(string(mid))) * mid
+                end
+                if flag != "0"
+                    mid = " "^(width - length(string(mid))) * mid
+                end
+            end
+        end
+        if flag != "u" && flag != "d"
+            s = mid*"?"*"$r"
+        end
+        if flag == "u" || flag == "d"
+            s = mid*"?"*"$r"*"$flag"
+        end
+        if overall_width != ""
+            s = " "^(parse(Int64, overall_width) - length(s)) * s
+        end
+        return s
     end
-    return "$mid?$r"
 end
