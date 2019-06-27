@@ -13,6 +13,7 @@ using SetRounding
 using Markdown
 
 using LinearAlgebra
+using Printf
 import LinearAlgebra: ×, dot, norm
 export ×, dot
 

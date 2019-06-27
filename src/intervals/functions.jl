@@ -435,33 +435,98 @@ function uncertain_string(x :: Interval{T}, m :: RegexMatch) where T
     x == entireinterval(T) && flag == "c" && return "Entire"
     isnai(x) && flag == "C" && return "[Nai]"
     isnai(x) && flag == "c" && return "[nai]"
-    mid = (x.lo + x.hi) / 2
-    r = (x.hi - x.lo) / 2
     if prec != ""
         prec = parse(Int64, prec)
         if flag != "u" && flag != "d"
-            r = Int32(trunc(r * 10^prec + 1))
-            mid = Float64(trunc(mid * 10^prec) / 10^prec)
+            r = Int32(trunc(((x.hi - x.lo) / 2) * 10^prec + 1))
+            mid = Float64(round(((x.hi + x.lo) / 2) * 10^prec) / 10^prec)
         end
         if flag == "u"
-            mid = Float64(trunc(x.lo * 10^prec) / 10^prec)
+            mid = Float64(round(x.lo * 10^prec) / 10^prec)
             r = Int32(trunc((x.hi - x.lo) * 10^prec + 1))
         end
         if flag == "d"
-            mid = Float64(trunc(x.hi * 10^prec + 1) / 10^prec)
+            mid = Float64(round(x.hi * 10^prec) / 10^prec)
             r = Int32(trunc((x.hi - x.lo) * 10^prec + 1))
         end
         if r > 9
             throw(ArgumentError("Cannot output the interval as a string with given precision"))
         end
-        mid = string(mid) * "0"^(prec - (length(string(mid)) - length(string(trunc(mid))) + 1))
+        if prec > 0
+            mid = string(mid) * "0"^(prec - (length(string(mid)) - length(string(trunc(mid))) + 1))
+        end
+        if prec == 0
+            mid = string(Int64(mid))
+        end
         if width != ""
-            if length(string(mid)) < parse(Int64, width)
+            if length(mid) < parse(Int64, width)
                 if flag == "0"
-                    mid = "0"^(width - length(string(mid))) * mid
+                    mid = "0"^(parse(Int64, width) - length(mid)) * mid
                 end
                 if flag != "0"
-                    mid = " "^(width - length(string(mid))) * mid
+                    mid = " "^(parse(Int64, width) - length(mid)) * mid
+                end
+            end
+        end
+        if flag != "u" && flag != "d"
+            s = mid*"?"*"$r"
+        end
+        if flag == "u" || flag == "d"
+            s = mid*"?"*"$r"*"$flag"
+        end
+        if overall_width != ""
+            s = " "^(parse(Int64, overall_width) - length(s)) * s
+        end
+        return s
+    end
+    if prec == ""
+        if flag != "u" && flag != "d"
+            w = @sprintf("%.1E", (x.hi - x.lo) / 2)
+            r = parse(Float64, w[1:3])
+            r = Int32(trunc(r + 1))
+            prec = -(parse(Int64, w[5 : end]))
+            if prec > 0
+                mid = Float64(round(((x.hi + x.lo) / 2) * 10^prec) / 10^prec)
+            end
+            if prec <= 0
+                mid = Int64(round((x.hi + x.lo) / 2))
+            end
+        end
+        if flag == "u"
+            w = @sprintf("%.1E", x.hi - x.lo)
+            r = parse(Float64, w[1:3])
+            r = Int32(trunc(r + 1))
+            prec = -(parse(Int64, w[5 : end]))
+            if prec > 0
+                mid = Float64(round(x.lo * 10^prec) / 10^prec)
+            end
+            if prec <= 0
+                mid = Int64(round(x.lo))
+            end
+        end
+        if flag == "d"
+            w = @sprintf("%.1E", x.hi - x.lo)
+            r = parse(Float64, w[1:3])
+            r = Int32(trunc(r + 1))
+            prec = -(parse(Int64, w[5 : end]))
+            if prec > 0
+                mid = Float64(round(x.hi * 10^prec) / 10^prec)
+            end
+            if prec <= 0
+                mid = Int64(round(x.hi))
+            end
+        end
+        if prec > 0
+            mid = string(mid) * "0"^(prec - (length(string(mid)) - length(string(trunc(mid))) + 1))
+        end
+        mid = string(mid)
+        if width != ""
+            if length(mid) < parse(Int64, width)
+                if flag == "0"
+                    mid = "0"^(parse(Int64, width) - length(mid)) * mid
+                end
+                if flag != "0"
+                    mid = " "^(parse(Int64, width) - length(mid)) * mid
                 end
             end
         end
