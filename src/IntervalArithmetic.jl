@@ -13,7 +13,7 @@ using SetRounding
 using Markdown
 
 using LinearAlgebra
-using Printf
+
 import LinearAlgebra: ×, dot, norm
 export ×, dot
 
@@ -46,6 +46,7 @@ import Base:  # for IntervalBox
 
 import Base.MPFR: MPFRRoundingMode
 import Base.MPFR: MPFRRoundUp, MPFRRoundDown, MPFRRoundNearest, MPFRRoundToZero, MPFRRoundFromZero
+import Printf.@sprintf
 
 import .Broadcast: broadcasted
 
