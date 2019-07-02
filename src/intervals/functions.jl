@@ -306,43 +306,18 @@ for f in (:log, :log2, :log10, :log1p)
         end
 end
 
-```
-This function takes an interval and a conversion specifier as input and gives a string interval containing the interval x.
-    for cs equal to u , it outputs empty, entire and nai in upper case
-    for cs equals to l, it outputs empty, entire and nai in lower case
-    for cs equal to f, it outputs full interval [-Inf,Inf] instead of entire interval.
-    for any other it outputs default string interval.
-```
-
 function string(x :: Interval{T}, cs :: AbstractString) where T
-    m = match(r"(\d*)\s?\:\s?\[(.)\s?(\d*)\s?\.\s?(\d*)\s?\]", cs)
+    m = match(r"(\d*)\s?\:\s?\[\s?(.)\s?(\d*)\s?\.\s?(\d*)\s?\]", cs)
     if m != nothing
-        infsup_string(x, m)
+        return infsup_string(x, m)
     end
     if m == nothing
         m = match(r"(\d*)\s?\:\s?(.)\s?(\d*)\s?\.\s?(\d*)\s?\?", cs)
         if m == nothing
             throw(ArgumentError("Unable to process string $x as an interval"))
         end
-        uncertain_string(x, m)
+        return uncertain_string(x, m)
     end
-end
-
-function string(x :: Interval{T}, cs :: Char) where T
-    if cs == 'u'
-        x == ∅ && return "[Empty]"
-        x == entireinterval(T) && return "Entire"
-        isnai(x) && return "[Nai]"
-    end
-    if cs == 'l'
-        x == ∅ && return "[empty]"
-        x == entireinterval(T) && return "entire"
-        isnai(x) && return "[nai]"
-    end
-    if cs == 'f'
-        x == entireinterval(T) && return "[-Inf,Inf]"
-    end
-    return string(x)
 end
 
 ```
@@ -365,63 +340,131 @@ function string(x :: Interval{T}) where T
     return "[$low, $high]"
 end
 
-```
-The argument string_len corresponds to the total length of the output string.
-```
-function string(x :: Interval{T}, string_len :: Integer) where T
-    x == ∅ && return "[Empty]"
-    x == entireinterval(T) && return "Entire"
-    isnai(x) && return "[Nai]"
-    min_len = length(string(trunc(x.lo))) + length(string(ceil(x.hi))) - 1
-    if string_len < min_len
-        throw(ArgumentError("Cannot output the interval as a string"))
+function infsup_string(x :: Interval{T}, m :: RegexMatch) where T
+    overall_width = m.captures[1]
+    flag = m.captures[2]
+    width = m.captures[3]
+    prec = m.captures[4]
+    if prec != ""
+        prec = parse(Int64, prec)
+        low = Float64(floor(x.lo * 10^prec) / 10^prec)
+        high = Float64(trunc(x.hi * 10^prec + 1) / 10^prec)
+        if prec > 0
+            low = string(low) * "0"^(prec - (length(string(low)) - length(string(trunc(low))) + 1))
+            high = string(high) * "0"^(prec - (length(string(high)) - length(string(trunc(high))) + 1))
+        end
+        if prec == 0
+            low = string(Int64(low))
+            high = string(Int64(high))
+        end
+        if width != ""
+            if length(high) < parse(Int64, width)
+                if flag == "0"
+                    low = "0"^(parse(Int64, width) - length(low)) * low
+                    high = "0"^(parse(Int64, width) - length(high)) * high
+                end
+                if flag != "0"
+                    low = " "^(parse(Int64, width) - length(low)) * low
+                    high = " "^(parse(Int64, width) - length(high)) * high
+                end
+            end
+            if length(high) > parse(Int64, width)
+                throw(ArgumentError("Cannot output the interval as a string"))
+            end
+        end
+        s = "[" * low * ", " * high * "]"
+        if overall_width != "" && parse(Int64, overall_width) >= length(s)
+            s = " "^(parse(Int64, overall_width) - length(s)) * s
+        end
+        if overall_width != "" && parse(Int64, overall_width) < length(s)
+            throw(ArgumentError("Cannot output the interval as a string"))
+        end
+        return s
     end
-    if string_len == min_len
-        low = Int64(trunc(x.lo))
-        high = Int64(ceil(x.hi))
+    if prec == ""
+        if width != ""
+            low = x.lo
+            high = x.hi
+            width = parse(Int64, width)
+            low_min = length(string(Int64(trunc(low))))
+            high_min = length(string(Int64(trunc(high))))
+            if width <= low_min + 1
+                low = Int64(trunc(low))
+            end
+            if width <= high_min + 1
+                high = Int64(trunc(high))
+            end
+            if width >= low_min + 2 && width <= low_min + 6
+                low_prec = width - low_min - 1
+                low = Float64(floor(x.lo * 10^low_prec) / 10^low_prec)
+            end
+            if width >= high_min + 2 && width <= high_min + 6
+                high_prec = width - high_min - 1
+                high = Float64(trunc(x.hi * 10^high_prec + 1) / 10^high_prec)
+            end
+            if width > low_min + 6
+                low_prec = 5
+                low = Float64(floor(x.lo * 10^low_prec) / 10^low_prec)
+            end
+            if width > high_min + 6
+                high_prec = 5
+                high = Float64(floor(x.lo * 10^high_prec) / 10^high_prec)
+            end
+            low = string(low)
+            high = string(high)
+            low = " " ^ (width - length(low)) * low
+            high = " " ^ (width - length(high)) * high
+            s = "[$low, $high]"
+            if overall_width != ""
+                overall_width = parse(Int64, overall_width)
+                s = " " ^ (overall_width - length(s)) * s
+            end
+            return s
+        end
+        if width == "" && overall_width != ""
+            string_len = parse(Int64, overall_width)
+            min_len = length(string(trunc(x.lo))) + length(string(ceil(x.hi)))
+            if string_len < min_len
+                throw(ArgumentError("Cannot output the interval as a string"))
+            end
+            if string_len == min_len
+                low = Int64(trunc(x.lo))
+                high = Int64(ceil(x.hi))
+            end
+            if string_len == min_len + 1
+                low = Int64(trunc(x.lo))
+                high = Int64(ceil(x.hi))
+                return " [$low, $high]"
+            end
+            if string_len == min_len + 2
+                low_prec = 1
+                low = Float64(floor(x.lo * 10^low_prec) / 10^low_prec)
+                high = Int64(ceil(x.hi))
+            end
+            if string_len == min_len + 3
+                low_prec = 2
+                low = Float64(floor(x.lo * 10^low_prec) / 10^low_prec)
+                high = Int64(ceil(x.hi))
+            end
+            if string_len >= min_len + 4 && string_len <= min_len + 12
+                high_prec = trunc((string_len - min_len - 2) / 2)
+                low_prec = string_len - min_len - high_prec - 2
+                low = Float64(floor(x.lo * 10^low_prec) / 10^low_prec)
+                high = Float64(trunc(x.hi * 10^high_prec + 1) / 10^high_prec)
+            end
+            if string_len > min_len + 12
+                high_prec = 5
+                low_prec = 5
+                low = Float64(floor(x.lo * 10^low_prec) / 10^low_prec)
+                high = Float64(trunc(x.hi * 10^high_prec + 1) / 10^high_prec)
+            end
+            s = "[$low, $high]"
+            return " "^(string_len - length(s)) * "[$low, $high]"
+        end
+        if width == "" && overall_width == ""
+            return string(x)
+        end
     end
-    if string_len == min_len + 1
-        low = Int64(trunc(x.lo))
-        high = Int64(ceil(x.hi))
-        return "[$low, $high]"
-    end
-    if string_len == min_len + 2
-        low_prec = 1
-        low = Float64(floor(x.lo * 10^low_prec) / 10^low_prec)
-        high = Int64(ceil(x.hi))
-    end
-    if string_len == min_len + 3
-        low_prec = 1
-        low = Float64(floor(x.lo * 10^low_prec) / 10^low_prec)
-        high = Int64(ceil(x.hi))
-    end
-    if string_len >= min_len + 4
-        high_prec = trunc((string_len - min_len - 2) / 2)
-        low_prec = string_len - min_len - high_prec - 2
-        low = Float64(floor(x.lo * 10^low_prec) / 10^low_prec)
-        high = Float64(trunc(x.hi * 10^high_prec + 1) / 10^high_prec)
-    end
-    s = "[$low,$high]"
-    return "[$low" * "0"^(string_len - length(s)) * ",$high]"
-end
-
-```
-low_fw : length of the lower limit of the interval string
-high_fw : length of the higher limit of the interval string
-low_precision : number of digits after decimal in the lower limit of interval string
-high_precision : number of digits after decimal in the higher limit of interval string
-julia> string(big(5)^(1/3) .. big(6.76455689) , 6, 6, 4, 4)
-"[1.7099,6.7646]"
-```
-function string(x :: Interval{T}, low_fw :: Int64, high_fw :: Int64, low_precision :: Int64, high_precision :: Int64) where T
-    x == ∅ && return "[Empty]"
-    x == entireinterval(T) && return "Entire"
-    isnai(x) && return "[Nai]"
-    low = Float64(floor(x.lo * 10^low_precision) / 10^low_precision)
-    high = Float64(trunc(x.hi * 10^high_precision + 1) / 10^high_precision)
-    s_low = " "^(low_fw - length(string(low))) * string(low)
-    s_high = " "^(high_fw - length(string(high))) * string(high)
-    return "["*s_low*","*s_high*"]"
 end
 
 function uncertain_string(x :: Interval{T}, m :: RegexMatch) where T
