@@ -1,23 +1,30 @@
 name = "IntervalArithmetic"
 uuid = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
-
-[compat]
-CRlibm = "≥ 0.7.0"
-StaticArrays = "≥ 0.8.0"
-FastRounding = "≥ 0.1.2"
-SetRounding = "≥ 0.2.0"
-RecipesBase = "≥ 0.5.0"
-julia = "≥ 1.1.0"
+repo = "https://github.com/JuliaIntervals/IntervalArithmetic.jl.git"
+version = "0.15.2"
 
 [deps]
 CRlibm = "96374032-68de-5a5b-8d9e-752f78720389"
 FastRounding = "fa42c844-2597-5d31-933b-ebd51ab2693f"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Markdown = "d6f4376e-aef5-505a-96c1-9c027394607a"
 RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
 SetRounding = "3cc68bcd-71a2-5612-b932-767ffbe40ab0"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
+[compat]
+CRlibm = "≥ 0.7.0"
+FastRounding = "≥ 0.1.2"
+Polynomials = "≥ 0.1.0"
+RecipesBase = "≥ 0.5.0"
+SetRounding = "≥ 0.2.0"
+StaticArrays = "≥ 0.8.0"
+julia = "≥ 1.1.0"
+
 [extras]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Polynomials = "f27b6e38-b328-58d1-80ce-0feddd5e7a45"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test"]
+test = ["LinearAlgebra", "Test", "Polynomials"]
