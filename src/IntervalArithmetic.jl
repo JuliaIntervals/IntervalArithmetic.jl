@@ -118,6 +118,7 @@ include("decorations/decorations.jl")
 include("rand.jl")
 include("parsing.jl")
 include("display.jl")
+include("nai.jl")
 
 include("plot_recipes/plot_recipes.jl")
 
