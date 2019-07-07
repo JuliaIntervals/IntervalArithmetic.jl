@@ -38,7 +38,7 @@ struct DecoratedInterval{T<:Real} <: AbstractInterval{T}
     function DecoratedInterval{T}(I::Interval, d::DECORATION) where T
         dd = decoration(I)
         dd <= trv && return new{T}(I, dd)
-        d == ill && return new{T}(nai(I), d)
+        dd == ill && return new{T}(I, dd)
         return new{T}(I, d)
     end
 end
@@ -47,7 +47,7 @@ DecoratedInterval(I::Interval{T}, d::DECORATION) where T<:AbstractFloat =
     DecoratedInterval{T}(I, d)
 
 function DecoratedInterval(a::T, b::T, d::DECORATION) where T<:Real
-    a > b && return DecoratedInterval(nai(T), ill)
+    a > b && return nai(T)
     DecoratedInterval(Interval(a,b), d)
 end
 
@@ -63,7 +63,7 @@ DecoratedInterval(a::T, b::S, d::DECORATION) where {T<:Real, S<:Real} =
 DecoratedInterval(I::Interval) = DecoratedInterval(I, decoration(I))
 
 function DecoratedInterval(a::T, b::T) where T<:Real
-    a > b && return DecoratedInterval(nai(T), ill)
+    a > b && return nai(T)
     DecoratedInterval(Interval(a,b))
 end
 
@@ -85,7 +85,7 @@ decoration(x::DecoratedInterval) = x.decoration
 
 # Automatic decorations for an Interval
 function decoration(I::Interval)
-    isnai(I) && return ill           # nai()
+    isnan(I.lo) && isnan(I.hi) && return ill
     isempty(I) && return trv         # emptyinterval
     isunbounded(I) && return dac     # unbounded
     com                              # common
