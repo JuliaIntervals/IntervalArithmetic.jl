@@ -79,13 +79,18 @@ DecoratedInterval(a::Tuple) = DecoratedInterval(a...)
 
 DecoratedInterval(I::DecoratedInterval, dec::DECORATION) = DecoratedInterval(I.interval, dec)
 
-interval_part(x::DecoratedInterval) = x.interval
+function interval_part(x::DecoratedInterval)
+    if isnai(x)
+        throw(ArgumentError("IntvlPartOfNai"))
+    end
+    return x.interval
+end
 
 decoration(x::DecoratedInterval) = x.decoration
 
 # Automatic decorations for an Interval
 function decoration(I::Interval)
-    isnan(I.lo) && isnan(I.hi) && return ill
+    isnan(I.lo) && isnan(I.hi) && return ill  #not an interval
     isempty(I) && return trv         # emptyinterval
     isunbounded(I) && return dac     # unbounded
     com                              # common

@@ -13,7 +13,7 @@ one(::Type{DecoratedInterval{T}}) where T<:Real = DecoratedInterval(one(T))
 ## Bool functions
 bool_functions = (
     :isempty, :isentire, :isunbounded,
-    :isfinite, :isnai, :isnan,
+    :isfinite, :isnan,
     :isthin, :iscommon
 )
 
