@@ -25,6 +25,17 @@ function tanh(a::Interval{BigFloat})
     return @round(tanh(a.lo), tanh(a.hi))
 end
 
+function coth(a::Interval{BigFloat})
+    isempty(a) && return a
+
+    a = @biginterval(a)
+    low = BigFloat()
+    high = BigFloat()
+    ccall((:mpfr_coth, :libmpfr) , Int32, (Ref{BigFloat}, Ref{BigFloat}, MPFRRoundingMode) , low , a.hi , MPFRRoundDown)
+    ccall((:mpfr_coth, :libmpfr) , Int32, (Ref{BigFloat}, Ref{BigFloat}, MPFRRoundingMode) , high , a.lo , MPFRRoundUp)
+    b = interval(low, high)
+    return b
+end
 
 function asinh(a::Interval{BigFloat})
     isempty(a) && return a
@@ -59,7 +70,7 @@ function atanh(a::Interval{BigFloat})
 end
 
 # Float64 versions of functions missing from CRlibm:
-for f in (:tanh, :asinh, :acosh, :atanh)
+for f in (:tanh, :coth, :asinh, :acosh, :atanh)
 
     @eval function ($f)(a::Interval{Float64})
         isempty(a) && return a
