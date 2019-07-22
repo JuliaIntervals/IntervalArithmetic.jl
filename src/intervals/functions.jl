@@ -282,6 +282,10 @@ function ^(x::Interval{T}, n::Integer) where {T} # fast integer power
 
 end
 
+function ^(x::Interval{T}, y::Rational{S}) where {T,S<:Integer}
+    return x^convert(Interval{T}, y)
+end
+
 function ^(x::Interval{T}, y::Real) where {T}  # fast real power, including for y an Interval
 
     isempty(x) && return x
