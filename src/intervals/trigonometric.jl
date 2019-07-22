@@ -395,3 +395,72 @@ function atan(y::Interval{BigFloat}, x::Interval{BigFloat})
 
     end
 end
+
+function cot(a::Interval{T}) where T
+    isempty(a) && return a
+
+    diam(a) > two_pi(T).lo && return entireinterval(a)
+
+    lo_quadrant = minimum(find_quadrants_tan(a.lo))
+    hi_quadrant = maximum(find_quadrants_tan(a.hi))
+
+    lo_quadrant_mod = mod(lo_quadrant, 2)
+    hi_quadrant_mod = mod(hi_quadrant, 2)
+
+    if lo_quadrant_mod == 1 && hi_quadrant_mod == 0
+        # check if really contains singularity:
+        if hi_quadrant * pi_interval(T) ⊆ a
+            return entireinterval(a)  # crosses singularity
+        end
+
+    elseif lo_quadrant_mod == hi_quadrant_mod && hi_quadrant > lo_quadrant
+        # must cross singularity
+        return entireinterval(a)
+
+    end
+
+    # @show a.lo, a.hi
+    # @show tan(a.lo), tan(a.hi)
+
+    a = @biginterval(a)
+    low = BigFloat()
+    high = BigFloat()
+    ccall((:mpfr_cot, :libmpfr) , Int32, (Ref{BigFloat}, Ref{BigFloat}, MPFRRoundingMode) , low , a.hi , MPFRRoundDown)
+    ccall((:mpfr_cot, :libmpfr) , Int32, (Ref{BigFloat}, Ref{BigFloat}, MPFRRoundingMode) , high , a.lo , MPFRRoundUp)
+    b = interval(low, high)
+    b = convert(Interval{T}, b)
+    return b
+end
+
+function cot(a::Interval{Float64})
+
+    T = Float64
+
+    isempty(a) && return a
+
+    diam(a) > pi_interval(T).lo && return entireinterval(a)
+
+    lo_quadrant, lo = quadrant(a.lo)
+    hi_quadrant, hi = quadrant(a.hi)
+
+    lo_quadrant_mod = mod(lo_quadrant, 2)
+    hi_quadrant_mod = mod(hi_quadrant, 2)
+
+    if lo_quadrant_mod == 1 && hi_quadrant_mod == 0
+        return entireinterval(a)  # crosses singularity
+
+    elseif lo_quadrant_mod == hi_quadrant_mod && hi_quadrant != lo_quadrant
+        # must cross singularity
+        return entireinterval(a)
+
+    end
+
+    a = @biginterval(a)
+    low = BigFloat()
+    high = BigFloat()
+    ccall((:mpfr_cot, :libmpfr) , Int32, (Ref{BigFloat}, Ref{BigFloat}, MPFRRoundingMode) , low , a.hi , MPFRRoundDown)
+    ccall((:mpfr_cot, :libmpfr) , Int32, (Ref{BigFloat}, Ref{BigFloat}, MPFRRoundingMode) , high , a.lo , MPFRRoundUp)
+    b = interval(low, high)
+    b = convert(Interval{Float64}, b)
+    return b
+end
