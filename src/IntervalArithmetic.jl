@@ -21,7 +21,7 @@ import Base:
     +, -, *, /, //, fma,
     <, >, ==, !=, ⊆, ^, <=,
     in, zero, one, eps, typemin, typemax, abs, abs2, real, min, max,
-    sqrt, exp, log, sin, cos, tan, inv,
+    sqrt, exp, log, sin, cos, tan, inv, hypot
     exp2, exp10, log2, log10,
     asin, acos, atan,
     sinh, cosh, tanh, asinh, acosh, atanh, sinpi, cospi,
@@ -63,7 +63,7 @@ export
     RoundTiesToEven, RoundTiesToAway,
     cancelminus, cancelplus, isunbounded,
     .., @I_str, ±,
-    pow, extended_div,
+    pow, hypot, extended_div,
     setformat, @format
 
 export

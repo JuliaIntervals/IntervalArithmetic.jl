@@ -264,7 +264,9 @@ function pow(x::Interval, y::Real)  # fast real power, including for y an Interv
 
 end
 
-
+function hypot(x::Interval, y::Interval)
+    sqrt(x^2 + y^2)
+end
 
 
 for f in (:exp, :expm1)
