@@ -95,7 +95,7 @@ else
     function atomic(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:Real}
         isinf(x) && return wideinterval(T(x))
 
-        Interval{T}( T(x, RoundDown), T(x, RoundUp) )
+        Interval( T(x, RoundDown), T(x, RoundUp) )
         # the rounding up could be done as nextfloat of the rounded down one?
         # use @round_up and @round_down here?
     end
@@ -121,7 +121,7 @@ atomic(::Type{Interval{Irrational{T}}}, x::Irrational{S}) where {T, S} =
     float(atomic(Interval{Float64}, x))
 
 function atomic(::Type{Interval{T}}, x::Interval) where T<:AbstractFloat
-    Interval{T}( T(x.lo, RoundDown), T(x.hi, RoundUp) )
+    Interval( T(x.lo, RoundDown), T(x.hi, RoundUp) )
 end
 
 # Complex numbers:
