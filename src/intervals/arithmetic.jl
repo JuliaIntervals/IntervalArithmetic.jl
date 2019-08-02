@@ -226,8 +226,7 @@ function extended_div(a::Interval{T}, b::Interval{T}) where T<:Real
         end
     elseif 0 ∈ a && 0 ∈ b
         return (entireinterval(S), emptyinterval(S))
-    end
-    
+
     return (a / b, emptyinterval(S))
 end
 
