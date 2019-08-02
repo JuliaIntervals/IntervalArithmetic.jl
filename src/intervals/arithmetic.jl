@@ -226,9 +226,11 @@ function extended_div(a::Interval{T}, b::Interval{T}) where T<:Real
         end
     elseif 0 ∈ a && 0 ∈ b
         return (entireinterval(T), emptyinterval(T))
-    else
-        return (a / b, emptyinterval(T))
+
     end
+
+    return (a / b, emptyinterval(T))
+
 end
 
 function extended_div1(a::Interval{T}, b::Interval{T}) where T<:Real
@@ -244,9 +246,10 @@ function extended_div1(a::Interval{T}, b::Interval{T}) where T<:Real
         end
     elseif 0 ∈ a && 0 ∈ b
         return entireinterval(T)
-    else
-        return a / b
     end
+
+    return a / b
+
 end
 
 function extended_div2(a::Interval{T}, b::Interval{T}) where T<:Real
@@ -262,9 +265,9 @@ function extended_div2(a::Interval{T}, b::Interval{T}) where T<:Real
         end
     elseif 0 ∈ a && 0 ∈ b
         return emptyinterval(T)
-    else
-        return emptyinterval(T)
     end
+    return emptyinterval(T)
+
 end
 
 //(a::Interval, b::Interval) = a / b    # to deal with rationals
