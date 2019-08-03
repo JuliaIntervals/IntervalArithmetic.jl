@@ -307,12 +307,12 @@ for f in (:log, :log2, :log10, :log1p)
 end
 
 function string(x :: Interval{T}, cs :: AbstractString) where T
-    m = match(r"(\d*)\s?\:\s?\[\s?(.)\s?(\d*)\s?\.\s?(\d*)\s?\]", cs)
+    m = match(r"(\d*)\s?\:\s?\[(.?)\s?(\d*)\s?\.\s?(\d*)\s?(.?)\s?\]", cs)
     if m != nothing
         return infsup_string(x, m)
     end
     if m == nothing
-        m = match(r"(\d*)\s?\:\s?(.)\s?(\d*)\s?\.\s?(\d*)\s?\?", cs)
+        m = match(r"(\d*)\s?\:(.?)\s?(\d*)\s?\.\s?(\d*)\s?\?\s?(\d*)\s?(.?)\s?", cs)
         if m == nothing
             throw(ArgumentError("Unable to process string $x as an interval"))
         end
@@ -345,17 +345,43 @@ function infsup_string(x :: Interval{T}, m :: RegexMatch) where T
     flag = m.captures[2]
     width = m.captures[3]
     prec = m.captures[4]
+    conversion = m.captures[5]
+    x == ∅ && flag == "C" && return "[Empty]"
+    x == ∅ && flag == "c" && return "[empty]"
+    x == entireinterval(T) && flag == "C" && return "Entire"
+    x == entireinterval(T) && flag == "c" && return "Entire"
+    isnai(x) && flag == "C" && return "[Nai]"
+    isnai(x) && flag == "c" && return "[nai]"
+    x == entireinterval(T) && flag == "<" && return "[-Inf, Inf]"
     if prec != ""
         prec = parse(Int64, prec)
-        low = Float64(floor(x.lo * 10^prec) / 10^prec)
-        high = Float64(trunc(x.hi * 10^prec + 1) / 10^prec)
+        low_prec = prec
+        high_prec = prec
+        low = x.lo
+        high = x.hi
+        if conversion == "e" || conversion == "E"
+            low = x.lo
+            s = @sprintf("%.1E", low)
+            low_exp = parse(Int64, s[5:end])
+            low = low / 10^low_exp
+            high = x.hi
+            s = @sprintf("%.1E", high)
+            high_exp = parse(Int64, s[5:end])
+            high = high / 10^high_exp
+        end
+        low = Float64(floor(low * 10^low_prec) / 10^low_prec)
+        high = Float64(trunc(high * 10^high_prec + 1) / 10^high_prec)
         if prec > 0
-            low = string(low) * "0"^(prec - (length(string(low)) - length(string(trunc(low))) + 1))
-            high = string(high) * "0"^(prec - (length(string(high)) - length(string(trunc(high))) + 1))
+            low = string(low) * "0"^(low_prec - (length(string(low)) - length(string(trunc(low))) + 1))
+            high = string(high) * "0"^(high_prec - (length(string(high)) - length(string(trunc(high))) + 1))
         end
         if prec == 0
             low = string(Int64(low))
             high = string(Int64(high))
+        end
+        if conversion == "e" || conversion == "E"
+            low = low * "e"* "$low_exp"
+            high = high * "e" * "$high_exp"
         end
         if width != ""
             if length(high) < parse(Int64, width)
@@ -385,33 +411,53 @@ function infsup_string(x :: Interval{T}, m :: RegexMatch) where T
         if width != ""
             low = x.lo
             high = x.hi
+            if conversion == "e" || conversion == "E"
+                low = x.lo
+                s = @sprintf("%.1E", low)
+                low_exp = parse(Int64, s[5:end])
+                low = low / 10^low_exp
+                high = x.hi
+                s = @sprintf("%.1E", high)
+                high_exp = parse(Int64, s[5:end])
+                high = high / 10^high_exp
+                low_min = length(string(Int64(trunc(low)))) + length(string(low_exp)) + 1
+                high_min = length(string(Int64(trunc(high)))) + length(string(high_exp)) + 1
+            end
             width = parse(Int64, width)
-            low_min = length(string(Int64(trunc(low))))
-            high_min = length(string(Int64(trunc(high))))
+            if conversion != "e" && conversion != "E"
+                low_min = length(string(Int64(trunc(low))))
+                high_min = length(string(Int64(trunc(high))))
+            end
             if width <= low_min + 1
                 low = Int64(trunc(low))
             end
             if width <= high_min + 1
-                high = Int64(trunc(high))
+                high = Int64(trunc(high + 1))
             end
             if width >= low_min + 2 && width <= low_min + 6
                 low_prec = width - low_min - 1
-                low = Float64(floor(x.lo * 10^low_prec) / 10^low_prec)
+                low = Float64(floor(low * 10^low_prec) / 10^low_prec)
             end
             if width >= high_min + 2 && width <= high_min + 6
                 high_prec = width - high_min - 1
-                high = Float64(trunc(x.hi * 10^high_prec + 1) / 10^high_prec)
+                high = Float64(trunc(high * 10^high_prec + 1) / 10^high_prec)
             end
             if width > low_min + 6
                 low_prec = 5
-                low = Float64(floor(x.lo * 10^low_prec) / 10^low_prec)
+                low = Float64(floor(low * 10^low_prec) / 10^low_prec)
             end
             if width > high_min + 6
                 high_prec = 5
-                high = Float64(floor(x.lo * 10^high_prec) / 10^high_prec)
+                high = Float64(floor(high * 10^high_prec) / 10^high_prec)
             end
-            low = string(low)
-            high = string(high)
+            if conversion != "e" && conversion != "E"
+                low = string(low)
+                high = string(high)
+            end
+            if conversion == "e" || conversion == "E"
+                low = string(low) * "e" * "$low_exp"
+                high = string(high) * "e" * "$high_exp"
+            end
             low = " " ^ (width - length(low)) * low
             high = " " ^ (width - length(high)) * high
             s = "[$low, $high]"
@@ -423,43 +469,68 @@ function infsup_string(x :: Interval{T}, m :: RegexMatch) where T
         end
         if width == "" && overall_width != ""
             string_len = parse(Int64, overall_width)
-            min_len = length(string(trunc(x.lo))) + length(string(ceil(x.hi)))
+            if conversion == "e" || conversion == "E"
+                low = x.lo
+                s = @sprintf("%.1E", low)
+                low_exp = parse(Int64, s[5:end])
+                low = low / 10^low_exp
+                high = x.hi
+                s = @sprintf("%.1E", high)
+                high_exp = parse(Int64, s[5:end])
+                high = high / 10^high_exp
+                min_len = length(string(Int64(trunc(low)))) + length(string(Int64(ceil(high)))) + length(string(low_exp)) + length(string(high_exp)) + 6
+            end
+            if conversion != "e" && conversion != "E"
+                low = x.lo
+                high = x.hi
+                min_len = length(string(trunc(low))) + length(string(ceil(high)))
+            end
             if string_len < min_len
                 throw(ArgumentError("Cannot output the interval as a string"))
             end
             if string_len == min_len
-                low = Int64(trunc(x.lo))
-                high = Int64(ceil(x.hi))
+                low = Int64(trunc(low))
+                high = Int64(ceil(high))
             end
             if string_len == min_len + 1
-                low = Int64(trunc(x.lo))
-                high = Int64(ceil(x.hi))
-                return " [$low, $high]"
+                low = Int64(trunc(low))
+                high = Int64(ceil(high))
+                if conversion == "e" || conversion =="E"
+                    return " [$low" * "e" * "$low_exp" * ", $high" * "e" * "$high_exp" * "]"
+                end
+                if conversion != "e" && conversion != "E"
+                    s = " [$low, $high]"
+                end
             end
             if string_len == min_len + 2
                 low_prec = 1
-                low = Float64(floor(x.lo * 10^low_prec) / 10^low_prec)
-                high = Int64(ceil(x.hi))
+                low = Float64(floor(low * 10^low_prec) / 10^low_prec)
+                high = Int64(ceil(high))
             end
             if string_len == min_len + 3
                 low_prec = 2
-                low = Float64(floor(x.lo * 10^low_prec) / 10^low_prec)
-                high = Int64(ceil(x.hi))
+                low = Float64(floor(low * 10^low_prec) / 10^low_prec)
+                high = Int64(ceil(high))
             end
             if string_len >= min_len + 4 && string_len <= min_len + 12
                 high_prec = trunc((string_len - min_len - 2) / 2)
                 low_prec = string_len - min_len - high_prec - 2
-                low = Float64(floor(x.lo * 10^low_prec) / 10^low_prec)
-                high = Float64(trunc(x.hi * 10^high_prec + 1) / 10^high_prec)
+                low = Float64(floor(low * 10^low_prec) / 10^low_prec)
+                high = Float64(trunc(high * 10^high_prec + 1) / 10^high_prec)
             end
             if string_len > min_len + 12
                 high_prec = 5
                 low_prec = 5
-                low = Float64(floor(x.lo * 10^low_prec) / 10^low_prec)
-                high = Float64(trunc(x.hi * 10^high_prec + 1) / 10^high_prec)
+                low = Float64(floor(low * 10^low_prec) / 10^low_prec)
+                high = Float64(trunc(high * 10^high_prec + 1) / 10^high_prec)
             end
-            s = "[$low, $high]"
-            return " "^(string_len - length(s)) * "[$low, $high]"
+            if conversion == "e" || conversion == "E"
+                s = "[$low" * "e" * "$low_exp" * ", $high" * "e" * "$high_exp]"
+            end
+            if conversion != "e" && conversion != "E"
+                s = "[$low, $high]"
+            end
+            return " "^(string_len - length(s)) * s
         end
         if width == "" && overall_width == ""
             return string(x)
@@ -472,14 +543,25 @@ function uncertain_string(x :: Interval{T}, m :: RegexMatch) where T
     flag = m.captures[2]
     width = m.captures[3]
     prec = m.captures[4]
+    rad_width = m.captures[5]
+    conversion = m.captures[6]
     x == ∅ && flag == "C" && return "[Empty]"
     x == ∅ && flag == "c" && return "[empty]"
     x == entireinterval(T) && flag == "C" && return "Entire"
     x == entireinterval(T) && flag == "c" && return "Entire"
     isnai(x) && flag == "C" && return "[Nai]"
     isnai(x) && flag == "c" && return "[nai]"
+    if (conversion == "e" || conversion == "E") && (flag == "u" || flag == "d")
+        throw(ArgumentError("Cannot output the interval as a string"))
+    end
     if prec != ""
         prec = parse(Int64, prec)
+        if conversion == "E" || conversion == "e"
+            mid = (x.lo + x.hi) / 2
+            s = @sprintf("%.1E", mid)
+            exp = parse(Int64, s[5:end])
+            prec = prec - exp
+        end
         if flag != "u" && flag != "d"
             r = Int32(trunc(((x.hi - x.lo) / 2) * 10^prec + 1))
             mid = Float64(round(((x.hi + x.lo) / 2) * 10^prec) / 10^prec)
@@ -501,6 +583,23 @@ function uncertain_string(x :: Interval{T}, m :: RegexMatch) where T
         if prec == 0
             mid = string(Int64(mid))
         end
+        if conversion == "E" || conversion == "e"
+            mid = parse(Float64, mid)
+            s = @sprintf("%.1E", mid)
+            exp = parse(Int64, s[5:end])
+            mid = mid / 10^exp
+            prec = prec + exp
+            mid = Float64(round(mid * 10^prec) / 10^prec)
+            if prec > 0
+                mid = string(mid) * "0"^(prec - (length(string(mid)) - length(string(trunc(mid))) + 1))
+            end
+            mid = string(mid)
+        end
+        if flag == "+"
+            if parse(Float64, mid) > 0
+                mid = "+" * mid
+            end
+        end
         if width != ""
             if length(mid) < parse(Int64, width)
                 if flag == "0"
@@ -511,11 +610,18 @@ function uncertain_string(x :: Interval{T}, m :: RegexMatch) where T
                 end
             end
         end
+        r = string(r)
+        if rad_width != ""
+            r = "0"^(parse(Int64, rad_width) - length(r)) * r
+        end
         if flag != "u" && flag != "d"
-            s = mid*"?"*"$r"
+            s = mid*"?"*r
         end
         if flag == "u" || flag == "d"
-            s = mid*"?"*"$r"*"$flag"
+            s = mid*"?"*r*"$flag"
+        end
+        if conversion == "E" || conversion == "e"
+            s = mid*"?"*r*"e"*"$exp"
         end
         if overall_width != ""
             s = " "^(parse(Int64, overall_width) - length(s)) * s
@@ -559,8 +665,22 @@ function uncertain_string(x :: Interval{T}, m :: RegexMatch) where T
                 mid = Int64(round(x.hi))
             end
         end
+        if r > 9
+            throw(ArgumentError("Cannot output the interval as a string"))
+        end
         if prec > 0
             mid = string(mid) * "0"^(prec - (length(string(mid)) - length(string(trunc(mid))) + 1))
+        end
+        if conversion == "E" || conversion == "e"
+            mid = parse(Float64, mid)
+            s = @sprintf("%.1E", mid)
+            exp = parse(Int64, s[5:end])
+            mid = Float64(mid / 10^exp)
+            prec = prec + exp
+            mid = Float64(round(mid * 10^prec) / 10^prec)
+            if prec > 0
+                mid = string(mid) * "0"^(prec - (length(string(mid)) - length(string(trunc(mid))) + 1))
+            end
         end
         mid = string(mid)
         if width != ""
@@ -573,11 +693,18 @@ function uncertain_string(x :: Interval{T}, m :: RegexMatch) where T
                 end
             end
         end
+        r = string(r)
+        if rad_width != ""
+            r = "0"^(parse(Int64, rad_width) - length(r)) * r
+        end
         if flag != "u" && flag != "d"
             s = mid*"?"*"$r"
         end
         if flag == "u" || flag == "d"
             s = mid*"?"*"$r"*"$flag"
+        end
+        if conversion == "E" || conversion == "e"
+            s = mid*"?"*"$r"*"e"*"$exp"
         end
         if overall_width != ""
             s = " "^(parse(Int64, overall_width) - length(s)) * s
