@@ -24,11 +24,11 @@ let b
 
     @test decoration(DecoratedInterval(2, 0.1, com)) == ill
     @test decoration(DecoratedInterval(2, 0.1)) == ill
-    @test isnai(interval_part(DecoratedInterval(2, 0.1)))
+    @test isnai(DecoratedInterval(2, 0.1))
     @test decoration(@decorated(2, 0.1)) == ill
     @test decoration(DecoratedInterval(big(2), big(1))) == ill
-    @test isnai(interval_part((DecoratedInterval(big(2), big(1)))))
-    @test isnai(interval_part(@decorated(big(2), big(1))))
+    @test isnai(DecoratedInterval(big(2), big(1)))
+    @test isnai(@decorated(big(2), big(1)))
 
     # Disabling the following tests, because Julia 0.5 has some strange behaviour here
     # @test_throws ArgumentError DecoratedInterval(BigInt(1), 1//10)

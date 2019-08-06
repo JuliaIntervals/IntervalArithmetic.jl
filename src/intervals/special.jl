@@ -45,7 +45,7 @@ Checks if `x` is a **common interval**, i.e. a non-empty,
 bounded, real interval.
 """
 function iscommon(a::Interval)
-    (isentire(a) || isempty(a) || isnai(a) || isunbounded(a)) && return false
+    (isentire(a) || isempty(a) || isnai(DecoratedInterval(a)) || isunbounded(a)) && return false
     true
 end
 
