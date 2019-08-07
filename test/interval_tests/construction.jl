@@ -160,7 +160,7 @@ const eeuler = Base.MathConstants.e
         @test Interval(1//10).lo == rationalize(0.1)
     end
 
-    @test string(emptyinterval()) == "[Empty]"
+    @test string(emptyinterval()) == "∅"
 
     params = IntervalArithmetic.IntervalParameters()
     @test params.precision_type == BigFloat

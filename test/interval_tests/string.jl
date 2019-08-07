@@ -2,15 +2,9 @@ using IntervalArithmetic
 using Test
 
 @testset "IntervalToText" begin
-    @test string(∅) == "[Empty]"
-    @test string(Interval(-Inf, Inf)) == "Entire"
-    @test string(nai(Float64)) == "[Nai]"
     @test string(Interval(1, 4)) == "[1, 4]"
     @test string(Interval(1.1, 4.1)) == "[1.1, 4.1]"
     @test string(Interval(1.12, 4.13)) == "[1.12, 4.13]"
-    @test string(Interval(1.132, 4.231)) == "[1.13, 4.24]"
-    @test string(@biginterval(5^(1/3), sqrt(5))) == "[1.7, 2.24]"
-    @test string(@biginterval(5^(2/3), sqrt(10))) == "[2.92, 3.17]"
     @test string(Interval(2.3534534644, 3.564537887687), "6 : [c  .  ]") == "[2, 4]"
     @test string(Interval(2.3534534644, 3.56453), "7 : [c  .  ]") == " [2, 4]"
     @test string(Interval(2.3534534644, 3.56453), "8 : [c  .  ]") == "[2.3, 4]"

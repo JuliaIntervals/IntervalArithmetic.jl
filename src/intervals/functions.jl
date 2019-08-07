@@ -320,26 +320,6 @@ function string(x :: Interval{T}, cs :: AbstractString) where T
     end
 end
 
-```
-Without any parameters, string function outputs the string of interval containing the interval x within 2 precision digits.
-julia> string(1.12321 .. 2.21322)
-"[1.12, 2.22]"
-```
-function string(x :: Interval{T}) where T
-    x == ∅ && return "[Empty]"
-    x == entireinterval(T) && return "Entire"
-    isnai(x) && return "[Nai]"
-    low = Float64(floor(x.lo * 100) / 100)
-    high = Float64(ceil(x.hi * 100) / 100)
-    if isinteger(low)
-        low = Int64(low)
-    end
-    if isinteger(high)
-        high = Int64(high)
-    end
-    return "[$low, $high]"
-end
-
 function infsup_string(x :: Interval{T}, m :: RegexMatch) where T
     overall_width = m.captures[1]
     flag = m.captures[2]
