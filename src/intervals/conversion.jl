@@ -102,8 +102,7 @@ else
 end
 
 function atomic(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:AbstractFloat}
-    isinf(x) && return wideinterval(x)#Interval{T}(prevfloat(T(x)), nextfloat(T(x)))
-    # isinf(x) && return Interval{T}(prevfloat(x), nextfloat(x))
+    isinf(x) && return wideinterval(T(x))
 
     xrat = rationalize(x)
 
