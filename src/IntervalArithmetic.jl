@@ -66,7 +66,7 @@ export
     cancelminus, cancelplus, isunbounded,
     .., @I_str, ±,
     pow, extended_div,
-    setformat, @format
+    setformat, @format, interval_to_string
 
 export
     setindex   # re-export from StaticArrays for IntervalBox
@@ -79,7 +79,6 @@ end
 export showfull
 
 import Base: rounding, setrounding, setprecision
-import Base.string
 
 
 ## Multidimensional

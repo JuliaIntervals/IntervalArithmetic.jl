@@ -306,7 +306,22 @@ for f in (:log, :log2, :log10, :log1p)
         end
 end
 
-function string(x :: Interval{T}, cs :: AbstractString) where T
+function interval_to_string(x :: Interval{T}) where T
+    x == ∅ && return "[Empty]"
+    x == entireinterval(T) && return "Entire"
+    isnai(x) && return "[Nai]"
+    low = Float64(floor(x.lo * 100000) / 100000)
+    high = Float64(ceil(x.hi * 100000) / 100000)
+    if isinteger(low)
+        low = Int64(low)
+    end
+    if isinteger(high)
+        high = Int64(high)
+    end
+    return "[$low, $high]"
+end
+
+function interval_to_string(x :: Interval{T}, cs :: AbstractString) where T
     m = match(r"(\d*)\s?\:\s?\[(.?)\s?(\d*)\s?\.\s?(\d*)\s?(.?)\s?\]", cs)
     if m != nothing
         return infsup_string(x, m)
