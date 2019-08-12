@@ -13,7 +13,8 @@ makedocs(
         "Decorations" => "decorations.md",
         "Multi-dimensional boxes" => "multidim.md",
         "Rounding" => "rounding.md",
-        "API" => "api.md"
+        "API" => "api.md",
+        "Input&Output" => "input_output.md"
     ]
 )
 

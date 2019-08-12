@@ -32,7 +32,8 @@ Pages = ["usage.md",
     "decorations.md",
     "multidim.md",
     "rounding.md",
-    "api.md"
+    "api.md",
+    "input_output.md"
     ]
 ```
 
