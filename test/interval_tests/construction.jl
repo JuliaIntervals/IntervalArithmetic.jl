@@ -350,4 +350,8 @@ end
     m = @which convert(T, x)
 
     @test m.sig == Tuple{typeof(convert),Type{Interval{T}},Interval{T}} where T
+
+    x = interval(1//1, 5//3)
+    @test convert(typeof(x), x) == x
+
 end
