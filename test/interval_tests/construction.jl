@@ -5,6 +5,8 @@ using Test
 
 const eeuler = Base.MathConstants.e
 
+using InteractiveUtils
+
 
 @testset "Constructing intervals" begin
     setprecision(Interval, 53)
@@ -339,4 +341,13 @@ import IntervalArithmetic: force_interval
     @test force_interval(Inf, 4) == Interval(4, Inf)
     @test force_interval(Inf, -Inf) == Interval(-Inf, Inf)
     @test_throws ArgumentError force_interval(NaN, 3)
+end
+
+@testset "#320 fixing convert bug" begin
+    x = 3..4
+    T = typeof(x)
+
+    m = @which convert(T, x)
+
+    @test m.sig == Tuple{typeof(convert),Type{Interval{T}},Interval{T}} where T
 end
