@@ -17,7 +17,7 @@ convert(::Type{Interval{T}}, x::Bool) where {T} = convert(Interval{T}, Int(x))
 convert(::Type{Interval{T}}, x::Real) where {T} = atomic(Interval{T}, x)
 convert(::Type{Interval{T}}, x::T) where {T<:Real} = Interval{T}(x)
 convert(::Type{Interval{T}}, x::Interval{T}) where {T} = x
-convert(::Type{Interval{T}}, x::Interval) where {T} = atomic(Interval{T}, x)
+convert(::Type{Interval{T}}, x::Interval{S}) where {T,S} = atomic(Interval{T}, x)
 
 convert(::Type{Interval}, x::Real) = (T = typeof(float(x)); convert(Interval{T}, x))
 convert(::Type{Interval}, x::Interval) = x
