@@ -2,28 +2,23 @@
 
 # TODO implement the edge cases for vasious flavors, this one is the set-based (IEEE)
 """
-    checked_mult(a, b, r::RoundingMode)
+    zero_times_infinity(::Type{AbstractFlavor})
 
-Multiplication `a*b` with the special case `0*Inf` giving `0`.
+Return the result of zero times positive infinity for the given flavor.
 """
-function checked_mult(a::T, b::T, r::RoundingMode) where T
-    if (a == 0 && isinf(b)) || (isinf(a) && b == 0)
-        return zero(T)
-    end
+zero_times_infinity(::Type{F}) where {T, F <: SetBasedFlavoredInterval{T}} = zero(T)
 
-    return *(a, b, r)
-end
 
 """
-    div_by_zero(F, a::AbstractFlavor)
+    inv_of_zero(F)
 
-Division of the interval `a` by exactly `0`.
+Inverse of the interval containing only `0`.
 """
-div_by_zero(::Type{F}, a::F) where {F <: SetBasedFlavoredInterval} = emptyinterval(F)
+inv_of_zero(::Type{F}) where {F <: SetBasedFlavoredInterval} = emptyinterval(F)
 
 """
     div_zero_by(F, x)
 
 Division of exactly `0` by `x`.
 """
-div_by_zero(::Type{F}, x) where {F <: SetBasedFlavoredInterval} = zero(F)
+div_zero_by(::Type{F}, x) where {F <: SetBasedFlavoredInterval} = zero(F)

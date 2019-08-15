@@ -34,10 +34,15 @@ argument given, the default interval flavor will be used. See the documentation
 of `Interval` for more information about the default interval falvor.
 """
 RR(::Type{F}) where {T, F <: AbstractFlavor{T}} = F(-Inf, Inf)
-RR(::F) where {T, F <: AbstractFlavor{T}} = ℝ(F)
+RR(::F) where {T, F <: AbstractFlavor{T}} = RR(F)
 
 RR(::Type{T}) where T = Interval{T}(-Inf, Inf)
-RR() = entireinterval(Float64)
+RR() = RR(Float64)
+
+function entireinterval(args...)
+    @warn "entireinterval is deprecated. Use RR instead."
+    return RR(args...)
+end
 
 # TODO decide if `inf` and `sup` should be used as default or rather `x.lo` and `x.hi`
 #= By default, intervals are expected to be represented as pair of numbers, with

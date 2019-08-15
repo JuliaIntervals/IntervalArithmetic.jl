@@ -33,21 +33,21 @@ round_expr(ex, rounding_mode) = ex  # generic fallback that doesn't round
 
 
 """
-    @round(ex1, ex2)
+    @round(F, ex1, ex2)
 
-Macro for internal use that creates an interval by rounding down `ex1` and rounding up `ex2`.
-Each expression may consist of only a *single* operation that needs rounding, e.g.
-`a.lo + b.lo` or `sin(a.lo)`.
-It also handles `min(...)` and `max(...)`, where the arguments are each themselves
-single operations.
+Macro for internal use that creates an interval of flavor F by rounding down
+`ex1` and rounding up `ex2`. Each expression may consist of only a *single*
+operation that needs rounding, e.g. `a.lo + b.lo` or `sin(a.lo)`.
+It also handles `min(...)` and `max(...)`, where the arguments are each
+themselves single operations.
 
 The macro uses the internal `round_expr` function to transform e.g.
 `a + b` into `+(a, b, RoundDown)`.
 
 The user-facing equivalent is `@interval`, which can handle much more general cases.
 """
-macro round(ex1, ex2)
-     :(Interval($(round_expr(ex1, RoundDown)), $(round_expr(ex2, RoundUp))))
+macro round(F, ex1, ex2)
+     :($F($(round_expr(ex1, RoundDown)), $(round_expr(ex2, RoundUp))))
 end
 
 macro round_down(ex1)
