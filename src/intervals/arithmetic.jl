@@ -507,7 +507,7 @@ function radius(a::Interval)
     return max(m - a.lo, a.hi - m)
 end
 
-function radius(a::Interval{Rational{T}}) where {T <: Integer}
+function radius(a::Interval{Rational{T}}) where T
     m = (a.lo + a.hi) / 2
     return max(m - a.lo, a.hi - m)
 end
@@ -521,7 +521,7 @@ Return the unique interval `c` such that `b+c=a`.
 See Section 12.12.5 of the IEEE-1788 Standard for
 Interval Arithmetic.
 """
-function cancelminus(a::Interval{T}, b::Interval{T}) where {T <: IASupportedType}
+function cancelminus(a::Interval{T}, b::Interval{T}) where T
     (isempty(a) && (isempty(b) || !isunbounded(b))) && return emptyinterval(T)
 
     (isunbounded(a) || isunbounded(b) || isempty(b)) && return entireinterval(T)

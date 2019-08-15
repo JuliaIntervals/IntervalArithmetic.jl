@@ -11,8 +11,7 @@ else
     const validity_check = false
 end
 
-const IASupportedType = Union{Integer, Rational, Irrational, Float16, Float32,
-                              Float64, BigFloat}
+const IASupportedType = Union{Integer, Rational, Irrational, AbstractFloat}
 
 abstract type AbstractInterval{T} <: Real end
 
@@ -20,7 +19,7 @@ struct Interval{T<:Real} <: AbstractInterval{T}
     lo :: T
     hi :: T
 
-    function Interval{T}(::Type{Val{true}}, a::Real, b::Real) where {T <: Real}
+    function Interval{T}(::Val{true}, a::Real, b::Real) where {T <: Real}
         if validity_check
 
             if is_valid_interval(a, b)
@@ -34,32 +33,32 @@ struct Interval{T<:Real} <: AbstractInterval{T}
 end
 
 ## Traits functions
-canBeIntervalBound(::Type{T}) where {T <: IASupportedType} = true
-canBeIntervalBound(T) = false  # Default case
+can_bound_interval(::Type{T}) where {T} = false  # Default case
+can_bound_interval(::Type{T}) where {T <: IASupportedType} = true
 
 ## Outer constructors
-function Interval{T}(::Type{Val{false}}, ::Real, ::Real) where {T <: Real}
-    throw(ArgumentError("Type $T is not suitable to construct an interval. If it is a custom type and should be accepted, make sure to define `canBeIntervalBound($T) = true`"))
+function Interval{T}(::Val{false}, ::Real, ::Real) where {T <: Real}
+    throw(ArgumentError("Type $T is not suitable to construct an interval. If it is a custom type and should be accepted, make sure to define `can_bound_interval(::Type{$T}) = true`"))
 end
 
-Interval{T}(a::Real, b::Real) where {T <: Real} = Interval{T}(Val{canBeIntervalBound(T)}, a, b)
-Interval(a::T, b::T) where {T <: Real} = Interval{T}(Val{canBeIntervalBound(T)}, a, b)
+Interval{T}(a::Real, b::Real) where {T} = Interval{T}(Val(can_bound_interval(T)), a, b)
+Interval(a::T, b::T) where {T <: Real} = Interval{T}(Val(can_bound_interval(T)), a, b)
 Interval(a::T) where {T <: Real} = Interval(a, a)
 Interval(a::Tuple) = Interval(a...)
-Interval(a::T, b::S) where {T <: Real, S <: Real} = Interval(promote(a,b)...)
+Interval(a::T, b::S) where {T, S} = Interval(promote(a,b)...)
 
 ## Concrete constructors for Interval, to effectively deal only with Float64,
 # BigFloat or Rational{Integer} intervals.
 Interval(a::T, b::T) where {T <: Integer} = Interval(float(a), float(b))
 Interval(a::T, b::T) where {T <: Irrational} = Interval(float(a), float(b))
 
-eltype(x::Interval{T}) where {T <: Real} = T
 # Constructors for Irrational
 # Single argument Irrational constructor are in IntervalArithmetic.jl
 # as generated functions need to be define last.
 Interval{T}(a::Irrational, b::Irrational) where {T<:Real} = Interval{T}(T(a, RoundDown), T(b, RoundUp))
 Interval{T}(a::Irrational, b::Real) where {T<:Real} = Interval{T}(T(a, RoundDown), b)
 Interval{T}(a::Real, b::Irrational) where {T<:Real} = Interval{T}(a, T(b, RoundUp))
+eltype(x::Interval{T}) where {T} = T
 
 Interval(a::Irrational, b::Irrational) = Interval{Float64}(a, b)
 Interval(a::Irrational, b::Real) = Interval{Float64}(a, b)
