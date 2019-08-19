@@ -5,11 +5,21 @@
 =#
 
 for f in (:sinh, :cosh, :tanh, :asinh)
-    @eval function ($f)(a::F) where {F<:AbstractFlavor}
-        isempty(a) && return a
-    
-        return @round(F, ($f)(a.lo), ($f)(a.hi))
-    end
+    @eval begin
+        function ($f)(a::F) where {F<:AbstractFlavor}
+            isempty(a) && return a
+        
+            return @round(F, ($f)(a.lo), ($f)(a.hi))
+        end
+
+        docstring = """
+            $f(a::AbstractFlavor)
+        
+        Corresponds to the IEEE standard `$f` function (Table 9.1).
+        """
+
+        @doc ($f) docstring
+    end 
 end
 
 """
@@ -41,6 +51,7 @@ function atanh(a::F) where {F<:AbstractFlavor}
 
     # The IEEE Std 1788-2015 does not allow intervals like of the
     # form Interval(∞,∞) and Interval(-∞,-∞) for set based intervals
+    # TODO check for flavor dependent behavior
     (res_lo == res_hi == Inf || res_lo == res_hi == -Inf) && return emptyinterval(a)
 
     return F(res_lo, res_hi)
