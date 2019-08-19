@@ -38,7 +38,7 @@ setprecision(Interval, Float64)
         @test @interval(-Inf, 1) == Interval(-Inf, 1.0)
         @test @biginterval(1, Inf) == Interval{BigFloat}(1.0, Inf)
         @test @biginterval(-Inf, 1) == Interval{BigFloat}(-Inf, 1.0)
-        @test @interval(-Inf, Inf) == entireinterval(Float64)
+        @test @interval(-Inf, Inf) == RR(Float64)
         @test emptyinterval(Rational{Int}) == ∅
 
         @test 1 == zero(a)+one(b)
@@ -62,27 +62,27 @@ setprecision(Interval, Float64)
         @test emptyinterval(a)/a == emptyinterval(a)
         @test inv(@interval(-4.0,0.0)) == @interval(-Inf, -0.25)
         @test inv(@interval(0.0,4.0)) == @interval(0.25, Inf)
-        @test inv(@interval(-4.0,4.0)) == entireinterval(Float64)
+        @test inv(@interval(-4.0,4.0)) == RR(Float64)
         @test @interval(0)/@interval(0) == emptyinterval()
         @test typeof(emptyinterval()) == Interval{Float64}
     end
 
     @testset "fma consistency" begin
         @test fma(emptyinterval(), a, b) == emptyinterval()
-        @test fma(entireinterval(), zero(a), b) == b
-        @test fma(entireinterval(), one(a), b) == entireinterval()
-        @test fma(zero(a), entireinterval(), b) == b
-        @test fma(one(a), entireinterval(), b) == entireinterval()
+        @test fma(RR(), zero(a), b) == b
+        @test fma(RR(), one(a), b) == RR()
+        @test fma(zero(a), RR(), b) == b
+        @test fma(one(a), RR(), b) == RR()
         @test fma(a, zero(a), c) == c
         @test fma(Interval(1//2), Interval(1//3), Interval(1//12)) == Interval(3//12)
     end
 
     @testset "∈ tests" begin
-        @test !(Inf ∈ entireinterval())
+        @test !(Inf ∈ RR())
         @test 0.1 ∈ @interval(0.1)
         @test 0.1 in @interval(0.1)
-        @test !(-Inf ∈ entireinterval())
-        @test !(Inf ∈ entireinterval())
+        @test !(-Inf ∈ RR())
+        @test !(Inf ∈ RR())
 
         @test_throws ArgumentError (3..4) ∈ (3..4)
     end
@@ -127,10 +127,10 @@ setprecision(Interval, Float64)
         @test strictprecedes(Interval(3.0,4.0),∅)
         @test !(strictprecedes(Interval(-3.0,-1.0),Interval(-1.0,0.0)))
         @test !(iscommon(emptyinterval()))
-        @test !(iscommon(entireinterval()))
+        @test !(iscommon(RR()))
         @test iscommon(a)
         @test !(isunbounded(emptyinterval()))
-        @test isunbounded(entireinterval())
+        @test isunbounded(RR())
         @test isunbounded(Interval(-Inf, 0.0))
         @test isunbounded(Interval(0.0, Inf))
         @test !(isunbounded(a))
@@ -165,8 +165,8 @@ setprecision(Interval, Float64)
 
     @testset "Special interval tests" begin
 
-        @test entireinterval(Float64) == Interval(-Inf, Inf)
-        @test isentire(entireinterval(a))
+        @test RR(Float64) == Interval(-Inf, Inf)
+        @test isentire(RR(a))
         @test isentire(Interval(-Inf, Inf))
         @test !(isentire(a))
         @test Interval(-Inf, Inf) ⪽ Interval(-Inf, Inf)
@@ -181,8 +181,8 @@ setprecision(Interval, Float64)
         @test sup(a) == a.hi
         @test inf(emptyinterval(a)) == Inf
         @test sup(emptyinterval(a)) == -Inf
-        @test inf(entireinterval(a)) == -Inf
-        @test sup(entireinterval(a)) == Inf
+        @test inf(RR(a)) == -Inf
+        @test sup(RR(a)) == Inf
         @test isnan(sup(nai(BigFloat)))
     end
 
@@ -234,12 +234,12 @@ setprecision(Interval, Float64)
 
         x = Interval(-2.0, 4.440892098500622e-16)
         y = Interval(-4.440892098500624e-16, 2.0)
-        @test cancelminus(x, y) == entireinterval(Float64)
-        @test cancelplus(x, y) == entireinterval(Float64)
+        @test cancelminus(x, y) == RR(Float64)
+        @test cancelplus(x, y) == RR(Float64)
         x = Interval(-big(1.0), eps(big(1.0))/4)
         y = Interval(-eps(big(1.0))/2, big(1.0))
-        @test cancelminus(x, y) == entireinterval(BigFloat)
-        @test cancelplus(x, y) == entireinterval(BigFloat)
+        @test cancelminus(x, y) == RR(BigFloat)
+        @test cancelplus(x, y) == RR(BigFloat)
         x = Interval(-big(1.0), eps(big(1.0))/2)
         y = Interval(-eps(big(1.0))/2, big(1.0))
         @test cancelminus(x, y) ⊆ Interval(-one(BigFloat), one(BigFloat))
@@ -248,14 +248,14 @@ setprecision(Interval, Float64)
         @test cancelplus(emptyinterval(), emptyinterval()) == emptyinterval()
         @test cancelminus(emptyinterval(), Interval(0.0, 5.0)) == emptyinterval()
         @test cancelplus(emptyinterval(), Interval(0.0, 5.0)) == emptyinterval()
-        @test cancelminus(entireinterval(), Interval(0.0, 5.0)) == entireinterval()
-        @test cancelplus(entireinterval(), Interval(0.0, 5.0)) == entireinterval()
-        @test cancelminus(Interval(5.0), Interval(-Inf, 0.0)) == entireinterval()
-        @test cancelplus(Interval(5.0), Interval(-Inf, 0.0)) == entireinterval()
-        @test cancelminus(Interval(0.0, 5.0), emptyinterval()) == entireinterval()
-        @test cancelplus(Interval(0.0, 5.0), emptyinterval()) == entireinterval()
-        @test cancelminus(Interval(0.0), Interval(0.0, 1.0)) == entireinterval()
-        @test cancelplus(Interval(0.0), Interval(0.0, 1.0)) == entireinterval()
+        @test cancelminus(RR(), Interval(0.0, 5.0)) == RR()
+        @test cancelplus(RR(), Interval(0.0, 5.0)) == RR()
+        @test cancelminus(Interval(5.0), Interval(-Inf, 0.0)) == RR()
+        @test cancelplus(Interval(5.0), Interval(-Inf, 0.0)) == RR()
+        @test cancelminus(Interval(0.0, 5.0), emptyinterval()) == RR()
+        @test cancelplus(Interval(0.0, 5.0), emptyinterval()) == RR()
+        @test cancelminus(Interval(0.0), Interval(0.0, 1.0)) == RR()
+        @test cancelplus(Interval(0.0), Interval(0.0, 1.0)) == RR()
         @test cancelminus(Interval(0.0), Interval(1.0)) == Interval(-1.0)
         @test cancelplus(Interval(0.0), Interval(1.0)) == Interval(1.0)
         @test cancelminus(Interval(-5.0, 0.0), Interval(0.0, 5.0)) == Interval(-5.0)
@@ -267,7 +267,7 @@ setprecision(Interval, Float64)
         @test isnan(IntervalArithmetic.radius(emptyinterval()))
         @test mid(c) == 2.125
         @test isnan(mid(emptyinterval()))
-        @test mid(entireinterval()) == 0.0
+        @test mid(RR()) == 0.0
         @test isnan(mid(nai()))
         if VERSION < v"0.7.0-DEV"
             @test_throws ArgumentError nai(Interval(1//2))
@@ -278,21 +278,21 @@ setprecision(Interval, Float64)
 
     @testset "abs, min, max, sign" begin
 
-        @test abs(entireinterval()) == Interval(0.0, Inf)
+        @test abs(RR()) == Interval(0.0, Inf)
         @test abs(emptyinterval()) == emptyinterval()
         @test abs(Interval(-3.0,1.0)) == Interval(0.0, 3.0)
         @test abs(Interval(-3.0,-1.0)) == Interval(1.0, 3.0)
         @test abs2(Interval(-3.0,1.0)) == Interval(0.0, 9.0)
         @test abs2(Interval(-3.0,-1.0)) == Interval(1.0, 9.0)
-        @test min(entireinterval(), Interval(3.0,4.0)) == Interval(-Inf, 4.0)
+        @test min(RR(), Interval(3.0,4.0)) == Interval(-Inf, 4.0)
         @test min(emptyinterval(), Interval(3.0,4.0)) == emptyinterval()
         @test min(Interval(-3.0,1.0), Interval(3.0,4.0)) == Interval(-3.0, 1.0)
         @test min(Interval(-3.0,-1.0), Interval(3.0,4.0)) == Interval(-3.0, -1.0)
-        @test max(entireinterval(), Interval(3.0,4.0)) == Interval(3.0, Inf)
+        @test max(RR(), Interval(3.0,4.0)) == Interval(3.0, Inf)
         @test max(emptyinterval(), Interval(3.0,4.0)) == emptyinterval()
         @test max(Interval(-3.0,1.0), Interval(3.0,4.0)) == Interval(3.0, 4.0)
         @test max(Interval(-3.0,-1.0), Interval(3.0,4.0)) == Interval(3.0, 4.0)
-        @test sign(entireinterval()) == Interval(-1.0, 1.0)
+        @test sign(RR()) == Interval(-1.0, 1.0)
         @test sign(emptyinterval()) == emptyinterval()
         @test sign(Interval(-3.0,1.0)) == Interval(-1.0, 1.0)
         @test sign(Interval(-3.0,-1.0)) == Interval(-1.0, -1.0)

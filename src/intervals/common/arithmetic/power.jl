@@ -48,7 +48,7 @@ function ^(a::F, n::Integer) where {F <: AbstractFlavor{BigFloat}}
                 iszero(a.hi) && return @round(-Inf, a.lo^n)
                 return @round(a.hi^n, a.lo^n)
             else
-                return entireinterval(a)  # TODO Check: is this 1/0 ?
+                return RR(a)  # TODO Check: is this 1/0 ?
             end
         end
 

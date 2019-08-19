@@ -1,7 +1,7 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
 #=  This file contains the functions described as "Integer functions"
-    in the IEEE Std 1788-2015 (sections 9.1).
+    in the IEEE Std 1788-2015 (section 9.1).
 =#
 
 for f in (:sign, :ceil, :floor, :trunc)

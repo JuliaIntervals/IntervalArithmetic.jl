@@ -56,6 +56,17 @@ function -(a::F, b::F) where {F <: AbstractFlavor}
 end
 
 """
+    scale(α, a::AbstractFlavor)
+
+Multiply an interval by a positive scalar.
+
+For efficiency, does not check that the constant is positive.
+
+This function is not part of the IEEE standard
+"""
+scale(α, a::F) where {F<:AbstractFlavor}= @round(F, α*a.lo, α*a.hi)
+
+"""
     *(a::AbstractFlavor, b::Real)
     *(a::Real, a::AbstractFlavor)
     *(a::AbstractFlavor, b::AbstractFlavor)
@@ -68,7 +79,7 @@ function *(x::Real, a::F) where {F <: AbstractFlavor}
     isempty(a) && return emptyinterval(F)
     (isthinzero(a) || iszero(x)) && return zero(F)
 
-    if x ≥ 0.0
+    if x ≥ zero(x)
         return @round(F, a.lo*x, a.hi*x)
     else
         return @round(F, a.hi*x, a.lo*x)

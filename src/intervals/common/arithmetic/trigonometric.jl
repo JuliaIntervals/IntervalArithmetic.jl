@@ -230,7 +230,7 @@ Corresponds to the IEEE standard `tan` function (Table 9.1).
 function tan(a::F) where {F<:AbstractFlavor}
     isempty(a) && return a
 
-    diam(a) > F(π).lo && return entireinterval(a)
+    diam(a) > F(π).lo && return RR(a)
 
     lo_quadrant = minimum(find_quadrants(a.lo))
     hi_quadrant = maximum(find_quadrants(a.hi))
@@ -241,12 +241,12 @@ function tan(a::F) where {F<:AbstractFlavor}
     if lo_quadrant_mod == 0 && hi_quadrant_mod == 1
         # check if really contains singularity:
         if hi_quadrant * half_pi(F) ⊆ a
-            return entireinterval(F)  # crosses singularity
+            return RR(F)  # crosses singularity
         end
 
     elseif lo_quadrant_mod == hi_quadrant_mod && hi_quadrant > lo_quadrant
         # must cross singularity
-        return entireinterval(F)
+        return RR(F)
 
     end
     return @round(F, tan(a.lo), tan(a.hi))
@@ -255,7 +255,7 @@ end
 function tan(a::F) where {F <: AbstractFlavor{Float64}}
     isempty(a) && return a
 
-    diam(a) > F(π).lo && return entireinterval(a)
+    diam(a) > F(π).lo && return RR(a)
 
     lo_quadrant, lo = quadrant(a.lo)
     hi_quadrant, hi = quadrant(a.hi)
@@ -264,11 +264,11 @@ function tan(a::F) where {F <: AbstractFlavor{Float64}}
     hi_quadrant_mod = mod(hi_quadrant, 2)
 
     if lo_quadrant_mod == 0 && hi_quadrant_mod == 1
-        return entireinterval(a)  # crosses singularity
+        return RR(a)  # crosses singularity
 
     elseif lo_quadrant_mod == hi_quadrant_mod && hi_quadrant != lo_quadrant
         # must cross singularity
-        return entireinterval(a)
+        return RR(a)
 
     end
 

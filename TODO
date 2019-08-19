@@ -1,0 +1,117 @@
+Review intervals folder: 
+  General:
+    ☐ Choose whether to use x == zero(T) or x == 0 across files
+    ☐ Check that default flavor always return safe result
+    ☐ {F <: Type} -> {F<:Type} (remove spaces)
+    ☐ Replace "IEEE standard" -> "IEEE Std 1788-2015"
+    ☐ "Corresponds to" -> "Implement" in doc
+    ✔ Rename `entireinterval` -> `RR` @done(19-08-19 19:14)
+    
+  Global precision:
+    ☐ Get rid of it
+    ☐ Replace pi_interval(T) by Interval{T}(π) everywhere
+  
+  Flavors:
+    ☐ Implement set based flavor
+    ☐ Implement cset flavor
+    ☐ Make cset default
+    ☐ Implement all the needed conversions
+      ☐ Automatise with Cassette.jl ?
+  
+  macros.jl:
+    ✔ Review @done(19-08-19 01:49)
+  
+  precision.jl:
+    ✔ Review @done(19-08-19 01:49)
+  
+  rounding.jl:
+    ✔ Review @done(19-08-19 01:50)
+  
+  complex.jl:
+    Should we even bother ?
+    ☐ Review
+
+  9.1. Arithmetic functions:
+    ☐ Distribute everything from arithmetic.jl in other files
+    basic.jl:
+      ✔ Split @done(19-08-19 01:14)
+      ✔ Verify all requested functions are there @done(19-08-19 02:01)
+      ✔ Common @done(19-08-19 01:11)
+      ☐ Flavor dependent *
+      ☐ Flavor dependent /
+      ☐ Flavor dependent inv
+      ☐ Flavor dependent fma
+    power.jl:
+      Finish review when zero(T) vs 0 is solved
+      ✔ Split @done(19-08-19 01:14)
+      ✔ Verify all requested functions are there @done(19-08-19 04:29)
+      ☐ Common
+      ☐ Flavor dependent power (for negative power)
+      ☐ Flavor dependant log
+    trigonometric.jl:
+      ✔ Split @done(19-08-19 02:00)
+      ✔ Verify all requested functions are there @done(19-08-19 02:00)
+      ✔ Clean constants @done(19-08-19 14:13)
+      ✔ Common @done(19-08-19 15:19)
+      ☐ zero(T) or 0 ?
+    hyperbolic.jl:
+      ✔ Split @done(19-08-19 15:23)
+      ✔ Verify all requested functions are there @done(19-08-19 15:23)
+      ✔ Common @done(19-08-19 15:31)
+      ✔ Add docstring to generated funcs @done(19-08-19 16:45)
+      ☐ Flavor dependent atanh
+    integer.jl:
+      ✔ Split @done(19-08-19 17:31)
+      ✔ Verify all requested functions are there @done(19-08-19 17:35)
+      ✔ Common @done(19-08-19 17:43)
+    absmax.jl:
+      ✔ Split @done(19-08-19 17:46)
+      ✔ Verify all requested functions are there @done(19-08-19 17:46)
+      ✔ Common @done(19-08-19 17:48)
+
+  9.2. Cancellative:
+    ✔ Split @done(19-08-19 19:14)
+    ✔ Verify all requested functions are there @done(19-08-19 19:14)
+    ✔ Common @done(19-08-19 19:14)
+    ☐ Check if cancelminus has flavor dependent edge cases
+
+  9.3 Set operations:
+    ✔ Split @done(19-08-19 19:31)
+    ✔ Verify all requested functions are there @done(19-08-19 19:31)
+    ✔ Common @done(19-08-19 19:31)
+
+  9.4. Numeric functions:
+    ✔ Split @done(19-08-19 01:26)
+    ✔ Common @done(19-08-19 01:11)
+    ☐ Solve mid(a, 0.5) != mid(a) discrepency
+    ☐ Flavor dependent mid
+
+  9.5. Boolean functions:
+    These are in the set_operations.jl file
+    ✔ Split @done(19-08-19 19:30)
+    ✔ Verify all requested functions are there @done(19-08-19 19:31)
+    ✔ Common @done(19-08-19 19:36)
+    ✔ equal is not the same as == @done(19-08-19 19:36)
+    ☐ Check `islessprime`
+    ☐ Flavor dependent issubset/isinterior ?
+
+  9.6. Operatons on/with decoration:
+    ☐ Split
+    ☐ Verify all requested functions are there
+    ☐ Review
+
+  9.7. Literals:
+    ☐ Review
+
+  9.8. Constructor:
+    ☐ Review
+    ☐ Check correctness and tightness for Interval{T}(x)
+    ☐ Document flavors
+    ☐ Document constructors
+    ✔ Add Interval{T}(π) @done(19-08-19 01:58)
+      ☐ Check performance of this
+
+  
+Review other folers:
+  Check PR #271 for details
+  ☐ Do it

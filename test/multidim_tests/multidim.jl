@@ -77,7 +77,7 @@ let X, A  # avoid problems with global variables
     @test !contains_zero(X ∩ Y)
     @test contains_zero( (-1..1) × (-1..1) )
     @test !isinf( (-1..1) × (0..Inf) )
-    @test isinf( entireinterval() × entireinterval() )
+    @test isinf( RR() × RR() )
 
     X = IntervalBox(2..4, 3..5)
     Y = IntervalBox(3..5, 4..17)
