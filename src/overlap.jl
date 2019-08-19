@@ -17,6 +17,6 @@ function overlap(a::Interval, b::Interval)
     b.hi < a.lo && return "after"
 end
 
-function overlap_dec(xx::DecoratedInterval , yy::DecoratedInterval)
+function overlap(xx::DecoratedInterval, yy::DecoratedInterval) where T
     return overlap(interval_part(xx) , interval_part(yy))
 end

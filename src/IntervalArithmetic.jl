@@ -100,7 +100,7 @@ export
 
 ## Overlap function
 export
-    overlap,overlap_dec
+    overlap
 
 
 function __init__()
