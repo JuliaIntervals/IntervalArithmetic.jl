@@ -364,8 +364,14 @@ function infsup_string(x :: Interval{T}, m :: RegexMatch) where T
             high_exp = parse(Int64, s[5:end])
             high = high / 10^high_exp
         end
-        low = round(floor(low * 10^low_prec) / 10^low_prec, digits = low_prec)
-        high = round(trunc(high * 10^high_prec + 1) / 10^high_prec, digits = high_prec)
+        low1 = floor(low, digits = low_prec)
+        if length(string(low)) <= length(string(low1)) && low1 < low
+            low = round(low, digits = low_prec)
+        end
+        if length(string(low)) > length(string(low1)) || low1 >= low
+            low = low1
+        end
+        high = ceil(high, digits = high_prec)
         if prec > 0
             low = string(low) * "0"^(low_prec - (length(string(low)) - length(string(trunc(low))) + 1))
             high = string(high) * "0"^(high_prec - (length(string(high)) - length(string(trunc(high))) + 1))
@@ -428,22 +434,22 @@ function infsup_string(x :: Interval{T}, m :: RegexMatch) where T
             end
             if width <= high_min + 1
                 high = Int64(trunc(high + 1))
-            end
+             end
             if width >= low_min + 2 && width <= low_min + 6
                 low_prec = width - low_min - 1
-                low = round(floor(low * 10^low_prec) / 10^low_prec, digits = low_prec)
+                low = floor(low * 10^low_prec) / 10^low_prec
             end
             if width >= high_min + 2 && width <= high_min + 6
                 high_prec = width - high_min - 1
-                high = round(trunc(high * 10^high_prec + 1) / 10^high_prec, digits = high_prec)
+                high = trunc(high * 10^high_prec + 1) / 10^high_prec
             end
             if width > low_min + 6
                 low_prec = 5
-                low = round(floor(low * 10^low_prec) / 10^low_prec, digits = low_prec)
+                low = floor(low * 10^low_prec) / 10^low_prec
             end
             if width > high_min + 6
                 high_prec = 5
-                high = round(floor(high * 10^high_prec) / 10^high_prec, digits = high_prec)
+                high = floor(high * 10^high_prec) / 10^high_prec
             end
             if conversion != "e" && conversion != "E"
                 low = string(low)
@@ -499,25 +505,25 @@ function infsup_string(x :: Interval{T}, m :: RegexMatch) where T
             end
             if string_len == min_len + 2
                 low_prec = 1
-                low = round(floor(low * 10^low_prec) / 10^low_prec, digits = low_prec)
+                low = floor(low * 10^low_prec) / 10^low_prec
                 high = Int64(ceil(high))
             end
             if string_len == min_len + 3
                 low_prec = 2
-                low = round(floor(low * 10^low_prec) / 10^low_prec, digits = low_prec)
+                low = floor(low * 10^low_prec) / 10^low_prec
                 high = Int64(ceil(high))
             end
             if string_len >= min_len + 4 && string_len <= min_len + 12
                 high_prec = trunc((string_len - min_len - 2) / 2)
                 low_prec = string_len - min_len - high_prec - 2
-                low = round(floor(low * 10^low_prec) / 10^low_prec, digits = Int64(low_prec))
-                high = round(trunc(high * 10^high_prec + 1) / 10^high_prec, digits = Int64(high_prec))
+                low = floor(low * 10^low_prec) / 10^low_prec
+                high = trunc(high * 10^high_prec + 1) / 10^high_prec
             end
             if string_len > min_len + 12
                 high_prec = 5
                 low_prec = 5
-                low = round(floor(low * 10^low_prec) / 10^low_prec, digits = low_prec)
-                high = round(trunc(high * 10^high_prec + 1) / 10^high_prec, digits = high_prec)
+                low = floor(low * 10^low_prec) / 10^low_prec
+                high = trunc(high * 10^high_prec + 1) / 10^high_prec
             end
             if conversion == "e" || conversion == "E"
                 s = "[$low" * "e" * "$low_exp" * ", $high" * "e" * "$high_exp]"
@@ -559,14 +565,14 @@ function uncertain_string(x :: Interval{T}, m :: RegexMatch) where T
         end
         if flag != "u" && flag != "d"
             r = Int32(trunc(((x.hi - x.lo) / 2) * 10^prec + 1))
-            mid = round(round(((x.hi + x.lo) / 2) * 10^prec) / 10^prec, digits = prec)
+            mid = round(((x.hi + x.lo) / 2) * 10^prec) / 10^prec
         end
         if flag == "u"
-            mid = round(round(x.lo * 10^prec) / 10^prec, digits = prec)
+            mid = round(x.lo * 10^prec) / 10^prec
             r = Int32(trunc((x.hi - x.lo) * 10^prec + 1))
         end
         if flag == "d"
-            mid = round(round(x.hi * 10^prec) / 10^prec, digits = prec)
+            mid = round(x.hi * 10^prec) / 10^prec
             r = Int32(trunc((x.hi - x.lo) * 10^prec + 1))
         end
         if r > 9
@@ -584,7 +590,7 @@ function uncertain_string(x :: Interval{T}, m :: RegexMatch) where T
             exp = parse(Int64, s[5:end])
             mid = mid / 10^exp
             prec = prec + exp
-            mid = round(round(mid * 10^prec) / 10^prec, digits = prec)
+            mid = round(mid * 10^prec) / 10^prec
             if prec > 0
                 mid = string(mid) * "0"^(prec - (length(string(mid)) - length(string(trunc(mid))) + 1))
             end
@@ -630,7 +636,7 @@ function uncertain_string(x :: Interval{T}, m :: RegexMatch) where T
             r = Int32(trunc(r + 1))
             prec = -(parse(Int64, w[5 : end]))
             if prec > 0
-                mid = round(round(((x.hi + x.lo) / 2) * 10^prec) / 10^prec, digits = prec)
+                mid = round(((x.hi + x.lo) / 2) * 10^prec) / 10^prec
             end
             if prec <= 0
                 mid = Int64(round((x.hi + x.lo) / 2))
@@ -642,7 +648,7 @@ function uncertain_string(x :: Interval{T}, m :: RegexMatch) where T
             r = Int32(trunc(r + 1))
             prec = -(parse(Int64, w[5 : end]))
             if prec > 0
-                mid = round(round(x.lo * 10^prec) / 10^prec, digits = prec)
+                mid = round(x.lo * 10^prec) / 10^prec
             end
             if prec <= 0
                 mid = Int64(round(x.lo))
@@ -654,7 +660,7 @@ function uncertain_string(x :: Interval{T}, m :: RegexMatch) where T
             r = Int32(trunc(r + 1))
             prec = -(parse(Int64, w[5 : end]))
             if prec > 0
-                mid = round(round(x.hi * 10^prec) / 10^prec, digits = prec)
+                mid = round(x.hi * 10^prec) / 10^prec
             end
             if prec <= 0
                 mid = Int64(round(x.hi))
@@ -672,7 +678,7 @@ function uncertain_string(x :: Interval{T}, m :: RegexMatch) where T
             exp = parse(Int64, s[5:end])
             mid = Float64(mid / 10^exp)
             prec = prec + exp
-            mid = round(round(mid * 10^prec) / 10^prec, digits = prec)
+            mid = round(mid * 10^prec) / 10^prec
             if prec > 0
                 mid = string(mid) * "0"^(prec - (length(string(mid)) - length(string(trunc(mid))) + 1))
             end
