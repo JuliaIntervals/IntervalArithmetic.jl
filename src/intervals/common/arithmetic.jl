@@ -30,7 +30,7 @@ end
 
 Checks if the interval `a` is strictly less than interval `b`.
 
-Corresponds to the IEEE Standard `strictLess` function (Table 10.3).
+Implement the `strictLess` function of the IEEE Std 1788-2015 (Table 10.3).
 """
 function isstrictless(a::F, b::F) where {F <: AbstractFlavor}
     isempty(a) && isempty(b) && return true
@@ -62,11 +62,12 @@ function strictprecedes(a::F, b::F) where {F <: AbstractFlavor}
     (isempty(a) || isempty(b)) && return true
     a.hi < b.lo
 end
-real(a::Interval) = a
 
 # zero, one, typemin, typemax
 # These are not defined in the IEEE standard
 # TODO move these early in the loading process
+# TODO move these to the conversion file
+real(a::Interval) = a
 zero(a::F) where {T <: Real, F <: AbstractFlavor{T}} = F(zero(T))
 zero(::Type{F}) where {T <: Real, F <: AbstractFlavor{T}} = F(zero(T))
 one(a::F) where {T <: Real, F <: AbstractFlavor{T}} = F(one(T))

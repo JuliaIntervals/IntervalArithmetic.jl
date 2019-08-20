@@ -1,7 +1,8 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
 #=  This file contains the functions described as "Integer functions"
-    in the IEEE Std 1788-2015 (section 9.1).
+    in the IEEE Std 1788-2015 (section 9.1) and required for set-based flavor
+    in section 10.5.3.
 =#
 
 for f in (:sign, :ceil, :floor, :trunc)
@@ -14,7 +15,7 @@ for f in (:sign, :ceil, :floor, :trunc)
     docstring = """
         $f(a::AbstractFlavor)
     
-    Corresponds to the IEEE Std 1788-2015 `$f` function (Table 9.1).
+    Implement the `$f` function of the IEEE Std 1788-2015 (Table 9.1).
     """
 
     @doc ($f) docstring

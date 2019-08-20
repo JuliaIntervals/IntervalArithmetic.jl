@@ -1,7 +1,8 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
 #=  This file contains the functions described as "Power functions"
-    in the IEEE standard (sections 9.1), with addition of the `sqr` function.
+    in the IEEE Std 1788-2015 (sections 9.1) and required for set-based flavor
+    in section 10.5.3, with addition of the `sqr` function.
 =#
 
 # Overwrite behaviour for literal integer powers
@@ -14,7 +15,7 @@ Base.literal_pow(::typeof(^), a::F, ::Val{p}) where {F <: AbstractFlavor, p} = a
     ^(a::AbstractFlavor, b::AbstractFlavor)
     ^(a::AbstractFlavor, b)
 
-Corresponds to the IEEE standard `pow` function (Table 9.1).
+Implement the `pow` function of the IEEE Std 1788-2015 (Table 9.1).
 """
 ^(a::F, b::F) where {F <: AbstractFlavor} = atomic(F, big53(a)^b)
 

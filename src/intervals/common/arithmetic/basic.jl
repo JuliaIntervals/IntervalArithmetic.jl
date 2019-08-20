@@ -1,8 +1,9 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
 #=  This file contains the functions described as "Basic arithmetic functions"
-    in the IEEE standard (sections 9.1), at the exception of the `sqr` function
-    present in the "Power functions" file.
+    in the IEEE Std 1788-2015 (sections 9.1) and required for set-based flavor
+    in section 10.5.3, at the exception of the `sqr` function present in the
+    "Power functions" file.
 =#
 
 +(a::AbstractFlavor) = a  # Not in the IEEE standard
@@ -10,7 +11,7 @@
 """
     -(a::AbstractFlavor)
 
-Corresponds to the IEEE standard `neg` function (Table 9.1).
+Implement the `neg` function of the IEEE Std 1788-2015 (Table 9.1).
 """
 -(a::F) where {F <: AbstractFlavor} = F(-a.hi, -a.lo)
 
@@ -20,7 +21,7 @@ Corresponds to the IEEE standard `neg` function (Table 9.1).
     +(a::Real, a::AbstractFlavor)
     +(a::AbstractFlavor, b::AbstractFlavor)
 
-Corresponds to the IEEE standard `add` function (Table 9.1).
+Implement the `add` function of the IEEE Std 1788-2015 (Table 9.1).
 """
 function +(a::F, b::Real) where {F <: AbstractFlavor}
     isempty(a) && return emptyinterval(F)
@@ -38,7 +39,7 @@ end
     -(a::Real, a::AbstractFlavor)
     -(a::AbstractFlavor, b::AbstractFlavor)
 
-Corresponds to the IEEE standard `sub` function (Table 9.1).
+Implement the `sub` function of the IEEE Std 1788-2015 (Table 9.1).
 """
 function -(a::F, b::Real) where {F <: AbstractFlavor}
     isempty(a) && return emptyinterval(F)
@@ -61,8 +62,6 @@ end
 Multiply an interval by a positive scalar.
 
 For efficiency, does not check that the constant is positive.
-
-This function is not part of the IEEE standard
 """
 scale(α, a::F) where {F<:AbstractFlavor}= @round(F, α*a.lo, α*a.hi)
 
@@ -71,7 +70,7 @@ scale(α, a::F) where {F<:AbstractFlavor}= @round(F, α*a.lo, α*a.hi)
     *(a::Real, a::AbstractFlavor)
     *(a::AbstractFlavor, b::AbstractFlavor)
 
-Corresponds to the IEEE standard `mul` function (Table 9.1).
+Implement the `mul` function of the IEEE Std 1788-2015 (Table 9.1).
 
 Note: the behavior of the multiplication if flavor dependent for some edge cases.
 """
@@ -127,7 +126,7 @@ end
     /(a::Real, a::AbstractFlavor)
     /(a::AbstractFlavor, b::AbstractFlavor)
 
-Corresponds to the IEEE standard `div` function (Table 9.1).
+Implement the `div` function of the IEEE Std 1788-2015 (Table 9.1).
 
 Note: the behavior of the division is flavor dependent for some edge cases.
 """
@@ -180,7 +179,7 @@ end
 """
     inv(a::AbstractFlavor)
 
-Corresponds to the IEEE standard `recip` function (Table 9.1).
+Implement the `recip` function of the IEEE Std 1788-2015 (Table 9.1).
 
 Note: the behavior of this function is flavor dependent for some edge cases.
 """
@@ -213,7 +212,7 @@ end
 
 Fused multiply-add.
 
-Corresponds to the IEEE standard `fma` function (Table 9.1).
+Implement the `fma` function of the IEEE Std 1788-2015 (Table 9.1).
 """
 # TODO check for flavor dependent edge cases
 function fma(a::F, b::F, c::F) where {T, F <: AbstractFlavor{T}}
@@ -251,7 +250,7 @@ end
 
 Square root of an interval.
 
-Corresponds to the IEEE standard `sqrt` function (Table 9.1).
+Implement the `sqrt` function of the IEEE Std 1788-2015 (Table 9.1).
 """
 function sqrt(a::F) where {F <: AbstractFlavor}
     domain = F(0, Inf)

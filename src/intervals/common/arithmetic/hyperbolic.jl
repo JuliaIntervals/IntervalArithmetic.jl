@@ -1,7 +1,8 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
 #=  This file contains the functions described as "Hyperbolic functions"
-    in the IEEE standard (sections 9.1).
+    in the IEEE Std 1788-2015 (sections 9.1) and required for set-based flavor
+    in section 10.5.3.
 =#
 
 for f in (:sinh, :cosh, :tanh, :asinh)
@@ -15,7 +16,7 @@ for f in (:sinh, :cosh, :tanh, :asinh)
         docstring = """
             $f(a::AbstractFlavor)
         
-        Corresponds to the IEEE standard `$f` function (Table 9.1).
+        Implement the `$f` function of the IEEE Std 1788-2015 (Table 9.1).
         """
 
         @doc ($f) docstring
@@ -25,7 +26,7 @@ end
 """
     acosh(a::AbstractFlavor)
 
-Corresponds to the IEEE standard `acosh` function (Table 9.1).
+Implement the `acosh` function of the IEEE Std 1788-2015 (Table 9.1).
 """
 function acosh(a::F) where {F<:AbstractFlavor}
     domain = F(1, Inf)
@@ -38,7 +39,7 @@ end
 """
     atanh(a::AbstractFlavor)
 
-Corresponds to the IEEE standard `atanh` function (Table 9.1).
+Implement the `atanh` function of the IEEE Std 1788-2015 (Table 9.1).
 """
 function atanh(a::F) where {F<:AbstractFlavor}
     domain = F(-1, 1)

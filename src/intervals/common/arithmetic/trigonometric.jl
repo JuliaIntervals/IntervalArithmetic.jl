@@ -1,7 +1,8 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
 #=  This file contains the functions described as "Trigonometric functions"
-    in the IEEE standard (sections 9.1).
+    in the IEEE Std 1788-2015 (sections 9.1) and required for set-based flavor
+    in section 10.5.3.
 =#
 
 const halfpi = pi / 2.0
@@ -51,7 +52,7 @@ end
 """
     sin(a::AbstractFlavor)
 
-Corresponds to the IEEE standard `sin` function (Table 9.1).
+Implement the `sin` function of the IEEE Std 1788-2015 (Table 9.1).
 """
 function sin(a::F) where {F<:AbstractFlavor}
     isempty(a) && return a
@@ -139,7 +140,7 @@ end
 """
     cos(a::AbstractFlavor)
 
-Corresponds to the IEEE standard `cos` function (Table 9.1).
+Implement the `cos` function of the IEEE Std 1788-2015 (Table 9.1).
 """
 function cos(a::F) where {F<:AbstractFlavor}
     isempty(a) && return a
@@ -225,7 +226,7 @@ end
 """
     tan(a::AbstractFlavor)
 
-Corresponds to the IEEE standard `tan` function (Table 9.1).
+Implement the `tan` function of the IEEE Std 1788-2015 (Table 9.1).
 """
 function tan(a::F) where {F<:AbstractFlavor}
     isempty(a) && return a
@@ -278,7 +279,7 @@ end
 """
     asin(a::AbstractFlavor)
 
-Corresponds to the IEEE standard `asin` function (Table 9.1).
+Implement the `asin` function of the IEEE Std 1788-2015 (Table 9.1).
 """
 function asin(a::F) where {F<:AbstractFlavor}
     domain = F(-1, 1)
@@ -292,7 +293,7 @@ end
 """
     acos(a::AbstractFlavor)
 
-Corresponds to the IEEE standard `acos` function (Table 9.1).
+Implement the `acos` function of the IEEE Std 1788-2015 (Table 9.1).
 """
 function acos(a::F) where {F<:AbstractFlavor}
     domain = F(-1, 1)
@@ -306,7 +307,7 @@ end
 """
     atan(a::AbstractFlavor)
 
-Corresponds to the IEEE standard `atan` function (Table 9.1).
+Implement the `atan` function of the IEEE Std 1788-2015 (Table 9.1).
 """
 function atan(a::F) where {F<:AbstractFlavor}
     isempty(a) && return a
