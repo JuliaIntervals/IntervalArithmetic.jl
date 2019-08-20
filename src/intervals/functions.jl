@@ -305,3 +305,411 @@ for f in (:log, :log2, :log10, :log1p)
 
         end
 end
+
+function interval_to_string(x :: Interval{T}) where T
+    x == ∅ && return "[Empty]"
+    x == entireinterval(T) && return "Entire"
+    isnai(x) && return "[Nai]"
+    low = round(floor(x.lo * 100000) / 100000, digits = 5)
+    high = round(ceil(x.hi * 100000) / 100000, digits = 5)
+    if isinteger(low)
+        low = Int64(low)
+    end
+    if isinteger(high)
+        high = Int64(high)
+    end
+    return "[$low, $high]"
+end
+
+function interval_to_string(x :: Interval{T}, cs :: AbstractString) where T
+    m = match(r"(\d*)\s?\:\s?\[(.?)\s?(\d*)\s?\.\s?(\d*)\s?(.?)\s?\]", cs)
+    if m != nothing
+        return infsup_string(x, m)
+    end
+    if m == nothing
+        m = match(r"(\d*)\s?\:(.?)\s?(\d*)\s?\.\s?(\d*)\s?\?\s?(\d*)\s?(.?)\s?", cs)
+        if m == nothing
+            throw(ArgumentError("Unable to process string $x as an interval"))
+        end
+        return uncertain_string(x, m)
+    end
+end
+
+function infsup_string(x :: Interval{T}, m :: RegexMatch) where T
+    overall_width = m.captures[1]
+    flag = m.captures[2]
+    width = m.captures[3]
+    prec = m.captures[4]
+    conversion = m.captures[5]
+    x == ∅ && flag == "C" && return "[Empty]"
+    x == ∅ && flag == "c" && return "[empty]"
+    x == entireinterval(T) && flag == "C" && return "Entire"
+    x == entireinterval(T) && flag == "c" && return "Entire"
+    isnai(x) && flag == "C" && return "[Nai]"
+    isnai(x) && flag == "c" && return "[nai]"
+    x == entireinterval(T) && flag == "<" && return "[-Inf, Inf]"
+    if prec != ""
+        prec = parse(Int64, prec)
+        low_prec = prec
+        high_prec = prec
+        low = x.lo
+        high = x.hi
+        if conversion == "e" || conversion == "E"
+            low = x.lo
+            s = @sprintf("%.1E", low)
+            low_exp = parse(Int64, s[5:end])
+            low = low / 10^low_exp
+            high = x.hi
+            s = @sprintf("%.1E", high)
+            high_exp = parse(Int64, s[5:end])
+            high = high / 10^high_exp
+        end
+        low1 = floor(low, digits = low_prec)
+        if length(string(low)) <= length(string(low1)) && low1 < low
+            low = round(low, digits = low_prec)
+        end
+        if length(string(low)) > length(string(low1)) || low1 >= low
+            low = low1
+        end
+        high = ceil(high, digits = high_prec)
+        if prec > 0
+            low = string(low) * "0"^(low_prec - (length(string(low)) - length(string(trunc(low))) + 1))
+            high = string(high) * "0"^(high_prec - (length(string(high)) - length(string(trunc(high))) + 1))
+        end
+        if prec == 0
+            low = string(Int64(low))
+            high = string(Int64(high))
+        end
+        if conversion == "e" || conversion == "E"
+            low = low * "e"* "$low_exp"
+            high = high * "e" * "$high_exp"
+        end
+        if width != ""
+            if length(high) < parse(Int64, width)
+                if flag == "0"
+                    low = "0"^(parse(Int64, width) - length(low)) * low
+                    high = "0"^(parse(Int64, width) - length(high)) * high
+                end
+                if flag != "0"
+                    low = " "^(parse(Int64, width) - length(low)) * low
+                    high = " "^(parse(Int64, width) - length(high)) * high
+                end
+            end
+            if length(high) > parse(Int64, width)
+                throw(ArgumentError("Cannot output the interval as a string"))
+            end
+        end
+        s = "[" * low * ", " * high * "]"
+        if overall_width != "" && parse(Int64, overall_width) >= length(s)
+            s = " "^(parse(Int64, overall_width) - length(s)) * s
+        end
+        if overall_width != "" && parse(Int64, overall_width) < length(s)
+            throw(ArgumentError("Cannot output the interval as a string"))
+        end
+        return s
+    end
+    if prec == ""
+        if width != ""
+            low = x.lo
+            high = x.hi
+            if conversion == "e" || conversion == "E"
+                low = x.lo
+                s = @sprintf("%.1E", low)
+                low_exp = parse(Int64, s[5:end])
+                low = low / 10^low_exp
+                high = x.hi
+                s = @sprintf("%.1E", high)
+                high_exp = parse(Int64, s[5:end])
+                high = high / 10^high_exp
+                low_min = length(string(Int64(trunc(low)))) + length(string(low_exp)) + 1
+                high_min = length(string(Int64(trunc(high)))) + length(string(high_exp)) + 1
+            end
+            width = parse(Int64, width)
+            if conversion != "e" && conversion != "E"
+                low_min = length(string(Int64(trunc(low))))
+                high_min = length(string(Int64(trunc(high))))
+            end
+            if width <= low_min + 1
+                low = Int64(trunc(low))
+            end
+            if width <= high_min + 1
+                high = Int64(trunc(high + 1))
+             end
+            if width >= low_min + 2 && width <= low_min + 6
+                low_prec = width - low_min - 1
+                low = floor(low * 10^low_prec) / 10^low_prec
+            end
+            if width >= high_min + 2 && width <= high_min + 6
+                high_prec = width - high_min - 1
+                high = trunc(high * 10^high_prec + 1) / 10^high_prec
+            end
+            if width > low_min + 6
+                low_prec = 5
+                low = floor(low * 10^low_prec) / 10^low_prec
+            end
+            if width > high_min + 6
+                high_prec = 5
+                high = floor(high * 10^high_prec) / 10^high_prec
+            end
+            if conversion != "e" && conversion != "E"
+                low = string(low)
+                high = string(high)
+            end
+            if conversion == "e" || conversion == "E"
+                low = string(low) * "e" * "$low_exp"
+                high = string(high) * "e" * "$high_exp"
+            end
+            low = " " ^ (width - length(low)) * low
+            high = " " ^ (width - length(high)) * high
+            s = "[$low, $high]"
+            if overall_width != ""
+                overall_width = parse(Int64, overall_width)
+                s = " " ^ (overall_width - length(s)) * s
+            end
+            return s
+        end
+        if width == "" && overall_width != ""
+            string_len = parse(Int64, overall_width)
+            if conversion == "e" || conversion == "E"
+                low = x.lo
+                s = @sprintf("%.1E", low)
+                low_exp = parse(Int64, s[5:end])
+                low = low / 10^low_exp
+                high = x.hi
+                s = @sprintf("%.1E", high)
+                high_exp = parse(Int64, s[5:end])
+                high = high / 10^high_exp
+                min_len = length(string(Int64(trunc(low)))) + length(string(Int64(ceil(high)))) + length(string(low_exp)) + length(string(high_exp)) + 6
+            end
+            if conversion != "e" && conversion != "E"
+                low = x.lo
+                high = x.hi
+                min_len = length(string(trunc(low))) + length(string(ceil(high)))
+            end
+            if string_len < min_len
+                throw(ArgumentError("Cannot output the interval as a string"))
+            end
+            if string_len == min_len
+                low = Int64(trunc(low))
+                high = Int64(ceil(high))
+            end
+            if string_len == min_len + 1
+                low = Int64(trunc(low))
+                high = Int64(ceil(high))
+                if conversion == "e" || conversion =="E"
+                    return " [$low" * "e" * "$low_exp" * ", $high" * "e" * "$high_exp" * "]"
+                end
+                if conversion != "e" && conversion != "E"
+                    s = " [$low, $high]"
+                end
+            end
+            if string_len == min_len + 2
+                low_prec = 1
+                low = floor(low * 10^low_prec) / 10^low_prec
+                high = Int64(ceil(high))
+            end
+            if string_len == min_len + 3
+                low_prec = 2
+                low = floor(low * 10^low_prec) / 10^low_prec
+                high = Int64(ceil(high))
+            end
+            if string_len >= min_len + 4 && string_len <= min_len + 12
+                high_prec = trunc((string_len - min_len - 2) / 2)
+                low_prec = string_len - min_len - high_prec - 2
+                low = floor(low * 10^low_prec) / 10^low_prec
+                high = trunc(high * 10^high_prec + 1) / 10^high_prec
+            end
+            if string_len > min_len + 12
+                high_prec = 5
+                low_prec = 5
+                low = floor(low * 10^low_prec) / 10^low_prec
+                high = trunc(high * 10^high_prec + 1) / 10^high_prec
+            end
+            if conversion == "e" || conversion == "E"
+                s = "[$low" * "e" * "$low_exp" * ", $high" * "e" * "$high_exp]"
+            end
+            if conversion != "e" && conversion != "E"
+                s = "[$low, $high]"
+            end
+            return " "^(string_len - length(s)) * s
+        end
+        if width == "" && overall_width == ""
+            return string(x)
+        end
+    end
+end
+
+function uncertain_string(x :: Interval{T}, m :: RegexMatch) where T
+    overall_width = m.captures[1]
+    flag = m.captures[2]
+    width = m.captures[3]
+    prec = m.captures[4]
+    rad_width = m.captures[5]
+    conversion = m.captures[6]
+    x == ∅ && flag == "C" && return "[Empty]"
+    x == ∅ && flag == "c" && return "[empty]"
+    x == entireinterval(T) && flag == "C" && return "Entire"
+    x == entireinterval(T) && flag == "c" && return "Entire"
+    isnai(x) && flag == "C" && return "[Nai]"
+    isnai(x) && flag == "c" && return "[nai]"
+    if (conversion == "e" || conversion == "E") && (flag == "u" || flag == "d")
+        throw(ArgumentError("Cannot output the interval as a string"))
+    end
+    if prec != ""
+        prec = parse(Int64, prec)
+        if conversion == "E" || conversion == "e"
+            mid = (x.lo + x.hi) / 2
+            s = @sprintf("%.1E", mid)
+            exp = parse(Int64, s[5:end])
+            prec = prec - exp
+        end
+        if flag != "u" && flag != "d"
+            r = Int32(trunc(((x.hi - x.lo) / 2) * 10^prec + 1))
+            mid = round(((x.hi + x.lo) / 2) * 10^prec) / 10^prec
+        end
+        if flag == "u"
+            mid = round(x.lo * 10^prec) / 10^prec
+            r = Int32(trunc((x.hi - x.lo) * 10^prec + 1))
+        end
+        if flag == "d"
+            mid = round(x.hi * 10^prec) / 10^prec
+            r = Int32(trunc((x.hi - x.lo) * 10^prec + 1))
+        end
+        if r > 9
+            throw(ArgumentError("Cannot output the interval as a string with given precision"))
+        end
+        if prec > 0
+            mid = string(mid) * "0"^(prec - (length(string(mid)) - length(string(trunc(mid))) + 1))
+        end
+        if prec == 0
+            mid = string(Int64(mid))
+        end
+        if conversion == "E" || conversion == "e"
+            mid = parse(Float64, mid)
+            s = @sprintf("%.1E", mid)
+            exp = parse(Int64, s[5:end])
+            mid = mid / 10^exp
+            prec = prec + exp
+            mid = round(mid * 10^prec) / 10^prec
+            if prec > 0
+                mid = string(mid) * "0"^(prec - (length(string(mid)) - length(string(trunc(mid))) + 1))
+            end
+            mid = string(mid)
+        end
+        if flag == "+"
+            if parse(Float64, mid) > 0
+                mid = "+" * mid
+            end
+        end
+        if width != ""
+            if length(mid) < parse(Int64, width)
+                if flag == "0"
+                    mid = "0"^(parse(Int64, width) - length(mid)) * mid
+                end
+                if flag != "0"
+                    mid = " "^(parse(Int64, width) - length(mid)) * mid
+                end
+            end
+        end
+        r = string(r)
+        if rad_width != ""
+            r = "0"^(parse(Int64, rad_width) - length(r)) * r
+        end
+        if flag != "u" && flag != "d"
+            s = mid*"?"*r
+        end
+        if flag == "u" || flag == "d"
+            s = mid*"?"*r*"$flag"
+        end
+        if conversion == "E" || conversion == "e"
+            s = mid*"?"*r*"e"*"$exp"
+        end
+        if overall_width != ""
+            s = " "^(parse(Int64, overall_width) - length(s)) * s
+        end
+        return s
+    end
+    if prec == ""
+        if flag != "u" && flag != "d"
+            w = @sprintf("%.1E", (x.hi - x.lo) / 2)
+            r = parse(Float64, w[1:3])
+            r = Int32(trunc(r + 1))
+            prec = -(parse(Int64, w[5 : end]))
+            if prec > 0
+                mid = round(((x.hi + x.lo) / 2) * 10^prec) / 10^prec
+            end
+            if prec <= 0
+                mid = Int64(round((x.hi + x.lo) / 2))
+            end
+        end
+        if flag == "u"
+            w = @sprintf("%.1E", x.hi - x.lo)
+            r = parse(Float64, w[1:3])
+            r = Int32(trunc(r + 1))
+            prec = -(parse(Int64, w[5 : end]))
+            if prec > 0
+                mid = round(x.lo * 10^prec) / 10^prec
+            end
+            if prec <= 0
+                mid = Int64(round(x.lo))
+            end
+        end
+        if flag == "d"
+            w = @sprintf("%.1E", x.hi - x.lo)
+            r = parse(Float64, w[1:3])
+            r = Int32(trunc(r + 1))
+            prec = -(parse(Int64, w[5 : end]))
+            if prec > 0
+                mid = round(x.hi * 10^prec) / 10^prec
+            end
+            if prec <= 0
+                mid = Int64(round(x.hi))
+            end
+        end
+        if r > 9
+            throw(ArgumentError("Cannot output the interval as a string"))
+        end
+        if prec > 0
+            mid = string(mid) * "0"^(prec - (length(string(mid)) - length(string(trunc(mid))) + 1))
+        end
+        if conversion == "E" || conversion == "e"
+            mid = parse(Float64, mid)
+            s = @sprintf("%.1E", mid)
+            exp = parse(Int64, s[5:end])
+            mid = Float64(mid / 10^exp)
+            prec = prec + exp
+            mid = round(mid * 10^prec) / 10^prec
+            if prec > 0
+                mid = string(mid) * "0"^(prec - (length(string(mid)) - length(string(trunc(mid))) + 1))
+            end
+        end
+        mid = string(mid)
+        if width != ""
+            if length(mid) < parse(Int64, width)
+                if flag == "0"
+                    mid = "0"^(parse(Int64, width) - length(mid)) * mid
+                end
+                if flag != "0"
+                    mid = " "^(parse(Int64, width) - length(mid)) * mid
+                end
+            end
+        end
+        r = string(r)
+        if rad_width != ""
+            r = "0"^(parse(Int64, rad_width) - length(r)) * r
+        end
+        if flag != "u" && flag != "d"
+            s = mid*"?"*"$r"
+        end
+        if flag == "u" || flag == "d"
+            s = mid*"?"*"$r"*"$flag"
+        end
+        if conversion == "E" || conversion == "e"
+            s = mid*"?"*"$r"*"e"*"$exp"
+        end
+        if overall_width != ""
+            s = " "^(parse(Int64, overall_width) - length(s)) * s
+        end
+        return s
+    end
+end

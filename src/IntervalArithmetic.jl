@@ -13,6 +13,7 @@ using SetRounding
 using Markdown
 
 using LinearAlgebra
+
 import LinearAlgebra: ×, dot, norm
 export ×, dot
 
@@ -45,6 +46,7 @@ import Base:  # for IntervalBox
 
 import Base.MPFR: MPFRRoundingMode
 import Base.MPFR: MPFRRoundUp, MPFRRoundDown, MPFRRoundNearest, MPFRRoundToZero, MPFRRoundFromZero
+import Printf.@sprintf
 
 import .Broadcast: broadcasted
 
@@ -64,7 +66,7 @@ export
     cancelminus, cancelplus, isunbounded,
     .., @I_str, ±,
     pow, extended_div,
-    setformat, @format
+    setformat, @format, interval_to_string
 
 export
     setindex   # re-export from StaticArrays for IntervalBox
@@ -77,7 +79,6 @@ end
 export showfull
 
 import Base: rounding, setrounding, setprecision
-
 
 
 ## Multidimensional
