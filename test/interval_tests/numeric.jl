@@ -331,6 +331,13 @@ end
         @test a * b == Interval{Float32}(floatmax(Float32), Inf)
     end
 
+    @testset "Decorated Zero and One tests" begin
 
+        a = @decorated(1, 2)
+        @test zero(a) == DecoratedInterval(0)
+        @test zero(DecoratedInterval{Float64}) == DecoratedInterval(0)
+        @test one(a) == DecoratedInterval(1)
+        @test one(DecoratedInterval{Float64}) == DecoratedInterval(1)
+    end
 
 end
