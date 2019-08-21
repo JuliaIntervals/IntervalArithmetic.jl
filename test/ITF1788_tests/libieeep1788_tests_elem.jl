@@ -995,6 +995,20 @@ end
     @test decoration((DecoratedInterval(Interval(-5.0, Inf), dac))^(1//2)) == decoration(DecoratedInterval(Interval(0.0, Inf), trv))
 end
 
+@testset "minimal_rsqrt_test" begin
+    @test reciprocal_sqrt(∅) == ∅
+    @test reciprocal_sqrt(Interval(-Inf, Inf)) == 0 .. Inf
+    @test reciprocal_sqrt(Interval(-Inf, -0x0.0000000000001p-1022)) == ∅
+    @test reciprocal_sqrt(Interval(-1.0, 1.0)) == 1.0 .. Inf
+    @test reciprocal_sqrt(Interval(0.0, 1.0)) == 1.0 .. Inf
+    @test reciprocal_sqrt(Interval(-0.0, 1.0)) == 1.0 .. Inf
+    @test reciprocal_sqrt(Interval(-5.0, 25.0)) == 0.2 .. Inf
+    @test reciprocal_sqrt(Interval(0.0, 25.0)) == 0.2 .. Inf
+    @test reciprocal_sqrt(Interval(-0.0, 25.0)) == 0.2 .. Inf
+    @test reciprocal_sqrt(Interval(-5.0, Inf)) == 0.0 .. Inf
+    @test reciprocal_sqrt(Interval(4.0, 25.0)) == 0.2 .. 0.5
+end
+
 @testset "minimal_fma_test" begin
     @test fma(∅, ∅, ∅) == ∅
     @test fma(Interval(-1.0, 1.0), ∅, ∅) == ∅
