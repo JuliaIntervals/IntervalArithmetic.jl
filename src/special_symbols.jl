@@ -1,0 +1,5 @@
+module Symbol
+
+export ∞, ..
+
+end
