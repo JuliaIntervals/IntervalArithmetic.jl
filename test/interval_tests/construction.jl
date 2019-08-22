@@ -7,21 +7,6 @@ const eeuler = Base.MathConstants.e
 
 
 @testset "Constructing intervals" begin
-    setprecision(Interval, 53)
-    @test IntervalArithmetic.parameters.precision == 53
-
-    setprecision(Interval, Float64)
-    @test IntervalArithmetic.parameters.precision == 53
-
-    @test precision(BigFloat) == 53
-    @test precision(Interval) == (Float64, 53)
-
-    # Checks for parameters
-    @test IntervalArithmetic.parameters.precision_type == Float64
-    @test IntervalArithmetic.parameters.precision == 53
-    @test IntervalArithmetic.parameters.rounding == :narrow
-    @test IntervalArithmetic.parameters.pi == @biginterval(pi)
-
     # Naive constructors, with no conversion involved
     @test Interval(1) == Interval(1.0, 1.0)
     @test size(Interval(1)) == (1,)
