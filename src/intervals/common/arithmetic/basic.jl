@@ -112,7 +112,7 @@ function mult(op, a::F, b::F) where {T, F <: AbstractFlavor{T}}
     elseif b.hi <= zero(T)
         a.lo >= zero(T) && return @round(F, op(a.hi, b.lo), op(a.lo, b.hi))
         a.hi <= zero(T) && return @round(F, op(a.hi, b.hi), op(a.lo, b.lo))
-        return @round(a.hi*b.lo, a.lo*b.lo)   # when zero(T) ∈ a
+        return @round(F, a.hi*b.lo, a.lo*b.lo)   # when zero(T) ∈ a
     else
         a.lo > zero(T) && return @round(F, op(a.hi, b.lo), op(a.hi, b.hi))
         a.hi < zero(T) && return @round(F, op(a.lo, b.hi), op(a.lo, b.lo))
@@ -136,9 +136,9 @@ function /(a::F, x::Real) where {F <: AbstractFlavor}
     isthinzero(a) && return div_zero_by(F, x)  # Flavor dependent
 
     if x ≥ 0.0
-        return @round(a.lo/x, a.hi/x)
+        return @round(F, a.lo/x, a.hi/x)
     else
-        return @round(a.hi/x, a.lo/x)
+        return @round(F, a.hi/x, a.lo/x)
     end
 end
 
@@ -258,5 +258,5 @@ function sqrt(a::F) where {F <: AbstractFlavor}
 
     isempty(a) && return a
 
-    @round(sqrt(a.lo), sqrt(a.hi))  # `sqrt` is correctly-rounded
+    @round(F, sqrt(a.lo), sqrt(a.hi))  # `sqrt` is correctly-rounded
 end

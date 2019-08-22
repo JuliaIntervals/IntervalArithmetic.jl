@@ -34,17 +34,17 @@ function ^(a::F, n::Integer) where {F <: AbstractFlavor{BigFloat}}
     if isodd(n) # odd power
         isentire(a) && return a
         if n > 0
-            iszero(a.lo) && return @round(0, a.hi^n)
-            iszero(a.hi) && return @round(a.lo^n, 0)
-            return @round(a.lo^n, a.hi^n)
+            iszero(a.lo) && return @round(F, 0, a.hi^n)
+            iszero(a.hi) && return @round(F, a.lo^n, 0)
+            return @round(F, a.lo^n, a.hi^n)
         else
             if a.lo ≥ 0
-                iszero(a.lo) && return @round(a.hi^n, Inf)
-                return @round(a.hi^n, a.lo^n)
+                iszero(a.lo) && return @round(F, a.hi^n, Inf)
+                return @round(F, a.hi^n, a.lo^n)
 
             elseif a.hi ≤ 0
-                iszero(a.hi) && return @round(-Inf, a.lo^n)
-                return @round(a.hi^n, a.lo^n)
+                iszero(a.hi) && return @round(F, -Inf, a.lo^n)
+                return @round(F, a.hi^n, a.lo^n)
             else
                 return RR(a)  # TODO Check: is this 1/0 ?
             end
@@ -53,20 +53,20 @@ function ^(a::F, n::Integer) where {F <: AbstractFlavor{BigFloat}}
     else # even power
         if n > 0
             if a.lo ≥ 0
-                return @round(a.lo^n, a.hi^n)
+                return @round(F, a.lo^n, a.hi^n)
             elseif a.hi ≤ 0
-                return @round(a.hi^n, a.lo^n)
+                return @round(F, a.hi^n, a.lo^n)
             else
-                return @round(mig(a)^n, mag(a)^n)
+                return @round(F, mig(a)^n, mag(a)^n)
             end
 
         else
             if a.lo ≥ 0
-                return @round(a.hi^n, a.lo^n)
+                return @round(F, a.hi^n, a.lo^n)
             elseif a.hi ≤ 0
-                return @round(a.lo^n, a.hi^n)
+                return @round(F, a.lo^n, a.hi^n)
             else
-                return @round(mag(a)^n, mig(a)^n)
+                return @round(F, mag(a)^n, mig(a)^n)
             end
         end
     end
@@ -232,7 +232,6 @@ for f in (:exp2, :exp10)
             return @round( F, ($f)(a.lo), ($f)(a.hi) )
         end
 end
-
 
 for f in (:log, :log2, :log10, :log1p)
     @eval function ($f)(a::F) where {T, F<:AbstractFlavor{T}}

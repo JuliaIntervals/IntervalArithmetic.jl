@@ -329,18 +329,18 @@ end
 
 # The function is unbounded at the bounded edges of the domain
 restricted_functions1 = Dict(
-    :log   => [0, ∞],
-    :log2  => [0, ∞],
-    :log10 => [0, ∞],
+    :log   => [0, Inf],
+    :log2  => [0, Inf],
+    :log10 => [0, Inf],
     :atanh => [-1, 1]
 )
 
 # The function is bounded at the bounded edge(s) of the domain
 restricted_functions2 = Dict(
-    :sqrt  => [0, ∞],
+    :sqrt  => [0, Inf],
     :asin  => [-1, 1],
     :acos  => [-1, 1],
-    :acosh => [1, ∞]
+    :acosh => [1, Inf]
 )
 
 # Define functions with restricted domains on DecoratedInterval's:

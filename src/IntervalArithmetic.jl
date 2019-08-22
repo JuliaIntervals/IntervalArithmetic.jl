@@ -102,8 +102,6 @@ export
 
 function __init__()
     setrounding(BigFloat, RoundNearest)
-
-
     setprecision(Interval, 256)  # set up pi
     setprecision(Interval, Float64)
 end

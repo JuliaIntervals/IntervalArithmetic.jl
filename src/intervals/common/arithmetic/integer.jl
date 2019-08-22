@@ -6,19 +6,20 @@
 =#
 
 for f in (:sign, :ceil, :floor, :trunc)
-    @eval begin
-        function ($f)(a::F) where {F<:AbstractFlavor}
-            isempty(a) && return emptyinterval(F)
-            return F(($f)(a.lo), ($f)(a.hi))
-        end
-
     docstring = """
         $f(a::AbstractFlavor)
     
     Implement the `$f` function of the IEEE Std 1788-2015 (Table 9.1).
     """
 
-    @doc ($f) docstring
+    @eval begin
+        function ($f)(a::F) where {F<:AbstractFlavor}
+            isempty(a) && return emptyinterval(F)
+            return F(($f)(a.lo), ($f)(a.hi))
+        end
+
+        @doc ($f) docstring
+    end
 end 
 
 const RoundTiesToEven = RoundNearest
