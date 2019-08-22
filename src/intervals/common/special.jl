@@ -2,47 +2,6 @@
 
 ## Definitions of special intervals and associated functions
 
-"""
-    `emptyinterval()`
-
-`emptyinterval`s are represented as the interval [∞, -∞]; note
-that this interval is an exception to the fact that the lower bound is
-larger than the upper one.
-
-Note that if the type of the returned interval can not be inferred from the
-argument given, the default interval flavor will be used. See the documentation
-of `Interval` for more information about the default interval falvor.
-"""
-emptyinterval(::Type{F}) where {F <: AbstractFlavor} = F(Inf, -Inf)
-emptyinterval(::F) where {F <: AbstractFlavor} = emptyinterval(F)
-emptyinterval(::Type{Complex{F}}) where {F <: AbstractFlavor} = complex(emptyinterval(F), emptyinterval(F))
-
-emptyinterval(::Type{T}) where T = emptyinterval(Interval{T})
-emptyinterval() = emptyinterval(Interval{Float64})
-
-
-"""
-    RR()
-
-`RR` represent the entire real line [-Inf, Inf].
-
-Depending on the flavor, `-Inf` and `Inf` may or may not be considerd inside this
-interval.
-
-Note that if the type of the returned interval can not be inferred from the
-argument given, the default interval flavor will be used. See the documentation
-of `Interval` for more information about the default interval falvor.
-"""
-RR(::Type{F}) where {T, F <: AbstractFlavor{T}} = F(-Inf, Inf)
-RR(::F) where {T, F <: AbstractFlavor{T}} = RR(F)
-
-RR(::Type{T}) where T = Interval{T}(-Inf, Inf)
-RR() = RR(Float64)
-
-function entireinterval(args...)
-    @warn "entireinterval is deprecated. Use RR instead."
-    return RR(args...)
-end
 
 # TODO decide if `inf` and `sup` should be used as default or rather `x.lo` and `x.hi`
 #= By default, intervals are expected to be represented as pair of numbers, with

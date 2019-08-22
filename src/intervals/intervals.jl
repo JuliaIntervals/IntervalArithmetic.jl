@@ -12,7 +12,6 @@ end
 abstract type AbstractRealFlavor{T} <: Real end
 abstract type AbstractNonRealFlavor{T} end
 
-
 """
     AbstractFlavor
 
@@ -59,8 +58,13 @@ for (Flavor, Supertype) in [(:SetBasedFlavoredInterval, AbstractNonRealFlavor), 
         $Flavor(x::$Flavor) = x
         $Flavor(x::Complex) = $Flavor(real(x)) + im*$Flavor(imag(x))
 
+        # TODO check if that gives correct results
         $Flavor{T}(x) where T = $Flavor(convert(T, x))
         $Flavor{T}(x::$Flavor) where T = atomic($Flavor{T}, x)
+
+        # TODO check performance of these
+        const $Flavor{T}(::Irrational{:π}) where T = atomic($Flavor{T}, π)
+        const $Flavor(::Irrational{:π}) = atomic($Flavor{Float64}, π)
 
         # Flavor without parametrization, allows reparametrization
         flavortype(::Type{$Flavor{T}}) where T = $Flavor

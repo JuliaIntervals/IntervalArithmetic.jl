@@ -4,7 +4,7 @@
 Empty interval of default flavor and `Float64` bounds. Can be typed as
 `\\emptyset<TAB>`.
 """
-const ∅ = emptyinterval(Float64)
+const ∅ = emptyinterval()
 
 """
     ≺(a, b)
@@ -12,6 +12,13 @@ const ∅ = emptyinterval(Float64)
 Alias of `strictPrecedes`. Can be typed as `\\prec<TAB>`.
 """
 const ≺ = strictprecedes
+
+"""
+    ⪽(a, b)
+
+Alias of `isinterior`. Can be typed as `\\subsetdot<TAB>`.
+"""
+const ⪽ = isinterior
 
 """
     ∞

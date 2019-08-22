@@ -1,7 +1,8 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
 #=  This file contains the functions described in section 9.2 of the IEEE Std
-    1788-2015 (Cancellative addition and subtraction).
+    1788-2015 (Cancellative addition and subtraction) and required for set-based
+    flavor in section 10.5.6.
 =#
 
 """

@@ -1,8 +1,9 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
 #=  This file contains the functions described as "Numeric functions" in the
-    IEEE-1788 standard (sections 9.4), together with some non required but similar
-    functions.
+    IEEE-1788 standard (sections 9.4) and required for set-based flavor
+    in section 10.5.9. Some other (non required) related functions are also
+    present.
 
     By default the behavior mimics the required one for the set-based flavor, as
     defined in the standard (sections 10.5.9 and 12.12.8 for the functions in
@@ -14,7 +15,7 @@
 
 Infimum of an interval.
 
-Corresponds to the IEEE-1788 standard `inf` function (Table 9.2).
+Implement the `inf` function of the IEEE Std 1788-2015 (Table 9.2).
 """
 inf(a::AbstractFlavor) = a.lo
 
@@ -23,7 +24,7 @@ inf(a::AbstractFlavor) = a.lo
 
 Supremum of an interval.
 
-Corresponds to the IEEE-1788 standard `sup` function (Table 9.2).
+Implement the `sup` function of the IEEE Std 1788-2015 (Table 9.2).
 """
 sup(a::AbstractFlavor) = a.hi
 
@@ -32,7 +33,7 @@ sup(a::AbstractFlavor) = a.hi
 
 Find the midpoint of interval `a`.
 
-Corresponds to the IEEE-1788 standard `mid` function (Table 9.2).
+Implement the `mid` function of the IEEE Std 1788-2015 (Table 9.2).
 """
 function mid(a::F) where {T, F <: AbstractFlavor{T}}
     isempty(a) && return convert(T, NaN)
@@ -60,8 +61,8 @@ instead.
     
 Assume 0 ≤ α ≤ 1.
 
-Note that for IEEE-1788 compliance, `scaled_mid(a, 0.5)` does not equal `mid(a)`
-for unbounded set-based intervals.
+Note that `scaled_mid(a, 0.5)` does not equal `mid(a)` for unbounded set-based
+intervals.
 """
 function scaled_mid(a::F, α) where {T, F <: AbstractFlavor{T}}
     isempty(a) && return convert(T, NaN)
@@ -86,7 +87,7 @@ end
 
 Return the diameter (length) of the interval `a`.
 
-Corresponds to the IEEE-1788 standard `wid` function (Table 9.2).
+Implement the `wid` function of the IEEE Std 1788-2015 (Table 9.2).
 """
 function diam(a::F) where {T, F <: AbstractFlavor{T}}
     isempty(a) && return convert(T, NaN)
@@ -99,7 +100,7 @@ end
 Return the radius of the interval `a`, such that `a ⊆ m ± radius`, where
 `m = mid(a)` is the midpoint.
 
-Corresponds to the IEEE-1788 standard `rad` function (Table 9.2).
+Implement the `rad` function of the IEEE Std 1788-2015 (Table 9.2).
 """
 function radius(a::AbstractFlavor)
     m, r = midpoint_radius(a)
@@ -111,7 +112,7 @@ midpoint_radius(a::AbstractFlavor)
 
 Return the midpoint of an interval `a` together with its radius.
 
-Function required by the IEEE-1788 standard in section 10.5.9 for the set-based
+Function required by the  IEEE Std 1788-2015 in section 10.5.9 for the set-based
 flavor.
 """
 function midpoint_radius(a::F) where {T, F <: AbstractFlavor{T}}
@@ -126,7 +127,7 @@ end
 
 Magnitude of an interval. Return `NaN` for empty intervals.
 
-Corresponds to the IEEE-1788 standard `mag` function (Table 9.2).
+Implement the `mag` function of the IEEE Std 1788-2015 (Table 9.2).
 """
 function mag(a::F) where {T, F <: AbstractFlavor{T}}
     isempty(a) && return convert(T, NaN)
@@ -138,7 +139,7 @@ end
 
 Mignitude of an interval. Return `NaN` for empty intervals.
 
-Corresponds to the IEEE-1788 standard `mig` function (Table 9.2).
+Implement the `mig` function of the IEEE Std 1788-2015 (Table 9.2).
 """
 function mig(a::F) where {T, F <: AbstractFlavor{T}}
     isempty(a) && return convert(T, NaN)

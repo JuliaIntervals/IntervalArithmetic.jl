@@ -1,7 +1,8 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
 #=  This file contains the functions described in sections 9.3 of the
-    IEEE Std 1788-2015 (Set operations), together with some similar functions.
+    IEEE Std 1788-2015 (Set operations) and required for set-based flavor
+    in section 10.5.7. Some other related functions are also present.
 =#
 
 """
