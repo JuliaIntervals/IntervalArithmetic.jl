@@ -75,11 +75,11 @@ for (Flavor, Supertype) in [(:SetBasedFlavoredInterval, AbstractNonRealFlavor), 
 end
 
 """
-    reparametrize(F::Type{AbstractFlavor}, ::ELTYPE)
+    reparametrize(F::Type{AbstractFlavor}, ::Type{ELTYPE})
 
 Return the type corresponding to flavor `F` with bounds of type `ELTYPE`.
 """
-reparametrize(::Type{F}, ::ELTYPE) where {F <: AbstractFlavor, ELTYPE} = flavortype(F){ELTYPE}
+reparametrize(::Type{F}, ::Type{ELTYPE}) where {F <: AbstractFlavor, ELTYPE} = flavortype(F){ELTYPE}
 
 const supported_flavors = (SetBasedFlavoredInterval, GenericFlavoredInterval)
 
@@ -192,7 +192,7 @@ See the documentation of `Interval` for more information about the default
 interval type.
 """
 function ..(a::T, b::S) where {T, S}
-    interval(atomic(Interval{T}, a).lo, atomic(Interval{S}, b).hi)
+    interval(atomic(Interval{Float64}, a).lo, atomic(Interval{Float64}, b).hi)
 end
 
 function ..(a::T, b::Irrational{S}) where {T, S}

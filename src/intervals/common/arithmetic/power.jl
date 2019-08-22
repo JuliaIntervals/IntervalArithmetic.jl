@@ -18,11 +18,8 @@ Base.literal_pow(::typeof(^), a::F, ::Val{p}) where {F <: AbstractFlavor, p} = a
 Implement the `pow` function of the IEEE Std 1788-2015 (Table 9.1).
 """
 ^(a::F, b::F) where {F <: AbstractFlavor} = atomic(F, big53(a)^b)
-
-# Write explicitly like this to avoid ambiguity warnings:
-for T in (:Integer, :Rational, :Float64, :BigFloat)  # TODO check if :BigFloat is needed there
-    @eval ^(a::F, x::$T) where {F <: AbstractFlavor} = atomic(F, big53(a)^x)
-end
+^(a::F, x::AbstractFloat) where {F <: AbstractFlavor{BigFloat}} = a^big(x)
+^(a::F, x) where {F<:AbstractFlavor} = atomic(F, big53(a)^x)
 
 # TODO check flavor dependant corner cases
 function ^(a::F, n::Integer) where {F <: AbstractFlavor{BigFloat}}
@@ -71,8 +68,6 @@ function ^(a::F, n::Integer) where {F <: AbstractFlavor{BigFloat}}
         end
     end
 end
-
-^(a::F, x::AbstractFloat) where {F <: AbstractFlavor{BigFloat}} = a^big(x)
 
 # Floating-point power of a BigFloat interval:
 function ^(a::F, x::BigFloat) where {F <: AbstractFlavor{BigFloat}}

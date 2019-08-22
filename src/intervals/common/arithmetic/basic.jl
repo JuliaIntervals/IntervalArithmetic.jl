@@ -78,7 +78,7 @@ function *(x::Real, a::F) where {F <: AbstractFlavor}
     isempty(a) && return emptyinterval(F)
     (isthinzero(a) || iszero(x)) && return zero(F)
 
-    if x ≥ zero(x)
+    if x ≥ 0.0
         return @round(F, a.lo*x, a.hi*x)
     else
         return @round(F, a.hi*x, a.lo*x)

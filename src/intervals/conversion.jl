@@ -110,12 +110,12 @@ function atomic(::Type{F}, x::S) where {T, S<:AbstractFloat, F<:AbstractFlavor{T
 end
 
 function atomic(::Type{F}, x::Irrational{S}) where {T, S, F<:AbstractFlavor{Irrational{T}}}
-    Flavor = flavortype(F)
-    return atomic(F{Float64}, x)
+    return atomic(reparametrize(F, Float64), x)
 end
 
-atomic(::Type{F}, x::AbstractFlavor) where {T, F<:AbstractFlavor{T}} =
-    F( T(inf(x), RoundDown), T(sup(x), RoundUp) )
+function atomic(::Type{F}, x::AbstractFlavor) where {T, F<:AbstractFlavor{T}}
+    return F( T(inf(x), RoundDown), T(sup(x), RoundUp) )
+end
 
 # Complex numbers:
 # TODO This one doesn't return an interval, not sure what it's suppose do do
