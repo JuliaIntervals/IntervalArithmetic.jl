@@ -19,9 +19,6 @@ Implement the `pow` function of the IEEE Std 1788-2015 (Table 9.1).
 """
 ^(a::F, b::F) where {F <: AbstractFlavor} = atomic(F, big53(a)^b)
 
-# TODO come back to that once zero(T) vs 0 is solved
-# TODO test todo stuff
-
 # Write explicitly like this to avoid ambiguity warnings:
 for T in (:Integer, :Rational, :Float64, :BigFloat)  # TODO check if :BigFloat is needed there
     @eval ^(a::F, x::$T) where {F <: AbstractFlavor} = atomic(F, big53(a)^x)
@@ -80,21 +77,21 @@ end
 # Floating-point power of a BigFloat interval:
 function ^(a::F, x::BigFloat) where {F <: AbstractFlavor{BigFloat}}
 
-    domain = F(0, Inf)g
+    domain = F(0, Inf)
 
     if iszero(a)
         a = a ∩ domain
-        x > zero(x) && return zero(a)
-        return emptyinterval(a)
+        x > zero(x) && return zero(F)
+        return emptyinterval(F)
     end
 
     isinteger(x) && return a^(round(Int, x))
     x == 0.5 && return sqrt(a)
 
     a = a ∩ domain
-    (isempty(x) || isempty(a)) && return emptyinterval(a)
+    (isempty(x) || isempty(a)) && return emptyinterval(F)
 
-    xx = atomic(Interval{BigFloat}, x)
+    xx = atomic(F, x)
 
     # @round() can't be used directly, because both arguments may
     # Inf or -Inf, which throws an error
@@ -102,25 +99,25 @@ function ^(a::F, x::BigFloat) where {F <: AbstractFlavor{BigFloat}}
     lolod = @round_down(a.lo^xx.lo)
     lolou = @round_up(a.lo^xx.lo)
     lo = (lolod == Inf || lolou == -Inf) ?
-        wideinterval(lolod) : Interval(lolod, lolou)
+        wideinterval(lolod) : F(lolod, lolou)
 
     # lo1 = @round(a.lo^xx.hi, a.lo^xx.hi)
     lohid = @round_down(a.lo^xx.hi)
     lohiu = @round_up(a.lo^xx.hi)
     lo1 = (lohid == Inf || lohiu == -Inf) ?
-        wideinterval(lohid) : Interval(lohid, lohiu)
+        wideinterval(lohid) : F(lohid, lohiu)
 
     # hi = @round(a.hi^xx.lo, a.hi^xx.lo)
     hilod = @round_down(a.hi^xx.lo)
     hilou = @round_up(a.hi^xx.lo)
     hi = (hilod == Inf || hilou == -Inf) ?
-        wideinterval(hilod) : Interval(hilod, hilou)
+        wideinterval(hilod) : F(hilod, hilou)
 
     # hi1 = @round(a.hi^xx.hi, a.hi^xx.hi)
     hihid = @round_down(a.hi^xx.hi)
     hihiu = @round_up(a.hi^xx.hi)
     hi1 = (hihid == Inf || hihiu == -Inf) ?
-        wideinterval(hihid) : Interval(hihid, hihiu)
+        wideinterval(hihid) : F(hihid, hihiu)
 
     lo = hull(lo, lo1)
     hi = hull(hi, hi1)
@@ -128,42 +125,41 @@ function ^(a::F, x::BigFloat) where {F <: AbstractFlavor{BigFloat}}
     return hull(lo, hi)
 end
 
-function ^(a::Interval{Rational{T}}, x::AbstractFloat) where T<:Integer
-    a = Interval(a.lo.num/a.lo.den, a.hi.num/a.hi.den)
+function ^(a::F, x::AbstractFloat) where {T<:Integer, F<:AbstractFlavor{Rational{T}}}
+    a = reparametrize(F, Float64)(a.lo.num/a.lo.den, a.hi.num/a.hi.den)
     a = a^x
-    atomic(Interval{Rational{T}}, a)
+    return atomic(F, a)
 end
 
 # Rational power
-function ^(a::Interval{BigFloat}, r::Rational{S}) where S<:Integer
-    T = BigFloat
-    domain = Interval{T}(0, Inf)
+function ^(a::F, r::Rational{S}) where {S<:Integer, F<:AbstractFlavor{BigFloat}}
+    domain = F(0, Inf)
 
     if a == zero(a)
         a = a ∩ domain
         r > zero(r) && return zero(a)
-        return emptyinterval(a)
+        return emptyinterval(F)
     end
 
-    isinteger(r) && return atomic(Interval{T}, a^round(S,r))
+    isinteger(r) && return atomic(F, a^round(S,r))
     r == one(S)//2 && return sqrt(a)
 
     a = a ∩ domain
-    (isempty(r) || isempty(a)) && return emptyinterval(a)
+    (isempty(r) || isempty(a)) && return emptyinterval(F)
 
-    y = atomic(Interval{BigFloat}, r)
+    y = atomic(F, r)
 
-    a^y
+    return a^y
 end
 
 # Interval power of an interval:
-function ^(a::Interval{BigFloat}, x::Interval)
+function ^(a::F, x::AbstractFlavor) where {F<:AbstractFlavor{BigFloat}}
     T = BigFloat
-    domain = Interval{T}(0, Inf)
+    domain = F(0, Inf)
 
     a = a ∩ domain
 
-    (isempty(x) || isempty(a)) && return emptyinterval(a)
+    (isempty(x) || isempty(a)) && return emptyinterval(F)
 
     lo1 = a^x.lo
     lo2 = a^x.hi
@@ -173,87 +169,78 @@ function ^(a::Interval{BigFloat}, x::Interval)
     hi2 = a^x.hi
     hi1 = hull(hi1, hi2)
 
-    hull(lo1, hi1)
+    return hull(lo1, hi1)
 end
 
-function sqr(a::Interval{T}) where T<:Real
+function sqr(a::AbstractFlavor)
     return a^2
 end
 
 """
-    pow(x::Interval, n::Integer)
+    pow(x::AbstractFlavor, n::Integer)
 
 A faster implementation of `x^n`, currently using `power_by_squaring`.
 `pow(x, n)` will usually return an interval that is slightly larger than that
 calculated by `x^n`, but is guaranteed to be a correct
 enclosure when using multiplication with correct rounding.
 """
-function pow(x::Interval, n::Integer)  # fast integer power
+function pow(x::F, n::Integer) where {F<:AbstractFlavor}
 
     isempty(x) && return x
 
     if iseven(n) && 0 ∈ x
 
         return hull(zero(x),
-                    hull(Base.power_by_squaring(Interval(mig(x)), n),
-                        Base.power_by_squaring(Interval(mag(x)), n))
+                    hull(Base.power_by_squaring(F(mig(x)), n),
+                        Base.power_by_squaring(F(mag(x)), n))
             )
 
     else
 
-      return hull( Base.power_by_squaring(Interval(x.lo), n),
-                    Base.power_by_squaring(Interval(x.hi), n) )
+      return hull( Base.power_by_squaring(F(x.lo), n),
+                    Base.power_by_squaring(F(x.hi), n) )
 
     end
-
 end
 
-function pow(x::Interval, y)  # fast real power, including for y an Interval
-
+function pow(x::AbstractFlavor, y)  # fast real power, including for y an Interval
     isempty(x) && return x
 
     return exp(y * log(x))
-
 end
-
-
-
 
 for f in (:exp, :expm1)
     @eval begin
-        function ($f)(a::Interval{T}) where T
+        function ($f)(a::F) where {F<:AbstractFlavor}
             isempty(a) && return a
-            @round( ($f)(a.lo), ($f)(a.hi) )
+            return @round( F, ($f)(a.lo), ($f)(a.hi) )
         end
     end
 end
 
 for f in (:exp2, :exp10)
-
     @eval function ($f)(x::BigFloat, r::RoundingMode)  # add BigFloat functions with rounding:
             setrounding(BigFloat, r) do
                 ($f)(x)
             end
         end
 
-    @eval ($f)(a::Interval{Float64}) = atomic(Interval{Float64}, $f(big53(a)))  # no CRlibm version
+    @eval ($f)(a::F) where {F<:AbstractFlavor} = atomic(F, $f(big53(a)))  # no CRlibm version
 
-    @eval function ($f)(a::Interval{BigFloat})
+    @eval function ($f)(a::F) where {F<:AbstractFlavor}
             isempty(a) && return a
-            @round( ($f)(a.lo), ($f)(a.hi) )
+            return @round( F, ($f)(a.lo), ($f)(a.hi) )
         end
 end
 
 
 for f in (:log, :log2, :log10, :log1p)
-
-    @eval function ($f)(a::Interval{T}) where T
-            domain = Interval{T}(0, Inf)
+    @eval function ($f)(a::F) where {T, F<:AbstractFlavor{T}}
+            domain = F(0, Inf)
             a = a ∩ domain
 
-            (isempty(a) || a.hi ≤ zero(T)) && return emptyinterval(a)
+            (isempty(a) || a.hi ≤ zero(T)) && return emptyinterval(F)
 
-            @round( ($f)(a.lo), ($f)(a.hi) )
-
+            return @round( F, ($f)(a.lo), ($f)(a.hi) )
         end
 end
