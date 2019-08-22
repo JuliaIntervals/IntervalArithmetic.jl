@@ -112,6 +112,7 @@ end
 ## Includes
 
 include("intervals/intervals.jl")
+
 include("multidim/multidim.jl")
 include("bisect.jl")
 include("decorations/decorations.jl")
@@ -119,6 +120,7 @@ include("decorations/decorations.jl")
 include("rand.jl")
 include("parsing.jl")
 include("display.jl")
+include("symbols.jl")
 
 include("plot_recipes/plot_recipes.jl")
 

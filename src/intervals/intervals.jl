@@ -158,20 +158,29 @@ end
 
 
 ## Include files
-include("common/special.jl")
-include("flavors/special.jl")
-
 include("macros.jl")
 include("rounding_macros.jl")
 include("rounding.jl")
 include("conversion.jl")
 include("precision.jl")
-include("set_operations.jl")
-include("arithmetic.jl")
-include("functions.jl")
-include("trigonometric.jl")
-include("hyperbolic.jl")
-include("complex.jl")
+
+include("common/arithmetic/absmax.jl")
+include("common/arithmetic/basic.jl")
+include("common/arithmetic/hyperbolic.jl")
+include("common/arithmetic/integer.jl")
+include("common/arithmetic/power.jl")
+include("common/arithmetic/trigonometric.jl")
+
+include("common/boolean.jl")
+include("common/cancellative.jl")
+include("common/constants.jl")
+include("common/extended_div.jl")
+include("common/misc.jl")
+include("common/numeric.jl")
+include("common/set_operations.jl")
+include("common/special.jl")
+
+include("flavors/special.jl")
 
 """
     a..b
