@@ -1,0 +1,12 @@
+Changelog
+
+- File structure changed to match the IEEE standard
+- Symbols that alias another function moved to `symbols.jl`
+- Removed global precision
+- Removed `pi_interval(T)` in favor of `Interval{T}(π)`
+- Renamed `multiply_by_positive_constant` to `scale`
+- `@round` now take the flavor of the returned interval as first argument
+- Removed `find_quadrants_tan` as it was a duplicate of `find_quadrants`
+- Renamed `mid(a, α)` -> `scaled_mid(a, α)`
+- Functions returning intervals based on bound type now required a flavor type as parameter
+- Rename `entireinterval` -> `RR`

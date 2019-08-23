@@ -3,29 +3,40 @@ Review intervals folder:
     ☐ Choose whether to use x == zero(T) or x == 0 across files
     ☐ Check that default flavor always return safe result
     ☐ {F <: Type} -> {F<:Type} (remove spaces)
-    ☐ Replace "IEEE standard" -> "IEEE Std 1788-2015"
-    ☐ "Corresponds to" -> "Implement" in doc
+    ✔ Replace "IEEE standard" -> "IEEE Std 1788-2015" @done(19-08-22 16:13)
+    ✔ "Corresponds to" -> "Implement" in doc @done(19-08-22 16:13)
     ✔ Rename `entireinterval` -> `RR` @done(19-08-19 19:14)
+    ☐ Investigate compile time warnings
+  
+  Discussion:
+    ☐ Do we want to keep `@floatinterval` and `@biginteral` or use `@interval(F, expr1, expr2)` instead ?
     
   Global precision:
-    ☐ Get rid of it
+    ✔ Get rid of it @done(19-08-20 16:49)
     ☐ Replace pi_interval(T) by Interval{T}(π) everywhere
   
   Flavors:
-    ☐ Implement set based flavor
+    Implement set based flavor:
+      ☐ Check all requested stuff 10.5.
+      ☐ Error on undefined
     ☐ Implement cset flavor
     ☐ Make cset default
     ☐ Implement all the needed conversions
       ☐ Automatise with Cassette.jl ?
   
   macros.jl:
-    ✔ Review @done(19-08-19 01:49)
+    ✔ Review @done(19-08-23 01:57)
+    ☐ Clean or open issue for cleaning of the file
   
   precision.jl:
     ✔ Review @done(19-08-19 01:49)
   
   rounding.jl:
     ✔ Review @done(19-08-19 01:50)
+
+  conversion.jl:
+    ✔ Review @done(19-08-23 03:25)
+    ☐ Fix ambiguous errors
   
   complex.jl:
     Should we even bother ?
@@ -42,12 +53,13 @@ Review intervals folder:
       ☐ Flavor dependent inv
       ☐ Flavor dependent fma
     power.jl:
-      Finish review when zero(T) vs 0 is solved
       ✔ Split @done(19-08-19 01:14)
       ✔ Verify all requested functions are there @done(19-08-19 04:29)
-      ☐ Common
+      ✔ Common @done(19-08-22 16:25)
+      ☐ Add doc to generated funcs
       ☐ Flavor dependent power (for negative power)
       ☐ Flavor dependant log
+      ☐ zero(T) or 0 ?
     trigonometric.jl:
       ✔ Split @done(19-08-19 02:00)
       ✔ Verify all requested functions are there @done(19-08-19 02:00)
@@ -108,10 +120,62 @@ Review intervals folder:
     ☐ Check correctness and tightness for Interval{T}(x)
     ☐ Document flavors
     ☐ Document constructors
+    ☐ Make `..` work correctly for all input types
     ✔ Add Interval{T}(π) @done(19-08-19 01:58)
-      ☐ Check performance of this
+      ☐ Check performance
+  
+  10.5. Required operations in set-based falvor:
+    10.5.1. Literals:
+      ☐ No idea, but do it
+    10.5.2. Constants:
+      ✔ Add ref to doc @done(19-08-21 00:09)
+      ☐ Move deprecation warning to a separated file ?
+    10.5.3. Forward mode elementary functions:
+      ✔ Add ref to doc @done(19-08-21 00:20)
+    10.5.4. Reverse mode elementary functions:
+      ✔ Open issue about their absence @done(19-08-20 03:16)
+      They are in IntervalConstraint.jl
+    10.5.5. Two output division:
+      ✔ Add ref to doc @done(19-08-21 00:23)
+      ☐ Flavor dependent edge case
+      ☐ Recent GH issue
+    10.5.6. Cancellative:
+      ✔ Add ref to doc @done(19-08-22 15:51)
+      ☐ Check that the set-based follow the required behavior for undbounded intervals
+    10.5.7. Set opeations:
+      ✔ Add ref to doc @done(19-08-22 15:55)
+    10.5.8. Constructors:
+      ☐ Review I guess
+    10.5.9. Numeric functions:
+      ✔ Add ref to doc @done(19-08-22 15:55)
+    10.5.10. Boolean:
+      ✔ Check everything required is present @done(19-08-22 16:07)
+      ✔ Add ref to doc @done(19-08-22 16:07)
+  10.6. Recommended operations:
+    ☐ Check all that stuff
+
+
+Other:
+  bisect.jl:
+    ☐ Review
+  display.jl:
+    ☐ Review
+  InteralArithmetic.jl:
+    ☐ Review
+    ☐ Make sure everything is exported correctly
+    ☐ Check renamed/new functions are exported
+  parsing.jl:
+    ✔ parsing of bare interval @done(19-08-23 02:28)
+    ☐ parsing of decorated interval
+  rand.jl:
+    ☐ Review
+  symbols.jl:
+    ☐ Make sure everything is here
 
   
-Review other folers:
+Review other folders:
   Check PR #271 for details
   ☐ Do it
+
+Bugs:
+  ☐ `Int` times `Interval` errors (e.g. `2*a`)
