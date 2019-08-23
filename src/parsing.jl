@@ -47,7 +47,7 @@ Parse a string as an interval. Formats allowed include:
 - "[3.5, 7.2]"
 - "[-0x1.3p-1, 2/3]"  # use numerical expressions
 """
-function parse(::Type{Interval{T}}, s::AbstractString) where T
+function parse(::Type{F}, s::AbstractString) where {T, F<:AbstractFlavor{T}}
 
     # Check version!
     if !(occursin("[", s))  # string like "3.1"
@@ -62,7 +62,7 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
         a = parse(T, s, RoundDown)
         b = parse(T, s, RoundUp)
 
-        return Interval(a, b)
+        return F(a, b)
 
         end
 
@@ -260,8 +260,5 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
         expr2 = parse(Float64, hi)
     end
 
-    interval = eval(make_interval(T, expr1, [expr2]))
-
-    return interval
-
+    return eval(make_interval(F, expr1, [expr2]))
 end
