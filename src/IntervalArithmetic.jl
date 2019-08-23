@@ -50,15 +50,16 @@ import Base.MPFR: MPFRRoundUp, MPFRRoundDown, MPFRRoundNearest, MPFRRoundToZero,
 import .Broadcast: broadcasted
 
 export
-    AbstractInterval, Interval,
+    Interval,
     interval,
     @interval, @biginterval, @floatinterval, @make_interval,
     diam, radius, mid, mag, mig, hull,
     emptyinterval, ∅, ∞, isempty, isinterior, isdisjoint, ⪽,
     precedes, strictprecedes, ≺, ⊂, ⊃, ⊇, contains_zero,
+    isidentical, isdistinct,
     RR, isentire, nai, isnai, isthin, iscommon, isatomic,
     widen, inf, sup, bisect,
-    parameters, eps, dist,
+    eps, dist,
     midpoint_radius, interval_from_midpoint_radius,
     RoundTiesToEven, RoundTiesToAway,
     cancelminus, cancelplus, isunbounded,

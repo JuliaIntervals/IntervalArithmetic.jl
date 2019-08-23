@@ -25,7 +25,7 @@ Note that the returned interval is of the default flavor. See the documentation
 of `Interval` for more information about the defaul interval falvor.
 """
 macro interval(expr1, expr2...)
-    make_interval(Float64, expr1, expr2)
+    make_interval(Interval{Float64}, expr1, expr2)
 end
 
 """
@@ -34,7 +34,7 @@ end
 Construct an interval with `Float64` bounds from an expression.
 """
 macro floatinterval(expr1, expr2...)
-    make_interval(Float64, expr1, expr2)
+    make_interval(Interval{Float64}, expr1, expr2)
 end
 
 """
@@ -43,7 +43,7 @@ end
 Construct an interval with `BigFloat` bounds from an expression.
 """
 macro biginterval(expr1, expr2...)
-    make_interval(BigFloat, expr1, expr2)
+    make_interval(Interval{BigFloat}, expr1, expr2)
 end
 
 
@@ -93,21 +93,19 @@ end
 
 
 """
-    make_interval(T, expr1, expr2)
+    make_interval(F, expr1, expr2)
 
 Take expressions and make each literal (0.1, 1, etc.) into a corresponding
 interval construction.
 """
-function make_interval(T, expr1, expr2)
-    # @show expr1, expr2
-
-    expr1 = transform(expr1, :atomic, :($Interval{$T}))
+function make_interval(F, expr1, expr2)
+    expr1 = transform(expr1, :atomic, :($F))
 
     if isempty(expr2)  # only one argument
-        return :(Interval($expr1))
+        return :(($F)($expr1))
     end
 
-    expr2 = transform(expr2[1], :atomic, :($Interval{$T}))
+    expr2 = transform(expr2[1], :atomic, :($F))
 
-    :(interval(inf($expr1), sup($expr2)))
+    return :(($F)(inf($expr1), sup($expr2)))
 end

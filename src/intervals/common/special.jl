@@ -54,7 +54,7 @@ Note that if no interval flavor is given, the returned interval is of the
 default interval flavor. See the documentation of `Interval` for more
 information about the default interval falvor.
 """
-wideinterval(::F, x::T) where {F <: AbstractFlavor, T <: AbstractFloat} =
+wideinterval(::Type{F}, x::T) where {F <: AbstractFlavor, T <: AbstractFloat} =
     F(prevfloat(x), nextfloat(x))
 wideinterval(x::T) where {T <: AbstractFloat} = wideinterval(Interval, x)
 

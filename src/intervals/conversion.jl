@@ -72,16 +72,14 @@ atomic(::Type{F}, x::AbstractString) where {F<:AbstractFlavor} = parse(F, x)
     function atomic(::Type{F}, x::S) where {T, S, F<:AbstractFlavor{T}}
         isinf(x) && return wideinterval(F, T(x))
 
-        F( parse(T, string(x), RoundDown),
-           parse(T, string(x), RoundUp) )
+        return F( parse(T, string(x), RoundDown),
+                  parse(T, string(x), RoundUp) )
     end
 
     function atomic(::Type{F}, x::Union{Irrational, Rational}) where {T, F<:AbstractFlavor{T}}
         isinf(x) && return wideinterval(F, T(x))
 
-        F( T(x, RoundDown), T(x, RoundUp) )
-        # the rounding up could be done as nextfloat of the rounded down one?
-        # use @round_up and @round_down here?
+        return F( T(x, RoundDown), T(x, RoundUp) )
     end
 
 else
@@ -130,7 +128,10 @@ function atomic(::Type{F}, x::Irrational) where {T<:Integer, F<:AbstractFlavor{R
     atomic(F, a)
 end
 
-atomic(::Type{F}, x::S) where {T<:Integer, S<:Union{Integer, Rational}, F<:AbstractFlavor{Rational{T}}} =
+atomic(::Type{F}, x::S) where {T<:Integer, S<:Integer, F<:AbstractFlavor{Rational{T}}} =
+    F(convert(Rational{T}, x))
+
+atomic(::Type{F}, x::S) where {T<:Integer, S<:Rational, F<:AbstractFlavor{Rational{T}}} =
     F(convert(Rational{T}, x))
 
 atomic(::Type{F}, x::S) where {T<:Integer, S<:AbstractFloat, F<:AbstractFlavor{Interval{Rational{T}}}} =

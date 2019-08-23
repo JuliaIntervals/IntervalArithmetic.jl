@@ -21,7 +21,7 @@ Checks if the intervals `a` and `b` are identical.
 
 Implement the `equal` function of the IEEE Std 1788-2015  (Table 9.3).
 """
-function isidentical(a::F, b::F) where {F <: AbstractFlavor}
+function isidentical(a::AbstractFlavor, b::AbstractFlavor)
     isempty(a) && isempty(b) && return true
     a.lo == b.lo && a.hi == b.hi
 end
