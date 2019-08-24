@@ -15,10 +15,7 @@ const eeuler = Base.MathConstants.e
     @test isidentical(Interval(1//10), Interval{Rational{Int}}(1//10, 1//10))
     @test isidentical(Interval(BigInt(1)//10), Interval{Rational{BigInt}}(1//10, 1//10))
     @test isidentical(Interval( (1.0, 2.0) ), Interval(1.0, 2.0))
-
     @test isidentical(Interval{Rational{Int}}(1), Interval(1//1))
-    #@test isidentical(Interval{Rational{Int}}(pi), Interval(rationalize(1.0*pi)))
-
     @test isidentical(Interval{BigFloat}(1), Interval{BigFloat}(big(1.0), big(1.0)))
 
     @test isidentical(-pi..pi, @interval(-pi,pi))
@@ -75,37 +72,12 @@ const eeuler = Base.MathConstants.e
     @test convert(Interval, Interval(0.1, 0.2)) === Interval(0.1, 0.2)
 
     @test isidentical(convert(Interval{Rational{Int}}, 0.1), Interval(1//10))
-    # @test isidentical(convert(Interval{Rational{BigInt}}, pi), Interval{Rational{BigInt}}(pi))
 
     ## promotion
     @test all(isidentical.(promote(Interval(2//1,3//1), Interval(1, 2)),
                            (Interval(2.0,3.0), Interval(1.0,2.0))))
     @test all(isidentical.(promote(Interval(1.0), pi), (Interval(1.0), @interval(pi))))
 
-    # # Constructors from the macros @interval, @floatinterval @biginterval
-    # TODO srap or adapt (old global precision)
-    # setprecision(Interval, 53)
-
-    # a = @interval(0.1)
-    # b = @interval(pi)
-
-    # @test nextfloat(a.lo) == a.hi
-    # @test typeof(a) == Interval{BigFloat}
-    # @test a == @biginterval("0.1")
-    # @test convert(Interval{Float64}, a) == @floatinterval(0.1)
-    # @test nextfloat(b.lo) == b.hi
-
-    # @test b == @biginterval(pi)
-    # x = 10238971209348170283710298347019823749182374098172309487120398471029837409182374098127304987123049817032984712039487
-    # @test @interval(x) == @biginterval(x)
-    # @test isthin(@interval(x)) == false
-
-    # x = 0.1
-    # a = @interval(x)
-    # @test nextfloat(a.lo) == a.hi
-
-
-    #setprecision(Interval, Float64)
     a = @interval(0.1)
     b = @interval(pi)
 
@@ -122,7 +94,6 @@ const eeuler = Base.MathConstants.e
     c = @interval(x)
     @test nextfloat(c.lo) == c.hi
 
-
     a = @interval("[0.1, 0.2]")
     b = @interval(0.1, 0.2)
 
@@ -130,27 +101,13 @@ const eeuler = Base.MathConstants.e
 
     @test_throws ArgumentError @interval("[0.1, 0.2")
 
-    # TODO scrap or adapt (old global precision)
-    # for precision in (64, Float64)
-    #     setprecision(Interval, precision)
-    #     d = big(3)
-    #     f = @interval(d, 2d)
-    #     @test @interval(3, 6) ⊆ f
-    # end
-
-
     for rounding in (:wide, :narrow)
         a = @interval(0.1, 0.2)
         @test a ⊆ Interval(0.09999999999999999, 0.20000000000000004)
 
         b = @interval(0.1)
         @test b ⊆ Interval(0.09999999999999999, 0.10000000000000002)
-
-        # b = setprecision(Interval, 128) do
-        #     @interval(0.1, 0.2)
-        # end
         @test b ⊆ Interval(0.09999999999999999, 0.20000000000000004)
-
         @test float(b) ⊆ a
 
         c = @interval("0.1", "0.2")
@@ -160,10 +117,6 @@ const eeuler = Base.MathConstants.e
     end
 
     @test string(emptyinterval()) == "∅"
-
-    # setprecision(Interval, 53)
-    # a = big(1)//3
-    # @test @interval(a) == Interval(big(3.3333333333333331e-01), big(3.3333333333333337e-01))
 end
 
 @testset "Big intervals" begin
@@ -179,13 +132,12 @@ end
 
     a = big(10)^10000
     @test isidentical(@floatinterval(a), Interval(1.7976931348623157e308, ∞))
-    # setprecision(Interval, 53)
-    # @test @biginterval(a) == Interval(big"9.9999999999999994e+9999", big"1.0000000000000001e+10000")
 end
 
+#=
 @testset "Complex intervals" begin
     a = @floatinterval(3 + 4im)
-    @test typeof(a)== Complex{Interval{Float64}}
+    @test typeof(a) == Complex{Interval{Float64}}
     @test isidentical(a, Interval(3) + im*Interval(4))
 
     # TODO; Uncomment these tests
@@ -193,6 +145,7 @@ end
     # @test real(b) == Interval(-13.12878308146216, -13.128783081462153)
     # @test imag(b) == Interval(-15.200784463067956, -15.20078446306795)
 end
+=#
 
 @testset ".. tests" begin
 
@@ -202,14 +155,11 @@ end
     @test big"0.3" ∈ a
 
     # part of issue #172:
-
     a = big(0.1)..2
     @test typeof(a) == Interval{BigFloat}
 end
 
 @testset "± tests" begin
-    # setprecision(Interval, Float64)
-
     @test 3 ± 1 == Interval(2.0, 4.0)
     @test 3 ± 0.5 == 2.5..3.5
     @test 3 ± 0.1 == 2.9..3.1
