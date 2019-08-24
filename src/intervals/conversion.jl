@@ -18,7 +18,9 @@ promote_rule(::Type{F}, ::Type{S}) where {T, S, F<:AbstractFlavor{T}} =
 
 # convert methods:
 convert(::Type{F}, x::Bool) where {F<:AbstractFlavor} = convert(F, Int(x))
-convert(::Type{F}, x::Real) where {F<:AbstractFlavor} = atomic(F, x)
+convert(::Type{F}, x::S) where {T, S, F<:AbstractFlavor{T}} = atomic(F, x)
+# Fallback if F not parametrized
+convert(::Type{F}, x::S) where {S, F<:AbstractFlavor} = atomic(F{promote_type(S, DefaultBound)}, x)
 convert(::Type{F}, x::F) where {F<:AbstractFlavor} = x
 convert(::Type{F}, x::G) where {F<:AbstractFlavor, G<:AbstractFlavor} = atomic(F, x)
 
