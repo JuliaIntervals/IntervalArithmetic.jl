@@ -158,8 +158,8 @@ end
 
 "Make an interval even if a > b"
 function force_interval(a, b)
-    a > b && return interval(b, a)
-    return interval(a, b)
+    a > b && return Interval(b, a, check=true)  # check == true to check for NaN
+    return Interval(a, b, check=true)
 end
 
 
@@ -229,5 +229,8 @@ a ± b = (a-b)..(a+b)
 
 Computes the integer hash code for an interval using the method for composite
 types used in `AutoHashEquals.jl`
+
+Note that in `IntervalArithmetic.jl`, equality of interval is given by
+`isidentical` rather than the `==` operator.
 """
-hash(x::T, h::UInt) where {T <: AbstractFlavor} = hash(x.hi, hash(x.lo, hash(T, h)))
+hash(x::F, h::UInt) where {F <: AbstractFlavor} = hash(x.hi, hash(x.lo, hash(flavortype(F), h)))

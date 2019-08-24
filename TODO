@@ -7,6 +7,7 @@ Review intervals folder:
     ✔ "Corresponds to" -> "Implement" in doc @done(19-08-22 16:13)
     ✔ Rename `entireinterval` -> `RR` @done(19-08-19 19:14)
     ☐ Investigate compile time warnings
+    ☐ Check if intervals of different flavor type can/should be equal in the sense of `isidentical`
   
   Discussion:
     ☐ Do we want to keep `@floatinterval` and `@biginteral` or use `@interval(F, expr1, expr2)` instead ?
