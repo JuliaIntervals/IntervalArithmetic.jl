@@ -130,6 +130,12 @@ function atomic(::Type{F}, x::Irrational) where {T<:Integer, F<:AbstractFlavor{R
     atomic(F, a)
 end
 
+# Reparametrize flavor with Integer bounds
+function atomic(::Type{F}, x) where {T<:Integer, F<:AbstractFlavor{T}}
+    S = promote_type(T, DefaultBound)
+    return atomic(reparametrize(F, S), x)
+end
+
 atomic(::Type{F}, x::S) where {T<:Integer, S<:Integer, F<:AbstractFlavor{Rational{T}}} =
     F(convert(Rational{T}, x))
 
@@ -140,4 +146,4 @@ atomic(::Type{F}, x::S) where {T<:Integer, S<:AbstractFloat, F<:AbstractFlavor{I
     F(rationalize(T, x))
 
 # Fallback when interval type is not explicitely parametrized
-atomic(::Type{F}, x) where {F<:AbstractFlavor} = atomic(F{Float64}, x)
+atomic(::Type{F}, x) where {F<:AbstractFlavor} = atomic(F{DefaultBound}, x)

@@ -148,6 +148,8 @@ end
 =#
 
 @testset ".. tests" begin
+    a = 1..2
+    @test typeof(a) == Interval{DefaultBound}
 
     a = 0.1..0.3
     @test a == Interval(0.09999999999999999, 0.30000000000000004)

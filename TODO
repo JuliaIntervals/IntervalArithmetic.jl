@@ -179,3 +179,6 @@ Review other folders:
 
 Bugs:
   ☐ `Int` times `Interval` errors (e.g. `2*a`)
+
+Tests:
+  ☐ Uncomment complex tests in `construction.jl`

@@ -50,7 +50,7 @@ import Base.MPFR: MPFRRoundUp, MPFRRoundDown, MPFRRoundNearest, MPFRRoundToZero,
 import .Broadcast: broadcasted
 
 export
-    Interval,
+    Interval, DefaultBound,
     interval,
     @interval, @biginterval, @floatinterval,
     diam, radius, mid, mag, mig, hull,

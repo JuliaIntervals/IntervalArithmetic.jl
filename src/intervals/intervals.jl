@@ -198,7 +198,8 @@ See the documentation of `Interval` for more information about the default
 interval type.
 """
 function ..(a::T, b::S) where {T, S}
-    return Interval(atomic(Interval{DefaultBound}, a).lo, atomic(Interval{DefaultBound}, b).hi, check=true)
+    R = promote_type(T, S)
+    return Interval(atomic(Interval{R}, a).lo, atomic(Interval{R}, b).hi, check=true)
 end
 
 function ..(a::T, b::Irrational{S}) where {T, S}
