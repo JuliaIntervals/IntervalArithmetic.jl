@@ -260,5 +260,5 @@ function parse(::Type{F}, s::AbstractString) where {T, F<:AbstractFlavor{T}}
         expr2 = parse(Float64, hi)
     end
 
-    return eval(make_interval(F, expr1, [expr2]))
+    return eval(wrap_literals(F, expr1, [expr2]))
 end

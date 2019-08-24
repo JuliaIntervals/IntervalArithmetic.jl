@@ -25,7 +25,7 @@ Note that the returned interval is of the default flavor. See the documentation
 of `Interval` for more information about the defaul interval falvor.
 """
 macro interval(expr1, expr2...)
-    make_interval(Interval{Float64}, expr1, expr2)
+    return wrap_literals(Interval{DefaultBound}, expr1, expr2)
 end
 
 """
@@ -34,7 +34,7 @@ end
 Construct an interval with `Float64` bounds from an expression.
 """
 macro floatinterval(expr1, expr2...)
-    make_interval(Interval{Float64}, expr1, expr2)
+    return wrap_literals(Interval{Float64}, expr1, expr2)
 end
 
 """
@@ -43,10 +43,8 @@ end
 Construct an interval with `BigFloat` bounds from an expression.
 """
 macro biginterval(expr1, expr2...)
-    make_interval(Interval{BigFloat}, expr1, expr2)
+    return wrap_literals(Interval{BigFloat}, expr1, expr2)
 end
-
-
 
 """
     transform(expr, f, T)
@@ -58,13 +56,11 @@ transform(x::Symbol, f, T) = :($f($T, $(esc(x))))   # use if x is not an express
 transform(x, f, T) = :($f($T, $x))
 
 function transform(expr::Expr, f::Symbol, T)
-
     if expr.head in ( :(.), :ref )   # of form  a.lo  or  a[i]
         return :($f($T, $(esc(expr))))
     end
 
     new_expr = copy(expr)
-
 
     first = 1  # where to start processing arguments
 
@@ -93,12 +89,12 @@ end
 
 
 """
-    make_interval(F, expr1, expr2)
+    wrap_literals(F, expr1, expr2)
 
 Take expressions and make each literal (0.1, 1, etc.) into a corresponding
-interval construction.
+interval construction using flavor `F`.
 """
-function make_interval(F, expr1, expr2)
+function wrap_literals(F, expr1, expr2)
     expr1 = transform(expr1, :atomic, :($F))
 
     if isempty(expr2)  # only one argument
@@ -107,5 +103,5 @@ function make_interval(F, expr1, expr2)
 
     expr2 = transform(expr2[1], :atomic, :($F))
 
-    return :(($F)(inf($expr1), sup($expr2)))
+    return :(($F)(inf($expr1), sup($expr2), check=true))
 end

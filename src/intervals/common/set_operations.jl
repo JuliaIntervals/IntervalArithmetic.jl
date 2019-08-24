@@ -55,7 +55,9 @@ all of `a` and `b`.
 
 Implement the `converxHull` function of the IEEE Std 1788-2015 (section 9.3).
 """
-hull(a::F, b::F) where {F <: AbstractFlavor} = F(min(a.lo, b.lo), max(a.hi, b.hi))
+hull(a::F, b::F) where {F<:AbstractFlavor} = F(min(a.lo, b.lo), max(a.hi, b.hi))
+hull(a::F, b::G) where {F<:AbstractFlavor, G<:AbstractFlavor} =
+    promote_type(F, G)(min(a.lo, b.lo), max(a.hi, b.hi))
 hull(a::Complex{F},b::Complex{F}) where {F <: AbstractFlavor} =
     complex(hull(real(a), real(b)), hull(imag(a), imag(b)))
 

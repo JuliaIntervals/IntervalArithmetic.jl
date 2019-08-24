@@ -2,21 +2,23 @@
 
 ## Promotion rules
 
-# TODO find a way to promote these (doesn't seem to be a way to do it in general)
-promote_rule(::Type{Interval{T}}, ::Type{Interval{S}}) where {T<:Real, S<:Real} =
-    Interval{promote_type(T, S)}
+function promote_rule(::Type{F}, ::Type{G}) where {T, S, F<:AbstractFlavor{T}, G<:AbstractFlavor{S}}
+    bare_F = flavortype(F)
+    bare_G = flavortype(G)
 
-promote_rule(::Type{Interval{T}}, ::Type{S}) where {T<:Real, S<:Real} =
-    Interval{promote_type(T, S)}
+    if bare_F == bare_G
+        return bare_F{promote_type(T, S)}
+    else
+        throw(ArgumentError("Can not promote interval of different flavor type $bare_F and $bare_G."))
+    end
+end
 
-promote_rule(::Type{BigFloat}, ::Type{Interval{T}}) where {T<:Real} =
-    Interval{promote_type(T, BigFloat)}
-
+promote_rule(::Type{F}, ::Type{S}) where {T, S, F<:AbstractFlavor{T}} =
+    reparametrize(F, promote_type(T, S))
 
 # convert methods:
 convert(::Type{F}, x::Bool) where {F<:AbstractFlavor} = convert(F, Int(x))
 convert(::Type{F}, x::Real) where {F<:AbstractFlavor} = atomic(F, x)
-convert(::Type{F}, x::T) where {T, F<:AbstractFlavor{T}} = F(x)
 convert(::Type{F}, x::F) where {F<:AbstractFlavor} = x
 convert(::Type{F}, x::G) where {F<:AbstractFlavor, G<:AbstractFlavor} = atomic(F, x)
 
@@ -136,3 +138,6 @@ atomic(::Type{F}, x::S) where {T<:Integer, S<:Rational, F<:AbstractFlavor{Ration
 
 atomic(::Type{F}, x::S) where {T<:Integer, S<:AbstractFloat, F<:AbstractFlavor{Interval{Rational{T}}}} =
     F(rationalize(T, x))
+
+# Fallback when interval type is not explicitely parametrized
+atomic(::Type{F}, x) where {F<:AbstractFlavor} = atomic(F{Float64}, x)

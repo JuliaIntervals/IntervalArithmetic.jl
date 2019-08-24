@@ -64,7 +64,26 @@ for (Flavor, Supertype) in [(:SetBasedFlavoredInterval, AbstractNonRealFlavor), 
 
         # TODO check performance of these
         const $Flavor{T}(::Irrational{:π}) where T = atomic($Flavor{T}, π)
-        const $Flavor(::Irrational{:π}) = atomic($Flavor{Float64}, π)
+        const $Flavor(::Irrational{:π}) = atomic($Flavor{DefaultBound}, π)
+
+        function $Flavor{T}(a, b; check=false) where {T}
+            if check && !is_valid_interval(a, b)
+                throw(ArgumentError("`[$a, $b]` is not a valid interval. Need `a ≤ b` to construct `interval(a, b)`."))
+            end
+        
+            return $Flavor(a, b)
+        end
+
+        function $Flavor(a, b; check=false)
+            if check && !is_valid_interval(a, b)
+                throw(ArgumentError("`[$a, $b]` is not a valid interval. Need `a ≤ b` to construct `interval(a, b)`."))
+            end
+        
+            return $Flavor(a, b)
+        end
+
+        $Flavor{T}(a; check=false) where T = $Flavor{T}(a, a, check=check)
+        $Flavor(a; check=false) = $Flavor(a, a, check=check)
 
         # Flavor without parametrization, allows reparametrization
         flavortype(::Type{$Flavor{T}}) where T = $Flavor
@@ -91,6 +110,15 @@ if haskey(ENV, "IA_DEFAULT_FLAVOR")
 else
     const Interval = SetBasedFlavoredInterval
 end
+
+if haskey(ENV, "IA_DEFAULT_BOUND_TYPE")
+    @eval quote
+        const DefaultBound = $(ENV["IA_DEFAULT_BOUND_TYPE"])
+    end
+else
+    const DefaultBound = Float64
+end
+
 defaultdoc = """
     Interval
 
@@ -127,28 +155,6 @@ function is_valid_interval(a::Real, b::Real)
 
     return true
 end
-
-"""
-    interval(a, b)
-
-`interval(a, b)` checks whether [a, b] is a valid interval, which is the case
-if `-∞ <= a <= b <= ∞`, using the (non-exported) `is_valid_interval` function.
-If so, then an `Interval(a, b)` object is returned; if not, then an error is thrown.
-
-Note that the interval created is of the default interval type. See the documentation
-of `Interval` for more information about the default interval type.
-"""
-function interval(a::Real, b::Real)
-    if !is_valid_interval(a, b)
-        throw(ArgumentError("`[$a, $b]` is not a valid interval. Need `a ≤ b` to construct `interval(a, b)`."))
-    end
-
-    return Interval(a, b)
-end
-
-interval(a::Real) = interval(a, a)
-interval(a::AbstractFlavor) = interval(a.lo, a.hi)
-interval(a::Interval) = a
 
 "Make an interval even if a > b"
 function force_interval(a, b)
@@ -192,22 +198,22 @@ See the documentation of `Interval` for more information about the default
 interval type.
 """
 function ..(a::T, b::S) where {T, S}
-    interval(atomic(Interval{Float64}, a).lo, atomic(Interval{Float64}, b).hi)
+    return Interval(atomic(Interval{DefaultBound}, a).lo, atomic(Interval{DefaultBound}, b).hi, check=true)
 end
 
 function ..(a::T, b::Irrational{S}) where {T, S}
     R = promote_type(T, Irrational{S})
-    interval(atomic(Interval{R}, a).lo, R(b, RoundUp))
+    return Interval(atomic(Interval{R}, a).lo, atomic(Interval{R}, b).hi, check=true)
 end
 
 function ..(a::Irrational{T}, b::S) where {T, S}
     R = promote_type(Irrational{T}, S)
-    return Interval(R(a, RoundDown), atomic(Interval{R}, b).hi)
+    return Interval(atomic(Interval{R}, a).lo, atomic(Interval{R}, b).hi, check=true)
 end
 
 function ..(a::Irrational{T}, b::Irrational{S}) where {T, S}
     R = promote_type(Irrational{T}, Irrational{S})
-    return Interval(a, b)
+    return Interval(atomic(Interval{R}, a).lo, atomic(Interval{R}, b).hi, check=true)
 end
 
 macro I_str(ex)  # I"[3,4]"

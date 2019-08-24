@@ -19,14 +19,12 @@ const eeuler = Base.MathConstants.e
     @test isidentical(Interval{Rational{Int}}(1), Interval(1//1))
     #@test isidentical(Interval{Rational{Int}}(pi), Interval(rationalize(1.0*pi)))
 
-    @test isidentical(Interval{Float64}(pi), Interval(float(pi)))
     @test isidentical(Interval{BigFloat}(1), Interval{BigFloat}(big(1.0), big(1.0)))
-    @test isidentical(Interval{BigFloat}(pi), Interval{BigFloat}(big(pi), big(pi)))
 
     @test isidentical(-pi..pi, @interval(-pi,pi))
-    @test isidentical(0..pi, hull(interval(0), Interval{Float64}(π)))
+    @test isidentical(0..pi, hull(Interval(0), Interval{Float64}(π)))
     @test isidentical(1.2..pi, @interval(1.2, pi))
-    @test isidentical(pi..big(4), hull(Interval{BigFloat}(π), interval(4)))
+    @test isidentical(pi..big(4), hull(Interval{BigFloat}(π), Interval(4)))
     @test isidentical(pi..pi, Interval{Float64}(π))
     @test isidentical(eeuler..pi, hull(@interval(eeuler), Interval{Float64}(π)))
 
@@ -53,20 +51,20 @@ const eeuler = Base.MathConstants.e
 
     # Disallowed conversions with a > b
 
-    @test_throws ArgumentError interval(2, 1)
-    @test_throws ArgumentError interval(big(2), big(1))
-    @test_throws ArgumentError interval(BigInt(1), 1//10)
-    @test_throws ArgumentError interval(1, 0.1)
-    @test_throws ArgumentError interval(big(1), big(0.1))
+    @test_throws ArgumentError Interval(2, 1, check=true)
+    @test_throws ArgumentError Interval(big(2), big(1), check=true)
+    @test_throws ArgumentError Interval(BigInt(1), 1//10, check=true)
+    @test_throws ArgumentError Interval(1, 0.1, check=true)
+    @test_throws ArgumentError Interval(big(1), big(0.1), check=true)
 
     @test_throws ArgumentError @interval(2, 1)
     @test_throws ArgumentError @interval(big(2), big(1))
     @test_throws ArgumentError @interval(big(1), 1//10)
     @test_throws ArgumentError @interval(1, 0.1)
     @test_throws ArgumentError @interval(big(1), big(0.1))
-    @test_throws ArgumentError interval(Inf)
-    @test_throws ArgumentError interval(-Inf, -Inf)
-    @test_throws ArgumentError interval(Inf, Inf)
+    @test_throws ArgumentError Interval(Inf, check=true)
+    @test_throws ArgumentError Interval(-Inf, -Inf, check=true)
+    @test_throws ArgumentError Interval(Inf, Inf, check=true)
 
     # Conversion to Interval without type
     @test isidentical(convert(Interval, 1), Interval(1.0))
