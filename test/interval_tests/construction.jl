@@ -152,7 +152,7 @@ end
     @test typeof(a) == Interval{DefaultBound}
 
     a = 0.1..0.3
-    @test a == Interval(0.09999999999999999, 0.30000000000000004)
+    @test isidentical(a, Interval(0.09999999999999999, 0.30000000000000004))
     @test big"0.1" ∈ a
     @test big"0.3" ∈ a
 
@@ -162,13 +162,13 @@ end
 end
 
 @testset "± tests" begin
-    @test 3 ± 1 == Interval(2.0, 4.0)
-    @test 3 ± 0.5 == 2.5..3.5
-    @test 3 ± 0.1 == 2.9..3.1
-    @test 0.5 ± 1 == -0.5..1.5
+    @test isidentical(3 ± 1, Interval(2.0, 4.0))
+    @test isidentical(3 ± 0.5, 2.5..3.5)
+    @test isidentical(3 ± 0.1, 2.9..3.1)
+    @test isidentical(0.5 ± 1, -0.5..1.5)
 
     # issue 172:
-    @test (1..1) ± 1 == 0..2
+    @test isidentical((1..1) ± 1, 0..2)
 
 end
 
@@ -190,7 +190,7 @@ end
 
 @testset "Conversion to Interval" begin
     a = convert(Interval, 3)
-    @test a == Interval(3.0)
+    @test isidentical(a, Interval(3.0))
     @test typeof(a) == Interval{Float64}
 
     a = convert(Interval, big(3))
@@ -199,11 +199,12 @@ end
 end
 
 @testset "Interval{T} constructor" begin
-    @test Interval{Float64}(1) == 1..1
-    @test Interval{Float64}(1.1) == Interval(1.1, 1.1)  # no rounding
+    @test isidentical(Interval{Float64}(1), 1..1)
+    # no rounding
+    @test isidentical(Interval{Float64}(1.1), Interval(1.1, 1.1))
 
-    @test Interval{BigFloat}(1) == @biginterval(1, 1)
-    @test Interval{BigFloat}(big"1.1") == Interval(big"1.1", big"1.1")
+    @test isidentical(Interval{BigFloat}(1), @biginterval(1, 1))
+    @test isidentical(Interval{BigFloat}(big"1.1"), Interval(big"1.1", big"1.1"))
 end
 
 # issue 192:
@@ -213,47 +214,59 @@ end
 end
 
 # issue 206:
-
-# setprecision(Interval, Float64)
-
 @testset "Interval strings" begin
-    @test I"[1, 2]" == @interval("[1, 2]")
-    @test I"[2/3, 1.1]" == @interval("[2/3, 1.1]") == Interval(0.6666666666666666, 1.1)
-    @test I"[1]" == @interval("[1]") == Interval(1.0, 1.0)
-    @test I"[-0x1.3p-1, 2/3]" == @interval("[-0x1.3p-1, 2/3]") == Interval(-0.59375, 0.6666666666666667)
+    @test isidentical(I"[1, 2]", @interval("[1, 2]"))
+
+    a = I"[2/3, 1.1]"
+    b = @interval("[2/3, 1.1]")
+    c = Interval(0.6666666666666666, 1.1)
+    @test isidentical(a, b)
+    @test isidentical(b, c)
+
+    a = I"[1]"
+    b = @interval("[1]")
+    c = Interval(1.0, 1.0)
+    @test isidentical(a, b)
+    @test isidentical(b, c)
+
+    a = I"[-0x1.3p-1, 2/3]"
+    b = @interval("[-0x1.3p-1, 2/3]")
+    c = Interval(-0.59375, 0.6666666666666667)
+    @test isidentical(a, b)
+    @test isidentical(b, c)
 end
 
 @testset "setdiff tests" begin
     x = 1..3
     y = 2..4
-    @test setdiff(x, y) == [1..2]
-    @test setdiff(y, x) == [3..4]
+    @test all(isidentical.(setdiff(x, y), [1..2]))
+    @test all(isidentical.(setdiff(y, x), [3..4]))
 
-    @test setdiff(x, x) == Interval{Float64}[]
+    @test setdiff(x, x) == Interval{DefaultBound}[]
 
-    @test setdiff(x, emptyinterval(x)) == [x]
+    @test all(isidentical.(setdiff(x, emptyinterval(x)), [x]))
 
     z = 0..5
-    @test setdiff(x, z) == Interval{Float64}[]
-    @test setdiff(z, x) == [0..1, 3..5]
+    @test setdiff(x, z) == Interval{DefaultBound}[]
+    @test all(isidentical.(setdiff(z, x), [0..1, 3..5]))
 end
 
 @testset "Interval{T}(x::Interval)" begin
-    @test Interval{Float64}(3..4) == Interval(3.0, 4.0)
-    @test Interval{BigFloat}(3..4) == Interval{BigFloat}(3, 4)
+    @test isidentical(Interval{Float64}(3..4), Interval(3.0, 4.0))
+    @test isidentical(Interval{BigFloat}(3..4), Interval{BigFloat}(3, 4))
 end
 
 @testset "@interval with fields" begin
     a = 3..4
     x = @interval(a.lo, 2*a.hi)
-    @test x == Interval(3, 8)
+    @test isidentical(x, Interval(3, 8))
 end
 
 @testset "@interval with user-defined function" begin
     f(x) = x==Inf ? one(x) : x/(1+x)  # monotonic
 
     x = 3..4
-    @test @interval(f(x.lo), f(x.hi)) == Interval(0.75, 0.8)
+    @test isidentical(@interval(f(x.lo), f(x.hi)), Interval(0.75, 0.8))
 end
 
 @testset "a..b with a > b" begin
@@ -280,9 +293,9 @@ end
 
 import IntervalArithmetic: force_interval
 @testset "force_interval" begin
-    @test force_interval(4, 3) == Interval(3, 4)
-    @test force_interval(4, Inf) == Interval(4, Inf)
-    @test force_interval(Inf, 4) == Interval(4, Inf)
-    @test force_interval(Inf, -Inf) == Interval(-Inf, Inf)
+    @test isidentical(force_interval(4, 3), Interval(3, 4))
+    @test isidentical(force_interval(4, Inf), Interval(4, Inf))
+    @test isidentical(force_interval(Inf, 4), Interval(4, Inf))
+    @test isidentical(force_interval(Inf, -Inf), Interval(-Inf, Inf))
     @test_throws ArgumentError force_interval(NaN, 3)
 end
