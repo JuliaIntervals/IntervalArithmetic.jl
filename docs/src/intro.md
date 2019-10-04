@@ -3,7 +3,7 @@
 The basic idea in Interval Arithmetic is to calculate with entire *sets* of real numbers, of which the simplest type are closed intervals
 $[a,b] := \{x \in \mathbb{R}: a \le x \le b \}$.
 
-We define arithmetic operations and functions to act on intervals, in such a way that the result of the calculation is a new interval that is guaranteed to contain the true range of the function.
+We define arithmetic operations and functions to act on intervals in such a way that the result of the calculation is a new interval that is guaranteed to contain the true range of the function.
 
 For example, for monotone functions like `exp`, we define
 ```
@@ -17,9 +17,9 @@ For non-monotone functions, like the squaring function, it is more complicated:
 ```
 We also have to round the lower endpoint down and the upper endpoint up to get guaranteed containment of the true result, since we are using floating-point arithmetic.
 
-For more information on how different functions behave in Interval Arithmetic, refer to [Interval Arithmetic](https://en.wikipedia.org/wiki/Interval_arithmetic)
+For more information on how different functions behave in Interval Arithmetic, refer to [Interval Arithmetic](https://en.wikipedia.org/wiki/Interval_arithmetic).
 
-Once we have done this for all basic functions, we can define a complicated Julia function like
+Once we have done this for basic functions, we can define a complicated Julia function like
 ```
 f(x) = sin(3x^2 - 2 cos(1/x))
 ```
