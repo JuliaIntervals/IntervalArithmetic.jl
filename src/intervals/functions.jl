@@ -234,6 +234,8 @@ enclosure when using multiplication with correct rounding.
 """
 function ^(x::Interval{T}, n::Integer) where {T} # fast integer power
 
+    n == 0 && return one(x)
+
     isempty(x) && return x
 
     negative_power = false
