@@ -69,10 +69,14 @@ setprecision(::Type{Interval}, t::Tuple) = setprecision(Interval, t...)
 precision(::Type{Interval}) = (parameters.precision_type, parameters.precision)
 
 
-const float_interval_pi = atomic(Interval{Float64}, pi)  # does not change
+const float64_interval_pi = atomic(Interval{Float64}, pi)  # does not change
+const float32_interval_pi = atomic(Interval{Float32}, pi)
+const float16_interval_pi = atomic(Interval{Float16}, pi)
 
 pi_interval(::Type{BigFloat}) = parameters.pi
-pi_interval(::Type{Float64})  = float_interval_pi
+pi_interval(::Type{Float64})  = float64_interval_pi
+pi_interval(::Type{Float32})  = float32_interval_pi
+pi_interval(::Type{Float16})  = float16_interval_pi
 
 
 function Base.setrounding(f::Function, ::Type{Rational{T}},
