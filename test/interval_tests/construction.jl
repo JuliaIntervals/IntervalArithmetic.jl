@@ -35,6 +35,7 @@ const eeuler = Base.MathConstants.e
 
     @test Interval{BigFloat}(1) == Interval{BigFloat}(big(1.0), big(1.0))
 
+    # Irrational
     @test -pi..pi == @interval(-pi,pi)
     @test 0..pi == hull(interval(0), Interval{Float64}(π))
     @test 1.2..pi == @interval(1.2, pi)
@@ -42,6 +43,18 @@ const eeuler = Base.MathConstants.e
     @test pi..pi == Interval{Float64}(π)
     @test eeuler..pi == hull(@interval(eeuler), Interval{Float64}(π))
     @test Interval(π) == @interval(π)
+    @test Interval(π, π) == Interval(π)
+    @test Interval{Float32}(π, π) == Interval{Float32}(π)
+
+    @test big(eeuler) in Interval(eeuler, π)
+    @test big(π) in Interval(eeuler, π)
+    @test big(eeuler) in Interval(0, eeuler)
+    @test big(π) in Interval(π, 4)
+
+    @test big(eeuler) in Interval{Float32}(eeuler, π)
+    @test big(π) in Interval{Float32}(eeuler, π)
+    @test big(eeuler) in Interval{Float32}(0, eeuler)
+    @test big(π) in Interval{Float32}(π, 4)
 
     # a < Inf and b > -Inf
     @test @interval(1e300) == Interval(9.999999999999999e299, 1.0e300)

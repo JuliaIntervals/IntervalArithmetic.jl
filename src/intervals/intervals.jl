@@ -47,9 +47,17 @@ Interval(a::T, b::S) where {T<:Real, S<:Real} = Interval(promote(a,b)...)
 ## Concrete constructors for Interval, to effectively deal only with Float64,
 # BigFloat or Rational{Integer} intervals.
 Interval(a::T, b::T) where T<:Integer = Interval(float(a), float(b))
-Interval(a::T, b::T) where T<:Irrational = Interval(float(a), float(b))
 
-eltype(x::Interval{T}) where T<:Real = T
+# Constructors for Irrational
+# Single argument Irrational constructor are in IntervalArithmetic.jl
+# as generated functions need to be define last.
+Interval{T}(a::Irrational, b::Irrational) where {T<:Real} = Interval{T}(T(a, RoundDown), T(b, RoundUp))
+Interval{T}(a::Irrational, b::Real) where {T<:Real} = Interval{T}(T(a, RoundDown), b)
+Interval{T}(a::Real, b::Irrational) where {T<:Real} = Interval{T}(a, T(b, RoundUp))
+
+Interval(a::Irrational, b::Irrational) = Interval{Float64}(a, b)
+Interval(a::Irrational, b::Real) = Interval{Float64}(a, b)
+Interval(a::Real, b::Irrational) = Interval{Float64}(a, b)
 
 Interval(x::Interval) = x
 Interval(x::Complex) = Interval(real(x)) + im*Interval(imag(x))
@@ -59,6 +67,7 @@ Interval{T}(x) where T = Interval(convert(T, x))
 Interval{T}(x::Interval) where T = atomic(Interval{T}, x)
 
 size(x::Interval) = (1,)
+eltype(x::Interval{T}) where T<:Real = T
 
 
 """
