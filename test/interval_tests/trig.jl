@@ -74,7 +74,7 @@ end
 end
 
 @testset "Inverse trig" begin
-    @test asin(@interval(1)) == @interval(pi/2)#pi_interval(Float64)/2
+    @test asin(@interval(1)) == @interval(pi/2)#Interval{Float64}(π)/2
     @test asin(@interval(0.9, 2)) == asin(@interval(0.9, 1))
     @test asin(@interval(3, 4)) == ∅
 
@@ -91,7 +91,7 @@ end
     @test acos(@biginterval(3, 4)) ⊆ acos(@interval(3, 4))
 
     @test atan(@interval(-1,1)) ==
-        Interval(-pi_interval(Float64).hi/4, pi_interval(Float64).hi/4)
+        Interval(-Interval{Float64}(π).hi/4, Interval{Float64}(π).hi/4)
     @test atan(@interval(0)) == Interval(0.0, 0.0)
     @test atan(@biginterval(-1, 1)) ⊆ atan(@interval(-1, 1))
 end
