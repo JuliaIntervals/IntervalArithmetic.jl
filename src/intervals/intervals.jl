@@ -58,16 +58,6 @@ Interval{T}(x) where T = Interval(convert(T, x))
 
 Interval{T}(x::Interval) where T = atomic(Interval{T}, x)
 
-
-Interval{T}(x::Irrational) where T = atomic(Interval{T}, x)
-#=
-@generated function Interval{T}(x::Irrational) where T
-    res = atomic(Interval{T}, x())  # Precompute the interval
-    return :(return $res)  # Set body of the function to return the precomputed result
-end
-=#
-Interval(x::Irrational) = atomic(Interval{Float64}, x)
-
 size(x::Interval) = (1,)
 
 

@@ -127,4 +127,14 @@ include("deprecated.jl")
 """
 const Region{T} = Union{Interval{T}, IntervalBox{T}}
 
+
+# These definitions has been put there because generated functions must be
+# defined after all methods they use.
+@generated function Interval{T}(x::Irrational) where T
+    res = atomic(Interval{T}, x())  # Precompute the interval
+    return :(return $res)  # Set body of the function to return the precomputed result
+end
+
+Interval(x::Irrational) = Interval{Float64}(x)
+
 end # module IntervalArithmetic
