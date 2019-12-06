@@ -58,7 +58,6 @@ export
     entireinterval, isentire, nai, isnai, isthin, iscommon, isatomic,
     widen, inf, sup, bisect,
     parameters, eps, dist,
-    pi_interval,
     midpoint_radius, interval_from_midpoint_radius,
     RoundTiesToEven, RoundTiesToAway,
     cancelminus, cancelplus, isunbounded,

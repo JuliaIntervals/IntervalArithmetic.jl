@@ -2,7 +2,7 @@
 
 
 # hard code this for efficiency:
-const one_over_half_pi_interval = inv(0.5 * pi_interval(Float64))
+const one_over_half_pi_interval = inv(0.5 * Interval{Float64}(π))
 
 """
 Multiply an interval by a positive constant.
@@ -10,16 +10,16 @@ For efficiency, does not check that the constant is positive.
 """
 multiply_by_positive_constant(α, x::Interval) = @round(α*x.lo, α*x.hi)
 
-half_pi(::Type{Float64}) = multiply_by_positive_constant(0.5, pi_interval(Float64))
-half_pi(::Type{T}) where {T} = 0.5 * pi_interval(T)
+half_pi(::Type{Float64}) = multiply_by_positive_constant(0.5, Interval{Float64}(π))
+half_pi(::Type{T}) where {T} = 0.5 * Interval{T}(π)
 half_pi(x::T) where {T<:AbstractFloat} = half_pi(T)
 
-two_pi(::Type{Float64}) = multiply_by_positive_constant(2.0, pi_interval(Float64))
-two_pi(::Type{T}) where {T} = 2 * pi_interval(T)
+two_pi(::Type{Float64}) = multiply_by_positive_constant(2.0, Interval{Float64}(π))
+two_pi(::Type{T}) where {T} = 2 * Interval{T}(π)
 
-range_atan(::Type{T}) where {T<:Real} = Interval(-(pi_interval(T).hi), pi_interval(T).hi)
+range_atan(::Type{T}) where {T<:Real} = Interval(-(Interval{T}(π).hi), Interval{T}(π).hi)
 half_range_atan(::Type{T}) where {T} = (temp = half_pi(T); Interval(-(temp.hi), temp.hi) )
-pos_range_atan(::Type{T}) where {T<:Real} = Interval(zero(T), pi_interval(T).hi)
+pos_range_atan(::Type{T}) where {T<:Real} = Interval(zero(T), Interval{T}(π).hi)
 
 const halfpi = pi / 2.0
 
@@ -59,7 +59,7 @@ function sin(a::Interval{T}) where T
 
     # Different cases depending on the two quadrants:
     if lo_quadrant == hi_quadrant
-        a.hi - a.lo > pi_interval(T).lo && return whole_range  # in same quadrant but separated by almost 2pi
+        a.hi - a.lo > Interval{T}(π).lo && return whole_range  # in same quadrant but separated by almost 2pi
         lo = @round(sin(a.lo), sin(a.lo)) # Interval(sin(a.lo, RoundDown), sin(a.lo, RoundUp))
         hi = @round(sin(a.hi), sin(a.hi)) # Interval(sin(a.hi, RoundDown), sin(a.hi, RoundUp))
         return hull(lo, hi)
@@ -111,7 +111,7 @@ function sin(a::Interval{Float64})
 
     # Different cases depending on the two quadrants:
     if lo_quadrant == hi_quadrant
-        a.hi - a.lo > pi_interval(T).lo && return whole_range  #
+        a.hi - a.lo > Interval{T}(π).lo && return whole_range  #
 
         if lo_quadrant == 1 || lo_quadrant == 2
             # negative slope
@@ -139,7 +139,7 @@ end
 
 function sinpi(a::Interval{T}) where T
     isempty(a) && return a
-    w = a * pi_interval(T)
+    w = a * Interval{T}(π)
     return(sin(w))
 end
 
@@ -162,7 +162,7 @@ function cos(a::Interval{T}) where T
 
     # Different cases depending on the two quadrants:
     if lo_quadrant == hi_quadrant # Interval limits in the same quadrant
-        a.hi - a.lo > pi_interval(T).lo && return whole_range
+        a.hi - a.lo > Interval{T}(π).lo && return whole_range
         lo = @round(cos(a.lo), cos(a.lo))
         hi = @round(cos(a.hi), cos(a.hi))
         return hull(lo, hi)
@@ -201,7 +201,7 @@ function cos(a::Interval{Float64})
 
     # Different cases depending on the two quadrants:
     if lo_quadrant == hi_quadrant # Interval limits in the same quadrant
-        a.hi - a.lo > pi_interval(T).lo && return whole_range
+        a.hi - a.lo > Interval{T}(π).lo && return whole_range
 
         if lo_quadrant == 2 || lo_quadrant == 3
             # positive slope
@@ -229,7 +229,7 @@ end
 
 function cospi(a::Interval{T}) where T
     isempty(a) && return a
-    w = a * pi_interval(T)
+    w = a * Interval{T}(π)
     return(cos(w))
 end
 
@@ -242,7 +242,7 @@ end
 function tan(a::Interval{T}) where T
     isempty(a) && return a
 
-    diam(a) > pi_interval(T).lo && return entireinterval(a)
+    diam(a) > Interval{T}(π).lo && return entireinterval(a)
 
     lo_quadrant = minimum(find_quadrants_tan(a.lo))
     hi_quadrant = maximum(find_quadrants_tan(a.hi))
@@ -274,7 +274,7 @@ function tan(a::Interval{Float64})
 
     isempty(a) && return a
 
-    diam(a) > pi_interval(T).lo && return entireinterval(a)
+    diam(a) > Interval{T}(π).lo && return entireinterval(a)
 
     lo_quadrant, lo = quadrant(a.lo)
     hi_quadrant, hi = quadrant(a.hi)
@@ -363,7 +363,7 @@ function atan(y::Interval{BigFloat}, x::Interval{BigFloat})
 
     elseif x.hi < zero(T)
 
-        y == zero(y) && return pi_interval(T)
+        y == zero(y) && return Interval{T}(π)
         y.lo ≥ zero(T) &&
             return @round(atan(y.hi, x.hi), atan(y.lo, x.lo))
         y.hi < zero(T) &&
@@ -381,7 +381,7 @@ function atan(y::Interval{BigFloat}, x::Interval{BigFloat})
             return half_range_atan(T)
 
         elseif x.hi == zero(T)
-            y == zero(y) && return pi_interval(T)
+            y == zero(y) && return Interval{T}(π)
             y.lo ≥ zero(T) && return @round(half_pi(BigFloat).lo, atan(y.lo, x.lo))
             y.hi < zero(T) && return @round(atan(y.hi, x.lo), -(half_pi(BigFloat).lo))
             return range_atan(T)
