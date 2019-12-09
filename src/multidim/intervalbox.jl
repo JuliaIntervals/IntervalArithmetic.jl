@@ -66,12 +66,12 @@ big(X::IntervalBox) = big.(X)
 
 # TODO: Update to use generator
 for (op, dotop) in ((:⊆, :.⊆), (:⊂, :.⊂), (:⊃, :.⊃))
-    @eval $(op)(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) where {N,T} = all($(dotop)(X, Y))
+    @eval $(op)(X::IntervalBox{N}, Y::IntervalBox{N}) where {N} = all($(dotop)(X, Y))
 end
 
-∩(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) where {N,T} =
+∩(X::IntervalBox{N}, Y::IntervalBox{N}) where {N} =
     IntervalBox(X.v .∩ Y.v)
-∪(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) where {N,T} =
+∪(X::IntervalBox{N}, Y::IntervalBox{N}) where {N} =
     IntervalBox(X.v .∪ Y.v)
 
 ∈(X::AbstractVector, Y::IntervalBox{N,T}) where {N,T} = all(X .∈ Y)
@@ -107,3 +107,5 @@ IntervalBox(x::Interval, ::Val{n}) where {n} = IntervalBox(SVector(ntuple( _ -> 
 IntervalBox(x::Interval, n::Int) = IntervalBox(x, Val(n))
 
 dot(x::IntervalBox, y::IntervalBox) = dot(x.v, y.v)
+
+Base.:(==)(x::IntervalBox, y::IntervalBox) = x.v == y.v
