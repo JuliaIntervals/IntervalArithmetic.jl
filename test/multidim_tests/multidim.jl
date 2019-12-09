@@ -35,34 +35,38 @@ let X, A  # avoid problems with global variables
     @test A .^ 2 == IntervalBox(1..4, 9..16)
     @test B .^ 0.5 == IntervalBox(@interval(0,sqrt(2)), @interval(sqrt(3),sqrt(6)))
 
-    @test A ⊆ A
-    @test A ⊆ B
-    @test A.v ⊆ B
-    @test A ⊂ B.v
-    @test !(A ⊂ A)
-    @test A ⊂ B
-    @test A.v ⊂ B
-    @test A ⊆ B.v
-    @test !(B ⊆ A)
-    @test !(B ⊂ A)
-    @test B ⊇ B
-    @test B ⊇ A
-    @test B.v ⊇ A
-    @test B ⊇ A.v
-    @test !(B ⊃ B)
-    @test B ⊃ A
-    @test B.v ⊃ A
-    @test B ⊃ A.v
-    @test !(A ⊇ B)
-    @test !(A ⊃ B)
+    for (A, B) in ( (A,B), (big(A), B), (A, big(B)), (big(A), big(B)) )
+        @test A ⊆ A
+        @test A ⊆ B
+        @test A.v ⊆ B
+        @test A ⊂ B.v
+        @test !(A ⊂ A)
+        @test A ⊂ B
+        @test A.v ⊂ B
+        @test A ⊆ B.v
+        @test !(B ⊆ A)
+        @test !(B ⊂ A)
+        @test B ⊇ B
+        @test B ⊇ A
+        @test B.v ⊇ A
+        @test B ⊇ A.v
+        @test !(B ⊃ B)
+        @test B ⊃ A
+        @test B.v ⊃ A
+        @test B ⊃ A.v
+        @test !(A ⊇ B)
+        @test !(A ⊃ B)
 
-    @test A ∩ B == A
-    @test A.v ∩ B == A
-    @test A ∩ B.v == A
+        @test A ∩ B == A
+        @test A.v ∩ B == A
+        @test A ∩ B.v == A
+    
+        @test A ∪ B == B
+        @test A.v ∪ B == B
+        @test A ∪ B.v == B
+    end
 
-    @test A ∪ B == B
-    @test A.v ∪ B == B
-    @test A ∪ B.v == B
+
 
     X = IntervalBox(1..2, 3..4)
     Y = IntervalBox(3..4, 3..4)
