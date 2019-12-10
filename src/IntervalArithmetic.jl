@@ -53,7 +53,7 @@ export
     interval,
     @interval, @biginterval, @floatinterval, @make_interval,
     diam, radius, mid, mag, mig, hull,
-    emptyinterval, ∅, ∞, isempty, isinterior, isdisjoint, ⪽,
+    emptyinterval, ∅, isempty, isinterior, isdisjoint, ⪽,
     precedes, strictprecedes, ≺, ⊂, ⊃, ⊇, contains_zero,
     entireinterval, isentire, nai, isnai, isthin, iscommon, isatomic,
     widen, inf, sup, bisect,
@@ -62,7 +62,7 @@ export
     midpoint_radius, interval_from_midpoint_radius,
     RoundTiesToEven, RoundTiesToAway,
     cancelminus, cancelplus, isunbounded,
-    .., @I_str, ±,
+    @I_str, ±,
     pow, extended_div,
     setformat, @format
 
@@ -77,7 +77,7 @@ end
 export showfull
 
 import Base: rounding, setrounding, setprecision
-
+import IntervalArithmetic.Symbol : ∞, ..
 
 
 ## Multidimensional
@@ -122,6 +122,9 @@ include("display.jl")
 include("plot_recipes/plot_recipes.jl")
 
 include("deprecated.jl")
+
+include("special_symbols.jl")
+using .Symbol
 
 """
     Region{T} = Union{Interval{T}, IntervalBox{T}}
