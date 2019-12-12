@@ -14,7 +14,7 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
 CRlibm = "0.7"
-FastRounding = "0.3"
+FastRounding = "0.2"
 Polynomials = "0.6"
 RecipesBase = "0.6, 0.7"
 SetRounding = "0.2"
