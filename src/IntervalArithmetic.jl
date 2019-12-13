@@ -135,6 +135,7 @@ const Region{T} = Union{Interval{T}, IntervalBox{T}}
     return :(return $res)  # Set body of the function to return the precomputed result
 end
 
+Interval{BigFloat}(x::Irrational) = atomic(Interval{BigFloat}, x)
 Interval(x::Irrational) = Interval{Float64}(x)
 
 end # module IntervalArithmetic

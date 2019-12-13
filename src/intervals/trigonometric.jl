@@ -10,12 +10,11 @@ For efficiency, does not check that the constant is positive.
 """
 multiply_by_positive_constant(α, x::Interval) = @round(α*x.lo, α*x.hi)
 
-half_pi(::Type{Float64}) = multiply_by_positive_constant(0.5, Interval{Float64}(π))
-half_pi(::Type{T}) where {T} = 0.5 * Interval{T}(π)
-half_pi(x::T) where {T<:AbstractFloat} = half_pi(T)
+half_pi(::Type{T}) where {T} = multiply_by_positive_constant(convert(T, 0.5), Interval{T}(π))
+half_pi(::T) where T = half_pi(T)
 
-two_pi(::Type{Float64}) = multiply_by_positive_constant(2.0, Interval{Float64}(π))
-two_pi(::Type{T}) where {T} = 2 * Interval{T}(π)
+two_pi(::Type{T}) where {T} = multiply_by_positive_constant(convert(T, 2.0), Interval{T}(π))
+two_pi(::T) where T = two_pi(T)
 
 range_atan(::Type{T}) where {T<:Real} = Interval(-(Interval{T}(π).hi), Interval{T}(π).hi)
 half_range_atan(::Type{T}) where {T} = (temp = half_pi(T); Interval(-(temp.hi), temp.hi) )

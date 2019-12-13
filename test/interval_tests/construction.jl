@@ -36,16 +36,21 @@ const eeuler = Base.MathConstants.e
     @test Interval{BigFloat}(1) == Interval{BigFloat}(big(1.0), big(1.0))
 
     # Irrational
-    @test -pi..pi == @interval(-pi,pi)
-    @test 0..pi == hull(interval(0), Interval{Float64}(π))
-    @test 1.2..pi == @interval(1.2, pi)
-    @test pi..big(4) == hull(Interval{BigFloat}(π), interval(4))
-    @test pi..pi == Interval{Float64}(π)
-    @test eeuler..pi == hull(@interval(eeuler), Interval{Float64}(π))
-    @test Interval(π) == @interval(π)
-    @test Interval(π, π) == Interval(π)
-    @test Interval{Float32}(π, π) == Interval{Float32}(π)
+    for irr in (π, eeuler)
+        @test @interval(-irr, irr).hi == (-irr..irr).hi
+        @test 0..irr == hull(interval(0), Interval{Float64}(irr))
+        @test 1.2..irr == @interval(1.2, irr)
+        @test irr..irr == Interval{Float64}(irr)
+        @test Interval(irr) == @interval(irr)
+        @test Interval(irr, irr) == Interval(irr)
+        @test Interval{Float32}(irr, irr) == Interval{Float32}(irr)
+    end
 
+    # The following error on windows due to a missing method in MPFR
+    @test_broken eeuler..big(4) == hull(Interval{BigFloat}(π), interval(4))
+    @test π..big(4) == hull(Interval{BigFloat}(π), interval(4))
+
+    @test eeuler..pi == hull(@interval(eeuler), Interval{Float64}(π))
     @test big(eeuler) in Interval(eeuler, π)
     @test big(π) in Interval(eeuler, π)
     @test big(eeuler) in Interval(0, eeuler)
