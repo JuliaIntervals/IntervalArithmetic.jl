@@ -12,7 +12,6 @@ setprecision(Interval, Float64)
         a = 1..2
         b = -1.1..1.3
         c = Interval(pi)
-        d = @interval(π)
 
         @testset "6 sig figs" begin
             setformat(:standard, sigfigs=6)
@@ -20,7 +19,6 @@ setprecision(Interval, Float64)
             @test string(a) == "[1, 2]"
             @test string(b) == "[-1.10001, 1.30001]"
             @test string(c) == "[3.14159, 3.1416]"
-            @test string(d) == "[3.14159, 3.1416]"
         end
 
         @testset "10 sig figs" begin
@@ -29,7 +27,6 @@ setprecision(Interval, Float64)
             @test string(a) == "[1, 2]"
             @test string(b) == "[-1.100000001, 1.300000001]"
             @test string(c) == "[3.141592653, 3.141592654]"
-            @test string(d) == "[3.141592653, 3.141592654]"
         end
 
         @testset "20 sig figs" begin
@@ -37,8 +34,7 @@ setprecision(Interval, Float64)
 
             @test string(a) == "[1, 2]"
             @test string(b) == "[-1.1000000000000000889, 1.3000000000000000445]"
-            @test string(c) == "[3.1415926535897931159, 3.141592653589793116]"
-            @test string(d) == "[3.1415926535897931159, 3.1415926535897935601]"
+            @test string(c) == "[3.1415926535897931159, 3.1415926535897935601]"
         end
 
         @testset "Full" begin
@@ -46,8 +42,7 @@ setprecision(Interval, Float64)
 
             @test string(a) == "Interval(1.0, 2.0)"
             @test string(b) == "Interval(-1.1, 1.3)"
-            @test string(c) == "Interval(3.141592653589793, 3.141592653589793)"
-            @test string(d) == "Interval(3.141592653589793, 3.1415926535897936)"
+            @test string(c) == "Interval(3.141592653589793, 3.1415926535897936)"
         end
 
         @testset "Midpoint" begin
@@ -55,8 +50,7 @@ setprecision(Interval, Float64)
 
             @test string(a) == "1.5 ± 0.5"
             @test string(b) == "0.1 ± 1.20001"
-            @test string(c) == "3.14159 ± 0"
-            @test string(d) == "3.14159 ± 4.4409e-16"
+            @test string(c) == "3.14159 ± 4.4409e-16"
 
             # issue 175:
             @test string(@biginterval(1, 2)) == "1.5 ± 0.5"

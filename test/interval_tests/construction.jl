@@ -26,7 +26,6 @@ const eeuler = Base.MathConstants.e
     @test Interval(1) == Interval(1.0, 1.0)
     @test size(Interval(1)) == (1,)
     @test Interval(big(1)) == Interval(1.0, 1.0)
-    @test Interval(eeuler) == Interval(1.0*eeuler)
     @test Interval(1//10) == Interval{Rational{Int}}(1//10, 1//10)
     @test Interval(BigInt(1)//10) == Interval{Rational{BigInt}}(1//10, 1//10)
     @test Interval( (1.0, 2.0) ) == Interval(1.0, 2.0)
@@ -34,16 +33,33 @@ const eeuler = Base.MathConstants.e
     @test Interval{Rational{Int}}(1) == Interval(1//1)
     #@test Interval{Rational{Int}}(pi) == Interval(rationalize(1.0*pi))
 
-    @test Interval{Float64}(pi) == Interval(float(pi))
     @test Interval{BigFloat}(1) == Interval{BigFloat}(big(1.0), big(1.0))
-    @test Interval{BigFloat}(pi) == Interval{BigFloat}(big(pi), big(pi))
 
-    @test -pi..pi == @interval(-pi,pi)
-    @test 0..pi == hull(interval(0), pi_interval(Float64))
-    @test 1.2..pi == @interval(1.2, pi)
-    @test pi..big(4) == hull(pi_interval(BigFloat), interval(4))
-    @test pi..pi == pi_interval(Float64)
-    @test eeuler..pi == hull(@interval(eeuler), pi_interval(Float64))
+    # Irrational
+    for irr in (π, eeuler)
+        @test @interval(-irr, irr).hi == (-irr..irr).hi
+        @test 0..irr == hull(interval(0), Interval{Float64}(irr))
+        @test 1.2..irr == @interval(1.2, irr)
+        @test irr..irr == Interval{Float64}(irr)
+        @test Interval(irr) == @interval(irr)
+        @test Interval(irr, irr) == Interval(irr)
+        @test Interval{Float32}(irr, irr) == Interval{Float32}(irr)
+    end
+
+    # The following error on windows due to a missing method in MPFR
+    @test_broken eeuler..big(4) == hull(Interval{BigFloat}(π), interval(4))
+    @test π..big(4) == hull(Interval{BigFloat}(π), interval(4))
+
+    @test eeuler..pi == hull(@interval(eeuler), Interval{Float64}(π))
+    @test big(eeuler) in Interval(eeuler, π)
+    @test big(π) in Interval(eeuler, π)
+    @test big(eeuler) in Interval(0, eeuler)
+    @test big(π) in Interval(π, 4)
+
+    @test big(eeuler) in Interval{Float32}(eeuler, π)
+    @test big(π) in Interval{Float32}(eeuler, π)
+    @test big(eeuler) in Interval{Float32}(0, eeuler)
+    @test big(π) in Interval{Float32}(π, 4)
 
     # a < Inf and b > -Inf
     @test @interval(1e300) == Interval(9.999999999999999e299, 1.0e300)

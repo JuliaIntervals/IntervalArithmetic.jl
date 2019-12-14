@@ -58,7 +58,6 @@ export
     entireinterval, isentire, nai, isnai, isthin, iscommon, isatomic,
     widen, inf, sup, bisect,
     parameters, eps, dist,
-    pi_interval,
     midpoint_radius, interval_from_midpoint_radius,
     RoundTiesToEven, RoundTiesToAway,
     cancelminus, cancelplus, isunbounded,
@@ -127,5 +126,16 @@ include("deprecated.jl")
     Region{T} = Union{Interval{T}, IntervalBox{T}}
 """
 const Region{T} = Union{Interval{T}, IntervalBox{T}}
+
+
+# These definitions has been put there because generated functions must be
+# defined after all methods they use.
+@generated function Interval{T}(x::Irrational) where T
+    res = atomic(Interval{T}, x())  # Precompute the interval
+    return :(return $res)  # Set body of the function to return the precomputed result
+end
+
+Interval{BigFloat}(x::Irrational) = atomic(Interval{BigFloat}, x)
+Interval(x::Irrational) = Interval{Float64}(x)
 
 end # module IntervalArithmetic

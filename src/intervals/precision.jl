@@ -68,19 +68,10 @@ setprecision(::Type{Interval}, t::Tuple) = setprecision(Interval, t...)
 
 precision(::Type{Interval}) = (parameters.precision_type, parameters.precision)
 
-
-const float_interval_pi = atomic(Interval{Float64}, pi)  # does not change
-
-pi_interval(::Type{BigFloat}) = parameters.pi
-pi_interval(::Type{Float64})  = float_interval_pi
-
-
 function Base.setrounding(f::Function, ::Type{Rational{T}},
     rounding_mode::RoundingMode) where T
     setrounding(f, float(Rational{T}), rounding_mode)
 end
-
-
 
 float(x::Interval{T}) where T = atomic( Interval{float(T)}, x)  # https://github.com/dpsanders/IntervalArithmetic.jl/issues/174
 
