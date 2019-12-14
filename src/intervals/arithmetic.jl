@@ -40,6 +40,7 @@ function precedes(a::Interval, b::Interval)
     (isempty(a) || isempty(b)) && return true
     a.hi ≤ b.lo
 end
+const ≼ = precedes # \preccurlyeq
 
 # strictpreceds
 function strictprecedes(a::Interval, b::Interval)
@@ -227,7 +228,7 @@ function extended_div(a::Interval{T}, b::Interval{T}) where T<:Real
     elseif 0 ∈ a && 0 ∈ b
         return (entireinterval(S), emptyinterval(S))
     end
-    
+
     return (a / b, emptyinterval(S))
 end
 
