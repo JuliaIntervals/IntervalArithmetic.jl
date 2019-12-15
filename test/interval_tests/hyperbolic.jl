@@ -3,9 +3,6 @@
 using IntervalArithmetic
 using Test
 
-setprecision(Interval, 128)
-setprecision(Interval, Float64)
-
 @testset "Hyperb tests" begin
     @test sinh(emptyinterval()) == emptyinterval()
     @test sinh(Interval(0.5)) == Interval(0.5210953054937473, 0.5210953054937474)

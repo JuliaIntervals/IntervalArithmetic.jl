@@ -1,7 +1,6 @@
 using IntervalArithmetic
 using Test
 
-
 @testset "`bisect` function" begin
     X = 0..1
     @test bisect(X, 0.5) == (0..0.5, 0.5..1)

@@ -3,9 +3,6 @@
 using IntervalArithmetic
 using Test
 
-setprecision(Interval, 128)
-setprecision(Interval, Float64)
-
 @testset "sin" begin
     @test sin(@interval(0.5)) == Interval(0.47942553860420295, 0.47942553860420301)
     @test sin(@interval(0.5, 1.67)) == Interval(4.7942553860420295e-01, 1.0)

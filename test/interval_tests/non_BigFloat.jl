@@ -15,8 +15,6 @@ using Test
 
 end
 
-setprecision(Interval, 64)
-
 @testset "Rounding rational intervals" begin
 
     X = Interval(big(1)//3)

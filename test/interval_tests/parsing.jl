@@ -3,8 +3,6 @@ using Test
 
 setformat(:standard, decorations=true, sigfigs=6)
 
-setprecision(128)
-
 @testset "Parse string to Interval" begin
     @test parse(Interval{Float64}, "1") == Interval(1, 1)
     @test parse(Interval{Float64}, "[1, 2]") == Interval(1, 2)
