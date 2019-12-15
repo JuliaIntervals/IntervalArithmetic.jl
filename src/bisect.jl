@@ -10,7 +10,7 @@ Returns a tuple of the new intervals.
 function bisect(X::Interval, α=where_bisect)
     @assert 0 ≤ α ≤ 1
 
-    m = mid(X, α)
+    m = scaled_mid(X, α)
 
     return (Interval(X.lo, m), Interval(m, X.hi))
 end
