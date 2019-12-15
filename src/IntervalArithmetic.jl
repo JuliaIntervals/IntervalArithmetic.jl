@@ -21,6 +21,7 @@ export ×, dot
 import Base:
     +, -, *, /, //, fma,
     <, >, ==, !=, ⊆, ^, <=,
+    isless,
     in, zero, one, eps, typemin, typemax, abs, abs2, real, min, max,
     sqrt, exp, log, sin, cos, tan, cot, inv, cbrt, csc, hypot, sec, 
     exp2, exp10, log2, log10,
@@ -51,9 +52,8 @@ import .Broadcast: broadcasted
 
 export
     Interval, DefaultBound,
-    interval,
     @interval, @biginterval, @floatinterval,
-    diam, radius, mid, mag, mig, hull,
+    diam, radius, mid, scaled_mid, mag, mig, hull,
     emptyinterval, ∅, ∞, isempty, isinterior, isdisjoint, ⪽,
     precedes, strictprecedes, ≺, ⊂, ⊃, ⊇, contains_zero,
     isidentical, isdistinct,
@@ -62,7 +62,7 @@ export
     eps, dist,
     midpoint_radius, interval_from_midpoint_radius,
     RoundTiesToEven, RoundTiesToAway,
-    cancelminus, cancelplus, isunbounded,
+    cancelminus, cancelplus, isbounded, isunbounded,
     .., @I_str, ±,
     pow, extended_div,
     setformat, @format
@@ -76,8 +76,6 @@ end
 
 export
     setindex   # re-export from StaticArrays for IntervalBox
-
-
 
 export showfull
 
@@ -103,8 +101,6 @@ export
 
 function __init__()
     setrounding(BigFloat, RoundNearest)
-    setprecision(Interval, 256)  # set up pi
-    setprecision(Interval, Float64)
 end
 
 

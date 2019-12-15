@@ -63,18 +63,18 @@ end
     @test Interval(-1.0, 1.0)/Interval(0.0,1.0) == RR(c)
     @test Interval(-1.0, 1.0)/Interval(-1.0,1.0) == RR(c)
 
-    @test extended_div(interval(-30.0,-15.0), interval(-5.0,-3.0)) == (interval(3.0, 10.0), emptyinterval(c))
-    @test extended_div(@interval(-30,-15) , @interval(-5,-3)) == (interval(3.0, 10.0), emptyinterval(c))
-    @test extended_div(1.0..2.0, 0.1..1.0) == (interval(1, 20.000000000000004), emptyinterval(c))
-    @test extended_div(a, c) == (interval(2.4999999999999998e-02, 4.4e+00), emptyinterval(c))
-    @test extended_div(c, interval(4.0)) == (interval(6.25e-02, 1e+00), emptyinterval(c))
+    @test extended_div(Interval(-30.0,-15.0), Interval(-5.0,-3.0)) == (Interval(3.0, 10.0), emptyinterval(c))
+    @test extended_div(@interval(-30,-15) , @interval(-5,-3)) == (Interval(3.0, 10.0), emptyinterval(c))
+    @test extended_div(1.0..2.0, 0.1..1.0) == (Interval(1, 20.000000000000004), emptyinterval(c))
+    @test extended_div(a, c) == (Interval(2.4999999999999998e-02, 4.4e+00), emptyinterval(c))
+    @test extended_div(c, Interval(4.0)) == (Interval(6.25e-02, 1e+00), emptyinterval(c))
     @test extended_div(c, zero(c)) == (emptyinterval(c), emptyinterval(c))
-    @test extended_div(interval( 0.0, 1.0), interval(0.0,1.0)) == (RR(c), emptyinterval(c))
-    @test extended_div(interval(-1.0, 1.0), interval(0.0,1.0)) == (RR(c), emptyinterval(c))
-    @test extended_div(interval(-1.0, 1.0), interval(-1.0,1.0)) == (RR(c), emptyinterval(c))
-    @test extended_div(interval(1.0, 2.0), interval(-4.0, 4.0)) == ((-∞.. -0.25), (0.25..∞))
-    @test extended_div(interval(-2.0, -1.0), interval(-2.0, 4.0)) == ((-∞.. -0.25), (0.5..∞))
-    @test extended_div(interval(0.0, 0.0), interval(-1.0, 1.0)) == (RR(c), emptyinterval(c))
+    @test extended_div(Interval( 0.0, 1.0), Interval(0.0,1.0)) == (RR(c), emptyinterval(c))
+    @test extended_div(Interval(-1.0, 1.0), Interval(0.0,1.0)) == (RR(c), emptyinterval(c))
+    @test extended_div(Interval(-1.0, 1.0), Interval(-1.0,1.0)) == (RR(c), emptyinterval(c))
+    @test extended_div(Interval(1.0, 2.0), Interval(-4.0, 4.0)) == ((-∞.. -0.25), (0.25..∞))
+    @test extended_div(Interval(-2.0, -1.0), Interval(-2.0, 4.0)) == ((-∞.. -0.25), (0.5..∞))
+    @test extended_div(Interval(0.0, 0.0), Interval(-1.0, 1.0)) == (RR(c), emptyinterval(c))
 
     a = @interval(1.e-20)
     @test a == Interval(1.0e-20, 1.0000000000000001e-20)
@@ -112,7 +112,6 @@ end
     @test Interval(1,2) ^ -3 == Interval(1/8, 1.0)
     @test Interval(0,3) ^ -3 == @interval(1/27, Inf)
     @test Interval(-1,2) ^ -3 == RR()
-    @test_throws ArgumentError interval(-1, -2) ^ -3  # wrong way round
     @test Interval(-3,2) ^ (3//1) == Interval(-27, 8)
     @test Interval(0.0) ^ 1.1 == Interval(0, 0)
     @test Interval(0.0) ^ 0.0 == emptyinterval()
@@ -131,14 +130,13 @@ end
     @test @interval(-3,4) ^ @interval(0.5) == Interval(0, 2)
     @test @biginterval(-3,4) ^ 0.5 == @biginterval(0, 2)
 
-    @test dist(@interval(1,27)^@interval(1/3), Interval(1., 3.)) < 2*eps(Interval(1,3))
-    @test dist(@interval(1,27)^(1/3), Interval(1., 3.)) < 2*eps(Interval(1,3))
+    @test dist(@interval(1,27)^@interval(1/3), Interval(1., 3.)) < 2*eps(Interval(1,3)).lo
+    @test dist(@interval(1,27)^(1/3), Interval(1., 3.)) < 2*eps(Interval(1,3)).lo
     @test Interval(1., 3.) ⊆ @interval(1,27)^(1//3)
     @test @interval(0.1,0.7)^(1//3) == Interval(0.46415888336127786, 0.8879040017426008)
     @test dist(@interval(0.1,0.7)^(1/3),
-        Interval(0.46415888336127786, 0.8879040017426008)) < 2*eps(@interval(0.1,0.7)^(1/3))
+        Interval(0.46415888336127786, 0.8879040017426008)) < 2*eps(@interval(0.1,0.7)^(1/3)).lo
 
-    setprecision(Interval, 256)
     x = @biginterval(27)
     y = x^(1//3)
     @test diam(y) == 0
@@ -152,8 +150,6 @@ end
     @test (0 <= diam(y) < 1e-76)
 
 end
-
-setprecision(Interval, Float64)
 
 @testset "Exp and log tests" begin
     @test exp(@biginterval(1//2)) ⊆ exp(@interval(1//2))
@@ -275,19 +271,6 @@ end
     @test round(@interval(0.1, 1.5), RoundTiesToAway) == Interval(0.0, 2.0)
     @test round(@interval(-1.5, 0.1), RoundTiesToAway) == Interval(-2.0, 0.0)
     @test round(@interval(-2.5, 0.1), RoundTiesToAway) == Interval(-3.0, 0.0)
-
-    # # :wide tests
-    # # setrounding(Interval, :wide)
-    # setprecision(Interval, Float64)
-    #
-    # a = @interval(-3.0, 2.0)
-    # @test a == Interval(-3.0, 2.0)
-    # @test a^3 == Interval(-27, 8)
-    # @test Interval(-3,2)^3 == Interval(-27, 8)
-    #
-    # @test Interval(-27.0, 8.0)^(1//3) == Interval(0, 2.0000000000000004)
-    #
-    # # setrounding(Interval, :narrow)
 end
 
 @testset "Fast power" begin
@@ -333,7 +316,7 @@ end
         @test y^2.1 ⊆ pow(y, 2.1)
     end
 
-    @testset "Fast interval powers" begin
+    @testset "Fast Interval powers" begin
         x = 1..2
         @test x^Interval(-1.5, 2.5) == Interval(0.35355339059327373, 5.656854249492381)
 
@@ -365,7 +348,7 @@ end
         @test inv(big(2..3)) == Interval(big"3.333333333333333333333333333333333333333333333333333333333333333333333333333305e-01", big"5.0e-01")
     end
 
-    @testset "Float32 intervals" begin
+    @testset "Float32 Intervals" begin
 
         a = Interval{Float32}(1e38)
         b = Interval{Float32}(1e2)

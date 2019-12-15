@@ -12,3 +12,4 @@ Changelog
 - Renamed `entireinterval` -> `RR`
 - Added check of the "IA_DEFAULT_FLAVOR" and "IA_DEFAULT_BOUND_TYPE" keys in `ENV` to get the flavor (`Interval`) and bound type (`DefaultBound`). The default interval type is thus `Interval{DefaultBound}`.
 - Replaced `interval` (checked interval construction) by `Interval{T}(a, b; check=false)`.
+- Remove promotion mechanism between intervals and numbers.

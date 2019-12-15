@@ -37,7 +37,7 @@ Implement the `mid` function of the IEEE Std 1788-2015 (Table 9.2).
 """
 function mid(a::F) where {T, F <: AbstractFlavor{T}}
     isempty(a) && return convert(T, NaN)
-    isentire(a) && return zero(a.lo)
+    isentire(a) && return zero(T)
 
     a.lo == -∞ && return nextfloat(a.lo)  # IEEE-1788 section 12.12.8
     a.hi == +∞ && return prevfloat(a.hi)  # IEEE-1788 section 12.12.8
@@ -66,10 +66,9 @@ intervals.
 """
 function scaled_mid(a::F, α) where {T, F <: AbstractFlavor{T}}
     isempty(a) && return convert(T, NaN)
-    isentire(a) && return zero(a.lo)
 
-    lo = (a.lo == -∞ ? nextfloat(T(-∞)) : a.lo)
-    hi = (a.hi == +∞ ? prevfloat(T(+∞)) : a.hi)
+    lo = (a.lo == -∞ ? nextfloat(a.lo) : a.lo)
+    hi = (a.hi == +∞ ? prevfloat(a.hi) : a.hi)
 
     β = convert(T, α)
 
@@ -116,7 +115,7 @@ Function required by the  IEEE Std 1788-2015 in section 10.5.9 for the set-based
 flavor.
 """
 function midpoint_radius(a::F) where {T, F <: AbstractFlavor{T}}
-    isempty(a) && return convert(T, NaN)
+    isempty(a) && return convert(T, NaN), convert(T, NaN)
     m = mid(a)
     return m, max(m - a.lo, a.hi - m)
 end

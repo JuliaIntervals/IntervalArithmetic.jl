@@ -69,21 +69,6 @@ const eeuler = Base.MathConstants.e
         @test_throws ArgumentError Interval(-Inf, -Inf, check=true)
         @test_throws ArgumentError Interval(Inf, Inf, check=true)
 
-        # Conversion to Interval without type
-        @test isidentical(convert(Interval, 1), Interval(1.0))
-        @test isidentical(convert(Interval, pi), @interval(pi))
-        @test isidentical(convert(Interval, eeuler), @interval(eeuler))
-        @test isidentical(convert(Interval, BigInt(1)), Interval(BigInt(1)))
-        @test isidentical(convert(Interval, 1//10), @interval(1//10))
-        @test convert(Interval, Interval(0.1, 0.2)) === Interval(0.1, 0.2)
-
-        @test isidentical(convert(Interval{Rational{Int}}, 0.1), Interval(1//10))
-
-        ## promotion
-        @test all(isidentical.(promote(Interval(2//1,3//1), Interval(1, 2)),
-                            (Interval(2.0,3.0), Interval(1.0,2.0))))
-        @test all(isidentical.(promote(Interval(1.0), pi), (Interval(1.0), @interval(pi))))
-
         a = @interval(0.1)
         b = @interval(pi)
 
@@ -92,7 +77,6 @@ const eeuler = Base.MathConstants.e
         @test nextfloat(a.lo) == a.hi
         @test b == @floatinterval(pi)
         @test nextfloat(b.lo) == b.hi
-        @test isidentical(convert(Interval{Float64}, @biginterval(0.1)), a)
         x = typemax(Int64)
         @test isidentical(@interval(x), @floatinterval(x))
         @test !isthin(@interval(x))
@@ -194,16 +178,6 @@ const eeuler = Base.MathConstants.e
         @test typeof(a) == Interval{Float64}
     end
 
-    @testset "Conversion to Interval" begin
-        a = convert(Interval, 3)
-        @test isidentical(a, Interval(3.0))
-        @test typeof(a) == Interval{Float64}
-
-        a = convert(Interval, big(3))
-        @test typeof(a) == Interval{BigFloat}
-
-    end
-
     @testset "Interval{T} constructor" begin
         @test isidentical(Interval{Float64}(1), 1..1)
         # no rounding
@@ -268,7 +242,7 @@ const eeuler = Base.MathConstants.e
     end
 
     @testset "@interval with user-defined function" begin
-        f(x) = x==Inf ? one(x) : x/(1+x)  # monotonic
+        f(x) = x.lo == Inf ? one(x) : x/(1+x)  # monotonic
 
         x = 3..4
         @test isidentical(@interval(f(x.lo), f(x.hi)), Interval(0.75, 0.8))

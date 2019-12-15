@@ -19,7 +19,10 @@ Implement the `pow` function of the IEEE Std 1788-2015 (Table 9.1).
 """
 ^(a::F, b::F) where {F <: AbstractFlavor} = atomic(F, big53(a)^b)
 ^(a::F, x::AbstractFloat) where {F <: AbstractFlavor{BigFloat}} = a^big(x)
-^(a::F, x) where {F<:AbstractFlavor} = atomic(F, big53(a)^x)
+
+for T in (:AbstractFloat, :Rational, :Integer)
+    @eval ^(a::F, x::$T) where {F<:AbstractFlavor} = atomic(F, big53(a)^x)
+end
 
 # TODO check flavor dependant corner cases
 function ^(a::F, n::Integer) where {F <: AbstractFlavor{BigFloat}}
@@ -222,7 +225,7 @@ for f in (:exp2, :exp10)
 
     @eval ($f)(a::F) where {F<:AbstractFlavor} = atomic(F, $f(big53(a)))  # no CRlibm version
 
-    @eval function ($f)(a::F) where {F<:AbstractFlavor}
+    @eval function ($f)(a::F) where {F<:AbstractFlavor{BigFloat}}
             isempty(a) && return a
             return @round( F, ($f)(a.lo), ($f)(a.hi) )
         end

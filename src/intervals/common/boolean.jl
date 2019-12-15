@@ -15,7 +15,7 @@ function islessprime(a::Real, b::Real)
 end
 
 """
-    isidentical(a, b)
+    isidentical(a::AbstractFlavor, b::AbstractFlavor)
 
 Checks if the intervals `a` and `b` are identical.
 
@@ -23,7 +23,17 @@ Implement the `equal` function of the IEEE Std 1788-2015  (Table 9.3).
 """
 function isidentical(a::AbstractFlavor, b::AbstractFlavor)
     isempty(a) && isempty(b) && return true
-    a.lo == b.lo && a.hi == b.hi
+    return a.lo == b.lo && a.hi == b.hi
+end
+
+"""
+    isidentical(a::AbstractFlavor, x::Real)
+
+Check if the interval `a` contains exactly (and only) the number `x`.
+"""
+function isidentical(a::AbstractFlavor, x::Real)
+    a.lo == a.hi == x && return true
+    return false
 end
 
 """

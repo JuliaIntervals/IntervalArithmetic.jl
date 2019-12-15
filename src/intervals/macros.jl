@@ -105,3 +105,7 @@ function wrap_literals(F, expr1, expr2)
 
     return :(($F)(inf($expr1), sup($expr2), check=true))
 end
+
+macro I_str(ex)  # I"[3,4]"
+    @interval(ex)
+end

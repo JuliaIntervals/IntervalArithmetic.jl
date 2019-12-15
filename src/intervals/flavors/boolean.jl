@@ -1,0 +1,1 @@
+==(x::SetBasedFlavoredInterval, y::SetBasedFlavoredInterval) = isidentical(x, y)

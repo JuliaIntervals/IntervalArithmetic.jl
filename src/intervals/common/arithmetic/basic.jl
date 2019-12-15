@@ -74,7 +74,7 @@ Implement the `mul` function of the IEEE Std 1788-2015 (Table 9.1).
 
 Note: the behavior of the multiplication if flavor dependent for some edge cases.
 """
-function *(x::Real, a::F) where {F <: AbstractFlavor}
+function *(x::T, a::F) where {T<:Real, F <: AbstractFlavor{T}}
     isempty(a) && return emptyinterval(F)
     (isthinzero(a) || iszero(x)) && return zero(F)
 
@@ -85,7 +85,8 @@ function *(x::Real, a::F) where {F <: AbstractFlavor}
     end
 end
 
-*(a::AbstractFlavor, x::Real) = x*a
+*(x::T, a::F) where {T <: Real, S, F <: AbstractFlavor{S}} = convert(S, x)*a
+*(a::F, x::T) where {T <: Real, S, F <: AbstractFlavor{S}} = x*a
 
 function *(a::F, b::F) where {F <: AbstractFlavor}
     (isempty(a) || isempty(b)) && return emptyinterval(F)
@@ -96,6 +97,7 @@ function *(a::F, b::F) where {F <: AbstractFlavor}
 
     return mult((x, y, r) -> unbounded_mult(F, x, y, r), a, b)
 end
+
 
 # Helper functions for multiplication
 function unbounded_mult(::Type{F}, x::T, y::T, r::RoundingMode) where {T, F <: AbstractFlavor{T}}
@@ -141,6 +143,8 @@ function /(a::F, x::Real) where {F <: AbstractFlavor}
         return @round(F, a.hi/x, a.lo/x)
     end
 end
+
+/(x::Real, a::AbstractFlavor) = x*inv(a)
 
 function /(a::F, b::F) where {T, F <: AbstractFlavor{T}}
     (isempty(a) || isempty(b)) && return emptyinterval(F)
@@ -193,7 +197,7 @@ function inv(a::F) where {T, F <: AbstractFlavor{T}}
         isthinzero(a) && return inv_of_zero(F)
     end
 
-    @round(F, inv(a.hi), inv(a.lo))
+    return @round(F, inv(a.hi), inv(a.lo))
 end
 
 # Rational division
@@ -242,7 +246,7 @@ function fma(a::F, b::F, c::F) where {T, F <: AbstractFlavor{T}}
         max_ignore_nans(hi1, hi2, hi3, hi4)
     end
 
-    F(lo, hi)
+    return F(lo, hi)
 end
 
 """
@@ -258,5 +262,5 @@ function sqrt(a::F) where {F <: AbstractFlavor}
 
     isempty(a) && return a
 
-    @round(F, sqrt(a.lo), sqrt(a.hi))  # `sqrt` is correctly-rounded
+    return @round(F, sqrt(a.lo), sqrt(a.hi))  # `sqrt` is correctly-rounded
 end

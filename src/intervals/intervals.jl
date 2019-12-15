@@ -29,7 +29,7 @@ const AbstractFlavor{T} = Union{AbstractRealFlavor{T}, AbstractNonRealFlavor{T}}
 eltype(x::AbstractFlavor{T}) where {T<:Real} = T
 size(x::AbstractFlavor) = (1,)
 
-for (Flavor, Supertype) in [(:SetBasedFlavoredInterval, AbstractNonRealFlavor), (:GenericFlavoredInterval, AbstractRealFlavor)]
+for (Flavor, Supertype) in [(:SetBasedFlavoredInterval, AbstractRealFlavor), (:GenericFlavoredInterval, AbstractNonRealFlavor)]
     flavordef = quote
         struct $Flavor{T} <: $Supertype{T}
             lo :: T
@@ -62,7 +62,7 @@ for (Flavor, Supertype) in [(:SetBasedFlavoredInterval, AbstractNonRealFlavor), 
         $Flavor{T}(x) where T = $Flavor(convert(T, x))
         $Flavor{T}(x::$Flavor) where T = atomic($Flavor{T}, x)
 
-        # TODO check performance of these
+        # TODO use def from new PR for that
         const $Flavor{T}(::Irrational{:π}) where T = atomic($Flavor{T}, π)
         const $Flavor(::Irrational{:π}) = atomic($Flavor{DefaultBound}, π)
 
@@ -87,11 +87,14 @@ for (Flavor, Supertype) in [(:SetBasedFlavoredInterval, AbstractNonRealFlavor), 
 
         # Flavor without parametrization, allows reparametrization
         flavortype(::Type{$Flavor{T}}) where T = $Flavor
+
+        convert(::Type{$Flavor{T}}, x::$Flavor{S}) where {T, S} = atomic($Flavor{T}, x)
     end
 
     # TODO Add documentations for flavors
     @eval $flavordef
 end
+
 
 """
     reparametrize(F::Type{AbstractFlavor}, ::Type{ELTYPE})
@@ -186,6 +189,8 @@ include("common/numeric.jl")
 include("common/set_operations.jl")
 include("common/special.jl")
 
+include("flavors/arithmetic.jl")
+include("flavors/boolean.jl")
 include("flavors/special.jl")
 
 """
@@ -215,10 +220,6 @@ end
 function ..(a::Irrational{T}, b::Irrational{S}) where {T, S}
     R = promote_type(Irrational{T}, Irrational{S})
     return Interval(atomic(Interval{R}, a).lo, atomic(Interval{R}, b).hi, check=true)
-end
-
-macro I_str(ex)  # I"[3,4]"
-    @interval(ex)
 end
 
 a ± b = (a-b)..(a+b)

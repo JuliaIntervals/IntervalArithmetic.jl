@@ -7,7 +7,8 @@ Review intervals folder:
     ✔ "Corresponds to" -> "Implement" in doc @done(19-08-22 16:13)
     ✔ Rename `entireinterval` -> `RR` @done(19-08-19 19:14)
     ☐ Investigate compile time warnings
-    ☐ Check if intervals of different flavor type can/should be equal in the sense of `isidentical`
+    ✔ Check if intervals of different flavor type can/should be equal in the sense of `isidentical` @done(19-12-08 01:12)
+    ☐ Operation on different flavors of interval should always error.
   
   Discussion:
     ☐ Do we want to keep `@floatinterval` and `@biginteral` or use `@interval(F, expr1, expr2)` instead ?
@@ -15,6 +16,7 @@ Review intervals folder:
   Global precision:
     ✔ Get rid of it @done(19-08-20 16:49)
     ☐ Replace pi_interval(T) by Interval{T}(π) everywhere
+    ☐ Be sure it is done in compliance with #338
   
   Flavors:
     Implement set based flavor:
@@ -49,6 +51,9 @@ Review intervals folder:
       ✔ Split @done(19-08-19 01:14)
       ✔ Verify all requested functions are there @done(19-08-19 02:01)
       ✔ Common @done(19-08-19 01:11)
+      ☐ Adapt for the removal of promotion
+        ☐ Make sure all cases are in the test suite
+      ☐ Solve ambiguity error for real flavors
       ☐ Flavor dependent *
       ☐ Flavor dependent /
       ☐ Flavor dependent inv
@@ -179,7 +184,7 @@ Review other folders:
   ☐ Do it
 
 Bugs:
-  ☐ `Int` times `Interval` errors (e.g. `2*a`)
+  ✔ `Int` times `Interval` errors (e.g. `2*a`) @done(19-12-14 23:50)
 
 Tests:
   ☐ Uncomment complex tests in `construction.jl`

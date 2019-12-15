@@ -11,7 +11,7 @@ Some flavor may behave differently (e.g. flavors using extended interval arithem
 =#
 isempty(x::AbstractFlavor) = (inf(x) == Inf && sup(x) == -Inf)
 isentire(x::AbstractFlavor) = (inf(x) == -Inf && sup(x) == Inf)
-isbounded(x::AbstractFlavor) = isfinite(x.lo) && isfinite(x.hi)
+isbounded(x::AbstractFlavor) = (isfinite(x.lo) && isfinite(x.hi)) || isempty(x)
 isunbounded(x::AbstractFlavor) = !isbounded(x)
 
 """
@@ -65,7 +65,7 @@ Check whether an interval `x` is *atomic*, i.e. is unable to be split.
 This occurs when the interval is empty, or when the upper bound equals the lower
 bound or the bounds are consecutive floating point numbers.
 """
-isatomic(x::AbstractFlavor) = isempty(x) || (inf(x) == sup(x)) || (sup(hi) == nextfloat(inf(x)))
+isatomic(x::AbstractFlavor) = isempty(x) || (inf(x) == sup(x)) || (sup(x) == nextfloat(inf(x)))
 
 contains_zero(x::AbstractFlavor{T}) where T = zero(T) ∈ x
 
