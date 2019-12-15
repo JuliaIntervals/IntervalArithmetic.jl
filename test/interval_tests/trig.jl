@@ -71,7 +71,7 @@ end
 end
 
 @testset "Inverse trig" begin
-    @test asin(@interval(1)) == @interval(pi/2)#Interval{Float64}(π)/2
+    @test asin(@interval(1)) == @interval(pi/2)
     @test asin(@interval(0.9, 2)) == asin(@interval(0.9, 1))
     @test asin(@interval(3, 4)) == ∅
 

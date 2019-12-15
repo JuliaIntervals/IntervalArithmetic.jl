@@ -149,8 +149,8 @@ function cos(a::F) where {F<:AbstractFlavor}
 
     diam(a) > two_pi(F).lo && return whole_range
 
-    lo_quadrant = minimum(find_quadrants(a.lo))
-    hi_quadrant = maximum(find_quadrants(a.hi))
+    lo_quadrant = minimum(find_quadrants(F, a.lo))
+    hi_quadrant = maximum(find_quadrants(F, a.hi))
 
     if hi_quadrant - lo_quadrant > 4  # close to limits
         return whole_range
@@ -233,8 +233,8 @@ function tan(a::F) where {F<:AbstractFlavor}
 
     diam(a) > F(π).lo && return RR(a)
 
-    lo_quadrant = minimum(find_quadrants(a.lo))
-    hi_quadrant = maximum(find_quadrants(a.hi))
+    lo_quadrant = minimum(find_quadrants(F, a.lo))
+    hi_quadrant = maximum(find_quadrants(F, a.hi))
 
     lo_quadrant_mod = mod(lo_quadrant, 2)
     hi_quadrant_mod = mod(hi_quadrant, 2)
@@ -359,12 +359,10 @@ function atan(y::F, x::F) where {T, F<:AbstractFlavor{T}}
         return range_atan(F)
 
     else # zero(T) ∈ x
-
         if x.lo == zero(T)
             y == zero(y) && return y
 
             y.lo ≥ zero(T) && return @round(F, atan(y.lo, x.hi), half_range_atan(F).hi)
-
             y.hi ≤ zero(T) && return @round(F, half_range_atan(F).lo, atan(y.hi, x.hi))
             return half_range_atan(F)
 

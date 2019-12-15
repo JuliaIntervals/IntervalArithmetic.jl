@@ -25,7 +25,7 @@ function round_expr(ex::Expr, rounding_mode::RoundingMode)
             return :( $(esc(op))($(esc(ex.args[2])), $rounding_mode ) )
         end
     else
-        return ex
+        return :( $(esc(ex)) )
     end
 end
 

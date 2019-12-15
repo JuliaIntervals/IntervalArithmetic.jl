@@ -276,6 +276,7 @@ function _setrounding(::Type{Interval}, rounding_type::Symbol)
         @eval $f(a::T, b::T, r::RoundingMode) where {T<:AbstractFloat} = $f($roundtype, a, b, r)
         @eval $f(a::Real, b::AbstractFloat, r::RoundingMode) = $f($roundtype, promote(a, b)..., r)
         @eval $f(a::AbstractFloat, b::Real, r::RoundingMode) = $f($roundtype, promote(a, b)..., r)
+        @eval $f(a::AbstractFloat, b::AbstractFloat, r::RoundingMode) = $f($roundtype, promote(a, b)..., r)
         @eval $f(a::Real, b::Real, r::RoundingMode) = $f($roundtype, float(a), float(b), r)
     end
 
