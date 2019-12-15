@@ -18,7 +18,7 @@ promote_rule(::Type{F}, ::Type{S}) where {T, S, F<:AbstractFlavor{T}} =
 
 # convert methods:
 convert(::Type{F}, x::Bool) where {F<:AbstractFlavor} = convert(F, Int(x))
-convert(::Type{F}, x::S) where {T, S, F<:AbstractFlavor{T}} = atomic(F, x)
+convert(::Type{F}, x::S) where {T, S<:Real, F<:AbstractFlavor{T}} = atomic(F, x)
 # Fallback if F not parametrized
 convert(::Type{F}, x::S) where {S, F<:AbstractFlavor} = atomic(F{promote_type(S, DefaultBound)}, x)
 convert(::Type{F}, x::F) where {F<:AbstractFlavor} = x
@@ -70,7 +70,7 @@ true
 """
 function atomic end
 
-atomic(::Type{F}, x::AbstractString) where {F<:AbstractFlavor} = parse(F, x)
+atomic(::Type{F}, x::AbstractString) where {T, F<:AbstractFlavor{T}} = parse(F, x)
 
 @static if Sys.iswindows()  # Windows cannot round properly
     function atomic(::Type{F}, x::S) where {T, S, F<:AbstractFlavor{T}}

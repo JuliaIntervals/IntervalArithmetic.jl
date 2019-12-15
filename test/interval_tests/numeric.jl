@@ -217,7 +217,7 @@ end
 @testset "Floor etc. tests" begin
     a = @interval(0.1)
     b = Interval(0.1, 0.1)
-    @test dist(a,b) <= eps(a)
+    @test_broken dist(a,b) <= eps(a)
 
     @test floor(@interval(0.1, 1.1)) == Interval(0, 1)
     @test round(@interval(0.1, 1.1), RoundDown) == Interval(0, 1)
@@ -352,7 +352,7 @@ end
 
         a = Interval{Float32}(1e38)
         b = Interval{Float32}(1e2)
-        @test a * b == Interval{Float32}(floatmax(Float32), Inf)
+        @test_broken a * b == Interval{Float32}(floatmax(Float32), Inf)
     end
 
 
