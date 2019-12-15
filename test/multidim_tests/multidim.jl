@@ -192,7 +192,7 @@ end
     @test Z == IntervalBox(Interval(0, 2), Interval(3, 5), Interval(0, 2), Interval(3, 5), Interval(4, 8))
     @test diam(Z) == 4
 
-    @test mid(IntervalBox(0..1, 3), 0.75) == [0.75, 0.75, 0.75]
+    @test scaled_mid(IntervalBox(0..1, 3), 0.75) == [0.75, 0.75, 0.75]
 end
 
 @testset "Constructing multidimensional IntervalBoxes" begin
@@ -204,9 +204,9 @@ end
     @test IntervalBox((1..2, 2..3)) == IntervalBox(1..2, 2..3)
     @test IntervalBox((1, 2)) == IntervalBox(1..1, 2..2)
     @test IntervalBox( (1, 2, 3) ) == IntervalBox(1..1, 2..2, 3..3)
-    @test IntervalBox( (1, 2, 3.1) ) == IntervalBox(1..1, 2..2, interval(3.1))
-    @test IntervalBox( SVector(1, 2, 3.1) ) == IntervalBox(1..1, 2..2, interval(3.1))
-    @test IntervalBox( interval.(SVector(1, 2, 3.1)) ) == IntervalBox(1..1, 2..2, interval(3.1))
+    @test IntervalBox( (1, 2, 3.1) ) == IntervalBox(1..1, 2..2, Interval(3.1))
+    @test IntervalBox( SVector(1, 2, 3.1) ) == IntervalBox(1..1, 2..2, Interval(3.1))
+    @test IntervalBox( Interval.(SVector(1, 2, 3.1)) ) == IntervalBox(1..1, 2..2, Interval(3.1))
     @test IntervalBox(3) == IntervalBox(3..3)
     @test IntervalBox(1:5) == IntervalBox(1..1, 2..2, 3..3, 4..4, 5..5)
     @test IntervalBox([1:5...]) == IntervalBox(1..1, 2..2, 3..3, 4..4, 5..5)
@@ -262,7 +262,7 @@ end
 @testset "∈" begin
     X = IntervalBox(3..4, 5..6)
     @test mid(X) ∈ X
-    @test mid(X, 0.75) ∈ X
+    @test scaled_mid(X, 0.75) ∈ X
 
     @test (zero(mid(X)) ∈ X) == false
     @test zero(mid(X)) ∉ X
