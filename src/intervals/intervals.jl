@@ -52,7 +52,6 @@ for (Flavor, Supertype) in [(:SetBasedFlavoredInterval, AbstractRealFlavor), (:G
         ## Concrete constructors for Interval, to effectively deal only with Float64,
         # BigFloat or Rational{Integer} intervals.
         $Flavor(a::T, b::T) where {T<:Integer} = $Flavor(float(a), float(b))
-        $Flavor(a::T, b::T) where {T<:Irrational} = $Flavor(float(a), float(b))
 
         $Flavor(x::AbstractFlavor) = $Flavor(x.lo, x.hi)
         $Flavor(x::$Flavor) = x
@@ -62,9 +61,16 @@ for (Flavor, Supertype) in [(:SetBasedFlavoredInterval, AbstractRealFlavor), (:G
         $Flavor{T}(x) where T = $Flavor(convert(T, x))
         $Flavor{T}(x::$Flavor) where T = atomic($Flavor{T}, x)
 
-        # TODO use def from new PR for that
-        const $Flavor{T}(::Irrational{:π}) where T = atomic($Flavor{T}, π)
-        const $Flavor(::Irrational{:π}) = atomic($Flavor{DefaultBound}, π)
+        # Constructors for Irrational
+        # Single argument Irrational constructor are in IntervalArithmetic.jl
+        # as generated functions need to be define last.
+        $Flavor{T}(a::Irrational, b::Irrational) where {T<:Real} = $Flavor{T}(T(a, RoundDown), T(b, RoundUp))
+        $Flavor{T}(a::Irrational, b::Real) where {T<:Real} = $Flavor{T}(T(a, RoundDown), b)
+        $Flavor{T}(a::Real, b::Irrational) where {T<:Real} = $Flavor{T}(a, T(b, RoundUp))
+
+        $Flavor(a::Irrational, b::Irrational) = $Flavor{Float64}(a, b)
+        $Flavor(a::Irrational, b::Real) = $Flavor{Float64}(a, b)
+        $Flavor(a::Real, b::Irrational) = $Flavor{Float64}(a, b)
 
         function $Flavor{T}(a, b; check=false) where {T}
             if check && !is_valid_interval(a, b)
@@ -159,10 +165,19 @@ function is_valid_interval(a::Real, b::Real)
     return true
 end
 
+
+"""
+    interval(a, b)
+
+`interval(a, b)` checks whether [a, b] is a valid `Interval`, which is the case if `-∞ <= a <= b <= ∞`, using the (non-exported) `is_valid_interval` function. If so, then an `Interval(a, b)` object is returned; if not, then an error is thrown.
+"""
+interval(a::Real, b::Real) = Interval(a, b, check=true)
+interval(a::Real) = interval(a, a)
+
 "Make an interval even if a > b"
 function force_interval(a, b)
-    a > b && return Interval(b, a, check=true)  # check == true to check for NaN
-    return Interval(a, b, check=true)
+    a > b && return interval(b, a)  # check == true to check for NaN
+    return interval(a, b)
 end
 
 

@@ -12,40 +12,44 @@ const eeuler = Base.MathConstants.e
         @test isidentical(Interval(1), Interval(1.0, 1.0))
         @test size(Interval(1)) == (1,)
         @test isidentical(Interval(big(1)), Interval(1.0, 1.0))
-        @test isidentical(Interval(eeuler), Interval(1.0*eeuler))
         @test isidentical(Interval(1//10), Interval{Rational{Int}}(1//10, 1//10))
         @test isidentical(Interval(BigInt(1)//10), Interval{Rational{BigInt}}(1//10, 1//10))
         @test isidentical(Interval( (1.0, 2.0) ), Interval(1.0, 2.0))
         @test isidentical(Interval{Rational{Int}}(1), Interval(1//1))
         @test isidentical(Interval{BigFloat}(1), Interval{BigFloat}(big(1.0), big(1.0)))
 
-        @test isidentical(-pi..pi, @interval(-pi,pi))
-        @test isidentical(0..pi, hull(Interval(0), Interval{Float64}(π)))
-        @test isidentical(1.2..pi, @interval(1.2, pi))
-        @test isidentical(pi..big(4), hull(Interval{BigFloat}(π), Interval(4)))
-        @test isidentical(pi..pi, Interval{Float64}(π))
-        @test isidentical(eeuler..pi, hull(@interval(eeuler), Interval{Float64}(π)))
+        # Irrational
+        for irr in (π, eeuler)
+            @test @interval(-irr, irr).hi == (-irr..irr).hi
+            @test 0..irr == hull(interval(0), Interval{Float64}(irr))
+            @test 1.2..irr == @interval(1.2, irr)
+            @test irr..irr == Interval{Float64}(irr)
+            @test Interval(irr) == @interval(irr)
+            @test Interval(irr, irr) == Interval(irr)
+            @test Interval{Float32}(irr, irr) == Interval{Float32}(irr)
+        end
 
-    # The following error on windows due to a missing method in MPFR
-    @test_broken eeuler..big(4) == hull(Interval{BigFloat}(π), interval(4))
-    @test π..big(4) == hull(Interval{BigFloat}(π), interval(4))
+        # The following error on windows due to a missing method in MPFR
+        @test_broken eeuler..big(4) == hull(Interval{BigFloat}(π), interval(4))
+        @test π..big(4) == hull(Interval{BigFloat}(π), interval(4))
 
-    @test eeuler..pi == hull(@interval(eeuler), Interval{Float64}(π))
-    @test big(eeuler) in Interval(eeuler, π)
-    @test big(π) in Interval(eeuler, π)
-    @test big(eeuler) in Interval(0, eeuler)
-    @test big(π) in Interval(π, 4)
+        @test eeuler..pi == hull(@interval(eeuler), Interval{Float64}(π))
+        @test big(eeuler) in Interval(eeuler, π)
+        @test big(π) in Interval(eeuler, π)
+        @test big(eeuler) in Interval(0, eeuler)
+        @test big(π) in Interval(π, 4)
 
-    @test big(eeuler) in Interval{Float32}(eeuler, π)
-    @test big(π) in Interval{Float32}(eeuler, π)
-    @test big(eeuler) in Interval{Float32}(0, eeuler)
-    @test big(π) in Interval{Float32}(π, 4)
+        @test big(eeuler) in Interval{Float32}(eeuler, π)
+        @test big(π) in Interval{Float32}(eeuler, π)
+        @test big(eeuler) in Interval{Float32}(0, eeuler)
+        @test big(π) in Interval{Float32}(π, 4)
 
-    # a < Inf and b > -Inf
-    @test isidentical(@interval(1e300), Interval(9.999999999999999e299, 1.0e300))
-    @test isidentical(@interval(-1e307), Interval(-1.0000000000000001e307, -1.0e307))
-    @test isidentical(@interval(Inf), IntervalArithmetic.wideinterval(Inf))
-    @test isidentical(IntervalArithmetic.wideinterval(-big(Inf)), Interval(-Inf, nextfloat(big(-Inf))))
+        # a < Inf and b > -Inf
+        @test isidentical(@interval(1e300), Interval(9.999999999999999e299, 1.0e300))
+        @test isidentical(@interval(-1e307), Interval(-1.0000000000000001e307, -1.0e307))
+        @test isidentical(@interval(Inf), IntervalArithmetic.wideinterval(Inf))
+        @test isidentical(IntervalArithmetic.wideinterval(-big(Inf)), Interval(-Inf, nextfloat(big(-Inf))))
+
         # a < Inf and b > -Inf
         @test isidentical(@interval(1e300), Interval(9.999999999999999e299, 1.0e300))
         @test isidentical(@interval(-1e307), Interval(-1.0000000000000001e307, -1.0e307))

@@ -15,8 +15,8 @@ Review intervals folder:
     
   Global precision:
     ✔ Get rid of it @done(19-08-20 16:49)
-    ☐ Replace pi_interval(T) by Interval{T}(π) everywhere
-    ☐ Be sure it is done in compliance with #338
+    ✔ Replace pi_interval(T) by Interval{T}(π) everywhere @done(19-12-18 22:59)
+    ✔ Be sure it is done in compliance with #338 @done(19-12-18 22:59)
   
   Flavors:
     Implement set based flavor:
@@ -127,8 +127,9 @@ Review intervals folder:
     ☐ Document flavors
     ☐ Document constructors
     ☐ Make `..` work correctly for all input types
+    ☐ Move `DefaultBound` definition before constructors to be able to use them
     ✔ Add Interval{T}(π) @done(19-08-19 01:58)
-      ☐ Check performance
+      ✔ Check performance @done(19-12-18 23:00)
   
   10.5. Required operations in set-based falvor:
     10.5.1. Literals:

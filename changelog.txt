@@ -3,13 +3,12 @@ Changelog
 - File structure changed to match the IEEE standard
 - Symbols that alias another function moved to `symbols.jl`
 - Removed global precision
+- `make_interval` renamed `wrap_literals`
 - Removed `pi_interval(T)` in favor of `Interval{T}(π)`
 - Renamed `multiply_by_positive_constant` to `scale`
 - `@round` now take the flavor of the returned interval as first argument
 - Removed `find_quadrants_tan` as it was a duplicate of `find_quadrants`
-- Renamed `mid(a, α)` -> `scaled_mid(a, α)`
+- Renamed `mid(a, α)` -> `scaled_mid(a, α)` (to avoid discrepency with default parameter)
 - Functions returning intervals based on bound type now required a flavor type as parameter
 - Renamed `entireinterval` -> `RR`
 - Added check of the "IA_DEFAULT_FLAVOR" and "IA_DEFAULT_BOUND_TYPE" keys in `ENV` to get the flavor (`Interval`) and bound type (`DefaultBound`). The default interval type is thus `Interval{DefaultBound}`.
-- Replaced `interval` (checked interval construction) by `Interval{T}(a, b; check=false)`.
-- Remove promotion mechanism between intervals and numbers.
