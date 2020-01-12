@@ -39,4 +39,5 @@ end
 
 # multiplication by a matrix
 
-*(A::AbstractMatrix, X::IntervalBox) = IntervalBox(A * X.v)
+*(A::AbstractMatrix, X::IntervalBox{N,T}) where {N,T} = IntervalBox(A * X.v)
+*(A::SMatrix{S1,S2,T1}, X::IntervalBox{S2,T2}) where {S1,S2,T1,T2} = IntervalBox(A * X.v)

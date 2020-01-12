@@ -1,9 +1,11 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
+abstract type AbstractIntervalBox{N,T} <: AbstractVector{T} end
+
 """An `IntervalBox` is an `N`-dimensional rectangular box, given
 by a Cartesian product of a vector of `N` `Interval`s.
 """
-struct IntervalBox{N,T}
+struct IntervalBox{N,T<:Real} <: AbstractIntervalBox{N,T}
     v::SVector{N, Interval{T}}
 end
 
