@@ -296,7 +296,7 @@ for f in (:exp2, :exp10)
 end
 
 
-for f in (:log, :log2, :log10, :log1p)
+for f in (:log, :log2, :log10)
 
     @eval function ($f)(a::Interval{T}) where T
             domain = Interval{T}(0, Inf)
@@ -307,4 +307,13 @@ for f in (:log, :log2, :log10, :log1p)
             @round( ($f)(a.lo), ($f)(a.hi) )
 
         end
+end
+
+function log1p(a::Interval{T}) where T
+    domain = Interval{T}(-1, Inf)
+    a = a ∩ domain
+
+    (isempty(a) || a.hi ≤ -one(T)) && return emptyinterval(a)
+
+    @round( log1p(a.lo), log1p(a.hi) )
 end

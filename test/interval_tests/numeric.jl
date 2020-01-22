@@ -152,6 +152,9 @@ setprecision(Interval, Float64)
     @test log2(@interval(0.25, 0.5)) == Interval(-2.0, -1.0)
     @test log10(@biginterval(1//10)) ⊆ log10(@interval(1//10))
     @test log10(@interval(0.01, 0.1)) == @interval(log10(0.01), log10(0.1))
+
+    @test log1p(@interval(-0.5, 0.1)) == @interval(log1p(-0.5), log1p(0.1))
+    @test log1p(interval(-10.0)) == ∅
 end
 
 @testset "Comparison tests" begin
