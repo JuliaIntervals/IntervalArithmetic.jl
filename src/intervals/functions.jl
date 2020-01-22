@@ -237,6 +237,9 @@ A faster implementation of `x^n`, currently using `power_by_squaring`.
 enclosure when using multiplication with correct rounding.
 """
 function pow(x::Interval, n::Integer)  # fast integer power
+    if n < 0
+        return 1/pow(x, -n)
+    end
 
     isempty(x) && return x
 
@@ -259,7 +262,7 @@ end
 function pow(x::Interval, y::Real)  # fast real power, including for y an Interval
 
     isempty(x) && return x
-
+    isinteger(y) && return pow(x, Int(y.lo))
     return exp(y * log(x))
 
 end
