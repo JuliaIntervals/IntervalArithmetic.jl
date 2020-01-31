@@ -576,6 +576,6 @@ Splits `x` in `n` intervals of the same diameter, which are returned
 as a vector.
 """
 function mince(x::Interval, n)
-    nodes = range(x.lo, stop = x.hi, length = n+1)
+    nodes = range(x.lo, x.hi, length = n+1)
     return [Interval(nodes[i], nodes[i+1]) for i in 1:length(nodes)-1]
 end
