@@ -344,15 +344,8 @@ end
 @testset "Mince for `Interval`s" begin
     v = mince(-1 .. 1, 4)
     @test v == [-1 .. -0.5, -0.5 .. 0, 0 .. 0.5, 0.5 .. 1]
-    h = hull(hull(v[1], v[2]), hull(v[3], v[4]))
-    @test h == -1 .. 1
+    @test hull(v...) == -1 .. 1
     v = mince(-1 .. 1, 8)
     @test length(v) == 8
-    let hh
-        hh = hull(v[1], v[2])
-        for i=3:8
-            hh = hull(hh, v[i])
-        end
-        @test hh == -1 .. 1
-    end
+    @test hull(v...) == -1 .. 1
 end

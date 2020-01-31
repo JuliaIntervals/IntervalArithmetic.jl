@@ -134,3 +134,12 @@ as a vector.
         nodes
     end
 end
+
+
+function IntervalArithmetic.hull(a::IntervalBox{N,T}, b::IntervalBox{N,T}) where {N,T}
+   v = Interval{T}[]
+   for ind in 1:N
+       push!(v, hull(a[ind], b[ind]))
+   end
+   return IntervalBox(v)
+end
