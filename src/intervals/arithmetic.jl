@@ -567,3 +567,15 @@ isinteger(a::Interval) = (a.lo == a.hi) && isinteger(a.lo)
 
 convert(::Type{Integer}, a::Interval) = isinteger(a) ?
         convert(Integer, a.lo) : throw(ArgumentError("Cannot convert $a to integer"))
+
+
+"""
+    mince(x::Interval, n)
+
+Splits `x` in `n` intervals of the same diameter, which are returned
+as a vector.
+"""
+function mince(x::Interval, n)
+    nodes = range(x.lo, stop = x.hi, length = n+1)
+    return [Interval(nodes[i], nodes[i+1]) for i in 1:length(nodes)-1]
+end

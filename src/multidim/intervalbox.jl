@@ -109,3 +109,28 @@ IntervalBox(x::Interval, n::Int) = IntervalBox(x, Val(n))
 dot(x::IntervalBox, y::IntervalBox) = dot(x.v, y.v)
 
 Base.:(==)(x::IntervalBox, y::IntervalBox) = x.v == y.v
+
+
+"""
+    mince(x::IntervalBox, n)
+
+Splits `x` in `n` intervals in each dimension of the same diameter. These
+intervals are combined in all possible `IntervalBox`-es, which are returned
+as a vector.
+"""
+@generated function mince(x::IntervalBox{N,T}, n) where {N,T}
+    quote
+        nodes_matrix = Array{Interval{T},2}(undef, n, N)
+        for i in 1:N
+            nodes_matrix[1:n,i] .= mince(x[i], n)
+        end
+
+        nodes = IntervalBox{$N,T}[]
+        Base.Cartesian.@nloops $N i _->(1:n) begin
+            Base.Cartesian.@nextract $N ival d->nodes_matrix[i_d, d]
+            ibox = Base.Cartesian.@ncall $N IntervalBox ival
+            push!(nodes, ibox)
+        end
+        nodes
+    end
+end

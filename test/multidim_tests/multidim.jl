@@ -60,7 +60,7 @@ let X, A  # avoid problems with global variables
         @test A ∩ B == A
         @test A.v ∩ B == A
         @test A ∩ B.v == A
-    
+
         @test A ∪ B == B
         @test A.v ∪ B == B
         @test A ∪ B.v == B
@@ -267,6 +267,29 @@ end
 
     @test B * X == IntervalBox(7..10, 15..22)
 
+end
+
+@testset "Mince for `IntervalBox`es" begin
+    ib2 = IntervalBox(-1..1, 2)
+    vb2 = mince(ib2, 4)
+    @test length(vb2) == 4^2
+    vv = [(-1 .. -0.5) × (-1 .. -0.5), (-0.5 .. 0) × (-1 .. -0.5),
+        (0 .. 0.5) × (-1 .. -0.5), (0.5 .. 1) × (-1 .. -0.5), #
+        (-1 .. -0.5) × (-0.5 .. 0), (-0.5 .. 0) × (-0.5 .. 0),
+        (0 .. 0.5) × (-0.5 .. 0), (0.5 .. 1) × (-0.5 .. 0), #
+        (-1 .. -0.5) × (0 .. 0.5), (-0.5 .. 0) × (0 .. 0.5),
+        (0 .. 0.5) × (0 .. 0.5), (0.5 .. 1) × (0 .. 0.5), #
+        (-1 .. -0.5) × (0.5 .. 1), (-0.5 .. 0) × (0.5 .. 1),
+        (0 .. 0.5) × (0.5 .. 1), (0.5 .. 1) × (0.5 .. 1)]
+    @test vb2 == vv
+
+    ib3 = IntervalBox(-1..1, 3)
+    vb3 = mince(ib3, 4)
+    @test length(vb3) == 4^3
+
+    ib4 = IntervalBox(-1..1, 4)
+    vb4 = mince(ib4, 4)
+    @test length(vb4) == 4^4
 end
 
 end
