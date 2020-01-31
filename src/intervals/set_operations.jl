@@ -119,8 +119,8 @@ hull(a::Interval, b::Interval) = Interval(min(a.lo, b.lo), max(a.hi, b.hi))
 # hull{T,S}(a::Interval{T}, b::Interval{S}) = hull(promote(a, b)...)
 hull(a::Complex{<:Interval},b::Complex{<:Interval}) =
     complex(hull(real(a),real(b)),hull(imag(a),imag(b)))
-hull(a, b...) = reduce(hull, (a, b...))
-
+hull(a...) = reduce(hull, a)
+hull(a::Vector{Interval{T}}) where {T}= hull(a...)
 
 """
     union(a, b)
