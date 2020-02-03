@@ -120,7 +120,7 @@ hull(a::Interval, b::Interval) = Interval(min(a.lo, b.lo), max(a.hi, b.hi))
 hull(a::Complex{<:Interval},b::Complex{<:Interval}) =
     complex(hull(real(a),real(b)),hull(imag(a),imag(b)))
 hull(a...) = reduce(hull, a)
-hull(a::Vector{Interval{T}}) where {T}= hull(a...)
+hull(a::Vector{Interval{T}}) where {T} = reduce(hull, a)
 
 """
     union(a, b)
@@ -133,7 +133,7 @@ union(a::Interval, b::Interval) = hull(a, b)
 #
 # union(a::Interval, b::Interval) = union(promote(a, b)...)
 union(a::Complex{<:Interval},b::Complex{<:Interval}) = hull(a, b)
-union(a, b, c...) = reduce(union, (a, b, c...))
+union(a...) = reduce(union, a)
 
 """
     setdiff(x::Interval, y::Interval)
