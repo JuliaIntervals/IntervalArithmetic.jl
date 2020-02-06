@@ -340,3 +340,15 @@ end
 
 
 end
+
+@testset "Mince for `Interval`s" begin
+    II = -1 .. 1
+    v = mince(II, 4)
+    @test v == [-1 .. -0.5, -0.5 .. 0, 0 .. 0.5, 0.5 .. 1]
+    @test hull(v...) == II
+    @test hull(v) == II
+    v = mince(II, 8)
+    @test length(v) == 8
+    @test hull(v...) == II
+    @test hull(v) == II
+end
