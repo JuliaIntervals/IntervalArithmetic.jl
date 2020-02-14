@@ -33,4 +33,11 @@ using Random
         @test rand(Y) isa SVector{2,T}
     end
 
+    for T in (Float32, Float64, BigFloat)
+        X = Interval{T}(3, 7)
+        Y = rand(X,7)
+        for x in Y
+            @test x isa T
+        end
+    end
 end
