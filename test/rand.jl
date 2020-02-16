@@ -35,7 +35,8 @@ using Random
 
     for T in (Float32, Float64, BigFloat)
         X = Interval{T}(3, 7)
-        Y = rand(X,7)
+        Y = rand(X, 7)
+        @test Y isa Array{T, 1} 
         for x in Y
             @test x isa T
         end
