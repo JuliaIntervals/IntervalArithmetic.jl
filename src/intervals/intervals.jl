@@ -67,7 +67,6 @@ Interval{T}(x) where T = Interval(convert(T, x))
 Interval{T}(x::Interval) where T = atomic(Interval{T}, x)
 
 size(x::Interval) = (1,)
-Base.eltype(x::IntervalArithmetic.Interval{T}) where T<:Real = IntervalArithmetic.Interval{T}
 
 
 """
@@ -138,6 +137,7 @@ include("functions.jl")
 include("trigonometric.jl")
 include("hyperbolic.jl")
 include("complex.jl")
+include("elt.jl")
 
 # Syntax for intervals
 
