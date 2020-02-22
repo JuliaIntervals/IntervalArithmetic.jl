@@ -33,11 +33,6 @@ setprecision(Interval, Float64)
         @test y./i == (a/i)..(b/i)
     end
 
-    j = 6
-    Y = IntervalBox(4..6, 4..5)
-    for i in 1:20
-        @test Y.*i == IntervalBox(a*i..j*i,a*i..b*i)
-    end
 end
 
 @testset "Numeric tests" begin

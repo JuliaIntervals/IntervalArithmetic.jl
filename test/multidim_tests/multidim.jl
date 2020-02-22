@@ -241,6 +241,22 @@ end
     @test sin.(X) == IntervalBox(sin(X[1]), sin(X[2]))
     @test mid.(X) == SVector(mid(X[1]), mid(X[2]))
     @test diam.(X) == SVector(diam(X[1]), diam(X[2]))
+
+
+    Y = IntervalBox(4..6, 4..5)
+    for i in 1:5
+        @test Y.*i == IntervalBox(Y[1].*i, Y[2].*i)
+    end
+    for i in 1:5
+        @test Y.+i == IntervalBox(Y[1].+i, Y[2].+i)
+    end
+    for i in 1:5
+        @test Y.-i == IntervalBox(Y[1].-i, Y[2].-i)
+    end
+    for i in 1:5
+        @test Y./i == IntervalBox(Y[1]./i, Y[2]./i)
+    end
+
 end
 
 @testset "∈" begin
