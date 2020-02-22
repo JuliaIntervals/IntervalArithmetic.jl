@@ -39,6 +39,9 @@ end
 
 eltype(::Type{IntervalBox{N,T}}) where {N,T} = Interval{T} # Note that this is defined for the type
 
+
+Base.eltype(x::IntervalBox{T}) where {T<:Real} = T
+
 length(X::IntervalBox{N,T}) where {N,T} = N
 
 

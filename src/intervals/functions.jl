@@ -19,6 +19,10 @@ end
 Base.literal_pow(::typeof(^), x::Interval{T}, ::Val{p}) where {T,p} = x^p
 
 
+Base.eltype(x::Interval{T}) where {T<:Real} = T
+
+
+
 function ^(a::Interval{BigFloat}, n::Integer)
     isempty(a) && return a
     n == 0 && return one(a)
