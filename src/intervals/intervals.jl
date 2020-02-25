@@ -67,7 +67,6 @@ Interval{T}(x) where T = Interval(convert(T, x))
 Interval{T}(x::Interval) where T = atomic(Interval{T}, x)
 
 size(x::Interval) = (1,)
-eltype(x::Interval{T}) where T<:Real = T
 
 
 """
