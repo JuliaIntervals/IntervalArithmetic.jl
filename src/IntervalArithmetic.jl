@@ -69,9 +69,6 @@ export
     setindex   # re-export from StaticArrays for IntervalBox
 
 
-if VERSION < v"1.0-dev"
-    import Base.showfull
-end
 
 export showfull
 
@@ -97,10 +94,7 @@ export
 
 function __init__()
     setrounding(BigFloat, RoundNearest)
-    if VERSION < v"0.7.0-DEV"
-        ## deprecated in 0.7
-        setrounding(Float64, RoundNearest)
-    end
+
 
     setprecision(Interval, 256)  # set up pi
     setprecision(Interval, Float64)
