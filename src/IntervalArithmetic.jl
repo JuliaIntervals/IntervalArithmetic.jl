@@ -56,7 +56,7 @@ export
     emptyinterval, ∅, ∞, isempty, isinterior, isdisjoint, ⪽,
     precedes, strictprecedes, ≼, ≺, ⊂, ⊃, ⊇, contains_zero,
     entireinterval, isentire, nai, isnai, isthin, iscommon, isatomic,
-    widen, inf, sup, bisect, mince, 
+    widen, inf, sup, bisect, mince, interval_signbit,
     parameters, eps, dist,
     midpoint_radius, interval_from_midpoint_radius,
     RoundTiesToEven, RoundTiesToAway,

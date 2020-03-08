@@ -19,6 +19,7 @@ setprecision(Interval, Float64)
             @test string(a) == "[1, 2]"
             @test string(b) == "[-1.10001, 1.30001]"
             @test string(c) == "[3.14159, 3.1416]"
+            @test string(complex(a,b)) == "[1, 2] + [-1.10001, 1.30001]*im"
         end
 
         @testset "10 sig figs" begin
@@ -27,6 +28,7 @@ setprecision(Interval, Float64)
             @test string(a) == "[1, 2]"
             @test string(b) == "[-1.100000001, 1.300000001]"
             @test string(c) == "[3.141592653, 3.141592654]"
+            @test string(complex(a,b)) == "[1, 2] + [-1.100000001, 1.300000001]*im"
         end
 
         @testset "20 sig figs" begin
@@ -43,6 +45,7 @@ setprecision(Interval, Float64)
             @test string(a) == "Interval(1.0, 2.0)"
             @test string(b) == "Interval(-1.1, 1.3)"
             @test string(c) == "Interval(3.141592653589793, 3.1415926535897936)"
+            @test string(complex(a,b)) == "Interval(1.0, 2.0) + Interval(-1.1, 1.3)*im"
         end
 
         @testset "Midpoint" begin
@@ -51,6 +54,7 @@ setprecision(Interval, Float64)
             @test string(a) == "1.5 ± 0.5"
             @test string(b) == "0.1 ± 1.20001"
             @test string(c) == "3.14159 ± 4.4409e-16"
+            @test string(complex(a,b)) == "1.5 ± 0.5 + 0.1 ± 1.20001*im"
 
             # issue 175:
             @test string(@biginterval(1, 2)) == "1.5 ± 0.5"

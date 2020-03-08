@@ -11,7 +11,7 @@ setprecision(Interval, Float64)
     y = 4..5
     a = 3
     b = 12
-    
+
     @test sqrt(sum(x.^2 .+ y.^2)) == 5..13
 
     for i in 1:20
@@ -24,7 +24,7 @@ setprecision(Interval, Float64)
     end
 
     a = 4
-    b = 5 
+    b = 5
     for i in 1:20
         @test y.+i == (a+i)..(b+i)
     end
@@ -231,9 +231,11 @@ end
     @test ceil(@interval(0.1, 1.1)) == Interval(1, 2)
     @test round(@interval(0.1, 1.1), RoundUp) == Interval(1, 2)
     @test sign(@interval(0.1, 1.1)) == Interval(1.0)
-    @test signbit(@interval(-4)) == @interval(1,1)
-    @test signbit(@interval(5)) == @interval(0,0)
-    @test signbit(@interval(-4,5)) == @interval(0,1)
+    @test signbit(emptyinterval()) == false
+    @test signbit(entireinterval()) == false
+    @test interval_signbit(@interval(-4)) == @interval(1,1)
+    @test interval_signbit(@interval(5)) == @interval(0,0)
+    @test interval_signbit(@interval(-4,5)) == @interval(0,1)
     @test copysign(@interval(1,2), @interval(-1,1)) == @interval(-2,2)
     @test copysign(3, @interval(-1,1)) == @interval(-3,3)
     @test copysign(3.0, @interval(-1,1)) == @interval(-3,3)
