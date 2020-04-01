@@ -27,7 +27,8 @@ using IntervalArithmetic
 #Preamble
 setprecision(53)
 setprecision(Interval, Float64)
-setrounding(Interval, :tight)
+# setrounding(Interval, :tight)
+setrounding(Interval, :emulation) # testing
 # Set full format, and show decorations
 @format full
 
