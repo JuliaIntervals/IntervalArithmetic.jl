@@ -35,9 +35,17 @@ setrounding(Interval, :tight)
 end
 
 setrounding(Interval, :emulation)
-@testset "Tight rounding using RoundingEmulation.jl" begin
+@testset "Tight rounding using RoundingEmulator.jl" begin
     @test rounding(Interval) == :emulation
     @test sin(x) == Interval(0.47942553860420295, 0.479425538604203)
+
+    # https://github.com/JuliaIntervals/IntervalArithmetic.jl/issues/215
+    tiny = Interval(0, floatmin())
+    huge = Interval(floatmax(), Inf)
+    @test tiny * tiny == Interval(0, nextfloat(0.0))
+    @test huge * huge == Interval(floatmax(), Inf)
+    @test huge / tiny == Interval(floatmax(), Inf)
+    @test tiny / huge == Interval(0, nextfloat(0.0))
 end
 
 setformat(:standard)
