@@ -5,12 +5,14 @@ This is a so-called "traits-based" design, as follows.
 The main body of the file defines versions of elementary functions with all allowed
 interval rounding types, e.g.
 +(IntervalRounding{:tight}, a, b, RoundDown)
++(IntervalRounding{:emulation}, a, b, RoundDown)
 +(IntervalRounding{:accurate}, a, b, RoundDown)
 +(IntervalRounding{:slow}, a, b, RoundDown)
 +(IntervalRounding{:none}, a, b, RoundDown)
 
 The current allowed rounding types are
 - :tight     # fast, tight (correct) rounding with errorfree arithmetic via FastRounding.jl
+- :emulation # tight (correct) rounding with improved errorfree arithmetic via RoundingEmulator.jl
 - :accurate # fast "accurate" rounding using prevfloat and nextfloat  (slightly wider than needed)
 - :slow    # tight (correct) rounding by changing rounding mode (slow)
 - :none     # no rounding (for speed comparisons; no enclosure is guaranteed)
@@ -115,8 +117,7 @@ for T in (Float32, Float64)
         end
 end
 
-
-
+# improved error-free arithmetic by RoundingEmulator.jl:
 for T in (Float32, Float64)
     for (op, f) in ( (:+, :add), (:-, :sub), (:*, :mul), (:/, :div), (:sqrt, :sqrt) )
         for (mode, suffix) in zip((:Down, :Up), (:_down, :_up))
