@@ -28,15 +28,15 @@ setrounding(Interval, :none)
     @test isa(w+w, Interval)
 end
 
-setrounding(Interval, :tight)
+setrounding(Interval, :fast)
 @testset "Tight, fast rounding using FastRounding.jl" begin
-    @test rounding(Interval) == :tight
+    @test rounding(Interval) == :fast
     @test sin(x) == Interval(0.47942553860420295, 0.479425538604203)
 end
 
-setrounding(Interval, :emulation)
+setrounding(Interval, :tight)
 @testset "Tight rounding using RoundingEmulator.jl" begin
-    @test rounding(Interval) == :emulation
+    @test rounding(Interval) == :tight
     @test sin(x) == Interval(0.47942553860420295, 0.479425538604203)
 
     # https://github.com/JuliaIntervals/IntervalArithmetic.jl/issues/215
