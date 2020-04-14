@@ -9,6 +9,7 @@ import CRlibm
 using StaticArrays
 using FastRounding
 using SetRounding
+using RoundingEmulator
 
 using Markdown
 
