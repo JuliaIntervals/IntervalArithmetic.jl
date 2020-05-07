@@ -48,6 +48,7 @@ To do so, we have incorporated tests from the excellent [ITF1788 test suite](htt
 ### Related packages
 - [MPFI.jl](https://github.com/andrioni/MPFI.jl), a Julia wrapper around the [MPFI C library](http://perso.ens-lyon.fr/nathalie.revol/software.html), a multiple-precision interval arithmetic library based on MPFR
 - [Intervals.jl](https://github.com/andrioni/Intervals.jl), an alternative implementation of basic interval functions.
+- [Intervals.jl](https://github.com/invenia/Intervals.jl), an alternative implementation of basic interval functions by Invenia Technical Computing.
 - [Unums.jl](https://github.com/JuliaComputing/Unums.jl), an implementation of interval arithmetic with variable precision ("ubounds")
 
 
