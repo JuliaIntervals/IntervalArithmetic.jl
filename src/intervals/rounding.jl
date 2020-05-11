@@ -69,6 +69,10 @@ sqrt(a::T, rounding_mode::RoundingMode) where {T<:Rational} = setrounding(float(
     sqrt(float(a))
 end
 
+cbrt(a::T, rounding_mode::RoundingMode) where {T<:Rational} = setrounding(float(T), rounding_mode) do
+    cbrt(float(a))
+end
+
 
 # no-ops for rational rounding:
 for f in (:+, :-, :*, :/)
@@ -114,12 +118,15 @@ for T in (Float32, Float64)
 
         @eval sqrt(::IntervalRounding{:fast},
                             a::$T, $mode1) = sqrt_round(a, $mode2)
+
+        @eval cbrt(::IntervalRounding{:fast},
+                            a::$T, $mode1) = cbrt_round(a, $mode2)
         end
 end
 
 # improved error-free arithmetic by RoundingEmulator.jl:
 for T in (Float32, Float64)
-    for (op, f) in ( (:+, :add), (:-, :sub), (:*, :mul), (:/, :div), (:sqrt, :sqrt) )
+    for (op, f) in ( (:+, :add), (:-, :sub), (:*, :mul), (:/, :div), (:sqrt, :sqrt), (:cbrt, :cbrt) )
         for (mode, suffix) in zip((:Down, :Up), (:_down, :_up))
             mode1 = Expr(:quote, mode)
             mode1 = :(::RoundingMode{$mode1})
@@ -205,7 +212,7 @@ for mode in (:Down, :Up)
 
 
     # functions not in CRlibm:
-    for f in (:sqrt, :inv, :tanh, :asinh, :acosh, :atanh)
+    for f in (:sqrt, :inv, :tanh, :asinh, :acosh, :atanh, :cbrt)
 
 
         @eval function $f(::IntervalRounding{:slow},
@@ -273,7 +280,7 @@ function _setrounding(::Type{Interval}, rounding_type::Symbol)
 
     # unary functions:
 
-    for f in (:sqrt, :inv)
+    for f in (:sqrt, :inv, :cbrt)
         @eval $f(a::T, r::RoundingMode) where {T<:AbstractFloat} = $f($roundtype, a, r)
     end
 
