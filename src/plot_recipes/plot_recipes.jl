@@ -32,7 +32,7 @@ end
 
     end
 
-    alpha --> 0.5
+    seriesalpha --> 0.5
 
     #x = xs
     #y = ys
