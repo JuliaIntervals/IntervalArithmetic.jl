@@ -5,7 +5,7 @@ using RecipesBase
 
     (x, y) = xx
 
-    alpha --> 0.5
+    seriesalpha --> 0.5
     seriestype := :shape
 
     x = [x.lo, x.hi, x.hi, x.lo]
