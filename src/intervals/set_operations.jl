@@ -72,9 +72,14 @@ Returns the intersection of the intervals `a` and `b`, considered as
 the points common in `a` and `b`.
 """
 function intersect(a::Interval{T}, b::Interval{T}) where T
-    isdisjoint(a,b) && return emptyinterval(T)
 
-    Interval(max(a.lo, b.lo), min(a.hi, b.hi))
+    x = Interval(max(a.lo, b.lo), min(a.hi, b.hi))
+
+    if x.lo > x.hi
+        return emptyinterval(T)
+    end
+
+    return x
 end
 # Specific promotion rule for intersect:
 intersect(a::Interval{T}, b::Interval{S}) where {T,S} =
