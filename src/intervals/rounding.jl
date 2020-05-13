@@ -69,6 +69,9 @@ sqrt(a::T, rounding_mode::RoundingMode) where {T<:Rational} = setrounding(float(
     sqrt(float(a))
 end
 
+cbrt(a::T, rounding_mode::RoundingMode) where {T<:Rational} = setrounding(float(T), rounding_mode) do
+    cbrt(float(a))
+end
 
 
 # no-ops for rational rounding:
@@ -115,6 +118,9 @@ for T in (Float32, Float64)
 
         @eval sqrt(::IntervalRounding{:fast},
                             a::$T, $mode1) = sqrt_round(a, $mode2)
+
+        @eval cbrt(::IntervalRounding{:fast},
+                            a::$T, $mode1) = cbrt_round(a, $mode2)
         end
 end
 
