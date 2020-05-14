@@ -233,6 +233,13 @@ function sqrt(a::Interval{T}) where T
     @round(sqrt(a.lo), sqrt(a.hi))  # `sqrt` is correctly-rounded
 end
 
+
+function cbrt(a::Interval{T}) where T
+    isempty(a) && return a
+
+    @round(cbrt(a.lo), cbrt(a.hi))  
+end
+
 """
     pow(x::Interval, n::Integer)
 
