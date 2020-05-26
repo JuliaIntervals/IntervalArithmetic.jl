@@ -107,7 +107,7 @@ end
 *(a::Interval{T}, x::T) where {T<:Real} = x*a
 
 "a * b where 0 * Inf is special-cased"
-function checked_mult(a::T, b::T, r::RoundingMode) where T
+@inline function checked_mult(a::T, b::T, r::RoundingMode) where T
 
     # println("checked_mult a=$a b=$b")
 
@@ -118,7 +118,7 @@ function checked_mult(a::T, b::T, r::RoundingMode) where T
     return *(a, b, r)
 end
 
-function mult(op, a::Interval{T}, b::Interval{T}) where T<:Real
+@inline function mult(op::O, a::Interval{T}, b::Interval{T}) where {O,T<:Real}
     if b.lo >= zero(T)
         a.lo >= zero(T) && return @round( op(a.lo, b.lo), op(a.hi, b.hi) )
         a.hi <= zero(T) && return @round( op(a.lo, b.hi), op(a.hi, b.lo) )
@@ -135,7 +135,7 @@ function mult(op, a::Interval{T}, b::Interval{T}) where T<:Real
     end
 end
 
-function *(a::Interval{T}, b::Interval{T}) where T<:Real
+@inline function *(a::Interval{T}, b::Interval{T}) where T<:Real
     (isempty(a) || isempty(b)) && return emptyinterval(T)
 
     (iszero(a) || iszero(b)) && return zero(Interval{T})
