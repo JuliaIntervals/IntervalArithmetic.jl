@@ -235,7 +235,7 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
 
         m.captures[1] = strip(m.captures[1], [' '])
 
-        if m.captures[1] == "Empty" || m.captures[1] == ""
+        if m.captures[1] == "Empty" || m.captures[1] == "" || m.captures[1] == "empty"
             return emptyinterval(T)
         end
         if m.captures[1] == "entire"

@@ -1,4 +1,4 @@
-
+include("ieee1788-constructors.jl")
 include("libieeep1788_tests_bool.jl")
 include("libieeep1788_tests_cancel.jl")
 include("libieeep1788_tests_elem.jl")

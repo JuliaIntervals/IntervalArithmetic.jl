@@ -38,7 +38,7 @@ struct DecoratedInterval{T<:Real} <: AbstractInterval{T}
     function DecoratedInterval{T}(I::Interval, d::DECORATION) where T
         dd = decoration(I)
         dd <= trv && return new{T}(I, dd)
-        d == ill && return new{T}(nai(I), d)
+        d == ill && return new{T}(nai(I))
         return new{T}(I, d)
     end
 end
@@ -47,7 +47,7 @@ DecoratedInterval(I::Interval{T}, d::DECORATION) where T<:AbstractFloat =
     DecoratedInterval{T}(I, d)
 
 function DecoratedInterval(a::T, b::T, d::DECORATION) where T<:Real
-    a > b && return DecoratedInterval(nai(T), ill)
+    a > b && return nai(T)
     DecoratedInterval(Interval(a,b), d)
 end
 
@@ -63,7 +63,7 @@ DecoratedInterval(a::T, b::S, d::DECORATION) where {T<:Real, S<:Real} =
 DecoratedInterval(I::Interval) = DecoratedInterval(I, decoration(I))
 
 function DecoratedInterval(a::T, b::T) where T<:Real
-    a > b && return DecoratedInterval(nai(T), ill)
+    a > b && return nai(T)
     DecoratedInterval(Interval(a,b))
 end
 
@@ -123,13 +123,45 @@ big(x::DecoratedInterval) = DecoratedInterval(big(interval_part(x)),
                                                 decoration(x))
 
 macro decorated(ex...)
-    local x
+    if(!(ex[1] isa String))
+        local x
 
-    if length(ex) == 1
-        x = :(@interval($(esc(ex[1]))))
+        if length(ex) == 1
+            x = :(@interval($(esc(ex[1]))))
+        else
+            x = :($(esc(ex[1])), $(esc(ex[2])))
+        end
+
+        :(DecoratedInterval($x))
     else
-        x = :($(esc(ex[1])), $(esc(ex[2])))
-    end
+        s = ex[1]
+        T = Float64
+        m = match(r"(\[.*\])(\_.*)?", s)
 
-    :(DecoratedInterval($x))
+        if m == nothing  
+
+            m = match(r"(.*\?[a-z0-9]*)(\_.*)?", s)
+
+            if m == nothing
+                throw(ArgumentError("Unable to process string as decorated interval"))
+            end
+
+        end
+        
+        if m.captures[1] == "[nai]" || m.captures[1] == "[Nai]"
+            return nai(T)
+        end
+
+        interval_string, decoration_string = m.captures
+        interval = parse(Interval{T}, interval_string)
+
+        if decoration_string != nothing
+            decoration_string = lowercase(decoration_string)
+            decoration_symbol = Symbol(decoration_string[2:end])
+            decoration = getfield(IntervalArithmetic, decoration_symbol)
+            return DecoratedInterval(interval, decoration)
+        else
+            DecoratedInterval(interval)
+        end
+    end
 end
