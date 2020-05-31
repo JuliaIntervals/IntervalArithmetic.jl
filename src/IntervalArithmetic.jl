@@ -54,10 +54,10 @@ export
     interval,
     @interval, @biginterval, @floatinterval, @make_interval,
     diam, radius, mid, mag, mig, hull,
-    emptyinterval, ∅, ∞, isempty, isinterior, isdisjoint, ⪽,
+    emptyinterval, ∅, ∞, isempty, isinterior, ⪽,
     precedes, strictprecedes, ≼, ≺, ⊂, ⊃, ⊇, contains_zero,
     entireinterval, isentire, nai, isnai, isthin, iscommon, isatomic,
-    widen, inf, sup, bisect, mince, 
+    widen, inf, sup, bisect, mince,
     parameters, eps, dist,
     midpoint_radius, interval_from_midpoint_radius,
     RoundTiesToEven, RoundTiesToAway,
@@ -65,6 +65,13 @@ export
     .., @I_str, ±,
     pow, extended_div,
     setformat, @format
+
+if VERSION >= v"1.5.0-DEV.124"
+    import Base: isadjoint
+else
+    export isadjoint
+end
+
 
 export
     setindex   # re-export from StaticArrays for IntervalBox
