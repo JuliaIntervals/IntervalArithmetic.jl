@@ -67,9 +67,9 @@ export
     setformat, @format
 
 if VERSION >= v"1.5.0-DEV.124"
-    import Base: isadjoint
+    import Base: isdisjoint
 else
-    export isadjoint
+    export isdisjoint
 end
 
 
