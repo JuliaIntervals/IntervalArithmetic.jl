@@ -8,7 +8,7 @@ that this interval is an exception to the fact that the lower bound is
 larger than the upper one."""
 emptyinterval(::Type{T}) where T<:Real = Interval{T}(Inf, -Inf)
 emptyinterval(x::Interval{T}) where T<:Real = emptyinterval(T)
-emptyinterval() = emptyinterval(precision(Interval)[1])
+const emptyinterval() = Interval(Inf,-Inf)
 const ∅ = emptyinterval(Float64)
 
 isempty(x::Interval) = x.lo == Inf && x.hi == -Inf
@@ -19,7 +19,7 @@ const ∞ = Inf
 """`entireinterval`s represent the whole Real line: [-∞, ∞]."""
 entireinterval(::Type{T}) where T<:Real = Interval{T}(-Inf, Inf)
 entireinterval(x::Interval{T}) where T<:Real = entireinterval(T)
-entireinterval() = entireinterval(precision(Interval)[1])
+const entireinterval() = Interval(-Inf,Inf)
 
 isentire(x::Interval) = x.lo == -Inf && x.hi == Inf
 isinf(x::Interval) = isentire(x)
@@ -30,7 +30,7 @@ isunbounded(x::Interval) = x.lo == -Inf || x.hi == Inf
 """`NaI` not-an-interval: [NaN, NaN]."""
 nai(::Type{T}) where T<:Real = Interval{T}(convert(T, NaN), convert(T, NaN))
 nai(x::Interval{T}) where T<:Real = nai(T)
-nai() = nai(precision(Interval)[1])
+const nai() = Interval(NaN,NaN)
 
 isnai(x::Interval) = isnan(x.lo) || isnan(x.hi)
 
