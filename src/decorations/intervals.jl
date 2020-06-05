@@ -79,7 +79,7 @@ DecoratedInterval(a::Tuple) = DecoratedInterval(a...)
 
 DecoratedInterval(I::DecoratedInterval, dec::DECORATION) = DecoratedInterval(I.interval, dec)
 
-interval_part(x::DecoratedInterval) = x.interval
+interval(x::DecoratedInterval) = x.interval
 
 decoration(x::DecoratedInterval) = x.decoration
 
@@ -111,7 +111,7 @@ convert(::Type{DecoratedInterval{T}}, x::S) where {T<:Real, S<:Integer} =
 #     convert(DecoratedInterval{T}, rationalize(x))
 # end
 function convert(::Type{DecoratedInterval{T}}, xx::DecoratedInterval) where T<:Real
-    x = interval_part(xx)
+    x = interval(xx)
     x = atomic(Interval{T},x)
     DecoratedInterval( x, decoration(xx) )
 end
@@ -119,7 +119,7 @@ end
 convert(::Type{DecoratedInterval{T}}, x::AbstractString) where T<:AbstractFloat =
     parse(DecoratedInterval{T}, x)
 
-big(x::DecoratedInterval) = DecoratedInterval(big(interval_part(x)),
+big(x::DecoratedInterval) = DecoratedInterval(big(interval(x)),
                                                 decoration(x))
 
 macro decorated(ex...)

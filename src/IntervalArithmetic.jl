@@ -91,7 +91,7 @@ export
 ## Decorations
 export
     @decorated,
-    interval_part, decoration, DecoratedInterval,
+    interval, decoration, DecoratedInterval,
     com, dac, def, trv, ill
 
 ## Union type

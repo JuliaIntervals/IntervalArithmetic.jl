@@ -8,12 +8,12 @@ let b
     @test decoration(a) == com
 
     b = sqrt(a)
-    @test interval_part(b) == sqrt(interval_part(a))
+    @test interval(b) == sqrt(interval(a))
     @test decoration(b) == com
 
     a = DecoratedInterval(@interval(-1, 1), com)
     b = sqrt(a)
-    @test interval_part(b) == sqrt(Interval(0, 1))
+    @test interval(b) == sqrt(Interval(0, 1))
     @test decoration(b) == trv
 
     d = DecoratedInterval(a, dac)

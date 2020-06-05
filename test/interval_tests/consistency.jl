@@ -173,7 +173,7 @@ setprecision(Interval, Float64)
 
         @test nai(a) === nai(a)
         @test nai(Float64) === DecoratedInterval(NaN)
-        @test isnan(interval_part(nai(BigFloat)).lo)
+        @test isnan(interval(nai(BigFloat)).lo)
         @test isnai(nai())
         @test !(isnai(a))
 
