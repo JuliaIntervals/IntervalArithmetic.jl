@@ -165,7 +165,7 @@ for mode in (:Down, :Up)
                                 $f(a, b)
                             end
                         end
-        
+
         @eval function $f(::DirectedRounding{:tight},
                             a::T, b::T, $mode1) where T<:AbstractFloat
                       setrounding(T, $mode2) do
@@ -254,7 +254,8 @@ end
 
 const rounding_types = (:fast, :tight, :accurate, :slow, :none)
 
-function _setrounding(::Type{Interval}, rounding_type::Symbol)
+"Redefines all relevant functions to use the specified directed rounding mode"
+function _set_directed_rounding(rounding_type::Symbol)
 
     if rounding_type == current_rounding_type[]
         return  # no need to redefine anything
@@ -305,12 +306,12 @@ function _setrounding(::Type{Interval}, rounding_type::Symbol)
 end
 
 """
-    setrounding(Interval, rounding_type::Symbol)
+    set_directed_rounding(rounding_type::Symbol)
 
-Set the rounding type used for all interval calculations on Julia v0.6 and above.
+Set the directed rounding mode used for all interval calculations and above.
 Valid `rounding_type`s are $rounding_types.
 """
-function setrounding(::Type{Interval}, rounding_type::Symbol)
+function set_directed_rounding(rounding_type::Symbol)
 
     # suppress redefinition warnings:
     # modified from OhMyREPL.jl
@@ -323,7 +324,7 @@ function setrounding(::Type{Interval}, rounding_type::Symbol)
     old_stderr = stderr
     redirect_stderr(io)
 
-    _setrounding(Interval, rounding_type)
+    _set_directed_rounding(rounding_type)
 
     redirect_stderr(old_stderr)
 
@@ -356,10 +357,10 @@ function setrounding(::Type{Interval}, rounding_type::Symbol)
 
 end
 
-rounding(Interval) = current_rounding_type[]
+directed_rounding(Interval) = current_rounding_type[]
 
 
 
 # default: correct rounding
 const current_rounding_type = Symbol[:undefined]
-setrounding(Interval, :tight)
+set_directed_rounding(Interval, :tight)
