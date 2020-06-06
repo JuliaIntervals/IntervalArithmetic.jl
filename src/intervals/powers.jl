@@ -1,12 +1,18 @@
 
 ## Powers
 
+struct PowerType{T} end
+
+## Design:
+# PowerType{:tight} gives tight powers of intervals using BigFloat
+# PowerType{:fast} gives slightly less-tight but faster powers, using repeated multiplication (power_by_squaring), using the current directed rounding method
+
 # CRlibm does not contain a correctly-rounded ^ function for Float64
 # Use the BigFloat version from MPFR instead, which is correctly-rounded:
-
 # Write explicitly like this to avoid ambiguity warnings:
+
 for T in (:Integer, :Float64, :BigFloat, :Interval)
-    @eval ^(a::Interval{Float64}, x::$T) = atomic(Interval{Float64}, big53(a)^x)
+    @eval ^(::PowerType{:tight}, a::Interval{Float64}, x::$T) = atomic(Interval{Float64}, big53(a)^x)
 end
 
 
@@ -22,7 +28,7 @@ Base.eltype(x::Interval{T}) where {T<:Real} = T
 
 
 
-function ^(a::Interval{BigFloat}, n::Integer)
+function ^(::PowerType{:tight}, a::Interval{BigFloat}, n::Integer)
     isempty(a) && return a
     n == 0 && return one(a)
     n == 1 && return a
@@ -88,7 +94,7 @@ end
 ^(a::Interval{BigFloat}, x::AbstractFloat) = a^big(x)
 
 # Floating-point power of a BigFloat interval:
-function ^(a::Interval{BigFloat}, x::BigFloat)
+function ^(::PowerType{:tight}, a::Interval{BigFloat}, x::BigFloat)
 
     domain = Interval{BigFloat}(0, Inf)
 
@@ -145,7 +151,7 @@ function ^(a::Interval{Rational{T}}, x::AbstractFloat) where T<:Integer
 end
 
 # Rational power
-function ^(a::Interval{T}, x::Rational) where T
+function ^(::PowerType{:tight}, a::Interval{T}, x::Rational) where T
     domain = Interval{T}(0, Inf)
 
     p = x.num
@@ -203,7 +209,7 @@ function ^(a::Interval{T}, x::Rational) where T
 end
 
 # Interval power of an interval:
-function ^(a::Interval{BigFloat}, x::Interval)
+function ^(::PowerType{:tight}, a::Interval{BigFloat}, x::Interval)
     T = BigFloat
     domain = Interval{T}(0, Inf)
 
@@ -223,32 +229,16 @@ function ^(a::Interval{BigFloat}, x::Interval)
 end
 
 
-function sqrt(a::Interval{T}) where T
-    domain = Interval{T}(0, Inf)
-    a = a ∩ domain
-
-    isempty(a) && return a
-
-    @round(sqrt(a.lo), sqrt(a.hi))  # `sqrt` is correctly-rounded
-end
-
-
-function cbrt(a::Interval{T}) where T
-    isempty(a) && return a
-
-    @round(cbrt(a.lo), cbrt(a.hi))
-end
 
 """
-    pow(x::Interval, n::Integer)
-
-A faster implementation of `x^n`, currently using `power_by_squaring`.
-`pow(x, n)` will usually return an interval that is slightly larger than that calculated by `x^n`, but is guaranteed to be a correct
+A fast (?) implementation of `x^n` using `power_by_squaring`.
+Usually return an interval that is slightly larger than that calculated
+using PowerType{:tight}, but is guaranteed to be a correct
 enclosure when using multiplication with correct rounding.
 """
-function pow(x::Interval, n::Integer)  # fast integer power
+function ^(::PowerType{:fast}, x::Interval, n::Integer)  # fast integer power
     if n < 0
-        return 1/pow(x, -n)
+        return 1 / pow(x, -n)
     end
 
     isempty(x) && return x
@@ -269,7 +259,7 @@ function pow(x::Interval, n::Integer)  # fast integer power
 
 end
 
-function pow(x::Interval, y::Real)  # fast real power, including for y an Interval
+function pow(::PowerType{:fast}, x::Interval, y::Real)  # fast real power, including for y an Interval
 
     isempty(x) && return x
     isinteger(y) && return pow(x, Int(y.lo))

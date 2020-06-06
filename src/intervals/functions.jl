@@ -1,5 +1,22 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
+function sqrt(a::Interval{T}) where T
+    domain = Interval{T}(0, Inf)
+    a = a ∩ domain
+
+    isempty(a) && return a
+
+    @round(sqrt(a.lo), sqrt(a.hi))  # `sqrt` is correctly-rounded
+end
+
+
+function cbrt(a::Interval{T}) where T
+    isempty(a) && return a
+
+    @round(cbrt(a.lo), cbrt(a.hi))
+end
+
+
 for f in (:exp, :expm1)
     @eval begin
         function ($f)(a::Interval{T}) where T
