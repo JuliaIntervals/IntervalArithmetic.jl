@@ -257,9 +257,9 @@ const rounding_types = (:fast, :tight, :accurate, :slow, :none)
 "Redefines all relevant functions to use the specified directed rounding mode"
 function _set_directed_rounding(rounding_type::Symbol)
 
-    if rounding_type == current_rounding_type[]
-        return  # no need to redefine anything
-    end
+    # if rounding_type == current_rounding_type[]
+    #     return  # no need to redefine anything
+    # end
 
     if rounding_type ∉ rounding_types
         throw(ArgumentError("Rounding type must be one of $rounding_types"))
@@ -302,7 +302,7 @@ function _set_directed_rounding(rounding_type::Symbol)
 
     end
 
-    current_rounding_type[] = rounding_type
+    # current_rounding_type[] = rounding_type
 end
 
 """
@@ -357,10 +357,10 @@ function set_directed_rounding(rounding_type::Symbol)
 
 end
 
-directed_rounding(Interval) = current_rounding_type[]
+# directed_rounding(Interval) = current_rounding_type[]
 
 
 
 # default: correct rounding
-const current_rounding_type = Symbol[:undefined]
-set_directed_rounding(Interval, :tight)
+#const current_rounding_type = Symbol[:undefined]
+set_directed_rounding(:tight)

@@ -266,3 +266,11 @@ function pow(::PowerType{:fast}, x::Interval, y::Real)  # fast real power, inclu
     return exp(y * log(x))
 
 end
+
+
+function set_power_type(power_type)
+
+    type = PowerType{power_type}()
+
+    @eval ^(x::Interval{T}, n::S) where {T, S<:Integer} = ^($type, x::Interval{T}, n)
+end

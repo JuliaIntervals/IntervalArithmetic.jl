@@ -16,51 +16,37 @@ Holds configuration information for the package:
     - `:tight`: gives tightest possible result by using `BigFloat` internally, and hence is slow
     - `:fast`: uses repeated multiplication based on `Base.power_by_squaring`, and hence is faster but gives slightly looser results
 """
-mutable struct Configuration
-    directed_rounding::Symbol
-    powers::Symbol
-end
 
-function Base.show(io::IO, config::Configuration)
-    println(io, "IntervalArithmetic.Configuration:")
-    println(io, "- directed_rounding: $(config.directed_rounding)")
-    println(io, "- powers: $(config.powers)")
-end
+const configuration = Dict(:directed_rounding => :tight,
+                           :powers => :fast)
 
-
-const configuration = Configuration(:tight, :fast)
-
-const directed_rounding_values = (:tight, :fast, :none)
-const power_values = (:tight, :fast)
+const allowed_values = Dict(:directed_rounding => (:tight, :fast, :none),
+                            :powers => (:tight, :fast))
 
 function configure!(; directed_rounding=nothing, powers=nothing)
     if directed_rounding != nothing
-        if directed_rounding ∉ directed_rounding_values
-            throw(ArgumentError("directed_rounding must be one of $directed_rounding_values"))
+        if directed_rounding ∉ allowed_values[:directed_rounding]
+            throw(ArgumentError("directed_rounding must be one of $(allowed_values[:directed_rounding])"))
         end
 
-        configuration.directed_rounding = directed_rounding
+        configuration[:directed_rounding] = directed_rounding
 
-        # TODO: Implement!
+        set_directed_rounding(directed_rounding)
     end
 
     if powers != nothing
-        if powers ∉ power_values
-            throw(ArgumentError("powers must be one of $directed_rounding_values"))
+        if powers ∉ allowed_values[:powers]
+            throw(ArgumentError("powers must be one of $(allowed_values[:powers])"))
         end
 
-        configuration.powers = powers
+        configuration[:powers] = powers
 
-        # TODO: Implement!
+        set_power_type(powers)
     end
 
     return configuration
 
 end
 
-configuration
 
-configure!(powers=:tight)
-
-
-ulp(f::F, x::T) where {F, T<:AbstractFloat} = 1
+# configure!(directed_rounding=:tight, powers=:tight)
