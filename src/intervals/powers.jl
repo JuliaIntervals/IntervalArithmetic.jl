@@ -236,33 +236,61 @@ Usually return an interval that is slightly larger than that calculated
 using PowerType{:tight}, but is guaranteed to be a correct
 enclosure when using multiplication with correct rounding.
 """
-function ^(::PowerType{:fast}, x::Interval, n::Integer)  # fast integer power
-    if n < 0
-        return 1 / pow(x, -n)
-    end
+function ^(::PowerType{:fast}, x::Interval{T}, n::Integer) where {T}  # fast integer power
+
+    n == 0 && return one(x)
 
     isempty(x) && return x
 
-    if iseven(n) && 0 ∈ x
-
-        return hull(zero(x),
-                    hull(Base.power_by_squaring(Interval(mig(x)), n),
-                        Base.power_by_squaring(Interval(mag(x)), n))
-            )
-
+    if n < 0
+        negative_power = true
+        n = -n
     else
+        negative_power = false
+    end
 
-      return hull( Base.power_by_squaring(Interval(x.lo), n),
-                    Base.power_by_squaring(Interval(x.hi), n) )
+    if iseven(n)
+        if 0 ∈ x
 
+            result =  Interval(zero(T),
+                        power_by_squaring(mag(x), n, RoundUp))
+
+        elseif x.lo > 0
+            result = Interval(power_by_squaring(x.lo, n, RoundDown),
+                            power_by_squaring(x.hi, n, RoundUp))
+
+        else  # x.lo < x.hi < 0
+            result = Interval(power_by_squaring(-x.hi, n, RoundDown),
+                            power_by_squaring(-x.lo, n, RoundUp))
+        end
+
+    else  # odd n
+
+         a = power_by_squaring(x.lo, n, RoundDown)
+         b = power_by_squaring(x.hi, n, RoundUp)
+
+        result = Interval(a, b)
+
+    end
+    #
+    # else  # completely negative interval
+    #     a = power_by_squaring(x.lo, n, RoundDown)
+    #     b = power_by_squaring(x.hi, n, RoundUp)
+    #
+    #     return Interval(a, b)
+    #end
+
+    if negative_power
+        return inv(result)
+    else
+        return result
     end
 
 end
-
-function pow(::PowerType{:fast}, x::Interval, y::Real)  # fast real power, including for y an Interval
+function ^(::PowerType{:fast}, x::Interval{T}, y::Real) where {T}  # fast real power, including for y an Interval
 
     isempty(x) && return x
-    isinteger(y) && return pow(x, Int(y.lo))
+    isinteger(y) && return x^(Int(y.lo))
     return exp(y * log(x))
 
 end
@@ -273,4 +301,41 @@ function set_power_type(power_type)
     type = PowerType{power_type}()
 
     @eval ^(x::Interval{T}, n::S) where {T, S<:Integer} = ^($type, x::Interval{T}, n)
+end
+
+
+
+# power_by_squaring adapted from Base Julia to add rounding mode:
+function power_by_squaring(x::AbstractFloat, p::Integer, r::RoundingMode)
+
+    # assumes p is positive
+
+    if p == 1
+        return x
+    elseif p == 0
+        return one(x)
+    elseif p == 2
+        return *(x, x, r)  # multiplication with directed rounding
+    end
+    # elseif p < 0
+    #     isone(x) && return copy(x)
+    #     isone(-x) && return iseven(p) ? one(x) : copy(x)
+    #     Base.throw_domerr_powbysq(x, p)
+    # end
+
+    t = trailing_zeros(p) + 1
+    p >>= t
+    while (t -= 1) > 0
+        x = *(x, x, r)
+    end
+    y = x
+    while p > 0
+        t = trailing_zeros(p) + 1
+        p >>= t
+        while (t -= 1) >= 0
+            x = *(x, x, r)
+        end
+        y = *(y, x, r)
+    end
+    return y
 end
