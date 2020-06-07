@@ -31,6 +31,11 @@ function configure!(; directed_rounding=nothing, powers=nothing)
 
         configuration[:directed_rounding] = directed_rounding
 
+        # name mismatch
+        if directed_rounding == :fast
+            directed_rounding = :accurate
+        end
+
         set_directed_rounding(directed_rounding)
     end
 
