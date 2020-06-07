@@ -49,4 +49,4 @@ function configure!(; directed_rounding=nothing, powers=nothing)
 end
 
 
-configure!(directed_rounding=:tight, powers=:fast)
+# configure!(directed_rounding=:tight, powers=:fast)
