@@ -306,7 +306,7 @@ end
 
 
 # power_by_squaring adapted from Base Julia to add rounding mode:
-function power_by_squaring(x::AbstractFloat, p::Integer, r::RoundingMode)
+function Base.power_by_squaring(x::AbstractFloat, p::Integer, r::RoundingMode)
 
     # assumes p is positive
 
