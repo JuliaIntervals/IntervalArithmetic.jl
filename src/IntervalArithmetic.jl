@@ -37,7 +37,8 @@ import Base:
     abs, abs2,
     show,
     isinteger, setdiff,
-    parse, hash
+    parse, hash,
+    power_by_squaring
 
 import Base:  # for IntervalBox
     broadcast, length,
