@@ -287,7 +287,7 @@ function ^(::PowerType{:fast}, x::Interval{T}, n::Integer) where {T}  # fast int
     end
 
 end
-function ^(::PowerType{:fast}, x::Interval{T}, y::Real) where {T}  # fast real power, including for y an Interval
+function ^(::PowerType{:fast}, x::Interval{T}, y::S) where {T, S<:Real}  # fast real power, including for y an Interval
 
     isempty(x) && return x
     isinteger(y) && return x^(Int(y.lo))
@@ -300,7 +300,9 @@ function set_power_type(power_type)
 
     type = PowerType{power_type}()
 
-    @eval ^(x::Interval{T}, n::S) where {T, S<:Real} = ^($type, x::Interval{T}, n)
+    for S in (Integer, Real)
+        @eval ^(x::Interval{T}, n::$S) where {T} = ^($type, x::Interval{T}, n)
+    end
 end
 
 
