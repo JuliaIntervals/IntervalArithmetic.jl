@@ -130,8 +130,8 @@ for T in (Float32, Float64)
         end
     end
 
-    @eval inv(::DirectedRounding{:tight}, a::$T, ::RoundingMode{:Down}) = div_down(one($T), a)
-    @eval inv(::DirectedRounding{:tight}, a::$T, ::RoundingMode{:Up}) = div_up(one($T), a)
+    @eval @inline inv(::DirectedRounding{:tight}, a::$T, ::RoundingMode{:Down}) = div_down(one($T), a)
+    @eval @inline inv(::DirectedRounding{:tight}, a::$T, ::RoundingMode{:Up}) = div_up(one($T), a)
 end
 
 
