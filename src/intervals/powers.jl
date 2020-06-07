@@ -242,13 +242,13 @@ function ^(::PowerType{:fast}, x::Interval{T}, n::Integer) where {T}  # fast int
 
     isempty(x) && return x
 
+    negative_power = false
+
     if n < 0
         negative_power = true
         n = -n
-    else
-        negative_power = false
     end
-
+        
     if iseven(n)
         if 0 ∈ x
 
