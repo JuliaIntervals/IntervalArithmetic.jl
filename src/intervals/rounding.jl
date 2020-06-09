@@ -344,11 +344,11 @@ function set_directed_rounding(rounding_type::Symbol)
         if !startswith(line, "WARNING: Method definition")
 
             if startswith(line, "WARNING") || startswith(line, "Use")
-                warn(line)
+                @warn(line)
 
             else
                 println("Error on line: ", line)
-                error(line)
+                @error(line)
             end
         end
     end
