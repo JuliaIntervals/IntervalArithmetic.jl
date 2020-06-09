@@ -321,13 +321,13 @@ function set_directed_rounding(rounding_type::Symbol)
 
     path, io = mktemp(cleanup=false)
 
-    old_stderr = stderr
+    # old_stderr = stderr
     # redirect_stderr(io)
 
     _set_directed_rounding(rounding_type)
 
-    @show path
-    redirect_stderr(old_stderr)
+    # @show path
+    # redirect_stderr(old_stderr)
 
     # check
     lines = readlines(path)
