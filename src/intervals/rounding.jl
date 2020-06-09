@@ -319,16 +319,15 @@ function set_directed_rounding(rounding_type::Symbol)
     # dump the warnings to a file, and check the file to make
     # sure they are only redefinition warnings
 
-    path, io = mktemp()
+    path, io = mktemp(cleanup=false)
 
     old_stderr = stderr
-    redirect_stderr(io)
+    # redirect_stderr(io)
 
     _set_directed_rounding(rounding_type)
 
+    @show path
     redirect_stderr(old_stderr)
-
-    close(io)
 
     # check
     lines = readlines(path)
@@ -352,6 +351,9 @@ function set_directed_rounding(rounding_type::Symbol)
             end
         end
     end
+
+    close(io)
+
 
     return rounding_type
 
