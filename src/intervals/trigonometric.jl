@@ -425,8 +425,13 @@ function cot(a::Interval{BigFloat})
     return b
 end
 
-function cot(a::Interval{T}) where T
-    isempty(a) && return a
+csc(a::Interval{BigFloat}) = 1/sin(a)
 
-    atomic(Interval{T}, cot(big53(a)) )
+for f in (:cot, :csc)
+
+    @eval function ($f)(a::Interval{T}) where T
+        isempty(a) && return a
+
+        atomic(Interval{T}, ($f)(big53(a)) )
+    end
 end

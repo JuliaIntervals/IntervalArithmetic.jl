@@ -22,7 +22,7 @@ import Base:
     +, -, *, /, //, fma,
     <, >, ==, !=, ⊆, ^, <=,
     in, zero, one, eps, typemin, typemax, abs, abs2, real, min, max,
-    sqrt, exp, log, sin, cos, tan, cot, inv, cbrt,
+    sqrt, exp, log, sin, cos, tan, cot, inv, cbrt, csc,
     exp2, exp10, log2, log10,
     asin, acos, atan,
     sinh, cosh, tanh, coth, asinh, acosh, atanh, sinpi, cospi,
