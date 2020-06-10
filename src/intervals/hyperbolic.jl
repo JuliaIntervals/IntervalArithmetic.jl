@@ -60,8 +60,9 @@ end
 
 coth(a::Interval{BigFloat}) = 1/tanh(a)
 
+csch(a::Interval{BigFloat}) = 1/sinh(a)
 # Float64 versions of functions missing from CRlibm:
-for f in (:tanh, :asinh, :acosh, :atanh, :coth)
+for f in (:tanh, :asinh, :acosh, :atanh, :coth, :csch)
 
     @eval function ($f)(a::Interval{Float64})
         isempty(a) && return a

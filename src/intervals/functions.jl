@@ -323,3 +323,5 @@ function log1p(a::Interval{T}) where T
 
     @round( log1p(a.lo), log1p(a.hi) )
 end
+
+
