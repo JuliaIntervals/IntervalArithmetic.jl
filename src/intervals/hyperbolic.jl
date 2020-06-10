@@ -58,8 +58,10 @@ function atanh(a::Interval{BigFloat})
     return Interval(res_lo, res_hi)
 end
 
+coth(a::Interval{BigFloat}) = 1/tanh(a)
+
 # Float64 versions of functions missing from CRlibm:
-for f in (:tanh, :asinh, :acosh, :atanh)
+for f in (:tanh, :asinh, :acosh, :atanh, :coth)
 
     @eval function ($f)(a::Interval{Float64})
         isempty(a) && return a
