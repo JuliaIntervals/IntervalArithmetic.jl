@@ -120,7 +120,7 @@ end
 
 # improved error-free arithmetic by RoundingEmulator.jl:
 for T in (Float32, Float64)
-    for (op, f) in ( (:+, :add), (:-, :sub), (:*, :mul), (:/, :div), (:sqrt, :sqrt), (:cbrt, :cbrt) )
+    for (op, f) in ( (:+, :add), (:-, :sub), (:*, :mul), (:/, :div), (:sqrt, :sqrt))
         for (mode, suffix) in zip((:Down, :Up), (:_down, :_up))
             mode1 = Expr(:quote, mode)
             mode1 = :(::RoundingMode{$mode1})
@@ -274,7 +274,7 @@ function _setrounding(::Type{Interval}, rounding_type::Symbol)
 
     # unary functions:
 
-    for f in (:sqrt, :inv, :cbrt)
+    for f in (:sqrt, :inv)
         @eval $f(a::T, r::RoundingMode) where {T<:AbstractFloat} = $f($roundtype, a, r)
     end
 
@@ -293,7 +293,7 @@ function _setrounding(::Type{Interval}, rounding_type::Symbol)
 
     # unary functions:
     for f in vcat(CRlibm.functions,
-                    [:tanh, :asinh, :acosh, :atanh, :cot, :coth])
+                    [:tanh, :asinh, :acosh, :atanh, :cot, :coth, :cbrt])
 
         @eval $f(a::T, r::RoundingMode) where {T<:AbstractFloat} = $f($roundtype, a, r)
 

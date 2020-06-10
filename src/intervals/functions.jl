@@ -234,11 +234,6 @@ function sqrt(a::Interval{T}) where T
 end
 
 
-function cbrt(a::Interval{T}) where T
-    isempty(a) && return a
-
-    @round(cbrt(a.lo), cbrt(a.hi))  
-end
 
 """
     pow(x::Interval, n::Integer)
@@ -290,7 +285,7 @@ for f in (:exp, :expm1)
     end
 end
 
-for f in (:exp2, :exp10)
+for f in (:exp2, :exp10, :cbrt)
 
     @eval function ($f)(x::BigFloat, r::RoundingMode)  # add BigFloat functions with rounding:
             setrounding(BigFloat, r) do
