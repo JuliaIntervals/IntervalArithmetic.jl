@@ -293,7 +293,7 @@ function _setrounding(::Type{Interval}, rounding_type::Symbol)
 
     # unary functions:
     for f in vcat(CRlibm.functions,
-                    [:tanh, :asinh, :acosh, :atanh, :cot, :coth, :cbrt, :csc, :csch])
+                    [:tanh, :asinh, :acosh, :atanh, :cot, :coth, :cbrt, :csc, :csch, :hypot])
 
         @eval $f(a::T, r::RoundingMode) where {T<:AbstractFloat} = $f($roundtype, a, r)
 
