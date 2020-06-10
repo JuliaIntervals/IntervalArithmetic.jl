@@ -394,3 +394,39 @@ function atan(y::Interval{BigFloat}, x::Interval{BigFloat})
 
     end
 end
+
+function cot(a::Interval{BigFloat})
+    isempty(a) && return a
+
+    diam(a) > Interval{BigFloat}(π).lo && return entireinterval(a)
+
+    lo_quadrant, lo = quadrant(Float64(a.lo))
+    hi_quadrant, hi = quadrant(Float64(a.hi))
+
+
+
+    lo_quadrant_mod = mod(lo_quadrant, 2)
+    hi_quadrant_mod = mod(hi_quadrant, 2)
+    
+    if(lo_quadrant_mod == 1 && hi_quadrant_mod == 0)
+        if(lo_quadrant < hi_quadrant)
+            return entireinterval(a)
+        else
+            return Interval(-Inf, cot(a.lo))
+        end
+    elseif(lo_quadrant_mod == 0 && hi_quadrant_mod == 0 && lo_quadrant > hi_quadrant)
+        return Interval(-Inf, cot(a.lo))
+    end 
+
+    low = BigFloat(cot(a.hi))
+    high = BigFloat(cot(a.lo))
+
+    b = interval(low, high)
+    return b
+end
+
+function cot(a::Interval{T}) where T
+    isempty(a) && return a
+
+    atomic(Interval{T}, cot(big53(a)) )
+end
