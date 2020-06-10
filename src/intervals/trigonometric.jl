@@ -427,7 +427,9 @@ end
 
 csc(a::Interval{BigFloat}) = 1/sin(a)
 
-for f in (:cot, :csc)
+sec(a::Interval{BigFloat}) = 1/cos(a)
+
+for f in (:cot, :csc, :sec)
 
     @eval function ($f)(a::Interval{T}) where T
         isempty(a) && return a

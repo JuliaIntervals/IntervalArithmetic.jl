@@ -206,7 +206,7 @@ for mode in (:Down, :Up)
 
 
     # functions not in CRlibm:
-    for f in (:sqrt, :inv, :tanh, :asinh, :acosh, :atanh, :cbrt, :cot, :coth, :csc, :csch, :hypot)
+    for f in (:sqrt, :inv, :tanh, :asinh, :acosh, :atanh, :cbrt, :cot, :coth, :csc, :csch, :hypot, :sec)
 
 
         @eval function $f(::IntervalRounding{:slow},
@@ -293,7 +293,7 @@ function _setrounding(::Type{Interval}, rounding_type::Symbol)
 
     # unary functions:
     for f in vcat(CRlibm.functions,
-                    [:tanh, :asinh, :acosh, :atanh, :cot, :coth, :cbrt, :csc, :csch, :hypot])
+                    [:tanh, :asinh, :acosh, :atanh, :cot, :coth, :cbrt, :csc, :csch, :hypot ,:sec])
 
         @eval $f(a::T, r::RoundingMode) where {T<:AbstractFloat} = $f($roundtype, a, r)
 
