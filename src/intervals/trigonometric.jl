@@ -412,17 +412,13 @@ function cot(a::Interval{BigFloat})
         if(lo_quadrant < hi_quadrant)
             return entireinterval(a)
         else
-            return Interval(-Inf, cot(a.lo))
+            return @round(-Inf, cot(a.lo))
         end
     elseif(lo_quadrant_mod == 0 && hi_quadrant_mod == 0 && lo_quadrant > hi_quadrant)
-        return Interval(-Inf, cot(a.lo))
+        return @round(-Inf, cot(a.lo))
     end 
 
-    low = BigFloat(cot(a.hi))
-    high = BigFloat(cot(a.lo))
-
-    b = interval(low, high)
-    return b
+    return @round(cot(a.hi), cot(a.lo))
 end
 
 csc(a::Interval{BigFloat}) = 1/sin(a)
