@@ -91,7 +91,7 @@ function sqr(a::Interval{T}) where T<:Real
     # return @round(mig(a)^2, mag(a)^2)
 end
 
-^(a::Interval{BigFloat}, x::AbstractFloat) = a^big(x)
+^(::PowerType{:tight}, a::Interval{BigFloat}, x::AbstractFloat) = a^big(x)
 
 # Floating-point power of a BigFloat interval:
 function ^(::PowerType{:tight}, a::Interval{BigFloat}, x::BigFloat)
@@ -144,7 +144,7 @@ function ^(::PowerType{:tight}, a::Interval{BigFloat}, x::BigFloat)
     return hull(lo, hi)
 end
 
-function ^(a::Interval{Rational{T}}, x::AbstractFloat) where T<:Integer
+function ^(::PowerType{:tight}, a::Interval{Rational{T}}, x::AbstractFloat) where T<:Integer
     a = Interval(a.lo.num/a.lo.den, a.hi.num/a.hi.den)
     a = a^x
     atomic(Interval{Rational{T}}, a)
@@ -248,7 +248,7 @@ function ^(::PowerType{:fast}, x::Interval{T}, n::Integer) where {T}  # fast int
         negative_power = true
         n = -n
     end
-        
+
     if iseven(n)
         if 0 ∈ x
 
@@ -296,15 +296,26 @@ function ^(::PowerType{:fast}, x::Interval{T}, y::S) where {T, S<:Real}  # fast 
 end
 
 
+# ^(::PowerType{:fast}, x::Interval{T}, n::Integer) where {T} = ^($type, x::Interval{T}, n)
+function ^(::PowerType{:fast}, x::Interval{T}, y::Rational) where {T}
+    ^(PowerType{:fast}(), x, Interval(y.num) / y.den)
+end
+
+
 function set_power_type(power_type)
 
     type = PowerType{power_type}()
 
-    for S in (Integer, Real)
-        @eval ^(x::Interval{T}, n::$S) where {T} = ^($type, x::Interval{T}, n)
+    for S in (Integer, Real, Rational)
+        @eval ^(x::Interval{T}, y::$S) where {T} = ^($type, x::Interval{T}, y)
     end
 end
 
+
+set_power_type(:tight)
+
+
+pow(x, y) = ^(PowerType{:fast}(), x, y)
 
 
 # power_by_squaring adapted from Base Julia to add rounding mode:
