@@ -290,8 +290,10 @@ end
 function ^(::PowerType{:fast}, x::Interval{T}, y::S) where {T, S<:Real}  # fast real power, including for y an Interval
 
     isempty(x) && return x
-    isinteger(y) && return x^(Int(y.lo))
-    return exp(y * log(x))
+
+    y2 = Interval(y)
+
+    return exp(y2 * log(x))
 
 end
 
