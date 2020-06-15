@@ -78,7 +78,7 @@ setprecision(Interval, Float64)
         @test string(b) == "[-1f0, ∞]"
 
         setformat(:full)
-        @test string(a) == "Interval(1f0, 2f0)"
+        @test string(a) == "Interval(1.0f0, 2.0f0)"
         @test string(b) == "Interval(-1.0f0, ∞)"
 
         setformat(:midpoint)
