@@ -204,6 +204,40 @@ function basic_representation(a::Interval, format=nothing)
     output
 end
 
+function basic_representation(a::Interval{Float32}, format=nothing)
+    if isempty(a)
+        return "∅"
+    end
+
+    if format == nothing
+        format = display_params.format  # default
+    end
+
+    sigfigs = display_params.sigfigs
+
+    local output
+
+    if format == :standard
+
+        aa = round_string(a.lo, sigfigs, RoundDown)
+        bb = round_string(a.hi, sigfigs, RoundUp)
+
+        output = "[$(aa)f0, $(bb)f0]"
+
+    elseif format == :full
+        output = "Interval($(a.lo)f0, $(a.hi)f0)"
+
+    elseif format == :midpoint
+        m = round_string(mid(a), sigfigs, RoundNearest)
+        r = round_string(radius(a), sigfigs, RoundUp)
+        output = "$(m)f0 ± $(r)f0"
+    end
+    output = replace(output, "inff0" => "∞")
+    output = replace(output, "Inff0" => "∞")
+    output = replace(output, "Inf32f0" => "∞")
+    output
+end
+
 function basic_representation(a::Interval{Rational{T}}, format=nothing) where
         T<:Integer
 

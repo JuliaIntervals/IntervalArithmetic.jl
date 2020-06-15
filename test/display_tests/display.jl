@@ -70,6 +70,21 @@ setprecision(Interval, Float64)
         @test string(a) == "19//24 ± 11//24"
     end
 
+    @testset "Interval{Float32}" begin
+        a = Interval{Float32}(1, 2)
+        b = Interval{Float32}(-1, Inf)
+        setformat(:standard)
+        @test string(a) == "[1f0, 2f0]"
+        @test string(b) == "[-1f0, ∞]"
+
+        setformat(:full)
+        @test string(a) == "Interval(1.0f0, 2.0f0)"
+        @test string(b) == "Interval(-1.0f0, ∞)"
+
+        setformat(:midpoint)
+        @test string(a) == "1.5f0 ± 0.5f0"
+    end
+
 
     setprecision(Interval, 256)
 
