@@ -153,31 +153,31 @@ for mode in (:Down, :Up)
     for f in (:+, :-, :*, :/, :atan)
 
         @eval function $f(::IntervalRounding{:slow},
-                          a::T, b::T, $mode1) where T<:AbstractFloat
+                          a::T, b::S, $mode1) where {T, S<:AbstractFloat}
                     setrounding(T, $mode2) do
                         $f(a, b)
                     end
                 end
 
         @eval function $f(::IntervalRounding{:fast},
-                                  a::T, b::T, $mode1) where T<:AbstractFloat
+                                  a::T, b::S, $mode1) where {T, S<:AbstractFloat}
                             setrounding(T, $mode2) do
                                 $f(a, b)
                             end
                         end
         
         @eval function $f(::IntervalRounding{:tight},
-                            a::T, b::T, $mode1) where T<:AbstractFloat
+                            a::T, b::S, $mode1) where {T, S<:AbstractFloat}
                       setrounding(T, $mode2) do
                           $f(a, b)
                       end
                   end
 
         @eval $f(::IntervalRounding{:accurate},
-                  a::T, b::T, $mode1) where {T<:AbstractFloat} = $directed($f(a, b))
+                  a::T, b::S, $mode1) where {T, S<:AbstractFloat} = $directed($f(a, b))
 
         @eval $f(::IntervalRounding{:none},
-                  a::T, b::T, $mode1) where {T<:AbstractFloat} = $f(a, b)
+                  a::T, b::S, $mode1) where {T, S<:AbstractFloat} = $f(a, b)
 
     end
 
@@ -269,7 +269,7 @@ function _setrounding(::Type{Interval}, rounding_type::Symbol)
 
     # binary functions:
     for f in (:+, :-, :*, :/)
-        @eval $f(a::T, b::T, r::RoundingMode) where {T<:AbstractFloat} = $f($roundtype, a, b, r)
+        @eval $f(a::T, b::S, r::RoundingMode) where {T, S<:AbstractFloat} = $f($roundtype, a, b, r)
     end
 
     # unary functions:

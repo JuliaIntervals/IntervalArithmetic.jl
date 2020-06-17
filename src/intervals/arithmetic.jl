@@ -66,17 +66,17 @@ typemax(::Type{Interval{T}}) where T<:Integer = Interval(typemax(T))
 +(a::Interval) = a
 -(a::Interval) = Interval(-a.hi, -a.lo)
 
-function +(a::Interval{T}, b::T) where {T<:Real}
+function +(a::Interval{T}, b::S) where {T, S<:AbstractFloat}
     isempty(a) && return emptyinterval(T)
     @round(a.lo + b, a.hi + b)
 end
-+(b::T, a::Interval{T}) where {T<:Real} = a+b
++(b::S, a::Interval{T}) where {T, S<:AbstractFloat} = a+b
 
-function -(a::Interval{T}, b::T) where {T<:Real}
+function -(a::Interval{T}, b::S) where {T, S<:AbstractFloat}
     isempty(a) && return emptyinterval(T)
     @round(a.lo - b, a.hi - b)
 end
-function -(b::T, a::Interval{T}) where {T<:Real}
+function -(b::S, a::Interval{T}) where {T, S<:AbstractFloat}
     isempty(a) && return emptyinterval(T)
     @round(b - a.hi, b - a.lo)
 end
@@ -93,7 +93,7 @@ end
 
 
 ## Multiplication
-function *(x::T, a::Interval{T}) where {T<:Real}
+function *(x::S, a::Interval{T}) where {T, S<:AbstractFloat}
     isempty(a) && return emptyinterval(T)
     (iszero(a) || iszero(x)) && return zero(Interval{T})
 
@@ -104,7 +104,7 @@ function *(x::T, a::Interval{T}) where {T<:Real}
     end
 end
 
-*(a::Interval{T}, x::T) where {T<:Real} = x*a
+*(a::Interval{T}, x::S) where {T, S<:AbstractFloat} = x*a
 
 "a * b where 0 * Inf is special-cased"
 @inline function checked_mult(a::T, b::T, r::RoundingMode) where T
@@ -147,7 +147,7 @@ end
 
 
 ## Division
-function /(a::Interval{T}, x::T) where {T<:Real}
+function /(a::Interval{T}, x::S) where {T, S<:AbstractFloat}
     isempty(a) && return emptyinterval(T)
     iszero(x) && return emptyinterval(T)
     iszero(a) && return zero(Interval{T})
