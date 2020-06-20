@@ -351,3 +351,7 @@ for (f, domain) in restricted_functions2
         DecoratedInterval(r, trv)
     end
 end
+
+function isnai(x::DecoratedInterval)
+    return x.decoration == ill
+end
