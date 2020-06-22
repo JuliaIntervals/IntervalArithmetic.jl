@@ -291,6 +291,8 @@ function ^(::PowerType{:fast}, x::Interval{T}, y::S) where {T, S<:Real}  # fast 
 
     isempty(x) && return x
 
+    isinteger(y) && return ^(PowerType{:fast}(), x, convert(Int, y.lo))
+
     y2 = Interval(y)
 
     return exp(y2 * log(x))
