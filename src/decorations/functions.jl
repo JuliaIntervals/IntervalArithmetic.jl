@@ -13,7 +13,7 @@ one(::Type{DecoratedInterval{T}}) where T<:Real = DecoratedInterval(one(T))
 ## Bool functions
 bool_functions = (
     :isempty, :isentire, :isunbounded,
-    :isfinite, :isnai, :isnan,
+    :isfinite, :isnan,
     :isthin, :iscommon
 )
 
@@ -350,4 +350,8 @@ for (f, domain) in restricted_functions2
         x ⊆ $(domain) && return DecoratedInterval(r, d)
         DecoratedInterval(r, trv)
     end
+end
+
+function isnai(x::DecoratedInterval)
+    return x.decoration == ill
 end

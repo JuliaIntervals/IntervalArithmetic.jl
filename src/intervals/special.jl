@@ -25,17 +25,8 @@ isentire(x::Interval) = x.lo == -Inf && x.hi == Inf
 isinf(x::Interval) = isentire(x)
 isunbounded(x::Interval) = x.lo == -Inf || x.hi == Inf
 
-
-# NaI: not-an-interval
-"""`NaI` not-an-interval: [NaN, NaN]."""
-nai(::Type{T}) where T<:Real = Interval{T}(convert(T, NaN), convert(T, NaN))
-nai(x::Interval{T}) where T<:Real = nai(T)
-nai() = nai(precision(Interval)[1])
-
-isnai(x::Interval) = isnan(x.lo) || isnan(x.hi)
-
 isfinite(x::Interval) = isfinite(x.lo) && isfinite(x.hi)
-isnan(x::Interval) = isnai(x)
+#isnan(x::Interval) = isnai(x)
 
 """
     isthin(x)
