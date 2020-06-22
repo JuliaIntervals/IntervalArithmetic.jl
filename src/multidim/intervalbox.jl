@@ -10,7 +10,9 @@ end
 # IntervalBox(x::Interval) = IntervalBox( SVector(x) )  # single interval treated as tuple with one element
 
 IntervalBox(x::Interval...) = IntervalBox(SVector(x))
-IntervalBox(x::SVector) = IntervalBox(interval.(x))
+
+IntervalBox(x::SVector{N,T}) where {N,T} = IntervalBox(interval.(x))
+
 IntervalBox(x::Tuple) = IntervalBox(SVector(x))
 IntervalBox(x::Real) = IntervalBox(interval.(x))
 IntervalBox(x...) = IntervalBox(x)

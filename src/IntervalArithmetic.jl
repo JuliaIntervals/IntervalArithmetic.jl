@@ -37,7 +37,8 @@ import Base:
     abs, abs2,
     show,
     isinteger, setdiff,
-    parse, hash
+    parse, hash,
+    power_by_squaring
 
 import Base:  # for IntervalBox
     broadcast, length,
@@ -80,7 +81,7 @@ export
 
 export showfull
 
-import Base: rounding, setrounding, setprecision
+import Base: setprecision
 
 
 
@@ -106,6 +107,8 @@ function __init__()
 
     setprecision(Interval, 256)  # set up pi
     setprecision(Interval, Float64)
+
+    # configure!(directed_rounding=:tight, powers=:fast)
 end
 
 
