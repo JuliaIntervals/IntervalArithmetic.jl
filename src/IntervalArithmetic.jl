@@ -119,8 +119,6 @@ include("multidim/multidim.jl")
 include("bisect.jl")
 include("decorations/decorations.jl")
 
-include("configuration.jl")
-
 include("rand.jl")
 include("parsing.jl")
 include("display.jl")

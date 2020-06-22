@@ -365,4 +365,4 @@ end
 
 # default: correct rounding
 #const current_rounding_type = Symbol[:undefined]
-set_directed_rounding(:tight)
+# set_directed_rounding(:tight)

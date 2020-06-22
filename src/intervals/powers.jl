@@ -316,7 +316,7 @@ function set_power_type(power_type)
 end
 
 
-set_power_type(:tight)
+# set_power_type(:tight)
 
 
 pow(x, y) = ^(PowerType{:fast}(), x, y)
