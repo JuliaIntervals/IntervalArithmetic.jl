@@ -135,33 +135,6 @@ macro decorated(ex...)
         :(DecoratedInterval($x))
     else
         s = ex[1]
-        T = Float64
-        m = match(r"(\[.*\])(\_.*)?", s)
-
-        if m == nothing  
-
-            m = match(r"(.*\?[a-z0-9]*)(\_.*)?", s)
-
-            if m == nothing
-                throw(ArgumentError("Unable to process string as decorated interval"))
-            end
-
-        end
-        
-        if m.captures[1] == "[nai]" || m.captures[1] == "[Nai]"
-            return nai(T)
-        end
-
-        interval_string, decoration_string = m.captures
-        interval = parse(Interval{T}, interval_string)
-
-        if decoration_string != nothing
-            decoration_string = lowercase(decoration_string)
-            decoration_symbol = Symbol(decoration_string[2:end])
-            decoration = getfield(IntervalArithmetic, decoration_symbol)
-            return DecoratedInterval(interval, decoration)
-        else
-            DecoratedInterval(interval)
-        end
+        parse(DecoratedInterval{Float64}, s)
     end
 end

@@ -19,18 +19,22 @@ function parse(::Type{DecoratedInterval{T}}, s::AbstractString) where T
 
     end
 
+    if m.captures[1] == "[nai]" || m.captures[1] == "[Nai]"
+        return nai(T)
+    end
+
     interval_string, decoration_string = m.captures
     interval = parse(Interval{T}, interval_string)
 
     # type unstable:
-    if decoration_string == nothing
-        decoration_string = "_com"
+    if decoration_string != nothing
+        decoration_string = lowercase(decoration_string)
+        decoration_symbol = Symbol(decoration_string[2:end])
+        decoration = getfield(IntervalArithmetic, decoration_symbol)
+        return DecoratedInterval(interval, decoration)
+    else
+        DecoratedInterval(interval)
     end
-
-    decoration_symbol = Symbol(decoration_string[2:end])
-    decoration = getfield(IntervalArithmetic, decoration_symbol)
-
-    return DecoratedInterval(interval, decoration)
 
 end
 
@@ -240,9 +244,6 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
         end
         if m.captures[1] == "entire"
             return entireinterval(T)
-        end
-        if m.captures[1] == "nai" || m.captures[1] == "Nai"
-            return nai(T)
         end
 
         lo = m.captures[1]
