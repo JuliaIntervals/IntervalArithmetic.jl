@@ -437,3 +437,11 @@ end
         @test which(/, (Interval{BigFloat}, Float32)).sig == div
     end
 end
+
+@testset "Return types for mathematical operators" begin
+    @test typeof(Interval{Float32}(4,5) / 2) == Interval{Float32}
+    @test typeof(Interval(4,5) + Float32(2)) == Interval{Float64}
+    @test typeof(Interval{BigFloat}(1,10) - Float32(3)) == Interval{BigFloat}
+    @test typeof(Interval{BigFloat}(2,6) * 9) == Interval{BigFloat}
+    @test typeof(Interval(2,3) / 4) == Interval{Float64}
+end
