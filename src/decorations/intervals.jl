@@ -38,7 +38,7 @@ struct DecoratedInterval{T<:Real} <: AbstractInterval{T}
     function DecoratedInterval{T}(I::Interval, d::DECORATION) where T
         dd = decoration(I)
         dd <= trv && return new{T}(I, dd)
-        d == ill && return new{T}(nai(I), d)
+        d == ill && return new{T}(nai(I))
         return new{T}(I, d)
     end
 end
@@ -47,7 +47,7 @@ DecoratedInterval(I::Interval{T}, d::DECORATION) where T<:AbstractFloat =
     DecoratedInterval{T}(I, d)
 
 function DecoratedInterval(a::T, b::T, d::DECORATION) where T<:Real
-    a > b && return DecoratedInterval(nai(T), ill)
+    a > b && return nai(T)
     DecoratedInterval(Interval(a,b), d)
 end
 
@@ -63,7 +63,7 @@ DecoratedInterval(a::T, b::S, d::DECORATION) where {T<:Real, S<:Real} =
 DecoratedInterval(I::Interval) = DecoratedInterval(I, decoration(I))
 
 function DecoratedInterval(a::T, b::T) where T<:Real
-    a > b && return DecoratedInterval(nai(T), ill)
+    a > b && return nai(T)
     DecoratedInterval(Interval(a,b))
 end
 
@@ -79,7 +79,7 @@ DecoratedInterval(a::Tuple) = DecoratedInterval(a...)
 
 DecoratedInterval(I::DecoratedInterval, dec::DECORATION) = DecoratedInterval(I.interval, dec)
 
-interval_part(x::DecoratedInterval) = x.interval
+interval(x::DecoratedInterval) = x.interval
 
 decoration(x::DecoratedInterval) = x.decoration
 
@@ -111,7 +111,7 @@ convert(::Type{DecoratedInterval{T}}, x::S) where {T<:Real, S<:Integer} =
 #     convert(DecoratedInterval{T}, rationalize(x))
 # end
 function convert(::Type{DecoratedInterval{T}}, xx::DecoratedInterval) where T<:Real
-    x = interval_part(xx)
+    x = interval(xx)
     x = atomic(Interval{T},x)
     DecoratedInterval( x, decoration(xx) )
 end
@@ -119,17 +119,22 @@ end
 convert(::Type{DecoratedInterval{T}}, x::AbstractString) where T<:AbstractFloat =
     parse(DecoratedInterval{T}, x)
 
-big(x::DecoratedInterval) = DecoratedInterval(big(interval_part(x)),
+big(x::DecoratedInterval) = DecoratedInterval(big(interval(x)),
                                                 decoration(x))
 
 macro decorated(ex...)
-    local x
+    if(!(ex[1] isa String))
+        local x
 
-    if length(ex) == 1
-        x = :(@interval($(esc(ex[1]))))
+        if length(ex) == 1
+            x = :(@interval($(esc(ex[1]))))
+        else
+            x = :($(esc(ex[1])), $(esc(ex[2])))
+        end
+
+        :(DecoratedInterval($x))
     else
-        x = :($(esc(ex[1])), $(esc(ex[2])))
+        s = ex[1]
+        parse(DecoratedInterval{Float64}, s)
     end
-
-    :(DecoratedInterval($x))
 end
