@@ -390,3 +390,50 @@ end
     @test hull(v...) == II
     @test hull(v) == II
 end
+
+@testset "function call for mathematical operators" begin
+
+    add = Tuple{typeof(+),IntervalArithmetic.Interval{T},S} where S<:AbstractFloat where T
+
+    @testset "+ operator" begin
+        @test which(+, (Interval{Float64}, Float32)).sig == add
+        @test which(+, (Interval{Float32}, Float64)).sig == add
+        @test which(+, (Interval{BigFloat}, Float64)).sig == add
+        @test which(+, (Interval{Float64}, BigFloat)).sig == add
+        @test which(+, (Interval{Float32}, BigFloat)).sig == add
+        @test which(+, (Interval{BigFloat}, Float32)).sig == add
+    end
+
+    sub = Tuple{typeof(-),IntervalArithmetic.Interval{T},S} where S<:AbstractFloat where T
+
+    @testset "- operator" begin
+        @test which(-, (Interval{Float64}, Float32)).sig == sub
+        @test which(-, (Interval{Float32}, Float64)).sig == sub
+        @test which(-, (Interval{BigFloat}, Float64)).sig == sub
+        @test which(-, (Interval{Float64}, BigFloat)).sig == sub
+        @test which(-, (Interval{Float32}, BigFloat)).sig == sub
+        @test which(-, (Interval{BigFloat}, Float32)).sig == sub
+    end
+
+    mul = Tuple{typeof(*),IntervalArithmetic.Interval{T},S} where S<:AbstractFloat where T
+
+    @testset "* operator" begin
+        @test which(*, (Interval{Float64}, Float32)).sig == mul
+        @test which(*, (Interval{Float32}, Float64)).sig == mul
+        @test which(*, (Interval{BigFloat}, Float64)).sig == mul
+        @test which(*, (Interval{Float64}, BigFloat)).sig == mul
+        @test which(*, (Interval{Float32}, BigFloat)).sig == mul
+        @test which(*, (Interval{BigFloat}, Float32)).sig == mul
+    end
+
+    div = Tuple{typeof(/),IntervalArithmetic.Interval{T},S} where S<:AbstractFloat where T
+
+    @testset "/ operator" begin
+        @test which(/, (Interval{Float64}, Float32)).sig == div
+        @test which(/, (Interval{Float32}, Float64)).sig == div
+        @test which(/, (Interval{BigFloat}, Float64)).sig == div
+        @test which(/, (Interval{Float64}, BigFloat)).sig == div
+        @test which(/, (Interval{Float32}, BigFloat)).sig == div
+        @test which(/, (Interval{BigFloat}, Float32)).sig == div
+    end
+end
