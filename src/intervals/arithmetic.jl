@@ -68,17 +68,39 @@ typemax(::Type{Interval{T}}) where T<:Integer = Interval(typemax(T))
 
 function +(a::Interval{T}, b::S) where {T, S<:AbstractFloat}
     isempty(a) && return emptyinterval(T)
-    @round(a.lo + b, a.hi + b)
+    c = @round(a.lo + b, a.hi + b)
+
+    if(typeof(c) != Interval{T})
+        convert(Interval{T}, c)
+    else
+        return c
+    end
+
 end
 +(b::S, a::Interval{T}) where {T, S<:AbstractFloat} = a+b
 
 function -(a::Interval{T}, b::S) where {T, S<:AbstractFloat}
     isempty(a) && return emptyinterval(T)
-    @round(a.lo - b, a.hi - b)
+    c = @round(a.lo - b, a.hi - b)
+
+    if(typeof(c) != Interval{T})
+        convert(Interval{T}, c)
+    else
+        return c
+    end
+
 end
+
 function -(b::S, a::Interval{T}) where {T, S<:AbstractFloat}
     isempty(a) && return emptyinterval(T)
-    @round(b - a.hi, b - a.lo)
+    c = @round(b - a.hi, b - a.lo)
+
+    if(typeof(c) != Interval{T})
+        convert(Interval{T}, c)
+    else
+        return c
+    end
+
 end
 
 function +(a::Interval{T}, b::Interval{T}) where T<:Real
@@ -98,10 +120,17 @@ function *(x::S, a::Interval{T}) where {T, S<:AbstractFloat}
     (iszero(a) || iszero(x)) && return zero(Interval{T})
 
     if x ≥ 0.0
-        return @round(a.lo*x, a.hi*x)
+        c = @round(a.lo*x, a.hi*x)
     else
-        return @round(a.hi*x, a.lo*x)
+        c = @round(a.hi*x, a.lo*x)
     end
+    
+    if(typeof(c) != Interval{T})
+        convert(Interval{T}, c)
+    else
+        return c
+    end
+
 end
 
 *(a::Interval{T}, x::S) where {T, S<:AbstractFloat} = x*a
@@ -153,10 +182,17 @@ function /(a::Interval{T}, x::S) where {T, S<:AbstractFloat}
     iszero(a) && return zero(Interval{T})
 
     if x ≥ 0.0
-        return @round(a.lo/x, a.hi/x)
+        c = @round(a.lo/x, a.hi/x)
     else
-        return @round(a.hi/x, a.lo/x)
+        c = @round(a.hi/x, a.lo/x)
     end
+
+    if(typeof(c) != Interval{T})
+        convert(Interval{T}, c)
+    else
+        return c
+    end
+
 end
 
 function inv(a::Interval{T}) where T<:Real

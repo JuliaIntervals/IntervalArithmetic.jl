@@ -444,4 +444,6 @@ end
     @test typeof(Interval{BigFloat}(1,10) - Float32(3)) == Interval{BigFloat}
     @test typeof(Interval{BigFloat}(2,6) * 9) == Interval{BigFloat}
     @test typeof(Interval(2,3) / 4) == Interval{Float64}
+    @test typeof(Interval{Float32}(3, 4) / 2.1) == Interval{Float32}
+    @test typeof(Interval{Float32}(3, 4) / big(2.1)) == Interval{Float32}
 end
