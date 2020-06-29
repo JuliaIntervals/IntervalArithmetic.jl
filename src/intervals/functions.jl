@@ -285,6 +285,7 @@ for f in (:exp, :expm1)
     end
 end
 
+
 for f in (:exp2, :exp10, :cbrt)
 
     @eval function ($f)(x::BigFloat, r::RoundingMode)  # add BigFloat functions with rounding:
