@@ -327,3 +327,30 @@ end
 hypot(a::Interval{BigFloat}, b::Interval{BigFloat}) = sqrt(a^2 + b^2)
 
 hypot(a::Interval{T}, b::Interval{T}) where T= atomic(Interval{T}, hypot(big53(a), big53(b)))
+
+function nthroot(a::Interval{BigFloat}, n::Integer)
+    if n > 0
+        a.hi < 0 && iseven(n) && return emptyinterval(BigFloat)
+        if a.lo < 0 && a.hi >= 0 && iseven(n)
+            a = a ∩ Interval{BigFloat}(0, Inf)
+        end
+        ui = convert(Culong, n)
+        low = BigFloat()
+        high = BigFloat()
+        ccall((:mpfr_rootn_ui, :libmpfr), Int32 , (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode) , low , a.lo , ui, MPFRRoundDown)
+        ccall((:mpfr_rootn_ui, :libmpfr), Int32 , (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode) , high , a.hi , ui, MPFRRoundUp)
+        b = interval(low , high)
+        return b
+    end
+    if n < 0
+        return inv(nthroot(a, -n))
+    end
+end
+
+function nthroot(a::Interval{T}, n::Integer) where T
+    n == 1 && return a
+    n < 0 && a == zero(a) && return emptyinterval(a)
+    isempty(a) && return a
+    b = nthroot(big53(a), n)
+    return convert(Interval{T}, b)
+end 
