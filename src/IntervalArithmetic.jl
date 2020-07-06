@@ -9,6 +9,7 @@ import CRlibm
 using StaticArrays
 using FastRounding
 using SetRounding
+using RoundingEmulator
 
 using Markdown
 
@@ -21,10 +22,10 @@ import Base:
     +, -, *, /, //, fma,
     <, >, ==, !=, ⊆, ^, <=,
     in, zero, one, eps, typemin, typemax, abs, abs2, real, min, max,
-    sqrt, exp, log, sin, cos, tan, inv,
+    sqrt, exp, log, sin, cos, tan, cot, inv, cbrt, csc, hypot, sec, 
     exp2, exp10, log2, log10,
     asin, acos, atan,
-    sinh, cosh, tanh, asinh, acosh, atanh, sinpi, cospi,
+    sinh, cosh, tanh, coth, csch, sech, asinh, acosh, atanh, sinpi, cospi,
     union, intersect, isempty,
     convert, promote_rule, eltype, size,
     BigFloat, float, widen, big,
@@ -53,7 +54,7 @@ export
     interval,
     @interval, @biginterval, @floatinterval, @make_interval,
     diam, radius, mid, mag, mig, hull,
-    emptyinterval, ∅, ∞, isempty, isinterior, isdisjoint, ⪽,
+    emptyinterval, ∅, ∞, isempty, isinterior, ⪽,
     precedes, strictprecedes, ≼, ≺, ⊂, ⊃, ⊇, contains_zero,
     entireinterval, isentire, nai, isnai, isthin, iscommon, isatomic,
     widen, inf, sup, bisect, mince, interval_signbit,
@@ -64,6 +65,13 @@ export
     .., @I_str, ±,
     pow, extended_div,
     setformat, @format
+
+if VERSION >= v"1.5.0-DEV.124"
+    import Base: isdisjoint
+else
+    export isdisjoint
+end
+
 
 export
     setindex   # re-export from StaticArrays for IntervalBox
@@ -83,7 +91,7 @@ export
 ## Decorations
 export
     @decorated,
-    interval_part, decoration, DecoratedInterval,
+    interval, decoration, DecoratedInterval,
     com, dac, def, trv, ill
 
 ## Union type

@@ -7,7 +7,8 @@
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaIntervals.github.io/IntervalArithmetic.jl/stable)
 [![](https://img.shields.io/badge/docs-latest-blue.svg)](https://JuliaIntervals.github.io/IntervalArithmetic.jl/latest)
 
-[![Join the chat at https://gitter.im/JuliaIntervals/IntervalArithmetic.jl](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/JuliaIntervals/IntervalArithmetic.jl?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![DOI](https://zenodo.org/badge/87007945.svg)](https://zenodo.org/badge/latestdoi/87007945)
+
 
 `IntervalArithmetic.jl` is a Julia package for performing *Validated Numerics* in Julia, i.e. *rigorous* computations with finite-precision floating-point arithmetic.
 
@@ -47,6 +48,7 @@ To do so, we have incorporated tests from the excellent [ITF1788 test suite](htt
 ### Related packages
 - [MPFI.jl](https://github.com/andrioni/MPFI.jl), a Julia wrapper around the [MPFI C library](http://perso.ens-lyon.fr/nathalie.revol/software.html), a multiple-precision interval arithmetic library based on MPFR
 - [Intervals.jl](https://github.com/andrioni/Intervals.jl), an alternative implementation of basic interval functions.
+- [Intervals.jl](https://github.com/invenia/Intervals.jl), an alternative implementation of basic interval functions by Invenia Technical Computing.
 - [Unums.jl](https://github.com/JuliaComputing/Unums.jl), an implementation of interval arithmetic with variable precision ("ubounds")
 
 

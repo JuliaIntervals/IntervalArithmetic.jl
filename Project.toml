@@ -1,26 +1,28 @@
 name = "IntervalArithmetic"
 uuid = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
 repo = "https://github.com/JuliaIntervals/IntervalArithmetic.jl.git"
-version = "0.16.6"
+version = "0.17.5"
 
 [deps]
 CRlibm = "96374032-68de-5a5b-8d9e-752f78720389"
 FastRounding = "fa42c844-2597-5d31-933b-ebd51ab2693f"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Markdown = "d6f4376e-aef5-505a-96c1-9c027394607a"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
+RoundingEmulator = "5eaf0fd0-dfba-4ccb-bf02-d820a40db705"
 SetRounding = "3cc68bcd-71a2-5612-b932-767ffbe40ab0"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
-Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [compat]
 CRlibm = "0.7, 0.8"
 FastRounding = "0.2"
-Polynomials = "0.6"
-RecipesBase = "0.6, 0.7, 0.8"
+Polynomials = "0.7"
+RecipesBase = "1.0"
+RoundingEmulator = "0.2"
 SetRounding = "0.2"
 StaticArrays = "0.8, 0.9, 0.10, 0.11, 0.12"
-julia = "1.1"
+julia = "1.3, 1.4, 1.5"
 
 [extras]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"

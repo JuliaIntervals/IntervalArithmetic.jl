@@ -1,5 +1,14 @@
 # What's new in `IntervalArithmetic.jl`
 
+## v0.17
+
+### Supported versions of Julia
+- The package now supports only Julia v1.3 and later.
+
+### Breaking changes
+- Changed from using `FastRounding.jl` to `RoundingEmulator.jl` for the defalt rounding mode. [#370](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/370)
+
+
 ## v0.15
 
 ### Supported versions of Julia

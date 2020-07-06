@@ -233,6 +233,8 @@ function sqrt(a::Interval{T}) where T
     @round(sqrt(a.lo), sqrt(a.hi))  # `sqrt` is correctly-rounded
 end
 
+
+
 """
     pow(x::Interval, n::Integer)
 
@@ -283,7 +285,7 @@ for f in (:exp, :expm1)
     end
 end
 
-for f in (:exp2, :exp10)
+for f in (:exp2, :exp10, :cbrt)
 
     @eval function ($f)(x::BigFloat, r::RoundingMode)  # add BigFloat functions with rounding:
             setrounding(BigFloat, r) do
@@ -321,3 +323,7 @@ function log1p(a::Interval{T}) where T
 
     @round( log1p(a.lo), log1p(a.hi) )
 end
+
+hypot(a::Interval{BigFloat}, b::Interval{BigFloat}) = sqrt(a^2 + b^2)
+
+hypot(a::Interval{T}, b::Interval{T}) where T= atomic(Interval{T}, hypot(big53(a), big53(b)))
