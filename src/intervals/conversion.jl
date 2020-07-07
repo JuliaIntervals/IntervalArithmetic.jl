@@ -78,7 +78,7 @@ atomic(::Type{Interval{T}}, x::AbstractString) where T<:AbstractFloat =
 @static if Sys.iswindows()  # Windows cannot round properly
     function atomic(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:Real}
         isinf(x) && return wideinterval(T(x))
-
+        
         Interval{T}( parse(T, string(x), RoundDown),
                      parse(T, string(x), RoundUp) )
     end
