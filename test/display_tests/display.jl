@@ -90,13 +90,13 @@ setprecision(Interval, Float64)
 
     @testset "DecoratedInterval" begin
         a = @decorated(1, 2)
-        @test typeof(a)== DecoratedInterval{Float64}
+        @test typeof(a)== DecoratedInterval{BigFloat} ##BigFloat because the precision is set to 256
 
         setformat(:standard, decorations=false)
-        @test string(a) == "[1, 2]"
+        @test string(a) == "[1, 2]₂₅₆"
 
         setformat(:standard, decorations=true)
-        @test string(a) == "[1, 2]_com"
+        @test string(a) == "[1, 2]₂₅₆_com"
 
         # issue 131:
         a = DecoratedInterval(big(2), big(3), com)

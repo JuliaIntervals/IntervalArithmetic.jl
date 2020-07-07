@@ -236,57 +236,60 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
     # match string of form [a, b]_dec:
     m1 = match(r"(\[.*\])(\_.*)?", s)
 
-    if(m1.captures[2] != nothing)
-        throw(ArgumentError("Unable to process string $s as an interval"))
-    end
+    if(m1 != nothing) 
 
-    m = match(r"\[(.*),(.*)\]", m1.captures[1])
-
-    if m != nothing  # matched
-        #@show m.captures[1], m.captures[2]
-        m.captures[1] = strip(m.captures[1], [' '])
-        m.captures[2] = strip(m.captures[2], [' '])
-        lo, hi = m.captures
-
-        m.captures[1] = lowercase(m.captures[1])
-        m.captures[2] = lowercase(m.captures[2])
-
-        if m.captures[2] == "+infinity" || m.captures[2] == "" || m.captures[2] == "inf" || m.captures[2] == "+inf" || m.captures[2] == "infinity"
-            hi = "Inf"
-        elseif m.captures[2] == "-infinity" || m.captures[2] == "" || m.captures[2] == "-inf"
-            hi = "-Inf"
+        if(m1.captures[2] != nothing)
+            throw(ArgumentError("Unable to process string $s as an interval"))
         end
-        #@show m.captures[1], m.captures[2]
-        if m.captures[1] == "-infinity" || m.captures[1] == "" || m.captures[1] == "-inf"
-            lo = "-Inf"
-        elseif m.captures[1] == "+infinity" || m.captures[1] == "" || m.captures[1] == "inf" || m.captures[1] == "+inf" || m.captures[1] == "infinity"
-            lo = "Inf"
+
+        m = match(r"\[(.*),(.*)\]", m1.captures[1])
+
+        if m != nothing  # matched
+            #@show m.captures[1], m.captures[2]
+            m.captures[1] = strip(m.captures[1], [' '])
+            m.captures[2] = strip(m.captures[2], [' '])
+            lo, hi = m.captures
+
+            m.captures[1] = lowercase(m.captures[1])
+            m.captures[2] = lowercase(m.captures[2])
+
+            if m.captures[2] == "+infinity" || m.captures[2] == "" || m.captures[2] == "inf" || m.captures[2] == "+inf" || m.captures[2] == "infinity"
+                hi = "Inf"
+            elseif m.captures[2] == "-infinity" || m.captures[2] == "" || m.captures[2] == "-inf"
+                hi = "-Inf"
+            end
+            #@show m.captures[1], m.captures[2]
+            if m.captures[1] == "-infinity" || m.captures[1] == "" || m.captures[1] == "-inf"
+                lo = "-Inf"
+            elseif m.captures[1] == "+infinity" || m.captures[1] == "" || m.captures[1] == "inf" || m.captures[1] == "+inf" || m.captures[1] == "infinity"
+                lo = "Inf"
+            end
         end
-    end
-
-    if m == nothing
-
-        m = match(r"\[(.*)\]", s)  # string like "[1]"
 
         if m == nothing
-            throw(ArgumentError("Unable to process string $s as interval"))
+
+            m = match(r"\[(.*)\]", s)  # string like "[1]"
+
+            if m == nothing
+                throw(ArgumentError("Unable to process string $s as interval"))
+            end
+
+            m.captures[1] = strip(m.captures[1], [' '])
+            m.captures[1] = lowercase(m.captures[1])
+
+            if m.captures[1] == "" || m.captures[1] == "empty"
+                return emptyinterval(T)
+            end
+            if m.captures[1] == "entire"
+                return entireinterval(T)
+            end
+
+            lo = m.captures[1]
+            hi = lo
+
         end
-
-        m.captures[1] = strip(m.captures[1], [' '])
-        m.captures[1] = lowercase(m.captures[1])
-
-        if m.captures[1] == "" || m.captures[1] == "empty"
-            return emptyinterval(T)
-        end
-        if m.captures[1] == "entire"
-            return entireinterval(T)
-        end
-
-        lo = m.captures[1]
-        hi = lo
-
     end
-
+    
     try
         expr1 = Meta.parse(lo)
         expr2 = Meta.parse(hi)
