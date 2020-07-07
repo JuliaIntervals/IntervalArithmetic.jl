@@ -129,7 +129,7 @@ macro decorated(ex...)
         if length(ex) == 1
             x = :(@interval($(esc(ex[1]))))
         else
-            x = :($(esc(ex[1])), $(esc(ex[2])))
+            x = :(@interval($(esc(ex[1])), $(esc(ex[2]))))
         end
 
         :(DecoratedInterval($x))

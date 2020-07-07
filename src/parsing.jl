@@ -87,7 +87,7 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
         if m == nothing
             m = match(r"(.*\?[a-z0-9]*)(\_.*)?", s)
 
-            if(m.captures[2] != nothing)
+            if(m!=nothing && m.captures[2] != nothing)
                 throw(ArgumentError("Unable to process string $s as interval"))
             end
 
