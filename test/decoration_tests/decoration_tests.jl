@@ -57,7 +57,6 @@ end
 
     @test convert(DecoratedInterval{Float64}, "[1,2]_dac") ==
                         DecoratedInterval(Interval(1, 2), dac)
-
 end
 
 end

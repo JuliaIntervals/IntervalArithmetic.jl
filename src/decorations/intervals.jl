@@ -37,7 +37,7 @@ struct DecoratedInterval{T<:Real} <: AbstractInterval{T}
 
     function DecoratedInterval{T}(I::Interval, d::DECORATION) where T
         dd = decoration(I)
-        dd <= trv && return new{T}(I, dd)
+        dd < trv && return new{T}(I, dd)
         d == ill && return nai(I)
         return new{T}(I, d)
     end

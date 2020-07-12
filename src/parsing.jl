@@ -1,5 +1,19 @@
 # Functions to parse strings to intervals
-
+function checkOverflow(a_string::AbstractString, b_string::AbstractString, s::AbstractString) #To handle numbers of type 1.0E+400
+    try
+        a = parse(Float64, a_string)
+        b = parse(Float64, b_string)
+        if a > 308 || (a == 308 && b > 1.7976931348623157) 
+            return Interval(floatmax(), Inf)
+        elseif a < -308 || (a == -308 && b > 2.2250738585072014)
+            return Interval(-Inf, floatmin())
+        else
+            return nothing 
+        end
+    catch
+        throw(ArgumentError("Unable to process string $s as interval"))
+    end
+end
 """
     parse{T}(DecoratedInterval{T}, s::AbstractString)
 
@@ -8,17 +22,13 @@ with decoration `dec`.
 """
 function parse(::Type{DecoratedInterval{T}}, s::AbstractString) where T
     m = match(r"(\[.*\])(\_.*)?", s)
-
+    
     if m == nothing  # matched
 
-        m = match(r"(.*\?[a-z0-9]*)(\_.*)?", s)
+        m = match(r"(.*\?[a-z0-9+-]*)(\_.*)?", s)
 
-        if m == nothing
-            throw(ArgumentError("Unable to process string $s as decorated interval"))
-        end
-        
-        
     end
+    # @show m.captures[1], m.captures[2]
 
     if m.captures[2] == "_ill"
         return nai()
@@ -48,8 +58,12 @@ function parse(::Type{DecoratedInterval{T}}, s::AbstractString) where T
             throw(ArgumentError("Cannot process $decoration_string as decoration"))
         end
         decoration_symbol = Symbol(decoration_string)
-        decoration = getfield(IntervalArithmetic, decoration_symbol)
-        return DecoratedInterval(interval, decoration)
+        decorationn = getfield(IntervalArithmetic, decoration_symbol)
+        if (decoration(DecoratedInterval(interval)) >= decorationn)
+            return DecoratedInterval(interval, decorationn)
+        else
+            throw(ArgumentError("$decorationn is not an appropriate decoration for $interval"))
+        end
     else
         DecoratedInterval(interval)
     end
@@ -116,6 +130,9 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
             if m != nothing  # matched
                 if m.captures[3] != "" && m.captures[4] == "" && m.captures[5] == nothing # string of form "3.4?1" or "10?2"
                     d = length(m.captures[2])
+                    if length(m.captures[3]) >= 308 #handle overflow
+                        return entireinterval(Float64)
+                    end
                     x = parse(Float64, m.captures[3] * "e-$d")
                     n = parse(Float64, m.captures[1]*"."*m.captures[2])
                     lo = n - x
@@ -207,10 +224,22 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
 
                     if m.captures[4] == "" && m.captures[5] != nothing    # strings of the form "3.56?1e2"
                         d = length(m.captures[2])
+                        e1 = split(s, 'e')[2]
+
+                        ee = checkOverflow(e1, m.captures[3], s) #To handle inputs of type 10?3e380
+                        if(ee != nothing)
+                            return ee
+                        end
+
                         x = parse(Float64, m.captures[3] * "e-$d")
                         n = parse(Float64, m.captures[1]*"."*m.captures[2])
-                        lo = parse(Float64, string(n-x)*m.captures[5])
-                        hi = parse(Float64, string(n+x)*m.captures[5])
+                        if(length(m.captures[5]) == 1)
+                            lo = parse(Float64, string(n-x)*m.captures[5]*e1)
+                            hi = parse(Float64, string(n+x)*m.captures[5]*e1)
+                        else
+                            lo = parse(Float64, string(n-x)*m.captures[5])
+                            hi = parse(Float64, string(n+x)*m.captures[5])
+                        end
                         interval = eval(make_interval(T, lo, [hi]))
                         return interval
                     end
@@ -287,8 +316,19 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
             lo = m.captures[1]
             hi = lo
 
+            ss =  split(hi, 'e')
+            if(length(ss) > 1)
+                e0, e1 = split(hi, 'e')
+                ee = checkOverflow(e1, e0, s)
+                if(ee != nothing)
+                    return ee
+                end
+                
+            end
         end
     end
+    
+    #@show lo, hi
     
     try
         expr1 = Meta.parse(lo)

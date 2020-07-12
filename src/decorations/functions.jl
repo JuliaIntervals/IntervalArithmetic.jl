@@ -16,7 +16,7 @@ nai(x::Interval{T}) where T<:Real = nai(T)
 nai(x::DecoratedInterval{T}) where T<:Real = nai(T)
 nai() = nai(precision(Interval)[1])
 isnai(x::Interval) = isnan(x.lo) || isnan(x.hi)
-isnai(x::DecoratedInterval) = isnai(interval(x)) && x.decoration == ill
+isnai(x::DecoratedInterval) = isnai(interval(x)) || x.decoration == ill
 isnan(x::Interval) = isnai(x)
 
 ## Bool functions
