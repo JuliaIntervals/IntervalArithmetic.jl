@@ -3,9 +3,9 @@ function checkOverflow(a_string::AbstractString, b_string::AbstractString, s::Ab
     try
         a = parse(Float64, a_string)
         b = parse(Float64, b_string)
-        if a > 308 || (a == 308 && b > 1.7976931348623157) 
+        if a > 308 || (a == 308 && b > 1.7976931348623157) #if greater than floatmax()
             return Interval(floatmax(), Inf)
-        elseif a < -308 || (a == -308 && b > 2.2250738585072014)
+        elseif a < -308 || (a == -308 && b > 2.2250738585072014) #if less than floatmin()
             return Interval(-Inf, floatmin())
         else
             return nothing 
@@ -233,13 +233,15 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
 
                         x = parse(Float64, m.captures[3] * "e-$d")
                         n = parse(Float64, m.captures[1]*"."*m.captures[2])
-                        if(length(m.captures[5]) == 1)
+
+                        if(length(m.captures[5]) == 1) #if m.captures[5] is e
                             lo = parse(Float64, string(n-x)*m.captures[5]*e1)
-                            hi = parse(Float64, string(n+x)*m.captures[5]*e1)
+                            hi = parse(Float64, string(n+x)*m.captures[5]*e1) 
                         else
                             lo = parse(Float64, string(n-x)*m.captures[5])
                             hi = parse(Float64, string(n+x)*m.captures[5])
                         end
+
                         interval = eval(make_interval(T, lo, [hi]))
                         return interval
                     end
