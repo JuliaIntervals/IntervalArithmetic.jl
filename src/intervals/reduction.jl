@@ -6,17 +6,17 @@ r is the rounding direction which takes 0.0 for RoundingToZero , 0.5 for Roundin
 """
 function vector_sum(v :: Vector{T} , r :: RoundingMode) where T
     sum1 = sum(BigFloat.(v))
-    return Float64(sum1, r)
+    return T(sum1, r)
 end
 
 function vector_dot(v :: Vector{T}, u :: Vector{T}, r :: RoundingMode) where T
     sum1 = sum(BigFloat.(v) .* BigFloat.(u))
-    return Float64(sum1, r)
+    return T(sum1, r)
 end
 
 function vector_sumAbs(v :: Vector{T} , r :: RoundingMode) where T
     sum1 = sum(BigFloat.(abs.(v)))
-    return Float64(sum1, r)
+    return T(sum1, r)
 end
 
 function vector_sumSquare(v :: Vector{T} , r :: RoundingMode) where T
