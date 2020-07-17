@@ -82,7 +82,6 @@ export
 export showfull
 
 import Base: rounding, setrounding, setprecision
-import Base.MPFR: MPFRRoundUp, MPFRRoundDown, MPFRRoundNearest, MPFRRoundToZero, MPFRRoundFromZero, MPFRRoundingMode
 
 
 ## Multidimensional
