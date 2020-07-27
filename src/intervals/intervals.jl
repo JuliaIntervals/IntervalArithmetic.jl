@@ -192,6 +192,7 @@ include("common/arithmetic/basic.jl")
 include("common/arithmetic/hyperbolic.jl")
 include("common/arithmetic/integer.jl")
 include("common/arithmetic/power.jl")
+include("common/arithmetic/signbit.jl")
 include("common/arithmetic/trigonometric.jl")
 
 include("common/boolean.jl")

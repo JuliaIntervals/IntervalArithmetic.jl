@@ -2,9 +2,6 @@
 
 
 ## Comparisons
-
-
-
 """
     isless(a, b)
 
