@@ -183,27 +183,23 @@ calculated by `x^n`, but is guaranteed to be a correct
 enclosure when using multiplication with correct rounding.
 """
 function pow(x::F, n::Integer) where {F<:AbstractFlavor}
-
+    n < 0 && return 1/pow(x, -n)
     isempty(x) && return x
 
     if iseven(n) && 0 ∈ x
-
         return hull(zero(x),
                     hull(Base.power_by_squaring(F(mig(x)), n),
                         Base.power_by_squaring(F(mag(x)), n))
             )
-
     else
-
       return hull( Base.power_by_squaring(F(x.lo), n),
                     Base.power_by_squaring(F(x.hi), n) )
-
     end
 end
 
 function pow(x::AbstractFlavor, y)  # fast real power, including for y an Interval
     isempty(x) && return x
-
+    isinteger(y) && return pow(x, Int(y.lo))
     return exp(y * log(x))
 end
 
