@@ -9,16 +9,6 @@ zero(::Type{DecoratedInterval{T}}) where T<:Real = DecoratedInterval(zero(T))
 one(a::DecoratedInterval{T}) where T<:Real = DecoratedInterval(one(T))
 one(::Type{DecoratedInterval{T}}) where T<:Real = DecoratedInterval(one(T))
 
-# NaI: not-an-interval
-"""`NaI` not-an-interval: [NaN, NaN]."""
-nai(::Type{T}) where T<:Real = DecoratedInterval(Interval{T}(convert(T, NaN), convert(T, NaN)), ill)
-nai(x::Interval{T}) where T<:Real = nai(T)
-nai(x::DecoratedInterval{T}) where T<:Real = nai(T)
-nai() = nai(precision(Interval)[1])
-isnai(x::Interval) = isnan(x.lo) || isnan(x.hi)
-isnai(x::DecoratedInterval) = isnai(interval(x)) && x.decoration == ill
-isnan(x::Interval) = isnai(x)
-
 ## Bool functions
 bool_functions = (
     :isempty, :isentire, :isunbounded,
@@ -28,7 +18,8 @@ bool_functions = (
 
 bool_binary_functions = (
     :<, :>, :!=, :⊆, :<=,
-    :isinterior, :isdisjoint, :precedes, :strictprecedes
+    :isinterior, :isdisjoint, :precedes, :strictprecedes,
+    :isidentical
 )
 
 for f in bool_functions

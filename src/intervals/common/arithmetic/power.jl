@@ -231,7 +231,7 @@ for f in (:exp2, :exp10)
         end
 end
 
-for f in (:log, :log2, :log10, :log1p)
+for f in (:log, :log2, :log10)
     @eval function ($f)(a::F) where {T, F<:AbstractFlavor{T}}
             domain = F(0, Inf)
             a = a ∩ domain
@@ -240,4 +240,13 @@ for f in (:log, :log2, :log10, :log1p)
 
             return @round( F, ($f)(a.lo), ($f)(a.hi) )
         end
+end
+
+function log1p(a::F) where {T, F<:AbstractFlavor{T}}
+    domain = Interval{T}(-1, Inf)
+    a = a ∩ domain
+
+    (isempty(a) || a.hi ≤ -one(T)) && return emptyinterval(a)
+
+    @round( F, log1p(a.lo), log1p(a.hi) )
 end

@@ -161,7 +161,6 @@ using Test
     end
 
     @testset "Special interval tests" begin
-
         @test isidentical(RR(Float64), Interval(-Inf, Inf))
         @test isentire(RR(a))
         @test isentire(Interval(-Inf, Inf))

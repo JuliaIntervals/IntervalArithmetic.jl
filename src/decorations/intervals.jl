@@ -91,21 +91,20 @@ DecoratedInterval(a::T, d::DECORATION) where {T<:Real} =
 
 function DecoratedInterval(a::T, b::T) where {T<:Real}
     a > b && return DecoratedInterval(nai(T), ill)
-    DecoratedInterval(Interval(a,b))
+    DecoratedInterval(Interval(a, b))
 end
 
 DecoratedInterval(a::T, b::T) where {T<:Integer} =
     DecoratedInterval(float(a),float(b))
 
-DecoratedInterval(a::T) where {T<:Real} = DecoratedInterval(Interval(a,a))
+DecoratedInterval(a::T) where {T<:Real} = DecoratedInterval(Interval(a, a))
 
 DecoratedInterval(a::T, b::S) where {T<:Real, S<:Real} =
     DecoratedInterval(promote(a, b)...)
 
 DecoratedInterval(a::Tuple) = DecoratedInterval(a...)
 
-
-interval_part(x::AbstractDecoratedInterval) = x.interval
+interval(x::AbstractDecoratedInterval) = x.interval
 decoration(x::AbstractDecoratedInterval) = x.decoration
 
 # Automatic decorations for an Interval
@@ -131,7 +130,7 @@ convert(::Type{DecoratedInterval{T}}, x::S) where {T<:Real, S<:Integer} =
     DecoratedInterval( Interval(T(x), T(x)) )
 
 function convert(::Type{DecoratedInterval{T}}, xx::DecoratedInterval) where {T<:Real}
-    x = interval_part(xx)
+    x = interval(xx)
     x = atomic(Interval{T},x)
     DecoratedInterval( x, decoration(xx) )
 end
@@ -139,7 +138,7 @@ end
 convert(::Type{DecoratedInterval{T}}, x::AbstractString) where {T<:AbstractFloat} =
     parse(DecoratedInterval{T}, x)
 
-big(x::DecoratedInterval) = DecoratedInterval(big(interval_part(x)), decoration(x))
+big(x::DecoratedInterval) = DecoratedInterval(big(interval(x)), decoration(x))
 
 macro decorated(ex...)
     if(!(ex[1] isa String))

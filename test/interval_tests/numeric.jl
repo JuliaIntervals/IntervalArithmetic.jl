@@ -3,9 +3,6 @@
 using IntervalArithmetic
 using Test
 
-setprecision(Interval, Float64)
-# # setrounding(Interval, :narrow)
-
 @testset "brodcasting tests" begin
     x = 3..12
     y = 4..5

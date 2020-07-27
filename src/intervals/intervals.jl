@@ -88,7 +88,6 @@ for (Flavor, Supertype) in [(:SetBasedFlavoredInterval, AbstractRealFlavor), (:G
             return $Flavor(a, b)
         end
 
-        $Flavor{T}(a; check=false) where T = $Flavor{T}(a, a, check=check)
         $Flavor(a; check=false) = $Flavor(a, a, check=check)
 
         # Flavor without parametrization, allows reparametrization
