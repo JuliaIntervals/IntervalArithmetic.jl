@@ -45,7 +45,7 @@ RR(::F) where {T, F <: AbstractFlavor{T}} = RR(F)
 RR(::Type{T}) where T = Interval{T}(-Inf, Inf)
 RR() = RR(Float64)
 
-function entireinterval(args...)
-    @warn "entireinterval is deprecated. Use RR or ℝ instead."
+function RR(args...)
+    @warn "RR is deprecated. Use RR or ℝ instead."
     return RR(args...)
 end

@@ -349,7 +349,7 @@ end
 
         a = Interval{Float32}(1e38)
         b = Interval{Float32}(1e2)
-        @test_broken a * b == Interval{Float32}(floatmax(Float32), Inf)
+        @test a * b == Interval{Float32}(floatmax(Float32), Inf)
     end
 
 

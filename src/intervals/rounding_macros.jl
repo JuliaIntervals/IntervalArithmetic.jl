@@ -50,6 +50,13 @@ macro round(F, ex1, ex2)
      :($(esc(F))($(round_expr(ex1, RoundDown)), $(round_expr(ex2, RoundUp))))
 end
 
+# TODO Remove this method to make sure correct type is always used in @round
+# Kept there for know to avoid having to patch all @round in the code
+macro round(ex1, ex2)
+    F = Interval{DefaultBound}
+    :($(esc(F))($(round_expr(ex1, RoundDown)), $(round_expr(ex2, RoundUp))))
+end
+
 macro round_down(ex1)
      round_expr(ex1, RoundDown)
 end

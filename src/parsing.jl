@@ -72,7 +72,7 @@ function parse(::Type{F}, s::AbstractString) where {T, F<:AbstractFlavor{T}}
 
             if m!= nothing
                 if m.captures[2] == ""    # strings of the form "10??"
-                    return entireinterval(T)
+                    return RR(T)
                 end
                 if m.captures[2] == "u"   # strings of the form "10??u"
                     lo = parse(Float64, m.captures[1])
@@ -243,7 +243,7 @@ function parse(::Type{F}, s::AbstractString) where {T, F<:AbstractFlavor{T}}
             return emptyinterval(T)
         end
         if m.captures[1] == "entire"
-            return entireinterval(T)
+            return RR(T)
         end
 
         lo = m.captures[1]

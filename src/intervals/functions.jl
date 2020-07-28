@@ -47,7 +47,7 @@ function ^(a::Interval{BigFloat}, n::Integer)
                 a.hi == 0 && return @round(-Inf, a.lo^n)
                 return @round(a.hi^n, a.lo^n)
             else
-                return entireinterval(a)
+                return RR(a)
             end
         end
 

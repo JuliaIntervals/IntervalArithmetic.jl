@@ -5,7 +5,7 @@ Review intervals folder:
     ☐ {F <: Type} -> {F<:Type} (remove spaces)
     ✔ Replace "IEEE standard" -> "IEEE Std 1788-2015" @done(19-08-22 16:13)
     ✔ "Corresponds to" -> "Implement" in doc @done(19-08-22 16:13)
-    ✔ Rename `entireinterval` -> `RR` @done(19-08-19 19:14)
+    ✔ Rename `RR` -> `RR` @done(19-08-19 19:14)
     ☐ Investigate compile time warnings
     ✔ Check if intervals of different flavor type can/should be equal in the sense of `isidentical` @done(19-12-08 01:12)
     ☐ Operation on different flavors of interval should always error.

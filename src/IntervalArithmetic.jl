@@ -59,7 +59,7 @@ export
     precedes, strictprecedes, ≺, ⊂, ⊃, ⊇, contains_zero,
     isidentical, isdistinct,
     RR, isentire, nai, isnai, isthin, iscommon, isatomic,
-    widen, inf, sup, bisect,
+    widen, inf, sup, bisect, mince,
     eps, dist,
     midpoint_radius, interval_from_midpoint_radius,
     RoundTiesToEven, RoundTiesToAway,

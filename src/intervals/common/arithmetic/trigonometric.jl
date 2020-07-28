@@ -137,6 +137,12 @@ function sin(a::F) where {F<:AbstractFlavor{Float64}}
     end
 end
 
+function sinpi(a::AbstractFlavor{T}) where T
+    isempty(a) && return a
+    w = a * Interval{T}(π)
+    return(sin(w))
+end
+
 """
     cos(a::AbstractFlavor)
 
@@ -221,6 +227,12 @@ function cos(a::F) where {F<:AbstractFlavor{Float64}}
     else #if ( lo_quadrant == 3 && hi_quadrant == 2 ) || ( lo_quadrant == 1 && hi_quadrant == 0 )
         return whole_range
     end
+end
+
+function cospi(a::AbstractFlavor{T}) where T
+    isempty(a) && return a
+    w = a * Interval{T}(π)
+    return(cos(w))
 end
 
 """

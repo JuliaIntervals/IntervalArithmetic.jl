@@ -136,12 +136,6 @@ function sin(a::Interval{Float64})
     end
 end
 
-function sinpi(a::Interval{T}) where T
-    isempty(a) && return a
-    w = a * Interval{T}(π)
-    return(sin(w))
-end
-
 function cos(a::Interval{T}) where T
     isempty(a) && return a
 
@@ -226,11 +220,6 @@ function cos(a::Interval{Float64})
     end
 end
 
-function cospi(a::Interval{T}) where T
-    isempty(a) && return a
-    w = a * Interval{T}(π)
-    return(cos(w))
-end
 
 function find_quadrants_tan(x::T) where {T}
     temp = atomic(Interval{T}, x) / half_pi(x)
@@ -241,7 +230,7 @@ end
 function tan(a::Interval{T}) where T
     isempty(a) && return a
 
-    diam(a) > Interval{T}(π).lo && return entireinterval(a)
+    diam(a) > Interval{T}(π).lo && return RR(a)
 
     lo_quadrant = minimum(find_quadrants_tan(a.lo))
     hi_quadrant = maximum(find_quadrants_tan(a.hi))
@@ -252,12 +241,12 @@ function tan(a::Interval{T}) where T
     if lo_quadrant_mod == 0 && hi_quadrant_mod == 1
         # check if really contains singularity:
         if hi_quadrant * half_pi(T) ⊆ a
-            return entireinterval(a)  # crosses singularity
+            return RR(a)  # crosses singularity
         end
 
     elseif lo_quadrant_mod == hi_quadrant_mod && hi_quadrant > lo_quadrant
         # must cross singularity
-        return entireinterval(a)
+        return RR(a)
 
     end
 
@@ -273,7 +262,7 @@ function tan(a::Interval{Float64})
 
     isempty(a) && return a
 
-    diam(a) > Interval{T}(π).lo && return entireinterval(a)
+    diam(a) > Interval{T}(π).lo && return RR(a)
 
     lo_quadrant, lo = quadrant(a.lo)
     hi_quadrant, hi = quadrant(a.hi)
@@ -282,11 +271,11 @@ function tan(a::Interval{Float64})
     hi_quadrant_mod = mod(hi_quadrant, 2)
 
     if lo_quadrant_mod == 0 && hi_quadrant_mod == 1
-        return entireinterval(a)  # crosses singularity
+        return RR(a)  # crosses singularity
 
     elseif lo_quadrant_mod == hi_quadrant_mod && hi_quadrant != lo_quadrant
         # must cross singularity
-        return entireinterval(a)
+        return RR(a)
 
     end
 
@@ -398,7 +387,7 @@ end
 function cot(a::Interval{BigFloat})
     isempty(a) && return a
 
-    diam(a) > Interval{BigFloat}(π).lo && return entireinterval(a)
+    diam(a) > Interval{BigFloat}(π).lo && return RR(a)
 
     lo_quadrant, lo = quadrant(Float64(a.lo))
     hi_quadrant, hi = quadrant(Float64(a.hi))
@@ -410,7 +399,7 @@ function cot(a::Interval{BigFloat})
     
     if(lo_quadrant_mod == 1 && hi_quadrant_mod == 0)
         if(lo_quadrant < hi_quadrant)
-            return entireinterval(a)
+            return RR(a)
         else
             return @round(-Inf, cot(a.lo))
         end

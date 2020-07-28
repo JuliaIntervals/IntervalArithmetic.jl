@@ -60,6 +60,8 @@ hull(a::F, b::G) where {F<:AbstractFlavor, G<:AbstractFlavor} =
     promote_type(F, G)(min(a.lo, b.lo), max(a.hi, b.hi))
 hull(a::Complex{F},b::Complex{F}) where {F <: AbstractFlavor} =
     complex(hull(real(a), real(b)), hull(imag(a), imag(b)))
+hull(a...) = reduce(hull, a)
+hull(a::Vector{F}) where {F<:AbstractFlavor} = reduce(hull, a)
 
 """
     union(a, b)
