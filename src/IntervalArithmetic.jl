@@ -98,6 +98,9 @@ export
 export
     Region
 
+## Overlap function
+export
+    overlap
 
 
 function __init__()
@@ -123,6 +126,7 @@ include("display.jl")
 include("plot_recipes/plot_recipes.jl")
 
 include("deprecated.jl")
+
 
 """
     Region{T} = Union{Interval{T}, IntervalBox{T}}
