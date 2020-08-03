@@ -365,3 +365,7 @@ for (f, domain) in restricted_functions2
         DecoratedInterval(r, trv)
     end
 end
+
+function overlap(xx::DecoratedInterval, yy::DecoratedInterval) where T
+    return overlap(interval_part(xx) , interval_part(yy))
+end
