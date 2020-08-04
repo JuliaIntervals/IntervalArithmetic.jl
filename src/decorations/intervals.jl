@@ -16,7 +16,7 @@ The nomenclature of the follows the IEEE-1788 (2015) standard
 - `ill -> 0`: nai ("not an interval")
 """
 @enum DECORATION ill=0 trv=1 def=2 dac=3 com=4
-# Note that `isless`, and hence ``<` and `min`, are automatically defined for enums
+# Note that `isweaklyless`, and hence ``<` and `min`, are automatically defined for enums
 
 abstract type AbstractRealDecoratedInterval{T, F} <: AbstractRealFlavor{T} end
 abstract type AbstractNonRealDecoratedInterval{T, F} <: AbstractNonRealFlavor{T} end

@@ -112,11 +112,11 @@ using Test
     end
 
     @testset "Comparison tests" begin
-        @test IntervalArithmetic.islessprime(a.lo, b.lo) == (a.lo < b.lo)
-        @test IntervalArithmetic.islessprime(Inf, Inf)
-        @test isless(∅, ∅)
-        @test !isless(Interval(1.0,2.0), ∅)
-        @test isless(Interval(-Inf,Inf), Interval(-Inf,Inf))
+        @test IntervalArithmetic.isweaklylessprime(a.lo, b.lo) == (a.lo < b.lo)
+        @test IntervalArithmetic.isweaklylessprime(Inf, Inf)
+        @test isweaklyless(∅, ∅)
+        @test !isweaklyless(Interval(1.0,2.0), ∅)
+        @test isweaklyless(Interval(-Inf,Inf), Interval(-Inf,Inf))
         @test precedes(∅,∅)
         @test precedes(Interval(3.0,4.0),∅)
         @test !(precedes(Interval(0.0,2.0),Interval(-Inf,Inf)))

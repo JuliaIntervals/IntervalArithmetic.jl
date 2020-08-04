@@ -21,7 +21,6 @@ export ×, dot
 import Base:
     +, -, *, /, //, fma,
     <, >, ==, !=, ⊆, ^, <=,
-    isless,
     in, zero, one, eps, typemin, typemax, abs, abs2, real, min, max,
     sqrt, exp, log, sin, cos, tan, cot, inv, cbrt, csc, hypot, sec, 
     exp2, exp10, log2, log10,
@@ -57,6 +56,7 @@ export
     diam, radius, mid, scaled_mid, mag, mig, hull,
     emptyinterval, ∅, ∞, isempty, isinterior, isdisjoint, ⪽,
     precedes, strictprecedes, ≺, ⊂, ⊃, ⊇, contains_zero,
+    isweaklyless, isstrictless,
     isidentical, isdistinct,
     RR, isentire, nai, isnai, isthin, iscommon, isatomic,
     widen, inf, sup, bisect, mince,

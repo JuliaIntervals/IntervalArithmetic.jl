@@ -110,7 +110,7 @@ Review intervals folder:
     ✔ Verify all requested functions are there @done(19-08-19 19:31)
     ✔ Common @done(19-08-19 19:36)
     ✔ equal is not the same as == @done(19-08-19 19:36)
-    ☐ Check `islessprime`
+    ☐ Check `isweaklylessprime`
     ☐ Flavor dependent issubset/isinterior ?
 
   9.6. Operatons on/with decoration:

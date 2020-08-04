@@ -9,7 +9,7 @@
 =#
 
 # Equivalent to `<` but with Inf < Inf being true.
-function islessprime(a::Real, b::Real)
+function isweaklylessprime(a::Real, b::Real)
     (isinf(a) || isinf(b)) && a == b && return true
     return a < b
 end
@@ -70,7 +70,7 @@ end
 ⊃(a::AbstractFlavor, b::AbstractFlavor) = b ⊂ a
 
 """
-    isless(a, b)
+    isweaklyless(a, b)
 
 Checks if the interval `a` is weakly less than interval `b`.
 
@@ -79,7 +79,7 @@ any element of `b`.
 
 Implement the `less` function of the IEEE Std 1788-2015 (Table 10.3).
 """
-function isless(a::F, b::F) where {F <: AbstractFlavor}
+function isweaklyless(a::F, b::F) where {F <: AbstractFlavor}
     isempty(a) && isempty(b) && return true
     (isempty(a) || isempty(b)) && return false
     (a.lo ≤ b.lo) && (a.hi ≤ b.hi)
@@ -107,7 +107,7 @@ Implement the `interior` function of the IEEE Std 1788-2015 (Table 9.3).
 """
 function isinterior(a::AbstractFlavor, b::AbstractFlavor)
     isempty(a) && return true
-    return islessprime(b.lo, a.lo) && islessprime(a.hi, b.hi)
+    return isweaklylessprime(b.lo, a.lo) && isweaklylessprime(a.hi, b.hi)
 end
 
 """
@@ -120,7 +120,7 @@ Implement the `strictLess` function of the IEEE Std 1788-2015 (Table 10.3).
 function isstrictless(a::F, b::F) where {F <: AbstractFlavor}
     isempty(a) && isempty(b) && return true
     (isempty(a) || isempty(b)) && return false
-    islessprime(a.lo, b.lo) && islessprime(a.hi, b.hi)  # TODO check this line in the standard
+    isweaklylessprime(a.lo, b.lo) && isweaklylessprime(a.hi, b.hi)  # TODO check this line in the standard
 end
 
 """
@@ -145,7 +145,7 @@ Implement the `disjoint` function of the IEEE Std 1788-2015 (Table 9.3).
 """
 function isdisjoint(a::AbstractFlavor, b::AbstractFlavor)
     (isempty(a) || isempty(b)) && return true
-    return islessprime(b.hi, a.lo) || islessprime(a.hi, b.lo)
+    return isweaklylessprime(b.hi, a.lo) || isweaklylessprime(a.hi, b.lo)
 end
 
 function isdisjoint(a::Complex{F}, b::Complex{F}) where {F <: AbstractFlavor}
