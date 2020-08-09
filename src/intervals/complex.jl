@@ -57,7 +57,7 @@ function sqrt(z::Complex{Interval{T}}) where T<:AbstractFloat
     x, y = reim(z)
 
     (inf(x) < 0 && inf(y) < 0 && sup(y) >= 0) && error("Interval lies across branch cut")
-    x == y == 0 && return Complex(zero(x),y)
+    iszero(x) && iszero(y) && return Complex(zero(x),y)
 
     (inf(x) < 0 && sup(x) > 0) && return sqrt((inf(x)..0) + im*y) ∪ sqrt((0..sup(x)) + im*y)
 

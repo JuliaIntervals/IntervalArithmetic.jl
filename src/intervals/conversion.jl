@@ -87,7 +87,7 @@ atomic(::Type{F}, x::AbstractString) where {T, F<:AbstractFlavor{T}} = parse(F, 
     end
 
 else
-    function atomic(::Type{F}, x::S) where {T, S, F <: AbstractFlavor{T}}
+    function atomic(::Type{F}, x::S) where {T, S, F<:AbstractFlavor{T}}
         isinf(x) && return wideinterval(F, T(x))
 
         F( T(x, RoundDown), T(x, RoundUp) )
@@ -103,7 +103,7 @@ function atomic(::Type{F}, x::S) where {T, S<:AbstractFloat, F<:AbstractFlavor{T
 
     # This prevents that xrat returns a 0//1 when x is very small
     # or 1//0 when x is too large but finite
-    if (x != zero(x) && xrat == 0) || isinf(xrat)
+    if (!iszero(x) && iszero(xrat)) || isinf(xrat)
         xstr = string(x)
         return F(parse(T, xstr, RoundDown), parse(T, xstr, RoundUp))
     end

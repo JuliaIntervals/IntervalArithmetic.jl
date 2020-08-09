@@ -13,7 +13,7 @@ Implement the `mulRevToPair` function of the IEEE Std 1788-2015 (section 10.5.5)
 """
 # TODO check this function and corresponding github issue (iirc)
 # TODO check for flavor dependent edge cases
-function extended_div(a::F, b::F) where {T, F <: AbstractFlavor{T}}
+function extended_div(a::F, b::F) where {T, F<:AbstractFlavor{T}}
     if 0 < b.hi && 0 > b.lo && 0 ∉ a
         if a.hi < 0
             return (F(T(-Inf), a.hi / b.hi), F(a.hi / b.lo, T(Inf)))

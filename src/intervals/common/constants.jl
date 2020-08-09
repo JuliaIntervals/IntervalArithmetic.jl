@@ -17,9 +17,9 @@ of `Interval` for more information about the default interval falvor.
 
 Implement the `empty` function of the IEEE Std 1788-2015 (section 10.5.2).
 """
-emptyinterval(::Type{F}) where {F <: AbstractFlavor} = F(Inf, -Inf)
-emptyinterval(::F) where {F <: AbstractFlavor} = emptyinterval(F)
-emptyinterval(::Type{Complex{F}}) where {F <: AbstractFlavor} = complex(emptyinterval(F), emptyinterval(F))
+emptyinterval(::Type{F}) where {F<:AbstractFlavor} = F(Inf, -Inf)
+emptyinterval(::F) where {F<:AbstractFlavor} = emptyinterval(F)
+emptyinterval(::Type{Complex{F}}) where {F<:AbstractFlavor} = complex(emptyinterval(F), emptyinterval(F))
 
 emptyinterval(::Type{T}) where T = emptyinterval(Interval{T})
 emptyinterval() = emptyinterval(Interval{Float64})
@@ -39,8 +39,8 @@ of `Interval` for more information about the default interval falvor.
 
 Implement the `entire` function of the IEEE Std 1788-2015 (section 10.5.2).
 """
-RR(::Type{F}) where {T, F <: AbstractFlavor{T}} = F(-Inf, Inf)
-RR(::F) where {T, F <: AbstractFlavor{T}} = RR(F)
+RR(::Type{F}) where {T, F<:AbstractFlavor{T}} = F(-Inf, Inf)
+RR(::F) where {T, F<:AbstractFlavor{T}} = RR(F)
 
 RR(::Type{T}) where T = Interval{T}(-Inf, Inf)
 RR() = RR(Float64)

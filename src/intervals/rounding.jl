@@ -317,7 +317,7 @@ end
 Set the rounding type used for all interval calculations on Julia v0.6 and above.
 Valid `rounding_type`s are $rounding_types.
 """
-function setrounding(::Type{F}, rounding_type::Symbol) where {F <: AbstractFlavor}
+function setrounding(::Type{F}, rounding_type::Symbol) where {F<:AbstractFlavor}
     # suppress redefinition warnings:
     # modified from OhMyREPL.jl
 

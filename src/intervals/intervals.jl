@@ -9,7 +9,7 @@ else
     const validity_check = false
 end
 
-abstract type AbstractRealFlavor{T} <: Real end
+abstract type AbstractRealFlavor{T}<:Real end
 abstract type AbstractNonRealFlavor{T} end
 
 """
@@ -31,7 +31,7 @@ size(x::AbstractFlavor) = (1,)
 
 for (Flavor, Supertype) in [(:SetBasedFlavoredInterval, AbstractRealFlavor), (:GenericFlavoredInterval, AbstractNonRealFlavor)]
     flavordef = quote
-        struct $Flavor{T} <: $Supertype{T}
+        struct $Flavor{T}<:$Supertype{T}
             lo :: T
             hi :: T
 
@@ -106,7 +106,7 @@ end
 
 Return the type corresponding to flavor `F` with bounds of type `ELTYPE`.
 """
-reparametrize(::Type{F}, ::Type{ELTYPE}) where {F <: AbstractFlavor, ELTYPE} = flavortype(F){ELTYPE}
+reparametrize(::Type{F}, ::Type{ELTYPE}) where {F<:AbstractFlavor, ELTYPE} = flavortype(F){ELTYPE}
 
 const supported_flavors = (SetBasedFlavoredInterval, GenericFlavoredInterval)
 
@@ -249,4 +249,4 @@ types used in `AutoHashEquals.jl`
 Note that in `IntervalArithmetic.jl`, equality of interval is given by
 `isidentical` rather than the `==` operator.
 """
-hash(x::F, h::UInt) where {F <: AbstractFlavor} = hash(x.hi, hash(x.lo, hash(flavortype(F), h)))
+hash(x::F, h::UInt) where {F<:AbstractFlavor} = hash(x.hi, hash(x.lo, hash(flavortype(F), h)))

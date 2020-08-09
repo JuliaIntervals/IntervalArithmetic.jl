@@ -25,26 +25,26 @@ Base.eltype(x::Interval{T}) where {T<:Real} = T
 
 function ^(a::Interval{BigFloat}, n::Integer)
     isempty(a) && return a
-    n == 0 && return one(a)
+    iszero(n) && return one(a)
     n == 1 && return a
     # n == 2 && return sqr(a)
-    n < 0 && a == zero(a) && return emptyinterval(a)
+    n < 0 && iszero(a) && return emptyinterval(a)
 
     T = BigFloat
 
     if isodd(n) # odd power
         isentire(a) && return a
         if n > 0
-            a.lo == 0 && return @round(0, a.hi^n)
-            a.hi == 0 && return @round(a.lo^n, 0)
+            iszero(a.lo) && return @round(0, a.hi^n)
+            iszero(a.hi) && return @round(a.lo^n, 0)
             return @round(a.lo^n, a.hi^n)
         else
             if a.lo ≥ 0
-                a.lo == 0 && return @round(a.hi^n, Inf)
+                iszero(a.lo) && return @round(a.hi^n, Inf)
                 return @round(a.hi^n, a.lo^n)
 
             elseif a.hi ≤ 0
-                a.hi == 0 && return @round(-Inf, a.lo^n)
+                iszero(a.hi) && return @round(-Inf, a.lo^n)
                 return @round(a.hi^n, a.lo^n)
             else
                 return RR(a)
@@ -93,14 +93,14 @@ function ^(a::Interval{BigFloat}, x::BigFloat)
 
     domain = Interval{BigFloat}(0, Inf)
 
-    if a == zero(a)
+    if iszero(a)
         a = a ∩ domain
         x > zero(x) && return zero(a)
         return emptyinterval(a)
     end
 
     isinteger(x) && return a^(round(Int, x))
-    x == 0.5 && return sqrt(a)
+    iszero(x).5 && return sqrt(a)
 
     a = a ∩ domain
     (isempty(x) || isempty(a)) && return emptyinterval(a)
@@ -153,9 +153,9 @@ function ^(a::Interval{T}, x::Rational) where T
     q = x.den
 
     isempty(a) && return emptyinterval(a)
-    x == 0 && return one(a)
+    iszero(x) && return one(a)
 
-    if a == zero(a)
+    if iszero(a)
         x > zero(x) && return zero(a)
         return emptyinterval(a)
     end

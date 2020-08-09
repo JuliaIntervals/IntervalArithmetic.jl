@@ -80,19 +80,19 @@ function sin(a::F) where {F<:AbstractFlavor}
         hi = @round(F, sin(a.hi), sin(a.hi))
         return hull(lo, hi)
 
-    elseif lo_quadrant == 3 && hi_quadrant == 0
+    elseif lo_quadrant == 3 && iszero(hi_quadrant)
         return @round(F, sin(a.lo), sin(a.hi))
 
     elseif lo_quadrant == 1 && hi_quadrant == 2
         return @round(F, sin(a.hi), sin(a.lo))
 
-    elseif ( lo_quadrant == 0 || lo_quadrant == 3 ) && ( hi_quadrant == 1 || hi_quadrant == 2 )
+    elseif ( iszero(lo_quadrant) || lo_quadrant == 3 ) && ( hi_quadrant == 1 || hi_quadrant == 2 )
         return @round(F, min(sin(a.lo), sin(a.hi)), 1)
 
-    elseif ( lo_quadrant == 1 || lo_quadrant == 2 ) && ( hi_quadrant == 3 || hi_quadrant == 0 )
+    elseif ( lo_quadrant == 1 || lo_quadrant == 2 ) && ( hi_quadrant == 3 || iszero(hi_quadrant) )
         return @round(F, -1, max(sin(a.lo), sin(a.hi)))
 
-    else  # if( lo_quadrant == 0 && hi_quadrant == 3 ) || ( lo_quadrant == 2 && hi_quadrant == 1 )
+    else  # if( iszero(lo_quadrant) && hi_quadrant == 3 ) || ( lo_quadrant == 2 && hi_quadrant == 1 )
         return whole_range
     end
 end
@@ -120,19 +120,19 @@ function sin(a::F) where {F<:AbstractFlavor{Float64}}
             return @round(F, sin(lo), sin(hi))
         end
 
-    elseif lo_quadrant == 3 && hi_quadrant == 0
+    elseif lo_quadrant == 3 && iszero(hi_quadrant)
         return @round(F, sin(lo), sin(hi))
 
     elseif lo_quadrant == 1 && hi_quadrant == 2
         return @round(F, sin(hi), sin(lo))
 
-    elseif ( lo_quadrant == 0 || lo_quadrant == 3 ) && ( hi_quadrant == 1 || hi_quadrant == 2 )
+    elseif ( iszero(lo_quadrant) || lo_quadrant == 3 ) && ( hi_quadrant == 1 || hi_quadrant == 2 )
         return @round(F, min(sin(lo), sin(hi)), 1)
 
-    elseif ( lo_quadrant == 1 || lo_quadrant == 2 ) && ( hi_quadrant == 3 || hi_quadrant == 0 )
+    elseif ( lo_quadrant == 1 || lo_quadrant == 2 ) && ( hi_quadrant == 3 || iszero(hi_quadrant) )
         return @round(F, -1, max(sin(lo), sin(hi)))
 
-    else #if( lo_quadrant == 0 && hi_quadrant == 3 ) || ( lo_quadrant == 2 && hi_quadrant == 1 )
+    else #if( iszero(lo_quadrant) && hi_quadrant == 3 ) || ( lo_quadrant == 2 && hi_quadrant == 1 )
         return whole_range
     end
 end
@@ -175,16 +175,16 @@ function cos(a::F) where {F<:AbstractFlavor}
     elseif lo_quadrant == 2 && hi_quadrant == 3
         return @round(F, cos(a.lo), cos(a.hi))
 
-    elseif lo_quadrant == 0 && hi_quadrant == 1
+    elseif iszero(lo_quadrant) && hi_quadrant == 1
         return @round(F, cos(a.hi), cos(a.lo))
 
-    elseif ( lo_quadrant == 2 || lo_quadrant == 3 ) && ( hi_quadrant == 0 || hi_quadrant == 1 )
+    elseif ( lo_quadrant == 2 || lo_quadrant == 3 ) && ( iszero(hi_quadrant) || hi_quadrant == 1 )
         return @round(F, min(cos(a.lo), cos(a.hi)), 1)
 
-    elseif ( lo_quadrant == 0 || lo_quadrant == 1 ) && ( hi_quadrant == 2 || hi_quadrant == 3 )
+    elseif ( iszero(lo_quadrant) || lo_quadrant == 1 ) && ( hi_quadrant == 2 || hi_quadrant == 3 )
         return @round(F, -1, max(cos(a.lo), cos(a.hi)))
 
-    else  # if ( lo_quadrant == 3 && hi_quadrant == 2 ) || ( lo_quadrant == 1 && hi_quadrant == 0 )
+    else  # if ( lo_quadrant == 3 && hi_quadrant == 2 ) || ( lo_quadrant == 1 && iszero(hi_quadrant) )
         return whole_range
     end
 end
@@ -215,16 +215,16 @@ function cos(a::F) where {F<:AbstractFlavor{Float64}}
     elseif lo_quadrant == 2 && hi_quadrant == 3
         return @round(F, cos(a.lo), cos(a.hi))
 
-    elseif lo_quadrant == 0 && hi_quadrant == 1
+    elseif iszero(lo_quadrant) && hi_quadrant == 1
         return @round(F, cos(a.hi), cos(a.lo))
 
-    elseif ( lo_quadrant == 2 || lo_quadrant == 3 ) && ( hi_quadrant == 0 || hi_quadrant == 1 )
+    elseif ( lo_quadrant == 2 || lo_quadrant == 3 ) && ( iszero(hi_quadrant) || hi_quadrant == 1 )
         return @round(F, min(cos(a.lo), cos(a.hi)), 1)
 
-    elseif ( lo_quadrant == 0 || lo_quadrant == 1 ) && ( hi_quadrant == 2 || hi_quadrant == 3 )
+    elseif ( iszero(lo_quadrant) || lo_quadrant == 1 ) && ( hi_quadrant == 2 || hi_quadrant == 3 )
         return @round(F, -1, max(cos(a.lo), cos(a.hi)))
 
-    else #if ( lo_quadrant == 3 && hi_quadrant == 2 ) || ( lo_quadrant == 1 && hi_quadrant == 0 )
+    else #if ( lo_quadrant == 3 && hi_quadrant == 2 ) || ( lo_quadrant == 1 && iszero(hi_quadrant) )
         return whole_range
     end
 end
@@ -251,7 +251,7 @@ function tan(a::F) where {F<:AbstractFlavor}
     lo_quadrant_mod = mod(lo_quadrant, 2)
     hi_quadrant_mod = mod(hi_quadrant, 2)
 
-    if lo_quadrant_mod == 0 && hi_quadrant_mod == 1
+    if iszero(lo_quadrant_mod) && hi_quadrant_mod == 1
         # check if really contains singularity:
         if hi_quadrant * half_pi(F) ⊆ a
             return RR(F)  # crosses singularity
@@ -265,7 +265,7 @@ function tan(a::F) where {F<:AbstractFlavor}
     return @round(F, tan(a.lo), tan(a.hi))
 end
 
-function tan(a::F) where {F <: AbstractFlavor{Float64}}
+function tan(a::F) where {F<:AbstractFlavor{Float64}}
     isempty(a) && return a
 
     diam(a) > F(π).lo && return RR(a)
@@ -276,7 +276,7 @@ function tan(a::F) where {F <: AbstractFlavor{Float64}}
     lo_quadrant_mod = mod(lo_quadrant, 2)
     hi_quadrant_mod = mod(hi_quadrant, 2)
 
-    if lo_quadrant_mod == 0 && hi_quadrant_mod == 1
+    if iszero(lo_quadrant_mod) && hi_quadrant_mod == 1
         return RR(a)  # crosses singularity
 
     elseif lo_quadrant_mod == hi_quadrant_mod && hi_quadrant != lo_quadrant
@@ -347,14 +347,14 @@ function atan(y::F, x::F) where {T, F<:AbstractFlavor{T}}
 
     # Check cases based on x
     if iszero(x)
-        y == zero(y) && return emptyinterval(F)
+        iszero(y) && return emptyinterval(F)
         y.lo ≥ zero(T) && return half_pi(F)
         y.hi ≤ zero(T) && return -half_pi(F)
         return half_range_atan(F)
 
     elseif x.lo > zero(T)
 
-        y == zero(y) && return y
+        iszero(y) && return y
         y.lo ≥ zero(T) &&
             return @round(F, atan(y.lo, x.hi), atan(y.hi, x.lo)) # refinement lo bound
         y.hi ≤ zero(T) &&
@@ -363,7 +363,7 @@ function atan(y::F, x::F) where {T, F<:AbstractFlavor{T}}
 
     elseif x.hi < zero(T)
 
-        y == zero(y) && return F(π)
+        iszero(y) && return F(π)
         y.lo ≥ zero(T) &&
             return @round(F, atan(y.hi, x.hi), atan(y.lo, x.lo))
         y.hi < zero(T) &&
@@ -371,15 +371,15 @@ function atan(y::F, x::F) where {T, F<:AbstractFlavor{T}}
         return range_atan(F)
 
     else # zero(T) ∈ x
-        if x.lo == zero(T)
-            y == zero(y) && return y
+        if iszero(x.lo)
+            iszero(y) && return y
 
             y.lo ≥ zero(T) && return @round(F, atan(y.lo, x.hi), half_range_atan(F).hi)
             y.hi ≤ zero(T) && return @round(F, half_range_atan(F).lo, atan(y.hi, x.hi))
             return half_range_atan(F)
 
-        elseif x.hi == zero(T)
-            y == zero(y) && return F(π)
+        elseif iszero(x.hi)
+            iszero(y) && return F(π)
             y.lo ≥ zero(T) && return @round(F, half_pi(F).lo, atan(y.lo, x.lo))
             y.hi < zero(T) && return @round(F, atan(y.hi, x.lo), -(half_pi(F).lo))
             return range_atan(F)

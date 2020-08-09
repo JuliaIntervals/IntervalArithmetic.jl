@@ -13,7 +13,7 @@
 
 Implement the `neg` function of the IEEE Std 1788-2015 (Table 9.1).
 """
--(a::F) where {F <: AbstractFlavor} = F(-a.hi, -a.lo)
+-(a::F) where {F<:AbstractFlavor} = F(-a.hi, -a.lo)
 
 
 """
@@ -23,13 +23,13 @@ Implement the `neg` function of the IEEE Std 1788-2015 (Table 9.1).
 
 Implement the `add` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function +(a::F, b::Real) where {F <: AbstractFlavor}
+function +(a::F, b::Real) where {F<:AbstractFlavor}
     isempty(a) && return emptyinterval(F)
     return @round(F, a.lo + b, a.hi + b)
 end
-+(b::Real, a::F) where {F <: AbstractFlavor} = a + b
++(b::Real, a::F) where {F<:AbstractFlavor} = a + b
 
-function +(a::F, b::F) where {F <: AbstractFlavor}
+function +(a::F, b::F) where {F<:AbstractFlavor}
     (isempty(a) || isempty(b)) && return emptyinterval(F)
     return @round(F, a.lo + b.lo, a.hi + b.hi)
 end
@@ -41,17 +41,17 @@ end
 
 Implement the `sub` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function -(a::F, b::Real) where {F <: AbstractFlavor}
+function -(a::F, b::Real) where {F<:AbstractFlavor}
     isempty(a) && return emptyinterval(F)
     return @round(F, a.lo - b, a.hi - b)
 end
 
-function -(b::Real, a::F) where {F <: AbstractFlavor}
+function -(b::Real, a::F) where {F<:AbstractFlavor}
     isempty(a) && return emptyinterval(F)
     return @round(F, b - a.hi, b - a.lo)
 end
 
-function -(a::F, b::F) where {F <: AbstractFlavor}
+function -(a::F, b::F) where {F<:AbstractFlavor}
     (isempty(a) || isempty(b)) && return emptyinterval(F)
     return @round(F, a.lo - b.hi, a.hi - b.lo)
 end
@@ -74,7 +74,7 @@ Implement the `mul` function of the IEEE Std 1788-2015 (Table 9.1).
 
 Note: the behavior of the multiplication if flavor dependent for some edge cases.
 """
-function *(x::T, a::F) where {T<:Real, F <: AbstractFlavor{T}}
+function *(x::T, a::F) where {T<:Real, F<:AbstractFlavor{T}}
     isempty(a) && return emptyinterval(F)
     (isthinzero(a) || iszero(x)) && return zero(F)
 
@@ -85,10 +85,10 @@ function *(x::T, a::F) where {T<:Real, F <: AbstractFlavor{T}}
     end
 end
 
-*(x::T, a::F) where {T <: Real, S, F <: AbstractFlavor{S}} = convert(S, x)*a
-*(a::F, x::T) where {T <: Real, S, F <: AbstractFlavor{S}} = x*a
+*(x::T, a::F) where {T<:Real, S, F<:AbstractFlavor{S}} = convert(S, x)*a
+*(a::F, x::T) where {T<:Real, S, F<:AbstractFlavor{S}} = x*a
 
-function *(a::F, b::F) where {F <: AbstractFlavor}
+function *(a::F, b::F) where {F<:AbstractFlavor}
     (isempty(a) || isempty(b)) && return emptyinterval(F)
 
     (isthinzero(a) || isthinzero(b)) && return zero(F)
@@ -100,13 +100,13 @@ end
 
 
 # Helper functions for multiplication
-function unbounded_mult(::Type{F}, x::T, y::T, r::RoundingMode) where {T, F <: AbstractFlavor{T}}
+function unbounded_mult(::Type{F}, x::T, y::T, r::RoundingMode) where {T, F<:AbstractFlavor{T}}
     iszero(x) && return sign(y)*zero_times_infinity(F)
     iszero(y) && return sign(x)*zero_times_infinity(F)
     return *(x, y, r)
 end
 
-function mult(op, a::F, b::F) where {T, F <: AbstractFlavor{T}}
+function mult(op, a::F, b::F) where {T, F<:AbstractFlavor{T}}
     if b.lo >= zero(T)
         a.lo >= zero(T) && return @round(F, op(a.lo, b.lo), op(a.hi, b.hi))
         a.hi <= zero(T) && return @round(F, op(a.lo, b.hi), op(a.hi, b.lo))
@@ -132,7 +132,7 @@ Implement the `div` function of the IEEE Std 1788-2015 (Table 9.1).
 
 Note: the behavior of the division is flavor dependent for some edge cases.
 """
-function /(a::F, x::Real) where {F <: AbstractFlavor}
+function /(a::F, x::Real) where {F<:AbstractFlavor}
     isempty(a) && return emptyinterval(T)
     iszero(x) && return inv_of_zero(F)  # Flavor dependent
     isthinzero(a) && return div_zero_by(F, x)  # Flavor dependent
@@ -146,7 +146,7 @@ end
 
 /(x::Real, a::AbstractFlavor) = x*inv(a)
 
-function /(a::F, b::F) where {T, F <: AbstractFlavor{T}}
+function /(a::F, b::F) where {T, F<:AbstractFlavor{T}}
     (isempty(a) || isempty(b)) && return emptyinterval(F)
     isthinzero(b) && return inv_of_zero(F)
 
@@ -187,7 +187,7 @@ Implement the `recip` function of the IEEE Std 1788-2015 (Table 9.1).
 
 Note: the behavior of this function is flavor dependent for some edge cases.
 """
-function inv(a::F) where {T, F <: AbstractFlavor{T}}
+function inv(a::F) where {T, F<:AbstractFlavor{T}}
     isempty(a) && return emptyinterval(F)
 
     if zero(T) ∈ a
@@ -219,7 +219,7 @@ Fused multiply-add.
 Implement the `fma` function of the IEEE Std 1788-2015 (Table 9.1).
 """
 # TODO check for flavor dependent edge cases
-function fma(a::F, b::F, c::F) where {T, F <: AbstractFlavor{T}}
+function fma(a::F, b::F, c::F) where {T, F<:AbstractFlavor{T}}
     (isempty(a) || isempty(b) || isempty(c)) && return emptyinterval(F)
 
     if isentire(a)
@@ -256,7 +256,7 @@ Square root of an interval.
 
 Implement the `sqrt` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function sqrt(a::F) where {F <: AbstractFlavor}
+function sqrt(a::F) where {F<:AbstractFlavor}
     domain = F(0, Inf)
     a = a ∩ domain
 

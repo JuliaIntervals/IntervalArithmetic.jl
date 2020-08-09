@@ -41,7 +41,7 @@ end
 
 Checks if the intervals `a` and `b` are not identical.
 """
-isdistinct(a::F, b::F) where {F <: AbstractFlavor} = !isidentical(a, b)
+isdistinct(a::F, b::F) where {F<:AbstractFlavor} = !isidentical(a, b)
 
 """
     issubset(a,b)
@@ -79,7 +79,7 @@ any element of `b`.
 
 Implement the `less` function of the IEEE Std 1788-2015 (Table 10.3).
 """
-function isweaklyless(a::F, b::F) where {F <: AbstractFlavor}
+function isweaklyless(a::F, b::F) where {F<:AbstractFlavor}
     isempty(a) && isempty(b) && return true
     (isempty(a) || isempty(b)) && return false
     (a.lo ≤ b.lo) && (a.hi ≤ b.hi)
@@ -92,7 +92,7 @@ Checks if the interval `a` is to the left of interval `b`.
 
 Implement the `precedes` function of the IEEE Std 1788-2015 (Table 10.3).
 """
-function precedes(a::F, b::F) where {F <: AbstractFlavor}
+function precedes(a::F, b::F) where {F<:AbstractFlavor}
     (isempty(a) || isempty(b)) && return true
     a.hi ≤ b.lo
 end
@@ -117,7 +117,7 @@ Checks if the interval `a` is strictly less than interval `b`.
 
 Implement the `strictLess` function of the IEEE Std 1788-2015 (Table 10.3).
 """
-function isstrictless(a::F, b::F) where {F <: AbstractFlavor}
+function isstrictless(a::F, b::F) where {F<:AbstractFlavor}
     isempty(a) && isempty(b) && return true
     (isempty(a) || isempty(b)) && return false
     isweaklylessprime(a.lo, b.lo) && isweaklylessprime(a.hi, b.hi)  # TODO check this line in the standard
@@ -130,7 +130,7 @@ Checks if the interval `a` is strictly to the left of interval `b`.
 
 Implement the `strictPrecedes` function of the IEEE Std 1788-2015 (Table 10.3).
 """
-function strictprecedes(a::F, b::F) where {F <: AbstractFlavor}
+function strictprecedes(a::F, b::F) where {F<:AbstractFlavor}
     (isempty(a) || isempty(b)) && return true
     a.hi < b.lo
 end
@@ -148,7 +148,7 @@ function isdisjoint(a::AbstractFlavor, b::AbstractFlavor)
     return isweaklylessprime(b.hi, a.lo) || isweaklylessprime(a.hi, b.lo)
 end
 
-function isdisjoint(a::Complex{F}, b::Complex{F}) where {F <: AbstractFlavor}
+function isdisjoint(a::Complex{F}, b::Complex{F}) where {F<:AbstractFlavor}
     return isdisjoint(real(a),real(b)) || isdisjoint(imag(a),imag(b))
 end
 
@@ -166,5 +166,5 @@ function in(x::Real, a::AbstractFlavor)
 end
 
 in(x::AbstractFlavor, y::AbstractFlavor) = throw(ArgumentError("$x ∈ $y is not defined"))
-in(x::Real, a::Complex{F}) where {F <: AbstractFlavor} = x ∈ real(a) && 0 ∈ imag(a)
-in(x::Complex{T}, a::Complex{F}) where {T <: Real, F <: AbstractFlavor} = real(x) ∈ real(a) && imag(x) ∈ imag(a)
+in(x::Real, a::Complex{F}) where {F<:AbstractFlavor} = x ∈ real(a) && 0 ∈ imag(a)
+in(x::Complex{T}, a::Complex{F}) where {T<:Real, F<:AbstractFlavor} = real(x) ∈ real(a) && imag(x) ∈ imag(a)

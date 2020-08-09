@@ -35,7 +35,7 @@ Find the midpoint of interval `a`.
 
 Implement the `mid` function of the IEEE Std 1788-2015 (Table 9.2).
 """
-function mid(a::F) where {T, F <: AbstractFlavor{T}}
+function mid(a::F) where {T, F<:AbstractFlavor{T}}
     isempty(a) && return convert(T, NaN)
     isentire(a) && return zero(T)
 
@@ -51,7 +51,7 @@ function mid(a::F) where {T, F <: AbstractFlavor{T}}
     return a.lo / 2 + a.hi / 2
 end
 
-mid(a::F) where {T, R <: Rational{T}, F <: AbstractFlavor{R}} = (1//2) * (a.lo + a.hi)
+mid(a::F) where {T, R<:Rational{T}, F<:AbstractFlavor{R}} = (1//2) * (a.lo + a.hi)
 
 """
     scaled_mid(a::AbstractFlavor, α)
@@ -64,7 +64,7 @@ Assume 0 ≤ α ≤ 1.
 Note that `scaled_mid(a, 0.5)` does not equal `mid(a)` for unbounded set-based
 intervals.
 """
-function scaled_mid(a::F, α) where {T, F <: AbstractFlavor{T}}
+function scaled_mid(a::F, α) where {T, F<:AbstractFlavor{T}}
     isempty(a) && return convert(T, NaN)
 
     lo = (a.lo == -∞ ? nextfloat(a.lo) : a.lo)
@@ -88,7 +88,7 @@ Return the diameter (length) of the interval `a`.
 
 Implement the `wid` function of the IEEE Std 1788-2015 (Table 9.2).
 """
-function diam(a::F) where {T, F <: AbstractFlavor{T}}
+function diam(a::F) where {T, F<:AbstractFlavor{T}}
     isempty(a) && return convert(T, NaN)
     @round_up(a.hi - a.lo)  # IEEE1788 section 12.12.8
 end
@@ -114,7 +114,7 @@ Return the midpoint of an interval `a` together with its radius.
 Function required by the  IEEE Std 1788-2015 in section 10.5.9 for the set-based
 flavor.
 """
-function midpoint_radius(a::F) where {T, F <: AbstractFlavor{T}}
+function midpoint_radius(a::F) where {T, F<:AbstractFlavor{T}}
     isempty(a) && return convert(T, NaN), convert(T, NaN)
     m = mid(a)
     return m, max(m - a.lo, a.hi - m)
@@ -128,7 +128,7 @@ Magnitude of an interval. Return `NaN` for empty intervals.
 
 Implement the `mag` function of the IEEE Std 1788-2015 (Table 9.2).
 """
-function mag(a::F) where {T, F <: AbstractFlavor{T}}
+function mag(a::F) where {T, F<:AbstractFlavor{T}}
     isempty(a) && return convert(T, NaN)
     max( abs(a.lo), abs(a.hi) )
 end
@@ -140,7 +140,7 @@ Mignitude of an interval. Return `NaN` for empty intervals.
 
 Implement the `mig` function of the IEEE Std 1788-2015 (Table 9.2).
 """
-function mig(a::F) where {T, F <: AbstractFlavor{T}}
+function mig(a::F) where {T, F<:AbstractFlavor{T}}
     isempty(a) && return convert(T, NaN)
     contains_zero(a) && return zero(T)
     min( abs(a.lo), abs(a.hi) )

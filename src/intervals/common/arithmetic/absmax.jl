@@ -21,7 +21,7 @@ abs2(a::AbstractFlavor) = sqr(a)
 
 Implement the `min` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function min(a::F, b::F) where {F <: AbstractFlavor}
+function min(a::F, b::F) where {F<:AbstractFlavor}
     (isempty(a) || isempty(b)) && return emptyinterval(F)
     return F( min(a.lo, b.lo), min(a.hi, b.hi))
 end
@@ -31,7 +31,7 @@ end
 
 Implement the `max` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function max(a::F, b::F) where {F <: AbstractFlavor}
+function max(a::F, b::F) where {F<:AbstractFlavor}
     (isempty(a) || isempty(b)) && return emptyinterval(F)
     return F( max(a.lo, b.lo), max(a.hi, b.hi))
 end

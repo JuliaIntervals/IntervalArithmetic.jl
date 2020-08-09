@@ -15,15 +15,15 @@ the points common in `a` and `b`.
 
 Implement the `intersection` function of the IEEE Std 1788-2015 (section 9.3).
 """
-function intersect(a::F, b::F) where {F <: AbstractFlavor}
+function intersect(a::F, b::F) where {F<:AbstractFlavor}
     isdisjoint(a, b) && return emptyinterval(F)
     return F(max(a.lo, b.lo), min(a.hi, b.hi))
 end
 
-intersect(a::F, b::G) where {F <: AbstractFlavor, G <: AbstractFlavor} =
+intersect(a::F, b::G) where {F<:AbstractFlavor, G<:AbstractFlavor} =
     intersect(promote(a, b)...)
 
-function intersect(a::Complex{F}, b::Complex{F}) where {F <: AbstractFlavor}
+function intersect(a::Complex{F}, b::Complex{F}) where {F<:AbstractFlavor}
     isdisjoint(a, b) && return emptyinterval(Complex{F})
     return complex(intersect(real(a), real(b)), intersect(imag(a), imag(b)))
 end
@@ -38,7 +38,7 @@ This function is applicable to any number of input intervals, as in
 If your use case needs to splat the input, as in `intersect(a...)`, consider
 `reduce(intersect, a)` instead, because you save the cost of splatting.
 """
-function intersect(a::F...) where {F <: AbstractFlavor}
+function intersect(a::F...) where {F<:AbstractFlavor}
     low = maximum(broadcast(ai -> ai.lo, a))
     high = minimum(broadcast(ai -> ai.hi, a))
 
@@ -58,7 +58,7 @@ Implement the `converxHull` function of the IEEE Std 1788-2015 (section 9.3).
 hull(a::F, b::F) where {F<:AbstractFlavor} = F(min(a.lo, b.lo), max(a.hi, b.hi))
 hull(a::F, b::G) where {F<:AbstractFlavor, G<:AbstractFlavor} =
     promote_type(F, G)(min(a.lo, b.lo), max(a.hi, b.hi))
-hull(a::Complex{F},b::Complex{F}) where {F <: AbstractFlavor} =
+hull(a::Complex{F},b::Complex{F}) where {F<:AbstractFlavor} =
     complex(hull(real(a), real(b)), hull(imag(a), imag(b)))
 hull(a...) = reduce(hull, a)
 hull(a::Vector{F}) where {F<:AbstractFlavor} = reduce(hull, a)
@@ -88,7 +88,7 @@ The array may:
 - contain a single interval, if `y` overlaps `x`
 - contain two intervals, if `y` is strictly contained within `x`.
 """
-function setdiff(x::F, y::F) where {F <: AbstractFlavor}
+function setdiff(x::F, y::F) where {F<:AbstractFlavor}
     intersection = x ∩ y
 
     isempty(intersection) && return [x]

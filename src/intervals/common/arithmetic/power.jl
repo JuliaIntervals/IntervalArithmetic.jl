@@ -7,7 +7,7 @@
 
 # Overwrite behaviour for literal integer powers
 # Default transforms `a^-p` to `inv(a)^p` which is incorrect for intervals.
-Base.literal_pow(::typeof(^), a::F, ::Val{p}) where {F <: AbstractFlavor, p} = a^p
+Base.literal_pow(::typeof(^), a::F, ::Val{p}) where {F<:AbstractFlavor, p} = a^p
 
 # CRlibm does not contain a correctly-rounded ^ function for Float64
 # Use the BigFloat version from MPFR instead, which is correctly-rounded.
@@ -17,17 +17,17 @@ Base.literal_pow(::typeof(^), a::F, ::Val{p}) where {F <: AbstractFlavor, p} = a
 
 Implement the `pow` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-^(a::F, b::F) where {F <: AbstractFlavor} = atomic(F, big53(a)^b)
-^(a::F, x::AbstractFloat) where {F <: AbstractFlavor{BigFloat}} = a^big(x)
+^(a::F, b::F) where {F<:AbstractFlavor} = atomic(F, big53(a)^b)
+^(a::F, x::AbstractFloat) where {F<:AbstractFlavor{BigFloat}} = a^big(x)
 
 for T in (:AbstractFloat, :Rational, :Integer)
     @eval ^(a::F, x::$T) where {F<:AbstractFlavor} = atomic(F, big53(a)^x)
 end
 
 # TODO check flavor dependant corner cases
-function ^(a::F, n::Integer) where {F <: AbstractFlavor{BigFloat}}
+function ^(a::F, n::Integer) where {F<:AbstractFlavor{BigFloat}}
     isempty(a) && return a
-    n == 0 && return one(F)
+    iszero(n) && return one(F)
     n == 1 && return a
     n < 0 && iszero(a) && return emptyinterval(F)
 
@@ -73,7 +73,7 @@ function ^(a::F, n::Integer) where {F <: AbstractFlavor{BigFloat}}
 end
 
 # Floating-point power of a BigFloat interval:
-function ^(a::F, x::BigFloat) where {F <: AbstractFlavor{BigFloat}}
+function ^(a::F, x::BigFloat) where {F<:AbstractFlavor{BigFloat}}
 
     domain = F(0, Inf)
 
@@ -133,7 +133,7 @@ end
 function ^(a::F, r::Rational{S}) where {S<:Integer, F<:AbstractFlavor{BigFloat}}
     domain = F(0, Inf)
 
-    if a == zero(a)
+    if iszero(a)
         a = a ∩ domain
         r > zero(r) && return zero(a)
         return emptyinterval(F)

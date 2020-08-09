@@ -41,7 +41,7 @@ end
 Widen the lowest and highest bounds of `x` to the previous and next representable
 floating-point numbers, respectively.
 """
-widen(x::F) where {T <: AbstractFloat, F <: AbstractFlavor{T}} =
+widen(x::F) where {T<:AbstractFloat, F<:AbstractFlavor{T}} =
     F(prevfloat(inf(x)), nextfloat(sup(x)))
 
 """
@@ -54,9 +54,9 @@ Note that if no interval flavor is given, the returned interval is of the
 default interval flavor. See the documentation of `Interval` for more
 information about the default interval falvor.
 """
-wideinterval(::Type{F}, x::T) where {F <: AbstractFlavor, T <: AbstractFloat} =
+wideinterval(::Type{F}, x::T) where {F<:AbstractFlavor, T<:AbstractFloat} =
     F(prevfloat(x), nextfloat(x))
-wideinterval(x::T) where {T <: AbstractFloat} = wideinterval(Interval, x)
+wideinterval(x::T) where {T<:AbstractFloat} = wideinterval(Interval, x)
 
 """
     isatomic(x::Interval)

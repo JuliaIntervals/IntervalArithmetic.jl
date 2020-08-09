@@ -9,7 +9,7 @@ Checks if the interval `a` is weakly less than interval `b`.
 
 Corresponds to the IEEE Standard `less` function (Table 10.3).
 """
-function isweaklyless(a::F, b::F) where {F <: AbstractFlavor}
+function isweaklyless(a::F, b::F) where {F<:AbstractFlavor}
     isempty(a) && isempty(b) && return true
     (isempty(a) || isempty(b)) && return false
     (a.lo ≤ b.lo) && (a.hi ≤ b.hi)
@@ -29,7 +29,7 @@ Checks if the interval `a` is strictly less than interval `b`.
 
 Implement the `strictLess` function of the IEEE Std 1788-2015 (Table 10.3).
 """
-function isstrictless(a::F, b::F) where {F <: AbstractFlavor}
+function isstrictless(a::F, b::F) where {F<:AbstractFlavor}
     isempty(a) && isempty(b) && return true
     (isempty(a) || isempty(b)) && return false
     isweaklylessprime(a.lo, b.lo) && isweaklylessprime(a.hi, b.hi)  # TODO check this line in the standard
@@ -42,7 +42,7 @@ Checks if the interval `a` is to the left of interval `b`.
 
 Corresponds to the IEEE Standard `precedes` function (Table 10.3).
 """
-function precedes(a::F, b::F) where {F <: AbstractFlavor}
+function precedes(a::F, b::F) where {F<:AbstractFlavor}
     (isempty(a) || isempty(b)) && return true
     a.hi ≤ b.lo
 end
@@ -55,7 +55,7 @@ Checks if the interval `a` is strictly to the left of interval `b`.
 
 Corresponds to the IEEE Standard `strictPrecedes` function (Table 10.3).
 """
-function strictprecedes(a::F, b::F) where {F <: AbstractFlavor}
+function strictprecedes(a::F, b::F) where {F<:AbstractFlavor}
     (isempty(a) || isempty(b)) && return true
     a.hi < b.lo
 end
@@ -65,14 +65,14 @@ end
 # TODO move these early in the loading process
 # TODO move these to the conversion file
 real(a::Interval) = a
-zero(a::F) where {T <: Real, F <: AbstractFlavor{T}} = F(zero(T))
-zero(::Type{F}) where {T <: Real, F <: AbstractFlavor{T}} = F(zero(T))
-one(a::F) where {T <: Real, F <: AbstractFlavor{T}} = F(one(T))
-one(::Type{F}) where {T <: Real, F <: AbstractFlavor{T}} = F(one(T))
-typemin(::Type{F}) where {T <: Real, F <: AbstractFlavor{T}} = wideinterval(F, typemin(F))
-typemax(::Type{F}) where {T <: Real, F <: AbstractFlavor{T}} = wideinterval(F, typemax(T))
-typemin(::Type{F}) where {T <: Integer, F <: AbstractFlavor{T}} = F(typemin(T))
-typemax(::Type{F}) where {T <: Integer, F <: AbstractFlavor{T}} = F(typemax(T))
+zero(a::F) where {T<:Real, F<:AbstractFlavor{T}} = F(zero(T))
+zero(::Type{F}) where {T<:Real, F<:AbstractFlavor{T}} = F(zero(T))
+one(a::F) where {T<:Real, F<:AbstractFlavor{T}} = F(one(T))
+one(::Type{F}) where {T<:Real, F<:AbstractFlavor{T}} = F(one(T))
+typemin(::Type{F}) where {T<:Real, F<:AbstractFlavor{T}} = wideinterval(F, typemin(F))
+typemax(::Type{F}) where {T<:Real, F<:AbstractFlavor{T}} = wideinterval(F, typemax(T))
+typemin(::Type{F}) where {T<:Integer, F<:AbstractFlavor{T}} = F(typemin(T))
+typemax(::Type{F}) where {T<:Integer, F<:AbstractFlavor{T}} = F(typemax(T))
 
 
 """
@@ -85,7 +85,7 @@ Corresponds to the IEEE standard `mulRevToPair` function (section 10.5.5).
 # TODO check this function and corresponding github issue (iirc)
 # TODO check for flavor dependent edge cases
 # TODO move to its own file
-function extended_div(a::F, b::F) where {T, F <: AbstractFlavor{T}}
+function extended_div(a::F, b::F) where {T, F<:AbstractFlavor{T}}
     if 0 < b.hi && 0 > b.lo && 0 ∉ a
         if a.hi < 0
             return (F(T(-Inf), a.hi / b.hi), F(a.hi / b.lo, T(Inf)))
