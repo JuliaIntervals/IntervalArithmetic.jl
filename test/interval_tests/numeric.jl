@@ -136,12 +136,12 @@ end
 
     x = @biginterval(27)
     y = x^(1//3)
-    @test_broken diam(y) == 0
+    @test diam(y) == 0
     y = x^(1/3)
     @test (0 <= diam(y) < 1e-76)
     x = @biginterval(9.595703125)
     y = x^(1//3)
-    @test_broken diam(y) == 0
+    @test diam(y) == 0
     x = @biginterval(0.1)
     y = x^(1//3)
     @test (0 <= diam(y) < 1e-76)
@@ -213,7 +213,7 @@ end
 @testset "Floor etc. tests" begin
     a = @interval(0.1)
     b = Interval(0.1, 0.1)
-    @test_broken dist(a,b) <= eps(a)
+    @test dist(a, b) <= eps(a).lo
 
     @test floor(@interval(0.1, 1.1)) == Interval(0, 1)
     @test round(@interval(0.1, 1.1), RoundDown) == Interval(0, 1)
@@ -312,7 +312,7 @@ end
         @test y^2.1 ⊆ pow(y, 2.1)
     end
 
-    @testset "Fast Interval powers" begin
+    @testset "Fast interval powers" begin
         x = 1..2
         @test x^Interval(-1.5, 2.5) == Interval(0.35355339059327373, 5.656854249492381)
 
@@ -344,7 +344,7 @@ end
         @test inv(big(2..3)) == Interval(big"3.333333333333333333333333333333333333333333333333333333333333333333333333333305e-01", big"5.0e-01")
     end
 
-    @testset "Float32 Intervals" begin
+    @testset "Float32 intervals" begin
 
         a = Interval{Float32}(1e38)
         b = Interval{Float32}(1e2)

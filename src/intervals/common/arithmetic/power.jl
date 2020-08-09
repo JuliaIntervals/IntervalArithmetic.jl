@@ -130,24 +130,60 @@ function ^(a::F, x::AbstractFloat) where {T<:Integer, F<:AbstractFlavor{Rational
 end
 
 # Rational power
-function ^(a::F, r::Rational{S}) where {S<:Integer, F<:AbstractFlavor{BigFloat}}
+function ^(a::F, x::Rational) where {F<:AbstractFlavor}
     domain = F(0, Inf)
 
+    p = x.num
+    q = x.den
+
+    isempty(a) && return emptyinterval(a)
+    iszero(x) && return one(a)
+
     if iszero(a)
-        a = a ∩ domain
-        r > zero(r) && return zero(a)
-        return emptyinterval(F)
+        x > zero(x) && return zero(a)
+        return emptyinterval(a)
     end
 
-    isinteger(r) && return atomic(F, a^round(S,r))
-    r == one(S)//2 && return sqrt(a)
+    x == (1//2) && return sqrt(a)
 
-    a = a ∩ domain
-    (isempty(r) || isempty(a)) && return emptyinterval(F)
+    if x >= 0
+        if a.lo ≥ 0
+            isinteger(x) && return a ^ Int64(x)
+            a = @biginterval(a)
+            ui = convert(Culong, q)
+            low = BigFloat()
+            high = BigFloat()
+            ccall((:mpfr_rootn_ui, :libmpfr) , Int32 , (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode) , low , a.lo , ui, MPFRRoundDown)
+            ccall((:mpfr_rootn_ui, :libmpfr) , Int32 , (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode) , high , a.hi , ui, MPFRRoundUp)
+            b = interval(low, high)
+            b = convert(F, b)
+            return b^p
+        end
 
-    y = atomic(F, r)
+        if a.lo < 0 && a.hi ≥ 0
+            isinteger(x) && return a ^ Int64(x)
+            a = a ∩ F(0, Inf)
+            a = @biginterval(a)
+            ui = convert(Culong, q)
+            low = BigFloat()
+            high = BigFloat()
+            ccall((:mpfr_rootn_ui, :libmpfr) , Int32 , (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode) , low , a.lo , ui, MPFRRoundDown)
+            ccall((:mpfr_rootn_ui, :libmpfr) , Int32 , (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode) , high , a.hi , ui, MPFRRoundUp)
+            b = interval(low, high)
+            b = convert(Interval{T}, b)
+            return b^p
+        end
 
-    return a^y
+        if a.hi < 0
+            isinteger(x) && return a ^ Int64(x)
+            return emptyinterval(a)
+        end
+
+    end
+
+    if x < 0
+        return inv(a^(-x))
+    end
 end
 
 # Interval power of an interval:
