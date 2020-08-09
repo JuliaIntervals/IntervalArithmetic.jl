@@ -36,6 +36,8 @@ Review intervals folder:
   
   rounding.jl:
     ✔ Review @done(19-08-19 01:50)
+    ☐ Decide how to define the setrounding function with multiple interval types
+    ☐ Check with latest discussion if everything is up to date
 
   conversion.jl:
     ✔ Review @done(19-08-23 03:25)

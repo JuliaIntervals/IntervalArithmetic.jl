@@ -10,6 +10,6 @@ include("linear_algebra.jl")
 include("loops.jl")
 include("parsing.jl")
 # include("rounding_macros.jl")
-# include("rounding.jl")  # TODO fix these tests
+include("rounding.jl")
 include("bisect.jl")
 # include("complex.jl")  # TODO fix these tests
