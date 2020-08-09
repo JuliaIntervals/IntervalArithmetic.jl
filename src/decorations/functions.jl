@@ -19,7 +19,7 @@ bool_functions = (
 bool_binary_functions = (
     :<, :>, :!=, :⊆, :<=,
     :isinterior, :isdisjoint, :precedes, :strictprecedes,
-    :isidentical
+    :≛
 )
 
 for f in bool_functions

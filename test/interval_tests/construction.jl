@@ -9,14 +9,14 @@ const eeuler = Base.MathConstants.e
 
     @testset "Constructing intervals" begin
         # Naive constructors, with no conversion involved
-        @test isidentical(Interval(1), Interval(1.0, 1.0))
+        @test Interval(1) ≛ Interval(1.0, 1.0)
         @test size(Interval(1)) == (1,)
-        @test isidentical(Interval(big(1)), Interval(1.0, 1.0))
-        @test isidentical(Interval(1//10), Interval{Rational{Int}}(1//10, 1//10))
-        @test isidentical(Interval(BigInt(1)//10), Interval{Rational{BigInt}}(1//10, 1//10))
-        @test isidentical(Interval( (1.0, 2.0) ), Interval(1.0, 2.0))
-        @test isidentical(Interval{Rational{Int}}(1), Interval(1//1))
-        @test isidentical(Interval{BigFloat}(1), Interval{BigFloat}(big(1.0), big(1.0)))
+        @test Interval(big(1)) ≛ Interval(1.0, 1.0)
+        @test Interval(1//10) ≛ Interval{Rational{Int}}(1//10, 1//10)
+        @test Interval(BigInt(1)//10) ≛ Interval{Rational{BigInt}}(1//10, 1//10)
+        @test Interval( (1.0, 2.0) ) ≛ Interval(1.0, 2.0)
+        @test Interval{Rational{Int}}(1) ≛ Interval(1//1)
+        @test Interval{BigFloat}(1) ≛ Interval{BigFloat}(big(1.0), big(1.0))
 
         # Irrational
         for irr in (π, eeuler)
@@ -45,16 +45,16 @@ const eeuler = Base.MathConstants.e
         @test big(π) in Interval{Float32}(π, 4)
 
         # a < Inf and b > -Inf
-        @test isidentical(@interval(1e300), Interval(9.999999999999999e299, 1.0e300))
-        @test isidentical(@interval(-1e307), Interval(-1.0000000000000001e307, -1.0e307))
-        @test isidentical(@interval(Inf), IntervalArithmetic.wideinterval(Inf))
-        @test isidentical(IntervalArithmetic.wideinterval(-big(Inf)), Interval(-Inf, nextfloat(big(-Inf))))
+        @test @interval(1e300) ≛ Interval(9.999999999999999e299, 1.0e300)
+        @test @interval(-1e307) ≛ Interval(-1.0000000000000001e307, -1.0e307)
+        @test @interval(Inf) ≛ IntervalArithmetic.wideinterval(Inf)
+        @test IntervalArithmetic.wideinterval(-big(Inf)) ≛ Interval(-Inf, nextfloat(big(-Inf)))
 
         # a < Inf and b > -Inf
-        @test isidentical(@interval(1e300), Interval(9.999999999999999e299, 1.0e300))
-        @test isidentical(@interval(-1e307), Interval(-1.0000000000000001e307, -1.0e307))
-        @test isidentical(@interval(Inf), IntervalArithmetic.wideinterval(Inf))
-        @test isidentical(IntervalArithmetic.wideinterval(-big(Inf)), Interval(-Inf, nextfloat(big(-Inf))))
+        @test @interval(1e300) ≛ Interval(9.999999999999999e299, 1.0e300)
+        @test @interval(-1e307) ≛ Interval(-1.0000000000000001e307, -1.0e307)
+        @test @interval(Inf) ≛ IntervalArithmetic.wideinterval(Inf)
+        @test IntervalArithmetic.wideinterval(-big(Inf)) ≛ Interval(-Inf, nextfloat(big(-Inf)))
 
         # Disallowed conversions with a > b
 
@@ -76,13 +76,13 @@ const eeuler = Base.MathConstants.e
         a = @interval(0.1)
         b = @interval(pi)
 
-        @test isidentical(a, @floatinterval("0.1"))
+        @test a ≛ @floatinterval("0.1")
         @test typeof(a) == Interval{Float64}
         @test nextfloat(a.lo) == a.hi
         @test b == @floatinterval(pi)
         @test nextfloat(b.lo) == b.hi
         x = typemax(Int64)
-        @test isidentical(@interval(x), @floatinterval(x))
+        @test @interval(x) ≛ @floatinterval(x)
         @test !isthin(@interval(x))
         x = rand()
         c = @interval(x)
@@ -91,7 +91,7 @@ const eeuler = Base.MathConstants.e
         a = @interval("[0.1, 0.2]")
         b = @interval(0.1, 0.2)
 
-        @test isidentical(a, b)
+        @test a ≛ b
 
         @test_throws ArgumentError @interval("[0.1, 0.2")
 
@@ -106,7 +106,7 @@ const eeuler = Base.MathConstants.e
 
             c = @interval("0.1", "0.2")
             @test c ⊆ a   # c is narrower than a
-            @test isidentical(Interval(1//2), Interval(0.5))
+            @test Interval(1//2) ≛ Interval(0.5)
             @test Interval(1//10).lo == rationalize(0.1)
         end
 
@@ -118,21 +118,21 @@ const eeuler = Base.MathConstants.e
         @test typeof(a)== Interval{Float64}
         @test typeof(big(a)) == Interval{BigFloat}
 
-        @test isidentical(@floatinterval(123412341234123412341241234), Interval(1.234123412341234e26, 1.2341234123412342e26))
-        @test isidentical(@interval(big"3"), @floatinterval(3))
+        @test @floatinterval(123412341234123412341241234) ≛ Interval(1.234123412341234e26, 1.2341234123412342e26)
+        @test @interval(big"3") ≛ @floatinterval(3)
 
 
-        @test_skip @floatinterval(big"1e10000") == Interval(1.7976931348623157e308, ∞)
+        @test @floatinterval(big"1e10000") ≛ Interval(1.7976931348623157e308, ∞)
 
         a = big(10)^10000
-        @test isidentical(@floatinterval(a), Interval(1.7976931348623157e308, ∞))
+        @test @floatinterval(a) ≛ Interval(1.7976931348623157e308, ∞)
     end
 
     #=
     @testset "Complex intervals" begin
         a = @floatinterval(3 + 4im)
         @test typeof(a) == Complex{Interval{Float64}}
-        @test isidentical(a, Interval(3) + im*Interval(4))
+        @test a ≛ Interval(3) + im*Interval(4)
 
         # TODO; Uncomment these tests
         # b = exp(a)
@@ -146,7 +146,7 @@ const eeuler = Base.MathConstants.e
         @test typeof(a) == Interval{DefaultBound}
 
         a = 0.1..0.3
-        @test isidentical(a, Interval(0.09999999999999999, 0.30000000000000004))
+        @test a ≛ Interval(0.09999999999999999, 0.30000000000000004)
         @test big"0.1" ∈ a
         @test big"0.3" ∈ a
 
@@ -156,13 +156,13 @@ const eeuler = Base.MathConstants.e
     end
 
     @testset "± tests" begin
-        @test isidentical(3 ± 1, Interval(2.0, 4.0))
-        @test isidentical(3 ± 0.5, 2.5..3.5)
-        @test isidentical(3 ± 0.1, 2.9..3.1)
-        @test isidentical(0.5 ± 1, -0.5..1.5)
+        @test 3 ± 1 ≛ Interval(2.0, 4.0)
+        @test 3 ± 0.5 ≛ 2.5..3.5
+        @test 3 ± 0.1 ≛ 2.9..3.1
+        @test 0.5 ± 1 ≛ -0.5..1.5
 
         # issue 172:
-        @test isidentical((1..1) ± 1, 0..2)
+        @test (1..1) ± 1 ≛ 0..2
 
     end
 
@@ -183,12 +183,12 @@ const eeuler = Base.MathConstants.e
     end
 
     @testset "Interval{T} constructor" begin
-        @test isidentical(Interval{Float64}(1), 1..1)
+        @test Interval{Float64}(1) ≛ 1..1
         # no rounding
-        @test isidentical(Interval{Float64}(1.1), Interval(1.1, 1.1))
+        @test Interval{Float64}(1.1) ≛ Interval(1.1, 1.1)
 
-        @test isidentical(Interval{BigFloat}(1), @biginterval(1, 1))
-        @test isidentical(Interval{BigFloat}(big"1.1"), Interval(big"1.1", big"1.1"))
+        @test Interval{BigFloat}(1) ≛ @biginterval(1, 1)
+        @test Interval{BigFloat}(big"1.1") ≛ Interval(big"1.1", big"1.1")
     end
 
     @testset "Disallow a single NaN in an interval" begin
@@ -198,58 +198,58 @@ const eeuler = Base.MathConstants.e
 
     # issue 206:
     @testset "Interval strings" begin
-        @test isidentical(I"[1, 2]", @interval("[1, 2]"))
+        @test I"[1, 2]" ≛ @interval("[1, 2]")
 
         a = I"[2/3, 1.1]"
         b = @interval("[2/3, 1.1]")
         c = Interval(0.6666666666666666, 1.1)
-        @test isidentical(a, b)
-        @test isidentical(b, c)
+        @test a ≛ b
+        @test b ≛ c
 
         a = I"[1]"
         b = @interval("[1]")
         c = Interval(1.0, 1.0)
-        @test isidentical(a, b)
-        @test isidentical(b, c)
+        @test a ≛ b
+        @test b ≛ c
 
         a = I"[-0x1.3p-1, 2/3]"
         b = @interval("[-0x1.3p-1, 2/3]")
         c = Interval(-0.59375, 0.6666666666666667)
-        @test isidentical(a, b)
-        @test isidentical(b, c)
+        @test a ≛ b
+        @test b ≛ c
     end
 
     @testset "setdiff tests" begin
         x = 1..3
         y = 2..4
-        @test all(isidentical.(setdiff(x, y), [1..2]))
-        @test all(isidentical.(setdiff(y, x), [3..4]))
+        @test all(setdiff(x, y) .≛ [1..2])
+        @test all(setdiff(y, x) .≛ [3..4])
 
         @test setdiff(x, x) == Interval{DefaultBound}[]
 
-        @test all(isidentical.(setdiff(x, emptyinterval(x)), [x]))
+        @test all(setdiff(x, emptyinterval(x)) .≛ [x])
 
         z = 0..5
         @test setdiff(x, z) == Interval{DefaultBound}[]
-        @test all(isidentical.(setdiff(z, x), [0..1, 3..5]))
+        @test all(setdiff(z, x) .≛ [0..1, 3..5])
     end
 
     @testset "Interval{T}(x::Interval)" begin
-        @test isidentical(Interval{Float64}(3..4), Interval(3.0, 4.0))
-        @test isidentical(Interval{BigFloat}(3..4), Interval{BigFloat}(3, 4))
+        @test Interval{Float64}(3..4) ≛ Interval(3.0, 4.0)
+        @test Interval{BigFloat}(3..4) ≛ Interval{BigFloat}(3, 4)
     end
 
     @testset "@interval with fields" begin
         a = 3..4
         x = @interval(a.lo, 2*a.hi)
-        @test isidentical(x, Interval(3, 8))
+        @test x ≛ Interval(3, 8)
     end
 
     @testset "@interval with user-defined function" begin
         f(x) = x.lo == Inf ? one(x) : x/(1+x)  # monotonic
 
         x = 3..4
-        @test isidentical(@interval(f(x.lo), f(x.hi)), Interval(0.75, 0.8))
+        @test @interval(f(x.lo), f(x.hi)) ≛ Interval(0.75, 0.8)
     end
 
     @testset "a..b with a > b" begin
@@ -259,26 +259,26 @@ const eeuler = Base.MathConstants.e
     @testset "Hashing of Intervals" begin
         x = Interval{Float64}(1, 2)
         y = Interval{BigFloat}(1, 2)
-        @test isidentical(x, y)
+        @test x ≛ y
         @test hash(x) == hash(y)
 
         x = @interval(0.1)
         y = IntervalArithmetic.big53(x)
-        @test isidentical(x, y)
+        @test x ≛ y
         @test hash(x) == hash(y)
 
         x = 1..2
         y = 1..3
-        @test !isidentical(x, y)
+        @test !(x ≛ y)
         @test hash(x) != hash(y)
     end
 
     import IntervalArithmetic: force_interval
     @testset "force_interval" begin
-        @test isidentical(force_interval(4, 3), Interval(3, 4))
-        @test isidentical(force_interval(4, Inf), Interval(4, Inf))
-        @test isidentical(force_interval(Inf, 4), Interval(4, Inf))
-        @test isidentical(force_interval(Inf, -Inf), Interval(-Inf, Inf))
+        @test force_interval(4, 3) ≛ Interval(3, 4)
+        @test force_interval(4, Inf) ≛ Interval(4, Inf)
+        @test force_interval(Inf, 4) ≛ Interval(4, Inf)
+        @test force_interval(Inf, -Inf) ≛ Interval(-Inf, Inf)
         @test_throws ArgumentError force_interval(NaN, 3)
     end
 

@@ -88,7 +88,6 @@ end
     @test 3.1 - x == Interval(1.1, 2.1)
     @test 0.1 * (1..1) == Interval(0.1, 0.1)
     @test (1..1) / 10.0 == Interval(0.09999999999999999, 0.1)
-
 end
 
 @testset "Power tests" begin
@@ -116,16 +115,17 @@ end
     @test Interval(0.0) ^ (-1//10) == emptyinterval()
     @test ∅ ^ 0 == ∅
     @test Interval(2.5)^3 == Interval(15.625, 15.625)
-    #@test Interval(5//2)^3.0 == Interval(125//8)
+    @test_broken Interval(5//2)^3.0 == Interval(125//8)
 
-    x = @interval(-3,2)
+    x = @interval(-3, 2)
     @test x^3 == @interval(-27, 8)
 
-    @test @interval(-3,4) ^ 0.5 == @interval(0, 2)
-    @test @interval(-3,4) ^ 0.5 == @interval(-3,4)^(1//2)
-    @test @interval(-3,2) ^ @interval(2) == Interval(0.0, 4.0)
-    @test @interval(-3,4) ^ @interval(0.5) == Interval(0, 2)
-    @test @biginterval(-3,4) ^ 0.5 == @biginterval(0, 2)
+    x = @interval(-3, 4)
+    @test @interval(-3, 4) ^ 0.5 == @interval(0, 2)
+    @test @interval(-3, 4) ^ 0.5 == @interval(-3, 4)^(1//2)
+    @test @interval(-3, 2) ^ @interval(2) == Interval(0.0, 4.0)
+    @test @interval(-3, 4) ^ @interval(0.5) == Interval(0, 2)
+    @test @biginterval(-3, 4) ^ 0.5 == @biginterval(0, 2)
 
     @test dist(@interval(1,27)^@interval(1/3), Interval(1., 3.)) < 2*eps(Interval(1,3)).lo
     @test dist(@interval(1,27)^(1/3), Interval(1., 3.)) < 2*eps(Interval(1,3)).lo
@@ -145,7 +145,6 @@ end
     x = @biginterval(0.1)
     y = x^(1//3)
     @test (0 <= diam(y) < 1e-76)
-
 end
 
 @testset "Exp and log tests" begin

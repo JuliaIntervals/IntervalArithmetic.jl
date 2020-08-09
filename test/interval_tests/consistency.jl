@@ -10,18 +10,16 @@ using Test
     c = @interval(0.25, 4.0)
 
     @testset "Interval types and constructors" begin
-
         @test isa( @interval(1,2), Interval )
         @test isa( @interval(0.1), Interval )
         @test isa( zero(b), Interval )
 
-        @test isidentical(zero(b), 0.0)
-        @test isidentical(zero(b), zero(typeof(b)))
-        @test isidentical(one(a), 1.0)
-        @test isidentical(one(a), one(typeof(a)))
-        @test isidentical(one(a), big(1.0))
-        @test !isidentical(a, b)
-        @test isdistinct(a, b)
+        @test zero(b) ≛ 0.0
+        @test zero(b) ≛ zero(typeof(b))
+        @test one(a) ≛ 1.0
+        @test one(a) ≛ one(typeof(a))
+        @test one(a) ≛ big(1.0)
+        @test !(a ≛ b)
         @test eps(typeof(a)) === eps(one(typeof(a)))
         @test typemin(typeof(a)) === Interval(-Inf, nextfloat(-Inf))
         @test typemax(typeof(a)) === Interval(prevfloat(Inf), Inf)
@@ -30,49 +28,48 @@ using Test
         @test typemin(Interval{Int64}) === Interval(typemin(Int64))
         @test typemax(Interval{Int64}) === Interval(typemax(Int64))
 
-        @test isidentical(a, Interval(a.lo, a.hi))
-        @test isidentical(@interval(1, Inf), Interval(1.0, Inf))
-        @test isidentical(@interval(-Inf, 1), Interval(-Inf, 1.0))
-        @test isidentical(@biginterval(1, Inf), Interval{BigFloat}(1.0, Inf))
-        @test isidentical(@biginterval(-Inf, 1), Interval{BigFloat}(-Inf, 1.0))
-        @test isidentical(@interval(-Inf, Inf), RR(Float64))
-        @test isidentical(emptyinterval(Rational{Int}), ∅)
+        @test a ≛ Interval(a.lo, a.hi)
+        @test @interval(1, Inf) ≛ Interval(1.0, Inf)
+        @test @interval(-Inf, 1) ≛ Interval(-Inf, 1.0)
+        @test @biginterval(1, Inf) ≛ Interval{BigFloat}(1.0, Inf)
+        @test @biginterval(-Inf, 1) ≛ Interval{BigFloat}(-Inf, 1.0)
+        @test @interval(-Inf, Inf) ≛ RR(Float64)
+        @test emptyinterval(Rational{Int}) ≛ ∅
 
         @test (zero(a) + one(b)).lo == 1
         @test (zero(a) + one(b)).hi == 1
-        @test isidentical(Interval(0,1) + emptyinterval(a), emptyinterval(a))
-        @test isidentical(@interval(0.25) - one(c)/4, zero(c))
-        @test isidentical(emptyinterval(a) - Interval(0,1), emptyinterval(a))
-        @test isidentical(Interval(0,1) - emptyinterval(a), emptyinterval(a))
-        @test isidentical(a*b, Interval(a.lo*b.lo, a.hi*b.hi))
-        @test isidentical(Interval(0,1) * emptyinterval(a), emptyinterval(a))
-        @test isidentical(a * Interval(0), zero(a))
+        @test Interval(0,1) + emptyinterval(a) ≛ emptyinterval(a)
+        @test @interval(0.25) - one(c)/4 ≛ zero(c)
+        @test emptyinterval(a) - Interval(0,1) ≛ emptyinterval(a)
+        @test Interval(0,1) - emptyinterval(a) ≛ emptyinterval(a)
+        @test a*b ≛ Interval(a.lo*b.lo, a.hi*b.hi)
+        @test Interval(0,1) * emptyinterval(a) ≛ emptyinterval(a)
+        @test a * Interval(0) ≛ zero(a)
     end
 
     @testset "inv" begin
-
-        @test isidentical(inv( zero(a) ), emptyinterval())  # Only for set based flavor
-        @test isidentical(inv( @interval(0, 1) ), Interval(1, Inf))
-        @test isidentical(inv( @interval(1, Inf) ), Interval(0, 1))
-        @test isidentical(inv(c), c)
-        @test isidentical(one(b)/b, inv(b))
-        @test isidentical(a/emptyinterval(a), emptyinterval(a))
-        @test isidentical(emptyinterval(a)/a, emptyinterval(a))
-        @test isidentical(inv(@interval(-4.0,0.0)), @interval(-Inf, -0.25))
-        @test isidentical(inv(@interval(0.0,4.0)), @interval(0.25, Inf))
-        @test isidentical(inv(@interval(-4.0,4.0)), RR(Float64))
-        @test isidentical(@interval(0)/@interval(0), emptyinterval())
+        @test inv( zero(a) ) ≛ emptyinterval()  # Only for set based flavor
+        @test inv( @interval(0, 1) ) ≛ Interval(1, Inf)
+        @test inv( @interval(1, Inf) ) ≛ Interval(0, 1)
+        @test inv(c) ≛ c
+        @test one(b)/b ≛ inv(b)
+        @test a/emptyinterval(a) ≛ emptyinterval(a)
+        @test emptyinterval(a)/a ≛ emptyinterval(a)
+        @test inv(@interval(-4.0,0.0)) ≛ @interval(-Inf, -0.25)
+        @test inv(@interval(0.0,4.0)) ≛ @interval(0.25, Inf)
+        @test inv(@interval(-4.0,4.0)) ≛ RR(Float64)
+        @test @interval(0)/@interval(0) ≛ emptyinterval()
         @test typeof(emptyinterval()) == Interval{Float64}
     end
 
     @testset "fma consistency" begin
-        @test isidentical(fma(emptyinterval(), a, b), emptyinterval())
-        @test isidentical(fma(RR(), zero(a), b), b)
-        @test isidentical(fma(RR(), one(a), b), RR())
-        @test isidentical(fma(zero(a), RR(), b), b)
-        @test isidentical(fma(one(a), RR(), b), RR())
-        @test isidentical(fma(a, zero(a), c), c)
-        @test isidentical(fma(Interval(1//2), Interval(1//3), Interval(1//12)), Interval(3//12))
+        @test fma(emptyinterval(), a, b) ≛ emptyinterval()
+        @test fma(RR(), zero(a), b) ≛ b
+        @test fma(RR(), one(a), b) ≛ RR()
+        @test fma(zero(a), RR(), b) ≛ b
+        @test fma(one(a), RR(), b) ≛ RR()
+        @test fma(a, zero(a), c) ≛ c
+        @test fma(Interval(1//2), Interval(1//3), Interval(1//12)) ≛ Interval(3//12)
     end
 
     @testset "∈ tests" begin
@@ -134,40 +131,40 @@ using Test
     end
 
     @testset "Intersection tests" begin
-        @test isidentical(emptyinterval(), Interval(Inf, -Inf))
-        @test isidentical((a ∩ @interval(-1)), emptyinterval(a))
+        @test emptyinterval() ≛ Interval(Inf, -Inf)
+        @test (a ∩ @interval(-1)) ≛ emptyinterval(a)
         @test isempty(a ∩ @interval(-1) )
         @test !(isempty(a))
-        @test !isidentical(emptyinterval(a), a)
-        @test isidentical(emptyinterval(), emptyinterval())
+        @test !(emptyinterval(a) ≛ a)
+        @test emptyinterval() ≛ emptyinterval()
 
-        @test isidentical(intersect(a, hull(a,b)), a)
-        @test isidentical(union(a,b), Interval(a.lo, b.hi))
+        @test intersect(a, hull(a,b)) ≛ a
+        @test union(a,b) ≛ Interval(a.lo, b.hi)
 
         # n-ary intersection
         @test intersect(Interval(1.0, 2.0),
                         Interval(-1.0, 5.0),
                         Interval(1.8, 3.0)) == Interval(1.8, 2.0)
-        @test isidentical(intersect(a, emptyinterval(), b), emptyinterval())
-        @test isidentical(intersect(0..1, 3..4, 0..1, 0..1), emptyinterval())
+        @test intersect(a, emptyinterval(), b) ≛ emptyinterval()
+        @test intersect(0..1, 3..4, 0..1, 0..1) ≛ emptyinterval()
     end
 
     @testset "Hull and union tests" begin
-        @test isidentical(hull(1..2, 3..4), Interval(1, 4))
-        @test isidentical(hull(Interval(1//3, 3//4), Interval(3, 4)), @interval(1/3, 4))
+        @test hull(1..2, 3..4) ≛ Interval(1, 4)
+        @test hull(Interval(1//3, 3//4), Interval(3, 4)) ≛ @interval(1/3, 4)
 
-        @test isidentical(union(1..2, 3..4), Interval(1, 4))
-        @test isidentical(union(Interval(1//3, 3//4), Interval(3, 4)), @interval(1/3, 4))
+        @test union(1..2, 3..4) ≛ Interval(1, 4)
+        @test union(Interval(1//3, 3//4), Interval(3, 4)) ≛ @interval(1/3, 4)
     end
 
     @testset "Special interval tests" begin
-        @test isidentical(RR(Float64), Interval(-Inf, Inf))
+        @test RR(Float64) ≛ Interval(-Inf, Inf)
         @test isentire(RR(a))
         @test isentire(Interval(-Inf, Inf))
         @test !(isentire(a))
         @test Interval(-Inf, Inf) ⪽ Interval(-Inf, Inf)
 
-        @test !(isidentical(nai(a), nai(a)))
+        @test !(nai(a) ≛ nai(a))
         @test nai(a) === nai(a)
         @test nai(Float64) === DecoratedInterval(NaN)
         @test isnan(interval(nai(BigFloat)).lo)
@@ -184,7 +181,6 @@ using Test
     end
 
     @testset "mid" begin
-
         @test mid(Interval(1//2)) == 1//2
         @test mid(1..2) == 1.5
         @test mid(0.1..0.3) == 0.2
@@ -209,7 +205,6 @@ using Test
     end
 
     @testset "diam" begin
-
         @test diam( Interval(1//2) ) == 0//1
         @test diam( @interval(1//10) ) == eps(0.1)
         @test diam( @interval(0.1) ) == eps(0.1)
@@ -218,7 +213,6 @@ using Test
     end
 
     @testset "mig and mag" begin
-
         @test mig(@interval(-2,2)) == BigFloat(0.0)
         @test mig( Interval(1//2) ) == 1//2
         @test isnan(mig(emptyinterval()))
@@ -228,35 +222,34 @@ using Test
     end
 
     @testset "cancelplus tests" begin
-
         x = Interval(-2.0, 4.440892098500622e-16)
         y = Interval(-4.440892098500624e-16, 2.0)
-        @test isidentical(cancelminus(x, y), RR(Float64))
-        @test isidentical(cancelplus(x, y), RR(Float64))
+        @test cancelminus(x, y) ≛ RR(Float64)
+        @test cancelplus(x, y) ≛ RR(Float64)
         x = Interval(-big(1.0), eps(big(1.0))/4)
         y = Interval(-eps(big(1.0))/2, big(1.0))
-        @test isidentical(cancelminus(x, y), RR(BigFloat))
-        @test isidentical(cancelplus(x, y), RR(BigFloat))
+        @test cancelminus(x, y) ≛ RR(BigFloat)
+        @test cancelplus(x, y) ≛ RR(BigFloat)
         x = Interval(-big(1.0), eps(big(1.0))/2)
         y = Interval(-eps(big(1.0))/2, big(1.0))
         @test cancelminus(x, y) ⊆ Interval(-one(BigFloat), one(BigFloat))
-        @test isidentical(cancelplus(x, y), Interval(zero(BigFloat), zero(BigFloat)))
-        @test isidentical(cancelminus(emptyinterval(), emptyinterval()), emptyinterval())
-        @test isidentical(cancelplus(emptyinterval(), emptyinterval()), emptyinterval())
-        @test isidentical(cancelminus(emptyinterval(), Interval(0.0, 5.0)), emptyinterval())
-        @test isidentical(cancelplus(emptyinterval(), Interval(0.0, 5.0)), emptyinterval())
-        @test isidentical(cancelminus(RR(), Interval(0.0, 5.0)), RR())
-        @test isidentical(cancelplus(RR(), Interval(0.0, 5.0)), RR())
-        @test isidentical(cancelminus(Interval(5.0), Interval(-Inf, 0.0)), RR())
-        @test isidentical(cancelplus(Interval(5.0), Interval(-Inf, 0.0)), RR())
-        @test isidentical(cancelminus(Interval(0.0, 5.0), emptyinterval()), RR())
-        @test isidentical(cancelplus(Interval(0.0, 5.0), emptyinterval()), RR())
-        @test isidentical(cancelminus(Interval(0.0), Interval(0.0, 1.0)), RR())
-        @test isidentical(cancelplus(Interval(0.0), Interval(0.0, 1.0)), RR())
-        @test isidentical(cancelminus(Interval(0.0), Interval(1.0)), Interval(-1.0))
-        @test isidentical(cancelplus(Interval(0.0), Interval(1.0)), Interval(1.0))
-        @test isidentical(cancelminus(Interval(-5.0, 0.0), Interval(0.0, 5.0)), Interval(-5.0))
-        @test isidentical(cancelplus(Interval(-5.0, 0.0), Interval(0.0, 5.0)), Interval(0.0))
+        @test cancelplus(x, y) ≛ Interval(zero(BigFloat), zero(BigFloat))
+        @test cancelminus(emptyinterval(), emptyinterval()) ≛ emptyinterval()
+        @test cancelplus(emptyinterval(), emptyinterval()) ≛ emptyinterval()
+        @test cancelminus(emptyinterval(), Interval(0.0, 5.0)) ≛ emptyinterval()
+        @test cancelplus(emptyinterval(), Interval(0.0, 5.0)) ≛ emptyinterval()
+        @test cancelminus(RR(), Interval(0.0, 5.0)) ≛ RR()
+        @test cancelplus(RR(), Interval(0.0, 5.0)) ≛ RR()
+        @test cancelminus(Interval(5.0), Interval(-Inf, 0.0)) ≛ RR()
+        @test cancelplus(Interval(5.0), Interval(-Inf, 0.0)) ≛ RR()
+        @test cancelminus(Interval(0.0, 5.0), emptyinterval()) ≛ RR()
+        @test cancelplus(Interval(0.0, 5.0), emptyinterval()) ≛ RR()
+        @test cancelminus(Interval(0.0), Interval(0.0, 1.0)) ≛ RR()
+        @test cancelplus(Interval(0.0), Interval(0.0, 1.0)) ≛ RR()
+        @test cancelminus(Interval(0.0), Interval(1.0)) ≛ Interval(-1.0)
+        @test cancelplus(Interval(0.0), Interval(1.0)) ≛ Interval(1.0)
+        @test cancelminus(Interval(-5.0, 0.0), Interval(0.0, 5.0)) ≛ Interval(-5.0)
+        @test cancelplus(Interval(-5.0, 0.0), Interval(0.0, 5.0)) ≛ Interval(0.0)
     end
 
     @testset "mid and radius" begin
@@ -270,32 +263,31 @@ using Test
     end
 
     @testset "abs, min, max, sign" begin
-
-        @test isidentical(abs(RR()), Interval(0.0, Inf))
-        @test isidentical(abs(emptyinterval()), emptyinterval())
-        @test isidentical(abs(Interval(-3.0,1.0)), Interval(0.0, 3.0))
-        @test isidentical(abs(Interval(-3.0,-1.0)), Interval(1.0, 3.0))
-        @test isidentical(abs2(Interval(-3.0,1.0)), Interval(0.0, 9.0))
-        @test isidentical(abs2(Interval(-3.0,-1.0)), Interval(1.0, 9.0))
-        @test isidentical(min(RR(), Interval(3.0,4.0)), Interval(-Inf, 4.0))
-        @test isidentical(min(emptyinterval(), Interval(3.0,4.0)), emptyinterval())
-        @test isidentical(min(Interval(-3.0,1.0), Interval(3.0,4.0)), Interval(-3.0, 1.0))
-        @test isidentical(min(Interval(-3.0,-1.0), Interval(3.0,4.0)), Interval(-3.0, -1.0))
-        @test isidentical(max(RR(), Interval(3.0,4.0)), Interval(3.0, Inf))
-        @test isidentical(max(emptyinterval(), Interval(3.0,4.0)), emptyinterval())
-        @test isidentical(max(Interval(-3.0,1.0), Interval(3.0,4.0)), Interval(3.0, 4.0))
-        @test isidentical(max(Interval(-3.0,-1.0), Interval(3.0,4.0)), Interval(3.0, 4.0))
-        @test isidentical(sign(RR()), Interval(-1.0, 1.0))
-        @test isidentical(sign(emptyinterval()), emptyinterval())
-        @test isidentical(sign(Interval(-3.0,1.0)), Interval(-1.0, 1.0))
-        @test isidentical(sign(Interval(-3.0,-1.0)), Interval(-1.0, -1.0))
+        @test abs(RR()) ≛ Interval(0.0, Inf)
+        @test abs(emptyinterval()) ≛ emptyinterval()
+        @test abs(Interval(-3.0,1.0)) ≛ Interval(0.0, 3.0)
+        @test abs(Interval(-3.0,-1.0)) ≛ Interval(1.0, 3.0)
+        @test abs2(Interval(-3.0,1.0)) ≛ Interval(0.0, 9.0)
+        @test abs2(Interval(-3.0,-1.0)) ≛ Interval(1.0, 9.0)
+        @test min(RR(), Interval(3.0,4.0)) ≛ Interval(-Inf, 4.0)
+        @test min(emptyinterval(), Interval(3.0,4.0)) ≛ emptyinterval()
+        @test min(Interval(-3.0,1.0), Interval(3.0,4.0)) ≛ Interval(-3.0, 1.0)
+        @test min(Interval(-3.0,-1.0), Interval(3.0,4.0)) ≛ Interval(-3.0, -1.0)
+        @test max(RR(), Interval(3.0,4.0)) ≛ Interval(3.0, Inf)
+        @test max(emptyinterval(), Interval(3.0,4.0)) ≛ emptyinterval()
+        @test max(Interval(-3.0,1.0), Interval(3.0,4.0)) ≛ Interval(3.0, 4.0)
+        @test max(Interval(-3.0,-1.0), Interval(3.0,4.0)) ≛ Interval(3.0, 4.0)
+        @test sign(RR()) ≛ Interval(-1.0, 1.0)
+        @test sign(emptyinterval()) ≛ emptyinterval()
+        @test sign(Interval(-3.0,1.0)) ≛ Interval(-1.0, 1.0)
+        @test sign(Interval(-3.0,-1.0)) ≛ Interval(-1.0, -1.0)
 
         # Test putting functions in @interval:
-        @test isidentical(log(@interval(-2,5)), @interval(-Inf,log(5.0)))
-        @test isidentical(@interval(sin(0.1) + cos(0.2)), sin(@interval(0.1)) + cos(@interval(0.2)))
+        @test log(@interval(-2,5)) ≛ @interval(-Inf, log(5.0))
+        @test @interval(sin(0.1) + cos(0.2)) ≛ sin(@interval(0.1)) + cos(@interval(0.2))
 
         f(x) = 2x
-        @test isidentical(@interval(f(0.1)), f(@interval(0.1)))
+        @test @interval(f(0.1)) ≛ f(@interval(0.1))
 
         # midpoint-radius representation
         a = @interval(0.1)
@@ -319,11 +311,11 @@ using Test
         a = @interval(1, 2)
         b = @interval(3, 4)
 
-        @test isidentical(a^b, @interval(1, 16))
-        @test isidentical(a^@interval(0.5, 1), a)
-        @test isidentical(a^@interval(0.3, 0.5), @interval(1, sqrt(2)))
+        @test a^b ≛ @interval(1, 16)
+        @test a^@interval(0.5, 1) ≛ a
+        @test a^@interval(0.3, 0.5) ≛ @interval(1, sqrt(2))
 
-        @test isidentical(b^@interval(0.3), Interval(1.3903891703159093, 1.5157165665103982))
+        @test b^@interval(0.3) ≛ Interval(1.3903891703159093, 1.5157165665103982)
     end
 
     @testset "isatomic" begin
@@ -349,7 +341,7 @@ using Test
     end
 
     @testset "Difference between checked and unchecked Intervals" begin
-        @test isidentical(Interval(1, 2, check=true), Interval(1, 2))
+        @test Interval(1, 2, check=true) ≛ Interval(1, 2)
 
         @test inf(Interval(3, 2)) == 3
         @test_throws ArgumentError Interval(3, 2, check=true)

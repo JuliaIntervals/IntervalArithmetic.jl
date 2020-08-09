@@ -247,6 +247,6 @@ Computes the integer hash code for an interval using the method for composite
 types used in `AutoHashEquals.jl`
 
 Note that in `IntervalArithmetic.jl`, equality of interval is given by
-`isidentical` rather than the `==` operator.
+`≛` rather than the `==` operator.
 """
 hash(x::F, h::UInt) where {F<:AbstractFlavor} = hash(x.hi, hash(x.lo, hash(flavortype(F), h)))

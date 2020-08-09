@@ -57,7 +57,7 @@ export
     emptyinterval, ∅, ∞, isempty, isinterior, isdisjoint, ⪽,
     precedes, strictprecedes, ≺, ⊂, ⊃, ⊇, contains_zero,
     isweaklyless, isstrictless,
-    isidentical, isdistinct,
+    ≛,
     RR, isentire, nai, isnai, isthin, iscommon, isatomic,
     widen, inf, sup, bisect, mince,
     eps, dist,

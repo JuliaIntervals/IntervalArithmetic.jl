@@ -15,39 +15,40 @@ function isweaklylessprime(a::Real, b::Real)
 end
 
 """
-    isidentical(a::AbstractFlavor, b::AbstractFlavor)
+    ≛(a::AbstractFlavor, b::AbstractFlavor)
 
 Checks if the intervals `a` and `b` are identical.
 
+Typed as \\stareq<TAB>.
+
 Implement the `equal` function of the IEEE Std 1788-2015  (Table 9.3).
+
+The more common `==` operator is resevered for flavor dependent pointwise
+equality.
+
+In most case this is equivalent to the built-in `===`.
 """
-function isidentical(a::AbstractFlavor, b::AbstractFlavor)
+function ≛(a::AbstractFlavor, b::AbstractFlavor)
     isempty(a) && isempty(b) && return true
     return a.lo == b.lo && a.hi == b.hi
 end
 
 """
-    isidentical(a::AbstractFlavor, x::Real)
+    ≛(a::AbstractFlavor, x::Real)
 
 Check if the interval `a` contains exactly (and only) the number `x`.
 """
-function isidentical(a::AbstractFlavor, x::Real)
+function ≛(a::AbstractFlavor, x::Real)
     a.lo == a.hi == x && return true
     return false
 end
 
 """
-    isdistinct(a, b)
-
-Checks if the intervals `a` and `b` are not identical.
-"""
-isdistinct(a::F, b::F) where {F<:AbstractFlavor} = !isidentical(a, b)
-
-"""
-    issubset(a,b)
     ⊆(a,b)
 
 Checks if all the points of the interval `a` are within the interval `b`.
+
+Typed with \\subseteq<TAB>.
 
 Implement the `subset` function of the IEEE Std 1788-2015 (Table 9.3).
 """
@@ -57,12 +58,14 @@ function ⊆(a::AbstractFlavor, b::AbstractFlavor)
 end
 
 """
-    ⊆(a,b)
+    ⊂(a,b)
 
 Checks if `a` is a strict subset of interval `b`.
+
+Typed with \\subset<TAB>.
 """
 function ⊂(a::AbstractFlavor, b::AbstractFlavor)
-    isidentical(a, b) && return false
+    a ≛ b && return false
     return a ⊆ b
 end
 

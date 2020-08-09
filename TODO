@@ -115,6 +115,8 @@ Review intervals folder:
     ✔ equal is not the same as == @done(19-08-19 19:36)
     ☐ Check `isweaklylessprime`
     ☐ Flavor dependent issubset/isinterior ?
+    ☐ Choose infix operator for `isidentical` ? e.g. ∼ \sim<TAB> (not currently parsed by julia) or ∽ \backsim<TAB> or ≛ \stareq<TAB> or whatever
+    This is mainly used for tests and don't necessarily need to be exported
 
   9.6. Operatons on/with decoration:
     ☐ Split
@@ -192,3 +194,4 @@ Bugs:
 
 Tests:
   ☐ Uncomment complex tests in `construction.jl`
+  ☐ Use `===` or `≛` instead of `==`
