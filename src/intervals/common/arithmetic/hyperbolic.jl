@@ -5,22 +5,30 @@
     in section 10.5.3.
 =#
 
-for f in (:sinh, :cosh, :tanh, :asinh)
-    docstring = """
-        $f(a::AbstractFlavor)
-    
-    Implement the `$f` function of the IEEE Std 1788-2015 (Table 9.1).
-    """
-
+for f in (:sinh, :tanh, :asinh)
     @eval begin
+        """
+            $($f)(a::AbstractFlavor)
+        
+        Implement the `$($f)` function of the IEEE Std 1788-2015 (Table 9.1).
+        """
         function ($f)(a::F) where {F<:AbstractFlavor}
             isempty(a) && return a
         
             return @round(F, ($f)(a.lo), ($f)(a.hi))
         end
-
-        @doc ($f) docstring
     end 
+end
+
+"""
+    cosh(a::AbstractFlavor)
+
+Implement the `cosh` function of the IEEE Std 1788-2015 (Table 9.1).
+"""
+function cosh(a::F) where {F<:AbstractFlavor}
+    isempty(a) && return a
+
+    return @round(F, cosh(mig(a)), cosh(mag(a)))
 end
 
 """

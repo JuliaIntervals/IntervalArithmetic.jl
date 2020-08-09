@@ -192,6 +192,11 @@ Review other folders:
 Bugs:
   ✔ `Int` times `Interval` errors (e.g. `2*a`) @done(19-12-14 23:50)
 
+Documentation:
+  ☐ Put docstrings inside `@eval` blocks
+  ☐ Document flavors
+
 Tests:
   ☐ Uncomment complex tests in `construction.jl`
   ☐ Use `===` or `≛` instead of `==`
+  ☐ Test all flavors
