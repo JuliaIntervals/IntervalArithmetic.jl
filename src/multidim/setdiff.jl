@@ -86,7 +86,7 @@ end
 #     for (x, label) in X
 #         label == -1 && return [A]   # intersection in one direction empty, so total intersection empty
 #
-#         if label == 0
+#         if iszero(label)
 #             push!(results_list, IntervalBox(x, A[2]))
 #             continue
 #         end
@@ -95,7 +95,7 @@ end
 #         for (y, label) in Y
 #             label == -1 && return [A]
 #
-#             if label == 0
+#             if iszero(label)
 #                 push!(results_list, IntervalBox(x, y))
 #                 continue
 #             end

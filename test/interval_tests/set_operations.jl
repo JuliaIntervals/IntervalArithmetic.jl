@@ -3,8 +3,6 @@
 using IntervalArithmetic
 using Test
 
-setprecision(Interval, Float64)
-
 @testset "setdiff" begin
     x = 2..4
     y = 3..5

@@ -9,16 +9,6 @@ zero(::Type{DecoratedInterval{T}}) where T<:Real = DecoratedInterval(zero(T))
 one(a::DecoratedInterval{T}) where T<:Real = DecoratedInterval(one(T))
 one(::Type{DecoratedInterval{T}}) where T<:Real = DecoratedInterval(one(T))
 
-# NaI: not-an-interval
-"""`NaI` not-an-interval: [NaN, NaN]."""
-nai(::Type{T}) where T<:Real = DecoratedInterval(Interval{T}(convert(T, NaN), convert(T, NaN)), ill)
-nai(x::Interval{T}) where T<:Real = nai(T)
-nai(x::DecoratedInterval{T}) where T<:Real = nai(T)
-nai() = nai(precision(Interval)[1])
-isnai(x::Interval) = isnan(x.lo) || isnan(x.hi)
-isnai(x::DecoratedInterval) = isnai(interval(x)) && x.decoration == ill
-isnan(x::Interval) = isnai(x)
-
 ## Bool functions
 bool_functions = (
     :isempty, :isentire, :isunbounded,
@@ -28,7 +18,8 @@ bool_functions = (
 
 bool_binary_functions = (
     :<, :>, :!=, :⊆, :<=,
-    :isinterior, :isdisjoint, :precedes, :strictprecedes
+    :isinterior, :isdisjoint, :precedes, :strictprecedes,
+    :≛
 )
 
 for f in bool_functions
@@ -329,18 +320,18 @@ end
 
 # The function is unbounded at the bounded edges of the domain
 restricted_functions1 = Dict(
-    :log   => [0, ∞],
-    :log2  => [0, ∞],
-    :log10 => [0, ∞],
+    :log   => [0, Inf],
+    :log2  => [0, Inf],
+    :log10 => [0, Inf],
     :atanh => [-1, 1]
 )
 
 # The function is bounded at the bounded edge(s) of the domain
 restricted_functions2 = Dict(
-    :sqrt  => [0, ∞],
+    :sqrt  => [0, Inf],
     :asin  => [-1, 1],
     :acos  => [-1, 1],
-    :acosh => [1, ∞]
+    :acosh => [1, Inf]
 )
 
 # Define functions with restricted domains on DecoratedInterval's:

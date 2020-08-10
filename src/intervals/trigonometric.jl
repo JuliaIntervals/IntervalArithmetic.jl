@@ -69,7 +69,7 @@ function sin(a::Interval{T}) where T
     elseif lo_quadrant==1 && hi_quadrant==2
         return @round(sin(a.hi), sin(a.lo)) # Interval(sin(a.hi, RoundDown), sin(a.lo, RoundUp))
 
-    elseif ( lo_quadrant == 0 || lo_quadrant==3 ) && ( hi_quadrant==1 || hi_quadrant==2 )
+    elseif ( iszero(lo_quadrant) || lo_quadrant==3 ) && ( hi_quadrant==1 || hi_quadrant==2 )
         return @round(min(sin(a.lo), sin(a.hi)), 1)
         # Interval(min(sin(a.lo, RoundDown), sin(a.hi, RoundDown)), one(T))
 
@@ -77,7 +77,7 @@ function sin(a::Interval{T}) where T
         return @round(-1, max(sin(a.lo), sin(a.hi)))
         # Interval(-one(T), max(sin(a.lo, RoundUp), sin(a.hi, RoundUp)))
 
-    else #if( lo_quadrant == 0 && hi_quadrant==3 ) || ( lo_quadrant == 2 && hi_quadrant==1 )
+    else #if( iszero(lo_quadrant) && hi_quadrant==3 ) || ( lo_quadrant == 2 && hi_quadrant==1 )
         return whole_range
     end
 end
@@ -125,21 +125,15 @@ function sin(a::Interval{Float64})
     elseif lo_quadrant==1 && hi_quadrant==2
         return @round(sin(hi), sin(lo))
 
-    elseif ( lo_quadrant == 0 || lo_quadrant==3 ) && ( hi_quadrant==1 || hi_quadrant==2 )
+    elseif ( iszero(lo_quadrant) || lo_quadrant==3 ) && ( hi_quadrant==1 || hi_quadrant==2 )
         return @round(min(sin(lo), sin(hi)), 1)
 
     elseif ( lo_quadrant == 1 || lo_quadrant==2 ) && ( hi_quadrant==3 || hi_quadrant==0 )
         return @round(-1, max(sin(lo), sin(hi)))
 
-    else #if( lo_quadrant == 0 && hi_quadrant==3 ) || ( lo_quadrant == 2 && hi_quadrant==1 )
+    else #if( iszero(lo_quadrant) && hi_quadrant==3 ) || ( lo_quadrant == 2 && hi_quadrant==1 )
         return whole_range
     end
-end
-
-function sinpi(a::Interval{T}) where T
-    isempty(a) && return a
-    w = a * Interval{T}(π)
-    return(sin(w))
 end
 
 function cos(a::Interval{T}) where T
@@ -169,13 +163,13 @@ function cos(a::Interval{T}) where T
     elseif lo_quadrant == 2 && hi_quadrant==3
         return @round(cos(a.lo), cos(a.hi))
 
-    elseif lo_quadrant == 0 && hi_quadrant==1
+    elseif iszero(lo_quadrant) && hi_quadrant==1
         return @round(cos(a.hi), cos(a.lo))
 
     elseif ( lo_quadrant == 2 || lo_quadrant==3 ) && ( hi_quadrant==0 || hi_quadrant==1 )
         return @round(min(cos(a.lo), cos(a.hi)), 1)
 
-    elseif ( lo_quadrant == 0 || lo_quadrant==1 ) && ( hi_quadrant==2 || hi_quadrant==3 )
+    elseif ( iszero(lo_quadrant) || lo_quadrant==1 ) && ( hi_quadrant==2 || hi_quadrant==3 )
         return @round(-1, max(cos(a.lo), cos(a.hi)))
 
     else#if ( lo_quadrant == 3 && hi_quadrant==2 ) || ( lo_quadrant == 1 && hi_quadrant==0 )
@@ -212,13 +206,13 @@ function cos(a::Interval{Float64})
     elseif lo_quadrant == 2 && hi_quadrant==3
         return @round(cos(a.lo), cos(a.hi))
 
-    elseif lo_quadrant == 0 && hi_quadrant==1
+    elseif iszero(lo_quadrant) && hi_quadrant==1
         return @round(cos(a.hi), cos(a.lo))
 
     elseif ( lo_quadrant == 2 || lo_quadrant==3 ) && ( hi_quadrant==0 || hi_quadrant==1 )
         return @round(min(cos(a.lo), cos(a.hi)), 1)
 
-    elseif ( lo_quadrant == 0 || lo_quadrant==1 ) && ( hi_quadrant==2 || hi_quadrant==3 )
+    elseif ( iszero(lo_quadrant) || lo_quadrant==1 ) && ( hi_quadrant==2 || hi_quadrant==3 )
         return @round(-1, max(cos(a.lo), cos(a.hi)))
 
     else #if ( lo_quadrant == 3 && hi_quadrant==2 ) || ( lo_quadrant == 1 && hi_quadrant==0 )
@@ -226,11 +220,6 @@ function cos(a::Interval{Float64})
     end
 end
 
-function cospi(a::Interval{T}) where T
-    isempty(a) && return a
-    w = a * Interval{T}(π)
-    return(cos(w))
-end
 
 function find_quadrants_tan(x::T) where {T}
     temp = atomic(Interval{T}, x) / half_pi(x)
@@ -241,7 +230,7 @@ end
 function tan(a::Interval{T}) where T
     isempty(a) && return a
 
-    diam(a) > Interval{T}(π).lo && return entireinterval(a)
+    diam(a) > Interval{T}(π).lo && return RR(a)
 
     lo_quadrant = minimum(find_quadrants_tan(a.lo))
     hi_quadrant = maximum(find_quadrants_tan(a.hi))
@@ -249,15 +238,15 @@ function tan(a::Interval{T}) where T
     lo_quadrant_mod = mod(lo_quadrant, 2)
     hi_quadrant_mod = mod(hi_quadrant, 2)
 
-    if lo_quadrant_mod == 0 && hi_quadrant_mod == 1
+    if iszero(lo_quadrant_mod) && hi_quadrant_mod == 1
         # check if really contains singularity:
         if hi_quadrant * half_pi(T) ⊆ a
-            return entireinterval(a)  # crosses singularity
+            return RR(a)  # crosses singularity
         end
 
     elseif lo_quadrant_mod == hi_quadrant_mod && hi_quadrant > lo_quadrant
         # must cross singularity
-        return entireinterval(a)
+        return RR(a)
 
     end
 
@@ -273,7 +262,7 @@ function tan(a::Interval{Float64})
 
     isempty(a) && return a
 
-    diam(a) > Interval{T}(π).lo && return entireinterval(a)
+    diam(a) > Interval{T}(π).lo && return RR(a)
 
     lo_quadrant, lo = quadrant(a.lo)
     hi_quadrant, hi = quadrant(a.hi)
@@ -281,12 +270,12 @@ function tan(a::Interval{Float64})
     lo_quadrant_mod = mod(lo_quadrant, 2)
     hi_quadrant_mod = mod(hi_quadrant, 2)
 
-    if lo_quadrant_mod == 0 && hi_quadrant_mod == 1
-        return entireinterval(a)  # crosses singularity
+    if iszero(lo_quadrant_mod) && hi_quadrant_mod == 1
+        return RR(a)  # crosses singularity
 
     elseif lo_quadrant_mod == hi_quadrant_mod && hi_quadrant != lo_quadrant
         # must cross singularity
-        return entireinterval(a)
+        return RR(a)
 
     end
 
@@ -336,24 +325,24 @@ function atan(y::Interval{BigFloat}, x::Interval{BigFloat})
     T = BigFloat
 
     # Prevent nonsense results when y has a signed zero:
-    if y.lo == zero(T)
+    if iszero(y.lo)
         y = Interval(zero(T), y.hi)
     end
-    if y.hi == zero(T)
+    if iszero(y.hi)
         y = Interval(y.lo, zero(T))
     end
 
     # Check cases based on x
-    if x == zero(x)
+    if iszero(x)
 
-        y == zero(y) && return emptyinterval(T)
+        iszero(y) && return emptyinterval(T)
         y.lo ≥ zero(T) && return half_pi(T)
         y.hi ≤ zero(T) && return -half_pi(T)
         return half_range_atan(T)
 
     elseif x.lo > zero(T)
 
-        y == zero(y) && return y
+        iszero(y) && return y
         y.lo ≥ zero(T) &&
             return @round(atan(y.lo, x.hi), atan(y.hi, x.lo)) # refinement lo bound
         y.hi ≤ zero(T) &&
@@ -362,7 +351,7 @@ function atan(y::Interval{BigFloat}, x::Interval{BigFloat})
 
     elseif x.hi < zero(T)
 
-        y == zero(y) && return Interval{T}(π)
+        iszero(y) && return Interval{T}(π)
         y.lo ≥ zero(T) &&
             return @round(atan(y.hi, x.hi), atan(y.lo, x.lo))
         y.hi < zero(T) &&
@@ -371,16 +360,16 @@ function atan(y::Interval{BigFloat}, x::Interval{BigFloat})
 
     else # zero(T) ∈ x
 
-        if x.lo == zero(T)
-            y == zero(y) && return y
+        if iszero(x.lo)
+            iszero(y) && return y
 
             y.lo ≥ zero(T) && return @round(atan(y.lo, x.hi), half_range_atan(BigFloat).hi)
 
             y.hi ≤ zero(T) && return @round(half_range_atan(BigFloat).lo, atan(y.hi, x.hi))
             return half_range_atan(T)
 
-        elseif x.hi == zero(T)
-            y == zero(y) && return Interval{T}(π)
+        elseif iszero(x.hi)
+            iszero(y) && return Interval{T}(π)
             y.lo ≥ zero(T) && return @round(half_pi(BigFloat).lo, atan(y.lo, x.lo))
             y.hi < zero(T) && return @round(atan(y.hi, x.lo), -(half_pi(BigFloat).lo))
             return range_atan(T)
@@ -398,7 +387,7 @@ end
 function cot(a::Interval{BigFloat})
     isempty(a) && return a
 
-    diam(a) > Interval{BigFloat}(π).lo && return entireinterval(a)
+    diam(a) > Interval{BigFloat}(π).lo && return RR(a)
 
     lo_quadrant, lo = quadrant(Float64(a.lo))
     hi_quadrant, hi = quadrant(Float64(a.hi))
@@ -408,13 +397,13 @@ function cot(a::Interval{BigFloat})
     lo_quadrant_mod = mod(lo_quadrant, 2)
     hi_quadrant_mod = mod(hi_quadrant, 2)
     
-    if(lo_quadrant_mod == 1 && hi_quadrant_mod == 0)
+    if(lo_quadrant_mod == 1 && iszero(hi_quadrant_mod))
         if(lo_quadrant < hi_quadrant)
-            return entireinterval(a)
+            return RR(a)
         else
             return @round(-Inf, cot(a.lo))
         end
-    elseif(lo_quadrant_mod == 0 && hi_quadrant_mod == 0 && lo_quadrant > hi_quadrant)
+    iszero(elseif(lo_quadrant_mod) && iszero(hi_quadrant_mod) && lo_quadrant > hi_quadrant)
         return @round(-Inf, cot(a.lo))
     end 
 

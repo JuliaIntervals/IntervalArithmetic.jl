@@ -40,7 +40,7 @@ setrounding(Interval, :tight)
     @test iscommon(Interval(0.0, -0.0))
     @test iscommon(Interval(5.0, 12.4))
     @test iscommon(Interval(-0x1.fffffffffffffp1023, 0x1.fffffffffffffp1023))
-    @test iscommon(entireinterval(Float64)) == false
+    @test iscommon(RR(Float64)) == false
     @test iscommon(∅) == false
     @test iscommon(Interval(-Inf, 0.0)) == false
     @test iscommon(Interval(0.0, Inf)) == false
@@ -63,7 +63,7 @@ end
     @test iscommon(DecoratedInterval(Interval(0.0, -0.0), dac))
     @test iscommon(DecoratedInterval(Interval(5.0, 12.4), def))
     @test iscommon(DecoratedInterval(Interval(-0x1.fffffffffffffp1023, 0x1.fffffffffffffp1023), trv))
-    @test iscommon(DecoratedInterval(entireinterval(Float64), dac)) == false
+    @test iscommon(DecoratedInterval(RR(Float64), dac)) == false
     @test iscommon(DecoratedInterval(∅, trv)) == false
     @test iscommon(DecoratedInterval(∅, trv)) == false
     @test iscommon(DecoratedInterval(Interval(-Inf, 0.0), trv)) == false
@@ -80,7 +80,7 @@ end
     @test isthin(Interval(-0.0, 0.0))
     @test isthin(Interval(0.0, -0.0))
     @test isthin(∅) == false
-    @test isthin(entireinterval(Float64)) == false
+    @test isthin(RR(Float64)) == false
     @test isthin(Interval(-1.0, 0.0)) == false
     @test isthin(Interval(-1.0, -0.5)) == false
     @test isthin(Interval(1.0, 2.0)) == false
@@ -99,7 +99,7 @@ end
     @test isthin(DecoratedInterval(Interval(0.0, -0.0), dac))
     @test isthin(DecoratedInterval(∅, trv)) == false
     @test isthin(DecoratedInterval(∅, trv)) == false
-    @test isthin(DecoratedInterval(entireinterval(Float64), def)) == false
+    @test isthin(DecoratedInterval(RR(Float64), def)) == false
     @test isthin(DecoratedInterval(Interval(-1.0, 0.0), dac)) == false
     @test isthin(DecoratedInterval(Interval(-1.0, -0.5), com)) == false
     @test isthin(DecoratedInterval(Interval(1.0, 2.0), def)) == false
@@ -132,14 +132,14 @@ end
     @test in(6.3, Interval(5.0, 12.4))
     @test ∈(12.4, Interval(5.0, 12.4))
     @test in(12.4, Interval(5.0, 12.4))
-    @test ∈(0.0, entireinterval(Float64))
-    @test in(0.0, entireinterval(Float64))
-    @test ∈(5.0, entireinterval(Float64))
-    @test in(5.0, entireinterval(Float64))
-    @test ∈(6.3, entireinterval(Float64))
-    @test in(6.3, entireinterval(Float64))
-    @test ∈(12.4, entireinterval(Float64))
-    @test in(12.4, entireinterval(Float64))
+    @test ∈(0.0, RR(Float64))
+    @test in(0.0, RR(Float64))
+    @test ∈(5.0, RR(Float64))
+    @test in(5.0, RR(Float64))
+    @test ∈(6.3, RR(Float64))
+    @test in(6.3, RR(Float64))
+    @test ∈(12.4, RR(Float64))
+    @test in(12.4, RR(Float64))
     @test ∈(-71.0, Interval(-27.0, 0.0)) == false
     @test in(-71.0, Interval(-27.0, 0.0)) == false
     @test ∈(0.1, Interval(-27.0, 0.0)) == false
@@ -162,10 +162,10 @@ end
     @test in(-Inf, ∅) == false
     @test ∈(Inf, ∅) == false
     @test in(Inf, ∅) == false
-    @test ∈(-Inf, entireinterval(Float64)) == false
-    @test in(-Inf, entireinterval(Float64)) == false
-    @test ∈(Inf, entireinterval(Float64)) == false
-    @test in(Inf, entireinterval(Float64)) == false
+    @test ∈(-Inf, RR(Float64)) == false
+    @test in(-Inf, RR(Float64)) == false
+    @test ∈(Inf, RR(Float64)) == false
+    @test in(Inf, RR(Float64)) == false
 end
 
 @testset "minimal_isMember_dec_test" begin
@@ -193,14 +193,14 @@ end
     @test in(6.3, DecoratedInterval(Interval(5.0, 12.4), dac))
     @test ∈(12.4, DecoratedInterval(Interval(5.0, 12.4), com))
     @test in(12.4, DecoratedInterval(Interval(5.0, 12.4), com))
-    @test ∈(0.0, DecoratedInterval(entireinterval(Float64), trv))
-    @test in(0.0, DecoratedInterval(entireinterval(Float64), trv))
-    @test ∈(5.0, DecoratedInterval(entireinterval(Float64), def))
-    @test in(5.0, DecoratedInterval(entireinterval(Float64), def))
-    @test ∈(6.3, DecoratedInterval(entireinterval(Float64), dac))
-    @test in(6.3, DecoratedInterval(entireinterval(Float64), dac))
-    @test ∈(12.4, DecoratedInterval(entireinterval(Float64), trv))
-    @test in(12.4, DecoratedInterval(entireinterval(Float64), trv))
+    @test ∈(0.0, DecoratedInterval(RR(Float64), trv))
+    @test in(0.0, DecoratedInterval(RR(Float64), trv))
+    @test ∈(5.0, DecoratedInterval(RR(Float64), def))
+    @test in(5.0, DecoratedInterval(RR(Float64), def))
+    @test ∈(6.3, DecoratedInterval(RR(Float64), dac))
+    @test in(6.3, DecoratedInterval(RR(Float64), dac))
+    @test ∈(12.4, DecoratedInterval(RR(Float64), trv))
+    @test in(12.4, DecoratedInterval(RR(Float64), trv))
     @test ∈(-71.0, DecoratedInterval(Interval(-27.0, 0.0), trv)) == false
     @test in(-71.0, DecoratedInterval(Interval(-27.0, 0.0), trv)) == false
     @test ∈(0.1, DecoratedInterval(Interval(-27.0, 0.0), def)) == false
@@ -231,9 +231,9 @@ end
     @test in(Inf, DecoratedInterval(∅, trv)) == false
     @test ∈(Inf, DecoratedInterval(∅, trv)) == false
     @test in(Inf, DecoratedInterval(∅, trv)) == false
-    @test ∈(-Inf, DecoratedInterval(entireinterval(Float64), trv)) == false
-    @test in(-Inf, DecoratedInterval(entireinterval(Float64), trv)) == false
-    @test ∈(Inf, DecoratedInterval(entireinterval(Float64), def)) == false
-    @test in(Inf, DecoratedInterval(entireinterval(Float64), def)) == false
+    @test ∈(-Inf, DecoratedInterval(RR(Float64), trv)) == false
+    @test in(-Inf, DecoratedInterval(RR(Float64), trv)) == false
+    @test ∈(Inf, DecoratedInterval(RR(Float64), def)) == false
+    @test in(Inf, DecoratedInterval(RR(Float64), def)) == false
 end
 # FactCheck.exitstatus()

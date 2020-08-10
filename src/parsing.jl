@@ -47,7 +47,7 @@ Parse a string as an interval. Formats allowed include:
 - "[3.5, 7.2]"
 - "[-0x1.3p-1, 2/3]"  # use numerical expressions
 """
-function parse(::Type{Interval{T}}, s::AbstractString) where T
+function parse(::Type{F}, s::AbstractString) where {T, F<:AbstractFlavor{T}}
 
     # Check version!
     if !(occursin("[", s))  # string like "3.1"
@@ -62,7 +62,7 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
         a = parse(T, s, RoundDown)
         b = parse(T, s, RoundUp)
 
-        return Interval(a, b)
+        return F(a, b)
 
         end
 
@@ -72,18 +72,18 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
 
             if m!= nothing
                 if m.captures[2] == ""    # strings of the form "10??"
-                    return entireinterval(T)
+                    return RR(T)
                 end
                 if m.captures[2] == "u"   # strings of the form "10??u"
                     lo = parse(Float64, m.captures[1])
                     hi = Inf
-                    interval = eval(make_interval(T, lo, [hi]))
+                    interval = eval(wrap_literals(Interval{T}, lo, [hi]))
                     return interval
                 end
                 if m.captures[2] == "d"   # strings of the form "10??d"
                     lo = -Inf
                     hi = parse(Float64, m.captures[1])
-                    interval = eval(make_interval(T, lo, [hi]))
+                    interval = eval(wrap_literals(Interval{T}, lo, [hi]))
                     return interval
                 end
             end
@@ -97,7 +97,7 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
                     n = parse(Float64, m.captures[1]*"."*m.captures[2])
                     lo = n - x
                     hi = n + x
-                    interval = eval(make_interval(T, lo, [hi]))
+                    interval = eval(wrap_literals(Interval{T}, lo, [hi]))
                     return interval
                 end
 
@@ -107,7 +107,7 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
                     n = parse(Float64, m.captures[1]*"." * m.captures[2])
                     lo = n - x
                     hi = n + x
-                    interval = eval(make_interval(T, lo, [hi]))
+                    interval = eval(wrap_literals(Interval{T}, lo, [hi]))
                     return interval
                 end
 
@@ -117,7 +117,7 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
                     n = parse(Float64, m.captures[1]*"." * m.captures[2])
                     lo = parse(Float64, string(n-x) * m.captures[5])
                     hi = parse(Float64, string(n+x) * m.captures[5])
-                    interval = eval(make_interval(T, lo, [hi]))
+                    interval = eval(wrap_literals(Interval{T}, lo, [hi]))
                     return interval
                 end
 
@@ -127,7 +127,7 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
                     n = parse(Float64, m.captures[1]*"."*m.captures[2])
                     lo = n
                     hi = n+x
-                    interval = eval(make_interval(T, lo, [hi]))
+                    interval = eval(wrap_literals(Interval{T}, lo, [hi]))
                     return interval
                 end
 
@@ -137,7 +137,7 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
                         n = parse(Float64, m.captures[1]*"."*m.captures[2])
                         lo = n - x
                         hi = n
-                        interval = eval(make_interval(T, lo, [hi]))
+                        interval = eval(wrap_literals(Interval{T}, lo, [hi]))
                         return interval
                 end
 
@@ -148,7 +148,7 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
                         n = parse(Float64, m.captures[1]*"."*m.captures[2])
                         lo = parse(Float64, string(n) * m.captures[5])
                         hi = parse(Float64, string(n+x) * m.captures[5])
-                        interval = eval(make_interval(T, lo, [hi]))
+                        interval = eval(wrap_literals(Interval{T}, lo, [hi]))
                         return interval
                     end
 
@@ -158,7 +158,7 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
                         n = parse(Float64, m.captures[1]*"."*m.captures[2])
                         lo = n
                         hi = n+x
-                        interval = eval(make_interval(T, lo, [hi]))
+                        interval = eval(wrap_literals(Interval{T}, lo, [hi]))
                         return interval
                     end
 
@@ -168,7 +168,7 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
                         n = parse(Float64, m.captures[1]*"."*m.captures[2])
                         lo = parse(Float64, string(n-x) * m.captures[5])
                         hi = parse(Float64, string(n) * m.captures[5])
-                        interval = eval(make_interval(T, lo, [hi]))
+                        interval = eval(wrap_literals(Interval{T}, lo, [hi]))
                         return interval
                     end
 
@@ -178,7 +178,7 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
                         n = parse(Float64, m.captures[1]*"."*m.captures[2])
                         lo = n-x
                         hi = n
-                        interval = eval(make_interval(T, lo, [hi]))
+                        interval = eval(wrap_literals(Interval{T}, lo, [hi]))
                         return interval
                     end
 
@@ -188,7 +188,7 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
                         n = parse(Float64, m.captures[1]*"."*m.captures[2])
                         lo = parse(Float64, string(n-x)*m.captures[5])
                         hi = parse(Float64, string(n+x)*m.captures[5])
-                        interval = eval(make_interval(T, lo, [hi]))
+                        interval = eval(wrap_literals(Interval{T}, lo, [hi]))
                         return interval
                     end
                 end
@@ -205,7 +205,7 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
                 throw(ArgumentError("Unable to process string $s as interval"))
             end
 
-            interval = eval(make_interval(T, lo, [hi]))
+            interval = eval(wrap_literals(Interval{T}, lo, [hi]))
             return interval
         end
     end
@@ -243,7 +243,7 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
             return emptyinterval(T)
         end
         if m.captures[1] == "entire"
-            return entireinterval(T)
+            return RR(T)
         end
 
         lo = m.captures[1]
@@ -260,8 +260,5 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
         expr2 = parse(Float64, hi)
     end
 
-    interval = eval(make_interval(T, expr1, [expr2]))
-
-    return interval
-
+    return eval(wrap_literals(F, expr1, [expr2]))
 end

@@ -10,9 +10,9 @@ end
 # IntervalBox(x::Interval) = IntervalBox( SVector(x) )  # single interval treated as tuple with one element
 
 IntervalBox(x::Interval...) = IntervalBox(SVector(x))
-IntervalBox(x::SVector) = IntervalBox(interval.(x))
+IntervalBox(x::SVector) = IntervalBox(Interval.(x))
 IntervalBox(x::Tuple) = IntervalBox(SVector(x))
-IntervalBox(x::Real) = IntervalBox(interval.(x))
+IntervalBox(x::Real) = IntervalBox(Interval.(x))
 IntervalBox(x...) = IntervalBox(x)
 IntervalBox(x) = IntervalBox(x...)
 IntervalBox(X::IntervalBox, n) = foldl(×, Iterators.repeated(X, n))
@@ -60,7 +60,7 @@ Return a vector of the `mid` of each interval composing the `IntervalBox`.
 See `mid(X::Interval, α=0.5)` for more informations.
 """
 mid(X::IntervalBox) = mid.(X)
-mid(X::IntervalBox, α) = mid.(X, α)
+scaled_mid(X::IntervalBox, α) = scaled_mid.(X, α)
 
 big(X::IntervalBox) = big.(X)
 
@@ -112,31 +112,6 @@ IntervalBox(x::Interval, n::Int) = IntervalBox(x, Val(n))
 dot(x::IntervalBox, y::IntervalBox) = dot(x.v, y.v)
 
 Base.:(==)(x::IntervalBox, y::IntervalBox) = x.v == y.v
-
-
-"""
-    mince(x::IntervalBox, n)
-
-Splits `x` in `n` intervals in each dimension of the same diameter. These
-intervals are combined in all possible `IntervalBox`-es, which are returned
-as a vector.
-"""
-@generated function mince(x::IntervalBox{N,T}, n) where {N,T}
-    quote
-        nodes_matrix = Array{Interval{T},2}(undef, n, N)
-        for i in 1:N
-            nodes_matrix[1:n,i] .= mince(x[i], n)
-        end
-
-        nodes = IntervalBox{$N,T}[]
-        Base.Cartesian.@nloops $N i _->(1:n) begin
-            Base.Cartesian.@nextract $N ival d->nodes_matrix[i_d, d]
-            ibox = Base.Cartesian.@ncall $N IntervalBox ival
-            push!(nodes, ibox)
-        end
-        nodes
-    end
-end
 
 hull(a::IntervalBox{N,T}, b::IntervalBox{N,T}) where {N,T} = IntervalBox(hull.(a[:], b[:]))
 hull(a::Vector{IntervalBox{N,T}}) where {N,T} = hull(a...)

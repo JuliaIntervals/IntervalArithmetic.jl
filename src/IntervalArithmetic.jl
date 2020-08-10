@@ -50,18 +50,20 @@ import Base.MPFR: MPFRRoundUp, MPFRRoundDown, MPFRRoundNearest, MPFRRoundToZero,
 import .Broadcast: broadcasted
 
 export
-    AbstractInterval, Interval,
+    Interval, DefaultBound,
     interval,
-    @interval, @biginterval, @floatinterval, @make_interval,
-    diam, radius, mid, mag, mig, hull,
-    emptyinterval, ∅, ∞, isempty, isinterior, ⪽,
-    precedes, strictprecedes, ≼, ≺, ⊂, ⊃, ⊇, contains_zero,
-    entireinterval, isentire, nai, isnai, isthin, iscommon, isatomic,
+    @interval, @biginterval, @floatinterval,
+    diam, radius, mid, scaled_mid, mag, mig, hull,
+    emptyinterval, ∅, ∞, isempty, isinterior, isdisjoint, ⪽,
+    precedes, strictprecedes, ≺, ⊂, ⊃, ⊇, contains_zero,
+    isweaklyless, isstrictless,
+    ≛,
+    RR, isentire, nai, isnai, isthin, iscommon, isatomic,
     widen, inf, sup, bisect, mince,
-    parameters, eps, dist,
+    eps, dist,
     midpoint_radius, interval_from_midpoint_radius,
     RoundTiesToEven, RoundTiesToAway,
-    cancelminus, cancelplus, isunbounded,
+    cancelminus, cancelplus, isbounded, isunbounded,
     .., @I_str, ±,
     pow, extended_div,
     setformat, @format
@@ -75,8 +77,6 @@ end
 
 export
     setindex   # re-export from StaticArrays for IntervalBox
-
-
 
 export showfull
 
@@ -102,16 +102,13 @@ export
 
 function __init__()
     setrounding(BigFloat, RoundNearest)
-
-
-    setprecision(Interval, 256)  # set up pi
-    setprecision(Interval, Float64)
 end
 
 
 ## Includes
 
 include("intervals/intervals.jl")
+
 include("multidim/multidim.jl")
 include("bisect.jl")
 include("decorations/decorations.jl")
@@ -119,10 +116,9 @@ include("decorations/decorations.jl")
 include("rand.jl")
 include("parsing.jl")
 include("display.jl")
+include("symbols.jl")
 
 include("plot_recipes/plot_recipes.jl")
-
-include("deprecated.jl")
 
 """
     Region{T} = Union{Interval{T}, IntervalBox{T}}
