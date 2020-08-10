@@ -68,39 +68,18 @@ typemax(::Type{Interval{T}}) where T<:Integer = Interval(typemax(T))
 
 function +(a::Interval{T}, b::S) where {T, S<:AbstractFloat}
     isempty(a) && return emptyinterval(T)
-    c = @round(a.lo + b, a.hi + b)
-
-    if(typeof(c) != Interval{T})
-        convert(Interval{T}, c)
-    else
-        return c
-    end
-
+    @round(Interval{T}, a.lo + b, a.hi + b)
 end
 +(b::S, a::Interval{T}) where {T, S<:AbstractFloat} = a+b
 
 function -(a::Interval{T}, b::S) where {T, S<:AbstractFloat}
     isempty(a) && return emptyinterval(T)
-    c = @round(a.lo - b, a.hi - b)
-
-    if(typeof(c) != Interval{T})
-        convert(Interval{T}, c)
-    else
-        return c
-    end
-
+    @round(Interval{T}, a.lo - b, a.hi - b)
 end
 
 function -(b::S, a::Interval{T}) where {T, S<:AbstractFloat}
     isempty(a) && return emptyinterval(T)
-    c = @round(b - a.hi, b - a.lo)
-
-    if(typeof(c) != Interval{T})
-        convert(Interval{T}, c)
-    else
-        return c
-    end
-
+    @round(Interval{T}, b - a.hi, b - a.lo)
 end
 
 function +(a::Interval{T}, b::Interval{T}) where T<:Real
@@ -120,15 +99,9 @@ function *(x::S, a::Interval{T}) where {T, S<:AbstractFloat}
     (iszero(a) || iszero(x)) && return zero(Interval{T})
 
     if x ≥ 0.0
-        c = @round(a.lo*x, a.hi*x)
+        c = @round(Interval{T}, a.lo*x, a.hi*x)
     else
-        c = @round(a.hi*x, a.lo*x)
-    end
-    
-    if(typeof(c) != Interval{T})
-        convert(Interval{T}, c)
-    else
-        return c
+        c = @round(Interval{T}, a.hi*x, a.lo*x)
     end
 
 end
@@ -182,15 +155,9 @@ function /(a::Interval{T}, x::S) where {T, S<:AbstractFloat}
     iszero(a) && return zero(Interval{T})
 
     if x ≥ 0.0
-        c = @round(a.lo/x, a.hi/x)
+        c = @round(Interval{T}, a.lo/x, a.hi/x)
     else
-        c = @round(a.hi/x, a.lo/x)
-    end
-
-    if(typeof(c) != Interval{T})
-        convert(Interval{T}, c)
-    else
-        return c
+        c = @round(Interval{T}, a.hi/x, a.lo/x)
     end
 
 end

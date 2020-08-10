@@ -90,3 +90,7 @@ function make_interval(T, expr1, expr2)
 
     :(interval(($expr1).lo, ($expr2).hi))
 end
+
+macro round(F, ex1, ex2)
+    :($(esc(F))($(round_expr(ex1, RoundDown)), $(round_expr(ex2, RoundUp))))
+end
