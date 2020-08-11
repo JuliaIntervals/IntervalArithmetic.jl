@@ -99,9 +99,9 @@ function *(x::S, a::Interval{T}) where {T, S<:AbstractFloat}
     (iszero(a) || iszero(x)) && return zero(Interval{T})
 
     if x ≥ 0.0
-        c = @round(Interval{T}, a.lo*x, a.hi*x)
+        return @round(Interval{T}, a.lo*x, a.hi*x)
     else
-        c = @round(Interval{T}, a.hi*x, a.lo*x)
+        return @round(Interval{T}, a.hi*x, a.lo*x)
     end
 
 end
@@ -155,9 +155,9 @@ function /(a::Interval{T}, x::S) where {T, S<:AbstractFloat}
     iszero(a) && return zero(Interval{T})
 
     if x ≥ 0.0
-        c = @round(Interval{T}, a.lo/x, a.hi/x)
+        return @round(Interval{T}, a.lo/x, a.hi/x)
     else
-        c = @round(Interval{T}, a.hi/x, a.lo/x)
+        return @round(Interval{T}, a.hi/x, a.lo/x)
     end
 
 end

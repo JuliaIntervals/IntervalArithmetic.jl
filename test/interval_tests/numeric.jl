@@ -393,40 +393,18 @@ end
 
 @testset "function call for mathematical operators" begin
 
-    @testset "+ operator" begin
-        @test which(+, (Interval{Float64}, Float32)).module == IntervalArithmetic
-        @test which(+, (Interval{Float32}, Float64)).module == IntervalArithmetic
-        @test which(+, (Interval{BigFloat}, Float64)).module == IntervalArithmetic
-        @test which(+, (Interval{Float64}, BigFloat)).module == IntervalArithmetic
-        @test which(+, (Interval{Float32}, Float64)).module == IntervalArithmetic
-        @test which(+, (Interval{BigFloat}, Float32)).module == IntervalArithmetic
-    end
+    types = [Float32, Float64, BigFloat]
+    operations = [+, *, -, /]
 
-    @testset "- operator" begin
-        @test which(-, (Interval{Float64}, Float32)).module == IntervalArithmetic
-        @test which(-, (Interval{Float32}, Float64)).module == IntervalArithmetic
-        @test which(-, (Interval{BigFloat}, Float64)).module == IntervalArithmetic
-        @test which(-, (Interval{Float64}, BigFloat)).module == IntervalArithmetic
-        @test which(-, (Interval{Float32}, Float64)).module == IntervalArithmetic
-        @test which(-, (Interval{BigFloat}, Float32)).module == IntervalArithmetic
-    end
-
-    @testset "* operator" begin
-        @test which(*, (Interval{Float64}, Float32)).module == IntervalArithmetic
-        @test which(*, (Interval{Float32}, Float64)).module == IntervalArithmetic
-        @test which(*, (Interval{BigFloat}, Float64)).module == IntervalArithmetic
-        @test which(*, (Interval{Float64}, BigFloat)).module == IntervalArithmetic
-        @test which(*, (Interval{Float32}, Float64)).module == IntervalArithmetic
-        @test which(*, (Interval{BigFloat}, Float32)).module == IntervalArithmetic
-    end
-
-    @testset "/ operator" begin
-        @test which(/, (Interval{Float64}, Float32)).module == IntervalArithmetic
-        @test which(/, (Interval{Float32}, Float64)).module == IntervalArithmetic
-        @test which(/, (Interval{BigFloat}, Float64)).module == IntervalArithmetic
-        @test which(/, (Interval{Float64}, BigFloat)).module == IntervalArithmetic
-        @test which(/, (Interval{Float32}, Float64)).module == IntervalArithmetic
-        @test which(/, (Interval{BigFloat}, Float32)).module == IntervalArithmetic
+    for op in operations
+        for T1 in types
+            for T2 in types
+                @test which(op, (Interval{T1}, T2)).module == IntervalArithmetic
+                if(op != /)
+                    @test which(op, (T1, Interval{T2})).module == IntervalArithmetic
+                end
+            end
+        end
     end
 end
 
