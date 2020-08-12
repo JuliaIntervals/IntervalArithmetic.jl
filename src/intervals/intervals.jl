@@ -26,8 +26,8 @@ subtyped. A new Flavor should instead subtype either `AbstractRealFlavor` or
 """
 const AbstractFlavor{T} = Union{AbstractRealFlavor{T}, AbstractNonRealFlavor{T}}
 
-eltype(x::AbstractFlavor{T}) where {T<:Real} = T
-size(x::AbstractFlavor) = (1,)
+eltype(::F) where {F<:AbstractFlavor} = F
+size(::AbstractFlavor) = (1,)
 
 for (Flavor, Supertype) in [(:SetBasedFlavoredInterval, AbstractRealFlavor), (:GenericFlavoredInterval, AbstractNonRealFlavor)]
     flavordef = quote
