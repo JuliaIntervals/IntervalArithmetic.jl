@@ -14,7 +14,6 @@ dist(a::AbstractFlavor, b::AbstractFlavor) = max(abs(a.lo-b.lo), abs(a.hi-b.hi))
 eps(a::F) where {F<:AbstractFlavor} = F(max(eps(a.lo), eps(a.hi)))
 eps(::Type{F}) where {T, F<:AbstractFlavor{T}} = F(eps(T))
 
-# TODO use the function return midpoint and radius for that
 interval_from_midpoint_radius(midpoint, radius) = Interval(midpoint-radius, midpoint+radius)
 
 isinteger(a::AbstractFlavor) = (a.lo == a.hi) && isinteger(a.lo)

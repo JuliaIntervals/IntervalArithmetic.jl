@@ -60,7 +60,6 @@ function atanh(a::F) where {F<:AbstractFlavor}
 
     # The IEEE Std 1788-2015 does not allow intervals like of the
     # form Interval(∞,∞) and Interval(-∞,-∞) for set based intervals
-    # TODO check for flavor dependent behavior
     (res_lo == res_hi == Inf || res_lo == res_hi == -Inf) && return emptyinterval(a)
 
     return F(res_lo, res_hi)

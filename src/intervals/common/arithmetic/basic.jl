@@ -218,7 +218,6 @@ Fused multiply-add.
 
 Implement the `fma` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-# TODO check for flavor dependent edge cases
 function fma(a::F, b::F, c::F) where {T, F<:AbstractFlavor{T}}
     (isempty(a) || isempty(b) || isempty(c)) && return emptyinterval(F)
 

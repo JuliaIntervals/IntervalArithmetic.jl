@@ -10,23 +10,27 @@ Review intervals folder:
     ☐ Investigate compile time warnings
     ✔ Check if intervals of different flavor type can/should be equal in the sense of `isidentical` @done(19-12-08 01:12)
     ☐ Operation on different flavors of interval should always error.
+    ☐ Check if `signbit` is in the standard
+    ☐ Test that definition of the default bound and flavor works (including change when rebuilding the package)
   
   Discussion:
     ☐ Do we want to keep `@floatinterval` and `@biginteral` or use `@interval(F, expr1, expr2)` instead ?
-    
+    ☐ Decide if `inf` and `sup` should be used as default or rather `x.lo` and `x.hi`
+
   Global precision:
     ✔ Get rid of it @done(19-08-20 16:49)
     ✔ Replace pi_interval(T) by Interval{T}(π) everywhere @done(19-12-18 22:59)
     ✔ Be sure it is done in compliance with #338 @done(19-12-18 22:59)
   
   Flavors:
+    ☐ Add documentations for flavors
     Implement set based flavor:
       ☐ Check all requested stuff 10.5.
       ☐ Error on undefined
     ☐ Implement cset flavor
-    ☐ Make cset default
-    ☐ Implement all the needed conversions
-      ☐ Automatise with Cassette.jl ?
+    ☐ Make cset default ?
+    ☐ Define the flavor dependent symbols like ==, <, <=
+    
   
   macros.jl:
     ✔ Review @done(19-08-23 01:57)
@@ -39,6 +43,7 @@ Review intervals folder:
     ✔ Review @done(19-08-19 01:50)
     ☐ Decide how to define the setrounding function with multiple interval types
     ☐ Check with latest discussion if everything is up to date
+    ☐ Remove default round method once it is not needed anymore
 
   conversion.jl:
     ✔ Review @done(19-08-23 03:25)
@@ -49,7 +54,7 @@ Review intervals folder:
     ☐ Review
 
   9.1. Arithmetic functions:
-    ☐ Distribute everything from arithmetic.jl in other files
+    ✔ Distribute everything from arithmetic.jl in other files @done(20-08-13 00:27)
     basic.jl:
       ✔ Split @done(19-08-19 01:14)
       ✔ Verify all requested functions are there @done(19-08-19 02:01)
@@ -68,13 +73,13 @@ Review intervals folder:
       ☐ Add doc to generated funcs
       ☐ Flavor dependent power (for negative power)
       ☐ Flavor dependant log
-      ☐ zero(T) or 0 ?
+      ✔ zero(T) or 0 ? @done(20-08-13 00:28)
     trigonometric.jl:
       ✔ Split @done(19-08-19 02:00)
       ✔ Verify all requested functions are there @done(19-08-19 02:00)
       ✔ Clean constants @done(19-08-19 14:13)
       ✔ Common @done(19-08-19 15:19)
-      ☐ zero(T) or 0 ?
+      ✔ zero(T) or 0 ? @done(20-08-13 00:28)
     hyperbolic.jl:
       ✔ Split @done(19-08-19 15:23)
       ✔ Verify all requested functions are there @done(19-08-19 15:23)

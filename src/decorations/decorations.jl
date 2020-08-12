@@ -4,7 +4,6 @@ include("functions.jl")
 # TODO Check if it is consistent with #386
 isnan(x::AbstractFlavor) = false  # NaI is always decorated
 
-# TODO adapt for each flavor
 """`NaI` not-an-interval: [NaN, NaN]."""
 nai(::Type{T}) where T = DecoratedInterval(convert(T, NaN), convert(T, NaN), ill)
 nai(::Type{F}) where {T, F<:Interval{T}} = nai(T)

@@ -3,7 +3,6 @@
 ## Definitions of special intervals and associated functions
 
 
-# TODO decide if `inf` and `sup` should be used as default or rather `x.lo` and `x.hi`
 #= By default, intervals are expected to be represented as pair of numbers, with
 the lower bound given by `inf(x)` and the upper bound by `sup(x)`.
 

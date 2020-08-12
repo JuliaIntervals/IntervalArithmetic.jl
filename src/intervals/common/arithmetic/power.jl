@@ -24,7 +24,6 @@ for T in (:AbstractFloat, :Rational, :Integer)
     @eval ^(a::F, x::$T) where {F<:AbstractFlavor} = atomic(F, big53(a)^x)
 end
 
-# TODO check flavor dependant corner cases
 function ^(a::F, n::Integer) where {F<:AbstractFlavor{BigFloat}}
     isempty(a) && return a
     iszero(n) && return one(F)
@@ -46,7 +45,7 @@ function ^(a::F, n::Integer) where {F<:AbstractFlavor{BigFloat}}
                 iszero(a.hi) && return @round(F, -Inf, a.lo^n)
                 return @round(F, a.hi^n, a.lo^n)
             else
-                return RR(a)  # TODO Check: is this 1/0 ?
+                return RR(a)
             end
         end
 

@@ -66,15 +66,15 @@ if Interval <: AbstractRealFlavor
 else
     const DecoratedInterval = NonRealDecoratedInterval
 end
-defaultdoc = """
+
+@doc """
     DecoratedInterval
 
 Default type of decorated interval, currently set to `$DecoratedInterval`.
 
 Not that the inner interval is of the default interval type. See the documentation
 of `Interval` for more information about the default interval type.
-"""
-@doc defaultdoc DecoratedInterval
+""" DecoratedInterval
 
 function DecoratedInterval(a::T, b::T, d::DECORATION) where {T<:Real}
     a > b && return DecoratedInterval(nai(T), ill)

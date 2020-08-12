@@ -1,6 +1,5 @@
-# TODO Check if it is in the standard
 """
-signbit(x::Interval)
+    signbit(x::Interval)
 
 Returns an interval containing `true` (`1`) if the value of the sign of any
 element in `x` is negative, containing `false` (`0`) if any element in `x`

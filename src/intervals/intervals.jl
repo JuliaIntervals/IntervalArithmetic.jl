@@ -96,7 +96,6 @@ for (Flavor, Supertype) in [(:SetBasedFlavoredInterval, AbstractRealFlavor), (:G
         convert(::Type{$Flavor{T}}, x::$Flavor{S}) where {T, S} = atomic($Flavor{T}, x)
     end
 
-    # TODO Add documentations for flavors
     @eval $flavordef
 end
 
@@ -110,7 +109,6 @@ reparametrize(::Type{F}, ::Type{ELTYPE}) where {F<:AbstractFlavor, ELTYPE} = fla
 
 const supported_flavors = (SetBasedFlavoredInterval, GenericFlavoredInterval)
 
-# TODO Properly test that this works
 if haskey(ENV, "IA_DEFAULT_FLAVOR")
     @eval quote
         const Interval = $(ENV["IA_DEFAULT_FLAVOR"])
@@ -127,16 +125,15 @@ else
     const DefaultBound = Float64
 end
 
-defaultdoc = """
+@doc """
     Interval
 
 Default type of interval, currently set to `$Interval`.
 
 To change this set the environnment variable `ENV["IA_DEFAULT_FLAVOR"]` to a
-`Symbol` matching the desired flavor name. Then rebuild the package (`build IntervalArithmetic`
-in a REPL in pkg mode).
-"""
-@doc defaultdoc Interval
+`Symbol` matching the desired flavor name. Then rebuild the package
+(`build IntervalArithmetic` in a REPL in pkg mode).
+""" Interval
 
 """
     is_valid_interval(a::Real, b::Real)

@@ -1,6 +1,3 @@
-# TODO define the flavor dependent symbols ==, <, <=
-
-# TODO implement the edge cases for vasious flavors, this one is the set-based (IEEE)
 """
     zero_times_infinity(::Type{AbstractFlavor})
 
