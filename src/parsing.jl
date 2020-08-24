@@ -1,5 +1,19 @@
 # Functions to parse strings to intervals
-
+function checkOverflow(a_string::AbstractString, b_string::AbstractString, s::AbstractString) #To handle numbers of type 1.0E+400
+    try
+        a = parse(Float64, a_string)
+        b = parse(Float64, b_string)
+        if a > 308 || (a == 308 && b > 1.7976931348623157) #if greater than floatmax()
+            return Interval(floatmax(), Inf)
+        elseif a < -308 || (a == -308 && b > 2.2250738585072014) #if less than floatmin()
+            return Interval(-Inf, floatmin())
+        else
+            return nothing 
+        end
+    catch
+        throw(ArgumentError("Unable to process string $s as interval"))
+    end
+end
 """
     parse{T}(DecoratedInterval{T}, s::AbstractString)
 
@@ -8,30 +22,48 @@ with decoration `dec`.
 """
 function parse(::Type{DecoratedInterval{T}}, s::AbstractString) where T
     m = match(r"(\[.*\])(\_.*)?", s)
-
+    
     if m == nothing  # matched
 
-        m = match(r"(.*\?[a-z0-9]*)(\_.*)?", s)
+        m = match(r"(.*\?[a-z0-9+-]*)(\_.*)?", s)
 
-        if m == nothing
-            throw(ArgumentError("Unable to process string $x as decorated interval"))
+    end
+    # @show m.captures[1], m.captures[2]
+
+    if m.captures[2] == "_ill"
+        return nai()
+    end
+
+    m.captures[1] = lowercase(m.captures[1])
+    #@show m.captures[1]
+    if m != nothing
+        m2 = match(r"\[(.*)\]", m.captures[1])
+        
+        if m2 != nothing
+            m2.captures[1] = strip(m2.captures[1], [' '])
+
+            if m2.captures[1] == "nai" 
+                return nai(T)
+            end
         end
-
     end
-
-    if m.captures[1] == "[nai]" || m.captures[1] == "[Nai]"
-        return nai(T)
-    end
-
     interval_string, decoration_string = m.captures
+    
     interval = parse(Interval{T}, interval_string)
 
     # type unstable:
     if decoration_string != nothing
-        decoration_string = lowercase(decoration_string)
-        decoration_symbol = Symbol(decoration_string[2:end])
-        decoration = getfield(IntervalArithmetic, decoration_symbol)
-        return DecoratedInterval(interval, decoration)
+        decoration_string = lowercase(decoration_string[2:end])
+        if(decoration_string != "com" && decoration_string != "def" && decoration_string != "dac" && decoration_string != "trv" && decoration_string != nothing)
+            throw(ArgumentError("Cannot process $decoration_string as decoration"))
+        end
+        decoration_symbol = Symbol(decoration_string)
+        decorationn = getfield(IntervalArithmetic, decoration_symbol)
+        if (decoration(DecoratedInterval(interval)) >= decorationn)
+            return DecoratedInterval(interval, decorationn)
+        else
+            throw(ArgumentError("$decorationn is not an appropriate decoration for $interval"))
+        end
     else
         DecoratedInterval(interval)
     end
@@ -51,7 +83,7 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
 
     # Check version!
     if !(occursin("[", s))  # string like "3.1"
-
+        
         m = match(r"(.*)±(.*)", s)
         if m != nothing
             a = parse(T, strip(m.captures[1]))
@@ -67,6 +99,11 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
         end
 
         if m == nothing
+            m = match(r"(.*\?[a-z0-9]*)(\_.*)?", s)
+
+            if(m!=nothing && m.captures[2] != nothing)
+                throw(ArgumentError("Unable to process string $s as interval"))
+            end
 
             m = match(r"(\-?\d*\.?\d*)\?\?([ud]?)", s)   # match with string of form "34??"
 
@@ -93,6 +130,9 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
             if m != nothing  # matched
                 if m.captures[3] != "" && m.captures[4] == "" && m.captures[5] == nothing # string of form "3.4?1" or "10?2"
                     d = length(m.captures[2])
+                    if length(m.captures[3]) >= 308 #handle overflow
+                        return entireinterval(Float64)
+                    end
                     x = parse(Float64, m.captures[3] * "e-$d")
                     n = parse(Float64, m.captures[1]*"."*m.captures[2])
                     lo = n - x
@@ -184,10 +224,24 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
 
                     if m.captures[4] == "" && m.captures[5] != nothing    # strings of the form "3.56?1e2"
                         d = length(m.captures[2])
+                        e1 = split(s, 'e')[2]
+
+                        ee = checkOverflow(e1, m.captures[3], s) #To handle inputs of type 10?3e380
+                        if(ee != nothing)
+                            return ee
+                        end
+
                         x = parse(Float64, m.captures[3] * "e-$d")
                         n = parse(Float64, m.captures[1]*"."*m.captures[2])
-                        lo = parse(Float64, string(n-x)*m.captures[5])
-                        hi = parse(Float64, string(n+x)*m.captures[5])
+
+                        if(length(m.captures[5]) == 1) #if m.captures[5] is e
+                            lo = parse(Float64, string(n-x)*m.captures[5]*e1)
+                            hi = parse(Float64, string(n+x)*m.captures[5]*e1) 
+                        else
+                            lo = parse(Float64, string(n-x)*m.captures[5])
+                            hi = parse(Float64, string(n+x)*m.captures[5])
+                        end
+
                         interval = eval(make_interval(T, lo, [hi]))
                         return interval
                     end
@@ -211,56 +265,92 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
     end
 
     # match string of form [a, b]_dec:
-    m = match(r"\[(.*),(.*)\]", s)
+    m1 = match(r"(\[.*\])(\_.*)?", s)
 
-    if m != nothing  # matched
+    if(m1 != nothing) 
 
-        m.captures[1] = strip(m.captures[1], [' '])
-        m.captures[2] = strip(m.captures[2], [' '])
-        lo, hi = m.captures
-
-        if m.captures[2] == "+infinity" || m.captures[2] == ""
-            hi = "Inf"
+        if(m1.captures[2] != nothing)
+            throw(ArgumentError("Unable to process string $s as an interval"))
         end
 
-        if m.captures[1] == "-infinity" || m.captures[1] == ""
-            lo = "-Inf"
+        m = match(r"\[(.*),(.*)\]", m1.captures[1])
+
+        if m != nothing  # matched
+            #@show m.captures[1], m.captures[2]
+            m.captures[1] = strip(m.captures[1], [' '])
+            m.captures[2] = strip(m.captures[2], [' '])
+            lo, hi = m.captures
+
+            m.captures[1] = lowercase(m.captures[1])
+            m.captures[2] = lowercase(m.captures[2])
+
+            if m.captures[2] == "+infinity" || m.captures[2] == "" || m.captures[2] == "inf" || m.captures[2] == "+inf" || m.captures[2] == "infinity"
+                hi = "Inf"
+            elseif m.captures[2] == "-infinity" || m.captures[2] == "" || m.captures[2] == "-inf"
+                hi = "-Inf"
+            end
+            #@show m.captures[1], m.captures[2]
+            if m.captures[1] == "-infinity" || m.captures[1] == "" || m.captures[1] == "-inf"
+                lo = "-Inf"
+            elseif m.captures[1] == "+infinity" || m.captures[1] == "" || m.captures[1] == "inf" || m.captures[1] == "+inf" || m.captures[1] == "infinity"
+                lo = "Inf"
+            end
         end
-
-    end
-
-    if m == nothing
-
-        m = match(r"\[(.*)\]", s)  # string like "[1]"
 
         if m == nothing
-            throw(ArgumentError("Unable to process string $s as interval"))
+
+            m = match(r"\[(.*)\]", s)  # string like "[1]"
+
+            if m == nothing
+                throw(ArgumentError("Unable to process string $s as interval"))
+            end
+
+            m.captures[1] = strip(m.captures[1], [' '])
+            m.captures[1] = lowercase(m.captures[1])
+
+            if m.captures[1] == "" || m.captures[1] == "empty"
+                return emptyinterval(T)
+            end
+            if m.captures[1] == "entire"
+                return entireinterval(T)
+            end
+
+            lo = m.captures[1]
+            hi = lo
+
+            ss =  split(hi, 'e')
+            if(length(ss) > 1)
+                e0, e1 = split(hi, 'e')
+                ee = checkOverflow(e1, e0, s)
+                if(ee != nothing)
+                    return ee
+                end
+                
+            end
         end
-
-        m.captures[1] = strip(m.captures[1], [' '])
-
-        if m.captures[1] == "Empty" || m.captures[1] == "" || m.captures[1] == "empty"
-            return emptyinterval(T)
-        end
-        if m.captures[1] == "entire"
-            return entireinterval(T)
-        end
-
-        lo = m.captures[1]
-        hi = lo
-
     end
-
-    expr1 = Meta.parse(lo)
-    expr2 = Meta.parse(hi)
-    if lo == "-Inf"
+    
+    #@show lo, hi
+    
+    try
+        expr1 = Meta.parse(lo)
+        expr2 = Meta.parse(hi)
+    catch
+        throw(ArgumentError("Unable to process string $s as interval"))
+    end
+    #@show lo, hi
+    if lo == "-Inf" || lo =="Inf"
         expr1 = parse(Float64, lo)
     end
-    if hi == "Inf"
+    if hi == "Inf" || hi == "-Inf"
         expr2 = parse(Float64, hi)
     end
 
-    interval = eval(make_interval(T, expr1, [expr2]))
+    try
+        interval = eval(make_interval(T, expr1, [expr2]))
+    catch
+        throw(ArgumentError("Unable to process string $s as interval"))
+    end
 
     return interval
 

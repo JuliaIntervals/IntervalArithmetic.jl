@@ -37,8 +37,8 @@ struct DecoratedInterval{T<:Real} <: AbstractInterval{T}
 
     function DecoratedInterval{T}(I::Interval, d::DECORATION) where T
         dd = decoration(I)
-        dd <= trv && return new{T}(I, dd)
-        d == ill && return new{T}(nai(I))
+        dd < trv && return new{T}(I, dd)
+        d == ill && return nai(I)
         return new{T}(I, d)
     end
 end
@@ -79,7 +79,16 @@ DecoratedInterval(a::Tuple) = DecoratedInterval(a...)
 
 DecoratedInterval(I::DecoratedInterval, dec::DECORATION) = DecoratedInterval(I.interval, dec)
 
-interval(x::DecoratedInterval) = x.interval
+struct IntvlPartOfNaI <: Exception
+    x::DecoratedInterval
+end
+
+Base.showerror(io::IO, e::IntvlPartOfNaI) = print(io, e.x, " not a valid decorated interval")
+
+function interval(x::DecoratedInterval)
+    isnai(x) && throw(IntvlPartOfNaI(x)) 
+    return x.interval
+end
 
 decoration(x::DecoratedInterval) = x.decoration
 
@@ -129,7 +138,7 @@ macro decorated(ex...)
         if length(ex) == 1
             x = :(@interval($(esc(ex[1]))))
         else
-            x = :($(esc(ex[1])), $(esc(ex[2])))
+            x = :(@interval($(esc(ex[1])), $(esc(ex[2]))))
         end
 
         :(DecoratedInterval($x))

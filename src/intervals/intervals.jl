@@ -79,11 +79,7 @@ function is_valid_interval(a::Real, b::Real)
     # println("isvalid()")
 
     if isnan(a) || isnan(b)
-        if isnan(a) && isnan(b)
-            return true
-        else
-            return false
-        end
+        throw(ArgumentError("NaN not a valid input for intervals"))
     end
 
     if a > b
