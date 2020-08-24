@@ -16,7 +16,7 @@ nai(x::Interval{T}) where T<:Real = nai(T)
 nai(x::DecoratedInterval{T}) where T<:Real = nai(T)
 nai() = nai(precision(Interval)[1])
 isnai(x::Interval) = isnan(x.lo) || isnan(x.hi)
-isnai(x::DecoratedInterval) = isnai(interval(x)) || x.decoration == ill
+isnai(x::DecoratedInterval) = isnai(x.interval) || x.decoration == ill
 isnan(x::Interval) = isnai(x)
 
 ## Bool functions
@@ -54,7 +54,7 @@ scalar_functions = (
 )
 
 for f in scalar_functions
-    @eval $(f)(xx::DecoratedInterval{T}) where T = $f(interval(xx))
+    @eval $(f)(xx::DecoratedInterval{T}) where T = $f(xx.interval)
 end
 
 
@@ -62,11 +62,11 @@ end
 arithm_functions = ( :+, :-, :* )
 
 +(xx::DecoratedInterval) =  xx
--(xx::DecoratedInterval) =  DecoratedInterval(-interval(xx), decoration(xx))
+-(xx::DecoratedInterval) =  DecoratedInterval(-xx.interval, decoration(xx))
 for f in arithm_functions
     @eval function $(f)(xx::DecoratedInterval{T}, yy::DecoratedInterval{T}) where T
-        x = interval(xx)
-        y = interval(yy)
+        x = xx.interval
+        y = yy.interval
         r = $f(x, y)
         dec = min(decoration(xx), decoration(yy), decoration(r))
         DecoratedInterval(r, dec)
@@ -75,7 +75,7 @@ end
 
 # Division
 function inv(xx::DecoratedInterval{T}) where T
-    x = interval(xx)
+    x = xx.interval
     dx = decoration(xx)
     dx = zero(T) ∈ x ? min(dx,trv) : dx
     r = inv(x)
@@ -83,8 +83,8 @@ function inv(xx::DecoratedInterval{T}) where T
     DecoratedInterval( r, dx )
 end
 function /(xx::DecoratedInterval{T}, yy::DecoratedInterval{T}) where T
-    x = interval(xx)
-    y = interval(yy)
+    x = xx.interval
+    y = yy.interval
     r = x / y
     dy = decoration(yy)
     dy = zero(T) ∈ y ? min(dy, trv) : dy

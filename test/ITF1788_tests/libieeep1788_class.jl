@@ -219,7 +219,7 @@ end
     @test interval(@decorated("[-infinity,infinity]_trv")) == entireinterval()
     @test interval(@decorated("[empty]_trv")) == @interval("[empty]")
     @test interval(@decorated("[-0X1.99999C0000000p+4,0X1.9999999999999P-4]_com")) == @interval(-0x1.99999C0000000p+4,0x1.9999999999999P-4)
-    @test interval(@decorated("[nai]")) === Interval(NaN, NaN)
+    @test_throws IntervalArithmetic.IntvlPartOfNaI interval(@decorated("[nai]"))
 end
 
 @testset "minimal_new_dec_test" begin

@@ -79,7 +79,16 @@ DecoratedInterval(a::Tuple) = DecoratedInterval(a...)
 
 DecoratedInterval(I::DecoratedInterval, dec::DECORATION) = DecoratedInterval(I.interval, dec)
 
-interval(x::DecoratedInterval) = x.interval
+struct IntvlPartOfNaI <: Exception
+    x::DecoratedInterval
+end
+
+Base.showerror(io::IO, e::IntvlPartOfNaI) = print(io, e.x, " not a valid decorated interval")
+
+function interval(x::DecoratedInterval)
+    isnai(x) && throw(IntvlPartOfNaI(x)) 
+    return x.interval
+end
 
 decoration(x::DecoratedInterval) = x.decoration
 
