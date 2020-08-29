@@ -396,6 +396,9 @@ end
     @test nthroot(∅, 4) == ∅
     @test nthroot(∅, -3) == ∅
     @test nthroot(∅, -4) == ∅
+    @test nthroot(Interval(1, 2), 0) == ∅
+    @test nthroot(Interval(5, 8), 0) == ∅
+    @test nthroot(Interval(1, 7), 0) == ∅
     @test nthroot(Interval(8, 27), 3) == Interval(2, 3)
     @test nthroot(Interval(0, 27), 3) == Interval(0, 3)
     @test nthroot(Interval(-27, 0), 3) == Interval(-3, 0)
@@ -414,6 +417,15 @@ end
     @test nthroot(Interval(16, 81), -4) == Interval(1/3, 1/2)
     @test nthroot(Interval(0, 81), -4) == Interval(1/3, Inf)
     @test nthroot(Interval(-81, 0), -4) == ∅
+    @test nthroot(Interval(-81, 1), 1) == Interval(-81, 1)
     @test nthroot(Interval(-81, 81), -4) == Interval(1/3, Inf)
     @test nthroot(Interval(-81, -16), -4) == ∅
+    @test nthroot(Interval(-81, -16), 1) == Interval(-81, -16)
+    @test nthroot(Interval{BigFloat}(16, 81), 4) == Interval{BigFloat}(2, 3)
+    @test nthroot(Interval{BigFloat}(0, 81), 4) == Interval{BigFloat}(0, 3)
+    @test nthroot(Interval{BigFloat}(-81, 0), 4) == Interval{BigFloat}(0)
+    @test nthroot(Interval{BigFloat}(-81, 81), 4) == Interval{BigFloat}(0, 3)
+    @test nthroot(Interval{BigFloat}(-27, 27), -3) == Interval{BigFloat}(-Inf, Inf)
+    @test nthroot(Interval{BigFloat}(-81, -16), -4) == ∅
+    @test nthroot(Interval{BigFloat}(-81, -16), 1) == Interval{BigFloat}(-81, -16)
 end 
