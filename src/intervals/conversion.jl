@@ -104,6 +104,7 @@ end
 function atomic(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:AbstractFloat}
     isinf(x) && return wideinterval(T(x))
 
+    # TODO: Delegate type assertion to the type system
     xrat = T == BigFloat ? rationalize(BigInt, x) : rationalize(x) # Issue #410
 
     # This prevents that xrat returns a 0//1 when x is very small
