@@ -31,6 +31,11 @@ macro floatinterval(expr1, expr2...)
     make_interval(Float64, expr1, expr2)
 end
 
+"The `@typeinterval` macro constructs an interval with entries of a given type."
+macro typeinterval(type, expr1, expr2...)
+    make_interval(type, expr1, expr2)
+end
+
 "The `@biginterval` macro constructs an interval with `BigFloat` entries."
 macro biginterval(expr1, expr2...)
     make_interval(BigFloat, expr1, expr2)
