@@ -311,10 +311,10 @@ end
 
 #atan{T<:Real, S<:Real}(y::Interval{T}, x::Interval{S}) = atan(promote(y, x)...)
 
-function atan(y::Interval{Float64}, x::Interval{Float64})
-    (isempty(y) || isempty(x)) && return emptyinterval(Float64)
+function atan(y::Interval{T}, x::Interval{T}) where T
+    (isempty(y) || isempty(x)) && return emptyinterval(T)
 
-    atomic(Interval{Float64}, atan(big53(y), big53(x)))
+    atomic(Interval{T}, atan(bigequiv(y), bigequiv(x)))
 end
 
 
@@ -418,7 +418,7 @@ for f in (:cot, :csc, :sec)
     @eval function ($f)(a::Interval{T}) where T
         isempty(a) && return a
 
-        atomic(Interval{T}, ($f)(big53(a)) )
+        atomic(Interval{T}, ($f)(bigequiv(a)) )
     end
 end
 

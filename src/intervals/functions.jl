@@ -7,7 +7,7 @@
 
 # Write explicitly like this to avoid ambiguity warnings:
 for T in (:Integer, :Float64, :BigFloat, :Interval)
-    @eval ^(a::Interval{Float64}, x::$T) = atomic(Interval{Float64}, big53(a)^x)
+    @eval ^(a::Interval{Float64}, x::$T) = atomic(Interval{Float64}, bigequiv(a)^x)
 end
 
 
@@ -294,7 +294,7 @@ for f in (:exp2, :exp10, :cbrt)
             end
         end
 
-    @eval ($f)(a::Interval{T}) where T = atomic(Interval{T}, $f(big53(a)))  # no CRlibm version
+    @eval ($f)(a::Interval{T}) where T = atomic(Interval{T}, $f(bigequiv(a)))  # no CRlibm version
 
     @eval function ($f)(a::Interval{BigFloat})
             isempty(a) && return a
@@ -327,7 +327,7 @@ end
 
 hypot(a::Interval{BigFloat}, b::Interval{BigFloat}) = sqrt(a^2 + b^2)
 
-hypot(a::Interval{T}, b::Interval{T}) where T= atomic(Interval{T}, hypot(big53(a), big53(b)))
+hypot(a::Interval{T}, b::Interval{T}) where T= atomic(Interval{T}, hypot(bigequiv(a), bigequiv(b)))
 
 """
 nthroot(a::Interval{BigFloat}, n::Integer)
@@ -357,6 +357,6 @@ function nthroot(a::Interval{BigFloat}, n::Integer)
 end
 
 function nthroot(a::Interval{T}, n::Integer) where T
-    b = nthroot(big53(a), n)
+    b = nthroot(bigequiv(a), n)
     return convert(Interval{T}, b)
 end 
