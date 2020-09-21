@@ -210,23 +210,23 @@ function atomic(::Type{F}, x::AbstractFloat) where {T, F<:Interval{T}}
 end
 
 """
-    big53(x::Interval{Float64})
+    bigequiv(x::Interval{Float64})
 
-Create an equivalent `BigFloat` interval to a given `Float64` interval.
+Create an equivalent `BigFloat` interval to a given `AbstractFloat` interval.
 """
-function big53(a::Interval{Float64})
-    return setprecision(BigFloat, 53) do  # precision of Float64
+function bigequiv(a::Interval{T}) where {T <: AbstractFloat}
+    setprecision(precision(T)) do  # precision of T
         return Interval{BigFloat}(a)
     end
 end
 
 """
-    big53(x::Float64)
+    bigequiv(x::AbstractFloat)
 
-Convert `x` to `BigFloat`.
+Convert `x` to an equivalent `BigFloat`, with the same underlying precision of `x`.
 """
-function big53(x::Float64)
-    return setprecision(BigFloat, 53) do
+function bigequiv(x::AbstractFloat)
+    return setprecision(precision(x)) do
         return BigFloat(x)
     end
 end
