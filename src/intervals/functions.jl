@@ -294,7 +294,7 @@ for f in (:exp2, :exp10, :cbrt)
             end
         end
 
-    @eval ($f)(a::Interval{Float64}) = atomic(Interval{Float64}, $f(big53(a)))  # no CRlibm version
+    @eval ($f)(a::Interval{T}) where T = atomic(Interval{T}, $f(big53(a)))  # no CRlibm version
 
     @eval function ($f)(a::Interval{BigFloat})
             isempty(a) && return a
