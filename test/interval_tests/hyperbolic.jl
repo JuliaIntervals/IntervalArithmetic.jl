@@ -42,7 +42,7 @@ end
     @test tanh(Interval{BigFloat}(0.5, 8.5)) ⊆ tanh(Interval(0.5, 8.5))
     @test tanh(Interval{BigFloat}(-4.5, 0.1)) ⊆ tanh(Interval(-4.5, 0.1))
     @test tanh(Interval{BigFloat}(1.3, 6.3)) ⊆ tanh(Interval(1.3, 6.3))
-    
+
     @test tanh(Interval(-4.5, 0.1)) ⊆ tanh(Interval{Float32}(-4.5, 0.1))
     @test tanh(Interval(1.3, 6.3)) ⊆ tanh(Interval{Float32}(1.3, 6.3))
 
