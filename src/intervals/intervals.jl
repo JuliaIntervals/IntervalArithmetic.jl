@@ -144,6 +144,14 @@ function ..(a::T, b::S) where {T, S}
     interval(atomic(Interval{T}, a).lo, atomic(Interval{S}, b).hi)
 end
 
+function ..(a::T, b::S) where {T<:Integer, S}
+    interval(atomic(Interval{S}, a).lo, atomic(Interval{S}, b).hi)
+end
+
+function ..(a::T, b::S) where {T, S<:Integer}
+    interval(atomic(Interval{T}, a).lo, atomic(Interval{T}, b).hi)
+end
+
 function ..(a::T, b::Irrational{S}) where {T, S}
     R = promote_type(T, Irrational{S})
     interval(atomic(Interval{R}, a).lo, R(b, RoundUp))
