@@ -5,7 +5,7 @@ using Test
 @testset "types consistency" begin
     int_types = [Int8, Int16, Int32, Int64, Int128]
     float_types = [Float16, Float32, Float64]
-    considered_types = vcat(int_types, float_types
+    considered_types = vcat(int_types, float_types)
     interval_functions = [.., interval, Interval]
     for interval_constructors in interval_functions
         for T in considered_types
