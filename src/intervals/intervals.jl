@@ -144,11 +144,11 @@ function ..(a::T, b::S) where {T, S}
     interval(atomic(Interval{T}, a).lo, atomic(Interval{S}, b).hi)
 end
 
-function ..(a::T, b::S) where {T<:Integer, S}
+function ..(a::T, b::S) where {T<:Integer, S<:AbstractFloat}
     interval(atomic(Interval{S}, a).lo, atomic(Interval{S}, b).hi)
 end
 
-function ..(a::T, b::S) where {T, S<:Integer}
+function ..(a::T, b::S) where {T<:AbstractFloat, S<:Integer}
     interval(atomic(Interval{T}, a).lo, atomic(Interval{T}, b).hi)
 end
 
