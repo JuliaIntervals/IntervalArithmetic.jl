@@ -84,6 +84,16 @@ end
     @test diam(a) == eps(1.e-20)
 
     @test (0..∞) * (-1..∞) == -∞..∞
+
+    @testset "BigFloat" begin
+        setprecision(BigFloat, 256) do
+            MID = BigFloat("0.1")
+            RAD = √eps(MID)
+            mid, rad = midpoint_radius(MID ± RAD)
+            @test rad >= RAD    # Issue #410
+        end
+    end
+
 end
 
 @testset "Arithmetic with constants" begin
