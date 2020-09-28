@@ -104,8 +104,22 @@ end
 function atomic(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:AbstractFloat}
     isinf(x) && return wideinterval(T(x))
 
-    # TODO: Delegate type assertion to the type system
-    xrat = T == BigFloat ? rationalize(BigInt, x) : rationalize(x) # Issue #410
+    xrat = rationalize(x)
+
+    # This prevents that xrat returns a 0//1 when x is very small
+    # or 1//0 when x is too large but finite
+    if (x != zero(x) && xrat == 0) || isinf(xrat)
+        xstr = string(x)
+        return Interval(parse(T, xstr, RoundDown), parse(T, xstr, RoundUp))
+    end
+
+    return atomic(Interval{T}, xrat)
+end
+
+function atomic(::Type{Interval{BigFloat}}, x::S) where {S<:AbstractFloat}
+    isinf(x) && return wideinterval(T(x))
+
+    xrat = rationalize(BigInt, x) # Issue #410
 
     # This prevents that xrat returns a 0//1 when x is very small
     # or 1//0 when x is too large but finite
