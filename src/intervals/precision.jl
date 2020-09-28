@@ -19,19 +19,19 @@ const big53_lock = ReentrantLock()
 
 "`big53` creates an equivalent `BigFloat` interval to a given `Float64` interval."
 function big53(a::Interval{Float64})
-    lock(big53_lock)
-    setprecision(Interval, 53) do  # precision of Float64
-        atomic(Interval{BigFloat}, a)
+    return lock(big53_lock) do
+        return setprecision(Interval, 53) do  # precision of Float64
+            return atomic(Interval{BigFloat}, a)
+        end
     end
-    unlock(big53_lock)
 end
 
 function big53(x::Float64)
-    lock(big53_lock)
-    setprecision(53) do
-        BigFloat(x)
+    return lock(big53_lock) do
+        return setprecision(53) do
+            return BigFloat(x)
+        end
     end
-    unlock(big53_lock)
 end
 
 
