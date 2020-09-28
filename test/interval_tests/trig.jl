@@ -46,6 +46,8 @@ end
     @test sinpi(1 .. 2) ⊇ Interval(-1 , 0)
     @test sinpi(0.25 .. 0.75) ⊇ Interval(1/sqrt(2) , 1)
     @test sinpi(-0.25 .. 0.25) ⊇ Interval(-1/sqrt(2) , 1/sqrt(2))
+    @test sinpi(1..1) == 0
+    @test sinpi(0.5..0.5) == 1
 end
 
 @testset "cospi" begin
@@ -54,6 +56,8 @@ end
     @test cospi(0.5 .. 1.5) ⊇ Interval(-1 , 0)
     @test cospi(0.25 .. 0.75) ⊇ Interval(-1/sqrt(2) , 1/sqrt(2))
     @test cospi(-0.25 .. 0.25) == Interval(1/sqrt(2) , 1)
+    @test cospi(1..1) == -1
+    @test cospi(0.5..0.5) == 0
 end
 
 @testset "tan" begin
