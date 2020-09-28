@@ -195,6 +195,8 @@ const eeuler = Base.MathConstants.e
         RAD = √eps(MID)
         mid, rad = midpoint_radius(MID ± RAD)
         @test rad >= RAD
+        mid, rad = midpoint_radius((MID-RAD)..(MID+RAD))
+        @test rad >= RAD
     end
 
 end
