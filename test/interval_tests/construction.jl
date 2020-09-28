@@ -191,12 +191,12 @@ const eeuler = Base.MathConstants.e
     # Interval{BigFloat} construction through ± involving a Float64 intermediate step ending up
     # with a _smaller_ interval radius
     setprecision(BigFloat, 256) do
-        MID = BigFloat("0.1")
-        RAD = √eps(MID)
-        mid, rad = midpoint_radius(MID ± RAD)
-        @test rad >= RAD
-        mid, rad = midpoint_radius((MID-RAD)..(MID+RAD))
-        @test rad >= RAD
+        orig_mid = BigFloat("0.1")
+        orig_rad = √eps(orig_mid)
+        test_mid, test_rad = midpoint_radius(orig_mid ± orig_rad)
+        @test test_rad >= orig_rad
+        test_mid, test_rad = midpoint_radius((orig_mid-orig_rad)..(orig_mid+orig_rad))
+        @test test_rad >= orig_rad
     end
 
 end
