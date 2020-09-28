@@ -141,15 +141,8 @@ include("complex.jl")
 # Syntax for intervals
 
 function ..(a::T, b::S) where {T, S}
-    interval(atomic(Interval{T}, a).lo, atomic(Interval{S}, b).hi)
-end
-
-function ..(a::T, b::S) where {T<:Integer, S<:AbstractFloat}
-    interval(atomic(Interval{S}, a).lo, atomic(Interval{S}, b).hi)
-end
-
-function ..(a::T, b::S) where {T<:AbstractFloat, S<:Integer}
-    interval(atomic(Interval{T}, a).lo, atomic(Interval{T}, b).hi)
+    R = promote_type(T, S)
+    interval(atomic(Interval{R}, a).lo, atomic(Interval{R}, b).hi)
 end
 
 function ..(a::T, b::Irrational{S}) where {T, S}
@@ -159,12 +152,12 @@ end
 
 function ..(a::Irrational{T}, b::S) where {T, S}
     R = promote_type(Irrational{T}, S)
-    return Interval(R(a, RoundDown), atomic(Interval{R}, b).hi)
+    return interval(R(a, RoundDown), atomic(Interval{R}, b).hi)
 end
 
 function ..(a::Irrational{T}, b::Irrational{S}) where {T, S}
     R = promote_type(Irrational{T}, Irrational{S})
-    return Interval(a, b)
+    return interval(R(a, RoundDown), R(b, RoundUp))
 end
 
 # ..(a::Integer, b::Integer) = interval(a, b)
