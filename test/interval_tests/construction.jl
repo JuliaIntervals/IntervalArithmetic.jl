@@ -216,6 +216,15 @@ end
     # @test imag(b) == Interval(-15.200784463067956, -15.20078446306795)
 end
 
+@testset "Typed intervals" begin
+    setprecision(Interval, Float64)
+
+    @test typeof(@interval Float64 1 2) == Interval{Float64}
+    @test typeof(@interval         1 2) == Interval{Float64}
+    @test typeof(@interval Float32 1 2) == Interval{Float32}
+    @test typeof(@interval Float16 1 2) == Interval{Float16}
+end
+
 @testset ".. tests" begin
 
     a = 0.1..0.3
