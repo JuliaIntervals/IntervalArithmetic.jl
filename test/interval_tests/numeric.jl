@@ -361,6 +361,9 @@ end
         @test cbrt(big(2..3)) ⊆ cbrt(2..3)
 
         @test cbrt(big(3..4)) != cbrt(3..4)
+
+        @test cbrt(2f0..3f0) == Interval(1.259921f0, 1.4422497f0)
+        @test cbrt(2..3) ⊆ cbrt(2f0..3f0)
     end
 
     @testset "inv" begin

@@ -15,14 +15,14 @@ const parameters = IntervalParameters()
 
 ## Precision:
 
-const float64_precision = 53
-
-"`big53` creates an equivalent `BigFloat` interval to a given `Float64` interval."
-big53(a::Interval{Float64}) = guarded_setprecision(Interval, float64_precision) do
-    return atomic(Interval{BigFloat}, a)
+"`bigequiv` creates an equivalent `BigFloat` interval to a given `AbstractFloat` interval."
+function bigequiv(a::Interval{T}) where {T <: AbstractFloat}
+    return guarded_setprecision(Interval, precision(T)) do
+        return atomic(Interval{BigFloat}, a)
+    end
 end
 
-big53(x::Float64) = guarded_setprecision(float64_precision) do
+bigequiv(x::AbstractFloat) = guarded_setprecision(precision(x)) do
     return BigFloat(x)
 end
 

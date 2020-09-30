@@ -16,8 +16,14 @@ Examples:
     @interval(1/3^2)
 ```
 """
-macro interval(expr1, expr2...)
-    make_interval(:(parameters.precision_type), expr1, expr2)
+macro interval(expr1)
+    make_interval(:(parameters.precision_type), expr1, ())
+end
+macro interval(expr1, expr2)
+    make_interval(:(parameters.precision_type), expr1, (expr2, ))
+end
+macro interval(T, expr1, expr2)
+    make_interval(T, expr1, (expr2, ))
 end
 
 "The `@floatinterval` macro constructs an interval with `Float64` entries."
@@ -78,7 +84,7 @@ end
 and making each literal (0.1, 1, etc.) into a corresponding interval construction,
 by calling `transform`."""
 function make_interval(T, expr1, expr2)
-    # @show expr1, expr2
+    # @show T, expr1, expr2
 
     expr1 = transform(expr1, :atomic, :(Interval{$T}))
 
