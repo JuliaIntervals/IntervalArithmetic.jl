@@ -15,29 +15,30 @@ const parameters = IntervalParameters()
 
 ## Precision:
 
-const big53_lock = ReentrantLock()
+const float64_precision = 53
 
 "`big53` creates an equivalent `BigFloat` interval to a given `Float64` interval."
-function big53(a::Interval{Float64})
-    return lock(big53_lock) do
-        return setprecision(Interval, 53) do  # precision of Float64
-            return atomic(Interval{BigFloat}, a)
-        end
-    end
+big53(a::Interval{Float64}) = guarded_setprecision(Interval, float64_precision) do
+    return atomic(Interval{BigFloat}, a)
 end
 
-function big53(x::Float64)
-    return lock(big53_lock) do
-        return setprecision(53) do
-            return BigFloat(x)
-        end
-    end
+big53(x::Float64) = guarded_setprecision(float64_precision) do
+    return BigFloat(x)
 end
 
+# NOTE: prevents multiple threads from calling setprecision() concurrently
+const precision_lock = ReentrantLock()
+
+guarded_setprecision(f, ::Type{Interval}, prec::Integer) = lock(precision_lock) do
+    return setprecision(f, Interval, prec)
+end
+
+guarded_setprecision(f, prec::Integer) = lock(precision_lock) do
+    return setprecision(f, prec)
+end
 
 setprecision(::Type{Interval}, ::Type{Float64}) = parameters.precision_type = Float64
 # does not change the BigFloat precision
-
 
 function setprecision(::Type{Interval}, ::Type{T}, prec::Integer) where T<:AbstractFloat
     #println("SETTING BIGFLOAT PRECISION TO $precision")
