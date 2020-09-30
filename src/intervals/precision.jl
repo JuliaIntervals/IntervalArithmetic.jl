@@ -15,17 +15,15 @@ const parameters = IntervalParameters()
 
 ## Precision:
 
-"`big53` creates an equivalent `BigFloat` interval to a given `Float64` interval."
-function big53(a::Interval{Float64})
-    setprecision(Interval, 53) do  # precision of Float64
+"`bigequiv` creates an equivalent `BigFloat` interval to a given `AbstractFloat` interval."
+function bigequiv(a::Interval{T}) where {T <: AbstractFloat}
+    setprecision(Interval, precision(T)) do  # precision of T
         atomic(Interval{BigFloat}, a)
     end
 end
 
-function big53(x::Float64)
-    # BigFloat(x, 53)  # in Julia v0.6
-
-    setprecision(53) do
+function bigequiv(x::AbstractFloat)
+    setprecision(precision(x)) do
         BigFloat(x)
     end
 end
