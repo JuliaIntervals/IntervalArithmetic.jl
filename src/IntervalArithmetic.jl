@@ -52,7 +52,7 @@ import .Broadcast: broadcasted
 export
     AbstractInterval, Interval,
     interval,
-    @interval, @biginterval, @floatinterval, @typeinterval,
+    @interval, @biginterval, @floatinterval,
     diam, radius, mid, mag, mig, hull,
     emptyinterval, ∅, ∞, isempty, isinterior, ⪽, nthroot,
     precedes, strictprecedes, ≼, ≺, ⊂, ⊃, ⊇, contains_zero,
