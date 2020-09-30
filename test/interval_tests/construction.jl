@@ -351,7 +351,7 @@ end
     @test isequal(hash(x), hash(y))
 
     x = 0.1
-    y = IntervalArithmetic.big53(x)
+    y = IntervalArithmetic.bigequiv(x)
     @test isequal(x, y)
     @test isequal(hash(x), hash(y))
 
