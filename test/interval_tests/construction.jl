@@ -350,6 +350,11 @@ end
     @test isequal(x, y)
     @test isequal(hash(x), hash(y))
 
+    x = 0.1
+    y = IntervalArithmetic.bigequiv(x)
+    @test isequal(x, y)
+    @test isequal(hash(x), hash(y))
+
     x = interval(1, 2)
     y = interval(1, 3)
     @test !isequal(x, y)

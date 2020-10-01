@@ -17,21 +17,28 @@ const parameters = IntervalParameters()
 
 "`bigequiv` creates an equivalent `BigFloat` interval to a given `AbstractFloat` interval."
 function bigequiv(a::Interval{T}) where {T <: AbstractFloat}
-    setprecision(Interval, precision(T)) do  # precision of T
-        atomic(Interval{BigFloat}, a)
+    return guarded_setprecision(Interval, precision(T)) do
+        return atomic(Interval{BigFloat}, a)
     end
 end
 
-function bigequiv(x::AbstractFloat)
-    setprecision(precision(x)) do
-        BigFloat(x)
-    end
+bigequiv(x::AbstractFloat) = guarded_setprecision(precision(x)) do
+    return BigFloat(x)
 end
 
+# NOTE: prevents multiple threads from calling setprecision() concurrently
+const precision_lock = ReentrantLock()
+
+guarded_setprecision(f, ::Type{Interval}, prec::Integer) = lock(precision_lock) do
+    return setprecision(f, Interval, prec)
+end
+
+guarded_setprecision(f, prec::Integer) = lock(precision_lock) do
+    return setprecision(f, prec)
+end
 
 setprecision(::Type{Interval}, ::Type{Float64}) = parameters.precision_type = Float64
 # does not change the BigFloat precision
-
 
 function setprecision(::Type{Interval}, ::Type{T}, prec::Integer) where T<:AbstractFloat
     #println("SETTING BIGFLOAT PRECISION TO $precision")
