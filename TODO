@@ -47,7 +47,7 @@ Review intervals folder:
 
   conversion.jl:
     ✔ Review @done(19-08-23 03:25)
-    ☐ Fix ambiguous errors
+    ☐ Fix ambiguity errors
   
   complex.jl:
     Should we even bother ?

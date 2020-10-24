@@ -20,7 +20,7 @@ Implement the `pow` function of the IEEE Std 1788-2015 (Table 9.1).
 ^(a::F, b::F) where {F<:AbstractFlavor} = atomic(F, big53(a)^b)
 ^(a::F, x::AbstractFloat) where {F<:AbstractFlavor{BigFloat}} = a^big(x)
 
-for T in (:AbstractFloat, :Rational, :Integer)
+for T in (:AbstractFloat, :Integer)
     @eval ^(a::F, x::$T) where {F<:AbstractFlavor} = atomic(F, big53(a)^x)
 end
 
