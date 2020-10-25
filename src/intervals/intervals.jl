@@ -9,113 +9,6 @@ else
     const validity_check = false
 end
 
-abstract type AbstractRealFlavor{T}<:Real end
-abstract type AbstractNonRealFlavor{T} end
-
-"""
-    AbstractFlavor
-
-Supertype of all interval flavors (*interval Flavor* is the IEEE-Standard term
-for a type of interval).
-
-For most practical purposes it acts as an abstract type from which all flavors
-are derived. It is however an abstract union and can therefore not be directly
-subtyped. A new Flavor should instead subtype either `AbstractRealFlavor` or
-`AbstractNonRealFlavor`, depending on wether the Flavor should be a subtype of
-`Real`.
-"""
-const AbstractFlavor{T} = Union{AbstractRealFlavor{T}, AbstractNonRealFlavor{T}}
-
-eltype(::F) where {F<:AbstractFlavor} = F
-size(::AbstractFlavor) = (1,)
-
-for (Flavor, Supertype) in [(:SetBasedFlavoredInterval, AbstractRealFlavor), (:GenericFlavoredInterval, AbstractNonRealFlavor)]
-    flavordef = quote
-        struct $Flavor{T}<:$Supertype{T}
-            lo :: T
-            hi :: T
-
-            function $Flavor{T}(a::Real, b::Real) where {T<:Real}
-                !validity_check && return new(a, b)
-                !is_valid_interval(a, b) && throw(ArgumentError("Interval of form [$a, $b] not allowed. Must have a ≤ b to construct interval(a, b)."))
-
-                new(a, b)
-            end
-        end
-
-        ## Outer constructors
-        $Flavor(a::T, b::T) where {T<:Real} = $Flavor{T}(a, b)
-        $Flavor(a::T) where {T<:Real} = $Flavor(a, a)
-        $Flavor(a::Tuple) = $Flavor(a...)
-        $Flavor(a::T, b::S) where {T<:Real, S<:Real} = $Flavor(promote(a, b)...)
-
-        ## Concrete constructors for Interval, to effectively deal only with Float64,
-        # BigFloat or Rational{Integer} intervals.
-        $Flavor(a::T, b::T) where {T<:Integer} = $Flavor(float(a), float(b))
-
-        $Flavor(x::AbstractFlavor) = $Flavor(x.lo, x.hi)
-        $Flavor(x::$Flavor) = x
-        $Flavor(x::Complex) = $Flavor(real(x)) + im*$Flavor(imag(x))
-
-        # TODO check if that gives correct results
-        $Flavor{T}(x) where T = $Flavor(convert(T, x))
-        $Flavor{T}(x::$Flavor) where T = atomic($Flavor{T}, x)
-
-        # Constructors for Irrational
-        # Single argument Irrational constructor are in IntervalArithmetic.jl
-        # as generated functions need to be define last.
-        $Flavor{T}(a::Irrational, b::Irrational) where {T<:Real} = $Flavor{T}(T(a, RoundDown), T(b, RoundUp))
-        $Flavor{T}(a::Irrational, b::Real) where {T<:Real} = $Flavor{T}(T(a, RoundDown), b)
-        $Flavor{T}(a::Real, b::Irrational) where {T<:Real} = $Flavor{T}(a, T(b, RoundUp))
-
-        $Flavor(a::Irrational, b::Irrational) = $Flavor{Float64}(a, b)
-        $Flavor(a::Irrational, b::Real) = $Flavor{Float64}(a, b)
-        $Flavor(a::Real, b::Irrational) = $Flavor{Float64}(a, b)
-
-        function $Flavor{T}(a, b; check=false) where {T}
-            if check && !is_valid_interval(a, b)
-                throw(ArgumentError("`[$a, $b]` is not a valid interval. Need `a ≤ b` to construct `interval(a, b)`."))
-            end
-        
-            return $Flavor(a, b)
-        end
-
-        function $Flavor(a, b; check=false)
-            if check && !is_valid_interval(a, b)
-                throw(ArgumentError("`[$a, $b]` is not a valid interval. Need `a ≤ b` to construct `interval(a, b)`."))
-            end
-        
-            return $Flavor(a, b)
-        end
-
-        $Flavor(a; check=false) = $Flavor(a, a, check=check)
-
-        # Flavor without parametrization, allows reparametrization
-        flavortype(::Type{$Flavor{T}}) where T = $Flavor
-
-        convert(::Type{$Flavor{T}}, x::$Flavor{S}) where {T, S} = atomic($Flavor{T}, x)
-    end
-
-    @eval $flavordef
-end
-
-
-"""
-    reparametrize(F::Type{AbstractFlavor}, ::Type{ELTYPE})
-
-Return the type corresponding to flavor `F` with bounds of type `ELTYPE`.
-"""
-reparametrize(::Type{F}, ::Type{ELTYPE}) where {F<:AbstractFlavor, ELTYPE} = flavortype(F){ELTYPE}
-
-const supported_flavors = (SetBasedFlavoredInterval, GenericFlavoredInterval)
-
-if haskey(ENV, "IA_DEFAULT_FLAVOR")
-    @eval quote
-        const Interval = $(ENV["IA_DEFAULT_FLAVOR"])
-    end
-else
-    const Interval = SetBasedFlavoredInterval
-end
 
 if haskey(ENV, "IA_DEFAULT_BOUND_TYPE")
     @eval quote
@@ -124,6 +17,90 @@ if haskey(ENV, "IA_DEFAULT_BOUND_TYPE")
 else
     const DefaultBound = Float64
 end
+
+
+"""
+    AbstractFlavor <: Real
+
+Supertype of all interval flavors (*interval Flavor* is the IEEE-Standard term
+for a type of interval).
+"""
+abstract type AbstractFlavor{T} <: Real end
+
+eltype(::F) where {F<:AbstractFlavor} = F
+size(::AbstractFlavor) = (1,)
+
+struct SetBasedInterval{T} <: AbstractFlavor{T}
+    lo :: T
+    hi :: T
+
+    function SetBasedInterval{T}(a::T, b::T) where {T}
+        if validity_check && !is_valid_interval(a, b)
+            throw(ArgumentError("Interval of form [$a, $b] not allowed. Must have a ≤ b to construct interval(a, b)."))
+        else
+            return new(a, b)
+        end
+    end
+end
+
+function (::Type{F})(args... ; check=false) where {F<:AbstractFlavor}
+    if check && !is_valid_interval(args...)
+        throw(ArgumentError("Interval of form [$a, $b] not allowed. Must have a ≤ b to construct interval(a, b)."))
+    else
+        return F(args...)
+    end
+end
+
+#= Outer constructors =#
+(::Type{F})(a::T) where {F<:AbstractFlavor, T} = F(a, a)
+(::Type{F})(a::Tuple) where {F<:AbstractFlavor} = F(a...)
+(::Type{F})(a::T, b::T) where {F<:AbstractFlavor, T} = F{T}(a, b)
+(::Type{F})(a::T, b::S) where {F<:AbstractFlavor, T, S} = F(promote(a, b)...)
+
+#= Concrete constructors for Interval, to effectively deal only with Float64,
+   BigFloat or Rational{Integer} intervals.
+=#
+(::Type{F})(a::T, b::T) where {F<:AbstractFlavor, T<:Integer} = F(float(a), float(b))
+(::Type{F})(a::S, b::S) where {T, F<:AbstractFlavor{T}, S<:Integer} = F(convert(T, a), convert(T, b))
+(::Type{F})(x::AbstractFlavor) where {F<:AbstractFlavor} = F(x.lo, x.hi)
+(::Type{F})(x::F) where {T, F<:AbstractFlavor{T}} = x
+(::Type{F})(x) where {T, F<:AbstractFlavor{T}} = F(convert(T, x))
+(::Type{F})(x::G) where {T, F<:AbstractFlavor{T}, G<:AbstractFlavor} = atomic(F, x)
+
+(::Type{F})(x::Complex) where {F<:AbstractFlavor} = F(real(x)) + im*F(imag(x))
+
+# Constructors for Irrational
+# Single argument Irrational constructor are in IntervalArithmetic.jl
+# as generated functions need to be define last.
+(::Type{F})(a::Irrational, b::Irrational) where {T, F<:AbstractFlavor{T}} = F(T(a, RoundDown), T(b, RoundUp))
+(::Type{F})(a::Irrational, b::Real) where {T, F<:AbstractFlavor{T}} = F(T(a, RoundDown), b)
+(::Type{F})(a::Real, b::Irrational) where {T, F<:AbstractFlavor{T}} = F(a, T(b, RoundUp))
+
+(::Type{F})(a::Irrational, b::Irrational) where {F<:AbstractFlavor} = F{DefaultBound}(a, b)
+(::Type{F})(a::Irrational, b::Real) where {F<:AbstractFlavor} = F{DefaultBound}(a, b)
+(::Type{F})(a::Real, b::Irrational) where {F<:AbstractFlavor} = F{DefaultBound}(a, b)
+
+# Flavor without parametrization, allows reparametrization
+# TODO Find a way to do the following in a generic way
+flavortype(::Type{SetBasedInterval{T}}) where T = SetBasedInterval
+
+"""
+    reparametrize(F::Type{AbstractFlavor}, ::Type{T})
+
+Return the type corresponding to flavor `F` with bounds of type `T`.
+"""
+reparametrize(::Type{F}, ::Type{T}) where {F<:AbstractFlavor, T} = flavortype(F){T}
+
+const supported_flavors = (SetBasedInterval,)
+
+if haskey(ENV, "IA_DEFAULT_FLAVOR")
+    @eval quote
+        const Interval = $(ENV["IA_DEFAULT_FLAVOR"])
+    end
+else
+    const Interval = SetBasedInterval
+end
+
 
 @doc """
     Interval
@@ -161,13 +138,18 @@ function is_valid_interval(a::Real, b::Real)
     return true
 end
 
+is_valid_interval(a::Real) = true
+
 
 """
     interval(a, b)
 
-`interval(a, b)` checks whether [a, b] is a valid `Interval`, which is the case if `-∞ <= a <= b <= ∞`, using the (non-exported) `is_valid_interval` function. If so, then an `Interval(a, b)` object is returned; if not, then an error is thrown.
+`interval(a, b)` checks whether [a, b] is a valid `Interval`, which is the case
+if `-∞ <= a <= b <= ∞`, using the (non-exported) `is_valid_interval` function.
+If so, then an `Interval(a, b)` object is returned; if not, then an error is thrown.
 """
 interval(a::Real, b::Real) = Interval(a, b, check=true)
+
 interval(a::Real) = interval(a, a)
 
 "Make an interval even if a > b"

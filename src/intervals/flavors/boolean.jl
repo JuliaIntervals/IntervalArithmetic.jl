@@ -1,3 +1,3 @@
-==(x::SetBasedFlavoredInterval, y::SetBasedFlavoredInterval) = (x ≛ y)
-<(x::SetBasedFlavoredInterval, y::SetBasedFlavoredInterval) = isstrictless(x, y)
-<=(x::SetBasedFlavoredInterval, y::SetBasedFlavoredInterval) = isweaklyless(x, y)
+==(x::SetBasedInterval, y::SetBasedInterval) = (x ≛ y)
+<(x::SetBasedInterval, y::SetBasedInterval) = isstrictless(x, y)
+<=(x::SetBasedInterval, y::SetBasedInterval) = isweaklyless(x, y)

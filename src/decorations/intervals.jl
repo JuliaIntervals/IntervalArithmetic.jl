@@ -18,8 +18,7 @@ The nomenclature of the follows the IEEE-1788 (2015) standard
 @enum DECORATION ill=0 trv=1 def=2 dac=3 com=4
 # Note that `isweaklyless`, and hence ``<` and `min`, are automatically defined for enums
 
-abstract type AbstractRealDecoratedInterval{T, F} <: AbstractRealFlavor{T} end
-abstract type AbstractNonRealDecoratedInterval{T, F} <: AbstractNonRealFlavor{T} end
+abstract type AbstractDecoratedInterval{T, F} <: AbstractFlavor{T} end
 
 """
     AbstractDecoratedInterval
@@ -28,10 +27,8 @@ A *decorated* interval is an interval, together with a *decoration*, i.e.
 a flag that records the status of the interval when thought of as the result
 of a previously executed sequence of functions acting on an initial interval.
 """
-const AbstractDecoratedInterval{T, F} = Union{AbstractRealDecoratedInterval{T, F}, AbstractNonRealDecoratedInterval{T, F}}
 
-decoratedtypes = [(:RealDecoratedInterval, AbstractRealFlavor, AbstractRealDecoratedInterval),
-                  (:NonRealDecoratedInterval, AbstractNonRealFlavor, AbstractNonRealDecoratedInterval)]
+decoratedtypes = [(:RealDecoratedInterval, AbstractFlavor, AbstractDecoratedInterval)]
 
 for (DecoratedFlavor, InnerFlavor, Supertype) in decoratedtypes
     decorateddef = quote
@@ -61,7 +58,7 @@ end
 
 
 # DecoratedInterval
-if Interval <: AbstractRealFlavor
+if Interval <: AbstractFlavor
     const DecoratedInterval = RealDecoratedInterval
 else
     const DecoratedInterval = NonRealDecoratedInterval
