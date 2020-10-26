@@ -32,6 +32,8 @@ struct Interval{T<:Real} <: AbstractInterval{T}
     end
 end
 
+eltype(::Interval{T}) where T = T
+
 ## Traits functions
 can_bound_interval(::Type{T}) where {T} = false  # Default case
 can_bound_interval(::Type{T}) where {T <: IASupportedType} = true
@@ -50,7 +52,6 @@ Interval(a::T, b::S) where {T, S} = Interval(promote(a,b)...)
 ## Concrete constructors for Interval, to effectively deal only with Float64,
 # BigFloat or Rational{Integer} intervals.
 Interval(a::T, b::T) where {T <: Integer} = Interval(float(a), float(b))
-Interval(a::T, b::T) where {T <: Irrational} = Interval(float(a), float(b))
 
 # Constructors for Irrational
 # Single argument Irrational constructor are in IntervalArithmetic.jl
@@ -58,7 +59,6 @@ Interval(a::T, b::T) where {T <: Irrational} = Interval(float(a), float(b))
 Interval{T}(a::Irrational, b::Irrational) where {T<:Real} = Interval{T}(T(a, RoundDown), T(b, RoundUp))
 Interval{T}(a::Irrational, b::Real) where {T<:Real} = Interval{T}(T(a, RoundDown), b)
 Interval{T}(a::Real, b::Irrational) where {T<:Real} = Interval{T}(a, T(b, RoundUp))
-eltype(x::Interval{T}) where {T} = T
 
 Interval(a::Irrational, b::Irrational) = Interval{Float64}(a, b)
 Interval(a::Irrational, b::Real) = Interval{Float64}(a, b)
@@ -160,7 +160,6 @@ function ..(a::Irrational{T}, b::S) where {T, S}
 end
 
 function ..(a::Irrational{T}, b::Irrational{S}) where {T, S}
-    R = promote_type(Irrational{T}, Irrational{S})
     return Interval(a, b)
 end
 
