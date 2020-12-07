@@ -11,6 +11,8 @@ function Base.show(io::IO, params::DisplayParameters)
     print(io, "- significant figures: $(params.sigfigs)")
 end
 
+Base.show(io::IO, x::Complex{<:Interval}) = print(io, x.re, " + ", x.im, "im")
+
 const display_params = DisplayParameters(:standard, false, 6)
 
 const display_options = (:standard, :full, :midpoint)
