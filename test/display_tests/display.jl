@@ -85,6 +85,12 @@ setprecision(Interval, Float64)
         @test string(a) == "1.5f0 ± 0.5f0"
     end
 
+    @testset "Complex{Interval}" begin
+        a = Complex(Interval(0, 2), 1)
+        @test typeof(a)== Complex{Interval{Float64}}
+        setformat(:standard)
+        @test string(a) == "[0, 2] + [1, 1]im"
+    end
 
     setprecision(Interval, 256)
 
