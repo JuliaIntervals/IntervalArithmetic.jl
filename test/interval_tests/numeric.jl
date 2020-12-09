@@ -208,6 +208,7 @@ end
     g = 1 // 3
 
     @test @interval(f*g) == Interval(1.1111111111111109e-01, 1.1111111111111115e-01)
+    @test interval(f, g) - 1 == interval(-2 // 3, -2 // 3)
     @test big(1.)/9 ∈ @interval(f*g)
     @test @interval(1)/9 ⊆ @interval(f*g)
     @test @interval(1)/9 ≠ @interval(f*g)
