@@ -223,6 +223,29 @@ function ^(a::Interval{BigFloat}, x::Interval)
     hull(lo1, hi1)
 end
 
+function nthroot(a::Interval{T}, n::Integer) where T
+    n == 1 && return a
+    n < 0 && a == zero(a) && return emptyinterval(a)
+    isempty(a) && return a
+    if n > 0
+        a.hi < 0 && iseven(n) && return emptyinterval(T)
+        if a.lo < 0 && a.hi >= 0 && iseven(n)
+            a = a ∩ Interval{T}(0, Inf)
+        end
+        a = @biginterval(a)
+        ui = convert(Culong, n)
+        low = BigFloat()
+        high = BigFloat()
+        ccall((:mpfr_rootn_ui, :libmpfr), Int32 , (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode) , low , a.lo , ui, MPFRRoundDown)
+        ccall((:mpfr_rootn_ui, :libmpfr), Int32 , (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode) , high , a.hi , ui, MPFRRoundUp)
+        b = interval(low , high)
+        b = convert(Interval{T}, b)
+        return b
+    end
+    if n < 0
+        return inv(nthroot(a, -n))
+    end
+end
 
 function sqrt(a::Interval{T}) where T
     domain = Interval{T}(0, Inf)
