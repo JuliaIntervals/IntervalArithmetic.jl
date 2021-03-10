@@ -291,13 +291,15 @@ function mag(a::Interval{T}) where T<:Real
     max( abs(a.lo), abs(a.hi) )
 end
 
+"""
+    mig(a::Interval)
+
+Returns the mignitude of an interval, defined as mig(X) = min {|x|: x ∈ X}
+"""
 function mig(a::Interval{T}) where T<:Real
     isempty(a) && return convert(eltype(a), NaN)
     zero(a.lo) ∈ a && return zero(a.lo)
-    r1, r2 = setrounding(T, RoundDown) do
-        abs(a.lo), abs(a.hi)
-    end
-    min( r1, r2 )
+    return min( abs(a.lo), abs(a.hi) )
 end
 
 
