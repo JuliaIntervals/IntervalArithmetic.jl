@@ -1,6 +1,6 @@
 # IntervalArithmetic.jl #
 
-[![Build Status](https://travis-ci.org/JuliaIntervals/IntervalArithmetic.jl.svg?branch=master)](https://travis-ci.org/JuliaIntervals/IntervalArithmetic.jl)
+[![Build Status](https://github.com/JuliaIntervals/IntervalArithmetic.jl/workflows/CI/badge.svg)](https://github.com/JuliaIntervals/IntervalArithmetic.jl/actions/workflows/CI.yml)
 [![coverage](https://codecov.io/gh/JuliaIntervals/IntervalArithmetic.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaIntervals/IntervalArithmetic.jl)
 
 [![docs](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliaintervals.github.io/pages/packages/intervalarithmetic/)
