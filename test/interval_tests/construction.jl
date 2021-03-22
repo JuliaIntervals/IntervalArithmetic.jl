@@ -370,3 +370,8 @@ import IntervalArithmetic: force_interval
     @test force_interval(Inf, -Inf) == Interval(-Inf, Inf)
     @test_throws ArgumentError force_interval(NaN, 3)
 end
+
+@testset "Zero interval" begin
+    @test zero_interval(Float64) === Interval{Float64}(0, 0)
+    @test zero_interval(0 .. 1) === Interval{Float64}(0, 0)
+end

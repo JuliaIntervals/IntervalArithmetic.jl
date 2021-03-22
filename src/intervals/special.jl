@@ -83,3 +83,11 @@ contains_zero(X::Interval{T}) where {T} = zero(T) ∈ X
 # """
 # widen(x::Interval{T}) where T<:AbstractFloat =
 #     Interval(prevfloat(x.lo), nextfloat(x.hi))
+
+"""
+    zero_interval(T)
+
+Return the zero interval `Interval(0, 0)` in the numeric type `T`.
+"""
+zero_interval(::Type{T}) where T<:Real = zero(Interval{T})
+zero_interval(x::Interval{T}) where T<:Real = zero(Interval{T})

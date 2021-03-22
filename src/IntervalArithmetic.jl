@@ -22,7 +22,7 @@ import Base:
     +, -, *, /, //, fma,
     <, >, ==, !=, ⊆, ^, <=,
     in, zero, one, eps, typemin, typemax, abs, abs2, real, min, max,
-    sqrt, exp, log, sin, cos, tan, cot, inv, cbrt, csc, hypot, sec, 
+    sqrt, exp, log, sin, cos, tan, cot, inv, cbrt, csc, hypot, sec,
     exp2, exp10, log2, log10,
     asin, acos, atan,
     sinh, cosh, tanh, coth, csch, sech, asinh, acosh, atanh, sinpi, cospi,
@@ -57,6 +57,7 @@ export
     emptyinterval, ∅, ∞, isempty, isinterior, ⪽, nthroot,
     precedes, strictprecedes, ≼, ≺, ⊂, ⊃, ⊇, contains_zero,
     entireinterval, isentire, nai, isnai, isthin, iscommon, isatomic,
+    zero_interval,
     widen, inf, sup, bisect, mince,
     parameters, eps, dist,
     midpoint_radius, interval_from_midpoint_radius,
@@ -86,7 +87,7 @@ import Base: rounding, setrounding, setprecision
 
 ## Multidimensional
 export
-    IntervalBox
+    IntervalBox, zero_box, symmetric_box
 
 ## Decorations
 export

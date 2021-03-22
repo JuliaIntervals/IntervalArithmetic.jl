@@ -314,4 +314,9 @@ end
     @test hull(vb4) == ib4
 end
 
+@testset "Special box constructors" begin
+    @test zero_box(2, Float64) === IntervalBox(0 .. 0, 2)
+    @test symmetric_box(2, Float64) === IntervalBox(-1 .. 1, 2)
+end
+
 end
