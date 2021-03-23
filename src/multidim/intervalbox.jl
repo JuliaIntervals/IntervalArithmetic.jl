@@ -142,11 +142,12 @@ hull(a::IntervalBox{N,T}, b::IntervalBox{N,T}) where {N,T} = IntervalBox(hull.(a
 hull(a::Vector{IntervalBox{N,T}}) where {N,T} = hull(a...)
 
 """
-    zero_box(N, T)
+    zero(IntervalBox{N, T})
 
 Return the zero interval box of dimension `N` in the numeric type `T`.
 """
-zero_box(N, ::Type{T}) where T<:Real = IntervalBox(zero_interval(T), N)
+zero(::Type{IntervalBox{N, T}}) where {N, T} = IntervalBox(zero(Interval{T}), N)
+zero(x::IntervalBox{N, T}) where {N, T} = zero(typeof(x))
 
 """
     symmetric_box(N, T)

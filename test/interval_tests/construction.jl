@@ -372,6 +372,6 @@ import IntervalArithmetic: force_interval
 end
 
 @testset "Zero interval" begin
-    @test zero_interval(Float64) === Interval{Float64}(0, 0)
-    @test zero_interval(0 .. 1) === Interval{Float64}(0, 0)
+    @test zero(Interval{Float64}) === Interval{Float64}(0, 0)
+    @test zero(0 .. 1) === Interval{Float64}(0, 0)
 end

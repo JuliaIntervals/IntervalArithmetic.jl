@@ -57,7 +57,6 @@ export
     emptyinterval, ∅, ∞, isempty, isinterior, ⪽, nthroot,
     precedes, strictprecedes, ≼, ≺, ⊂, ⊃, ⊇, contains_zero,
     entireinterval, isentire, nai, isnai, isthin, iscommon, isatomic,
-    zero_interval,
     widen, inf, sup, bisect, mince,
     parameters, eps, dist,
     midpoint_radius, interval_from_midpoint_radius,
@@ -87,7 +86,7 @@ import Base: rounding, setrounding, setprecision
 
 ## Multidimensional
 export
-    IntervalBox, zero_box, symmetric_box
+    IntervalBox, symmetric_box
 
 ## Decorations
 export
