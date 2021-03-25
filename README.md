@@ -1,11 +1,9 @@
 # IntervalArithmetic.jl #
 
-[![Build Status](https://travis-ci.org/JuliaIntervals/IntervalArithmetic.jl.svg?branch=master)](https://travis-ci.org/JuliaIntervals/IntervalArithmetic.jl)
-[![Coverage Status](https://coveralls.io/repos/github/JuliaIntervals/IntervalArithmetic.jl/badge.svg?branch=master)](https://coveralls.io/github/JuliaIntervals/IntervalArithmetic.jl?branch=master)
-[![codecov](https://codecov.io/gh/JuliaIntervals/IntervalArithmetic.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaIntervals/IntervalArithmetic.jl)
+[![Build Status](https://github.com/JuliaIntervals/IntervalArithmetic.jl/workflows/CI/badge.svg)](https://github.com/JuliaIntervals/IntervalArithmetic.jl/actions/workflows/CI.yml)
+[![coverage](https://codecov.io/gh/JuliaIntervals/IntervalArithmetic.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaIntervals/IntervalArithmetic.jl)
 
-[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaIntervals.github.io/IntervalArithmetic.jl/stable)
-[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://JuliaIntervals.github.io/IntervalArithmetic.jl/latest)
+[![docs](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliaintervals.github.io/pages/packages/intervalarithmetic/)
 
 [![DOI](https://zenodo.org/badge/87007945.svg)](https://zenodo.org/badge/latestdoi/87007945)
 
@@ -26,6 +24,10 @@ The aim of the package is correctness over speed, although performance considera
 - Nikolay Kryukov
 - John Verzani
 
+## Documentation
+Documentation for the package is available [here](https://juliaintervals.github.io/pages/packages/intervalarithmetic/).
+
+The best way to learn how to use the package is to look at the tutorial, available in the organisation webpage [here](https://juliaintervals.github.io/pages/tutorials/tutorialArithmetic/).
 
 ## Installation
 To install the package, from within Julia do
