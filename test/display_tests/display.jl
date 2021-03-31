@@ -90,6 +90,9 @@ setprecision(Interval, Float64)
         @test typeof(a) == Complex{Interval{Float64}}
         setformat(:standard)
         @test string(a) == "[0, 2] + [1, 1]im"
+
+        setformat(:midpoint)
+        @test string(a) == "(1 ± 1) + (1 ± 0)im"
     end
 
     setprecision(Interval, 256)

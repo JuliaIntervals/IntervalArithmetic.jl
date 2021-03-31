@@ -11,8 +11,6 @@ function Base.show(io::IO, params::DisplayParameters)
     print(io, "- significant figures: $(params.sigfigs)")
 end
 
-Base.show(io::IO, x::Complex{<:Interval}) = print(io, x.re, " + ", x.im, "im")
-
 const display_params = DisplayParameters(:standard, false, 6)
 
 const display_options = (:standard, :full, :midpoint)
@@ -334,6 +332,16 @@ function representation(X::IntervalBox, format=nothing)
 
 end
 
+function representation(x::Complex{<:Interval}, format=nothing)
+
+    if format == nothing
+        format = display_params.format
+    end
+
+    format == :midpoint && return string('(', x.re, ')', " + ", '(', x.im, ')', "im")
+
+    return string(x.re, " + ", x.im, "im")
+end
 
 for T in (Interval, DecoratedInterval)
     @eval show(io::IO, a::$T{S}) where S = print(io, representation(a))
@@ -341,7 +349,8 @@ for T in (Interval, DecoratedInterval)
     @eval showfull(a::$T{S}) where S = showfull(stdout, a)
 end
 
-T = IntervalBox
-@eval show(io::IO, a::$T) = print(io, representation(a))
-@eval show(io::IO, ::MIME"text/plain", a::$T) = print(io, representation(a))
-@eval showfull(io::IO, a::$T) = print(io, representation(a, :full))
+for T in (IntervalBox, Complex{<:Interval})
+    @eval show(io::IO, a::$T) = print(io, representation(a))
+    @eval show(io::IO, ::MIME"text/plain", a::$T) = print(io, representation(a))
+    @eval showfull(io::IO, a::$T) = print(io, representation(a, :full))
+end
