@@ -58,3 +58,14 @@ end
     @test abs(y).lo == 0.0
     @test abs2(y).lo == 0.0
 end
+
+# This test is somewhat related to `show` for complex intervals: see
+# https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/367
+@testset "interval_signbit and `qr`" begin
+    unit_interval = 1..1
+    A = [unit_interval -unit_interval; unit_interval unit_interval]
+    Q = qr(A)
+
+    @test (1/sqrt(2)) ∈ Q.Q[2,2]
+    @test sqrt(2) ∈ Q.R[2,2]
+end
