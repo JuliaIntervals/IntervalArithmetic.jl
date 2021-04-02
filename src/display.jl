@@ -272,6 +272,11 @@ function subscriptify(n::Integer)
     join( [Char(subscript_0 + i) for i in dig])
 end
 
+function superscriptify(n::Integer)
+    exps = ['⁰', '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹']
+    dig = reverse(digits(n))
+    return join([exps[d+1] for d in dig])
+end
 
 # fall-back:
 representation(a::Interval{T}, format=nothing) where T =
@@ -317,7 +322,9 @@ function representation(a::DecoratedInterval{T}, format=nothing) where T
 end
 
 
-function representation(X::IntervalBox, format=nothing)
+function representation(X::IntervalBox{N, T}, format=nothing) where {N, T}
+
+    all(==(first(X)), X) && return string(first(X), superscriptify(N))
 
     if format == nothing
         format = display_params.format  # default
