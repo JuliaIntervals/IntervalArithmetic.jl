@@ -172,10 +172,10 @@ setprecision(Interval, Float64)
         @test string(X) == "[1.09999, 1.20001] × [2.09999, 2.20001]"
 
         X = IntervalBox(-Inf..Inf, -Inf..Inf)
-        @test string(X) == "[-∞, ∞] × [-∞, ∞]"
+        @test string(X) == "[-∞, ∞]²"
 
         setformat(:full)
-        @test string(X) == "IntervalBox(Interval(-Inf, Inf), Interval(-Inf, Inf))"
+        @test string(X) == "Interval(-Inf, Inf)²"
 
     end
 end
