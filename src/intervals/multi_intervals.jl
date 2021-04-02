@@ -1,6 +1,30 @@
 using IntervalArithmetic
 import Base: getindex, ∪
 import Base: +, -, *, /, min, max, ^, log, <, >
+import IntervalArithmetic: hull
+
+"""
+
+    Multi-Intervals are unions of disjoint intervals. 
+    This file includes constructors, arithmetic (including intervals and scalars)
+    and complement functions
+
+    Empty sets and intersecting intervals are appropriately handled in the constructor:
+
+    julia> a = interval(0,2) ∪ interval(3,4)
+    [0, 2] ∪ [3, 4]
+
+    julia> b = interval(1,2) ∪ interval(4,5) ∪ ∅
+    [1, 2] ∪ [4, 5]
+
+    julia> c = a * b 
+    [0, 10] ∪ [12, 20]
+    
+    julia> complement(c)
+    [-∞, 0] ∪ [10, 12] ∪ [20, ∞]
+
+"""
+
 
 abstract type MultiInterval{T} <: AbstractInterval{T} end
 
@@ -36,9 +60,9 @@ intervalM(x :: IntervalM, y :: Interval) = intervalM([x.v; y])
 intervalM(x :: IntervalM, y :: IntervalM) = intervalM([x.v; y.v])
 ∪(x :: IntervalM, y :: IntervalM) = intervalM(x,y)
 
-# Get index from multi-interval array
+# MultiInterval can act like a vector
 getindex(x :: IntervalM, ind :: Integer) = getindex(x.v,ind)
-getindex(x :: IntervalM, ind :: Array{ <:Integer}) = getindex(x.v,ind)
+getindex(x :: IntervalM, ind :: Array{ <: Integer}) = getindex(x.v,ind)
 
 # Remove ∅ from Multi-Interval
 function removeEmpties(x :: IntervalM)
@@ -47,7 +71,7 @@ function removeEmpties(x :: IntervalM)
     return IntervalM(Vnew)
 end
 
-# Recursively envolpe intervals which intersect
+# Envolpe intervals which intersect. Recursive condense!
 function condense(x :: IntervalM)
 
     if isCondensed(x); return x; end
@@ -73,16 +97,32 @@ function isCondensed(x :: IntervalM)
 end
 
 # Envolpe/hull. Keeps it as a multi interval
-env(x :: IntervalM) = IntervalM(hull(x.v))
-hull(x :: IntervalM) = IntervalM(hull(x.v))
+env(x :: IntervalM) = IntervalM([hull(x.v)])
+hull(x :: IntervalM) = IntervalM([hull(x.v)])
 
+
+# Computes the complement of a Multi-Interval
+function complement(x :: IntervalM)
+
+    v = sort(x.v)
+    vLo = left.(v)
+    vHi = right.(v)
+
+    pushfirst!(vHi, -∞)
+    push!(vLo, ∞)
+
+    complements = interval.(vHi,vLo)
+
+    return intervalM(complements)
+end
+
+complement(x :: Interval) = complement(intervalM(x))
 
 ###
 #   Multi-Interval Arithmetic
 ###
 
 for op in (:+, :-, :*, :/, :min, :max, :^, :log, :<, :>)
-    
     @eval ($op)( x::IntervalM, y::IntervalM) = intervalM([$op(xv, yv) for xv in x.v, yv in y.v][:])
 
     @eval ($op)( x::IntervalM, y::Interval) = intervalM(broadcast($op, x.v, y))
@@ -93,6 +133,15 @@ for op in (:+, :-, :*, :/, :min, :max, :^, :log, :<, :>)
     
 end
 
+###
+#   Utilities and show
+###
+
+left(x :: Interval) = x.lo
+right(x :: Interval) = x.hi
+
+left(x :: IntervalM) = left.(x.v)
+right(x :: IntervalM) = right.(x.v)
 
 function Base.show(io::IO, this::IntervalM)
     v = sort(this.v)
