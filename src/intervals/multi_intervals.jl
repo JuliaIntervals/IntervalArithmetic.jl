@@ -36,9 +36,9 @@ intervalM(x :: IntervalM, y :: Interval) = intervalM([x.v; y])
 intervalM(x :: IntervalM, y :: IntervalM) = intervalM([x.v; y.v])
 ∪(x :: IntervalM, y :: IntervalM) = intervalM(x,y)
 
-# MultiInterval can act like a vector
+# Get index from multi-interval array
 getindex(x :: IntervalM, ind :: Integer) = getindex(x.v,ind)
-getindex(x :: IntervalM, ind :: Array{ <: Integer}) = getindex(x.v,ind)
+getindex(x :: IntervalM, ind :: Array{ <:Integer}) = getindex(x.v,ind)
 
 # Remove ∅ from Multi-Interval
 function removeEmpties(x :: IntervalM)
@@ -47,7 +47,7 @@ function removeEmpties(x :: IntervalM)
     return IntervalM(Vnew)
 end
 
-# Envolpe intervals which intersect. Recursive condense!
+# Recursively envolpe intervals which intersect
 function condense(x :: IntervalM)
 
     if isCondensed(x); return x; end
@@ -82,6 +82,7 @@ hull(x :: IntervalM) = IntervalM(hull(x.v))
 ###
 
 for op in (:+, :-, :*, :/, :min, :max, :^, :log, :<, :>)
+    
     @eval ($op)( x::IntervalM, y::IntervalM) = intervalM([$op(xv, yv) for xv in x.v, yv in y.v][:])
 
     @eval ($op)( x::IntervalM, y::Interval) = intervalM(broadcast($op, x.v, y))
