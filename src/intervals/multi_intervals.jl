@@ -1,6 +1,6 @@
 using IntervalArithmetic
 import Base: getindex, ∪
-import Base: +, -, *, /, min, max, ^, log, <, >
+import Base: +, -, *, /, min, max, ^, log, <, >, exp, sin, cos, tan
 import IntervalArithmetic: hull
 
 """
@@ -131,6 +131,10 @@ for op in (:+, :-, :*, :/, :min, :max, :^, :log, :<, :>)
     @eval ($op)( x::IntervalM, n::Real) = intervalM(broadcast($op, x.v, n))
     @eval ($op)( n::Real, x::IntervalM) = intervalM(broadcast($op, n, x.v))
     
+end
+
+for op in (:-, :sin, :cos, :tan, :exp, :log)
+    @eval ($op)( x::IntervalM) = intervalM(broadcast($op, x.v))
 end
 
 ###
