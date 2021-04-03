@@ -171,7 +171,7 @@ for mode in (:Down, :Up)
                                 $f(a, b)
                             end
                         end
-        
+
         @eval function $f(::IntervalRounding{:tight},
                             a::T, b::T, $mode1) where T<:AbstractFloat
                       setrounding(T, $mode2) do
@@ -276,6 +276,7 @@ function _setrounding(::Type{Interval}, rounding_type::Symbol)
     # binary functions:
     for f in (:+, :-, :*, :/)
         @eval $f(a::T, b::T, r::RoundingMode) where {T<:AbstractFloat} = $f($roundtype, a, b, r)
+        @eval $f(a::T, b::T, r::RoundingMode) where {T<:Integer} = $f(float(a), float(b), r)
     end
 
     # unary functions:

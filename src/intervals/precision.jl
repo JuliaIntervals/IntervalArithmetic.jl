@@ -21,10 +21,12 @@ function bigequiv(a::Interval{T}) where {T <: AbstractFloat}
         return atomic(Interval{BigFloat}, a)
     end
 end
+bigequiv(a::Interval{<:Integer}) = Interval(BigFloat(a.lo), BigFloat(a.hi))
 
 bigequiv(x::AbstractFloat) = guarded_setprecision(precision(x)) do
     return BigFloat(x)
 end
+bigequiv(x::Integer) = big(x)
 
 # NOTE: prevents multiple threads from calling setprecision() concurrently
 const precision_lock = ReentrantLock()

@@ -6,12 +6,12 @@ using Test
 setprecision(Interval, Float64)
 # # setrounding(Interval, :narrow)
 
-@testset "brodcasting tests" begin
+@testset "broadcasting tests" begin
     x = 3..12
     y = 4..5
     a = 3
     b = 12
-    
+
     @test sqrt(sum(x.^2 .+ y.^2)) == 5..13
 
     for i in 1:20
@@ -24,7 +24,7 @@ setprecision(Interval, Float64)
     end
 
     a = 4
-    b = 5 
+    b = 5
     for i in 1:20
         @test y.+i == (a+i)..(b+i)
     end
@@ -95,6 +95,20 @@ end
     @test 0.1 * (1..1) == Interval(0.1, 0.1)
     @test (1..1) / 10.0 == Interval(0.09999999999999999, 0.1)
 
+end
+
+@testset "Arithmetic with Interval{Int}" begin
+    x = Interval{Int}(2, 4)
+    @test x + 1 === Interval(3, 5)
+    @test x - 1 === Interval(1, 3)
+    @test 2*x   === Interval(4, 8)
+    @test x/2   === Interval{Float64}(1, 2)
+    @test x + x === Interval(4, 8)
+    @test x - x === Interval(-2, 2)
+    @test x * x === Interval(4, 16)
+
+    x = Interval{Int}(typemin(Int), typemax(Int))
+    @test x+10 == Interval(+(float(typemin(Int)), 10.0, RoundDown), +(float(typemax(Int)), 10.0, RoundUp))
 end
 
 @testset "Power tests" begin
@@ -173,8 +187,11 @@ setprecision(Interval, Float64)
 
     @test exp2(@biginterval(1//2)) ⊆ exp2(@interval(1//2))
     @test exp2(Interval(1024.0)) == Interval(1.7976931348623157e308, Inf)
+    @test exp2(Interval{Int}(2, 3)) == Interval{Int}(4, 8)
     @test exp10(@biginterval(1//2)) ⊆ exp10(@interval(1//2))
     @test exp10(Interval(308.5)) == Interval(1.7976931348623157e308, Inf)
+    @test exp10(Interval{Int}(2, 3)) == Interval{Int}(100, 1000)
+    @test_throws InexactError exp10(Interval{Int}(10, 100))
 
     @test log2(@biginterval(1//2)) ⊆ log2(@interval(1//2))
     @test log2(@interval(0.25, 0.5)) == Interval(-2.0, -1.0)
@@ -183,6 +200,10 @@ setprecision(Interval, Float64)
 
     @test log1p(@interval(-0.5, 0.1)) == @interval(log1p(-0.5), log1p(0.1))
     @test log1p(interval(-10.0)) == ∅
+    @test log1p(Interval{Int}(2, 3)) == log1p(@interval(2, 3))
+
+    x = Interval{Int}(2, 4)
+    @test log(x) == log(2..4)
 end
 
 @testset "Comparison tests" begin
@@ -220,6 +241,8 @@ end
     @test big(1.)/9 ∈ @interval(1/9)
 
     @test @interval(1/9) == @interval(1//9)
+
+    @test hypot(Interval{Int}(2, 3), Interval{Int}(2, 3)) == sqrt(Interval{Int}(8, 18))
 end
 
 @testset "Floor etc. tests" begin
@@ -349,13 +372,14 @@ end
     end
 
     @testset "sqrt" begin
-        @test sqrt(2..3) == Interval(1.414213562373095, 1.7320508075688774)
+        @test sqrt(2..3) == sqrt(Interval{Int}(2, 3)) == Interval(1.414213562373095, 1.7320508075688774)
 
         @test sqrt(big(2..3)) == Interval(big"1.414213562373095048801688724209698078569671875376948073176679737990732478462102", big"1.732050807568877293527446341505872366942805253810380628055806979451933016908815")
     end
 
     @testset "cbrt" begin
         @test cbrt(2..3) == Interval(1.259921049894873, 1.4422495703074085)
+        @test cbrt(Interval{Int}(2, 3)) == Interval(1.259921049894873, 1.4422495703074085)
 
         @test cbrt(big(2..3)) == Interval(big"1.259921049894873164767210607278228350570251464701507980081975112155299676513956", big"1.442249570307408382321638310780109588391869253499350577546416194541687596830003")
 
@@ -432,4 +456,4 @@ end
     @test nthroot(Interval{BigFloat}(-27, 27), -3) == Interval{BigFloat}(-Inf, Inf)
     @test nthroot(Interval{BigFloat}(-81, -16), -4) == ∅
     @test nthroot(Interval{BigFloat}(-81, -16), 1) == Interval{BigFloat}(-81, -16)
-end 
+end

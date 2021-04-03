@@ -123,6 +123,10 @@ function atomic(::Type{Interval{T}}, x::Interval) where T<:AbstractFloat
     Interval{T}( T(x.lo, RoundDown), T(x.hi, RoundUp) )
 end
 
+function atomic(::Type{Interval{T}}, x::Interval) where T<:Integer
+    Interval{T}( floor(T, x.lo), ceil(T, x.hi) )
+end
+
 # Complex numbers:
 atomic(::Type{Interval{T}}, x::Complex{Bool}) where T<:AbstractFloat =
     (x == im) ? one(T)*im : throw(ArgumentError("Complex{Bool} not equal to im"))
