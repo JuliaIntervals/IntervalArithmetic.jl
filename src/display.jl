@@ -324,13 +324,17 @@ end
 
 function representation(X::IntervalBox{N, T}, format=nothing) where {N, T}
 
-    all(==(first(X)), X) && return string(first(X), superscriptify(N))
+    isempty(X) && return string("∅", superscriptify(N))
 
     if format == nothing
         format = display_params.format  # default
     end
 
-    if display_params.format == :full
+    if all(==(first(X)), X)
+        return string(representation(first(X), format), superscriptify(N))
+    end
+
+    if format == :full
         return string("IntervalBox(", join(X.v, ", "), ")")
 
     else
