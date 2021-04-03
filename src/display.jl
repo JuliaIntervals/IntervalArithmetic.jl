@@ -170,6 +170,7 @@ function round_string(x::BigFloat, digits::Int, r::RoundingMode)
 end
 
 round_string(x::Real, digits::Int, r::RoundingMode) = round_string(big(x), digits, r)
+round_string(x::Integer, digits::Int, r::RoundingMode) = string(x)
 
 
 function basic_representation(a::Interval, format=nothing)

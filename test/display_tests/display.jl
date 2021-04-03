@@ -57,6 +57,19 @@ setprecision(Interval, Float64)
         end
     end
 
+    @testset "Interval{Int}" begin
+        a = Interval{Int}(1, 5)
+        @test typeof(a)== Interval{Int}
+        setformat(:standard)
+        @test string(a) == "[1, 5]"
+
+        setformat(:full)
+        @test string(a) == "Interval(1, 5)"
+
+        setformat(:midpoint)
+        @test string(a) == "3 ± 2"
+    end
+
     @testset "Interval{Rational{T}}" begin
         a = Interval(1//3, 5//4)
         @test typeof(a)== Interval{Rational{Int}}

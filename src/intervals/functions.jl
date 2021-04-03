@@ -232,6 +232,7 @@ function sqrt(a::Interval{T}) where T
 
     @round(sqrt(a.lo), sqrt(a.hi))  # `sqrt` is correctly-rounded
 end
+sqrt(a::Interval{<:Integer}) where T = sqrt(float(a))
 
 
 
@@ -301,6 +302,7 @@ for f in (:exp2, :exp10, :cbrt)
             @round( ($f)(a.lo), ($f)(a.hi) )
         end
 end
+cbrt(a::Interval{T}) where T<:Integer = cbrt(float(a))
 
 
 for f in (:log, :log2, :log10)
@@ -314,6 +316,7 @@ for f in (:log, :log2, :log10)
             @round( ($f)(a.lo), ($f)(a.hi) )
 
         end
+    @eval ($f)(a::Interval{<:Integer}) = ($f)(float(a))
 end
 
 function log1p(a::Interval{T}) where T
@@ -324,10 +327,12 @@ function log1p(a::Interval{T}) where T
 
     @round( log1p(a.lo), log1p(a.hi) )
 end
+log1p(a::Interval{<:Integer}) = log1p(float(a))
 
 hypot(a::Interval{BigFloat}, b::Interval{BigFloat}) = sqrt(a^2 + b^2)
 
-hypot(a::Interval{T}, b::Interval{T}) where T= atomic(Interval{T}, hypot(bigequiv(a), bigequiv(b)))
+hypot(a::Interval{T}, b::Interval{T}) where T<:AbstractFloat = atomic(Interval{T}, hypot(bigequiv(a), bigequiv(b)))
+hypot(a::Interval{T}, b::Interval{T}) where T<:Integer = hypot(float(a), float(b))
 
 """
 nthroot(a::Interval{BigFloat}, n::Integer)
@@ -359,4 +364,4 @@ end
 function nthroot(a::Interval{T}, n::Integer) where T
     b = nthroot(bigequiv(a), n)
     return convert(Interval{T}, b)
-end 
+end

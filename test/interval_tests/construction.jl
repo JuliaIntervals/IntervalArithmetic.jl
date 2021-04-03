@@ -283,6 +283,9 @@ end
 
     @test Interval{BigFloat}(1) == @biginterval(1, 1)
     @test Interval{BigFloat}(big"1.1") == Interval(big"1.1", big"1.1")
+
+    @test Interval{Int}(3 .. 5) == Interval{Int}(3, 5)
+    @test Interval{Int}(3.2 .. 4.7) == Interval{Int}(3, 5)
 end
 
 # issue 192:
