@@ -360,4 +360,5 @@ for T in (IntervalBox, Complex{<:Interval})
     @eval show(io::IO, a::$T) = print(io, representation(a))
     @eval show(io::IO, ::MIME"text/plain", a::$T) = print(io, representation(a))
     @eval showfull(io::IO, a::$T) = print(io, representation(a, :full))
+    @eval showfull(a::$T) = showfull(stdout, a)
 end
