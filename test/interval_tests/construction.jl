@@ -186,6 +186,9 @@ const eeuler = Base.MathConstants.e
     setprecision(Interval, 53)
     a = big(1)//3
     @test @interval(a) == Interval(big(3.3333333333333331e-01), big(3.3333333333333337e-01))
+
+    setprecision(Interval, Float16, 53)
+    @test @interval(1.00001) == Interval{Float16}(1, 1.00098)
 end
 
 @testset "Big intervals" begin
