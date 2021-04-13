@@ -336,7 +336,8 @@ function representation(X::IntervalBox{N, T}, format=nothing) where {N, T}
 
     if format == :full
         return string("IntervalBox(", join(X.v, ", "), ")")
-
+    elseif format == :midpoint
+        return string("(", join(X.v, ") × ("), ")")
     else
         return join(X.v, " × ")
     end
