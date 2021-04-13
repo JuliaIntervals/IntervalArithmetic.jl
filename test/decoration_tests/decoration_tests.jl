@@ -60,4 +60,29 @@ end
 
 end
 
+
+@testset "Decorated intervals comparison" begin
+
+    a = 1..3
+    b = @decorated 1 3
+
+    c = @decorated 4 5
+
+    @test a == b
+    @test b == a
+
+    @test a < c
+    @test c > a
+    @test a <= c
+    @test c >= a
+
+    d = @decorated 0 2
+
+    @test d < a
+    @test a > d
+    @test d <= a
+    @test a >= d
+
+end
+
 end

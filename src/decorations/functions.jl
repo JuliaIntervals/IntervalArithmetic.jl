@@ -362,3 +362,10 @@ for (f, domain) in restricted_functions2
         DecoratedInterval(r, trv)
     end
 end
+
+## comparisons
+
+for op in (:(==), :<=, :>=, :<, :>)
+      @eval Base.$op(a::Interval, b::DecoratedInterval) = $op(a, b.interval)
+      @eval Base.$op(a::DecoratedInterval, b::Interval) = $op(a.interval, b)
+end
