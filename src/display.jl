@@ -324,18 +324,31 @@ end
 
 function representation(X::IntervalBox{N, T}, format=nothing) where {N, T}
 
-    isempty(X) && return string("∅", superscriptify(N))
-
     if format == nothing
         format = display_params.format  # default
     end
 
-    if all(==(first(X)), X)
-        return string(representation(first(X), format), superscriptify(N))
+    n = format == :full ? N : superscriptify(N)
+
+    if isempty(X)
+        format == :full && return string("IntervalBox(∅, ", n, ")")
+        return string("∅", n)
+    end
+
+    x = first(X)
+    if all(==(x), X)
+        if format == :full
+            return string("IntervalBox(", representation(x, format), ", ", n, ")")
+        elseif format == :midpoint
+            return string("(", representation(x, format), ")", n)
+        else
+            return string(representation(x, format), n)
+        end
     end
 
     if format == :full
-        return string("IntervalBox(", join(X.v, ", "), ")")
+        full_str = representation.(X.v, :full)
+        return string("IntervalBox(", join(full_str, ", "), ")")
     elseif format == :midpoint
         return string("(", join(X.v, ") × ("), ")")
     else

@@ -175,7 +175,7 @@ setprecision(Interval, Float64)
         @test string(X) == "[-∞, ∞]²"
 
         setformat(:full)
-        @test string(X) == "Interval(-Inf, Inf)²"
+        @test string(X) == "IntervalBox(Interval(-Inf, Inf), 2)"
 
     end
 end
