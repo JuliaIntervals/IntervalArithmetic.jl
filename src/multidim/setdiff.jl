@@ -35,15 +35,15 @@ function setdiff(A::IntervalBox{N,T}, B::IntervalBox{N,T}) where {N,T}
 
     result_list = fill(IntervalBox(emptyinterval(T), N), 2*N)
     offset = 0
-    x = Array(A.v)
+    x = A.v
     @inbounds for i = 1:N
         tmp = _setdiff(A[i], B[i])
         @inbounds for j = 1:2
-            x[i] = tmp[j]
+            x = setindex(x, tmp[j], i)
             result_list[offset+j] = IntervalBox{N, T}(x)
         end
         offset += 2
-        x[i] = intersection[i]
+        x = setindex(x, intersection[i], i)
     end
     filter!(!isempty, result_list)
 end
