@@ -54,7 +54,7 @@ export
     interval,
     @interval, @biginterval, @floatinterval,
     diam, radius, mid, mag, mig, hull,
-    emptyinterval, ∅, ∞, isempty, isinterior, ⪽, nthroot, setdiff1, setdiff2,
+    emptyinterval, ∅, ∞, isempty, isinterior, ⪽, nthroot,
     precedes, strictprecedes, ≼, ≺, ⊂, ⊃, ⊇, contains_zero,
     entireinterval, isentire, nai, isnai, isthin, iscommon, isatomic,
     widen, inf, sup, bisect, mince,
