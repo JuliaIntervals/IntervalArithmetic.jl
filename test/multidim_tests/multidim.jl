@@ -158,6 +158,12 @@ end
                               IntervalBox(3..4, 3..6, 7..10) ])
 
 
+    X = IntervalBox(-Inf..Inf, 1..2)
+    Y = IntervalBox(1..2, -1..1.5)
+
+    @test Set(setdiff(X, Y)) == Set([IntervalBox(-Inf..1, 1..2),
+                              IntervalBox(2..Inf, 1..2),
+                              IntervalBox(1..2, 1.5..2)])
 end
 
 @testset "mid, diam, × for IntervalBox" begin
