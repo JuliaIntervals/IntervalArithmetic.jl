@@ -108,34 +108,34 @@ end
 @testset "setdiff for IntervalBox" begin
     X = IntervalBox(2..4, 3..5)
     Y = IntervalBox(3..5, 4..6)
-    @test setdiff(X, Y) == [ IntervalBox(3..4, 3..4),
-                              IntervalBox(2..3, 3..5) ]
+    @test Set(setdiff(X, Y)) == Set([ IntervalBox(3..4, 3..4),
+                              IntervalBox(2..3, 3..5) ])
 
-    @test setdiff(X.v, Y) == [ IntervalBox(3..4, 3..4),
-                              IntervalBox(2..3, 3..5) ]
+    @test Set(setdiff(X.v, Y)) == Set([ IntervalBox(3..4, 3..4),
+                              IntervalBox(2..3, 3..5) ])
 
-    @test setdiff(X, Y.v) == [ IntervalBox(3..4, 3..4),
-                              IntervalBox(2..3, 3..5) ]
+    @test Set(setdiff(X, Y.v)) == Set([ IntervalBox(3..4, 3..4),
+                              IntervalBox(2..3, 3..5) ])
 
     X = IntervalBox(2..5, 3..6)
     Y = IntervalBox(-10..10, 4..5)
-    @test setdiff(X, Y) == [ IntervalBox(2..5, 3..4),
-                              IntervalBox(2..5, 5..6) ]
+    @test Set(setdiff(X, Y)) == Set([ IntervalBox(2..5, 3..4),
+                              IntervalBox(2..5, 5..6) ])
 
 
     X = IntervalBox(2..5, 3..6)
     Y = IntervalBox(4..6, 4..5)
-    @test setdiff(X, Y) == [ IntervalBox(4..5, 3..4),
+    @test Set(setdiff(X, Y)) == Set([ IntervalBox(4..5, 3..4),
                               IntervalBox(4..5, 5..6),
-                              IntervalBox(2..4, 3..6) ]
+                              IntervalBox(2..4, 3..6) ])
 
 
     X = IntervalBox(2..5, 3..6)
     Y = IntervalBox(3..4, 4..5)
-    @test setdiff(X, Y) == [ IntervalBox(3..4, 3..4),
+    @test Set(setdiff(X, Y)) == Set([ IntervalBox(3..4, 3..4),
                               IntervalBox(3..4, 5..6),
                               IntervalBox(2..3, 3..6),
-                              IntervalBox(4..5, 3..6) ]
+                              IntervalBox(4..5, 3..6) ])
 
 
     X = IntervalBox(2..5, 3..6)
@@ -150,14 +150,20 @@ end
 
     X = IntervalBox(1..4, 3..6, 7..10)
     Y = IntervalBox(2..3, 4..5, 8..9)
-    @test setdiff(X, Y) == [ IntervalBox(2..3, 4..5, 7..8),
+    @test Set(setdiff(X, Y)) == Set([ IntervalBox(2..3, 4..5, 7..8),
                               IntervalBox(2..3, 4..5, 9..10),
                               IntervalBox(2..3, 3..4, 7..10),
                               IntervalBox(2..3, 5..6, 7..10),
                               IntervalBox(1..2, 3..6, 7..10),
-                              IntervalBox(3..4, 3..6, 7..10) ]
+                              IntervalBox(3..4, 3..6, 7..10) ])
 
 
+    X = IntervalBox(-Inf..Inf, 1..2)
+    Y = IntervalBox(1..2, -1..1.5)
+
+    @test Set(setdiff(X, Y)) == Set([IntervalBox(-Inf..1, 1..2),
+                              IntervalBox(2..Inf, 1..2),
+                              IntervalBox(1..2, 1.5..2)])
 end
 
 @testset "mid, diam, × for IntervalBox" begin
