@@ -41,13 +41,13 @@ let b
     @test @decorated(-3,-2) ^ -3 == DecoratedInterval(-1/8.,-1/27)
     @test @decorated(0,3) ^ 2 == DecoratedInterval(0, 9)
     @test @decorated(0,3) ^ -2 == DecoratedInterval(1/9, Inf, trv)
-    @test @decorated(2,3)^Interval(0.0, 1.0) == DecoratedInterval(1.0,3.0)
     @test @decorated(2,3)^@decorated(0.0, 1.0) == DecoratedInterval(1.0,3.0)
-    @test @decorated(0, 2)^Interval(0.0, 1.0) == DecoratedInterval(0.0,2.0, trv)
+    @test @decorated(2,3)^@decorated(0.0, 1.0) == DecoratedInterval(1.0,3.0)
     @test @decorated(0, 2)^@decorated(0.0, 1.0) == DecoratedInterval(0.0,2.0, trv)
-    @test @decorated(-3, 2)^Interval(0.0, 1.0) == DecoratedInterval(0.0,2.0, trv)
+    @test @decorated(0, 2)^@decorated(0.0, 1.0) == DecoratedInterval(0.0,2.0, trv)
     @test @decorated(-3, 2)^@decorated(0.0, 1.0) == DecoratedInterval(0.0,2.0, trv)
-    @test @decorated(-3, 2)^Interval(-1.0, 1.0) == DecoratedInterval(0.0,Inf, trv)
+    @test @decorated(-3, 2)^@decorated(0.0, 1.0) == DecoratedInterval(0.0,2.0, trv)
+    @test @decorated(-3, 2)^@decorated(-1.0, 1.0) == DecoratedInterval(0.0,Inf, trv)
     @test @decorated(-3, 2)^@decorated(-1.0, 1.0) == DecoratedInterval(0.0, Inf, trv)
 end
 
@@ -63,26 +63,37 @@ end
 
 @testset "Decorated intervals comparison" begin
 
-    a = 1..3
-    b = @decorated 1 3
+    a = @decorated 1 3
 
-    c = @decorated 4 5
+    b = @decorated 4 5
 
-    @test a == b
-    @test b == a
+    @test a != b
 
-    @test a < c
-    @test c > a
-    @test a <= c
-    @test c >= a
-
-    d = @decorated 0 2
-
-    @test d < a
-    @test a > d
-    @test d <= a
-    @test a >= d
+    @test a < b
+    @test b > a
+    @test a <= b
+    @test b >= a
 
 end
 
+@testset "Mixed bare/decorated operations" begin
+
+    a = 1..2
+    b = @decorated 3 4
+    for op in (:(==), :!=, :<=, :>=, :<, :>, :≼, :≺, :⊂, :⊃, :⊇, :⊆, :⪽, :isdisjoint,
+        :+, :-, :*, :/, ://, :^, :pow, :extended_div, :atan, :min, :max, :dist,
+        :cancelminus, :cancelplus, :hypot, :copysign, :flipsign,
+        :in, :intersect, :union, :setdiff, :hull)
+
+        @eval @test_throws ArgumentError $op($a, $b)
+        @eval @test_throws ArgumentError $op($b, $a)
+    end
+
+    @test_throws ArgumentError fma(a, a, b)
+    @test_throws ArgumentError fma(a, b, a)
+    @test_throws ArgumentError fma(b, a, a)
+    @test_throws ArgumentError fma(a, b, b)
+    @test_throws ArgumentError fma(b, b, a)
+    @test_throws ArgumentError fma(b, a, b)
+end
 end
