@@ -42,13 +42,9 @@ let b
     @test @decorated(0,3) ^ 2 == DecoratedInterval(0, 9)
     @test @decorated(0,3) ^ -2 == DecoratedInterval(1/9, Inf, trv)
     @test @decorated(2,3)^@decorated(0.0, 1.0) == DecoratedInterval(1.0,3.0)
-    @test @decorated(2,3)^@decorated(0.0, 1.0) == DecoratedInterval(1.0,3.0)
     @test @decorated(0, 2)^@decorated(0.0, 1.0) == DecoratedInterval(0.0,2.0, trv)
-    @test @decorated(0, 2)^@decorated(0.0, 1.0) == DecoratedInterval(0.0,2.0, trv)
-    @test @decorated(-3, 2)^@decorated(0.0, 1.0) == DecoratedInterval(0.0,2.0, trv)
     @test @decorated(-3, 2)^@decorated(0.0, 1.0) == DecoratedInterval(0.0,2.0, trv)
     @test @decorated(-3, 2)^@decorated(-1.0, 1.0) == DecoratedInterval(0.0,Inf, trv)
-    @test @decorated(-3, 2)^@decorated(-1.0, 1.0) == DecoratedInterval(0.0, Inf, trv)
 end
 
 @testset "Convert string to DecoratedInterval" begin
