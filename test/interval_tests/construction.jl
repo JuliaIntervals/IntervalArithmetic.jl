@@ -236,6 +236,10 @@ end
 
     a = big(0.1)..2
     @test typeof(a) == Interval{BigFloat}
+
+    @test_throws ArgumentError 2..1
+    @test_throws ArgumentError π..1
+    @test_throws ArgumentError π..eeuler
 end
 
 @testset "± tests" begin
