@@ -47,13 +47,14 @@ in(x::T, a::DecoratedInterval) where T<:Real = in(x, interval(a))
 
 ## scalar functions: mig, mag and friends
 scalar_functions = (
-    :mig, :mag, :inf, :sup, :mid, :diam, :radius, :dist, :eps, :midpoint_radius
+    :mig, :mag, :inf, :sup, :mid, :diam, :radius, :eps, :midpoint_radius
 )
 
 for f in scalar_functions
     @eval $(f)(xx::DecoratedInterval{T}) where T = $f(interval(xx))
 end
 
+dist(xx::DecoratedInterval, yy::DecoratedInterval) = dist(interval(xx), interval(yy))
 
 ## Arithmetic function; / is treated separately
 arithm_functions = ( :+, :-, :* )
