@@ -105,6 +105,7 @@ end
     interval(a, b)
 
 `interval(a, b)` checks whether [a, b] is a valid `Interval`, which is the case if `-∞ <= a <= b <= ∞`, using the (non-exported) `is_valid_interval` function. If so, then an `Interval(a, b)` object is returned; if not, then an error is thrown.
+No directed rounding is performed on the extremes of the interval.
 """
 function interval(a::Real, b::Real)
     if !is_valid_interval(a, b)
@@ -140,6 +141,11 @@ include("complex.jl")
 
 # Syntax for intervals
 
+"""
+    a..b
+
+This is the main method to create an interval. If a <= b, the interval [a, b] is created using directed rounding.
+"""
 function ..(a::T, b::S) where {T, S}
     interval(atomic(Interval{T}, a).lo, atomic(Interval{S}, b).hi)
 end
