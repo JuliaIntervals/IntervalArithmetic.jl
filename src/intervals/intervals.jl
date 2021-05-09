@@ -151,12 +151,12 @@ end
 
 function ..(a::Irrational{T}, b::S) where {T, S}
     R = promote_type(Irrational{T}, S)
-    return Interval(R(a, RoundDown), atomic(Interval{R}, b).hi)
+    return interval(R(a, RoundDown), atomic(Interval{R}, b).hi)
 end
 
 function ..(a::Irrational{T}, b::Irrational{S}) where {T, S}
     R = promote_type(Irrational{T}, Irrational{S})
-    return Interval(a, b)
+    return interval(a, b)
 end
 
 # ..(a::Integer, b::Integer) = interval(a, b)
