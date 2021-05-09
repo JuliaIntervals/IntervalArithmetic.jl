@@ -45,7 +45,6 @@ let b
     @test @decorated(0, 2)^@decorated(0.0, 1.0) == DecoratedInterval(0.0,2.0, trv)
     @test @decorated(-3, 2)^@decorated(0.0, 1.0) == DecoratedInterval(0.0,2.0, trv)
     @test @decorated(-3, 2)^@decorated(-1.0, 1.0) == DecoratedInterval(0.0,Inf, trv)
-    @test @decorated(-3, 2)^@decorated(-1.0, 1.0) == DecoratedInterval(0.0, Inf, trv)
 
     a = @decorated 1 2
     b = @decorated 3 4
