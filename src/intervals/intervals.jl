@@ -79,11 +79,7 @@ function is_valid_interval(a::Real, b::Real)
     # println("isvalid()")
 
     if isnan(a) || isnan(b)
-        if isnan(a) && isnan(b)
-            return true
-        else
-            return false
-        end
+        return false
     end
 
     if a > b
@@ -106,9 +102,10 @@ end
 
 `interval(a, b)` checks whether [a, b] is a valid `Interval`, which is the case if `-∞ <= a <= b <= ∞`, using the (non-exported) `is_valid_interval` function. If so, then an `Interval(a, b)` object is returned; if not, then an error is thrown.
 """
-function interval(a::Real, b::Real)
+function interval(a::T, b::S) where {T<:Real, S<:Real}
     if !is_valid_interval(a, b)
-        throw(ArgumentError("`[$a, $b]` is not a valid interval. Need `a ≤ b` to construct `interval(a, b)`."))
+        @warn "Invalid input, empty interval is returned"
+        return emptyinterval(promote_type(T, S, Float64))
     end
 
     return Interval(a, b)

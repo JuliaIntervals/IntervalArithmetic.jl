@@ -11,7 +11,7 @@ setprecision(Interval, Float64)
     y = 4..5
     a = 3
     b = 12
-    
+
     @test sqrt(sum(x.^2 .+ y.^2)) == 5..13
 
     for i in 1:20
@@ -24,7 +24,7 @@ setprecision(Interval, Float64)
     end
 
     a = 4
-    b = 5 
+    b = 5
     for i in 1:20
         @test y.+i == (a+i)..(b+i)
     end
@@ -115,7 +115,7 @@ end
     @test Interval(1,2) ^ -3 == Interval(1/8, 1.0)
     @test Interval(0,3) ^ -3 == @interval(1/27, Inf)
     @test Interval(-1,2) ^ -3 == entireinterval()
-    @test_throws ArgumentError interval(-1, -2) ^ -3  # wrong way round
+    @test isempty(interval(-1, -2) ^ -3)  # wrong way round
     @test Interval(-3,2) ^ (3//1) == Interval(-27, 8)
     @test Interval(0.0) ^ 1.1 == Interval(0, 0)
     @test Interval(0.0) ^ 0.0 == emptyinterval()
@@ -432,4 +432,4 @@ end
     @test nthroot(Interval{BigFloat}(-27, 27), -3) == Interval{BigFloat}(-Inf, Inf)
     @test nthroot(Interval{BigFloat}(-81, -16), -4) == ∅
     @test nthroot(Interval{BigFloat}(-81, -16), 1) == Interval{BigFloat}(-81, -16)
-end 
+end
