@@ -138,6 +138,26 @@ as a vector.
     end
 end
 
+@generated function mince(x::IntervalBox{N,T}, tup::NTuple{N,Int}) where {N,T}
+    quote
+        n = maximum(tup)
+        nodes_matrix = Array{Interval{T},2}(undef, n, N)
+        fill!(nodes_matrix, emptyinterval(T))
+        for i in 1:N
+            nodes_matrix[1:tup[i],i] .= mince(x[i], tup[i])
+        end
+
+        nodes = IntervalBox{$N,T}[]
+        Base.Cartesian.@nloops $N i _->(1:n) begin
+            Base.Cartesian.@nextract $N ival d->nodes_matrix[i_d, d]
+            ibox = Base.Cartesian.@ncall $N IntervalBox ival
+            isempty(ibox) || push!(nodes, ibox)
+        end
+        nodes
+    end
+end
+
+
 hull(a::IntervalBox{N,T}, b::IntervalBox{N,T}) where {N,T} = IntervalBox(hull.(a[:], b[:]))
 hull(a::Vector{IntervalBox{N,T}}) where {N,T} = hull(a...)
 
