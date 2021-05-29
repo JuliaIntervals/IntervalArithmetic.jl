@@ -115,7 +115,7 @@ end
     @test Interval(1,2) ^ -3 == Interval(1/8, 1.0)
     @test Interval(0,3) ^ -3 == @interval(1/27, Inf)
     @test Interval(-1,2) ^ -3 == entireinterval()
-    @test isempty(interval(-1, -2) ^ -3)  # wrong way round
+    @test_logs (:warn, ) @test isempty(interval(-1, -2) ^ -3)
     @test Interval(-3,2) ^ (3//1) == Interval(-27, 8)
     @test Interval(0.0) ^ 1.1 == Interval(0, 0)
     @test Interval(0.0) ^ 0.0 == emptyinterval()

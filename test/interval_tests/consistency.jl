@@ -380,10 +380,10 @@ setprecision(Interval, Float64)
         @test interval(1, 2) == Interval(1, 2)
 
         @test inf(Interval(3, 2)) == 3
-        @test isempty(interval(3, 2))
+        @test_logs (:warn,) @test isempty(interval(3, 2))
 
         @test sup(Interval(Inf, Inf)) == Inf
-        @test isempty(interval(Inf, Inf))
+        @test_logs (:warn,) @test isempty(interval(Inf, Inf))
 
     end
 

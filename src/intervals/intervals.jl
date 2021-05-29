@@ -25,7 +25,8 @@ struct Interval{T<:Real} <: AbstractInterval{T}
                 new(a, b)
 
             else
-                throw(ArgumentError("Interval of form [$a, $b] not allowed. Must have a ≤ b to construct interval(a, b)."))
+                @warn "Invalid input, empty interval is returned"
+                return new(T(Inf), T(-Inf))
             end
 
         end
@@ -82,13 +83,7 @@ function is_valid_interval(a::Real, b::Real)
         return false
     end
 
-    if a > b
-        if isinf(a) && isinf(b)
-            return true  # empty interval = [∞,-∞]
-        else
-            return false
-        end
-    end
+    a > b && return false
 
     if a == Inf || b == -Inf
         return false
@@ -138,21 +133,32 @@ include("complex.jl")
 # Syntax for intervals
 
 function ..(a::T, b::S) where {T, S}
-    interval(atomic(Interval{T}, a).lo, atomic(Interval{S}, b).hi)
+    if !is_valid_interval(a, b)
+        @warn "Invalid input, empty interval is returned"
+        return emptyinterval(promote_type(T, S, Float64))
+    end
+    Interval(atomic(Interval{T}, a).lo, atomic(Interval{S}, b).hi)
 end
 
 function ..(a::T, b::Irrational{S}) where {T, S}
+    if !is_valid_interval(a, b)
+        @warn "Invalid input, empty interval is returned"
+        return emptyinterval(promote_type(T, Irrational{S}, Float64))
+    end
     R = promote_type(T, Irrational{S})
-    interval(atomic(Interval{R}, a).lo, R(b, RoundUp))
+    Interval(atomic(Interval{R}, a).lo, R(b, RoundUp))
 end
 
 function ..(a::Irrational{T}, b::S) where {T, S}
+    if !is_valid_interval(a, b)
+        @warn "Invalid input, empty interval is returned"
+        return emptyinterval(promote_type(Irrational{T}, S, Float64))
+    end
     R = promote_type(Irrational{T}, S)
-    return interval(R(a, RoundDown), atomic(Interval{R}, b).hi)
+    return Interval(R(a, RoundDown), atomic(Interval{R}, b).hi)
 end
 
 function ..(a::Irrational{T}, b::Irrational{S}) where {T, S}
-    R = promote_type(Irrational{T}, Irrational{S})
     return interval(a, b)
 end
 

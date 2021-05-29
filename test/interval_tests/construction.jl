@@ -69,20 +69,20 @@ const eeuler = Base.MathConstants.e
 
     # Disallowed conversions with a > b
 
-    @test isempty(interval(2, 1))
-    @test isempty(interval(big(2), big(1)))
-    @test isempty(interval(BigInt(1), 1//10))
-    @test isempty(interval(1, 0.1))
-    @test isempty(interval(big(1), big(0.1)))
+    @test_logs (:warn,) @test isempty(interval(2, 1))
+    @test_logs (:warn,) @test isempty(interval(big(2), big(1)))
+    @test_logs (:warn,) @test isempty(interval(BigInt(1), 1//10))
+    @test_logs (:warn,) @test isempty(interval(1, 0.1))
+    @test_logs (:warn,) @test isempty(interval(big(1), big(0.1)))
 
-    @test isempty(@interval(2, 1))
-    @test isempty(@interval(big(2), big(1)))
-    @test isempty(@interval(big(1), 1//10))
-    @test isempty(@interval(1, 0.1))
-    @test isempty(@interval(big(1), big(0.1)))
-    @test isempty(interval(Inf))
-    @test isempty(interval(-Inf, -Inf))
-    @test isempty(interval(Inf, Inf))
+    @test_logs (:warn,) @test isempty(@interval(2, 1))
+    @test_logs (:warn,) @test isempty(@interval(big(2), big(1)))
+    @test_logs (:warn,) @test isempty(@interval(big(1), 1//10))
+    @test_logs (:warn,) @test isempty(@interval(1, 0.1))
+    @test_logs (:warn,) @test isempty(@interval(big(1), big(0.1)))
+    @test_logs (:warn,) @test isempty(interval(Inf))
+    @test_logs (:warn,) @test isempty(interval(-Inf, -Inf))
+    @test_logs (:warn,) @test isempty(interval(Inf, Inf))
 
     # Conversion to Interval without type
     @test convert(Interval, 1) == Interval(1.0)
@@ -237,10 +237,10 @@ end
     a = big(0.1)..2
     @test typeof(a) == Interval{BigFloat}
 
-    @test isempty(2..1)
-    @test isempty(π..1)
-    @test isempty(π..eeuler)
-    @test isempty(4..π)
+    @test_logs (:warn, ) @test isempty(2..1)
+    @test_logs (:warn, ) @test isempty(π..1)
+    @test_logs (:warn, ) @test isempty(π..eeuler)
+    @test_logs (:warn, ) @test isempty(4..π)
     @test 1..π == Interval(1, π)
 end
 
@@ -293,9 +293,9 @@ end
 
 # issue 192:
 @testset "Disallow NaN in an interval" begin
-    @test isempty(interval(NaN, 2))
-    @test isempty(interval(Inf, NaN))
-    @test isempty(interval(NaN, NaN))
+    @test_logs (:warn, ) @test isempty(interval(NaN, 2))
+    @test_logs (:warn, ) @test isempty(interval(Inf, NaN))
+    @test_logs (:warn, ) @test isempty(interval(NaN, NaN))
 end
 
 # issue 206:
@@ -343,7 +343,7 @@ end
 end
 
 @testset "a..b with a > b" begin
-    @test isempty(3..2)
+    @test_logs (:warn,) @test isempty(3..2)
 end
 
 @testset "Hashing of Intervals" begin
@@ -375,7 +375,7 @@ import IntervalArithmetic: force_interval
     @test force_interval(4, Inf) == Interval(4, Inf)
     @test force_interval(Inf, 4) == Interval(4, Inf)
     @test force_interval(Inf, -Inf) == Interval(-Inf, Inf)
-    @test isempty(force_interval(NaN, 3))
+    @test_logs (:warn,) @test isempty(force_interval(NaN, 3))
 end
 
 @testset "Zero interval" begin
