@@ -577,5 +577,5 @@ as a vector.
 """
 function mince(x::Interval, n)
     nodes = range(x.lo, x.hi, length = n+1)
-    return [Interval(nodes[i], nodes[i+1]) for i in 1:length(nodes)-1]
+    return @. Interval(nodes[1:n], nodes[2:n+1])
 end
