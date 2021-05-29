@@ -306,18 +306,28 @@ end
     @test vb2 == vv
     @test hull(vb2...) == ib2
     @test hull(vb2) == ib2
+    @test mince(ib2, (4,4)) == vb2
+    @test mince(ib2, (1,4)) == [ (-1 .. 1)×(-1 .. -0.5), (-1 .. 1)×(-0.5 .. 0),
+        (-1 .. 1)×(0 .. 0.5), (-1 .. 1)×(0.5 .. 1)]
+    @test hull(mince(ib2, (1,4))) == ib2
 
     ib3 = IntervalBox(-1..1, 3)
     vb3 = mince(ib3, 4)
     @test length(vb3) == 4^3
     @test hull(vb3...) == ib3
     @test hull(vb3) == ib3
+    @test mince(ib3, (4,4,4)) == vb3
+    @test mince(ib3, (2,1,1)) == [(-1 .. 0)×(-1 .. 1)×(-1 .. 1), 
+        (0 .. 1)×(-1 .. 1)×(-1 .. 1)]
+    @test hull(mince(ib3, (2,1,1))) == ib3
 
     ib4 = IntervalBox(-1..1, 4)
     vb4 = mince(ib4, 4)
     @test length(vb4) == 4^4
     @test hull(vb4...) == ib4
     @test hull(vb4) == ib4
+    @test mince(ib4,(4,4,4,4)) == vb4
+    @test mince(ib4,(1,1,1,1)) == [ib4]
 end
 
 @testset "Special box constructors" begin
