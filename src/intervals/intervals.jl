@@ -100,7 +100,7 @@ end
 function interval(a::T, b::S) where {T<:Real, S<:Real}
     if !is_valid_interval(a, b)
         @warn "Invalid input, empty interval is returned"
-        return emptyinterval(promote_type(T, S, Float64))
+        return emptyinterval(promote_type(T, S))
     end
 
     return Interval(a, b)
@@ -135,7 +135,7 @@ include("complex.jl")
 function ..(a::T, b::S) where {T, S}
     if !is_valid_interval(a, b)
         @warn "Invalid input, empty interval is returned"
-        return emptyinterval(promote_type(T, S, Float64))
+        return emptyinterval(promote_type(T, S))
     end
     Interval(atomic(Interval{T}, a).lo, atomic(Interval{S}, b).hi)
 end
@@ -143,7 +143,7 @@ end
 function ..(a::T, b::Irrational{S}) where {T, S}
     if !is_valid_interval(a, b)
         @warn "Invalid input, empty interval is returned"
-        return emptyinterval(promote_type(T, Irrational{S}, Float64))
+        return emptyinterval(promote_type(T, Irrational{S}))
     end
     R = promote_type(T, Irrational{S})
     Interval(atomic(Interval{R}, a).lo, R(b, RoundUp))
@@ -152,7 +152,7 @@ end
 function ..(a::Irrational{T}, b::S) where {T, S}
     if !is_valid_interval(a, b)
         @warn "Invalid input, empty interval is returned"
-        return emptyinterval(promote_type(Irrational{T}, S, Float64))
+        return emptyinterval(promote_type(Irrational{T}, S))
     end
     R = promote_type(Irrational{T}, S)
     return Interval(R(a, RoundDown), atomic(Interval{R}, b).hi)

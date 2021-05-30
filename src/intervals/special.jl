@@ -9,6 +9,7 @@ larger than the upper one."""
 emptyinterval(::Type{T}) where T<:Real = Interval{T}(Inf, -Inf)
 emptyinterval(x::Interval{T}) where T<:Real = emptyinterval(T)
 emptyinterval() = emptyinterval(precision(Interval)[1])
+emptyinterval(::Type{<:Integer}) = emptyinterval(Float64)
 const ∅ = emptyinterval(Float64)
 
 isempty(x::Interval) = x.lo == Inf && x.hi == -Inf
@@ -20,6 +21,7 @@ const ∞ = Inf
 entireinterval(::Type{T}) where T<:Real = Interval{T}(-Inf, Inf)
 entireinterval(x::Interval{T}) where T<:Real = entireinterval(T)
 entireinterval() = entireinterval(precision(Interval)[1])
+entireinterval(::Type{<:Integer}) = entireinterval(Float64)
 
 isentire(x::Interval) = x.lo == -Inf && x.hi == Inf
 isinf(x::Interval) = isentire(x)
