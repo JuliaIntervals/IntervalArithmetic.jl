@@ -241,6 +241,8 @@ end
     @test_logs (:warn, ) @test isempty(π..1)
     @test_logs (:warn, ) @test isempty(π..eeuler)
     @test_logs (:warn, ) @test isempty(4..π)
+    @test_logs (:warn, ) @test isempty(NaN..3)
+    @test_logs (:warn, ) @test isempty(3..NaN)
     @test 1..π == Interval(1, π)
 end
 
