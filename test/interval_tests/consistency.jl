@@ -39,7 +39,9 @@ setprecision(Interval, Float64)
         @test @biginterval(1, Inf) == Interval{BigFloat}(1.0, Inf)
         @test @biginterval(-Inf, 1) == Interval{BigFloat}(-Inf, 1.0)
         @test @interval(-Inf, Inf) == entireinterval(Float64)
+        @test entireinterval(Int) == entireinterval(Float64)
         @test emptyinterval(Rational{Int}) == ∅
+        @test emptyinterval(Int) == ∅
 
         @test 1 == zero(a)+one(b)
         @test Interval(0,1) + emptyinterval(a) == emptyinterval(a)
