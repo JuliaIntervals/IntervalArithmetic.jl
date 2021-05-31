@@ -95,7 +95,7 @@ end
 """
     interval(a, b)
 
-`interval(a, b)` checks whether [a, b] is a valid `Interval`, which is the case if `-∞ <= a <= b <= ∞`, using the (non-exported) `is_valid_interval` function. If so, then an `Interval(a, b)` object is returned; if not, then an error is thrown.
+`interval(a, b)` checks whether [a, b] is a valid `Interval`, using the (non-exported) `is_valid_interval` function. If so, then an `Interval(a, b)` object is returned; if not, a warning is printed and the empty interval is returned.
 """
 function interval(a::T, b::S) where {T<:Real, S<:Real}
     if !is_valid_interval(a, b)
