@@ -141,8 +141,7 @@ end
 @generated function mince(x::IntervalBox{N,T}, tup::NTuple{N,Int}) where {N,T}
     quote
         n = maximum(tup)
-        nodes_matrix = Array{Interval{T},2}(undef, n, N)
-        fill!(nodes_matrix, emptyinterval(T))
+        nodes_matrix = fill(emptyinterval(T), n, N)
         for i in 1:N
             nodes_matrix[1:tup[i],i] .= mince(x[i], tup[i])
         end
