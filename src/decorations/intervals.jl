@@ -36,23 +36,25 @@ struct DecoratedInterval{T<:Real} <: AbstractInterval{T}
     decoration::DECORATION
 
     function DecoratedInterval{T}(I::Interval, d::DECORATION) where T
-        dd = decoration(I)
-        dd <= trv && return new{T}(I, dd)
-        d == ill && return new{T}(nai(I))
         return new{T}(I, d)
     end
 end
 
-DecoratedInterval(I::Interval{T}, d::DECORATION) where T<:AbstractFloat =
-    DecoratedInterval{T}(I, d)
+function DecoratedInterval(I::Interval{T}, d::DECORATION) where T<:Real
+    d = min(decoration(I), d)
+    d == ill && return nai(T)
+    return DecoratedInterval{T}(I, d)
+end
 
 function DecoratedInterval(a::T, b::T, d::DECORATION) where T<:Real
     is_valid_interval(a, b) || return nai(T)
     DecoratedInterval(Interval(a,b), d)
 end
 
-DecoratedInterval(a::T, d::DECORATION) where T<:Real =
-    DecoratedInterval(Interval(a,a), d)
+function DecoratedInterval(a::T, d::DECORATION) where T<:Real
+    is_valid_interval(a, a) || return nai(T)
+    return DecoratedInterval(Interval(a,a), d)
+end
 
 DecoratedInterval(a::Tuple, d::DECORATION) = DecoratedInterval(a..., d)
 
@@ -70,7 +72,10 @@ end
 DecoratedInterval(a::T, b::T) where T<:Integer =
     DecoratedInterval(float(a),float(b))
 
-DecoratedInterval(a::T) where T<:Real = DecoratedInterval(Interval(a,a))
+function DecoratedInterval(a::T) where T<:Real
+    is_valid_interval(a, a) || return nai(T)
+    DecoratedInterval(Interval(a,a))
+end
 
 DecoratedInterval(a::T, b::S) where {T<:Real, S<:Real} =
     DecoratedInterval(promote(a, b)...)
@@ -79,7 +84,13 @@ DecoratedInterval(a::Tuple) = DecoratedInterval(a...)
 
 DecoratedInterval(I::DecoratedInterval, dec::DECORATION) = DecoratedInterval(I.interval, dec)
 
-interval(x::DecoratedInterval) = x.interval
+function interval(x::DecoratedInterval{T}) where {T <: Real}
+    if isnai(x)
+        @warn "trying to access interval part of NaI, empty interval is returned"
+        return emptyinterval(T)
+    end
+    return x.interval
+end
 
 decoration(x::DecoratedInterval) = x.decoration
 

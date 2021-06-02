@@ -311,7 +311,7 @@ function representation(a::DecoratedInterval{T}, format=nothing) where T
         return "DecoratedInterval($(representation(interval(a), format)), $(decoration(a)))"
     end
 
-    var_interval = representation(interval(a), format)
+    var_interval = isnai(a) ? "[NaI]" : representation(interval(a), format)
 
     if display_params.decorations
         string(var_interval, "_", decoration(a))
