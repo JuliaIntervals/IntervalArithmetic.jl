@@ -115,45 +115,30 @@ Base.:(==)(x::IntervalBox, y::IntervalBox) = x.v == y.v
 
 
 """
-    mince(x::IntervalBox, n)
+    mince(x::IntervalBox, n::Int)
 
 Splits `x` in `n` intervals in each dimension of the same diameter. These
 intervals are combined in all possible `IntervalBox`-es, which are returned
 as a vector.
 """
-@generated function mince(x::IntervalBox{N,T}, n) where {N,T}
-    quote
-        nodes_matrix = Array{Interval{T},2}(undef, n, N)
-        for i in 1:N
-            nodes_matrix[1:n,i] .= mince(x[i], n)
-        end
+@inline mince(x::IntervalBox{N,T}, n::Int) where {N,T} = 
+    mince(x, ntuple(_ -> n, N))
 
-        nodes = IntervalBox{$N,T}[]
-        Base.Cartesian.@nloops $N i _->(1:n) begin
-            Base.Cartesian.@nextract $N ival d->nodes_matrix[i_d, d]
-            ibox = Base.Cartesian.@ncall $N IntervalBox ival
-            push!(nodes, ibox)
-        end
-        nodes
+"""
+    mince(x::IntervalBox, ncuts::::NTuple{N,Int})
+
+Splits `x[i]` in `ncuts[i]` intervals . These intervals are 
+combined in all possible `IntervalBox`-es, which are returned
+as a vector.
+"""
+@inline function mince(x::IntervalBox{N,T}, ncuts::NTuple{N,Int}) where {N,T}
+    minced_intervals = [mince(x[i], ncuts[i]) for i in 1:N]
+    minced_boxes = Vector{IntervalBox{N,T}}(undef, prod(ncuts))
+
+    for (k, cut_indices) in enumerate(CartesianIndices(ncuts))
+        minced_boxes[k] = IntervalBox([minced_intervals[i][cut_indices[i]] for i in 1:N])
     end
-end
-
-@generated function mince(x::IntervalBox{N,T}, tup::NTuple{N,Int}) where {N,T}
-    quote
-        n = maximum(tup)
-        nodes_matrix = fill(emptyinterval(T), n, N)
-        for i in 1:N
-            nodes_matrix[1:tup[i],i] .= mince(x[i], tup[i])
-        end
-
-        nodes = IntervalBox{$N,T}[]
-        Base.Cartesian.@nloops $N i _->(1:n) begin
-            Base.Cartesian.@nextract $N ival d->nodes_matrix[i_d, d]
-            ibox = Base.Cartesian.@ncall $N IntervalBox ival
-            isempty(ibox) || push!(nodes, ibox)
-        end
-        nodes
-    end
+    return minced_boxes
 end
 
 

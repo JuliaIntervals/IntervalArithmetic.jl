@@ -575,7 +575,7 @@ convert(::Type{Integer}, a::Interval) = isinteger(a) ?
 Splits `x` in `n` intervals of the same diameter, which are returned
 as a vector.
 """
-function mince(x::Interval, n)
+@inline function mince(x::Interval, n)
     nodes = range(x.lo, x.hi, length = n+1)
     return Interval.(nodes[1:n], nodes[2:n+1])
 end
