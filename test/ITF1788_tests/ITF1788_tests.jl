@@ -1,6 +1,8 @@
 include("ieee1788-constructors.jl")
+include("ieee1788-exceptions.jl")
 include("libieeep1788_tests_bool.jl")
 include("libieeep1788_tests_cancel.jl")
+include("libieeep1788_class.jl")
 include("libieeep1788_tests_elem.jl")
 include("libieeep1788_tests_mul_rev.jl")
 include("libieeep1788_tests_num.jl")
