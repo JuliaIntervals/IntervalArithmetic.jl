@@ -54,6 +54,15 @@ let b
     b = @decorated 3 4
 
     @test dist(a, b) == 2.0
+
+    # invalid input
+    @test isnai(@decorated(3, 1, com))
+    @test isnai(@decorated(3, 1))
+    @test isnai(@decorated(Inf, Inf))
+    @test isnai(@decorated(-Inf, -Inf))
+    @test isnai(@decorated(NaN, 3))
+    @test isnai(@decorated(3, NaN))
+    @test isnai(@decorated(NaN, NaN))
 end
 
 @testset "Convert string to DecoratedInterval" begin

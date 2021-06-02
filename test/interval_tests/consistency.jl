@@ -39,7 +39,9 @@ setprecision(Interval, Float64)
         @test @biginterval(1, Inf) == Interval{BigFloat}(1.0, Inf)
         @test @biginterval(-Inf, 1) == Interval{BigFloat}(-Inf, 1.0)
         @test @interval(-Inf, Inf) == entireinterval(Float64)
+        @test entireinterval(Int) == entireinterval(Float64)
         @test emptyinterval(Rational{Int}) == ∅
+        @test emptyinterval(Int) == ∅
 
         @test 1 == zero(a)+one(b)
         @test Interval(0,1) + emptyinterval(a) == emptyinterval(a)
@@ -380,10 +382,10 @@ setprecision(Interval, Float64)
         @test interval(1, 2) == Interval(1, 2)
 
         @test inf(Interval(3, 2)) == 3
-        @test_throws ArgumentError interval(3, 2)
+        @test_logs (:warn,) @test isempty(interval(3, 2))
 
         @test sup(Interval(Inf, Inf)) == Inf
-        @test_throws ArgumentError interval(Inf, Inf)
+        @test_logs (:warn,) @test isempty(interval(Inf, Inf))
 
     end
 
