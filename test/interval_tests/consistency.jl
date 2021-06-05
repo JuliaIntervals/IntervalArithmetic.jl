@@ -175,7 +175,7 @@ setprecision(Interval, Float64)
 
         @test nai(a) === nai(a)
         @test nai(Float64) === DecoratedInterval(NaN)
-        @test isnan(interval(nai(BigFloat)).lo)
+        @test_logs (:warn, ) @test isempty(interval(nai(BigFloat)))
         @test isnai(nai())
         @test !(isnai(a))
 
@@ -185,7 +185,6 @@ setprecision(Interval, Float64)
         @test sup(emptyinterval(a)) == -Inf
         @test inf(entireinterval(a)) == -Inf
         @test sup(entireinterval(a)) == Inf
-        @test isnan(sup(nai(BigFloat)))
     end
 
     @testset "mid" begin
@@ -271,11 +270,6 @@ setprecision(Interval, Float64)
         @test isnan(mid(emptyinterval()))
         @test mid(entireinterval()) == 0.0
         @test isnan(mid(nai()))
-        if VERSION < v"0.7.0-DEV"
-            @test_throws ArgumentError nai(Interval(1//2))
-        else
-            @test_throws InexactError nai(Interval(1//2))
-        end
     end
 
     @testset "abs, min, max, sign" begin

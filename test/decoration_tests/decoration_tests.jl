@@ -74,4 +74,14 @@ end
 
 end
 
+@testset "decorated rational intervals" begin
+    @test isnai(nai(Rational))
+    @test isnai(nai(Rational{BigInt}))
+    
+    @test DecoratedInterval(1//2, 3//4) == DecoratedInterval{Rational{Int}}(1//2..3//4, com)
+
+    @test DecoratedInterval(1//2, 1//0) == DecoratedInterval{Rational{Int}}(1//2..1//0, dac)
+    @test DecoratedInterval(1//2, 1//0, com) == DecoratedInterval{Rational{Int}}(1//2..1//0, dac)
+end
+
 end

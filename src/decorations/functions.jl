@@ -11,12 +11,15 @@ one(::Type{DecoratedInterval{T}}) where T<:Real = DecoratedInterval(one(T))
 
 # NaI: not-an-interval
 """`NaI` not-an-interval: [NaN, NaN]."""
-nai(::Type{T}) where T<:Real = DecoratedInterval(Interval{T}(convert(T, NaN), convert(T, NaN)), ill)
+                            nai(::Type{<:Integer}) = nai(Float64)
+nai(::Type{Rational}) = nai(Rational{Int})
+nai(::Type{Rational{T}}) where {T<:Real} = DecoratedInterval{Rational{T}}(Interval{Rational{T}}(1//0, -1//0), ill)
+nai(::Type{T}) where T<:Real = DecoratedInterval{T}(Interval{T}(convert(T, NaN), convert(T, NaN)), ill)
 nai(x::Interval{T}) where T<:Real = nai(T)
 nai(x::DecoratedInterval{T}) where T<:Real = nai(T)
 nai() = nai(precision(Interval)[1])
 isnai(x::Interval) = isnan(x.lo) || isnan(x.hi)
-isnai(x::DecoratedInterval) = isnai(interval(x)) && x.decoration == ill
+isnai(x::DecoratedInterval) = x.decoration == ill
 isnan(x::Interval) = isnai(x)
 
 ## Bool functions
@@ -32,7 +35,10 @@ bool_binary_functions = (
 )
 
 for f in bool_functions
-    @eval $(f)(xx::DecoratedInterval) = $(f)(interval(xx))
+    @eval function $(f)(xx::DecoratedInterval)
+        isnai(xx) && return false
+        return $(f)(interval(xx))
+    end
 end
 
 for f in bool_binary_functions
@@ -51,7 +57,12 @@ scalar_functions = (
 )
 
 for f in scalar_functions
-    @eval $(f)(xx::DecoratedInterval{T}) where T = $f(interval(xx))
+    @eval begin 
+        function $(f)(x::DecoratedInterval{T}) where T
+            isnai(x) && return T(NaN)
+            return $f(interval(x))
+        end
+    end
 end
 
 dist(xx::DecoratedInterval, yy::DecoratedInterval) = dist(interval(xx), interval(yy))
