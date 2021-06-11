@@ -106,6 +106,9 @@ function atomic(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:AbstractF
 
     xrat = rationalize(x)
 
+    # Prevent generating NaN if denominator is too large
+    isinf(T(xrat.den)) && return Interval{T}( T(x, RoundDown), T(x, RoundUp) )
+
     # This prevents that xrat returns a 0//1 when x is very small
     # or 1//0 when x is too large but finite
     if (x != zero(x) && xrat == 0) || isinf(xrat)
