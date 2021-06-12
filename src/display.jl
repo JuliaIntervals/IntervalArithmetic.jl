@@ -272,6 +272,11 @@ function subscriptify(n::Integer)
     join( [Char(subscript_0 + i) for i in dig])
 end
 
+function superscriptify(n::Integer)
+    exps = ['⁰', '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹']
+    dig = reverse(digits(n))
+    return join([exps[d+1] for d in dig])
+end
 
 # fall-back:
 representation(a::Interval{T}, format=nothing) where T =
@@ -317,21 +322,51 @@ function representation(a::DecoratedInterval{T}, format=nothing) where T
 end
 
 
-function representation(X::IntervalBox, format=nothing)
+function representation(X::IntervalBox{N, T}, format=nothing) where {N, T}
 
     if format == nothing
         format = display_params.format  # default
     end
 
-    if display_params.format == :full
-        return string("IntervalBox(", join(X.v, ", "), ")")
+    n = format == :full ? N : superscriptify(N)
 
+    if isempty(X)
+        format == :full && return string("IntervalBox(∅, ", n, ")")
+        return string("∅", n)
+    end
+
+    x = first(X)
+    if all(==(x), X)
+        if format == :full
+            return string("IntervalBox(", representation(x, format), ", ", n, ")")
+        elseif format == :midpoint
+            return string("(", representation(x, format), ")", n)
+        else
+            return string(representation(x, format), n)
+        end
+    end
+
+    if format == :full
+        full_str = representation.(X.v, :full)
+        return string("IntervalBox(", join(full_str, ", "), ")")
+    elseif format == :midpoint
+        return string("(", join(X.v, ") × ("), ")")
     else
         return join(X.v, " × ")
     end
 
 end
 
+function representation(x::Complex{<:Interval}, format=nothing)
+
+    if format == nothing
+        format = display_params.format
+    end
+
+    format == :midpoint && return string('(', x.re, ')', " + ", '(', x.im, ')', "im")
+
+    return string(x.re, " + ", x.im, "im")
+end
 
 for T in (Interval, DecoratedInterval)
     @eval show(io::IO, a::$T{S}) where S = print(io, representation(a))
@@ -339,7 +374,9 @@ for T in (Interval, DecoratedInterval)
     @eval showfull(a::$T{S}) where S = showfull(stdout, a)
 end
 
-T = IntervalBox
-@eval show(io::IO, a::$T) = print(io, representation(a))
-@eval show(io::IO, ::MIME"text/plain", a::$T) = print(io, representation(a))
-@eval showfull(io::IO, a::$T) = print(io, representation(a, :full))
+for T in (IntervalBox, Complex{<:Interval})
+    @eval show(io::IO, a::$T) = print(io, representation(a))
+    @eval show(io::IO, ::MIME"text/plain", a::$T) = print(io, representation(a))
+    @eval showfull(io::IO, a::$T) = print(io, representation(a, :full))
+    @eval showfull(a::$T) = showfull(stdout, a)
+end

@@ -1,6 +1,6 @@
 `IntervalArithmetic.jl` is licensed under the MIT "Expat" License:
 
-> Copyright (c) 2014-2020: David P. Sanders & Luis Benet
+> Copyright (c) 2014-2021: David P. Sanders & Luis Benet
 >
 > Permission is hereby granted, free of charge, to any person obtaining
 > a copy of this software and associated documentation files (the

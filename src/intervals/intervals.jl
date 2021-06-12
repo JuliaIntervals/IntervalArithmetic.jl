@@ -25,7 +25,8 @@ struct Interval{T<:Real} <: AbstractInterval{T}
             if is_valid_interval(a, b)
                 new(a, b)
             else
-                throw(ArgumentError("Interval of form [$a, $b] not allowed. Must have a ≤ b to construct interval(a, b)."))
+                @warn "Invalid input, empty interval is returned"
+                return new(T(Inf), T(-Inf))
             end
         end
         new(a, b)
@@ -84,20 +85,10 @@ function is_valid_interval(a::Real, b::Real)
     # println("isvalid()")
 
     if isnan(a) || isnan(b)
-        if isnan(a) && isnan(b)
-            return true
-        else
-            return false
-        end
+        return false
     end
 
-    if a > b
-        if isinf(a) && isinf(b)
-            return true  # empty interval = [∞,-∞]
-        else
-            return false
-        end
-    end
+    a > b && return false
 
     if a == Inf || b == -Inf
         return false
@@ -109,11 +100,12 @@ end
 """
     interval(a, b)
 
-`interval(a, b)` checks whether [a, b] is a valid `Interval`, which is the case if `-∞ <= a <= b <= ∞`, using the (non-exported) `is_valid_interval` function. If so, then an `Interval(a, b)` object is returned; if not, then an error is thrown.
+`interval(a, b)` checks whether [a, b] is a valid `Interval`, using the (non-exported) `is_valid_interval` function. If so, then an `Interval(a, b)` object is returned; if not, a warning is printed and the empty interval is returned.
 """
-function interval(a::Real, b::Real)
+function interval(a::T, b::S) where {T<:Real, S<:Real}
     if !is_valid_interval(a, b)
-        throw(ArgumentError("`[$a, $b]` is not a valid interval. Need `a ≤ b` to construct `interval(a, b)`."))
+        @warn "Invalid input, empty interval is returned"
+        return emptyinterval(promote_type(T, S))
     end
 
     return Interval(a, b)
@@ -146,21 +138,33 @@ include("complex.jl")
 # Syntax for intervals
 
 function ..(a::T, b::S) where {T, S}
-    interval(atomic(Interval{T}, a).lo, atomic(Interval{S}, b).hi)
+    if !is_valid_interval(a, b)
+        @warn "Invalid input, empty interval is returned"
+        return emptyinterval(promote_type(T, S))
+    end
+    Interval(atomic(Interval{T}, a).lo, atomic(Interval{S}, b).hi)
 end
 
 function ..(a::T, b::Irrational{S}) where {T, S}
+    if !is_valid_interval(a, b)
+        @warn "Invalid input, empty interval is returned"
+        return emptyinterval(promote_type(T, Irrational{S}))
+    end
     R = promote_type(T, Irrational{S})
-    interval(atomic(Interval{R}, a).lo, R(b, RoundUp))
+    Interval(atomic(Interval{R}, a).lo, R(b, RoundUp))
 end
 
 function ..(a::Irrational{T}, b::S) where {T, S}
+    if !is_valid_interval(a, b)
+        @warn "Invalid input, empty interval is returned"
+        return emptyinterval(promote_type(Irrational{T}, S))
+    end
     R = promote_type(Irrational{T}, S)
     return Interval(R(a, RoundDown), atomic(Interval{R}, b).hi)
 end
 
 function ..(a::Irrational{T}, b::Irrational{S}) where {T, S}
-    return Interval(a, b)
+    return interval(a, b)
 end
 
 # ..(a::Integer, b::Integer) = interval(a, b)
