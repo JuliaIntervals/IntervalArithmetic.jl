@@ -167,7 +167,7 @@ function round_string(x::BigFloat, digits::Int, r::RoundingMode)
     return repr
 end
 
-round_string(x::Real, digits::Int, r::RoundingMode) = round_string(big(x), digits, r)
+round_string(x::Real, digits::Int, r::RoundingMode) = round_string(BigFloat(x), digits, r)
 
 
 function basic_representation(a::Interval, format=nothing)

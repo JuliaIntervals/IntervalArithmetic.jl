@@ -84,6 +84,11 @@ const eeuler = Base.MathConstants.e
     @test_logs (:warn,) @test isempty(interval(-Inf, -Inf))
     @test_logs (:warn,) @test isempty(interval(Inf, Inf))
 
+    # Disallowed creation of interval witha a or b an interval
+    @test_throws ArgumentError Interval(1, 1..2)
+    @test_throws ArgumentError Interval(1..2, 1)
+    @test_throws ArgumentError Interval(1..2, 1..2)
+
     # Conversion to Interval without type
     @test convert(Interval, 1) == Interval(1.0)
     @test convert(Interval, pi) == @interval(pi)
