@@ -5,6 +5,8 @@ using Test
 
 const eeuler = Base.MathConstants.e
 
+using InteractiveUtils
+
 
 @testset "Constructing intervals" begin
     setprecision(Interval, 53)
@@ -383,4 +385,17 @@ end
 @testset "Zero interval" begin
     @test zero(Interval{Float64}) === Interval{Float64}(0, 0)
     @test zero(0 .. 1) === Interval{Float64}(0, 0)
+end
+
+@testset "#320 fixing convert bug" begin
+    x = 3..4
+    T = typeof(x)
+
+    m = @which convert(T, x)
+
+    @test m.sig == Tuple{typeof(convert),Type{Interval{T}},Interval{T}} where T
+
+    x = interval(1//1, 5//3)
+    @test convert(typeof(x), x) == x
+
 end
