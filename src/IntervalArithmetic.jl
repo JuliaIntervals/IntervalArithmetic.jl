@@ -29,7 +29,7 @@ import Base:
     union, intersect, isempty,
     convert, promote_rule, eltype, size,
     BigFloat, float, widen, big,
-    ∩, ∪, ⊆, ⊇, ∈, eps,
+    ∩, ∪, ⊆, ⊇, ∈, eps, floatmin, floatmax,
     floor, ceil, trunc, sign, round, copysign, flipsign, signbit,
     expm1, log1p,
     precision,
