@@ -333,6 +333,8 @@ end
 dist(a::Interval, b::Interval) = max(abs(a.lo-b.lo), abs(a.hi-b.hi))
 eps(a::Interval) = Interval(max(eps(a.lo), eps(a.hi)))
 eps(::Type{Interval{T}}) where T<:Real = Interval(eps(T))
+floatmin(::Type{Interval{T}}) where T<:Real = floatmin(T)
+floatmax(::Type{Interval{T}}) where T<:Real = floatmax(T)
 
 ## floor, ceil, trunc, sign, roundTiesToEven, roundTiesToAway
 function floor(a::Interval)
