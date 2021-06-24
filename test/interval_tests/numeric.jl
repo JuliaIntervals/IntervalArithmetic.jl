@@ -200,6 +200,10 @@ end
 
     # real
     @test real(@interval(-1, 1)) == Interval(-1, 1)
+
+    a = 0.3..0.7
+    b = a + 1e-10
+    @test a ≈ b
 end
 
 @testset "Rational tests" begin
