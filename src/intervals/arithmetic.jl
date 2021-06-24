@@ -50,6 +50,7 @@ function strictprecedes(a::Interval, b::Interval)
 end
 const ≺ = strictprecedes # \prec
 
+isapprox(a::Interval, b::Interval; kwargs...) = isapprox(a.lo, b.lo; kwargs...) && isapprox(a.hi, b.hi; kwargs...)
 
 # zero, one, typemin, typemax
 zero(a::Interval{T}) where T<:Real = Interval(zero(T))
