@@ -363,3 +363,30 @@ for (f, domain) in restricted_functions2
         DecoratedInterval(r, trv)
     end
 end
+
+## mixed operations
+
+for op in (:(==), :!=, :<=, :<, :≼, :≺, :⊂, :⊃, :⊇, :⊆, :⪽, :isdisjoint,
+            :+, :-, :*, :/, ://, :^, :pow, :extended_div, :atan, :min, :max, :dist,
+            :cancelminus, :cancelplus, :hypot, :copysign, :flipsign,
+            :in, :intersect, :union, :setdiff, :hull)
+      @eval $op(::Interval, ::DecoratedInterval) =
+        throw(ArgumentError("operations between bare and decorated intervals not allowed"))
+
+      @eval $op(::DecoratedInterval, ::Interval) =
+        throw(ArgumentError("operations between bare and decorated intervals not allowed"))
+end
+
+fma(::Interval, ::Interval, ::DecoratedInterval) =
+    throw(ArgumentError("operations between bare and decorated intervals not allowed"))
+fma(::Interval, ::DecoratedInterval, ::Interval) =
+    throw(ArgumentError("operations between bare and decorated intervals not allowed"))
+fma(::DecoratedInterval, ::Interval, ::Interval) =
+    throw(ArgumentError("operations between bare and decorated intervals not allowed"))
+
+fma(::Interval, ::DecoratedInterval, ::DecoratedInterval) =
+    throw(ArgumentError("operations between bare and decorated intervals not allowed"))
+fma(::DecoratedInterval, ::DecoratedInterval, ::Interval) =
+    throw(ArgumentError("operations between bare and decorated intervals not allowed"))
+fma(::DecoratedInterval, ::Interval, ::DecoratedInterval) =
+    throw(ArgumentError("operations between bare and decorated intervals not allowed"))
