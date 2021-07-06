@@ -186,6 +186,19 @@ const eeuler = Base.MathConstants.e
     setprecision(Interval, 53)
     a = big(1)//3
     @test @interval(a) == Interval(big(3.3333333333333331e-01), big(3.3333333333333337e-01))
+
+    # Issue #410 test:
+    # Interval{BigFloat} construction through ± involving a Float64 intermediate step ending up
+    # with a _smaller_ interval radius
+    setprecision(BigFloat, 256) do
+        orig_mid = BigFloat("0.1")
+        orig_rad = √eps(orig_mid)
+        test_mid, test_rad = midpoint_radius(orig_mid ± orig_rad)
+        @test test_rad >= orig_rad
+        test_mid, test_rad = midpoint_radius((orig_mid-orig_rad)..(orig_mid+orig_rad))
+        @test test_rad >= orig_rad
+    end
+
 end
 
 @testset "Big intervals" begin
