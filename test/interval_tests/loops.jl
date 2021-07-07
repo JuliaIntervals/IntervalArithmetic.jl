@@ -101,9 +101,6 @@ end
     @test big_pi ∈ pi4
     @test big_pi ∈ pi5
 
-    @test pi1 == pi2
-    @test pi2 == pi3
-
 end
 
 setprecision(Interval, Float64)

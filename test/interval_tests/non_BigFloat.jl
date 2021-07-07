@@ -43,7 +43,7 @@ end
     @test f(c) == Interval(0.19999999999999998, 0.30000000000000004)
 
     d = @interval(0.1, 0.2)
-    @test f(d) == @biginterval(0.2, 0.3)
+    @test f(d) == Interval(big"0.200000000000000005546", big"0.300000000000000005567")
 end
 
 @testset "Testing conversions" begin

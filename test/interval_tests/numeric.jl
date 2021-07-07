@@ -395,6 +395,33 @@ end
     @test hull(v) == II
 end
 
+@testset "function call for mathematical operators" begin
+
+    types = [Float32, Float64, BigFloat]
+    operations = [+, *, -, /]
+
+    for op in operations
+        for T1 in types
+            for T2 in types
+                @test which(op, (Interval{T1}, T2)).module == IntervalArithmetic
+                if(op != /)
+                    @test which(op, (T1, Interval{T2})).module == IntervalArithmetic
+                end
+            end
+        end
+    end
+end
+
+@testset "Return types for mathematical operators" begin
+    @test typeof(Interval{Float32}(4,5) / 2) == Interval{Float32}
+    @test typeof(Interval(4,5) + Float32(2)) == Interval{Float64}
+    @test typeof(Interval{BigFloat}(1,10) - Float32(3)) == Interval{BigFloat}
+    @test typeof(Interval{BigFloat}(2,6) * 9) == Interval{BigFloat}
+    @test typeof(Interval(2,3) / 4) == Interval{Float64}
+    @test typeof(Interval{Float32}(3, 4) / 2.1) == Interval{Float32}
+    @test typeof(Interval{Float32}(3, 4) / big(2.1)) == Interval{Float32}
+end
+
 @testset "nthroot test" begin
     @test nthroot(∅, 3) == ∅
     @test nthroot(∅, 4) == ∅
