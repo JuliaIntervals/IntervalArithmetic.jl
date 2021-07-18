@@ -6,10 +6,10 @@
 # Use the BigFloat version from MPFR instead, which is correctly-rounded:
 
 # Write explicitly like this to avoid ambiguity warnings:
-for T in (:Integer, :Float64, :Float32, :BigFloat, :Interval)
+for T in (:Integer, :Float64, :BigFloat, :Interval)
     @eval ^(a::Interval{Float64}, x::$T) = atomic(Interval{Float64}, bigequiv(a)^x)
 end
-
+@eval ^(a::Interval{Float32}, x::$T) = atomic(Interval{Float32}, bigequiv(a)^x)
 
 # Integer power:
 
