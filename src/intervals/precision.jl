@@ -15,25 +15,30 @@ const parameters = IntervalParameters()
 
 ## Precision:
 
-"`big53` creates an equivalent `BigFloat` interval to a given `Float64` interval."
-function big53(a::Interval{Float64})
-    setprecision(Interval, 53) do  # precision of Float64
-        atomic(Interval{BigFloat}, a)
+"`bigequiv` creates an equivalent `BigFloat` interval to a given `AbstractFloat` interval."
+function bigequiv(a::Interval{T}) where {T <: AbstractFloat}
+    return guarded_setprecision(Interval, precision(T)) do
+        return atomic(Interval{BigFloat}, a)
     end
 end
 
-function big53(x::Float64)
-    # BigFloat(x, 53)  # in Julia v0.6
-
-    setprecision(53) do
-        BigFloat(x)
-    end
+bigequiv(x::AbstractFloat) = guarded_setprecision(precision(x)) do
+    return BigFloat(x)
 end
 
+# NOTE: prevents multiple threads from calling setprecision() concurrently
+const precision_lock = ReentrantLock()
+
+guarded_setprecision(f, ::Type{Interval}, prec::Integer) = lock(precision_lock) do
+    return setprecision(f, Interval, prec)
+end
+
+guarded_setprecision(f, prec::Integer) = lock(precision_lock) do
+    return setprecision(f, prec)
+end
 
 setprecision(::Type{Interval}, ::Type{Float64}) = parameters.precision_type = Float64
 # does not change the BigFloat precision
-
 
 function setprecision(::Type{Interval}, ::Type{T}, prec::Integer) where T<:AbstractFloat
     #println("SETTING BIGFLOAT PRECISION TO $precision")

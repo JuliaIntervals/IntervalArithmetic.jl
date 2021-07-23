@@ -27,7 +27,7 @@ bool_functions = (
 )
 
 bool_binary_functions = (
-    :<, :>, :!=, :⊆, :<=,
+    :<, :>, :!=, :⊆, :<=, :(==),
     :isinterior, :isdisjoint, :precedes, :strictprecedes
 )
 
@@ -36,27 +36,25 @@ for f in bool_functions
 end
 
 for f in bool_binary_functions
-    @eval $(f)(xx::DecoratedInterval, yy::DecoratedInterval) =
+    @eval function $(f)(xx::DecoratedInterval, yy::DecoratedInterval)
+        (isnai(xx) || isnai(yy)) && return false
         $(f)(interval(xx), interval(yy))
+    end
 end
 
 in(x::T, a::DecoratedInterval) where T<:Real = in(x, interval(a))
 
 
-function ==(x::DecoratedInterval, y::DecoratedInterval)
-    isnai(x) && isnai(y) && return true
-    return (==(interval(x), interval(y)))
-end
-
 ## scalar functions: mig, mag and friends
 scalar_functions = (
-    :mig, :mag, :inf, :sup, :mid, :diam, :radius, :dist, :eps
+    :mig, :mag, :inf, :sup, :mid, :diam, :radius, :eps, :midpoint_radius
 )
 
 for f in scalar_functions
     @eval $(f)(xx::DecoratedInterval{T}) where T = $f(interval(xx))
 end
 
+dist(xx::DecoratedInterval, yy::DecoratedInterval) = dist(interval(xx), interval(yy))
 
 ## Arithmetic function; / is treated separately
 arithm_functions = ( :+, :-, :* )

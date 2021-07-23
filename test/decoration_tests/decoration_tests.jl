@@ -49,6 +49,20 @@ let b
     @test @decorated(-3, 2)^@decorated(0.0, 1.0) == DecoratedInterval(0.0,2.0, trv)
     @test @decorated(-3, 2)^Interval(-1.0, 1.0) == DecoratedInterval(0.0,Inf, trv)
     @test @decorated(-3, 2)^@decorated(-1.0, 1.0) == DecoratedInterval(0.0, Inf, trv)
+
+    a = @decorated 1 2
+    b = @decorated 3 4
+
+    @test dist(a, b) == 2.0
+
+    # invalid input
+    @test isnai(@decorated(3, 1, com))
+    @test isnai(@decorated(3, 1))
+    @test isnai(@decorated(Inf, Inf))
+    @test isnai(@decorated(-Inf, -Inf))
+    @test isnai(@decorated(NaN, 3))
+    @test isnai(@decorated(3, NaN))
+    @test isnai(@decorated(NaN, NaN))
 end
 
 @testset "Convert string to DecoratedInterval" begin

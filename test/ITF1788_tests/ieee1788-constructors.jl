@@ -62,7 +62,7 @@ end
 
 # Example from Section 11.3
 @testset "IEEE1788.e" begin
-    @test DecoratedInterval(2, 1) == nai()
+    @test isnai(DecoratedInterval(2, 1))
 end
 
 # Examples from Table 12.1
@@ -99,7 +99,7 @@ end
     @test decoration(@decorated("-10??u")) == decoration(DecoratedInterval(Interval(-10.0, Inf), dac))
     @test @decorated("-10??") == DecoratedInterval(Interval(-Inf, Inf), dac)
     @test decoration(@decorated("-10??")) == decoration(DecoratedInterval(Interval(-Inf, Inf), dac))
-    @test @decorated("[nai]") == nai()
+    @test isnai(@decorated("[nai]"))
     @test @decorated("3.56?1_def") == DecoratedInterval(Interval(0x3.8ccccccccccccp+0, 0x3.91eb851eb8520p+0), def)
     @test decoration(@decorated("3.56?1_def")) == decoration(DecoratedInterval(Interval(0x3.8ccccccccccccp+0, 0x3.91eb851eb8520p+0), def))
 end

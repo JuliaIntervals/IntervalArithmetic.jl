@@ -69,20 +69,20 @@ const eeuler = Base.MathConstants.e
 
     # Disallowed conversions with a > b
 
-    @test_throws ArgumentError interval(2, 1)
-    @test_throws ArgumentError interval(big(2), big(1))
-    @test_throws ArgumentError interval(BigInt(1), 1//10)
-    @test_throws ArgumentError interval(1, 0.1)
-    @test_throws ArgumentError interval(big(1), big(0.1))
+    @test_logs (:warn,) @test isempty(interval(2, 1))
+    @test_logs (:warn,) @test isempty(interval(big(2), big(1)))
+    @test_logs (:warn,) @test isempty(interval(BigInt(1), 1//10))
+    @test_logs (:warn,) @test isempty(interval(1, 0.1))
+    @test_logs (:warn,) @test isempty(interval(big(1), big(0.1)))
 
-    @test_throws ArgumentError @interval(2, 1)
-    @test_throws ArgumentError @interval(big(2), big(1))
-    @test_throws ArgumentError @interval(big(1), 1//10)
-    @test_throws ArgumentError @interval(1, 0.1)
-    @test_throws ArgumentError @interval(big(1), big(0.1))
-    @test_throws ArgumentError interval(Inf)
-    @test_throws ArgumentError interval(-Inf, -Inf)
-    @test_throws ArgumentError interval(Inf, Inf)
+    @test_logs (:warn,) @test isempty(@interval(2, 1))
+    @test_logs (:warn,) @test isempty(@interval(big(2), big(1)))
+    @test_logs (:warn,) @test isempty(@interval(big(1), 1//10))
+    @test_logs (:warn,) @test isempty(@interval(1, 0.1))
+    @test_logs (:warn,) @test isempty(@interval(big(1), big(0.1)))
+    @test_logs (:warn,) @test isempty(interval(Inf))
+    @test_logs (:warn,) @test isempty(interval(-Inf, -Inf))
+    @test_logs (:warn,) @test isempty(interval(Inf, Inf))
 
     # Conversion to Interval without type
     @test convert(Interval, 1) == Interval(1.0)
@@ -216,6 +216,15 @@ end
     # @test imag(b) == Interval(-15.200784463067956, -15.20078446306795)
 end
 
+@testset "Typed intervals" begin
+    setprecision(Interval, Float64)
+
+    @test typeof(@interval Float64 1 2) == Interval{Float64}
+    @test typeof(@interval         1 2) == Interval{Float64}
+    @test typeof(@interval Float32 1 2) == Interval{Float32}
+    @test typeof(@interval Float16 1 2) == Interval{Float16}
+end
+
 @testset ".. tests" begin
 
     a = 0.1..0.3
@@ -227,6 +236,14 @@ end
 
     a = big(0.1)..2
     @test typeof(a) == Interval{BigFloat}
+
+    @test_logs (:warn, ) @test isempty(2..1)
+    @test_logs (:warn, ) @test isempty(π..1)
+    @test_logs (:warn, ) @test isempty(π..eeuler)
+    @test_logs (:warn, ) @test isempty(4..π)
+    @test_logs (:warn, ) @test isempty(NaN..3)
+    @test_logs (:warn, ) @test isempty(3..NaN)
+    @test 1..π == Interval(1, π)
 end
 
 @testset "± tests" begin
@@ -277,9 +294,10 @@ end
 end
 
 # issue 192:
-@testset "Disallow a single NaN in an interval" begin
-    @test_throws ArgumentError interval(NaN, 2)
-    @test_throws ArgumentError interval(Inf, NaN)
+@testset "Disallow NaN in an interval" begin
+    @test_logs (:warn, ) @test isempty(interval(NaN, 2))
+    @test_logs (:warn, ) @test isempty(interval(Inf, NaN))
+    @test_logs (:warn, ) @test isempty(interval(NaN, NaN))
 end
 
 # issue 206:
@@ -327,7 +345,7 @@ end
 end
 
 @testset "a..b with a > b" begin
-    @test_throws ArgumentError 3..2
+    @test_logs (:warn,) @test isempty(3..2)
 end
 
 @testset "Hashing of Intervals" begin
@@ -337,7 +355,12 @@ end
     @test isequal(hash(x), hash(y))
 
     x = @interval(0.1)
-    y = IntervalArithmetic.big53(x)
+    y = IntervalArithmetic.bigequiv(x)
+    @test isequal(x, y)
+    @test isequal(hash(x), hash(y))
+
+    x = 0.1
+    y = IntervalArithmetic.bigequiv(x)
     @test isequal(x, y)
     @test isequal(hash(x), hash(y))
 
@@ -354,5 +377,10 @@ import IntervalArithmetic: force_interval
     @test force_interval(4, Inf) == Interval(4, Inf)
     @test force_interval(Inf, 4) == Interval(4, Inf)
     @test force_interval(Inf, -Inf) == Interval(-Inf, Inf)
-    @test_throws ArgumentError force_interval(NaN, 3)
+    @test_logs (:warn,) @test isempty(force_interval(NaN, 3))
+end
+
+@testset "Zero interval" begin
+    @test zero(Interval{Float64}) === Interval{Float64}(0, 0)
+    @test zero(0 .. 1) === Interval{Float64}(0, 0)
 end

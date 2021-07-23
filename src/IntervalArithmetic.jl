@@ -22,7 +22,7 @@ import Base:
     +, -, *, /, //, fma,
     <, >, ==, !=, ⊆, ^, <=,
     in, zero, one, eps, typemin, typemax, abs, abs2, real, min, max,
-    sqrt, exp, log, sin, cos, tan, cot, inv, cbrt, csc, hypot, sec, 
+    sqrt, exp, log, sin, cos, tan, cot, inv, cbrt, csc, hypot, sec,
     exp2, exp10, log2, log10,
     asin, acos, atan,
     sinh, cosh, tanh, coth, csch, sech, asinh, acosh, atanh, sinpi, cospi,
@@ -52,7 +52,7 @@ import .Broadcast: broadcasted
 export
     AbstractInterval, Interval,
     interval,
-    @interval, @biginterval, @floatinterval, @make_interval,
+    @interval, @biginterval, @floatinterval,
     diam, radius, mid, mag, mig, hull,
     emptyinterval, ∅, ∞, isempty, isinterior, ⪽, nthroot,
     precedes, strictprecedes, ≼, ≺, ⊂, ⊃, ⊇, contains_zero,
@@ -86,7 +86,7 @@ import Base: rounding, setrounding, setprecision
 
 ## Multidimensional
 export
-    IntervalBox
+    IntervalBox, symmetric_box
 
 ## Decorations
 export
