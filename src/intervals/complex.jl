@@ -1,5 +1,9 @@
 
-⊆(x::Complex{Interval{T}}, y::Complex{Interval{T}}) where T = real(x) ⊆ real(y) && imag(x) ⊆ imag(y)
+for op in (:⊆, :⊂)
+    @eval function $(op)(x::Complex{Interval{T}}, y::Complex{Interval{S}}) where {T, S}
+        return $(op)(real(x), real(y)) && $(op)(imag(x), imag(y))
+    end
+end
 
 function ^(x::Complex{Interval{T}}, n::Integer) where {T}
     if n < 0
@@ -116,4 +120,9 @@ end
 # # \left( |x|^p \right)^{1/p}.
 # function norm(z::Complex{T}, p=2) where T<:Interval
 #     return (abs(z)^(p))^(1 / p)
-# end 
+# end
+
+# real functions
+mid(z::Complex{T}) where {T <: Interval} = mid(real(z)) + mid(imag(z)) * im
+mag(z::Complex{T}) where {T <: Interval} = sup(abs(z))
+mig(z::Complex{T}) where {T <: Interval} = inf(abs(z))
