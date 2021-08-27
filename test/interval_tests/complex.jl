@@ -8,6 +8,11 @@ using LinearAlgebra
     b = @interval 4im + 3
     c = (@interval -1 4) + (@interval 0 2)*im
 
+    @test a ⊂ c
+    @test a ⊆ c
+    @test (b ⊂ c) == false
+    @test (b ⊆ c) == false
+
     @test typeof(a) == Complex{IntervalArithmetic.Interval{Float64}}
     @test a ==  Interval(0) + Interval(1)*im
     @test a * a == Interval(-1)
@@ -57,4 +62,11 @@ end
     y = (-1..1) + (-2..2)*im
     @test abs(y).lo == 0.0
     @test abs2(y).lo == 0.0
+end
+
+@testset "real functions" begin
+    x = (0..3) + (0..4)*im
+    @test mag(x) == 5
+    @test mig(x) == 0
+    @test mid(x) == 1.5 + 2im
 end
