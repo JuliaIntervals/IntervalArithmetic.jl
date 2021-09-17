@@ -19,6 +19,10 @@ struct Interval{T<:Real} <: AbstractInterval{T}
 
     function Interval{T}(a::Real, b::Real) where T<:Real
 
+        if isinf(a) && a == b
+            return emptyinterval(T)
+        end
+    
         if validity_check
 
             if is_valid_interval(a, b)
@@ -86,6 +90,10 @@ function is_valid_interval(a::Real, b::Real)
         end
     end
 
+    if isinf(a) && a == b 
+        return true 
+    end
+
     if a > b
         if isinf(a) && isinf(b)
             return true  # empty interval = [∞,-∞]
@@ -107,6 +115,8 @@ end
 `interval(a, b)` checks whether [a, b] is a valid `Interval`, which is the case if `-∞ <= a <= b <= ∞`, using the (non-exported) `is_valid_interval` function. If so, then an `Interval(a, b)` object is returned; if not, then an error is thrown.
 """
 function interval(a::Real, b::Real)
+
+    
     if !is_valid_interval(a, b)
         throw(ArgumentError("`[$a, $b]` is not a valid interval. Need `a ≤ b` to construct `interval(a, b)`."))
     end

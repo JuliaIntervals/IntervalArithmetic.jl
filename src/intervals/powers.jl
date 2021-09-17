@@ -327,8 +327,24 @@ function Base.power_by_squaring(x::AbstractFloat, p::Integer, r::RoundingMode)
 
     # assumes p is positive
 
+    p_orig = p
+
+    # handle sign explicitly by calculating with positive
+    s = sign(x)
+    x = abs(x)
+
+    if s < 0 && isodd(p)
+        # we need to reverse the rounding mode:
+        if r == RoundDown 
+            r = RoundUp 
+        
+        elseif r == RoundUp
+            r = RoundDown 
+        end
+    end
+
     if p == 1
-        return x
+        return copysign(x, s)
     elseif p == 0
         return one(x)
     elseif p == 2
@@ -345,7 +361,9 @@ function Base.power_by_squaring(x::AbstractFloat, p::Integer, r::RoundingMode)
     while (t -= 1) > 0
         x = *(x, x, r)
     end
+
     y = x
+    
     while p > 0
         t = trailing_zeros(p) + 1
         p >>= t
@@ -354,5 +372,8 @@ function Base.power_by_squaring(x::AbstractFloat, p::Integer, r::RoundingMode)
         end
         y = *(y, x, r)
     end
-    return y
+
+    if isodd(p_orig)
+        return copysign(y, s)   
+    end
 end
