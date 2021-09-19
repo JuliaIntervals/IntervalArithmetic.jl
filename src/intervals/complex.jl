@@ -1,5 +1,5 @@
 
-for op in (:⊆, :⊂)
+for op in (:⊆, :⊂, :⪽)
     @eval function $(op)(x::Complex{Interval{T}}, y::Complex{Interval{S}}) where {T, S}
         return $(op)(real(x), real(y)) && $(op)(imag(x), imag(y))
     end
