@@ -10,6 +10,7 @@ using LinearAlgebra
 
     @test a ⊂ c
     @test a ⊆ c
+    @test a ⪽ c
     @test (b ⊂ c) == false
     @test (b ⊆ c) == false
 
