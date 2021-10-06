@@ -223,6 +223,9 @@ end
     @test typeof(@interval         1 2) == Interval{Float64}
     @test typeof(@interval Float32 1 2) == Interval{Float32}
     @test typeof(@interval Float16 1 2) == Interval{Float16}
+
+    @test eltype(Interval(1, 2)) == Interval{Float64}
+    @test numtype(Interval(1, 2)) == Float64
 end
 
 @testset ".. tests" begin
