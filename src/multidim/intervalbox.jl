@@ -40,7 +40,7 @@ end
 eltype(::Type{IntervalBox{N,T}}) where {N,T} = Interval{T} # Note that this is defined for the type
 
 
-Base.eltype(x::IntervalBox{T}) where {T<:Real} = T
+Base.eltype(x::IntervalBox{T}) where {T<:Real} = Interval{T}
 
 length(X::IntervalBox{N,T}) where {N,T} = N
 
@@ -121,13 +121,13 @@ Splits `x` in `n` intervals in each dimension of the same diameter. These
 intervals are combined in all possible `IntervalBox`-es, which are returned
 as a vector.
 """
-@inline mince(x::IntervalBox{N,T}, n::Int) where {N,T} = 
+@inline mince(x::IntervalBox{N,T}, n::Int) where {N,T} =
     mince(x, ntuple(_ -> n, N))
 
 """
     mince(x::IntervalBox, ncuts::::NTuple{N,Int})
 
-Splits `x[i]` in `ncuts[i]` intervals . These intervals are 
+Splits `x[i]` in `ncuts[i]` intervals . These intervals are
 combined in all possible `IntervalBox`-es, which are returned
 as a vector.
 """
