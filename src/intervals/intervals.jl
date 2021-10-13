@@ -111,8 +111,8 @@ interval(a::Interval) = a
 
 "Make an interval even if a > b"
 function force_interval(a, b)
-    a > b && return interval(b, a)
-    return interval(a, b)
+    a > b && return Interval(b, a)
+    return Interval(a, b)
 end
 
 
@@ -138,7 +138,7 @@ function ..(a::T, b::S) where {T, S}
         return emptyinterval(promote_type(T, S))
     end
     R = promote_type(T, S)
-    interval(atomic(Interval{R}, a).lo, atomic(Interval{R}, b).hi)
+    Interval(atomic(Interval{R}, a).lo, atomic(Interval{R}, b).hi)
 end
 
 function ..(a::T, b::Irrational{S}) where {T, S}
@@ -156,7 +156,7 @@ function ..(a::Irrational{T}, b::S) where {T, S}
         return emptyinterval(promote_type(Irrational{T}, S))
     end
     R = promote_type(Irrational{T}, S)
-    return interval(R(a, RoundDown), atomic(Interval{R}, b).hi)
+    return Interval(R(a, RoundDown), atomic(Interval{R}, b).hi)
 end
 
 function ..(a::Irrational{T}, b::Irrational{S}) where {T, S}
