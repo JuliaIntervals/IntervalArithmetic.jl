@@ -7,15 +7,15 @@
 
 const halfpi = pi / 2.0
 
-half_pi(::Type{F}) where {F<:AbstractFlavor} = scale(0.5, F(π))
-two_pi(::Type{F}) where {F<:AbstractFlavor} = scale(2, F(π))
+half_pi(::Type{F}) where {F<:Interval} = scale(0.5, F(π))
+two_pi(::Type{F}) where {F<:Interval} = scale(2, F(π))
 
-function range_atan(::Type{F}) where {F<:AbstractFlavor}
+function range_atan(::Type{F}) where {F<:Interval}
     temp = F(π)
     return F(-temp.hi, temp.hi)
 end
 
-function half_range_atan(::Type{F}) where {F<:AbstractFlavor}
+function half_range_atan(::Type{F}) where {F<:Interval}
     temp = half_pi(F)
     return F(-temp.hi, temp.hi)
 end
@@ -32,7 +32,7 @@ This is a rather indirect way to determine if π/2 and 3π/2 are contained
 in the interval; cf. the formula for sine of an interval in
 Tucker, *Validated Numerics*.
 """
-function find_quadrants(::Type{F}, x) where {F<:AbstractFlavor}
+function find_quadrants(::Type{F}, x) where {F<:Interval}
     temp = atomic(F, x) / half_pi(F)
 
     return floor(temp.lo), floor(temp.hi)
@@ -50,11 +50,11 @@ function quadrant(x::Float64)
 end
 
 """
-    sin(a::AbstractFlavor)
+    sin(a::Interval)
 
 Implement the `sin` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function sin(a::F) where {F<:AbstractFlavor}
+function sin(a::F) where {F<:Interval}
     isempty(a) && return a
 
     whole_range = F(-1, 1)
@@ -97,7 +97,7 @@ function sin(a::F) where {F<:AbstractFlavor}
     end
 end
 
-function sin(a::F) where {F<:AbstractFlavor{Float64}}
+function sin(a::F) where {F<:Interval{Float64}}
     isempty(a) && return a
 
     whole_range = F(-1, 1)
@@ -137,18 +137,18 @@ function sin(a::F) where {F<:AbstractFlavor{Float64}}
     end
 end
 
-function sinpi(a::AbstractFlavor{T}) where T
+function sinpi(a::Interval{T}) where T
     isempty(a) && return a
     w = a * Interval{T}(π)
     return(sin(w))
 end
 
 """
-    cos(a::AbstractFlavor)
+    cos(a::Interval)
 
 Implement the `cos` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function cos(a::F) where {F<:AbstractFlavor}
+function cos(a::F) where {F<:Interval}
     isempty(a) && return a
 
     whole_range = F(-1, 1)
@@ -189,7 +189,7 @@ function cos(a::F) where {F<:AbstractFlavor}
     end
 end
 
-function cos(a::F) where {F<:AbstractFlavor{Float64}}
+function cos(a::F) where {F<:Interval{Float64}}
     isempty(a) && return a
 
     whole_range = F(-1, 1)
@@ -229,18 +229,18 @@ function cos(a::F) where {F<:AbstractFlavor{Float64}}
     end
 end
 
-function cospi(a::AbstractFlavor{T}) where T
+function cospi(a::Interval{T}) where T
     isempty(a) && return a
     w = a * Interval{T}(π)
     return(cos(w))
 end
 
 """
-    tan(a::AbstractFlavor)
+    tan(a::Interval)
 
 Implement the `tan` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function tan(a::F) where {F<:AbstractFlavor}
+function tan(a::F) where {F<:Interval}
     isempty(a) && return a
 
     diam(a) > F(π).lo && return RR(a)
@@ -265,7 +265,7 @@ function tan(a::F) where {F<:AbstractFlavor}
     return @round(F, tan(a.lo), tan(a.hi))
 end
 
-function tan(a::F) where {F<:AbstractFlavor{Float64}}
+function tan(a::F) where {F<:Interval{Float64}}
     isempty(a) && return a
 
     diam(a) > F(π).lo && return RR(a)
@@ -289,11 +289,11 @@ function tan(a::F) where {F<:AbstractFlavor{Float64}}
 end
 
 """
-    asin(a::AbstractFlavor)
+    asin(a::Interval)
 
 Implement the `asin` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function asin(a::F) where {F<:AbstractFlavor}
+function asin(a::F) where {F<:Interval}
     domain = F(-1, 1)
     a = a ∩ domain
 
@@ -303,11 +303,11 @@ function asin(a::F) where {F<:AbstractFlavor}
 end
 
 """
-    acos(a::AbstractFlavor)
+    acos(a::Interval)
 
 Implement the `acos` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function acos(a::F) where {F<:AbstractFlavor}
+function acos(a::F) where {F<:Interval}
     domain = F(-1, 1)
     a = a ∩ domain
 
@@ -317,23 +317,23 @@ function acos(a::F) where {F<:AbstractFlavor}
 end
 
 """
-    atan(a::AbstractFlavor)
+    atan(a::Interval)
 
 Implement the `atan` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function atan(a::F) where {F<:AbstractFlavor}
+function atan(a::F) where {F<:Interval}
     isempty(a) && return a
 
     return @round(F, atan(a.lo), atan(a.hi))
 end
 
-function atan(y::F, x::F) where {F<:AbstractFlavor{Float64}}
+function atan(y::F, x::F) where {F<:Interval{Float64}}
     (isempty(y) || isempty(x)) && return emptyinterval(F)
 
     return atomic(F, atan(big53(y), big53(x)))
 end
 
-function atan(y::F, x::F) where {T, F<:AbstractFlavor{T}}
+function atan(y::F, x::F) where {T, F<:Interval{T}}
     (isempty(y) || isempty(x)) && return emptyinterval(F)
 
     # Prevent nonsense results when y has a signed zero:
