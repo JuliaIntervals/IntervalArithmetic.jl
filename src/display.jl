@@ -185,6 +185,8 @@ function basic_representation(a::Interval, format=nothing)
 
     local output
 
+    a = Interval(_signofzero(a.lo), a.hi)
+
     if format == :standard
 
         aa = round_string(a.lo, sigfigs, RoundDown)
@@ -218,6 +220,8 @@ function basic_representation(a::Interval{Float32}, format=nothing)
     sigfigs = display_params.sigfigs
 
     local output
+
+    a = Interval(_signofzero(a.lo), a.hi)
 
     if format == :standard
 
@@ -267,6 +271,8 @@ function basic_representation(a::Interval{Rational{T}}, format=nothing) where
 
     output
 end
+
+@inline _signofzero(a::Real) = ifelse(iszero(a) && signbit(a), copysign(a, 1), a)
 
 function subscriptify(n::Integer)
     dig = reverse(digits(n))
