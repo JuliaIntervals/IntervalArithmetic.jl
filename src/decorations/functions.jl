@@ -315,7 +315,7 @@ function atan(yy::DecoratedInterval{T}, xx::DecoratedInterval{T}) where T
     if zero(T) ∈ y
         zero(T) ∈ x && return DecoratedInterval(r, trv)
         if x.hi < zero(T)
-            signbit(y.lo) && return DecoratedInterval(r, min(d, def))
+            y.lo < zero(T) && return DecoratedInterval(r, min(d, def))
             return DecoratedInterval(r, min(d, dac))
         end
     end
