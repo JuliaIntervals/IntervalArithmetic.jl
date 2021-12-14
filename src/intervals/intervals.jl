@@ -40,7 +40,6 @@ struct Interval{T<:Real} <: AbstractInterval{T}
 end
 
 @inline _normalisezero(a::Real) = ifelse(iszero(a) && signbit(a), copysign(a, 1), a)
-@inline _normalisezero(a::Integer) = _normalisezero(float(a))
 
 
 ## Outer constructors
