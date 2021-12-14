@@ -20,9 +20,10 @@ struct Interval{T<:Real} <: AbstractInterval{T}
     function Interval{T}(a::Real, b::Real) where T<:Real
 
         if validity_check
-
+            a = _normalisezero(a)
+            b = _normalisezero(b)
             if is_valid_interval(a, b)
-                new(a, b)
+                return new(a, b)
 
             else
                 @warn "Invalid input, empty interval is returned"
@@ -36,6 +37,8 @@ struct Interval{T<:Real} <: AbstractInterval{T}
     end
 end
 
+@inline _normalisezero(a::Real) = ifelse(iszero(a) && signbit(a), copysign(a, 1), a)
+@inline _normalisezero(a::Integer) = float(a)
 
 
 ## Outer constructors

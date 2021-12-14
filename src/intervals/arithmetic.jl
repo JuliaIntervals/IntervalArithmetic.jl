@@ -302,7 +302,7 @@ end
 
 
 # Infimum and supremum of an interval
-inf(a::Interval) = a.lo
+inf(a::Interval) = ifelse(iszero(a.lo) && !signbit(a.lo), copysign(a.lo, -1), a.lo)
 sup(a::Interval) = a.hi
 
 
