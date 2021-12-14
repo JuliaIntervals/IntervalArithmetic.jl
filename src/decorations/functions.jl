@@ -314,8 +314,9 @@ function atan(yy::DecoratedInterval{T}, xx::DecoratedInterval{T}) where T
     # Check cases when decoration is trv and decays (from com or dac)
     if zero(T) ∈ y
         zero(T) ∈ x && return DecoratedInterval(r, trv)
-        if x.hi < zero(T) && y.lo != y.hi && signbit(y.lo) && Int(d) > 2
-            return DecoratedInterval(r, decay(d))
+        if x.hi < zero(T)
+            signbit(y.lo) && return DecoratedInterval(r, min(d, def))
+            return DecoratedInterval(r, min(d, dac))
         end
     end
     DecoratedInterval(r, d)
