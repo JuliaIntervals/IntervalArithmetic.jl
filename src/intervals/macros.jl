@@ -25,7 +25,7 @@ Note that the returned interval is of the default flavor. See the documentation
 of `Interval` for more information about the defaul interval falvor.
 """
 macro interval(expr1, expr2...)
-    return wrap_literals(Interval{DefaultBound}, expr1, expr2)
+    return wrap_literals(Interval{default_bound()}, expr1, expr2)
 end
 
 """
@@ -103,7 +103,7 @@ function wrap_literals(F, expr1, expr2)
 
     expr2 = transform(expr2[1], :atomic, :($F))
 
-    return :(($F)(inf($expr1), sup($expr2), check=true))
+    return :(checked_interval(inf($expr1), sup($expr2)))
 end
 
 macro I_str(ex)  # I"[3,4]"

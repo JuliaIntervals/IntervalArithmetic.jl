@@ -15,7 +15,7 @@ function isweaklylessprime(a::Real, b::Real)
 end
 
 """
-    ≛(a::AbstractFlavor, b::AbstractFlavor)
+    ≛(a::Interval, b::Interval)
 
 Checks if the intervals `a` and `b` are identical.
 
@@ -23,22 +23,22 @@ Typed as \\stareq<TAB>.
 
 Implement the `equal` function of the IEEE Std 1788-2015  (Table 9.3).
 
-The more common `==` operator is resevered for flavor dependent pointwise
+The more common `==` operator is reserved for flavor dependent pointwise
 equality.
 
 In most case this is equivalent to the built-in `===`.
 """
-function ≛(a::AbstractFlavor, b::AbstractFlavor)
+function ≛(a::Interval, b::Interval)
     isempty(a) && isempty(b) && return true
     return a.lo == b.lo && a.hi == b.hi
 end
 
 """
-    ≛(a::AbstractFlavor, x::Real)
+    ≛(a::Interval, x::Real)
 
 Check if the interval `a` contains exactly (and only) the number `x`.
 """
-function ≛(a::AbstractFlavor, x::Real)
+function ≛(a::Interval, x::Real)
     a.lo == a.hi == x && return true
     return false
 end
@@ -52,7 +52,7 @@ Typed with \\subseteq<TAB>.
 
 Implement the `subset` function of the IEEE Std 1788-2015 (Table 9.3).
 """
-function ⊆(a::AbstractFlavor, b::AbstractFlavor)
+function ⊆(a::Interval, b::Interval)
     isempty(a) && return true
     b.lo ≤ a.lo && a.hi ≤ b.hi
 end
@@ -64,13 +64,13 @@ Checks if `a` is a strict subset of interval `b`.
 
 Typed with \\subset<TAB>.
 """
-function ⊂(a::AbstractFlavor, b::AbstractFlavor)
+function ⊂(a::Interval, b::Interval)
     a ≛ b && return false
     return a ⊆ b
 end
 
-⊇(a::AbstractFlavor, b::AbstractFlavor) = b ⊆ a
-⊃(a::AbstractFlavor, b::AbstractFlavor) = b ⊂ a
+⊇(a::Interval, b::Interval) = b ⊆ a
+⊃(a::Interval, b::Interval) = b ⊂ a
 
 """
     isweaklyless(a, b)
@@ -82,7 +82,7 @@ any element of `b`.
 
 Implement the `less` function of the IEEE Std 1788-2015 (Table 10.3).
 """
-function isweaklyless(a::F, b::F) where {F<:AbstractFlavor}
+function isweaklyless(a::F, b::F) where {F<:Interval}
     isempty(a) && isempty(b) && return true
     (isempty(a) || isempty(b)) && return false
     (a.lo ≤ b.lo) && (a.hi ≤ b.hi)
@@ -95,9 +95,9 @@ Checks if the interval `a` is to the left of interval `b`.
 
 Implement the `precedes` function of the IEEE Std 1788-2015 (Table 10.3).
 """
-function precedes(a::F, b::F) where {F<:AbstractFlavor}
+function precedes(a::F, b::F) where {F<:Interval}
     (isempty(a) || isempty(b)) && return true
-    a.hi ≤ b.lo
+    return a.hi ≤ b.lo
 end
 
 """
@@ -108,34 +108,39 @@ interval `b`.
 
 Implement the `interior` function of the IEEE Std 1788-2015 (Table 9.3).
 """
-function isinterior(a::AbstractFlavor, b::AbstractFlavor)
+function isinterior(a::Interval, b::Interval)
     isempty(a) && return true
     return isweaklylessprime(b.lo, a.lo) && isweaklylessprime(a.hi, b.hi)
 end
 
 """
-isstrictless(a, b)
+    isstrictless(a, b)
 
-Checks if the interval `a` is strictly less than interval `b`.
+Checks if the interval `a` is strictly less than interval `b`, which is true
+if `a.lo < b.lo` and `a.hi < b.hi`.
+
+For variants in the definition of "strictly less than" for intervals see
+`strictprecedes` and `<`.
 
 Implement the `strictLess` function of the IEEE Std 1788-2015 (Table 10.3).
 """
-function isstrictless(a::F, b::F) where {F<:AbstractFlavor}
+function isstrictless(a::F, b::F) where {F<:Interval}
     isempty(a) && isempty(b) && return true
     (isempty(a) || isempty(b)) && return false
-    isweaklylessprime(a.lo, b.lo) && isweaklylessprime(a.hi, b.hi)  # TODO check this line in the standard
+    # TODO check the following line in the standard
+    return isweaklylessprime(a.lo, b.lo) && isweaklylessprime(a.hi, b.hi)
 end
 
 """
-strictprecedes(a, b)
+    strictprecedes(a, b)
 
 Checks if the interval `a` is strictly to the left of interval `b`.
 
 Implement the `strictPrecedes` function of the IEEE Std 1788-2015 (Table 10.3).
 """
-function strictprecedes(a::F, b::F) where {F<:AbstractFlavor}
+function strictprecedes(a::F, b::F) where {F<:Interval}
     (isempty(a) || isempty(b)) && return true
-    a.hi < b.lo
+    return a.hi < b.lo
 end
 
 """
@@ -146,12 +151,12 @@ interval `b`.
 
 Implement the `disjoint` function of the IEEE Std 1788-2015 (Table 9.3).
 """
-function isdisjoint(a::AbstractFlavor, b::AbstractFlavor)
+function isdisjoint(a::Interval, b::Interval)
     (isempty(a) || isempty(b)) && return true
     return isweaklylessprime(b.hi, a.lo) || isweaklylessprime(a.hi, b.lo)
 end
 
-function isdisjoint(a::Complex{F}, b::Complex{F}) where {F<:AbstractFlavor}
+function isdisjoint(a::Complex{F}, b::Complex{F}) where {F<:Interval}
     return isdisjoint(real(a),real(b)) || isdisjoint(imag(a),imag(b))
 end
 
@@ -163,11 +168,11 @@ Checks if the number `x` is a member of the interval `a`, treated as a set.
 
 Implement the `isMember` function of the IEEE Std 1788-2015 (section 10.6.3).
 """
-function in(x::Real, a::AbstractFlavor)
+function in(x::Real, a::Interval)
     isinf(x) && return false
-    a.lo <= x <= a.hi
+    return a.lo <= x <= a.hi
 end
 
-in(x::AbstractFlavor, y::AbstractFlavor) = throw(ArgumentError("$x ∈ $y is not defined"))
-in(x::Real, a::Complex{F}) where {F<:AbstractFlavor} = x ∈ real(a) && 0 ∈ imag(a)
-in(x::Complex{T}, a::Complex{F}) where {T<:Real, F<:AbstractFlavor} = real(x) ∈ real(a) && imag(x) ∈ imag(a)
+in(x::Interval, y::Interval) = throw(ArgumentError("$x ∈ $y is not defined, maybe you meant `⊂`"))
+in(x::Real, a::Complex{F}) where {F<:Interval} = x ∈ real(a) && 0 ∈ imag(a)
+in(x::Complex{T}, a::Complex{F}) where {T<:Real, F<:Interval} = real(x) ∈ real(a) && imag(x) ∈ imag(a)

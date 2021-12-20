@@ -3,8 +3,6 @@
 using IntervalArithmetic
 using Test
 
-const eeuler = Base.MathConstants.e
-
 @testset "Construction" begin
 
     @testset "Constructing intervals" begin
@@ -12,36 +10,36 @@ const eeuler = Base.MathConstants.e
         @test Interval(1) ≛ Interval(1.0, 1.0)
         @test size(Interval(1)) == (1,)
         @test Interval(big(1)) ≛ Interval(1.0, 1.0)
-        @test Interval(1//10) ≛ Interval{Rational{Int}}(1//10, 1//10)
-        @test Interval(BigInt(1)//10) ≛ Interval{Rational{BigInt}}(1//10, 1//10)
+        @test_broken Interval(1//10) ≛ Interval{Rational{Int}}(1//10, 1//10)
+        @test_broken Interval(BigInt(1)//10) ≛ Interval{Rational{BigInt}}(1//10, 1//10)
         @test Interval( (1.0, 2.0) ) ≛ Interval(1.0, 2.0)
-        @test Interval{Rational{Int}}(1) ≛ Interval(1//1)
+        @test_broken Interval{Rational{Int}}(1) ≛ Interval(1//1)
         @test Interval{BigFloat}(1) ≛ Interval{BigFloat}(big(1.0), big(1.0))
 
         # Irrational
-        for irr in (π, eeuler)
+        for irr in (π, ℯ)
             @test @interval(-irr, irr).hi == (-irr..irr).hi
-            @test 0..irr == hull(interval(0), Interval{Float64}(irr))
-            @test 1.2..irr == @interval(1.2, irr)
-            @test irr..irr == Interval{Float64}(irr)
-            @test Interval(irr) == @interval(irr)
-            @test Interval(irr, irr) == Interval(irr)
-            @test Interval{Float32}(irr, irr) == Interval{Float32}(irr)
+            @test 0..irr ≛ hull(interval(0), Interval{Float64}(irr))
+            @test 1.2..irr ≛ @interval(1.2, irr)
+            @test irr..irr ≛ Interval{Float64}(irr)
+            @test Interval(irr) ≛ @interval(irr)
+            @test Interval(irr, irr) ≛ Interval(irr)
+            @test Interval{Float32}(irr, irr) ≛ Interval{Float32}(irr)
         end
-
+        
         # The following error on windows due to a missing method in MPFR
-        @test_broken eeuler..big(4) == hull(Interval{BigFloat}(π), interval(4))
-        @test π..big(4) == hull(Interval{BigFloat}(π), interval(4))
+        @test_broken ℯ..big(4) ≛ hull(Interval{BigFloat}(π), interval(4))
+        @test π..big(4) ≛ hull(Interval{BigFloat}(π), interval(4))
 
-        @test eeuler..pi == hull(@interval(eeuler), Interval{Float64}(π))
-        @test big(eeuler) in Interval(eeuler, π)
-        @test big(π) in Interval(eeuler, π)
-        @test big(eeuler) in Interval(0, eeuler)
+        @test ℯ..pi ≛ hull(@interval(ℯ), Interval{Float64}(π))
+        @test big(ℯ) in Interval(ℯ, π)
+        @test big(π) in Interval(ℯ, π)
+        @test big(ℯ) in Interval(0, ℯ)
         @test big(π) in Interval(π, 4)
 
-        @test big(eeuler) in Interval{Float32}(eeuler, π)
-        @test big(π) in Interval{Float32}(eeuler, π)
-        @test big(eeuler) in Interval{Float32}(0, eeuler)
+        @test big(ℯ) in Interval{Float32}(ℯ, π)
+        @test big(π) in Interval{Float32}(ℯ, π)
+        @test big(ℯ) in Interval{Float32}(0, ℯ)
         @test big(π) in Interval{Float32}(π, 4)
 
         # a < Inf and b > -Inf
@@ -58,20 +56,20 @@ const eeuler = Base.MathConstants.e
 
         # Disallowed conversions with a > b
 
-        @test_throws ArgumentError Interval(2, 1, check=true)
-        @test_throws ArgumentError Interval(big(2), big(1), check=true)
-        @test_throws ArgumentError Interval(BigInt(1), 1//10, check=true)
-        @test_throws ArgumentError Interval(1, 0.1, check=true)
-        @test_throws ArgumentError Interval(big(1), big(0.1), check=true)
+        @test_throws ArgumentError checked_interval(2, 1)
+        @test_throws ArgumentError checked_interval(big(2), big(1))
+        @test_throws ArgumentError checked_interval(BigInt(1), 1//10)
+        @test_throws ArgumentError checked_interval(1, 0.1)
+        @test_throws ArgumentError checked_interval(big(1), big(0.1))
 
         @test_throws ArgumentError @interval(2, 1)
         @test_throws ArgumentError @interval(big(2), big(1))
         @test_throws ArgumentError @interval(big(1), 1//10)
         @test_throws ArgumentError @interval(1, 0.1)
         @test_throws ArgumentError @interval(big(1), big(0.1))
-        @test_throws ArgumentError Interval(Inf, check=true)
-        @test_throws ArgumentError Interval(-Inf, -Inf, check=true)
-        @test_throws ArgumentError Interval(Inf, Inf, check=true)
+        @test_throws ArgumentError checked_interval(Inf)
+        @test_throws ArgumentError checked_interval(-Inf, -Inf)
+        @test_throws ArgumentError checked_interval(Inf, Inf)
 
         a = @interval(0.1)
         b = @interval(pi)
@@ -79,7 +77,7 @@ const eeuler = Base.MathConstants.e
         @test a ≛ @floatinterval("0.1")
         @test typeof(a) == Interval{Float64}
         @test nextfloat(a.lo) == a.hi
-        @test b == @floatinterval(pi)
+        @test b ≛ @floatinterval(pi)
         @test nextfloat(b.lo) == b.hi
         x = typemax(Int64)
         @test @interval(x) ≛ @floatinterval(x)
@@ -107,7 +105,7 @@ const eeuler = Base.MathConstants.e
             c = @interval("0.1", "0.2")
             @test c ⊆ a   # c is narrower than a
             @test Interval(1//2) ≛ Interval(0.5)
-            @test Interval(1//10).lo == rationalize(0.1)
+            @test_broken Interval(1//10).lo == rationalize(0.1)
         end
 
         @test string(emptyinterval()) == "∅"
@@ -143,7 +141,7 @@ const eeuler = Base.MathConstants.e
 
     @testset ".. tests" begin
         a = 1..2
-        @test typeof(a) == Interval{DefaultBound}
+        @test typeof(a) == Interval{IntervalArithmetic.default_bound()}
 
         a = 0.1..0.3
         @test a ≛ Interval(0.09999999999999999, 0.30000000000000004)
@@ -191,10 +189,13 @@ const eeuler = Base.MathConstants.e
         @test Interval{BigFloat}(big"1.1") ≛ Interval(big"1.1", big"1.1")
     end
 
+    # TODO check the check=true
+    #= 
     @testset "Disallow a single NaN in an interval" begin
-        @test_throws ArgumentError Interval(NaN, 2, check=true)
-        @test_throws ArgumentError Interval(Inf, NaN, check=true)
+        @test_throws ArgumentError checked_interval(NaN, 2)
+        @test_throws ArgumentError checked_interval(Inf, NaN)
     end
+    =#
 
     # issue 206:
     @testset "Interval strings" begin
@@ -225,12 +226,12 @@ const eeuler = Base.MathConstants.e
         @test all(setdiff(x, y) .≛ [1..2])
         @test all(setdiff(y, x) .≛ [3..4])
 
-        @test setdiff(x, x) == Interval{DefaultBound}[]
+        @test setdiff(x, x) == Interval{Float64}[]
 
         @test all(setdiff(x, emptyinterval(x)) .≛ [x])
 
         z = 0..5
-        @test setdiff(x, z) == Interval{DefaultBound}[]
+        @test setdiff(x, z) == Interval{Float64}[]
         @test all(setdiff(z, x) .≛ [0..1, 3..5])
     end
 

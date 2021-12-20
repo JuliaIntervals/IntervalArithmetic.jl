@@ -8,11 +8,11 @@
 for f in (:sinh, :tanh, :asinh)
     @eval begin
         """
-            $($f)(a::AbstractFlavor)
+            $($f)(a::Interval)
         
         Implement the `$($f)` function of the IEEE Std 1788-2015 (Table 9.1).
         """
-        function ($f)(a::F) where {F<:AbstractFlavor}
+        function ($f)(a::F) where {F<:Interval}
             isempty(a) && return a
         
             return @round(F, ($f)(a.lo), ($f)(a.hi))
@@ -21,22 +21,22 @@ for f in (:sinh, :tanh, :asinh)
 end
 
 """
-    cosh(a::AbstractFlavor)
+    cosh(a::Interval)
 
 Implement the `cosh` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function cosh(a::F) where {F<:AbstractFlavor}
+function cosh(a::F) where {F<:Interval}
     isempty(a) && return a
 
     return @round(F, cosh(mig(a)), cosh(mag(a)))
 end
 
 """
-    acosh(a::AbstractFlavor)
+    acosh(a::Interval)
 
 Implement the `acosh` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function acosh(a::F) where {F<:AbstractFlavor}
+function acosh(a::F) where {F<:Interval}
     domain = F(1, Inf)
     a = a ∩ domain
     isempty(a) && return a
@@ -45,11 +45,11 @@ function acosh(a::F) where {F<:AbstractFlavor}
 end
 
 """
-    atanh(a::AbstractFlavor)
+    atanh(a::Interval)
 
 Implement the `atanh` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function atanh(a::F) where {F<:AbstractFlavor}
+function atanh(a::F) where {F<:Interval}
     domain = F(-1, 1)
     a = a ∩ domain
 
@@ -67,7 +67,7 @@ end
 
 # Float64 versions of functions missing from CRlibm:
 for f in (:tanh, :asinh, :acosh, :atanh)
-    @eval function ($f)(a::F) where {F<:AbstractFlavor{Float64}}
+    @eval function ($f)(a::F) where {F<:Interval{Float64}}
         isempty(a) && return a
 
         return atomic(F, ($f)(big53(a)) )

@@ -8,10 +8,10 @@ the lower bound given by `inf(x)` and the upper bound by `sup(x)`.
 
 Some flavor may behave differently (e.g. flavors using extended interval arithemetic)
 =#
-isempty(x::AbstractFlavor) = (inf(x) == Inf && sup(x) == -Inf)
-isentire(x::AbstractFlavor) = (inf(x) == -Inf && sup(x) == Inf)
-isbounded(x::AbstractFlavor) = (isfinite(x.lo) && isfinite(x.hi)) || isempty(x)
-isunbounded(x::AbstractFlavor) = !isbounded(x)
+isempty(x::Interval) = (inf(x) == Inf && sup(x) == -Inf)
+isentire(x::Interval) = (inf(x) == -Inf && sup(x) == Inf)
+isbounded(x::Interval) = (isfinite(x.lo) && isfinite(x.hi)) || isempty(x)
+isunbounded(x::Interval) = !isbounded(x)
 
 """
     isthin(x)
@@ -21,7 +21,7 @@ representable float. Any float which is not exactly representable
 does *not* yield a thin interval. Corresponds to `isSingleton` of
 the standard.
 """
-isthin(x::AbstractFlavor) = (inf(x) == sup(x))
+isthin(x::Interval) = (inf(x) == sup(x))
 
 """
     iscommon(x)
@@ -29,7 +29,7 @@ isthin(x::AbstractFlavor) = (inf(x) == sup(x))
 Checks if `x` is a **common interval**, i.e. a non-empty,
 bounded, real interval.
 """
-function iscommon(x::AbstractFlavor)
+function iscommon(x::Interval)
     (isentire(x) || isempty(x) || isunbounded(x)) && return false
     return true
 end
@@ -40,12 +40,12 @@ end
 Widen the lowest and highest bounds of `x` to the previous and next representable
 floating-point numbers, respectively.
 """
-widen(x::F) where {T<:AbstractFloat, F<:AbstractFlavor{T}} =
+widen(x::F) where {T<:AbstractFloat, F<:Interval{T}} =
     F(prevfloat(inf(x)), nextfloat(sup(x)))
 
 """
     wideinterval(x::AbstractFloat)
-    wideinterval(::AbstractFlavor, x::AbstractFloat)
+    wideinterval(::Interval, x::AbstractFloat)
 
 Returns the interval `[prevfloat(x), nextfloat(x)]`.
 
@@ -53,7 +53,7 @@ Note that if no interval flavor is given, the returned interval is of the
 default interval flavor. See the documentation of `Interval` for more
 information about the default interval falvor.
 """
-wideinterval(::Type{F}, x::T) where {F<:AbstractFlavor, T<:AbstractFloat} =
+wideinterval(::Type{F}, x::T) where {F<:Interval, T<:AbstractFloat} =
     F(prevfloat(x), nextfloat(x))
 wideinterval(x::T) where {T<:AbstractFloat} = wideinterval(Interval, x)
 
@@ -64,13 +64,13 @@ Check whether an interval `x` is *atomic*, i.e. is unable to be split.
 This occurs when the interval is empty, or when the upper bound equals the lower
 bound or the bounds are consecutive floating point numbers.
 """
-isatomic(x::AbstractFlavor) = isempty(x) || (inf(x) == sup(x)) || (sup(x) == nextfloat(inf(x)))
+isatomic(x::Interval) = isempty(x) || (inf(x) == sup(x)) || (sup(x) == nextfloat(inf(x)))
 
-contains_zero(x::AbstractFlavor{T}) where T = zero(T) ∈ x
+contains_zero(x::Interval{T}) where T = zero(T) ∈ x
 
 """
     isthinzero(x)
 
 Return wether the interval only contains zero.
 """
-isthinzero(x::AbstractFlavor) = iszero(x.lo) && iszero(x.hi)
+isthinzero(x::Interval) = iszero(x.lo) && iszero(x.hi)

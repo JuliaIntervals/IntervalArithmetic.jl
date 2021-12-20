@@ -8,11 +8,11 @@
 for f in (:sign, :ceil, :floor, :trunc)
     @eval begin
         """
-            $($f)(a::AbstractFlavor)
+            $($f)(a::Interval)
     
         Implement the `$($f)` function of the IEEE Std 1788-2015 (Table 9.1).
         """
-        function ($f)(a::F) where {F<:AbstractFlavor}
+        function ($f)(a::F) where {F<:Interval}
             isempty(a) && return emptyinterval(F)
             return F(($f)(a.lo), ($f)(a.hi))
         end
@@ -23,7 +23,7 @@ const RoundTiesToEven = RoundNearest
 const RoundTiesToAway = RoundNearestTiesAway
 
 """
-    round(a::AbstractFlavor[, RoundingMode])
+    round(a::Interval[, RoundingMode])
 
 Return the interval with rounded to an integer limits.
 
@@ -32,17 +32,17 @@ the IEEE Std 1788-2015. `roundTiesToEven` corresponds
 to `round(a)` or `round(a, RoundNearest)`, and `roundTiesToAway`
 to `round(a, RoundNearestTiesAway)`.
 """
-round(a::AbstractFlavor) = round(a, RoundNearest)
-round(a::AbstractFlavor, ::RoundingMode{:ToZero}) = trunc(a)
-round(a::AbstractFlavor, ::RoundingMode{:Up}) = ceil(a)
-round(a::AbstractFlavor, ::RoundingMode{:Down}) = floor(a)
+round(a::Interval) = round(a, RoundNearest)
+round(a::Interval, ::RoundingMode{:ToZero}) = trunc(a)
+round(a::Interval, ::RoundingMode{:Up}) = ceil(a)
+round(a::Interval, ::RoundingMode{:Down}) = floor(a)
 
-function round(a::F, ::RoundingMode{:Nearest}) where {F<:AbstractFlavor}
+function round(a::F, ::RoundingMode{:Nearest}) where {F<:Interval}
     isempty(a) && return emptyinterval(F)
     return F(round(a.lo), round(a.hi))
 end
 
-function round(a::F, ::RoundingMode{:NearestTiesAway}) where {F<:AbstractFlavor}
+function round(a::F, ::RoundingMode{:NearestTiesAway}) where {F<:Interval}
     isempty(a) && return emptyinterval(F)
     return F(round(a.lo, RoundNearestTiesAway), round(a.hi, RoundNearestTiesAway))
 end

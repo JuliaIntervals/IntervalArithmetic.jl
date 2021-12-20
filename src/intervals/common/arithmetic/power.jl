@@ -7,24 +7,24 @@
 
 # Overwrite behaviour for literal integer powers
 # Default transforms `a^-p` to `inv(a)^p` which is incorrect for intervals.
-Base.literal_pow(::typeof(^), a::F, ::Val{p}) where {F<:AbstractFlavor, p} = a^p
+Base.literal_pow(::typeof(^), a::F, ::Val{p}) where {F<:Interval, p} = a^p
 
 # CRlibm does not contain a correctly-rounded ^ function for Float64
 # Use the BigFloat version from MPFR instead, which is correctly-rounded.
 """
-    ^(a::AbstractFlavor, b::AbstractFlavor)
-    ^(a::AbstractFlavor, b)
+    ^(a::Interval, b::Interval)
+    ^(a::Interval, b)
 
 Implement the `pow` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-^(a::F, b::F) where {F<:AbstractFlavor} = atomic(F, big53(a)^b)
-^(a::F, x::AbstractFloat) where {F<:AbstractFlavor{BigFloat}} = a^big(x)
+^(a::F, b::F) where {F<:Interval} = atomic(F, big53(a)^b)
+^(a::F, x::AbstractFloat) where {F<:Interval{BigFloat}} = a^big(x)
 
 for T in (:AbstractFloat, :Integer)
-    @eval ^(a::F, x::$T) where {F<:AbstractFlavor} = atomic(F, big53(a)^x)
+    @eval ^(a::F, x::$T) where {F<:Interval} = atomic(F, big53(a)^x)
 end
 
-function ^(a::F, n::Integer) where {F<:AbstractFlavor{BigFloat}}
+function ^(a::F, n::Integer) where {F<:Interval{BigFloat}}
     isempty(a) && return a
     iszero(n) && return one(F)
     n == 1 && return a
@@ -72,7 +72,7 @@ function ^(a::F, n::Integer) where {F<:AbstractFlavor{BigFloat}}
 end
 
 # Floating-point power of a BigFloat interval:
-function ^(a::F, x::BigFloat) where {F<:AbstractFlavor{BigFloat}}
+function ^(a::F, x::BigFloat) where {F<:Interval{BigFloat}}
 
     domain = F(0, Inf)
 
@@ -122,14 +122,16 @@ function ^(a::F, x::BigFloat) where {F<:AbstractFlavor{BigFloat}}
     return hull(lo, hi)
 end
 
-function ^(a::F, x::AbstractFloat) where {T<:Integer, F<:AbstractFlavor{Rational{T}}}
-    a = reparametrize(F, Float64)(a.lo.num/a.lo.den, a.hi.num/a.hi.den)
+function ^(a::Interval{Rational{T}}, x::AbstractFloat) where {T<:Integer}
+    # TODO Check wheter the type should be hardcoded here or be the 
+    # default bound type
+    a = Interval{Float64}(a.lo.num/a.lo.den, a.hi.num/a.hi.den)
     a = a^x
     return atomic(F, a)
 end
 
 # Rational power
-function ^(a::F, x::Rational) where {F<:AbstractFlavor}
+function ^(a::F, x::Rational) where {F<:Interval}
     domain = F(0, Inf)
 
     p = x.num
@@ -186,7 +188,7 @@ function ^(a::F, x::Rational) where {F<:AbstractFlavor}
 end
 
 # Interval power of an interval:
-function ^(a::F, x::AbstractFlavor) where {F<:AbstractFlavor{BigFloat}}
+function ^(a::F, x::Interval) where {F<:Interval{BigFloat}}
     T = BigFloat
     domain = F(0, Inf)
 
@@ -205,19 +207,19 @@ function ^(a::F, x::AbstractFlavor) where {F<:AbstractFlavor{BigFloat}}
     return hull(lo1, hi1)
 end
 
-function sqr(a::AbstractFlavor)
+function sqr(a::Interval)
     return a^2
 end
 
 """
-    pow(x::AbstractFlavor, n::Integer)
+    pow(x::Interval, n::Integer)
 
 A faster implementation of `x^n`, currently using `power_by_squaring`.
 `pow(x, n)` will usually return an interval that is slightly larger than that
 calculated by `x^n`, but is guaranteed to be a correct
 enclosure when using multiplication with correct rounding.
 """
-function pow(x::F, n::Integer) where {F<:AbstractFlavor}
+function pow(x::F, n::Integer) where {F<:Interval}
     n < 0 && return 1/pow(x, -n)
     isempty(x) && return x
 
@@ -232,7 +234,7 @@ function pow(x::F, n::Integer) where {F<:AbstractFlavor}
     end
 end
 
-function pow(x::AbstractFlavor, y)  # fast real power, including for y an Interval
+function pow(x::Interval, y)  # fast real power, including for y an Interval
     isempty(x) && return x
     isinteger(y) && return pow(x, Int(y.lo))
     return exp(y * log(x))
@@ -240,7 +242,7 @@ end
 
 for f in (:exp, :expm1)
     @eval begin
-        function ($f)(a::F) where {F<:AbstractFlavor}
+        function ($f)(a::F) where {F<:Interval}
             isempty(a) && return a
             return @round( F, ($f)(a.lo), ($f)(a.hi) )
         end
@@ -254,16 +256,16 @@ for f in (:exp2, :exp10, :cbrt)
             end
         end
 
-    @eval ($f)(a::F) where {F<:AbstractFlavor} = atomic(F, $f(big53(a)))  # no CRlibm version
+    @eval ($f)(a::F) where {F<:Interval} = atomic(F, $f(big53(a)))  # no CRlibm version
 
-    @eval function ($f)(a::F) where {F<:AbstractFlavor{BigFloat}}
+    @eval function ($f)(a::F) where {F<:Interval{BigFloat}}
             isempty(a) && return a
             return @round( F, ($f)(a.lo), ($f)(a.hi) )
         end
 end
 
 for f in (:log, :log2, :log10)
-    @eval function ($f)(a::F) where {T, F<:AbstractFlavor{T}}
+    @eval function ($f)(a::F) where {T, F<:Interval{T}}
             domain = F(0, Inf)
             a = a ∩ domain
 
@@ -273,7 +275,7 @@ for f in (:log, :log2, :log10)
         end
 end
 
-function log1p(a::F) where {T, F<:AbstractFlavor{T}}
+function log1p(a::F) where {T, F<:Interval{T}}
     domain = Interval{T}(-1, Inf)
     a = a ∩ domain
 

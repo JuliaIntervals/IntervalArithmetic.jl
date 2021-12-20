@@ -18,60 +18,28 @@ The nomenclature of the follows the IEEE-1788 (2015) standard
 @enum DECORATION ill=0 trv=1 def=2 dac=3 com=4
 # Note that `isweaklyless`, and hence ``<` and `min`, are automatically defined for enums
 
-abstract type AbstractDecoratedInterval{T, F} <: AbstractFlavor{T} end
-
 """
-    AbstractDecoratedInterval
+    DecoratedInterval
 
 A *decorated* interval is an interval, together with a *decoration*, i.e.
 a flag that records the status of the interval when thought of as the result
 of a previously executed sequence of functions acting on an initial interval.
 """
 
-decoratedtypes = [(:RealDecoratedInterval, AbstractFlavor, AbstractDecoratedInterval)]
+struct DecoratedInterval{T}
+    interval::Interval{T}
+    decoration::DECORATION
 
-for (DecoratedFlavor, InnerFlavor, Supertype) in decoratedtypes
-    decorateddef = quote
-        struct $DecoratedFlavor{T, F<:$InnerFlavor{T}} <: $Supertype{T, F}
-            interval::F
-            decoration::DECORATION
-
-            function $DecoratedFlavor{T, F}(I::F, d::DECORATION) where {T, F<:$InnerFlavor{T}}
-                dd = decoration(I)
-                dd <= trv && return new{T, F}(I, dd)
-                d == ill && return new{T, F}(nai(I), d)
-                return new{T, F}(I, d)
-            end
-        end
-
-        $DecoratedFlavor(I::F, d::DECORATION) where {T, F<:$InnerFlavor{T}} =
-            DecoratedInterval{T, F}(I, d)
-
-        $DecoratedFlavor(I::AbstractDecoratedInterval, dec::DECORATION) = $DecoratedFlavor(I.interval, dec)
-
-        # Automatic decorations for an interval
-        $DecoratedFlavor(I::AbstractFlavor) = DecoratedInterval(I, decoration(I))
+    function DecoratedInterval{T}(I::Interval{T}) where {T}
+        dd = decoration(I)
+        dd <= trv && return new{T}(I, dd)
+        d == ill && return new{T}(nai(I), d)
+        return new{T}(I, d)
     end
-
-    @eval $decorateddef
 end
 
-
-# DecoratedInterval
-if Interval <: AbstractFlavor
-    const DecoratedInterval = RealDecoratedInterval
-else
-    const DecoratedInterval = NonRealDecoratedInterval
-end
-
-@doc """
-    DecoratedInterval
-
-Default type of decorated interval, currently set to `$DecoratedInterval`.
-
-Not that the inner interval is of the default interval type. See the documentation
-of `Interval` for more information about the default interval type.
-""" DecoratedInterval
+DecoratedInterval(I::Interval, d::DECORATION) = DecoratedInterval(I, d)
+DecoratedInterval(I::DecoratedInterval, dec::DECORATION) = DecoratedInterval(I.interval, dec)
 
 function DecoratedInterval(a::T, b::T, d::DECORATION) where {T<:Real}
     a > b && return DecoratedInterval(nai(T), ill)
@@ -101,11 +69,11 @@ DecoratedInterval(a::T, b::S) where {T<:Real, S<:Real} =
 
 DecoratedInterval(a::Tuple) = DecoratedInterval(a...)
 
-interval(x::AbstractDecoratedInterval) = x.interval
-decoration(x::AbstractDecoratedInterval) = x.decoration
+interval(x::DecoratedInterval) = x.interval
+decoration(x::DecoratedInterval) = x.decoration
 
 # Automatic decorations for an Interval
-function decoration(I::AbstractFlavor)
+function decoration(I::Interval)
     isnai(I) && return ill           # nai()
     isempty(I) && return trv         # emptyinterval
     isunbounded(I) && return dac     # unbounded
@@ -114,7 +82,7 @@ end
 
 # Promotion and conversion, and other constructors
 
-promote_rule(::Type{D}, ::Type{S}) where {T<:Real, S<:Real, F<:AbstractFlavor{T}, D<:AbstractDecoratedInterval{T, F}} =
+promote_rule(::Type{D}, ::Type{S}) where {T<:Real, S<:Real, F<:Interval{T}, D<:DecoratedInterval{T}} =
     D{promote_type(T, S), F}
 
 promote_rule(::Type{DecoratedInterval{T}}, ::Type{DecoratedInterval{S}}) where

@@ -41,8 +41,7 @@ Allowed rounding types are
 """
 struct IntervalRounding{T} end
 
-
-
+current_rounding_mode() = IntervalRounding{:tight}()
 
 # Functions that are the same for all rounding types:
 
@@ -54,13 +53,15 @@ struct IntervalRounding{T} end
 zero(a::Interval{T}, ::RoundingMode) where {T<:AbstractFloat} = zero(T)
 zero(::Type{T}, ::RoundingMode) where {T<:AbstractFloat} = zero(T)
 
+# BigFloat conversion
 convert(::Type{BigFloat}, x, rounding_mode::RoundingMode) =
     setrounding(BigFloat, rounding_mode) do
         convert(BigFloat, x)
     end
 
-parse(::Type{T}, x::AbstractString, rounding_mode::RoundingMode) where {T} = setrounding(T, rounding_mode) do
-    parse(T, x)
+# Parsing from string
+parse(::Type{T}, x::AbstractString, rounding_mode::RoundingMode) where T = setrounding(Float64, rounding_mode) do
+    return float(parse(T, x))
 end
 
 # use BigFloat parser to get round issues on Windows:
@@ -74,12 +75,9 @@ function parse(::Type{Float64}, s::AbstractString, r::RoundingMode)
     return Float64(a, r)
 end
 
-
 sqrt(a::T, rounding_mode::RoundingMode) where {T<:Rational} = setrounding(float(T), rounding_mode) do
-    sqrt(float(a))
+    return sqrt(float(a))
 end
-
-
 
 # no-ops for rational rounding:
 for f in (:+, :-, :*, :/)
@@ -87,7 +85,6 @@ for f in (:+, :-, :*, :/)
 end
 
 # error-free arithmetic:
-
 for (op, f) in ( (:+, :add), (:-, :sub), (:*, :mul), (:/, :div) )
     ff = Symbol(f, "_round")
 
@@ -255,117 +252,39 @@ for mode in (:Down, :Up)
     end
 end
 
-
+## Default
 const rounding_types = (:fast, :tight, :accurate, :slow, :none)
 
-function _setrounding(::Type{Interval}, rounding_type::Symbol)
-
-    if rounding_type == current_rounding_type[]
-        return  # no need to redefine anything
-    end
-
-    if rounding_type ∉ rounding_types
-        throw(ArgumentError("Rounding type must be one of $rounding_types"))
-    end
-
-    roundtype = IntervalRounding{rounding_type}()
-
-
-    # binary functions:
-    for f in (:+, :-, :*, :/)
-        @eval $f(a::T, b::T, r::RoundingMode) where {T<:AbstractFloat} = $f($roundtype, a, b, r)
-        @eval $f(a::Real, b::AbstractFloat, r::RoundingMode) = $f($roundtype, promote(a, b)..., r)
-        @eval $f(a::AbstractFloat, b::Real, r::RoundingMode) = $f($roundtype, promote(a, b)..., r)
-        @eval $f(a::AbstractFloat, b::AbstractFloat, r::RoundingMode) = $f($roundtype, promote(a, b)..., r)
-        @eval $f(a::Real, b::Real, r::RoundingMode) = $f($roundtype, float(a), float(b), r)
-    end
-
-    # unary functions:
-
-    for f in (:sqrt, :inv)
-        @eval $f(a::T, r::RoundingMode) where {T<:AbstractFloat} = $f($roundtype, a, r)
-    end
-
-
-    if rounding_type in (:fast, :tight)   # for remaining functions, use CRlibm
-        roundtype = IntervalRounding{:slow}()
-    end
-
-
-    for f in (:^, :atan)
-        @eval $f(a::T, b::T, r::RoundingMode) where {T<:AbstractFloat} = $f($roundtype, a, b, r)
-    end
-
-    @eval ^(a::T, b::S, r::RoundingMode) where {T<:AbstractFloat, S<:Real} = ^($roundtype, promote(a, b)..., r)
-
-    # unary functions:
-    for f in vcat(CRlibm.functions,
-                    [:tanh, :asinh, :acosh, :atanh, :cot])
-
-        @eval $f(a::T, r::RoundingMode) where {T<:AbstractFloat} = $f($roundtype, a, r)
-
-        @eval $f(x::Real, r::RoundingMode) = $f(float(x), r)
-
-    end
-
-    current_rounding_type[] = rounding_type
+# binary functions:
+for f in (:+, :-, :*, :/)
+    @eval $f(a::T, b::T, r::RoundingMode) where {T<:AbstractFloat} = $f(current_rounding_mode(), a, b, r)
+    @eval $f(a::Real, b::AbstractFloat, r::RoundingMode) = $f(current_rounding_mode(), promote(a, b)..., r)
+    @eval $f(a::AbstractFloat, b::Real, r::RoundingMode) = $f(current_rounding_mode(), promote(a, b)..., r)
+    @eval $f(a::AbstractFloat, b::AbstractFloat, r::RoundingMode) = $f(current_rounding_mode(), promote(a, b)..., r)
+    @eval $f(a::Real, b::Real, r::RoundingMode) = $f(current_rounding_mode(), float(a), float(b), r)
 end
 
-"""
-    setrounding(Interval, rounding_type::Symbol)
-
-Set the rounding type used for all interval calculations on Julia v0.6 and above.
-Valid `rounding_type`s are $rounding_types.
-"""
-function setrounding(::Type{F}, rounding_type::Symbol) where {F<:AbstractFlavor}
-    # suppress redefinition warnings:
-    # modified from OhMyREPL.jl
-
-    # dump the warnings to a file, and check the file to make
-    # sure they are only redefinition warnings
-
-    path, io = mktemp()
-
-    old_stderr = stderr
-    redirect_stderr(io)
-
-    _setrounding(Interval, rounding_type)
-
-    redirect_stderr(old_stderr)
-
-    close(io)
-
-    # check
-    lines = readlines(path)
-
-    # print(lines)
-
-    for line in lines
-
-        if line == ""
-            continue
-        end
-
-        if !startswith(line, "WARNING: Method definition")
-
-            if startswith(line, "WARNING") || startswith(line, "Use")
-                warn(line)
-
-            else
-                println("Error on line: ", line)
-                error(line)
-            end
-        end
-    end
-
-    return rounding_type
-
+# unary functions:
+for f in (:sqrt, :inv)
+    @eval $f(a::T, r::RoundingMode) where {T<:AbstractFloat} = $f(current_rounding_mode(), a, r)
 end
 
-# default: correct rounding
-const current_rounding_type = Symbol[:undefined]
-
-for Flavor in supported_flavors
-    setrounding(Flavor, :tight)
-    @eval rounding(::Type{$Flavor}) = current_rounding_type[]
+# TODO This should be in the method definition
+#=
+if rounding_type in (:fast, :tight)   # for remaining functions, use CRlibm
+    roundtype = IntervalRounding{:slow}()
 end
+=#
+
+for f in (:^, :atan)
+    @eval $f(a::T, b::T, r::RoundingMode) where {T<:AbstractFloat} = $f(current_rounding_mode(), a, b, r)
+end
+
+@eval ^(a::T, b::S, r::RoundingMode) where {T<:AbstractFloat, S<:Real} = ^(current_rounding_mode(), promote(a, b)..., r)
+
+# unary functions:
+for f in vcat(CRlibm.functions, [:tanh, :asinh, :acosh, :atanh, :cot])
+    @eval $f(a::T, r::RoundingMode) where {T<:AbstractFloat} = $f(current_rounding_mode(), a, r)
+    @eval $f(x::Real, r::RoundingMode) = $f(float(x), r)
+end
+

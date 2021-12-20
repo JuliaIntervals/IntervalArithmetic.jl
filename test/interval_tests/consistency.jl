@@ -341,13 +341,13 @@ using Test
     end
 
     @testset "Difference between checked and unchecked Intervals" begin
-        @test Interval(1, 2, check=true) ≛ Interval(1, 2)
+        @test checked_interval(1, 2) ≛ Interval(1, 2)
 
         @test inf(Interval(3, 2)) == 3
-        @test_throws ArgumentError Interval(3, 2, check=true)
+        @test_throws ArgumentError checked_interval(3, 2)
 
         @test sup(Interval(Inf, Inf)) == Inf
-        @test_throws ArgumentError Interval(Inf, Inf, check=true)
+        @test_throws ArgumentError checked_interval(Inf, Inf)
 
     end
 

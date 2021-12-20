@@ -1,28 +1,16 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
 ## Promotion rules
-
-function promote_rule(::Type{F}, ::Type{G}) where {T, S, F<:AbstractFlavor{T}, G<:AbstractFlavor{S}}
-    bare_F = flavortype(F)
-    bare_G = flavortype(G)
-
-    if bare_F == bare_G
-        return bare_F{promote_type(T, S)}
-    else
-        throw(ArgumentError("Can not promote interval of different flavor type $bare_F and $bare_G."))
-    end
-end
-
-promote_rule(::Type{F}, ::Type{S}) where {T, S, F<:AbstractFlavor{T}} =
-    reparametrize(F, promote_type(T, S))
+# TODO Removed promotion rules, to check if it is needed
 
 # convert methods:
-convert(::Type{F}, x::Bool) where {F<:AbstractFlavor} = convert(F, Int(x))
+convert(::Type{F}, x::Bool) where {F<:Interval} = convert(F, Int(x))
 # TODO Introduce "BoundType" union for that kind of cases instead of AbstractFloat
-convert(::Type{F}, x::S) where {T, S<:AbstractFloat, F<:AbstractFlavor{T}} = atomic(F, x)
-# Fallback if F not parametrized
-convert(::Type{F}, x::S) where {S, F<:AbstractFlavor} = atomic(F{promote_type(S, DefaultBound)}, x)
-convert(::Type{F}, x::F) where {F<:AbstractFlavor} = x
+# NOTE I believe there was a PR for this
+convert(::Type{F}, x::S) where {F<:Interval, S<:AbstractFloat} = atomic(F, x)
+convert(::Type{Interval{T}}, x::S) where {T, S<:Number} = atomic(Interval{promote_type(S, T)}, x)
+convert(::Type{Interval{T}}, x::Interval) where T = atomic(Interval{T}, x)
+convert(::Type{F}, x::F) where {F<:Interval} = x
 
 """
     atomic(::Type{<:Interval}, x)
@@ -70,24 +58,24 @@ true
 """
 function atomic end
 
-atomic(::Type{F}, x::AbstractString) where {T, F<:AbstractFlavor{T}} = parse(F, x)
+atomic(::Type{F}, x::AbstractString) where {T, F<:Interval{T}} = parse(F, x)
 
 @static if Sys.iswindows()  # Windows cannot round properly
-    function atomic(::Type{F}, x::S) where {T, S, F<:AbstractFlavor{T}}
+    function atomic(::Type{F}, x::S) where {T, S, F<:Interval{T}}
         isinf(x) && return wideinterval(F, T(x))
 
         return F( parse(T, string(x), RoundDown),
                   parse(T, string(x), RoundUp) )
     end
 
-    function atomic(::Type{F}, x::Union{Irrational, Rational}) where {T, F<:AbstractFlavor{T}}
+    function atomic(::Type{F}, x::Union{Irrational, Rational}) where {T, F<:Interval{T}}
         isinf(x) && return wideinterval(F, T(x))
 
         return F( T(x, RoundDown), T(x, RoundUp) )
     end
 
 else
-    function atomic(::Type{F}, x::S) where {T, S, F<:AbstractFlavor{T}}
+    function atomic(::Type{F}, x::S) where {T, S, F<:Interval{T}}
         isinf(x) && return wideinterval(F, T(x))
 
         F( T(x, RoundDown), T(x, RoundUp) )
@@ -96,7 +84,7 @@ else
     end
 end
 
-function atomic(::Type{F}, x::S) where {T, S<:AbstractFloat, F<:AbstractFlavor{T}}
+function atomic(::Type{F}, x::S) where {T, S<:AbstractFloat, F<:Interval{T}}
     isinf(x) && return wideinterval(F, x)
 
     xrat = rationalize(x)
@@ -111,11 +99,7 @@ function atomic(::Type{F}, x::S) where {T, S<:AbstractFloat, F<:AbstractFlavor{T
     return atomic(F, xrat)
 end
 
-function atomic(::Type{F}, x::Irrational{S}) where {T, S, F<:AbstractFlavor{Irrational{T}}}
-    return atomic(reparametrize(F, Float64), x)
-end
-
-function atomic(::Type{F}, x::AbstractFlavor) where {T, F<:AbstractFlavor{T}}
+function atomic(::Type{F}, x::Interval) where {T, F<:Interval{T}}
     return F( T(inf(x), RoundDown), T(sup(x), RoundUp) )
 end
 
@@ -126,26 +110,17 @@ end
 
 
 # Rational intervals
-function atomic(::Type{F}, x::Irrational) where {T<:Integer, F<:AbstractFlavor{Rational{T}}}
+function atomic(::Type{F}, x::Irrational) where {T<:Integer, F<:Interval{Rational{T}}}
     Flavor = flavortype(F)
     a = float(atomic(Flavor{BigFloat}, x))
     atomic(F, a)
 end
 
-# Reparametrize flavor with Integer bounds
-function atomic(::Type{F}, x) where {T<:Integer, F<:AbstractFlavor{T}}
-    S = promote_type(T, DefaultBound)
-    return atomic(reparametrize(F, S), x)
-end
-
-atomic(::Type{F}, x::S) where {T<:Integer, S<:Integer, F<:AbstractFlavor{Rational{T}}} =
+atomic(::Type{F}, x::S) where {T<:Integer, S<:Integer, F<:Interval{Rational{T}}} =
     F(convert(Rational{T}, x))
 
-atomic(::Type{F}, x::S) where {T<:Integer, S<:Rational, F<:AbstractFlavor{Rational{T}}} =
+atomic(::Type{F}, x::S) where {T<:Integer, S<:Rational, F<:Interval{Rational{T}}} =
     F(convert(Rational{T}, x))
 
-atomic(::Type{F}, x::S) where {T<:Integer, S<:AbstractFloat, F<:AbstractFlavor{Interval{Rational{T}}}} =
+atomic(::Type{F}, x::S) where {T<:Integer, S<:AbstractFloat, F<:Interval{Interval{Rational{T}}}} =
     F(rationalize(T, x))
-
-# Fallback when interval type is not explicitely parametrized
-atomic(::Type{F}, x) where {F<:AbstractFlavor} = atomic(F{DefaultBound}, x)

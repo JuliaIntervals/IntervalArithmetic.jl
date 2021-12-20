@@ -12,7 +12,7 @@ Return the unique interval `c` such that `b + c = a`.
 
 Implement the `cancelMinus` function of the IEEE Std 1788-2015 (section 9.2).
 """
-function cancelminus(a::F, b::F) where {F<:AbstractFlavor}
+function cancelminus(a::F, b::F) where {F<:Interval}
     (isempty(a) && (isempty(b) || !isunbounded(b))) && return emptyinterval(F)
 
     (isunbounded(a) || isunbounded(b) || isempty(b)) && return RR(F)
@@ -40,7 +40,7 @@ function cancelminus(a::F, b::F) where {F<:AbstractFlavor}
 
     return RR(F)
 end
-cancelminus(a::AbstractFlavor, b::AbstractFlavor) = cancelminus(promote(a, b)...)
+cancelminus(a::Interval, b::Interval) = cancelminus(promote(a, b)...)
 
 """
     cancelplus(a, b)
@@ -51,4 +51,4 @@ Equivalent to `cancelminus(a, −b)`.
 
 Implement the `cancelPlus` function of the IEEE Std 1788-2015 (section 9.2).
 """
-cancelplus(a::AbstractFlavor, b::AbstractFlavor) = cancelminus(a, -b)
+cancelplus(a::Interval, b::Interval) = cancelminus(a, -b)

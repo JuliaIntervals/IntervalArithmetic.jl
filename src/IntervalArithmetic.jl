@@ -20,7 +20,7 @@ export ×, dot
 
 import Base:
     +, -, *, /, //, fma,
-    <, >, ==, !=, ⊆, ^, <=,
+    <, >, ==, !=, ⊆, ^, <=, >=,
     in, zero, one, eps, typemin, typemax, abs, abs2, real, min, max,
     sqrt, exp, log, sin, cos, tan, cot, inv, cbrt, csc, hypot, sec, 
     exp2, exp10, log2, log10,
@@ -50,8 +50,8 @@ import Base.MPFR: MPFRRoundUp, MPFRRoundDown, MPFRRoundNearest, MPFRRoundToZero,
 import .Broadcast: broadcasted
 
 export
-    Interval, DefaultBound,
-    interval,
+    Interval,
+    interval, checked_interval,
     @interval, @biginterval, @floatinterval,
     diam, radius, mid, scaled_mid, mag, mig, hull,
     emptyinterval, ∅, ∞, isempty, isinterior, isdisjoint, ⪽,

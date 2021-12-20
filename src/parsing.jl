@@ -47,7 +47,7 @@ Parse a string as an interval. Formats allowed include:
 - "[3.5, 7.2]"
 - "[-0x1.3p-1, 2/3]"  # use numerical expressions
 """
-function parse(::Type{F}, s::AbstractString) where {T, F<:AbstractFlavor{T}}
+function parse(::Type{F}, s::AbstractString) where {T, F<:Interval{T}}
     # Check version!
     if !(occursin("[", s))  # string like "3.1"
 

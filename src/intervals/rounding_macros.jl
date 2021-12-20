@@ -53,7 +53,7 @@ end
 # TODO Remove this method to make sure correct type is always used in @round
 # Kept there for know to avoid having to patch all @round in the code
 macro round(ex1, ex2)
-    F = Interval{DefaultBound}
+    F = Interval{default_bound()}
     :($(esc(F))($(round_expr(ex1, RoundDown)), $(round_expr(ex2, RoundUp))))
 end
 
