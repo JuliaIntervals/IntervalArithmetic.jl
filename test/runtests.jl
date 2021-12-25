@@ -1,11 +1,10 @@
 using IntervalArithmetic
 using Test
 
+IntervalArithmetic.:(≛)(a::Tuple, b::Tuple) = all(a .≛ b)
 
-const Interval = IntervalArithmetic.Interval
 
 # Interval tests:
-
 setformat(:full)
 
 include("interval_tests/intervals.jl")

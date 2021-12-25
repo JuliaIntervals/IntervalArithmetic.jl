@@ -28,7 +28,7 @@ function ^(a::F, n::Integer) where {F<:Interval{BigFloat}}
     isempty(a) && return a
     iszero(n) && return one(F)
     n == 1 && return a
-    n < 0 && iszero(a) && return emptyinterval(F)
+    n < 0 && isthinzero(a) && return emptyinterval(F)
 
     if isodd(n) # odd power
         isentire(a) && return a
@@ -140,7 +140,7 @@ function ^(a::F, x::Rational) where {F<:Interval}
     isempty(a) && return emptyinterval(a)
     iszero(x) && return one(a)
 
-    if iszero(a)
+    if isthinzero(a)
         x > zero(x) && return zero(a)
         return emptyinterval(a)
     end

@@ -20,7 +20,7 @@ Currently only Flavor{:set_based} is supported.
     by a thin zero return the empty interval.
     The edge cases are
         - `x/(0..0) ≛ ∅`
-        - `(0..0)/(0..0) ≛ ∅`  # TODO Find ref for that
+        - `(0..0)/(0..0) ≛ ∅`  # TODO Find ref for that It is not consistent with what we test for extended div !
         - `(0..0)*(-Inf..Inf) ≛ 0`
         - `Inf ∈ (0..Inf) == false`
 - `:cset` (not implemented) : Elements of an interval are either real numbers

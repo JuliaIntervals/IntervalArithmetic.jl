@@ -101,8 +101,8 @@ end
 
 # Helper functions for multiplication
 function unbounded_mult(::Type{F}, x::T, y::T, r::RoundingMode) where {T, F<:Interval{T}}
-    iszero(x) && return sign(y)*zero_times_infinity(current_flavor())
-    iszero(y) && return sign(x)*zero_times_infinity(current_flavor())
+    iszero(x) && return sign(y)*zero_times_infinity(current_flavor(), T)
+    iszero(y) && return sign(x)*zero_times_infinity(current_flavor(), Transpose)
     return *(x, y, r)
 end
 
