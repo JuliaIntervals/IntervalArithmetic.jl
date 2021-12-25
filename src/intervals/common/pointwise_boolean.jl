@@ -75,9 +75,9 @@ function <=(::TernaryLogic, x::Interval, y::Interval)
 end
 
 # TODO We got a warning in VSCode there
-!=(::TernaryLogic, x::Interval, y::Interval) = !==(TernaryLogic, x, y)
->(::TernaryLogic, x::Interval, y::Interval) = !<(TernaryLogic, x, y)
->=(::TernaryLogic, x::Interval, y::Interval) = !<=(TernaryLogic, x, y)
+!=(::TernaryLogic, x::Interval, y::Interval) = !(==(TernaryLogic(), x, y))
+>(::TernaryLogic, x::Interval, y::Interval) = !<(TernaryLogic(), x, y)
+>=(::TernaryLogic, x::Interval, y::Interval) = !<=(TernaryLogic(), x, y)
 
 
 ## Boolean Intervals
@@ -113,10 +113,23 @@ for op in bool_operations
 end
 
 
-## Default behaviors
+## Number-interval comparisons
+for op in bool_operations
+    @eval function $op(P::PointwisePolitic, x::F, y::Real) where {F<:Interval}
+        return $op(P, x, F(y))
+    end
 
+    @eval function $op(P::PointwisePolitic, x::Real, y::F) where {F<:Interval}
+        return $op(P, F(x), y)
+    end
+end
+
+
+## Default behaviors
 pointwise_politic() = TernaryLogic()
 
 for op in bool_operations
     @eval $op(x::Interval, y::Interval) = $op(pointwise_politic(), x, y)
+    @eval $op(x::Interval, y::Real) = $op(pointwise_politic(), x, y)
+    @eval $op(x::Real, y::Interval) = $op(pointwise_politic(), x, y)
 end

@@ -179,7 +179,7 @@ end
 
     @test d < 3
     @test d <= 2
-    @test (d < 2) ≛ false
+    @test ismissing(d < 2)
     @test -1 < d
     @test !(d < 0.15)
 
@@ -199,7 +199,6 @@ end
     @test @interval(f*g) ≛ Interval(1.1111111111111109e-01, 1.1111111111111115e-01)
     @test big(1.)/9 ∈ @interval(f*g)
     @test @interval(1)/9 ⊆ @interval(f*g)
-    @test @interval(1)/9 ≠ @interval(f*g)
 
     h = 1/3
     i = 1/3
@@ -301,14 +300,11 @@ end
         @test pow(x, 0.5) ≛ Interval(1.0, 1.4142135623730951)
         @test pow(x, 0.5) ≛ x^0.5
 
-        @test pow(x, 17.3) != x^17.3
-
         y = 2..3
         @test pow(y, -0.5) ≛ Interval(0.5773502691896257, 0.7071067811865476)
 
         y = -2..3
         @test pow(y, 2.1) ≛ Interval(0.0, 10.045108566305146)
-        @test pow(y, 2.1) != y^2.1
         @test y^2.1 ⊆ pow(y, 2.1)
     end
 
@@ -331,12 +327,8 @@ end
 
     @testset "cbrt" begin
         @test cbrt(2..3) ≛ Interval(1.259921049894873, 1.4422495703074085)
-
         @test cbrt(big(2..3)) ≛ Interval(big"1.259921049894873164767210607278228350570251464701507980081975112155299676513956", big"1.442249570307408382321638310780109588391869253499350577546416194541687596830003")
-
         @test cbrt(big(2..3)) ⊆ cbrt(2..3)
-
-        @test cbrt(big(3..4)) != cbrt(3..4)
     end
 
     @testset "inv" begin
@@ -358,11 +350,11 @@ end
 @testset "Mince for `Interval`s" begin
     II = -1 .. 1
     v = mince(II, 4)
-    @test v ≛ [-1 .. -0.5, -0.5 .. 0, 0 .. 0.5, 0.5 .. 1]
+    @test all(v .≛ [-1 .. -0.5, -0.5 .. 0, 0 .. 0.5, 0.5 .. 1])
     @test hull(v...) ≛ II
     @test hull(v) ≛ II
     v = mince(II, 8)
-    @test length(v) ≛ 8
+    @test length(v) == 8
     @test hull(v...) ≛ II
     @test hull(v) ≛ II
 end

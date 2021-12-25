@@ -4,13 +4,13 @@ using IntervalArithmetic
 using Test
 
 @testset "sin" begin
-    @test sin(@interval(0.5)) == Interval(0.47942553860420295, 0.47942553860420301)
-    @test sin(@interval(0.5, 1.67)) == Interval(4.7942553860420295e-01, 1.0)
-    @test sin(@interval(1.67, 3.2)) == Interval(-5.8374143427580093e-02, 9.9508334981018021e-01)
-    @test sin(@interval(2.1, 5.6)) == Interval(-1.0, 0.863209366648874)
-    @test sin(@interval(0.5, 8.5)) == Interval(-1.0, 1.0)
-    @test sin(@floatinterval(-4.5, 0.1)) == Interval(-1.0, 0.9775301176650971)
-    @test sin(@floatinterval(1.3, 6.3)) == Interval(-1.0, 1.0)
+    @test sin(@interval(0.5)) ≛ Interval(0.47942553860420295, 0.47942553860420301)
+    @test sin(@interval(0.5, 1.67)) ≛ Interval(4.7942553860420295e-01, 1.0)
+    @test sin(@interval(1.67, 3.2)) ≛ Interval(-5.8374143427580093e-02, 9.9508334981018021e-01)
+    @test sin(@interval(2.1, 5.6)) ≛ Interval(-1.0, 0.863209366648874)
+    @test sin(@interval(0.5, 8.5)) ≛ Interval(-1.0, 1.0)
+    @test sin(@floatinterval(-4.5, 0.1)) ≛ Interval(-1.0, 0.9775301176650971)
+    @test sin(@floatinterval(1.3, 6.3)) ≛ Interval(-1.0, 1.0)
 
     @test sin(@biginterval(0.5)) ⊆ sin(@interval(0.5))
     @test sin(@biginterval(0.5, 1.67)) ⊆ sin(@interval(0.5, 1.67))
@@ -22,11 +22,11 @@ using Test
 end
 
 @testset "cos" begin
-    @test cos(@interval(0.5)) == Interval(0.87758256189037265, 0.87758256189037276)
-    @test cos(@interval(0.5, 1.67)) == Interval(-0.09904103659872825, 0.8775825618903728)
-    @test cos(@interval(2.1, 5.6)) == Interval(-1.0, 0.77556587851025016)
-    @test cos(@interval(0.5, 8.5)) == Interval(-1.0, 1.0)
-    @test cos(@interval(1.67, 3.2)) == Interval(-1.0, -0.09904103659872801)
+    @test cos(@interval(0.5)) ≛ Interval(0.87758256189037265, 0.87758256189037276)
+    @test cos(@interval(0.5, 1.67)) ≛ Interval(-0.09904103659872825, 0.8775825618903728)
+    @test cos(@interval(2.1, 5.6)) ≛ Interval(-1.0, 0.77556587851025016)
+    @test cos(@interval(0.5, 8.5)) ≛ Interval(-1.0, 1.0)
+    @test cos(@interval(1.67, 3.2)) ≛ Interval(-1.0, -0.09904103659872801)
 
     @test cos(@biginterval(0.5)) ⊆ cos(@interval(0.5))
     @test cos(@biginterval(0.5, 1.67)) ⊆ cos(@interval(0.5, 1.67))
@@ -38,29 +38,29 @@ end
 end
 
 @testset "sinpi" begin
-    @test sinpi(∅) == ∅
-    @test sinpi(0.5 .. 1.5) == Interval(-1 , 1)
+    @test sinpi(∅) ≛ ∅
+    @test sinpi(0.5 .. 1.5) ≛ Interval(-1 , 1)
     @test sinpi(1 .. 2) ⊇ Interval(-1 , 0)
     @test sinpi(0.25 .. 0.75) ⊇ Interval(1/sqrt(2) , 1)
     @test sinpi(-0.25 .. 0.25) ⊇ Interval(-1/sqrt(2) , 1/sqrt(2))
 end
 
 @testset "cospi" begin
-    @test cospi(∅) == ∅
-    @test cospi(1 .. 2) == Interval(-1 , 1)
+    @test cospi(∅) ≛ ∅
+    @test cospi(1 .. 2) ≛ Interval(-1 , 1)
     @test cospi(0.5 .. 1.5) ⊇ Interval(-1 , 0)
     @test cospi(0.25 .. 0.75) ⊇ Interval(-1/sqrt(2) , 1/sqrt(2))
-    @test cospi(-0.25 .. 0.25) == Interval(1/sqrt(2) , 1)
+    @test cospi(-0.25 .. 0.25) ≛ Interval(1/sqrt(2) , 1)
 end
 
 @testset "tan" begin
-    @test tan(@interval(0.5)) == Interval(0.54630248984379048, 0.5463024898437906)
-    @test tan(@interval(0.5, 1.67)) == RR()
-    @test tan(@interval(1.67, 3.2)) == Interval(-10.047182299210307, 0.05847385445957865)
-    @test tan(Interval(6.638314112824137, 8.38263151220128)) == RR()  # https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/20
+    @test tan(@interval(0.5)) ≛ Interval(0.54630248984379048, 0.5463024898437906)
+    @test tan(@interval(0.5, 1.67)) ≛ RR()
+    @test tan(@interval(1.67, 3.2)) ≛ Interval(-10.047182299210307, 0.05847385445957865)
+    @test tan(Interval(6.638314112824137, 8.38263151220128)) ≛ RR()  # https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/20
 
     @test tan(@biginterval(0.5)) ⊆ tan(@interval(0.5))
-    @test tan(@biginterval(0.5, 1.67)) == RR(BigFloat)
+    @test tan(@biginterval(0.5, 1.67)) ≛ RR(BigFloat)
     @test tan(@biginterval(0.5, 1.67)) ⊆ tan(@interval(0.5, 1.67))
     @test tan(@biginterval(1.67, 3.2)) ⊆ tan(@interval(1.67, 3.2))
     @test tan(@biginterval(2.1, 5.6)) ⊆ tan(@interval(2.1, 5.6))
@@ -71,117 +71,117 @@ end
 end
 
 @testset "Inverse trig" begin
-    @test asin(@interval(1)) == @interval(pi/2)
-    @test asin(@interval(0.9, 2)) == asin(@interval(0.9, 1))
-    @test asin(@interval(3, 4)) == ∅
+    @test asin(@interval(1)) ≛ @interval(pi/2)
+    @test asin(@interval(0.9, 2)) ≛ asin(@interval(0.9, 1))
+    @test asin(@interval(3, 4)) ≛ ∅
 
     @test asin(@biginterval(1)) ⊆ asin(@interval(1))
     @test asin(@biginterval(0.9, 2)) ⊆ asin(@interval(0.9, 2))
     @test asin(@biginterval(3, 4)) ⊆ asin(@interval(3, 4))
 
-    @test acos(@interval(1)) == Interval(0., 0.)
-    @test acos(@interval(-2, -0.9)) == acos(@interval(-1, -0.9))
-    @test acos(@interval(3, 4)) == ∅
+    @test acos(@interval(1)) ≛ Interval(0., 0.)
+    @test acos(@interval(-2, -0.9)) ≛ acos(@interval(-1, -0.9))
+    @test acos(@interval(3, 4)) ≛ ∅
 
     @test acos(@biginterval(1)) ⊆ acos(@interval(1))
     @test acos(@biginterval(-2, -0.9)) ⊆ acos(@interval(-2, -0.9))
     @test acos(@biginterval(3, 4)) ⊆ acos(@interval(3, 4))
 
-    @test atan(@interval(-1,1)) ==
+    @test atan(@interval(-1,1)) ≛
         Interval(-Interval{Float64}(π).hi/4, Interval{Float64}(π).hi/4)
-    @test atan(@interval(0)) == Interval(0.0, 0.0)
+    @test atan(@interval(0)) ≛ Interval(0.0, 0.0)
     @test atan(@biginterval(-1, 1)) ⊆ atan(@interval(-1, 1))
 end
 
 @testset "atan" begin
-    @test atan(∅, RR()) == ∅
-    @test atan(RR(), ∅) == ∅
-    @test atan(@interval(0.0, 1.0), @biginterval(0.0)) == @biginterval(pi/2)
-    @test atan(@interval(0.0, 1.0), @interval(0.0)) == @interval(pi/2)
-    @test atan(@interval(-1.0, -0.1), @interval(0.0)) == @interval(-pi/2)
-    @test atan(@interval(-1.0, 1.0), @interval(0.0)) == @interval(-pi/2, pi/2)
-    @test atan(@interval(0.0), @interval(0.1, 1.0)) == @interval(0.0)
+    @test atan(∅, RR()) ≛ ∅
+    @test atan(RR(), ∅) ≛ ∅
+    @test atan(@interval(0.0, 1.0), @biginterval(0.0)) ≛ @biginterval(pi/2)
+    @test atan(@interval(0.0, 1.0), @interval(0.0)) ≛ @interval(pi/2)
+    @test atan(@interval(-1.0, -0.1), @interval(0.0)) ≛ @interval(-pi/2)
+    @test atan(@interval(-1.0, 1.0), @interval(0.0)) ≛ @interval(-pi/2, pi/2)
+    @test atan(@interval(0.0), @interval(0.1, 1.0)) ≛ @interval(0.0)
     @test atan(@biginterval(0.0, 0.1), @biginterval(0.1, 1.0)) ⊆
         atan(@interval(0.0, 0.1), @interval(0.1, 1.0))
-    @test atan(@interval(0.0, 0.1), @interval(0.1, 1.0)) ==
+    @test atan(@interval(0.0, 0.1), @interval(0.1, 1.0)) ≛
         Interval(0.0, 0.7853981633974484)
     @test atan(@biginterval(-0.1, 0.0), @biginterval(0.1, 1.0)) ⊆
         atan(@interval(-0.1, 0.0), @interval(0.1, 1.0))
-    @test atan(@interval(-0.1, 0.0), @interval(0.1, 1.0)) ==
+    @test atan(@interval(-0.1, 0.0), @interval(0.1, 1.0)) ≛
         Interval(-0.7853981633974484, 0.0)
     @test atan(@biginterval(-0.1, -0.1), @biginterval(0.1, Inf)) ⊆
         atan(@interval(-0.1, -0.1), @interval(0.1, Inf))
-    @test atan(@interval(-0.1, 0.0), @interval(0.1, Inf)) ==
+    @test atan(@interval(-0.1, 0.0), @interval(0.1, Inf)) ≛
         Interval(-0.7853981633974484, 0.0)
     @test atan(@biginterval(0.0, 0.1), @biginterval(-2.0, -0.1)) ⊆
         atan(@interval(0.0, 0.1), @interval(-2.0, -0.1))
-    @test atan(@interval(0.0, 0.1), @interval(-2.0, -0.1)) ==
+    @test atan(@interval(0.0, 0.1), @interval(-2.0, -0.1)) ≛
         Interval(2.356194490192345, 3.1415926535897936)
     @test atan(@biginterval(-0.1, 0.0), @biginterval(-2.0, -0.1)) ⊆
         atan(@interval(-0.1, 0.0), @interval(-2.0, -0.1))
-    @test atan(@interval(-0.1, 0.0), @interval(-2.0, -0.1)) ==
+    @test atan(@interval(-0.1, 0.0), @interval(-2.0, -0.1)) ≛
         @interval(-pi, pi)
     @test atan(@biginterval(-0.1, 0.1), @biginterval(-Inf, -0.1)) ⊆
         atan(@interval(-0.1, 0.1), @interval(-Inf, -0.1))
-    @test atan(@interval(-0.1, 0.1), @interval(-Inf, -0.1)) ==
+    @test atan(@interval(-0.1, 0.1), @interval(-Inf, -0.1)) ≛
         @interval(-pi, pi)
 
     @test atan(@biginterval(0.0, 0.0), @biginterval(-2.0, 0.0)) ⊆
         atan(@interval(0.0, 0.0), @interval(-2.0, 0.0))
-    @test atan(@interval(-0.0, 0.0), @interval(-2.0, 0.0)) ==
+    @test atan(@interval(-0.0, 0.0), @interval(-2.0, 0.0)) ≛
         Interval(3.141592653589793, 3.1415926535897936)
     @test atan(@biginterval(0.0, 0.1), @biginterval(-0.1, 0.0)) ⊆
         atan(@interval(0.0, 0.1), @interval(-0.1, 0.0))
-    @test atan(@interval(-0.0, 0.1), @interval(-0.1, 0.0)) ==
+    @test atan(@interval(-0.0, 0.1), @interval(-0.1, 0.0)) ≛
         Interval(1.5707963267948966, 3.1415926535897936)
     @test atan(@biginterval(-0.1, -0.1), @biginterval(-0.1, 0.0)) ⊆
         atan(@interval(-0.1, -0.1), @interval(-0.1, 0.0))
-    @test atan(@interval(-0.1, -0.1), @interval(-0.1, 0.0)) ==
+    @test atan(@interval(-0.1, -0.1), @interval(-0.1, 0.0)) ≛
         Interval(-2.3561944901923453, -1.5707963267948966)
     @test atan(@biginterval(-0.1, 0.1), @biginterval(-2.0, 0.0)) ⊆
         atan(@interval(-0.1, 0.1), @interval(-2.0, 0.0))
-    @test atan(@interval(-0.1, 0.1), @interval(-2.0, 0.0)) ==
+    @test atan(@interval(-0.1, 0.1), @interval(-2.0, 0.0)) ≛
         @interval(-pi, pi)
 
     @test atan(@biginterval(0.0, 0.0), @biginterval(-2.0, 0.0)) ⊆
         atan(@interval(0.0, 0.0), @interval(-2.0, 0.0))
-    @test atan(@interval(-0.0, 0.0), @interval(-2.0, 0.0)) ==
+    @test atan(@interval(-0.0, 0.0), @interval(-2.0, 0.0)) ≛
         Interval(3.141592653589793, 3.1415926535897936)
     @test atan(@biginterval(0.0, 0.1), @biginterval(-0.1, 0.0)) ⊆
         atan(@interval(0.0, 0.1), @interval(-0.1, 0.0))
-    @test atan(@interval(-0.0, 0.1), @interval(-0.1, 0.0)) ==
+    @test atan(@interval(-0.0, 0.1), @interval(-0.1, 0.0)) ≛
         Interval(1.5707963267948966, 3.1415926535897936)
     @test atan(@biginterval(-0.1, -0.1), @biginterval(-0.1, 0.0)) ⊆
         atan(@interval(-0.1, -0.1), @interval(-0.1, 0.0))
-    @test atan(@interval(-0.1, -0.1), @interval(-0.1, 0.0)) ==
+    @test atan(@interval(-0.1, -0.1), @interval(-0.1, 0.0)) ≛
         Interval(-2.3561944901923453, -1.5707963267948966)
     @test atan(@biginterval(-0.1, 0.1), @biginterval(-2.0, 0.0)) ⊆
         atan(@interval(-0.1, 0.1), @interval(-2.0, 0.0))
-    @test atan(@interval(-0.1, 0.1), @interval(-2.0, 0.0)) ==
+    @test atan(@interval(-0.1, 0.1), @interval(-2.0, 0.0)) ≛
         @interval(-pi, pi)
     @test atan(@biginterval(0.0, 0.1), @biginterval(-2.0, 0.1)) ⊆
         atan(@interval(0.0, 0.1), @interval(-2.0, 0.1))
-    @test atan(@interval(-0.0, 0.1), @interval(-2.0, 0.1)) ==
+    @test atan(@interval(-0.0, 0.1), @interval(-2.0, 0.1)) ≛
         Interval(0.0, 3.1415926535897936)
     @test atan(@biginterval(-0.1, -0.1), @biginterval(-0.1, 0.1)) ⊆
         atan(@interval(-0.1, -0.1), @interval(-0.1, 0.1))
-    @test atan(@interval(-0.1, -0.1), @interval(-0.1, 0.1)) ==
+    @test atan(@interval(-0.1, -0.1), @interval(-0.1, 0.1)) ≛
         Interval(-2.3561944901923453, -0.7853981633974482)
     @test atan(@biginterval(-0.1, 0.1), @biginterval(-2.0, 0.1)) ⊆
         atan(@interval(-0.1, 0.1), @interval(-2.0, 0.1))
-    @test atan(@interval(-0.1, 0.1), @interval(-2.0, 0.1)) ==
+    @test atan(@interval(-0.1, 0.1), @interval(-2.0, 0.1)) ≛
         @interval(-pi, pi)
 
-    @test atan(@interval(-0.1, 0.1), @interval(0.1, 0.1)) ==
+    @test atan(@interval(-0.1, 0.1), @interval(0.1, 0.1)) ≛
         Interval(-0.7853981633974484, 0.7853981633974484)
     @test atan(@biginterval(-0.1, 0.1), @biginterval(0.1, 0.1)) ⊆
         atan(@interval(-0.1, 0.1), @interval(0.1, 0.1))
-    @test atan(@interval(0.0), @interval(-0.0, 0.1)) == @interval(0.0)
-    @test atan(@interval(0.0, 0.1), @interval(-0.0, 0.1)) ==
+    @test atan(@interval(0.0), @interval(-0.0, 0.1)) ≛ @interval(0.0)
+    @test atan(@interval(0.0, 0.1), @interval(-0.0, 0.1)) ≛
         Interval(0.0, 1.5707963267948968)
-    @test atan(@interval(-0.1, 0.0), @interval(0.0, 0.1)) ==
+    @test atan(@interval(-0.1, 0.0), @interval(0.0, 0.1)) ≛
         Interval(-1.5707963267948968, 0.0)
-    @test atan(@interval(-0.1, 0.1), @interval(-0.0, 0.1)) ==
+    @test atan(@interval(-0.1, 0.1), @interval(-0.0, 0.1)) ≛
         Interval(-1.5707963267948968, 1.5707963267948968)
     @test atan(@biginterval(-0.1, 0.1), @biginterval(-0.0, 0.1)) ⊆
         atan(@interval(-0.1, 0.1), @interval(0.0, 0.1))
@@ -192,20 +192,20 @@ end
         @test tan(a) ⊆ sin(a)/cos(a)
     end
 
-    @test sin(Interval(-pi/2, 3pi/2)) == Interval(-1, 1)
-    @test cos(Interval(-pi/2, 3pi/2)) == Interval(-1, 1)
+    @test sin(Interval(-pi/2, 3pi/2)) ≛ Interval(-1, 1)
+    @test cos(Interval(-pi/2, 3pi/2)) ≛ Interval(-1, 1)
 end
 
 @testset "Trig with large arguments" begin
     x = Interval(2.)^1000   # this is a thin interval
     @test diam(x) == 0.0
 
-    @test sin(x) == Interval(-0.15920170308624246, -0.15920170308624243)
-    @test cos(x) == Interval(0.9872460775989135, 0.9872460775989136)
-    @test tan(x) == Interval(-0.16125837995065806, -0.16125837995065803)
+    @test sin(x) ≛ Interval(-0.15920170308624246, -0.15920170308624243)
+    @test cos(x) ≛ Interval(0.9872460775989135, 0.9872460775989136)
+    @test tan(x) ≛ Interval(-0.16125837995065806, -0.16125837995065803)
 
     x = Interval(prevfloat(∞), ∞)
-    @test sin(x) == -1..1
-    @test cos(x) == -1..1
-    @test tan(x) == -∞..∞
+    @test sin(x) ≛ -1..1
+    @test cos(x) ≛ -1..1
+    @test tan(x) ≛ -∞..∞
 end

@@ -333,7 +333,9 @@ function atan(y::F, x::F) where {F<:Interval{Float64}}
     return atomic(F, atan(big53(y), big53(x)))
 end
 
-function atan(y::F, x::F) where {T, F<:Interval{T}}
+function atan(y::Interval{T}, x::Interval{S}) where {T, S}
+    F = Interval{promote_type(T, S)}
+
     (isempty(y) || isempty(x)) && return emptyinterval(F)
 
     # Prevent nonsense results when y has a signed zero:
@@ -346,15 +348,14 @@ function atan(y::F, x::F) where {T, F<:Interval{T}}
     end
 
     # Check cases based on x
-    if iszero(x)
-        iszero(y) && return emptyinterval(F)
+    if isthinzero(x)
+        isthinzero(y) && return emptyinterval(F)
         y.lo ≥ zero(T) && return half_pi(F)
         y.hi ≤ zero(T) && return -half_pi(F)
         return half_range_atan(F)
 
     elseif x.lo > zero(T)
-
-        iszero(y) && return y
+        isthinzero(y) && return y
         y.lo ≥ zero(T) &&
             return @round(F, atan(y.lo, x.hi), atan(y.hi, x.lo)) # refinement lo bound
         y.hi ≤ zero(T) &&
@@ -362,8 +363,7 @@ function atan(y::F, x::F) where {T, F<:Interval{T}}
         return @round(F, atan(y.lo, x.lo), atan(y.hi, x.lo))
 
     elseif x.hi < zero(T)
-
-        iszero(y) && return F(π)
+        isthinzero(y) && return F(π)
         y.lo ≥ zero(T) &&
             return @round(F, atan(y.hi, x.hi), atan(y.lo, x.lo))
         y.hi < zero(T) &&
@@ -372,14 +372,13 @@ function atan(y::F, x::F) where {T, F<:Interval{T}}
 
     else # zero(T) ∈ x
         if iszero(x.lo)
-            iszero(y) && return y
-
+            isthinzero(y) && return y
             y.lo ≥ zero(T) && return @round(F, atan(y.lo, x.hi), half_range_atan(F).hi)
             y.hi ≤ zero(T) && return @round(F, half_range_atan(F).lo, atan(y.hi, x.hi))
             return half_range_atan(F)
 
         elseif iszero(x.hi)
-            iszero(y) && return F(π)
+            isthinzero(y) && return F(π)
             y.lo ≥ zero(T) && return @round(F, half_pi(F).lo, atan(y.lo, x.lo))
             y.hi < zero(T) && return @round(F, atan(y.hi, x.lo), -(half_pi(F).lo))
             return range_atan(F)
@@ -390,6 +389,5 @@ function atan(y::F, x::F) where {T, F<:Interval{T}}
                 return @round(F, atan(y.hi, x.lo), atan(y.hi, x.hi))
             return range_atan(F)
         end
-
     end
 end
