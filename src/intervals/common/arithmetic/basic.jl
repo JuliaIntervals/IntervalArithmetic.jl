@@ -134,7 +134,7 @@ Note: the behavior of the division is flavor dependent for some edge cases.
 """
 function /(a::F, x::Real) where {F<:Interval}
     isempty(a) && return emptyinterval(T)
-    iszero(x) && return div_by_zero(current_flavor(), a)
+    iszero(x) && return div_by_thin_zero(current_flavor(), a)
 
     if x ≥ 0.0
         return @round(F, a.lo/x, a.hi/x)
@@ -147,7 +147,7 @@ end
 
 function /(a::F, b::F) where {T, F<:Interval{T}}
     (isempty(a) || isempty(b)) && return emptyinterval(F)
-    isthinzero(b) && return div_by_zero(current_flavor(), a)
+    isthinzero(b) && return div_by_thin_zero(current_flavor(), a)
 
     if b.lo > zero(T) # b strictly positive
         a.lo >= zero(T) && return @round(F, a.lo/b.hi, a.hi/b.lo)
@@ -193,7 +193,7 @@ function inv(a::F) where {T, F<:Interval{T}}
         a.lo < zero(T) == a.hi && return @round(F, T(-Inf), inv(a.lo))
         a.lo == zero(T) < a.hi && return @round(F, inv(a.hi), T(Inf))
         a.lo < zero(T) < a.hi && return RR(F)
-        isthinzero(a) && return inv_of_zero(F)
+        isthinzero(a) && return div_by_thin_zero(current_flavor(), one(F))
     end
 
     return @round(F, inv(a.hi), inv(a.lo))
@@ -221,10 +221,10 @@ function fma(a::F, b::F, c::F) where {T, F<:Interval{T}}
     (isempty(a) || isempty(b) || isempty(c)) && return emptyinterval(F)
 
     if isentire(a)
-        iszero(b) && return c
+        isthinzero(b) && return c
         return RR(F)
     elseif isentire(b)
-        iszero(a) && return c
+        isthinzero(a) && return c
         return RR(F)
     end
 

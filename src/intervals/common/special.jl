@@ -73,4 +73,5 @@ contains_zero(x::Interval{T}) where T = zero(T) ∈ x
 
 Return wether the interval only contains zero.
 """
+# TODO (?) Move to pointwise boolean
 isthinzero(x::Interval) = iszero(x.lo) && iszero(x.hi)

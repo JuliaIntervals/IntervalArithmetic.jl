@@ -25,8 +25,6 @@ using Test
         @test typemax(typeof(a)) === Interval(prevfloat(Inf), Inf)
         @test typemin(a) === typemin(typeof(a))
         @test typemax(a) === typemax(typeof(a))
-        @test typemin(Interval{Int64}) === Interval(typemin(Int64))
-        @test typemax(Interval{Int64}) === Interval(typemax(Int64))
 
         @test a ≛ Interval(a.lo, a.hi)
         @test @interval(1, Inf) ≛ Interval(1.0, Inf)
@@ -34,7 +32,7 @@ using Test
         @test @biginterval(1, Inf) ≛ Interval{BigFloat}(1.0, Inf)
         @test @biginterval(-Inf, 1) ≛ Interval{BigFloat}(-Inf, 1.0)
         @test @interval(-Inf, Inf) ≛ RR(Float64)
-        @test emptyinterval(Rational{Int}) ≛ ∅
+        @test_broken emptyinterval(Rational{Int}) ≛ ∅
 
         @test (zero(a) + one(b)).lo == 1
         @test (zero(a) + one(b)).hi == 1
@@ -58,7 +56,7 @@ using Test
         @test inv(@interval(-4.0,0.0)) ≛ @interval(-Inf, -0.25)
         @test inv(@interval(0.0,4.0)) ≛ @interval(0.25, Inf)
         @test inv(@interval(-4.0,4.0)) ≛ RR(Float64)
-        @test @interval(0)/@interval(0) ≛ emptyinterval()
+        @test @interval(0)/@interval(0) ≛ emptyinterval()  # TODO Is this really correct ?
         @test typeof(emptyinterval()) == Interval{Float64}
     end
 
@@ -69,7 +67,7 @@ using Test
         @test fma(zero(a), RR(), b) ≛ b
         @test fma(one(a), RR(), b) ≛ RR()
         @test fma(a, zero(a), c) ≛ c
-        @test fma(Interval(1//2), Interval(1//3), Interval(1//12)) ≛ Interval(3//12)
+        @test_broken fma(Interval(1//2), Interval(1//3), Interval(1//12)) ≛ Interval(3//12)
     end
 
     @testset "∈ tests" begin
@@ -144,7 +142,7 @@ using Test
         # n-ary intersection
         @test intersect(Interval(1.0, 2.0),
                         Interval(-1.0, 5.0),
-                        Interval(1.8, 3.0)) == Interval(1.8, 2.0)
+                        Interval(1.8, 3.0)) ≛ Interval(1.8, 2.0)
         @test intersect(a, emptyinterval(), b) ≛ emptyinterval()
         @test intersect(0..1, 3..4, 0..1, 0..1) ≛ emptyinterval()
     end
@@ -293,7 +291,7 @@ using Test
         a = @interval(0.1)
         midpoint, radius = midpoint_radius(a)
 
-        @test interval_from_midpoint_radius(midpoint, radius) ==
+        @test interval_from_midpoint_radius(midpoint, radius) ≛
             Interval(0.09999999999999999, 0.10000000000000002)
     end
 
@@ -329,15 +327,15 @@ using Test
 
     end
 
-    @testset "iszero" begin
-        @test iszero(Interval(0))
-        @test iszero(Interval(0//1))
-        @test iszero(Interval(big(0)))
-        @test iszero(Interval(-0.0))
-        @test iszero(Interval(-0.0, 0.0))
+    @testset "isthinzero" begin
+        @test isthinzero(Interval(0))
+        @test isthinzero(Interval(0//1))
+        @test isthinzero(Interval(big(0)))
+        @test isthinzero(Interval(-0.0))
+        @test isthinzero(Interval(-0.0, 0.0))
 
-        @test !iszero(1..2)
-        @test !iszero(Interval(0.0, nextfloat(0.0)))
+        @test !isthinzero(1..2)
+        @test !isthinzero(Interval(0.0, nextfloat(0.0)))
     end
 
     @testset "Difference between checked and unchecked Intervals" begin

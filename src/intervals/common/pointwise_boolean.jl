@@ -18,6 +18,7 @@
 # TODO Fetch the tests from NumberInterval.jl for the ternary politic
 # TODO More globally, test the file
 # TODO Add a :ternary_with_warning politic for the default?
+# TODO Add iszero
 """
     PointwisePolitic{P}
 

@@ -5,15 +5,14 @@ __precompile__(true)
 module IntervalArithmetic
 
 import CRlibm
-
-using StaticArrays
-using FastRounding
-using SetRounding
-using RoundingEmulator
-
-using Markdown
+import FastRounding
+import RoundingEmulator
 
 using LinearAlgebra
+using Markdown
+using StaticArrays
+using SetRounding
+
 import LinearAlgebra: ×, dot, norm
 export ×, dot
 
@@ -55,7 +54,7 @@ export
     @interval, @biginterval, @floatinterval,
     diam, radius, mid, scaled_mid, mag, mig, hull,
     emptyinterval, ∅, ∞, isempty, isinterior, isdisjoint, ⪽,
-    precedes, strictprecedes, ≺, ⊂, ⊃, ⊇, contains_zero,
+    precedes, strictprecedes, ≺, ⊂, ⊃, ⊇, contains_zero, isthinzero,
     isweaklyless, isstrictless,
     ≛,
     RR, isentire, nai, isnai, isthin, iscommon, isatomic,

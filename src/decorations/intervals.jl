@@ -29,16 +29,8 @@ of a previously executed sequence of functions acting on an initial interval.
 struct DecoratedInterval{T}
     interval::Interval{T}
     decoration::DECORATION
-
-    function DecoratedInterval{T}(I::Interval{T}) where {T}
-        dd = decoration(I)
-        dd <= trv && return new{T}(I, dd)
-        d == ill && return new{T}(nai(I), d)
-        return new{T}(I, d)
-    end
 end
 
-DecoratedInterval(I::Interval, d::DECORATION) = DecoratedInterval(I, d)
 DecoratedInterval(I::DecoratedInterval, dec::DECORATION) = DecoratedInterval(I.interval, dec)
 
 function DecoratedInterval(a::T, b::T, d::DECORATION) where {T<:Real}
@@ -53,6 +45,15 @@ DecoratedInterval(a::T, b::S, d::DECORATION) where {T<:Real, S<:Real} =
 
 DecoratedInterval(a::T, d::DECORATION) where {T<:Real} =
     DecoratedInterval(Interval(a, a), d)
+
+function DecoratedInterval{T}(I::Interval) where {T}
+    dd = decoration(I)
+    dd <= trv && return DecoratedInterval{T}(I, dd)
+    d == ill && return DecoratedInterval{T}(nai(I), d)
+    return DecoratedInterval{T}(I, d)
+end
+
+DecoratedInterval(I::Interval) = DecoratedInterval{default_bound()}(I)
 
 function DecoratedInterval(a::T, b::T) where {T<:Real}
     a > b && return DecoratedInterval(nai(T), ill)

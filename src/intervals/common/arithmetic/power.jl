@@ -76,7 +76,7 @@ function ^(a::F, x::BigFloat) where {F<:Interval{BigFloat}}
 
     domain = F(0, Inf)
 
-    if iszero(a)
+    if isthinzero(a)
         a = a ∩ domain
         x > zero(x) && return zero(F)
         return emptyinterval(F)

@@ -20,7 +20,7 @@ Currently only Flavor{:set_based} is supported.
     by a thin zero return the empty interval.
     The edge cases are
         - `x/(0..0) ≛ ∅`
-        - `(0..0)/(0..0) ≛ (-Inf..Inf)`  # TODO Check that
+        - `(0..0)/(0..0) ≛ ∅`  # TODO Find ref for that
         - `(0..0)*(-Inf..Inf) ≛ 0`
         - `Inf ∈ (0..Inf) == false`
 - `:cset` (not implemented) : Elements of an interval are either real numbers
@@ -31,27 +31,24 @@ Currently only Flavor{:set_based} is supported.
         - `(0..0)*(-Inf..Inf) ≛ (-Inf..Inf)`
         - `Inf ∈ (0..Inf) == true`
 """
-abstract type Flavor{F} end
-
-const SetBased = Flavor{:set_based}
+struct Flavor{F} end
 
 current_flavor() = Flavor{:set_based}()
 
 """
-    zero_times_infinity(::Flavor, T)
+    zero_times_infinity(::Flavor, x)
 
 Return the result of zero times positive infinity for the given flavor.
 """
-zero_times_infinity(::SetBased, ::Type{T}) where T = zero(T)
+zero_times_infinity(::Flavor{:set_based}, ::Type{T}) where T = zero(T)
 
 """
-    inv_of_zero(::Flavor, T)
+    div_by_thin_zero(::Flavor, x)
 
-Inverse of the interval containing only `0`.
+Divide `x` by the interval containing only `0`.
 """
-function div_by_zero(::SetBased, x::Interval{T}) where T
-    0 ∈ x && return RR(T)
+function div_by_thin_zero(::Flavor{:set_based}, x::Interval{T}) where T
     return emptyinterval(T)
 end
 
-contains_infinity(::SetBased, x::Interval) = false
+contains_infinity(::Flavor{:set_based}, x::Interval) = false
