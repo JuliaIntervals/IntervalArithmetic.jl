@@ -128,7 +128,7 @@ function ^(xx::DecoratedInterval{T}, qq::DecoratedInterval{S}) where {T,S}
     q = interval(qq)
     r = x^q
     d = min(decoration(xx), decoration(qq), decoration(r))
-    if x > zero(T) || (x.lo ≥ zero(T) && q.lo > zero(T)) ||
+    if x.lo > zero(T) || (x.lo ≥ zero(T) && q.lo > zero(T)) ||
             (isthin(q) && isinteger(q.lo) && q.lo > zero(q)) ||
             (isthin(q) && isinteger(q.lo) && zero(T) ∉ x)
         return DecoratedInterval(r, d)

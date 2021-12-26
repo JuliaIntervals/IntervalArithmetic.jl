@@ -3,12 +3,8 @@ using Test
 
 let x, b
 
-setprecision(Interval, Float64)
-
 @testset "setformat tests" begin
-
     @testset "Interval" begin
-
         a = 1..2
         b = -1.1..1.3
         c = Interval(pi)
@@ -59,15 +55,15 @@ setprecision(Interval, Float64)
 
     @testset "Interval{Rational{T}}" begin
         a = Interval(1//3, 5//4)
-        @test typeof(a)== Interval{Rational{Int}}
+        @test_broken typeof(a)== Interval{Rational{Int}}
         setformat(:standard)
-        @test string(a) == "[1//3, 5//4]"
+        @test_broken string(a) == "[1//3, 5//4]"
 
         setformat(:full)
-        @test string(a) == "Interval(1//3, 5//4)"
+        @test_broken string(a) == "Interval(1//3, 5//4)"
 
         setformat(:midpoint)
-        @test string(a) == "19//24 ± 11//24"
+        @test_broken string(a) == "19//24 ± 11//24"
     end
 
     @testset "Interval{Float32}" begin
@@ -85,8 +81,7 @@ setprecision(Interval, Float64)
         @test string(a) == "1.5f0 ± 0.5f0"
     end
 
-
-    setprecision(Interval, 256)
+    setprecision(BigFloat, 256)
 
     @testset "DecoratedInterval" begin
         a = @decorated(1, 2)
@@ -118,14 +113,13 @@ setprecision(Interval, Float64)
 
     end
 
-
-    setprecision(Interval, 128)
+    setprecision(BigFloat, 128)
 
     @testset "BigFloat intervals" begin
         setformat(:standard, decorations=false)
 
-        a = @interval big(1)
-        @test typeof(a)== Interval{BigFloat}
+        a = Interval(big(1))
+        @test typeof(a) == Interval{BigFloat}
         @test string(a) == "[1, 1]₁₂₈"
 
         setformat(:full)
@@ -145,11 +139,7 @@ setprecision(Interval, Float64)
         @test string(a) == "DecoratedInterval(Interval(2.0, 3.0), com)"
     end
 
-
-    setprecision(Interval, Float64)
-
     @testset "IntervalBox" begin
-
         setformat(:standard, sigfigs=6)
 
         X = IntervalBox(1..2, 3..4)
@@ -173,7 +163,7 @@ end
 
 @testset "showfull" begin
     setformat(:standard, decorations=false, sigfigs=6)
-    setprecision(128)
+    setprecision(BigFloat, 128)
 
     x = 0..1
     @test string(x) == "[0, 1]"
@@ -208,5 +198,7 @@ end
     @format 10
     @test string(x) == "[0.09999999999, 0.3000000001]"
 end
+
+setprecision(BigFloat, 256)
 
 end

@@ -16,7 +16,7 @@
 
 # TODO Need help for the names x_x
 # TODO Fetch the tests from NumberInterval.jl for the ternary politic
-# TODO More globally, test the file
+# TODO More globally, test the file (especially isinf and isfinite)
 # TODO Add a :ternary_with_warning politic for the default?
 # TODO Add iszero
 """
@@ -55,6 +55,10 @@ bool_operations = [
     :(==), :(!=), :<, :(<=), :>, :(>=)
 ]
 
+bool_functions = [
+    :isinf, :isfinite
+]
+
 ## Ternary logic
 
 function ==(::TernaryLogic, x::Interval, y::Interval)
@@ -79,34 +83,55 @@ end
 >(::TernaryLogic, x::Interval, y::Interval) = !<(TernaryLogic(), x, y)
 >=(::TernaryLogic, x::Interval, y::Interval) = !<=(TernaryLogic(), x, y)
 
+# Boolean functions
+function isinf(::TernaryLogic, x::Interval)
+    if x.lo === -Inf || x.hi === Inf
+        isthin(x) && return true
+        return missing
+    end
+    return false
+end
+
+isfinite(::TernaryLogic, x::Interval) = !isinf(TernaryLogic(), x)
+
 
 ## Boolean Intervals
-
 struct BooleanInterval
     has_true::Bool
     has_false::Bool
 end
 
-function BooleanInterval(args...)
-    has_true = (true in args)
-    has_false = (false in args)
-    return BooleanInterval(has_true, has_false)
+function BooleanInterval(arg)
+    ismissing(arg) && return BooleanInterval(true, true)
+    arg && return BooleanInterval(true, false)
+    return BooleanInterval(false, true)
 end
 
 for op in bool_operations
     @eval function $op(::BooleanIntervals, x::Interval, y::Interval)
-        ternary_res = $op(TernaryLogic, x, y)
-        ismissing(ternary_res) && return BooleanInterval(true, false)
-        return BooleanInterval(ternary_res)
+        return BooleanInterval($op(TernaryLogic(), x, y))
+    end
+end
+
+for f in bool_functions
+    @eval function $f(::BooleanInterval, x::Interval)
+        return BooleanInterval($f(TernaryLogic(), x))
     end
 end
 
 
 ## Binary consistent
-
 for op in bool_operations
     @eval function $op(::BinaryConsistent, x::Interval, y::Interval)
         ternary_res = $op(TernaryLogic, x, y)
+        ismissing(ternary_res) && return false
+        return BooleanInterval(ternary_res)
+    end
+end
+
+for f in bool_functions
+    @eval function $f(::BinaryConsistent, x::Interval, y::Interval)
+        ternary_res = $f(TernaryLogic, x)
         ismissing(ternary_res) && return false
         return BooleanInterval(ternary_res)
     end
@@ -132,4 +157,8 @@ for op in bool_operations
     @eval $op(x::Interval, y::Interval) = $op(pointwise_politic(), x, y)
     @eval $op(x::Interval, y::Real) = $op(pointwise_politic(), x, y)
     @eval $op(x::Real, y::Interval) = $op(pointwise_politic(), x, y)
+end
+
+for f in bool_functions
+    @eval $f(x::Interval) = $f(pointwise_politic(), x)
 end

@@ -62,6 +62,7 @@ export
     eps, dist,
     midpoint_radius, interval_from_midpoint_radius,
     RoundTiesToEven, RoundTiesToAway,
+    IntervalRounding,
     cancelminus, cancelplus, isbounded, isunbounded,
     .., @I_str, ±,
     pow, extended_div,

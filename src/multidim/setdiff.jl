@@ -8,7 +8,7 @@ function labelled_setdiff(x::Interval{T}, y::Interval{T}) where T
     intersection = x ∩ y
 
     isempty(intersection) && return [(x, -1)]
-    intersection == x && return [(x, 1)]
+    intersection ≛ x && return [(x, 1)]
 
     x.lo == intersection.lo && return [(intersection, 1), (Interval(intersection.hi, x.hi), 0)]
     x.hi == intersection.hi && return [(intersection, 1), (Interval(x.lo, intersection.lo), 0)]

@@ -15,13 +15,10 @@ the points common in `a` and `b`.
 
 Implement the `intersection` function of the IEEE Std 1788-2015 (section 9.3).
 """
-function intersect(a::F, b::F) where {F<:Interval}
-    isdisjoint(a, b) && return emptyinterval(F)
-    return F(max(a.lo, b.lo), min(a.hi, b.hi))
+function intersect(a::Interval{T}, b::Interval{S}) where {T, S}
+    isdisjoint(a, b) && return emptyinterval(promote_type(T, S))
+    return Interval{promote_type(T, S)}(max(a.lo, b.lo), min(a.hi, b.hi))
 end
-
-intersect(a::F, b::G) where {F<:Interval, G<:Interval} =
-    intersect(promote(a, b)...)
 
 function intersect(a::Complex{F}, b::Complex{F}) where {F<:Interval}
     isdisjoint(a, b) && return emptyinterval(Complex{F})

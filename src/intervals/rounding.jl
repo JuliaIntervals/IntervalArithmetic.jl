@@ -44,7 +44,7 @@ struct IntervalRounding{T} end
 ## Default
 const rounding_types = (:fast, :tight, :accurate, :slow, :none)
 
-current_rounding_mode() = IntervalRounding{:tight}()
+interval_rounding() = IntervalRounding{:tight}()
 
 # BigFloat conversion
 convert(::Type{BigFloat}, x, rounding_mode::RoundingMode) =
@@ -190,11 +190,11 @@ end
 #= Default definitions, fallback and :none =#
 # Binary functions
 for f in (:+, :-, :*, :/, :^, :atan)
-    @eval $f(a::T, b::T, r::RoundingMode) where {T<:AbstractFloat} = $f(current_rounding_mode(), a, b, r)
-    @eval $f(a::Real, b::AbstractFloat, r::RoundingMode) = $f(current_rounding_mode(), promote(a, b)..., r)
-    @eval $f(a::AbstractFloat, b::Real, r::RoundingMode) = $f(current_rounding_mode(), promote(a, b)..., r)
-    @eval $f(a::AbstractFloat, b::AbstractFloat, r::RoundingMode) = $f(current_rounding_mode(), promote(a, b)..., r)
-    @eval $f(a::Real, b::Real, r::RoundingMode) = $f(current_rounding_mode(), float(a), float(b), r)
+    @eval $f(a::T, b::T, r::RoundingMode) where {T<:AbstractFloat} = $f(interval_rounding(), a, b, r)
+    @eval $f(a::Real, b::AbstractFloat, r::RoundingMode) = $f(interval_rounding(), promote(a, b)..., r)
+    @eval $f(a::AbstractFloat, b::Real, r::RoundingMode) = $f(interval_rounding(), promote(a, b)..., r)
+    @eval $f(a::AbstractFloat, b::AbstractFloat, r::RoundingMode) = $f(interval_rounding(), promote(a, b)..., r)
+    @eval $f(a::Real, b::Real, r::RoundingMode) = $f(interval_rounding(), float(a), float(b), r)
 
     # Fallback to :slow if the requested interval rounding is unavailable
     @eval function $f(::IntervalRounding, a, b, r::RoundingMode)
@@ -209,8 +209,8 @@ end
 
 # Unary functions
 for f in vcat(CRlibm.functions, [:sqrt, :inv, :tanh, :asinh, :acosh, :atanh, :cot])
-    @eval $f(a::AbstractFloat, r::RoundingMode) = $f(current_rounding_mode(), a, r)
-    @eval $f(a::Real, r::RoundingMode) = $f(current_rounding_mode(), float(a), r)
+    @eval $f(a::AbstractFloat, r::RoundingMode) = $f(interval_rounding(), a, r)
+    @eval $f(a::Real, r::RoundingMode) = $f(interval_rounding(), float(a), r)
 
     # Fallback to :slow if the requested interval rounding is unavailable
     @eval function $f(::IntervalRounding, a, r::RoundingMode)
