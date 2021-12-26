@@ -13,7 +13,6 @@ using Test
         a = @interval(i)
         @test a.lo == i
     end
-
 end
 
 
@@ -80,7 +79,6 @@ end
 
 
 @testset "Pi tests" begin
-
     big_pi = setprecision(256) do
         big(pi)
     end
@@ -99,7 +97,6 @@ end
     @test big_pi ∈ pi4
     @test big_pi ∈ pi5
 
-    @test pi1 == pi2
-    @test pi2 == pi3
-
+    @test pi1 ≛ pi2
+    @test pi2 ≛ pi3
 end

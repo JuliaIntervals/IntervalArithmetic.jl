@@ -111,7 +111,9 @@ IntervalBox(x::Interval, n::Int) = IntervalBox(x, Val(n))
 
 dot(x::IntervalBox, y::IntervalBox) = dot(x.v, y.v)
 
-Base.:(==)(x::IntervalBox, y::IntervalBox) = x.v == y.v
+Base.:(==)(x::IntervalBox, y::IntervalBox) = all(x.v .== y.v)
+Base.:(!=)(x::IntervalBox, y::IntervalBox) = all(x.v .!= y.v)
+≛(x::IntervalBox, y::IntervalBox) = all(x.v .≛ y.v)
 
 hull(a::IntervalBox{N,T}, b::IntervalBox{N,T}) where {N,T} = IntervalBox(hull.(a[:], b[:]))
 hull(a::Vector{IntervalBox{N,T}}) where {N,T} = hull(a...)

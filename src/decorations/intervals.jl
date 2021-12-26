@@ -47,8 +47,8 @@ DecoratedInterval(a::T, d::DECORATION) where {T<:Real} =
     DecoratedInterval(Interval(a, a), d)
 
 function DecoratedInterval{T}(I::Interval) where {T}
-    dd = decoration(I)
-    dd <= trv && return DecoratedInterval{T}(I, dd)
+    d = decoration(I)
+    d <= trv && return DecoratedInterval{T}(I, d)
     d == ill && return DecoratedInterval{T}(nai(I), d)
     return DecoratedInterval{T}(I, d)
 end

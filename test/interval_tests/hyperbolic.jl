@@ -4,10 +4,10 @@ using IntervalArithmetic
 using Test
 
 @testset "Hyperb tests" begin
-    @test sinh(emptyinterval()) == emptyinterval()
-    @test sinh(Interval(0.5)) == Interval(0.5210953054937473, 0.5210953054937474)
-    @test sinh(Interval(0.5, 1.67)) == Interval(0.5210953054937473, 2.5619603657712102)
-    @test sinh(Interval(-4.5, 0.1)) == Interval(-45.00301115199179, 0.10016675001984404)
+    @test sinh(emptyinterval()) ≛ emptyinterval()
+    @test sinh(Interval(0.5)) ≛ Interval(0.5210953054937473, 0.5210953054937474)
+    @test sinh(Interval(0.5, 1.67)) ≛ Interval(0.5210953054937473, 2.5619603657712102)
+    @test sinh(Interval(-4.5, 0.1)) ≛ Interval(-45.00301115199179, 0.10016675001984404)
     @test sinh(@biginterval(0.5)) ⊆ sinh(@interval(0.5))
 
 
@@ -18,10 +18,10 @@ using Test
     @test sinh(@biginterval(-4.5, 0.1)) ⊆ sinh(@interval(-4.5, 0.1))
     @test sinh(@biginterval(1.3, 6.3)) ⊆ sinh(@interval(1.3, 6.3))
 
-    @test cosh(emptyinterval()) == emptyinterval()
-    @test cosh(Interval(0.5)) == Interval(1.1276259652063807, 1.127625965206381)
-    @test cosh(Interval(0.5, 1.67)) == Interval(1.1276259652063807, 2.750207431409957)
-    @test cosh(Interval(-4.5, 0.1)) == Interval(1.0, 45.01412014853003)
+    @test cosh(emptyinterval()) ≛ emptyinterval()
+    @test cosh(Interval(0.5)) ≛ Interval(1.1276259652063807, 1.127625965206381)
+    @test cosh(Interval(0.5, 1.67)) ≛ Interval(1.1276259652063807, 2.750207431409957)
+    @test cosh(Interval(-4.5, 0.1)) ≛ Interval(1.0, 45.01412014853003)
     @test cosh(@biginterval(0.5)) ⊆ cosh(@interval(0.5))
     @test cosh(@biginterval(0.5, 1.67)) ⊆ cosh(@interval(0.5, 1.67))
     @test cosh(@biginterval(1.67, 3.2)) ⊆ cosh(@interval(1.67, 3.2))
@@ -30,10 +30,10 @@ using Test
     @test cosh(@biginterval(-4.5, 0.1)) ⊆ cosh(@interval(-4.5, 0.1))
     @test cosh(@biginterval(1.3, 6.3)) ⊆ cosh(@interval(1.3, 6.3))
 
-    @test tanh(emptyinterval()) == emptyinterval()
-    @test tanh(Interval(0.5)) == Interval(0.46211715726000974, 0.4621171572600098)
-    @test tanh(Interval(0.5, 1.67)) == Interval(0.46211715726000974, 0.9315516846152083)
-    @test tanh(Interval(-4.5, 0.1)) == Interval(-0.9997532108480276, 0.09966799462495583)
+    @test tanh(emptyinterval()) ≛ emptyinterval()
+    @test tanh(Interval(0.5)) ≛ Interval(0.46211715726000974, 0.4621171572600098)
+    @test tanh(Interval(0.5, 1.67)) ≛ Interval(0.46211715726000974, 0.9315516846152083)
+    @test tanh(Interval(-4.5, 0.1)) ≛ Interval(-0.9997532108480276, 0.09966799462495583)
 
     @test tanh(@biginterval(0.5)) ⊆ tanh(@interval(0.5))
     @test tanh(@biginterval(0.5, 1.67)) ⊆ tanh(@interval(0.5, 1.67))

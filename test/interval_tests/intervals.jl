@@ -1,15 +1,15 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
-include("construction.jl")
-include("consistency.jl")
-include("numeric.jl")
-include("trig.jl")
-include("hyperbolic.jl")
-include("non_BigFloat.jl")
-include("linear_algebra.jl")
-include("loops.jl")
-include("parsing.jl")
-# include("rounding_macros.jl")
-include("rounding.jl")
-include("bisect.jl")
-# include("complex.jl")  # TODO fix these tests
+include_test("construction.jl")
+include_test("consistency.jl")
+include_test("numeric.jl")
+include_test("trig.jl")
+include_test("hyperbolic.jl")
+include_test("non_BigFloat.jl")
+include_test("linear_algebra.jl")
+include_test("loops.jl")
+include_test("parsing.jl")
+# include_test("rounding_macros.jl")
+include_test("rounding.jl")
+include_test("bisect.jl")
+# include_test("complex.jl")  # TODO fix these tests
