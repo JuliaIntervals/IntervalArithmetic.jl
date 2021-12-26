@@ -57,15 +57,21 @@ parse(::Type{T}, x::AbstractString, rounding_mode::RoundingMode) where T = setro
     return float(parse(T, x))
 end
 
-# use BigFloat parser to get round issues on Windows:
-function parse(::Type{Float64}, s::AbstractString, r::RoundingMode)
-    a = setprecision(BigFloat, 53) do
-            setrounding(BigFloat, r) do
-                parse(BigFloat, s)   # correctly takes account of rounding mode
+# use higher precision float parser to get round issues on Windows
+@static if Sys.iswindows()
+    function parse(::Type{Float64}, s::AbstractString, r::RoundingMode)
+        a = setprecision(BigFloat, 53) do
+                setrounding(BigFloat, r) do
+                    parse(BigFloat, s)   # correctly takes account of rounding mode
+                end
             end
-        end
 
-    return Float64(a, r)
+        return Float64(a, r)
+    end
+
+    function parse(::Type{T}, s::AbstractString, r::RoundingMode) where {T <: Union{Float16, Float32}}
+        return T(parse(Float64, s, r), r)
+    end
 end
 
 

@@ -12,13 +12,12 @@ to give a guaranteed containing interval.
 
 Examples:
 ```
-    @interval(0.1)
+    @interval sin(0.1) + cos(0.2)
+```
 
-    @interval(0.1, 0.2)
-
-    @interval(1/3, 1/6)
-
-    @interval(1/3^2)
+is equivalent to
+```
+    sin(0.1..0.1) + cos(0.2..0.2)
 ```
 
 Note that the returned interval is of the default flavor. See the documentation

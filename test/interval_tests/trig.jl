@@ -185,6 +185,21 @@ end
         Interval(-1.5707963267948968, 1.5707963267948968)
     @test atan(@biginterval(-0.1, 0.1), @biginterval(-0.0, 0.1)) ⊆
         atan(@interval(-0.1, 0.1), @interval(0.0, 0.1))
+
+    @test atan(@interval(Float32, -0.1, 0.1), @interval(Float32, 0.1, 0.1)) ==
+        Interval(-0.78539824f0, 0.78539824f0)
+    @test atan(@interval(-0.1, 0.1), @interval(0.1, 0.1)) ⊆
+        atan(@interval(Float32, -0.1, 0.1), @interval(Float32, 0.1, 0.1))
+    @test atan(@interval(Float32, 0.0, 0.0), @interval(Float32, -0.0, 0.1)) ==
+        @interval(Float32, 0.0, 0.0)
+    @test atan(@interval(Float32, 0.0, 0.1), @interval(Float32, -0.0, 0.1)) ==
+        Interval(0.0, 1.5707964f0)
+    @test atan(@interval(Float32, -0.1, 0.0), @interval(Float32, 0.0, 0.1)) ==
+        Interval(-1.5707964f0, 0.0)
+    @test atan(@interval(Float32, -0.1, 0.1), @interval(Float32, -0.0, 0.1)) ==
+        Interval(-1.5707964f0, 1.5707964f0)
+    @test atan(@interval(-0.1, 0.1), @interval(-0.0, 0.1)) ⊆
+        atan(@interval(Float32, -0.1, 0.1), @interval(Float32, 0.0, 0.1))
 end
 
 @testset "Trig" begin

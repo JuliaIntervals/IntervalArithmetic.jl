@@ -342,11 +342,10 @@ using Test
         @test checked_interval(1, 2) ≛ Interval(1, 2)
 
         @test inf(Interval(3, 2)) == 3
-        @test_throws ArgumentError checked_interval(3, 2)
+        @test_logs (:warn,) @test isempty(interval(3, 2))
 
         @test sup(Interval(Inf, Inf)) == Inf
-        @test_throws ArgumentError checked_interval(Inf, Inf)
-
+        @test_logs (:warn,) @test isempty(interval(Inf, Inf))
     end
 
     @testset "Type stability" begin

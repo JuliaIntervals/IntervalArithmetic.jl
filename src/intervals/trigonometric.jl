@@ -266,10 +266,13 @@ function atan(a::Interval{T}) where T
     return @round(atan(a.lo), atan(a.hi))
 end
 
-function atan(y::Interval{Float64}, x::Interval{Float64})
-    (isempty(y) || isempty(x)) && return emptyinterval(Float64)
 
-    atomic(Interval{Float64}, atan(big53(y), big53(x)))
+#atan{T<:Real, S<:Real}(y::Interval{T}, x::Interval{S}) = atan(promote(y, x)...)
+
+function atan(y::Interval{T}, x::Interval{T}) where T
+    (isempty(y) || isempty(x)) && return emptyinterval(T)
+
+    atomic(Interval{T}, atan(big53(y), big53(x)))
 end
 
 function atan(y::Interval{BigFloat}, x::Interval{BigFloat})

@@ -5,9 +5,21 @@
     in section 10.5.3, with addition of the `sqr` function.
 =#
 
-# Overwrite behaviour for literal integer powers
-# Default transforms `a^-p` to `inv(a)^p` which is incorrect for intervals.
-Base.literal_pow(::typeof(^), a::F, ::Val{p}) where {F<:Interval, p} = a^p
+# CRlibm does not contain a correctly-rounded ^ function for Float64
+# Use the BigFloat version from MPFR instead, which is correctly-rounded:
+
+# Write explicitly like this to avoid ambiguity warnings:
+for T in (:Integer, :Float64, :BigFloat, :Interval)
+    @eval ^(a::Interval{Float64}, x::$T) = atomic(Interval{Float64}, bigequiv(a)^x)
+end
+
+
+# Integer power:
+
+# overwrite new behaviour for small integer powers from
+# https://github.com/JuliaLang/julia/pull/24240:
+
+Base.literal_pow(::typeof(^), x::Interval{T}, ::Val{p}) where {T,p} = x^p
 
 # CRlibm does not contain a correctly-rounded ^ function for Float64
 # Use the BigFloat version from MPFR instead, which is correctly-rounded.
@@ -248,6 +260,7 @@ for f in (:exp, :expm1)
         end
     end
 end
+
 
 for f in (:exp2, :exp10, :cbrt)
     @eval function ($f)(x::BigFloat, r::RoundingMode)  # add BigFloat functions with rounding:

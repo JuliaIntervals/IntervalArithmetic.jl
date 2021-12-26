@@ -40,7 +40,8 @@ end
 eltype(::Type{IntervalBox{N,T}}) where {N,T} = Interval{T} # Note that this is defined for the type
 
 
-Base.eltype(x::IntervalBox{T}) where {T<:Real} = T
+Base.eltype(x::IntervalBox{N, T}) where {N, T<:Real} = Interval{T}
+numtype(x::IntervalBox{N, T}) where {N, T<:Real} = T
 
 length(X::IntervalBox{N,T}) where {N,T} = N
 
@@ -111,9 +112,53 @@ IntervalBox(x::Interval, n::Int) = IntervalBox(x, Val(n))
 
 dot(x::IntervalBox, y::IntervalBox) = dot(x.v, y.v)
 
-Base.:(==)(x::IntervalBox, y::IntervalBox) = all(x.v .== y.v)
-Base.:(!=)(x::IntervalBox, y::IntervalBox) = all(x.v .!= y.v)
+==(x::IntervalBox, y::IntervalBox) = all(x.v .== y.v)
+!=(x::IntervalBox, y::IntervalBox) = all(x.v .!= y.v)
 ≛(x::IntervalBox, y::IntervalBox) = all(x.v .≛ y.v)
+
+"""
+    mince(x::IntervalBox, n::Int)
+
+Splits `x` in `n` intervals in each dimension of the same diameter. These
+intervals are combined in all possible `IntervalBox`-es, which are returned
+as a vector.
+"""
+@inline mince(x::IntervalBox{N,T}, n::Int) where {N,T} =
+    mince(x, ntuple(_ -> n, N))
+
+"""
+    mince(x::IntervalBox, ncuts::::NTuple{N,Int})
+
+Splits `x[i]` in `ncuts[i]` intervals . These intervals are
+combined in all possible `IntervalBox`-es, which are returned
+as a vector.
+"""
+@inline function mince(x::IntervalBox{N,T}, ncuts::NTuple{N,Int}) where {N,T}
+    minced_intervals = [mince(x[i], ncuts[i]) for i in 1:N]
+    minced_boxes = Vector{IntervalBox{N,T}}(undef, prod(ncuts))
+
+    for (k, cut_indices) in enumerate(CartesianIndices(ncuts))
+        minced_boxes[k] = IntervalBox([minced_intervals[i][cut_indices[i]] for i in 1:N])
+    end
+    return minced_boxes
+end
+
 
 hull(a::IntervalBox{N,T}, b::IntervalBox{N,T}) where {N,T} = IntervalBox(hull.(a[:], b[:]))
 hull(a::Vector{IntervalBox{N,T}}) where {N,T} = hull(a...)
+
+"""
+    zero(IntervalBox{N, T})
+
+Return the zero interval box of dimension `N` in the numeric type `T`.
+"""
+zero(::Type{IntervalBox{N, T}}) where {N, T} = IntervalBox(zero(Interval{T}), N)
+zero(x::IntervalBox{N, T}) where {N, T} = zero(typeof(x))
+
+"""
+    symmetric_box(N, T)
+
+Return the symmetric interval box of dimension `N` in the numeric type `T`,
+each side is `Interval(-1, 1)`.
+"""
+symmetric_box(N, ::Type{T}) where T<:Real = IntervalBox(Interval{T}(-1, 1), N)

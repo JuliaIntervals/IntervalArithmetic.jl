@@ -60,7 +60,7 @@ Interval(x::Complex) = Interval(real(x)) + im*Interval(imag(x))
 eltype(::Interval) = Interval
 size(::Interval) = (1,)
 
-
+@inline _normalisezero(a::Real) = ifelse(iszero(a) && signbit(a), copysign(a, 1), a)
 
 """
     is_valid_interval(a::Real, b::Real)
@@ -72,13 +72,7 @@ function is_valid_interval(a::Real, b::Real)
         return false
     end
 
-    if a > b
-        if isinf(a) && isinf(b)
-            return true  # empty interval = [∞,-∞]
-        else
-            return false
-        end
-    end
+    a > b && return false
 
     # TODO Check if this is necessary
     if a == Inf || b == -Inf
@@ -94,13 +88,15 @@ is_valid_interval(a::Real) = true
 """
     interval(a, b)
 
-`interval(a, b)` checks whether [a, b] is a valid `Interval`, which is the case
-if `-∞ <= a <= b <= ∞`, using the (non-exported) `is_valid_interval` function.
-If so, then an `Interval(a, b)` object is returned; if not, then an error is thrown.
+`interval(a, b)` checks whether [a, b] is a valid `Interval`, using the (non-exported) `is_valid_interval` function. If so, then an `Interval(a, b)` object is returned; if not, a warning is printed and the empty interval is returned.
 """
-function interval(a::Real, b::Real)
-    is_valid_interval(a, b) && return Interval(a, b)
-    throw(ArgumentError("($a..$b) is not a valid interval."))
+function interval(a::T, b::S) where {T<:Real, S<:Real}
+    if !is_valid_interval(a, b)
+        @warn "Invalid input, empty interval is returned"
+        return emptyinterval(promote_type(T, S))
+    end
+
+    return Interval(a, b)
 end
 
 interval(a::Real) = interval(a, a)

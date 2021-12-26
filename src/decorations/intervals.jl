@@ -34,8 +34,8 @@ end
 DecoratedInterval(I::DecoratedInterval, dec::DECORATION) = DecoratedInterval(I.interval, dec)
 
 function DecoratedInterval(a::T, b::T, d::DECORATION) where {T<:Real}
-    a > b && return DecoratedInterval(nai(T), ill)
-    DecoratedInterval(Interval(a, b), d)
+    is_valid_interval(a, b) || return nai(T)
+    DecoratedInterval(Interval(a,b), d)
 end
 
 DecoratedInterval(a::Tuple, d::DECORATION) = DecoratedInterval(a..., d)
@@ -56,8 +56,8 @@ end
 DecoratedInterval(I::Interval) = DecoratedInterval{default_bound()}(I)
 
 function DecoratedInterval(a::T, b::T) where {T<:Real}
-    a > b && return DecoratedInterval(nai(T), ill)
-    DecoratedInterval(Interval(a, b))
+    is_valid_interval(a, b) || return nai(T)
+    DecoratedInterval(Interval(a,b))
 end
 
 DecoratedInterval(a::T, b::T) where {T<:Integer} =
