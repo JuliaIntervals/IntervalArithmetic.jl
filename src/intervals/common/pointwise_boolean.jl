@@ -51,11 +51,11 @@ const BinaryConsistent = PointwisePolitic{:binary_consistent}
 const BooleanIntervals = PointwisePolitic{:boolean_intervals}
 const TernaryLogic = PointwisePolitic{:ternary_logic}
 
-bool_operations = [
+pointwise_bool_operations = [
     :(==), :(!=), :<, :(<=), :>, :(>=)
 ]
 
-bool_functions = [
+pointwise_bool_functions = [
     :isinf, :isfinite
 ]
 
@@ -107,13 +107,13 @@ function BooleanInterval(arg)
     return BooleanInterval(false, true)
 end
 
-for op in bool_operations
+for op in pointwise_bool_operations
     @eval function $op(::BooleanIntervals, x::Interval, y::Interval)
         return BooleanInterval($op(TernaryLogic(), x, y))
     end
 end
 
-for f in bool_functions
+for f in pointwise_bool_functions
     @eval function $f(::BooleanInterval, x::Interval)
         return BooleanInterval($f(TernaryLogic(), x))
     end
@@ -121,7 +121,7 @@ end
 
 
 ## Binary consistent
-for op in bool_operations
+for op in pointwise_bool_operations
     @eval function $op(::BinaryConsistent, x::Interval, y::Interval)
         ternary_res = $op(TernaryLogic, x, y)
         ismissing(ternary_res) && return false
@@ -129,7 +129,7 @@ for op in bool_operations
     end
 end
 
-for f in bool_functions
+for f in pointwise_bool_functions
     @eval function $f(::BinaryConsistent, x::Interval, y::Interval)
         ternary_res = $f(TernaryLogic, x)
         ismissing(ternary_res) && return false
@@ -139,7 +139,7 @@ end
 
 
 ## Number-interval comparisons
-for op in bool_operations
+for op in pointwise_bool_operations
     @eval function $op(P::PointwisePolitic, x::F, y::Real) where {F<:Interval}
         return $op(P, x, F(y))
     end
@@ -153,12 +153,12 @@ end
 ## Default behaviors
 pointwise_politic() = TernaryLogic()
 
-for op in bool_operations
+for op in pointwise_bool_operations
     @eval $op(x::Interval, y::Interval) = $op(pointwise_politic(), x, y)
     @eval $op(x::Interval, y::Real) = $op(pointwise_politic(), x, y)
     @eval $op(x::Real, y::Interval) = $op(pointwise_politic(), x, y)
 end
 
-for f in bool_functions
+for f in pointwise_bool_functions
     @eval $f(x::Interval) = $f(pointwise_politic(), x)
 end

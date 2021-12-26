@@ -62,11 +62,11 @@ using Test
     @test_logs (:warn,) @test isempty(interval(Inf, Inf))
 
     # Conversion to Interval without type
-    @test convert(Interval, 1) == Interval(1.0)
-    @test convert(Interval, pi) == @interval(pi)
-    @test convert(Interval, eeuler) == @interval(eeuler)
-    @test convert(Interval, BigInt(1)) == Interval(BigInt(1))
-    @test convert(Interval, 1//10) == @interval(1//10)
+    @test convert(Interval, 1) ≛ Interval(1.0)
+    @test convert(Interval, pi) ≛ @interval(pi)
+    @test convert(Interval, ℯ) ≛ @interval(ℯ)
+    @test convert(Interval, BigInt(1)) ≛ Interval(BigInt(1))
+    @test convert(Interval, 1//10) ≛ @interval(1//10)
     @test convert(Interval, Interval(0.1, 0.2)) === Interval(0.1, 0.2)
 
     a = @interval(0.1)

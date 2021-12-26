@@ -4,14 +4,17 @@ using Test
 IntervalArithmetic.:(≛)(a::Tuple, b::Tuple) = all(a .≛ b)
 
 function include_test(filename)
+    include(filename)
+    return
+    
     @testset "$filename" begin
         include(filename)
     end
 end
 
-# Interval tests:
 setformat(:full)
 
+# Interval tests:
 include_test("interval_tests/intervals.jl")
 include_test("decoration_tests/decoration_tests.jl")
 

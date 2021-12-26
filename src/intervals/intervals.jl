@@ -60,6 +60,20 @@ Interval(x::Complex) = Interval(real(x)) + im*Interval(imag(x))
 eltype(::Interval) = Interval
 size(::Interval) = (1,)
 
+"""
+    numtype(x::Interval)
+
+Returns the type of the bounds of the interval.
+
+### Example
+
+```julia
+julia> numtype(1..2)
+Float64
+```
+"""
+numtype(::Interval{T}) where T = T
+
 @inline _normalisezero(a::Real) = ifelse(iszero(a) && signbit(a), copysign(a, 1), a)
 
 """

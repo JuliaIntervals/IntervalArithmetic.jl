@@ -1,8 +1,5 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
-## Promotion rules
-# TODO Removed promotion rules, to check if it is needed
-
 # convert methods:
 convert(::Type{F}, x::Bool) where {F<:Interval} = convert(F, Int(x))
 # TODO Introduce "BoundType" union for that kind of cases instead of AbstractFloat

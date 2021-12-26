@@ -186,7 +186,6 @@ function basic_representation(a::Interval, format=nothing)
     local output
 
     if format == :standard
-
         aa = round_string(a.lo, sigfigs, RoundDown)
         bb = round_string(a.hi, sigfigs, RoundUp)
 
@@ -285,48 +284,39 @@ representation(a::Interval{T}, format=nothing) where T =
     basic_representation(a, format)
 
 function representation(a::Interval{BigFloat}, format=nothing)
-
-    if format == nothing
+    if format === nothing
         format = display_params.format  # default
     end
 
-
     if format == :standard
-
         return string(basic_representation(a, format), subscriptify(precision(a.lo)))
-
     else
-
         return basic_representation(a, format)
-
     end
 end
 
 
 function representation(a::DecoratedInterval{T}, format=nothing) where T
-
-    if format == nothing
+    if format === nothing
         format = display_params.format  # default
     end
 
-    if format==:full
+    if format == :full
         return "DecoratedInterval($(representation(interval(a), format)), $(decoration(a)))"
     end
 
     var_interval = representation(interval(a), format)
 
     if display_params.decorations
-        string(var_interval, "_", decoration(a))
+        return string(var_interval, "_", decoration(a))
     else
-        var_interval
+        return var_interval
     end
-
 end
 
 
 function representation(X::IntervalBox{N, T}, format=nothing) where {N, T}
-
-    if format == nothing
+    if format === nothing
         format = display_params.format  # default
     end
 
@@ -360,8 +350,7 @@ function representation(X::IntervalBox{N, T}, format=nothing) where {N, T}
 end
 
 function representation(x::Complex{<:Interval}, format=nothing)
-
-    if format == nothing
+    if format === nothing
         format = display_params.format
     end
 
