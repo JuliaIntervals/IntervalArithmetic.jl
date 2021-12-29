@@ -57,67 +57,14 @@ function atomic end
 
 atomic(::Type{F}, x::AbstractString) where {T, F<:Interval{T}} = parse(F, x)
 
-@static if Sys.iswindows()  # Windows cannot round properly
-    function atomic(::Type{F}, x::S) where {T, S, F<:Interval{T}}
-        isinf(x) && return wideinterval(F, T(x))
-
-        return F( parse(T, string(x), RoundDown),
-                  parse(T, string(x), RoundUp) )
-    end
-
-    function atomic(::Type{F}, x::Union{Irrational, Rational}) where {T, F<:Interval{T}}
-        isinf(x) && return wideinterval(F, T(x))
-
-        return F( T(x, RoundDown), T(x, RoundUp) )
-    end
-
-else
-    function atomic(::Type{F}, x::S) where {T, S, F<:Interval{T}}
-        isinf(x) && return wideinterval(F, T(x))
-
-        F( T(x, RoundDown), T(x, RoundUp) )
-        # the rounding up could be done as nextfloat of the rounded down one?
-        # use @round_up and @round_down here?
-    end
+function atomic(::Type{F}, x) where {T, F<:Interval{T}}
+    return Interval(T(x, RoundDown), T(x, RoundUp))
 end
 
-function atomic(::Type{F}, x::S) where {T, S<:AbstractFloat, F<:Interval{T}}
-    isinf(x) && return wideinterval(F, x)
-
-    xrat = rationalize(x)
-
-    # This prevents that xrat returns a 0//1 when x is very small
-    # or 1//0 when x is too large but finite
-    if (!iszero(x) && iszero(xrat)) || isinf(xrat)
-        xstr = string(x)
-        return F(parse(T, xstr, RoundDown), parse(T, xstr, RoundUp))
-    end
-
-    return atomic(F, xrat)
+function atomic(::Type{F}, x::AbstractFloat) where {T, F<:Interval{T}}
+    return Interval(prevfloat(T(x, RoundDown)), nextfloat(T(x, RoundUp)))
 end
 
 function atomic(::Type{F}, x::Interval) where {T, F<:Interval{T}}
-    return F( T(inf(x), RoundDown), T(sup(x), RoundUp) )
+    return Interval(T(x.lo, RoundDown), T(x.hi, RoundUp))
 end
-
-# Complex numbers:
-# TODO This one doesn't return an interval, not sure what it's suppose do do
-# atomic(::Type{Interval{T}}, x::Complex{Bool}) where T<:AbstractFloat =
-#     (x == im) ? one(T)*im : throw(ArgumentError("Complex{Bool} not equal to im"))
-
-
-# Rational intervals
-function atomic(::Type{F}, x::Irrational) where {T<:Integer, F<:Interval{Rational{T}}}
-    Flavor = flavortype(F)
-    a = float(atomic(Flavor{BigFloat}, x))
-    atomic(F, a)
-end
-
-atomic(::Type{F}, x::S) where {T<:Integer, S<:Integer, F<:Interval{Rational{T}}} =
-    F(convert(Rational{T}, x))
-
-atomic(::Type{F}, x::S) where {T<:Integer, S<:Rational, F<:Interval{Rational{T}}} =
-    F(convert(Rational{T}, x))
-
-atomic(::Type{F}, x::S) where {T<:Integer, S<:AbstractFloat, F<:Interval{Interval{Rational{T}}}} =
-    F(rationalize(T, x))

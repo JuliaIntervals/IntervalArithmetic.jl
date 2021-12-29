@@ -169,21 +169,6 @@ function ..(a::T, b::S) where {T, S}
     return checked_interval(atomic(Interval{R}, a).lo, atomic(Interval{R}, b).hi)
 end
 
-function ..(a::T, b::Irrational{S}) where {T, S}
-    R = promote_type(default_bound(), T, Irrational{S})
-    return checked_interval(atomic(Interval{R}, a).lo, atomic(Interval{R}, b).hi)
-end
-
-function ..(a::Irrational{T}, b::S) where {T, S}
-    R = promote_type(default_bound(), Irrational{T}, S)
-    return checked_interval(atomic(Interval{R}, a).lo, atomic(Interval{R}, b).hi)
-end
-
-function ..(a::Irrational{T}, b::Irrational{S}) where {T, S}
-    R = promote_type(default_bound(), Irrational{T}, Irrational{S})
-    return checked_interval(atomic(Interval{R}, a).lo, atomic(Interval{R}, b).hi)
-end
-
 a ± b = (a-b)..(a+b)
 ±(a::Interval, b) = (a.lo - b)..(a.hi + b)
 
