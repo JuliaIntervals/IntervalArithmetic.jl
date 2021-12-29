@@ -1,21 +1,22 @@
 Review intervals folder: 
   General:
     ✔ Choose whether to use x == zero(T) or x == 0 across files @done(20-08-09 16:05)
-    Use iszero everywhere
-    ☐ Check that default flavor always return safe result
+    ✔ Use iszero everywhere @done(21-12-29 23:30)
+    ✔ Check that default flavor always return safe result @done(21-12-29 23:30)
     ✔ {F <: Type} -> {F<:Type} (remove spaces) @done(20-08-09 16:05)
     ✔ Replace "IEEE standard" -> "IEEE Std 1788-2015" @done(19-08-22 16:13)
     ✔ "Corresponds to" -> "Implement" in doc @done(19-08-22 16:13)
     ✔ Rename `RR` -> `RR` @done(19-08-19 19:14)
-    ☐ Investigate compile time warnings
+    ✔ Investigate compile time warnings @done(21-12-29 23:30)
     ✔ Check if intervals of different flavor type can/should be equal in the sense of `isidentical` @done(19-12-08 01:12)
-    ☐ Operation on different flavors of interval should always error.
+    ✔ Operation on different flavors of interval should always error. @done(21-12-29 23:29)
     ☐ Check if `signbit` is in the standard
     ☐ Test that definition of the default bound and flavor works (including change when rebuilding the package)
   
   Discussion:
     ☐ Do we want to keep `@floatinterval` and `@biginteral` or use `@interval(F, expr1, expr2)` instead ?
-    ☐ Decide if `inf` and `sup` should be used as default or rather `x.lo` and `x.hi`
+    ✔ Decide if `inf` and `sup` should be used as default or rather `x.lo` and `x.hi` @done(21-12-29 23:29)
+      ✔ `inf` and `sup` should be strict equivalent to `x.lo` and `x.hi` @done(21-12-29 23:29)
 
   Global precision:
     ✔ Get rid of it @done(19-08-20 16:49)
@@ -29,7 +30,7 @@ Review intervals folder:
       ☐ Error on undefined
     ☐ Implement cset flavor
     ☐ Make cset default ?
-    ☐ Define the flavor dependent symbols like ==, <, <=
+    ✔ Define the flavor dependent symbols like ==, <, <= @done(21-12-29 23:28)
     
   
   macros.jl:
@@ -41,13 +42,16 @@ Review intervals folder:
   
   rounding.jl:
     ✔ Review @done(19-08-19 01:50)
-    ☐ Decide how to define the setrounding function with multiple interval types
+    ✔ Decide how to define the setrounding function with multiple interval types @done(21-12-29 23:28)
+      ✔ Use a global function `current_interval_rounding` @done(21-12-29 23:28)
     ☐ Check with latest discussion if everything is up to date
-    ☐ Remove default round method once it is not needed anymore
+    ✔ Remove default round method once it is not needed anymore @done(21-12-29 23:34)
 
   conversion.jl:
     ✔ Review @done(19-08-23 03:25)
-    ☐ Fix ambiguity errors
+    ✔ Fix ambiguity errors @done(21-12-29 23:27)
+    ☐ Simplify and test `atomic`
+      ☐ Accept the fact we have two eps for floating points inputs
   
   complex.jl:
     Should we even bother ?
@@ -59,9 +63,8 @@ Review intervals folder:
       ✔ Split @done(19-08-19 01:14)
       ✔ Verify all requested functions are there @done(19-08-19 02:01)
       ✔ Common @done(19-08-19 01:11)
-      ☐ Adapt for the removal of promotion
+      ✔ Adapt for the removal of promotion @done(21-12-29 23:27)
         ☐ Make sure all cases are in the test suite
-      ☐ Solve ambiguity error for real flavors
       ☐ Flavor dependent *
       ☐ Flavor dependent /
       ☐ Flavor dependent inv
@@ -70,7 +73,6 @@ Review intervals folder:
       ✔ Split @done(19-08-19 01:14)
       ✔ Verify all requested functions are there @done(19-08-19 04:29)
       ✔ Common @done(19-08-22 16:25)
-      ☐ Add doc to generated funcs
       ☐ Flavor dependent power (for negative power)
       ☐ Flavor dependant log
       ✔ zero(T) or 0 ? @done(20-08-13 00:28)
@@ -120,7 +122,7 @@ Review intervals folder:
     ✔ equal is not the same as == @done(19-08-19 19:36)
     ☐ Check `isweaklylessprime`
     ☐ Flavor dependent issubset/isinterior ?
-    ☐ Choose infix operator for `isidentical` ? e.g. ∼ \sim<TAB> (not currently parsed by julia) or ∽ \backsim<TAB> or ≛ \stareq<TAB> or whatever
+    ✔ Choose infix operator for `isidentical` ? e.g. ∼ \sim<TAB> (not currently parsed by julia) or ∽ \backsim<TAB> or ≛ \stareq<TAB> or whatever @done(21-12-29 23:31)
     This is mainly used for tests and don't necessarily need to be exported
 
   9.6. Operatons on/with decoration:
@@ -136,8 +138,8 @@ Review intervals folder:
     ☐ Check correctness and tightness for Interval{T}(x)
     ☐ Document flavors
     ☐ Document constructors
-    ☐ Make `..` work correctly for all input types
-    ☐ Move `DefaultBound` definition before constructors to be able to use them
+    ✔ Make `..` work correctly for all input types @done(21-12-29 23:31)
+    ✔ Choose a mechanism for the default bound @done(21-12-29 23:31)
     ✔ Add Interval{T}(π) @done(19-08-19 01:58)
       ✔ Check performance @done(19-12-18 23:00)
   
@@ -182,7 +184,7 @@ Other:
     ☐ Make sure everything is exported correctly
     ☐ Check renamed/new functions are exported
   parsing.jl:
-    ✔ parsing of bare interval @done(19-08-23 02:28)
+    ✔ parsing of bare interval @done(21-12-29 23:27)
     ☐ parsing of decorated interval
   rand.jl:
     ☐ Review
@@ -203,5 +205,5 @@ Documentation:
 
 Tests:
   ☐ Uncomment complex tests in `construction.jl`
-  ☐ Use `===` or `≛` instead of `==`
+  ✔ Use `===` or `≛` instead of `==` @done(21-12-29 23:26)
   ☐ Test all flavors
