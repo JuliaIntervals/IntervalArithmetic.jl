@@ -23,11 +23,10 @@ end
     c = @floatinterval(0.1, 0.2)
 
     @test isa(@floatinterval(0.1), Interval)
-    @test c ≛ Interval(0.09999999999999999, 0.2)
+    @test c ≛ Interval(prevfloat(0.1), nextfloat(0.2))
+    @test widen(c) ≛ Interval(prevfloat(0.1, 2), nextfloat(0.2, 2))
 
-    @test widen(c) ≛ Interval(0.09999999999999998, 0.20000000000000004)
-
-    @test @floatinterval(pi) ≛ Interval(3.141592653589793, 3.1415926535897936)
+    @test Interval{Float64}(pi) ≛ Interval(3.141592653589793, 3.1415926535897936)
 end
 
 @testset "Testing functions of intervals" begin
@@ -38,12 +37,4 @@ end
 
     d = @interval(0.1, 0.2)
     @test_broken f(d) ≛ @biginterval(0.2, 0.3)
-end
-
-@testset "Testing conversions" begin
-    f = @interval(0.1, 0.2)
-    @test @floatinterval(f) ≛ Interval(0.09999999999999999, 0.2)
-
-    g = @floatinterval(0.1, 0.2)
-    @test @interval(g) ≛ Interval(9.9999999999999992e-02, 2.0000000000000001e-01)
 end

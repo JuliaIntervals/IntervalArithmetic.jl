@@ -7,12 +7,21 @@ Parse a string of the form `"[a, b]_dec"` as a `DecoratedInterval`
 with decoration `dec`.
 """
 function parse(::Type{DecoratedInterval{T}}, s::AbstractString) where T
-    "_" ∉ s && throw(ArgumentError("no decoration given in the string \"$s\"."))
+    if '_' ∉ s
+        x = parse(Interval{T}, s)
+        return DecoratedInterval(x.lo, x.hi)
+    end
 
-    interval_string, decoration_string = split(s, "_")
-    interval = parse(Type{Interval{T}}, interval_string)
-    decoration = Symbol(decoration_string)
-    return DecoratedInterval(interval, decoration)
+    decorations = Dict(
+        "ill" => ill,
+        "trv" => trv,
+        "def" => def,
+        "dac" => dac,
+        "com" => com)
+
+    interval_string, dec = split(s, "_")
+    interval = parse(Interval{T}, interval_string)
+    return DecoratedInterval(interval, decorations[dec])
 end
 
 """
@@ -27,6 +36,7 @@ including for number that have no exact float representation like "0.1".
 Roughly speaking, the valid forms are
     - `[ 1.33 ]` or simply `1.33` : The interval containing only `1.33``.
     - `[ 1.44, 2.78 ]` : The interval `[1.44, 2.78]`.
+    - `7.88 ± 0.03`: The interval `[7.85, 7.91]`.j
     - `6.42?2` : The interval `6.42 ± 0.02`. The number after `?` represent
         the uncertainty in the last digit.
         Physicists would write it as `6.42(2)`.
@@ -51,6 +61,18 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
 end
 
 """
+Same as `parse(T, s, rounding_mode)`, but also accept string representing rational numbers.
+"""
+function extended_parse(T, s, rounding_mode)
+    if '/' in s
+        num, denum = parse.(Int, split(s, '/'))
+        return T(num//denum, rounding_mode)
+    end
+
+    return parse(T, s, rounding_mode)
+end
+
+"""
     interval_parser(::Type{Interval})
 
 Return a parser that processes a string according to Section 9.7 of
@@ -63,13 +85,14 @@ function interval_parser(::Type{Interval{T}}) where T
     # Exclude a minimal number of Char and let Julia parse the number
     # when needed
     any_number = Lazy(Repeat1(CharNotIn("[]?ud")))
+    integer = Lazy(Repeat1(CharIn("0123456789")))
 
     point_interval = Either(
         Sequence(seq -> seq[2], "[", trim(any_number), "]"),
         trim(any_number)
     ) do x
-            lo = parse(T, join(x), RoundDown)
-            hi = parse(T, join(x), RoundUp)
+            lo = extended_parse(T, join(x), RoundDown)
+            hi = extended_parse(T, join(x), RoundUp)
         return checked_interval(lo, hi)
     end
     infsup_interval = Sequence(
@@ -78,52 +101,56 @@ function interval_parser(::Type{Interval{T}}) where T
             ",",
             trim(any_number),
             "]") do seq
-        lo = parse(T, join(seq[2]), RoundDown)
-        hi = parse(T, join(seq[4]), RoundUp)
+        lo = extended_parse(T, join(seq[2]), RoundDown)
+        hi = extended_parse(T, join(seq[4]), RoundUp)
         return checked_interval(lo, hi)
     end
     uncert_interval = Sequence(
         any_number,
         "?",
-        Optional(any_number, default="0.5"),  # The radius
-        Optional(CharIn("ud")),
+        Optional(integer, default=missing),  # The radius
+        Optional(CharIn("ud"), default='?'),
         Optional(Sequence("e", any_number), default=("e", "0"))
     ) do seq
         x = join(seq[1])
-        radius = parse(Float64, join(seq[3]))
+        radius = ismissing(seq[3]) ? 1//2 : Rational(parse(Int, join(seq[3])))
         dir = seq[4]
-        scale = 10^parse(Int, join(seq[5][2]))
+        exponent = parse(Int, join(seq[5][2]))
 
         # TODO The ulp calculation is wrong when x has an exponent
         # e.g. 1.33e6?1
         # This is in principle not allowed by the standard but I see no reason
         # to disallow it
-        if !('.' in x)
-            ulp = 1
-        else
-            _, decimals = split(x, '.')
-            ulp = 10.0^(-length(decimals))
+        # Remove the decimal point, scaling accordingly
+        if '.' in x
+            core, decimals = split(x, '.')
+            exponent -= length(decimals)
+            x = join([core, decimals])
         end
 
-        rlo = rhi = *(radius, ulp, RoundUp)
+        rhi = dir == 'd' ? Rational(0) : radius
+        rlo = dir == 'u' ? Rational(0) : radius
+        scale = exponent >= 0 ? 10^exponent : 1//10^-exponent
+        x = parse(Int, x)
+        lo = T((x - rlo)*scale, RoundDown)
+        hi = T((x + rhi)*scale, RoundUp)
+        return Interval(lo, hi)
+    end
 
-        lo = parse(T, x, RoundDown)
-        hi = parse(T, x, RoundUp)
-
-        if !(ismissing(dir))
-            if dir == 'd'
-                rhi = 0.0
-            else
-                rlo = 0.0
-            end
-        end
-
-        return @round(Interval{T}, lo - rlo, hi + rhi) * scale
+    # Not in the standard
+    pm_interval = Sequence(
+        any_number,
+        trim("±"),
+        any_number
+    ) do seq
+        a = parse(T, join(seq[1]))
+        b = parse(T, join(seq[3]))
+        return a ± b
     end
     
     return Sequence(
         first,
-        Either(uncert_interval, infsup_interval, point_interval),
+        Either(pm_interval, uncert_interval, infsup_interval, point_interval),
         AtEnd()
     )
 end

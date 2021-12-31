@@ -66,7 +66,7 @@ export
     IntervalRounding,
     cancelminus, cancelplus, isbounded, isunbounded,
     .., @I_str, ±,
-    pow, extended_div,
+    pow, extended_div, nthroot,
     setformat, @format
 
 if VERSION >= v"1.5.0-DEV.124"

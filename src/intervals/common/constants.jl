@@ -21,8 +21,11 @@ emptyinterval(::Type{F}) where {F<:Interval} = F(Inf, -Inf)
 emptyinterval(::F) where {F<:Interval} = emptyinterval(F)
 emptyinterval(::Type{Complex{F}}) where {F<:Interval} = complex(emptyinterval(F), emptyinterval(F))
 
-emptyinterval(::Type{T}) where T = emptyinterval(Interval{T})
-emptyinterval() = emptyinterval(Interval{Float64})
+# TODO Here the restriction should be any allowed bound type. Using
+# AbstractFloat for simplicity for now
+emptyinterval(::Type{T}) where {T<:AbstractFloat} = emptyinterval(Interval{T})
+emptyinterval(::Type{<:Real}) = emptyinterval(Interval{default_bound()})
+emptyinterval() = emptyinterval(Interval{default_bound()})
 
 
 """

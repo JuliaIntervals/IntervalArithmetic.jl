@@ -62,7 +62,15 @@ function atomic(::Type{F}, x) where {T, F<:Interval{T}}
 end
 
 function atomic(::Type{F}, x::AbstractFloat) where {T, F<:Interval{T}}
-    return Interval(prevfloat(T(x, RoundDown)), nextfloat(T(x, RoundUp)))
+    lo = T(x, RoundDown)
+    hi = T(x, RoundUp)
+    if x == lo
+        lo = prevfloat(lo)
+    end
+    if x == hi
+        hi = nextfloat(hi)
+    end
+    return Interval(lo, hi)
 end
 
 function atomic(::Type{F}, x::Interval) where {T, F<:Interval{T}}

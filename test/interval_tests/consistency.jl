@@ -5,9 +5,9 @@ using Test
 
 @testset "Consistency tests" begin
 
-    a = @interval(0.1, 1.1)
-    b = @interval(0.9, 2.0)
-    c = @interval(0.25, 4.0)
+    a = Interval(0.1, 1.1)
+    b = Interval(0.9, 2.0)
+    c = Interval(0.25, 4.0)
 
     @testset "Interval types and constructors" begin
         @test isa( @interval(1,2), Interval )
@@ -32,31 +32,31 @@ using Test
         @test @biginterval(1, Inf) ≛ Interval{BigFloat}(1.0, Inf)
         @test @biginterval(-Inf, 1) ≛ Interval{BigFloat}(-Inf, 1.0)
         @test @interval(-Inf, Inf) ≛ RR(Float64)
-        @test_broken emptyinterval(Rational{Int}) ≛ ∅
+        @test emptyinterval(Rational{Int}) ≛ ∅
 
         @test (zero(a) + one(b)).lo == 1
         @test (zero(a) + one(b)).hi == 1
         @test Interval(0,1) + emptyinterval(a) ≛ emptyinterval(a)
-        @test @interval(0.25) - one(c)/4 ≛ zero(c)
+        @test Interval(0.25) - one(c)/4 ≛ zero(c)
         @test emptyinterval(a) - Interval(0,1) ≛ emptyinterval(a)
         @test Interval(0,1) - emptyinterval(a) ≛ emptyinterval(a)
-        @test a*b ≛ Interval(a.lo*b.lo, a.hi*b.hi)
+        @test a*b ≛ Interval(*(a.lo, b.lo, RoundDown), *(a.hi, b.hi, RoundUp))
         @test Interval(0,1) * emptyinterval(a) ≛ emptyinterval(a)
         @test a * Interval(0) ≛ zero(a)
     end
 
     @testset "inv" begin
         @test inv( zero(a) ) ≛ emptyinterval()  # Only for set based flavor
-        @test inv( @interval(0, 1) ) ≛ Interval(1, Inf)
-        @test inv( @interval(1, Inf) ) ≛ Interval(0, 1)
+        @test inv( Interval(0, 1) ) ≛ Interval(1, Inf)
+        @test inv( Interval(1, Inf) ) ≛ Interval(0, 1)
         @test inv(c) ≛ c
         @test one(b)/b ≛ inv(b)
         @test a/emptyinterval(a) ≛ emptyinterval(a)
         @test emptyinterval(a)/a ≛ emptyinterval(a)
-        @test inv(@interval(-4.0,0.0)) ≛ @interval(-Inf, -0.25)
-        @test inv(@interval(0.0,4.0)) ≛ @interval(0.25, Inf)
-        @test inv(@interval(-4.0,4.0)) ≛ RR(Float64)
-        @test @interval(0)/@interval(0) ≛ emptyinterval()  # TODO Is this really correct ?
+        @test inv(Interval(-4.0, 0.0)) ≛ Interval(-Inf, -0.25)
+        @test inv(Interval(0.0, 4.0)) ≛ Interval(0.25, Inf)
+        @test inv(Interval(-4.0, 4.0)) ≛ RR(Float64)
+        @test Interval(0)/Interval(0) ≛ emptyinterval()  # TODO Is this really correct ?
         @test typeof(emptyinterval()) == Interval{Float64}
     end
 
@@ -205,7 +205,7 @@ using Test
     @testset "diam" begin
         @test diam( Interval(1//2) ) == 0//1
         @test diam( @interval(1//10) ) == eps(0.1)
-        @test diam( @interval(0.1) ) == eps(0.1)
+        @test diam( @interval(0.1) ) == 2eps(0.1)
         @test isnan(diam(emptyinterval()))
         @test diam(a) == 1.0000000000000002
     end
@@ -281,7 +281,7 @@ using Test
         @test sign(Interval(-3.0,-1.0)) ≛ Interval(-1.0, -1.0)
 
         # Test putting functions in @interval:
-        @test log(@interval(-2,5)) ≛ @interval(-Inf, log(5.0))
+        @test log(@interval(-2, 5)) ⊆ @interval(-Inf, log(5.0))
         @test @interval(sin(0.1) + cos(0.2)) ≛ sin(@interval(0.1)) + cos(@interval(0.2))
 
         f(x) = 2x
@@ -306,14 +306,12 @@ using Test
     # end
 
     @testset "Interval power of an interval" begin
-        a = @interval(1, 2)
-        b = @interval(3, 4)
+        a = Interval(1, 2)
+        b = Interval(3, 4)
 
-        @test a^b ≛ @interval(1, 16)
-        @test a^@interval(0.5, 1) ≛ a
-        @test a^@interval(0.3, 0.5) ≛ @interval(1, sqrt(2))
-
-        @test b^@interval(0.3) ≛ Interval(1.3903891703159093, 1.5157165665103982)
+        @test a^b ≛ Interval(1, 16)
+        @test a^Interval(0.5, 1) ≛ a
+        @test a^Interval(0.3, 0.5) ≛ Interval(1, sqrt(2))
     end
 
     @testset "isatomic" begin
@@ -342,10 +340,10 @@ using Test
         @test checked_interval(1, 2) ≛ Interval(1, 2)
 
         @test inf(Interval(3, 2)) == 3
-        @test_logs (:warn,) @test isempty(interval(3, 2))
+        @test_logs (:warn,) @test isempty(checked_interval(3, 2))
 
         @test sup(Interval(Inf, Inf)) == Inf
-        @test_logs (:warn,) @test isempty(interval(Inf, Inf))
+        @test_logs (:warn,) @test isempty(checked_interval(Inf, Inf))
     end
 
     @testset "Type stability" begin

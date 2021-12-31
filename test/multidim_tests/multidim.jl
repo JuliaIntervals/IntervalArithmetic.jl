@@ -29,8 +29,8 @@ let X, A  # avoid problems with global variables
     @test dot(A, B.v) ≛ @interval(9, 28)
     @test dot(A.v, B) ≛ @interval(9, 28)
     @test A .* B ≛ IntervalBox(0..4, 9..24)
-    @test A ./ A ≛ IntervalBox((0.5)..2, (0.75)..(4/3))
-    @test 1 ./ B ≛ IntervalBox((0.5)..Inf, (1/6)..(1/3))
+    @test A ./ A ≛ IntervalBox((0.5)..2, (0.75)..(4//3))
+    @test 1 ./ B ≛ IntervalBox((0.5)..Inf, (1//6)..(1//3))
     @test B ./ 1 ≛ B
     @test A .^ 2 ≛ IntervalBox(1..4, 9..16)
     @test B .^ 0.5 ≛ IntervalBox(@interval(0,sqrt(2)), @interval(sqrt(3),sqrt(6)))
@@ -106,60 +106,89 @@ end
 
 
 @testset "setdiff for IntervalBox" begin
+    function sameset(A, B)
+        length(A) != length(B) && return false
+        for a in A
+            found = false
+            for b in B
+                if a ≛ b
+                    found = true
+                    break
+                end
+            end
+
+            !found && return false
+        end
+        return true
+    end
+
     X = IntervalBox(2..4, 3..5)
     Y = IntervalBox(3..5, 4..6)
-    @test all(setdiff(X, Y) .≛ [ IntervalBox(3..4, 3..4),
-                              IntervalBox(2..3, 3..5) ])
+    @test sameset(
+        setdiff(X, Y),
+        [ IntervalBox(3..4, 3..4),
+          IntervalBox(2..3, 3..5) ])
 
-    @test all(setdiff(X.v, Y) .≛ [ IntervalBox(3..4, 3..4),
-                              IntervalBox(2..3, 3..5) ])
+    @test sameset(
+        setdiff(X.v, Y),
+        [ IntervalBox(3..4, 3..4),
+          IntervalBox(2..3, 3..5) ])
 
-    @test all(setdiff(X, Y.v) .≛ [ IntervalBox(3..4, 3..4),
-                              IntervalBox(2..3, 3..5) ])
+    @test sameset(
+        setdiff(X, Y.v),
+        [ IntervalBox(3..4, 3..4),
+          IntervalBox(2..3, 3..5) ])
 
     X = IntervalBox(2..5, 3..6)
     Y = IntervalBox(-10..10, 4..5)
-    @test all(setdiff(X, Y) .≛ [ IntervalBox(2..5, 3..4),
-                              IntervalBox(2..5, 5..6) ])
+    @test sameset(
+        setdiff(X, Y),
+        [ IntervalBox(2..5, 3..4),
+          IntervalBox(2..5, 5..6) ])
 
     X = IntervalBox(2..5, 3..6)
     Y = IntervalBox(4..6, 4..5)
-    @test all(setdiff(X, Y) .≛ [ IntervalBox(4..5, 3..4),
-                              IntervalBox(4..5, 5..6),
-                              IntervalBox(2..4, 3..6) ])
+    @test sameset(
+        setdiff(X, Y),
+        [ IntervalBox(4..5, 3..4),
+          IntervalBox(4..5, 5..6),
+          IntervalBox(2..4, 3..6) ])
 
     X = IntervalBox(2..5, 3..6)
     Y = IntervalBox(3..4, 4..5)
-    @test all(setdiff(X, Y) .≛ [ IntervalBox(3..4, 3..4),
-                              IntervalBox(3..4, 5..6),
-                              IntervalBox(2..3, 3..6),
-                              IntervalBox(4..5, 3..6) ])
+    @test sameset(
+        setdiff(X, Y),
+        [ IntervalBox(3..4, 3..4),
+          IntervalBox(3..4, 5..6),
+          IntervalBox(2..3, 3..6),
+          IntervalBox(4..5, 3..6) ])
 
     X = IntervalBox(2..5, 3..6)
     Y = IntervalBox(2..4, 10..20)
-    @test all(setdiff(X, Y) .≛ typeof(X)[X])
+    @test sameset(setdiff(X, Y), typeof(X)[X])
 
     X = IntervalBox(2..5, 3..6)
     Y = IntervalBox(-10..10, -10..10)
-    @test all(setdiff(X, Y) .≛ typeof(X)[])
+    @test sameset(setdiff(X, Y), typeof(X)[])
 
     X = IntervalBox(1..4, 3..6, 7..10)
     Y = IntervalBox(2..3, 4..5, 8..9)
-    @test all(setdiff(X, Y) .≛ [ IntervalBox(2..3, 4..5, 7..8),
-                              IntervalBox(2..3, 4..5, 9..10),
-                              IntervalBox(2..3, 3..4, 7..10),
-                              IntervalBox(2..3, 5..6, 7..10),
-                              IntervalBox(1..2, 3..6, 7..10),
-                              IntervalBox(3..4, 3..6, 7..10) ])
-
+    @test sameset(
+        setdiff(X, Y),
+        [ IntervalBox(2..3, 4..5, 7..8),
+          IntervalBox(2..3, 4..5, 9..10),
+          IntervalBox(2..3, 3..4, 7..10),
+          IntervalBox(2..3, 5..6, 7..10),
+          IntervalBox(1..2, 3..6, 7..10),
+          IntervalBox(3..4, 3..6, 7..10) ])
 
     X = IntervalBox(-Inf..Inf, 1..2)
     Y = IntervalBox(1..2, -1..1.5)
-
-    # TODO Use Set for all the test in this testsuite
-    @test_broken Set(setdiff(X, Y)) == Set([IntervalBox(-Inf..1, 1..2),
-                              IntervalBox(2..Inf, 1..2),
-                              IntervalBox(1..2, 1.5..2)])
+    @test sameset(
+        setdiff(X, Y),
+        [ IntervalBox(-Inf..1, 1..2),
+          IntervalBox(2..Inf, 1..2),
+          IntervalBox(1..2, 1.5..2) ])
 end
 
 @testset "mid, diam, × for IntervalBox" begin
@@ -294,7 +323,7 @@ end
     @test all(vb2 .≛ vv)
     @test hull(vb2...) ≛ ib2
     @test hull(vb2) ≛ ib2
-    @test mince(ib2, (4, 4)) ≛ vb2
+    @test all(mince(ib2, (4, 4)) .≛ vb2)
     @test all(
         mince(ib2, (1,4)) .≛ [ (-1 .. 1)×(-1 .. -0.5), (-1 .. 1)×(-0.5 .. 0),
         (-1 .. 1)×(0 .. 0.5), (-1 .. 1)×(0.5 .. 1)])
@@ -305,9 +334,9 @@ end
     @test length(vb3) == 4^3
     @test hull(vb3...) ≛ ib3
     @test hull(vb3) ≛ ib3
-    @test mince(ib3, (4,4,4)) ≛ vb3
-    @test mince(ib3, (2,1,1)) ≛ [(-1 .. 0)×(-1 .. 1)×(-1 .. 1), 
-        (0 .. 1)×(-1 .. 1)×(-1 .. 1)]
+    @test all(mince(ib3, (4,4,4)) .≛ vb3)
+    @test all(mince(ib3, (2,1,1)) .≛ [(-1 .. 0)×(-1 .. 1)×(-1 .. 1), 
+        (0 .. 1)×(-1 .. 1)×(-1 .. 1)])
     @test hull(mince(ib3, (2,1,1))) ≛ ib3
 
     ib4 = IntervalBox(-1..1, 4)
@@ -315,8 +344,8 @@ end
     @test length(vb4) == 4^4
     @test hull(vb4...) ≛ ib4
     @test hull(vb4) ≛ ib4
-    @test mince(ib4,(4,4,4,4)) ≛ vb4
-    @test mince(ib4,(1,1,1,1)) ≛ (ib4,)
+    @test all(mince(ib4,(4,4,4,4)) .≛ vb4)
+    @test all(mince(ib4,(1,1,1,1)) .≛ (ib4,))
 end
 
 @testset "Special box constructors" begin

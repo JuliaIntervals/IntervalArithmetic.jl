@@ -9,13 +9,12 @@ function _setdiff(x::Interval{T}, y::Interval{T}) where T
     intersection = x ∩ y
 
     isempty(intersection) && return (x, emptyinterval(T))
-    intersection == x && return (emptyinterval(T), emptyinterval(T))  # x is subset of y; setdiff is empty
+    intersection ≛ x && return (emptyinterval(T), emptyinterval(T))  # x is subset of y; setdiff is empty
 
     x.lo == intersection.lo && return (Interval(intersection.hi, x.hi), emptyinterval(T))
     x.hi == intersection.hi && return (Interval(x.lo, intersection.lo), emptyinterval(T))
 
     return (Interval(x.lo, y.lo), Interval(y.hi, x.hi))
-
 end
 
 

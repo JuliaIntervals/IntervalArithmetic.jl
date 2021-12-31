@@ -4,9 +4,6 @@ using Test
 IntervalArithmetic.:(≛)(a::Tuple, b::Tuple) = all(a .≛ b)
 
 function include_test(filename)
-    include(filename)
-    return
-    
     @testset "$filename" begin
         include(filename)
     end

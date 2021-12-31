@@ -65,13 +65,4 @@ let b
     @test isnai(@decorated(NaN, NaN))
 end
 
-@testset "Convert string to DecoratedInterval" begin
-    @test convert(DecoratedInterval{Float64}, "[1,2]") ≛
-                    DecoratedInterval(Interval(1, 2), com)
-
-    @test convert(DecoratedInterval{Float64}, "[1,2]_dac") ≛
-                        DecoratedInterval(Interval(1, 2), dac)
-
-end
-
 end

@@ -10,7 +10,7 @@
 
 # Write explicitly like this to avoid ambiguity warnings:
 for T in (:Integer, :Float64, :BigFloat, :Interval)
-    @eval ^(a::Interval{Float64}, x::$T) = atomic(Interval{Float64}, bigequiv(a)^x)
+    @eval ^(a::Interval{Float64}, x::$T) = atomic(Interval{Float64}, big53(a)^x)
 end
 
 
@@ -269,7 +269,7 @@ for f in (:exp2, :exp10, :cbrt)
             end
         end
 
-    @eval ($f)(a::F) where {F<:Interval} = atomic(F, $f(big53(a)))  # no CRlibm version
+    @eval ($f)(a::F) where {F<:Interval} = atomic(F, $f(big(a)))  # no CRlibm version
 
     @eval function ($f)(a::F) where {F<:Interval{BigFloat}}
             isempty(a) && return a

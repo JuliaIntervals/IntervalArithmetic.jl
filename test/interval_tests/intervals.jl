@@ -9,7 +9,6 @@ include_test("non_BigFloat.jl")
 include_test("linear_algebra.jl")
 include_test("loops.jl")
 include_test("parsing.jl")
-# include_test("rounding_macros.jl")
 include_test("rounding.jl")
 include_test("bisect.jl")
-# include_test("complex.jl")  # TODO fix these tests
+# include_test("complex.jl")  # TODO uncomment when Complex support is restored

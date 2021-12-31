@@ -18,7 +18,7 @@ using Test
     for irr in (π, ℯ)
         @test @interval(-irr, irr).hi == (-irr..irr).hi
         @test 0..irr ≛ hull(interval(0), Interval{Float64}(irr))
-        @test 1.2..irr ≛ @interval(1.2, irr)
+        @test (1.2..irr).hi == @interval(1.2, irr).hi
         @test irr..irr ≛ Interval{Float64}(irr)
         @test Interval(irr) ≛ @interval(irr)
         @test Interval(irr, irr) ≛ Interval(irr)
@@ -40,14 +40,8 @@ using Test
     @test big(π) in Interval{Float32}(π, 4)
 
     # a < Inf and b > -Inf
-    @test @interval(1e300) ≛ Interval(9.999999999999999e299, 1.0e300)
-    @test @interval(-1e307) ≛ Interval(-1.0000000000000001e307, -1.0e307)
-    @test @interval(Inf) ≛ IntervalArithmetic.wideinterval(Inf)
-    @test IntervalArithmetic.wideinterval(-big(Inf)) ≛ Interval(-Inf, nextfloat(big(-Inf)))
-
-    # a < Inf and b > -Inf
-    @test @interval(1e300) ≛ Interval(9.999999999999999e299, 1.0e300)
-    @test @interval(-1e307) ≛ Interval(-1.0000000000000001e307, -1.0e307)
+    @test @interval("1e300") ≛ Interval(9.999999999999999e299, 1.0e300)
+    @test @interval("-1e307") ≛ Interval(-1.0000000000000001e307, -1.0e307)
     @test @interval(Inf) ≛ IntervalArithmetic.wideinterval(Inf)
     @test IntervalArithmetic.wideinterval(-big(Inf)) ≛ Interval(-Inf, nextfloat(big(-Inf)))
 
@@ -72,9 +66,9 @@ using Test
     a = @interval(0.1)
     b = @interval(pi)
 
-    @test a ≛ @floatinterval("0.1")
+    @test @floatinterval("0.1") ⊆ a
     @test typeof(a) == Interval{Float64}
-    @test nextfloat(a.lo) == a.hi
+    @test nextfloat(a.lo, 2) == a.hi
     @test b ≛ @floatinterval(pi)
     @test nextfloat(b.lo) == b.hi
     x = typemax(Int64)
@@ -82,15 +76,17 @@ using Test
     @test !isthin(@interval(x))
     x = rand()
     c = @interval(x)
-    @test nextfloat(c.lo) == c.hi
+    @test nextfloat(c.lo) == x
+    @test nextfloat(x) == c.hi
 
     a = @interval("[0.1, 0.2]")
     b = @interval(0.1, 0.2)
 
-    @test a ≛ b
+    @test a ⊆ b
 
     @test_throws ArgumentError @interval("[0.1, 0.2")
 
+    # TODO Actually use the rounding mode here
     for rounding in (:wide, :narrow)
         a = @interval(0.1, 0.2)
         @test a ⊆ Interval(0.09999999999999999, 0.20000000000000004)
@@ -109,6 +105,12 @@ using Test
     @test string(emptyinterval()) == "∅"
 end
 
+# Issue 502
+@testset "Corner case for enclosure" begin
+    # 0.100000000000000006 Round down to 0.1 for Float64
+    @test BigFloat("0.100000000000000006") in @interval 0.100000000000000006
+end
+
 @testset "Big intervals" begin
     a = @floatinterval(3)
     @test typeof(a)== Interval{Float64}
@@ -117,11 +119,10 @@ end
     @test @floatinterval(123412341234123412341241234) ≛ Interval(1.234123412341234e26, 1.2341234123412342e26)
     @test @interval(big"3") ≛ @floatinterval(3)
 
-
-    @test @floatinterval(big"1e10000") ≛ Interval(1.7976931348623157e308, ∞)
+    @test @floatinterval(big"1e10000") ≛ Interval(prevfloat(∞), ∞)
 
     a = big(10)^10000
-    @test @floatinterval(a) ≛ Interval(1.7976931348623157e308, ∞)
+    @test @floatinterval(a) ≛ Interval(prevfloat(∞), ∞)
 end
 
 #=
@@ -143,7 +144,7 @@ end
 
     @test_logs (:warn, ) @test isempty(2..1)
     @test_logs (:warn, ) @test isempty(π..1)
-    @test_logs (:warn, ) @test isempty(π..eeuler)
+    @test_logs (:warn, ) @test isempty(π..ℯ)
     @test_logs (:warn, ) @test isempty(4..π)
     @test_logs (:warn, ) @test isempty(NaN..3)
     @test_logs (:warn, ) @test isempty(3..NaN)
@@ -158,7 +159,6 @@ end
 
     # issue 172:
     @test (1..1) ± 1 ≛ 0..2
-
 end
 
 @testset "Conversion to interval of same type" begin
@@ -178,7 +178,7 @@ end
     # PR 496
     @test eltype(Interval(1, 2)) == Interval{Float64}
     @test IntervalArithmetic.numtype(Interval(1, 2)) == Float64
-    @test [1 2; 3 4] * Interval(-1, 1) == [-1..1 -2..2;-3..3 -4..4]
+    @test all([1 2; 3 4] * Interval(-1, 1) .≛ [-1..1 -2..2;-3..3 -4..4])
 
     @test eltype(IntervalBox(1..2, 2..3)) == Interval{Float64}
     @test IntervalArithmetic.numtype(IntervalBox(1..2, 2..3)) == Float64
@@ -200,14 +200,6 @@ end
     @test Interval{BigFloat}(1) ≛ @biginterval(1, 1)
     @test Interval{BigFloat}(big"1.1") ≛ Interval(big"1.1", big"1.1")
 end
-
-# TODO check the check=true
-#= 
-@testset "Disallow a single NaN in an interval" begin
-    @test_throws ArgumentError checked_interval(NaN, 2)
-    @test_throws ArgumentError checked_interval(Inf, NaN)
-end
-=#
 
 # issue 206:
 @testset "Interval strings" begin
@@ -255,14 +247,14 @@ end
 @testset "@interval with fields" begin
     a = 3..4
     x = @interval(a.lo, 2*a.hi)
-    @test x ≛ Interval(3, 8)
+    @test Interval(3, 8) ⊆ x
 end
 
 @testset "@interval with user-defined function" begin
     f(x) = x.lo == Inf ? one(x) : x/(1+x)  # monotonic
 
     x = 3..4
-    @test @interval(f(x.lo), f(x.hi)) ≛ Interval(0.75, 0.8)
+    @test Interval(0.75, 0.8) ⊆ @interval(f(x.lo), f(x.hi))
 end
 
 # issue 192:
@@ -295,14 +287,14 @@ end
 
 import IntervalArithmetic: force_interval
 @testset "force_interval" begin
-    @test force_interval(4, 3) == Interval(3, 4)
-    @test force_interval(4, Inf) == Interval(4, Inf)
-    @test force_interval(Inf, 4) == Interval(4, Inf)
-    @test force_interval(Inf, -Inf) == Interval(-Inf, Inf)
+    @test force_interval(4, 3) ≛ Interval(3, 4)
+    @test force_interval(4, Inf) ≛ Interval(4, Inf)
+    @test force_interval(Inf, 4) ≛ Interval(4, Inf)
+    @test force_interval(Inf, -Inf) ≛ Interval(-Inf, Inf)
     @test_logs (:warn,) @test isempty(force_interval(NaN, 3))
 end
 
 @testset "Zero interval" begin
-    @test zero(Interval{Float64}) === Interval{Float64}(0, 0)
-    @test zero(0 .. 1) === Interval{Float64}(0, 0)
+    @test zero(Interval{Float64}) ≛ Interval{Float64}(0, 0)
+    @test zero(0 .. 1) ≛ Interval{Float64}(0, 0)
 end

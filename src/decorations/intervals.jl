@@ -33,18 +33,13 @@ end
 
 DecoratedInterval(I::DecoratedInterval, dec::DECORATION) = DecoratedInterval(I.interval, dec)
 
-function DecoratedInterval(a::T, b::T, d::DECORATION) where {T<:Real}
-    is_valid_interval(a, b) || return nai(T)
-    DecoratedInterval(Interval(a,b), d)
+function DecoratedInterval(a::Real, b::Real, d::DECORATION)
+    is_valid_interval(a, b) || return DecoratedInterval(Interval(a,b), ill)
+    return DecoratedInterval(Interval(a,b), d)
 end
 
+DecoratedInterval(a::Real, d::DECORATION) = DecoratedInterval(a, a, d)
 DecoratedInterval(a::Tuple, d::DECORATION) = DecoratedInterval(a..., d)
-
-DecoratedInterval(a::T, b::S, d::DECORATION) where {T<:Real, S<:Real} =
-    DecoratedInterval(promote(a, b)..., d)
-
-DecoratedInterval(a::T, d::DECORATION) where {T<:Real} =
-    DecoratedInterval(Interval(a, a), d)
 
 function DecoratedInterval{T}(I::Interval) where {T}
     d = decoration(I)
@@ -55,19 +50,12 @@ end
 
 DecoratedInterval(I::Interval) = DecoratedInterval{default_bound()}(I)
 
-function DecoratedInterval(a::T, b::T) where {T<:Real}
-    is_valid_interval(a, b) || return nai(T)
-    DecoratedInterval(Interval(a,b))
+function DecoratedInterval(a::Real, b::Real)
+    is_valid_interval(a, b) || return DecoratedInterval(Interval(a,b), ill)
+    return DecoratedInterval(Interval(a,b))
 end
 
-DecoratedInterval(a::T, b::T) where {T<:Integer} =
-    DecoratedInterval(float(a),float(b))
-
-DecoratedInterval(a::T) where {T<:Real} = DecoratedInterval(Interval(a, a))
-
-DecoratedInterval(a::T, b::S) where {T<:Real, S<:Real} =
-    DecoratedInterval(promote(a, b)...)
-
+DecoratedInterval(a::Real) = DecoratedInterval(a, a)
 DecoratedInterval(a::Tuple) = DecoratedInterval(a...)
 
 interval(x::DecoratedInterval) = x.interval
@@ -81,42 +69,19 @@ function decoration(I::Interval)
     com                              # common
 end
 
-# Promotion and conversion, and other constructors
-
-promote_rule(::Type{D}, ::Type{S}) where {T<:Real, S<:Real, F<:Interval{T}, D<:DecoratedInterval{T}} =
-    D{promote_type(T, S), F}
-
-promote_rule(::Type{DecoratedInterval{T}}, ::Type{DecoratedInterval{S}}) where
-    {T<:Real, S<:Real} = DecoratedInterval{promote_type(T, S)}
-
-convert(::Type{DecoratedInterval{T}}, x::S) where {T<:Real, S<:Real} =
-    DecoratedInterval( Interval(T(x, RoundDown), T(x, RoundUp)) )
-
-convert(::Type{DecoratedInterval{T}}, x::S) where {T<:Real, S<:Integer} =
-    DecoratedInterval( Interval(T(x), T(x)) )
-
-function convert(::Type{DecoratedInterval{T}}, xx::DecoratedInterval) where {T<:Real}
-    x = interval(xx)
-    x = atomic(Interval{T},x)
-    DecoratedInterval( x, decoration(xx) )
-end
-
-convert(::Type{DecoratedInterval{T}}, x::AbstractString) where {T<:AbstractFloat} =
-    parse(DecoratedInterval{T}, x)
-
 big(x::DecoratedInterval) = DecoratedInterval(big(interval(x)), decoration(x))
 
 macro decorated(ex...)
-    if(!(ex[1] isa String))
-        local x
-
+    if !(ex[1] isa String)
         if length(ex) == 1
             x = :(@interval($(esc(ex[1]))))
+            lo = :($x.lo)
+            hi = :($x.hi)
         else
-            x = :($(esc(ex[1])), $(esc(ex[2])))
+            lo, hi = ex 
         end
 
-        :(DecoratedInterval($x))
+        return :(DecoratedInterval($lo, $hi))
     else
         s = ex[1]
         parse(DecoratedInterval{Float64}, s)

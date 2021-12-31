@@ -23,8 +23,16 @@ is equivalent to
 Note that the returned interval is of the default flavor. See the documentation
 of `Interval` for more information about the defaul interval falvor.
 """
-macro interval(expr1, expr2...)
+macro interval(expr)
+    return wrap_literals(Interval{default_bound()}, expr)
+end
+
+macro interval(expr1, expr2)
     return wrap_literals(Interval{default_bound()}, expr1, expr2)
+end
+
+macro interval(T, expr1, expr2)
+    return wrap_literals(:(Interval{$T}), expr1, expr2)
 end
 
 """
@@ -32,7 +40,11 @@ end
 
 Construct an interval with `Float64` bounds from an expression.
 """
-macro floatinterval(expr1, expr2...)
+macro floatinterval(expr)
+    return wrap_literals(Interval{Float64}, expr)
+end
+
+macro floatinterval(expr1, expr2)
     return wrap_literals(Interval{Float64}, expr1, expr2)
 end
 
@@ -41,7 +53,11 @@ end
 
 Construct an interval with `BigFloat` bounds from an expression.
 """
-macro biginterval(expr1, expr2...)
+macro biginterval(expr)
+    return wrap_literals(Interval{BigFloat}, expr)
+end
+
+macro biginterval(expr1, expr2)
     return wrap_literals(Interval{BigFloat}, expr1, expr2)
 end
 
@@ -93,14 +109,13 @@ end
 Take expressions and make each literal (0.1, 1, etc.) into a corresponding
 interval construction using flavor `F`.
 """
+function wrap_literals(F, expr)
+    return transform(expr, :atomic, :($F))
+end
+
 function wrap_literals(F, expr1, expr2)
     expr1 = transform(expr1, :atomic, :($F))
-
-    if isempty(expr2)  # only one argument
-        return :(($F)($expr1))
-    end
-
-    expr2 = transform(expr2[1], :atomic, :($F))
+    expr2 = transform(expr2, :atomic, :($F))
 
     return :(checked_interval(inf($expr1), sup($expr2)))
 end

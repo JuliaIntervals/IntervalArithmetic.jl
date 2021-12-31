@@ -262,3 +262,37 @@ function sqrt(a::F) where {F<:Interval}
 
     return @round(F, sqrt(a.lo), sqrt(a.hi))  # `sqrt` is correctly-rounded
 end
+
+
+"""
+    nthroot(a::Interval{BigFloat}, n::Integer)
+
+Compute the real n-th root of Interval.
+"""
+function nthroot(a::Interval{BigFloat}, n::Integer)
+    n == 1 && return a
+    n < 0 && isthinzero(a) && return emptyinterval(a)
+    isempty(a) && return a
+    if n > 0
+        a.hi < 0 && iseven(n) && return emptyinterval(BigFloat)
+        if a.lo < 0 && a.hi >= 0 && iseven(n)
+            a = a ∩ Interval{BigFloat}(0, Inf)
+        end
+        ui = convert(Culong, n)
+        low = BigFloat()
+        high = BigFloat()
+        ccall((:mpfr_rootn_ui, :libmpfr), Int32 , (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode) , low , a.lo , ui, MPFRRoundDown)
+        ccall((:mpfr_rootn_ui, :libmpfr), Int32 , (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode) , high , a.hi , ui, MPFRRoundUp)
+        b = interval(low , high)
+        return b
+    elseif n < 0
+        return inv(nthroot(a, -n))
+    elseif n == 0
+        return emptyinterval(a)
+    end
+end
+
+function nthroot(a::Interval{T}, n::Integer) where T
+    b = nthroot(big(a), n)
+    return convert(Interval{T}, b)
+end

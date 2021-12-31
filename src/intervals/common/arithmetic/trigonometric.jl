@@ -11,14 +11,11 @@ half_pi(::Type{F}) where {F<:Interval} = scale(0.5, F(π))
 two_pi(::Type{F}) where {F<:Interval} = scale(2, F(π))
 
 function range_atan(::Type{F}) where {F<:Interval}
-    temp = F(π)
+    temp = F(π)  # Using F(-π, π) converts -π to Float64 before Interval construction
     return F(-temp.hi, temp.hi)
 end
 
-function half_range_atan(::Type{F}) where {F<:Interval}
-    temp = half_pi(F)
-    return F(-temp.hi, temp.hi)
-end
+half_range_atan(::Type{F}) where {F<:Interval} = range_atan(F) / 2
 
 """
     find_quadrants(x)
@@ -327,14 +324,15 @@ function atan(a::F) where {F<:Interval}
     return @round(F, atan(a.lo), atan(a.hi))
 end
 
-function atan(y::F, x::F) where {F<:Interval{Float64}}
-    (isempty(y) || isempty(x)) && return emptyinterval(F)
-
-    return atomic(F, atan(big53(y), big53(x)))
-end
-
 function atan(y::Interval{T}, x::Interval{S}) where {T, S}
     F = Interval{promote_type(T, S)}
+    (isempty(y) || isempty(x)) && return emptyinterval(F)
+    return atomic(F, atan(big(y), big(x)))
+end
+
+function atan(y::Interval{BigFloat}, x::Interval{BigFloat})
+    F = Interval{BigFloat}
+    T = BigFloat
 
     (isempty(y) || isempty(x)) && return emptyinterval(F)
 

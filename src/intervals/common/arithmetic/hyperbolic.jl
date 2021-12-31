@@ -4,7 +4,6 @@
     in the IEEE Std 1788-2015 (sections 9.1) and required for set-based flavor
     in section 10.5.3.
 =#
-
 for f in (:sinh, :tanh, :asinh)
     @eval begin
         """
@@ -14,7 +13,6 @@ for f in (:sinh, :tanh, :asinh)
         """
         function ($f)(a::F) where {F<:Interval}
             isempty(a) && return a
-        
             return @round(F, ($f)(a.lo), ($f)(a.hi))
         end
     end 

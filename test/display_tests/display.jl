@@ -81,6 +81,7 @@ let x, b
         @test string(a) == "1.5f0 ± 0.5f0"
     end
 
+    #= # TODO uncomment when Complex support is restored
     @testset "Complex{Interval}" begin
         a = Complex(Interval(0, 2), 1)
         @test typeof(a) == Complex{Interval{Float64}}
@@ -90,6 +91,7 @@ let x, b
         setformat(:midpoint)
         @test string(a) == "(1 ± 1) + (1 ± 0)im"
     end
+    =#
 
     setprecision(BigFloat, 256)
 
@@ -160,7 +162,7 @@ let x, b
         @test s == "[1, 2] × [3, 4]"
 
         X = IntervalBox(1.1..1.2, 2.1..2.2)
-        @test string(X) == "[1.09999, 1.20001] × [2.09999, 2.20001]"
+        @test string(X) == "[1.1, 1.2] × [2.1, 2.20001]"
 
         X = IntervalBox(-Inf..Inf, -Inf..Inf)
         @test string(X) == "[-∞, ∞]²"
@@ -225,7 +227,7 @@ end
 end
 
 @testset "@format tests" begin
-    x = 0.1..0.3
+    x = prevfloat(0.1)..nextfloat(0.3)
 
     @format full
     @test string(x) == "Interval(0.09999999999999999, 0.30000000000000004)"
@@ -233,7 +235,7 @@ end
     @format standard 3
     @test string(x) == "[0.0999, 0.301]"
 
-    @format 10
+    @format standard 10
     @test string(x) == "[0.09999999999, 0.3000000001]"
 end
 

@@ -57,7 +57,7 @@ Interval{T}(x::Interval) where T = atomic(Interval{T}, x)
 #= Complex =#
 Interval(x::Complex) = Interval(real(x)) + im*Interval(imag(x))
 
-eltype(::Interval) = Interval
+eltype(::F) where {F<:Interval} = F
 size(::Interval) = (1,)
 
 """
@@ -159,18 +159,18 @@ include("common/special.jl")
     a..b
     ..(a, b)
 
-Create the interval `[a, b]` of the default interval type.
+Create the interval `[a, b]`.
 
-See the documentation of `Interval` for more information about the default
-interval type.
+Validity of the interval is checked, but nothing is done to compensate for
+the fact that floating point literals are rounded to nearest when parsed.
+
+Use the string macro `I"[a, b]"` to ensure tight enclosure around the number
+that is typed in, even when it is not exactly representable as a floating point
+number (like `0.1`).
 """
-function ..(a::T, b::S) where {T, S}
-    R = promote_type(default_bound(), T, S)
-    return checked_interval(atomic(Interval{R}, a).lo, atomic(Interval{R}, b).hi)
-end
-
-a ± b = (a-b)..(a+b)
-±(a::Interval, b) = (a.lo - b)..(a.hi + b)
+..(a, b) = checked_interval(a, b)
+a ± b = checked_interval(-(a, b, RoundDown), +(a, b, RoundUp))
+±(a::Interval, b) = Interval(-(a.lo, b, RoundDown), +(a.hi, b, RoundUp))
 
 """
     hash(x, h)
