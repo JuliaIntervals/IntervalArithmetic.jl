@@ -167,7 +167,7 @@ end
     @test d <= 2
     @test ismissing(d < 2)
     @test -1 < d
-    @test !(d < 0.15)
+    @test ismissing(d < 0.15)
 
     # abs
     @test abs(Interval(0.1, 0.2)) ≛ Interval(0.1, 0.2)
