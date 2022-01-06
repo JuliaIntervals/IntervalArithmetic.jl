@@ -19,8 +19,21 @@ end
 Base.literal_pow(::typeof(^), x::Interval{T}, ::Val{p}) where {T,p} = x^p
 
 
-Base.eltype(x::Interval{T}) where {T<:Real} = T
+Base.eltype(x::Interval{T}) where {T<:Real} = Interval{T}
 
+"""
+    numtype(::Interval{T}) where {T<:Real} = T
+
+Returns the type of the bounds of the interval.
+
+### Example
+
+```julia
+julia> numtype(1..2)
+Float64
+```
+"""
+numtype(::Interval{T}) where {T<:Real} = T
 
 
 function ^(a::Interval{BigFloat}, n::Integer)
@@ -359,4 +372,4 @@ end
 function nthroot(a::Interval{T}, n::Integer) where T
     b = nthroot(bigequiv(a), n)
     return convert(Interval{T}, b)
-end 
+end

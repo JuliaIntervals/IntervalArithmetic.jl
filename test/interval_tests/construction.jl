@@ -223,6 +223,14 @@ end
     @test typeof(@interval         1 2) == Interval{Float64}
     @test typeof(@interval Float32 1 2) == Interval{Float32}
     @test typeof(@interval Float16 1 2) == Interval{Float16}
+
+    # PR 496
+    @test eltype(Interval(1, 2)) == Interval{Float64}
+    @test IntervalArithmetic.numtype(Interval(1, 2)) == Float64
+    @test [1 2; 3 4] * Interval(-1, 1) == [-1..1 -2..2;-3..3 -4..4]
+
+    @test eltype(IntervalBox(1..2, 2..3)) == Interval{Float64}
+    @test IntervalArithmetic.numtype(IntervalBox(1..2, 2..3)) == Float64
 end
 
 @testset ".. tests" begin

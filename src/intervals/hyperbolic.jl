@@ -34,7 +34,7 @@ end
 
 
 function acosh(a::Interval{BigFloat})
-    domain = Interval(one(eltype(a)), Inf)
+    domain = Interval(one(BigFloat), Inf)
     a = a ∩ domain
     isempty(a) && return a
 
@@ -43,7 +43,7 @@ end
 
 
 function atanh(a::Interval{BigFloat})
-    domain = Interval(-one(eltype(a)), one(eltype(a)))
+    domain = Interval(-one(BigFloat), one(BigFloat))
     a = a ∩ domain
 
     isempty(a) && return a
