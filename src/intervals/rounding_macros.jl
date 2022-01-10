@@ -7,16 +7,13 @@ Transforms a single expression by applying a rounding mode, e.g.
 - `sin(a)` into `sin(a, RoundDown)`
 """
 function round_expr(ex::Expr, rounding_mode::RoundingMode)
-
     if ex.head == :call
-
         op = ex.args[1]
 
         if op ∈ (:min, :max)
             mapped_args = round_expr.(ex.args[2:end], rounding_mode)
             return :($op($(mapped_args...)))
         end
-
 
         if length(ex.args) == 3  # binary operator
             return :( $(esc(op))( $(esc(ex.args[2])), $(esc(ex.args[3])), $rounding_mode) )
@@ -57,6 +54,7 @@ macro round(ex1, ex2)
     :($(esc(F))($(round_expr(ex1, RoundDown)), $(round_expr(ex2, RoundUp))))
 end
 
+# TODO These two are barely use, they should be removed
 macro round_down(ex1)
      round_expr(ex1, RoundDown)
 end

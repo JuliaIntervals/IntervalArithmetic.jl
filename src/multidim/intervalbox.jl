@@ -70,16 +70,16 @@ big(X::IntervalBox) = big.(X)
 
 # TODO: Update to use generator
 for (op, dotop) in ((:⊆, :.⊆), (:⊂, :.⊂), (:⊃, :.⊃))
-    @eval $(op)(X::IntervalBox{N}, Y::IntervalBox{N}) where {N} = all($(dotop)(X, Y))
+    @eval $(op)(X::IntervalBox{N}, Y::IntervalBox{N}) where N = all($(dotop)(X, Y))
 end
 
-∩(X::IntervalBox{N}, Y::IntervalBox{N}) where {N} =
+∩(X::IntervalBox{N}, Y::IntervalBox{N}) where N =
     IntervalBox(X.v .∩ Y.v)
-∪(X::IntervalBox{N}, Y::IntervalBox{N}) where {N} =
+∪(X::IntervalBox{N}, Y::IntervalBox{N}) where N =
     IntervalBox(X.v .∪ Y.v)
 
-∈(X::AbstractVector, Y::IntervalBox{N,T}) where {N,T} = all(X .∈ Y)
-∈(X, Y::IntervalBox{N,T}) where {N,T} = throw(ArgumentError("$X ∈ $Y is not defined"))
+∈(X::AbstractVector, Y::IntervalBox{N, T}) where {N, T} = all(X .∈ Y)
+∈(X, Y::IntervalBox{N, T}) where {N, T} = throw(ArgumentError("$X ∈ $Y is not defined"))
 
 
 #=
@@ -92,11 +92,11 @@ isempty(X::IntervalBox) = any(isempty, X.v)
 
 diam(X::IntervalBox) = maximum(diam.(X.v))
 
-emptyinterval(X::IntervalBox{N,T}) where {N,T} = IntervalBox(emptyinterval.(X.v))
+emptyinterval(X::IntervalBox{N,T}) where {N, T} = IntervalBox(emptyinterval.(X.v))
 
 isinf(X::IntervalBox) = any(isinf.(X))
 
-isinterior(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) where {N,T} = all(isinterior.(X, Y))
+isinterior(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) where {N, T} = all(isinterior.(X, Y))
 
 contains_zero(X::SVector) = all(contains_zero.(X))
 contains_zero(X::IntervalBox) = all(contains_zero.(X))

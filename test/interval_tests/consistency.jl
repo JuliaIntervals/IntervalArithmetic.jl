@@ -286,13 +286,6 @@ using Test
 
         f(x) = 2x
         @test @interval(f(0.1)) ≛ f(@interval(0.1))
-
-        # midpoint-radius representation
-        a = @interval(0.1)
-        midpoint, radius = midpoint_radius(a)
-
-        @test interval_from_midpoint_radius(midpoint, radius) ≛
-            Interval(0.09999999999999999, 0.10000000000000002)
     end
 
     # @testset "Interval rounding tests" begin

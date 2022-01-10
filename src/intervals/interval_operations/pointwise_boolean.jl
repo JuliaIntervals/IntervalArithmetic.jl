@@ -5,12 +5,12 @@
 
     This is different from what is described in sections 9.5 of the
     IEEE Std 1788-2015 (Boolean functions of intervals), since we deal here
-    with what is needed for drop in replacement of Float by intervals,
+    with what is needed for drop-in replacement of floats by intervals,
     and not what is reasonnable to do with intervals in a separate execution
     environment.
 
-    Essentially, julia is better at composability that what the standard
-    ever expected from a programming language so we have some extra problems
+    Essentially, julia is better at composability and we are more ambitious
+    that what the standard ever expected, so we have some extra problems
     to solve.
 =#
 
@@ -56,7 +56,7 @@ pointwise_bool_operations = [
 ]
 
 pointwise_bool_functions = [
-    :isinf, :isfinite
+    :isinf, :isfinite, :isinteger
 ]
 
 ## Ternary logic
@@ -93,7 +93,7 @@ function isinf(::TernaryLogic, x::Interval)
 end
 
 isfinite(::TernaryLogic, x::Interval) = !isinf(TernaryLogic(), x)
-
+isinteger(::TernaryLogic, a::Interval) = (a.lo == a.hi) && isinteger(a.lo)
 
 ## Boolean Intervals
 struct BooleanInterval

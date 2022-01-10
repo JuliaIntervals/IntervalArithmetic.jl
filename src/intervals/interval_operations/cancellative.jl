@@ -47,7 +47,7 @@ cancelminus(a::Interval, b::Interval) = cancelminus(promote(a, b)...)
 
 Return the unique interval `c` such that `b - c = a`.
 
-Equivalent to `cancelminus(a, −b)`.
+Equivalent to `cancelminus(a, -b)`.
 
 Implement the `cancelPlus` function of the IEEE Std 1788-2015 (section 9.2).
 """

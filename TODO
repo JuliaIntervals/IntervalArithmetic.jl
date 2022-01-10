@@ -11,10 +11,12 @@ Review intervals folder:
     ✔ Check if intervals of different flavor type can/should be equal in the sense of `isidentical` @done(19-12-08 01:12)
     ✔ Operation on different flavors of interval should always error. @done(21-12-29 23:29)
     ☐ Check if `signbit` is in the standard
-    ☐ Test that definition of the default bound and flavor works (including change when rebuilding the package)
+    ☐ Test that definition of the default bound and flavor works
+    ✔ Distribute functions from `special.jl` and `misc.jl` somewhere more informative @done(22-01-10 02:12)
   
   Discussion:
-    ☐ Do we want to keep `@floatinterval` and `@biginteral` or use `@interval(F, expr1, expr2)` instead ?
+    ✔ Do we want to keep `@floatinterval` and `@biginteral` or use `@interval(F, expr1, expr2)` instead ? @done(22-01-10 00:55)
+      ✔ It is fine actually @done(22-01-10 00:55)
     ✔ Decide if `inf` and `sup` should be used as default or rather `x.lo` and `x.hi` @done(21-12-29 23:29)
       ✔ `inf` and `sup` should be strict equivalent to `x.lo` and `x.hi` @done(21-12-29 23:29)
 
@@ -32,6 +34,9 @@ Review intervals folder:
     ☐ Make cset default ?
     ✔ Define the flavor dependent symbols like ==, <, <= @done(21-12-29 23:28)
     
+  intervals.jl:
+    ☐ Split constructors from the includes
+    ☐ Put helper, utils function (e.g. `eltype`) somewhere else
   
   macros.jl:
     ✔ Review @done(19-08-23 01:57)
@@ -44,18 +49,22 @@ Review intervals folder:
     ✔ Review @done(19-08-19 01:50)
     ✔ Decide how to define the setrounding function with multiple interval types @done(21-12-29 23:28)
       ✔ Use a global function `current_interval_rounding` @done(21-12-29 23:28)
-    ☐ Check with latest discussion if everything is up to date
+    ✔ Check with latest discussion if everything is up to date @done(22-01-10 00:56)
     ✔ Remove default round method once it is not needed anymore @done(21-12-29 23:34)
+    ✔ Test new mechanism @done(22-01-10 01:18)
+    ☐ Remove `@round_up` and `@round_down`
 
   conversion.jl:
     ✔ Review @done(19-08-23 03:25)
     ✔ Fix ambiguity errors @done(21-12-29 23:27)
-    ☐ Simplify and test `atomic`
-      ☐ Accept the fact we have two eps for floating points inputs
+    ✔ Simplify `atomic` @done(22-01-10 00:56)
+      ✔ Accept the fact we have two eps for floating points inputs @done(22-01-09 21:20)
+    ✔ Test the new `atomic` @done(22-01-10 01:18)
   
   complex.jl:
     Should we even bother ?
-    ☐ Review
+    ✔ Drop support for now @done(22-01-10 00:57)
+    ☐ Document the support drop
 
   9.1. Arithmetic functions:
     ✔ Distribute everything from arithmetic.jl in other files @done(20-08-13 00:27)
@@ -143,7 +152,7 @@ Review intervals folder:
     ✔ Add Interval{T}(π) @done(19-08-19 01:58)
       ✔ Check performance @done(19-12-18 23:00)
   
-  10.5. Required operations in set-based falvor:
+  10.5. Required operations in set-based flavor:
     10.5.1. Literals:
       ☐ No idea, but do it
     10.5.2. Constants:
@@ -197,6 +206,9 @@ Other:
 Review other folders:
   Check PR #271 for details
   ☐ Do it
+  multidim:
+    arithmetic.jl:
+      ☐ StaticArray.jl v1.0 wants to promote the array eltype to interval
 
 Bugs:
   ✔ `Int` times `Interval` errors (e.g. `2*a`) @done(19-12-14 23:50)
@@ -204,10 +216,12 @@ Bugs:
   ☐ Find why 5 of the hyperb tests are failing only when put within the same testset as the others
 
 Documentation:
-  ☐ Put docstrings inside `@eval` blocks
+  ✘ Put docstrings inside `@eval` blocks @cancelled(22-01-10 01:00)
+  Not needed anymore since we don't use eval as much
   ☐ Document flavors
 
 Tests:
-  ☐ Uncomment complex tests in `construction.jl`
+  ✘ Uncomment complex tests in `construction.jl` @cancelled(22-01-10 01:00)
+  Dropped support for Complex for now
   ✔ Use `===` or `≛` instead of `==` @done(21-12-29 23:26)
   ☐ Test all flavors

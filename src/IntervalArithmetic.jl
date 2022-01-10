@@ -61,7 +61,7 @@ export
     RR, isentire, nai, isnai, isthin, iscommon, isatomic,
     widen, inf, sup, bisect, mince,
     eps, dist,
-    midpoint_radius, interval_from_midpoint_radius,
+    midpoint_radius,
     RoundTiesToEven, RoundTiesToAway,
     IntervalRounding,
     cancelminus, cancelplus, isbounded, isunbounded,

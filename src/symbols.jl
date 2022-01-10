@@ -1,15 +1,16 @@
 """
     ∅
 
-Empty interval of default flavor and `Float64` bounds. Can be typed as
-`\\emptyset<TAB>`.
+Empty interval of default flavor and default bounds.
+
+Alias of `emptyinterval()`. Can be typed as `\\emptyset<TAB>`.
 """
 const ∅ = emptyinterval()
 
 """
     ≺(a, b)
 
-Alias of `strictPrecedes`. Can be typed as `\\prec<TAB>`.
+Alias of `strictprecedes`. Can be typed as `\\prec<TAB>`.
 """
 const ≺ = strictprecedes
 
@@ -30,6 +31,8 @@ const ∞ = Inf
 """
     ℝ
 
-Alias of `RR`. Can be typed as `\\bbR<TAB>`.
+Entire interval of defaul flavor and default bounds.
+
+Alias of `RR()`. Can be typed as `\\bbR<TAB>`.
 """
-const ℝ = RR
+const ℝ = RR()

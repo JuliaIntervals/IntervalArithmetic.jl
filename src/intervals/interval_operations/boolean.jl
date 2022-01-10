@@ -176,3 +176,47 @@ end
 in(x::Interval, y::Interval) = throw(ArgumentError("$x ∈ $y is not defined, maybe you meant `⊂`"))
 in(x::Real, a::Complex{F}) where {F<:Interval} = x ∈ real(a) && 0 ∈ imag(a)
 in(x::Complex{T}, a::Complex{F}) where {T<:Real, F<:Interval} = real(x) ∈ real(a) && imag(x) ∈ imag(a)
+
+contains_zero(x::Interval{T}) where T = zero(T) ∈ x
+
+isempty(x::Interval) = (inf(x) == Inf && sup(x) == -Inf)
+isentire(x::Interval) = (inf(x) == -Inf && sup(x) == Inf)
+isbounded(x::Interval) = (isfinite(x.lo) && isfinite(x.hi)) || isempty(x)
+isunbounded(x::Interval) = !isbounded(x)
+
+"""
+    isthin(x)
+
+Checks if `x` is the set consisting of a single exactly
+representable float. Any float which is not exactly representable
+does *not* yield a thin interval. Corresponds to `isSingleton` of
+the standard.
+"""
+isthin(x::Interval) = (x.lo == x.hi)
+
+"""
+    iscommon(x)
+
+Checks if `x` is a **common interval**, i.e. a non-empty,
+bounded, real interval.
+"""
+function iscommon(x::Interval)
+    (isentire(x) || isempty(x) || isunbounded(x)) && return false
+    return true
+end
+"""
+    isatomic(x::Interval)
+
+Check whether an interval `x` is *atomic*, i.e. is unable to be split.
+This occurs when the interval is empty, or when the upper bound equals the lower
+bound or the bounds are consecutive floating point numbers.
+"""
+
+isatomic(x::Interval) = isempty(x) || (inf(x) == sup(x)) || (sup(x) == nextfloat(inf(x)))
+
+"""
+    isthinzero(x)
+
+Return wether the interval only contains zero.
+"""
+isthinzero(x::Interval) = iszero(x.lo) && iszero(x.hi)

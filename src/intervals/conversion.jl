@@ -76,3 +76,56 @@ end
 function atomic(::Type{F}, x::Interval) where {T, F<:Interval{T}}
     return Interval(T(x.lo, RoundDown), T(x.hi, RoundUp))
 end
+
+"""
+    widen(x)
+
+Widen the lowest and highest bounds of `x` to the previous and next representable
+floating-point numbers, respectively.
+"""
+widen(x::F) where {T<:AbstractFloat, F<:Interval{T}} =
+    F(prevfloat(inf(x)), nextfloat(sup(x)))
+
+"""
+    wideinterval(x::AbstractFloat)
+    wideinterval(::Interval, x::AbstractFloat)
+
+Returns the interval `[prevfloat(x), nextfloat(x)]`.
+
+Note that if no interval flavor is given, the returned interval is of the
+default interval flavor. See the documentation of `Interval` for more
+information about the default interval falvor.
+"""
+wideinterval(::Type{F}, x::T) where {F<:Interval, T<:AbstractFloat} =
+    F(prevfloat(x), nextfloat(x))
+wideinterval(x::T) where {T<:AbstractFloat} = wideinterval(Interval, x)
+
+"""
+    big53(x::Interval{Float64})
+
+Create an equivalent `BigFloat` interval to a given `Float64` interval.
+"""
+function big53(a::Interval{Float64})
+    setprecision(BigFloat, 53) do  # precision of Float64
+        return atomic(Interval{BigFloat}, a)
+    end
+end
+
+"""
+    big53(x::Float64)
+
+Convert `x` to `BigFloat`.
+"""
+function big53(x::Float64)
+    setprecision(BigFloat, 53) do
+        return BigFloat(x)
+    end
+end
+
+function Base.setrounding(f::Function, ::Type{Rational{T}}, 
+                          rounding_mode::RoundingMode) where T
+    setrounding(f, float(Rational{T}), rounding_mode)
+end
+
+float(x::Interval{T}) where T = atomic(Interval{float(T)}, x)
+big(x::Interval) = atomic(Interval{BigFloat}, x)

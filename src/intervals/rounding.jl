@@ -100,11 +100,9 @@ rounding_directions = [
 ]
 
 # TODO Check what type restriction are actually needed here
-# TODO :none mode is defined twice since it does not depend on the rounding
-# direction
 for (dir, RoundingDirection, outfloat) in rounding_directions
     #= :fast and :tight for functions supported by FastRounding.jl
-        and RoundingEmulator.jl =#
+        and RoundingEmulator.jl respectively =#
     # NOTE RoundingEmulator.jl only works with Float32 and Float64
     for (op, f) in ( (:+, :add), (:-, :sub), (:*, :mul), (:/, :div) )
         @eval function $op(::IntervalRounding{:fast}, a, b, ::$RoundingDirection)
@@ -168,7 +166,7 @@ for (dir, RoundingDirection, outfloat) in rounding_directions
         end
     end
 
-    # Unary functions not in CRlibm:
+    # Unary functions not in CRlibm
     for f in (:sqrt, :inv, :tanh, :asinh, :acosh, :atanh, :cot)
         @eval function $f(::IntervalRounding{:accurate}, a::AbstractFloat, ::$RoundingDirection)
             return $outfloat($f(a))
@@ -194,6 +192,22 @@ for (dir, RoundingDirection, outfloat) in rounding_directions
 end
 
 #= Default definitions, fallback and :none =#
+# Unary functions
+for f in vcat(CRlibm.functions, [:sqrt, :inv, :tanh, :asinh, :acosh, :atanh, :cot])
+    @eval $f(a::AbstractFloat, r::RoundingMode) = $f(interval_rounding(), a, r)
+    @eval $f(a::Real, r::RoundingMode) = $f(interval_rounding(), float(a), r)
+
+    # Fallback to :slow if the requested interval rounding is unavailable
+    @eval function $f(::IntervalRounding, a, r::RoundingMode)
+        return $f(IntervalRounding{:slow}(), a, r)
+    end
+
+    # No rounding
+    @eval function $f(::IntervalRounding{:none}, a, r::RoundingMode)
+        return $f(a)
+    end
+end
+
 # Binary functions
 for f in (:+, :-, :*, :/, :^, :atan)
     @eval $f(a::T, b::T, r::RoundingMode) where {T<:AbstractFloat} = $f(interval_rounding(), a, b, r)
@@ -210,21 +224,5 @@ for f in (:+, :-, :*, :/, :^, :atan)
     # No rounding
     @eval function $f(::IntervalRounding{:none}, a, b, r::RoundingMode)
         return $f(a, b)
-    end
-end
-
-# Unary functions
-for f in vcat(CRlibm.functions, [:sqrt, :inv, :tanh, :asinh, :acosh, :atanh, :cot])
-    @eval $f(a::AbstractFloat, r::RoundingMode) = $f(interval_rounding(), a, r)
-    @eval $f(a::Real, r::RoundingMode) = $f(interval_rounding(), float(a), r)
-
-    # Fallback to :slow if the requested interval rounding is unavailable
-    @eval function $f(::IntervalRounding, a, r::RoundingMode)
-        return $f(IntervalRounding{:slow}(), a, r)
-    end
-
-    # No rounding
-    @eval function $f(::IntervalRounding{:none}, a, r::RoundingMode)
-        return $f(a)
     end
 end

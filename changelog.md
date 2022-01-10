@@ -26,3 +26,4 @@ Changelog
 - (temporarily?) Dropped support for rational and complex intervals.
 - `interval` aliased to the more explicit `checked_interval`
 - Removed conversion from string to decorated interval, in favor of parsing.
+- Removed `interval_from_midpoint_radius`. It is implemented by `±`.
