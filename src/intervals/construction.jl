@@ -1,24 +1,64 @@
-# This file is part of the IntervalArithmetic.jl package; MIT licensed
+"""
+    IntervalArithmetic.default_bound()
 
-# TODO Use that
-# TODO DOcument it too
+Return the default bound for intervals.
+
+Can be redefined to change the default behavior for constructors that do
+not explicitly take the bound type as an argument, like `..`.
+
+Intervals only support bounds that are `AbstractFloat`.
+
+In general, what happens is that if none of the bounds is an `AbstractFloat`
+they get promoted to the default bound.
+Otherwise the constructors promote the two bounds to a common type and use
+that one as bound type.
+
+Example
+=======
+julia> IntervalArithmetic.default_bound()
+Float64
+
+julia> typeof(1..2)  # Both bounds are Int, so they get promoted to the default
+Interval{Float64}
+
+julia> typeof(1..2f0)  # One of the bound is Float32, so the bounds promote to it
+Interval{Float32}
+
+julia> IntervalArithmetic.default_bound() = Float32  # New default
+
+julia> typeof(1..2)  # Both bounds are Int, so they get promoted to the default
+Interval{Float32}
+
+julia> typeof(1..2.0)  # One of the bound is Float64, so the bounds promote to it
+Interval{Float64}
+"""
 default_bound() = Float64
 
-# TODO Better doc here
+@inline _normalisezero(a::Real) = ifelse(iszero(a) && signbit(a), copysign(a, 1), a)
+
 """
     Interval
 
 An interval for guaranteed computation.
+
+For the most part, it can be used as a drop-in replacement for real numbers.
+
+The computation is guaranteed in the sense that the image of the input
+interval is guaranteed to lie inside the returned interval.
 """
 struct Interval{T} <: Real
     lo::T
     hi::T
 
     function Interval{T}(a, b) where T
+        a = _normalisezero(a)
+        b = _normalisezero(b)
         new{T}(T(a, RoundDown), T(b, RoundUp))
     end
 
     function Interval{T}(a::T, b::T) where T
+        a = _normalisezero(a)
+        b = _normalisezero(b)
         new{T}(a, b)
     end
 end
@@ -44,31 +84,24 @@ Interval(a::T, b::Irrational) where {T<:AbstractFloat} = Interval{T}(a, T(b, Rou
 
 function Interval(a::Irrational, b::Irrational)
     T = default_bound()
-    return Interval{T}(T(a, RoundDown), T(b, RoundUp))
+    return Interval{T}(a, b)
 end
 
 #= Interval =#
 Interval{T}(x::Interval{T}) where T = x
-Interval{T}(x::Interval) where T = atomic(Interval{T}, x)
+Interval{T}(x::Interval) where T = Interval{T}(x.lo, x.hi)
 
 #= Complex =#
 Interval(x::Complex) = Interval(real(x)) + im*Interval(imag(x))
 
-"""
-    numtype(x::Interval)
+# These definitions has been put there because generated functions must be
+# defined after all methods they use.
+@generated function Interval{T}(x::Irrational) where T
+    res = Interval{T}(x(), x())  # Precompute the interval
+    return :(return $res)  # Set body of the function to return the precomputed result
+end
 
-Returns the type of the bounds of the interval.
-
-### Example
-
-```julia
-julia> numtype(1..2)
-Float64
-```
-"""
-numtype(::Interval{T}) where T = T
-
-@inline _normalisezero(a::Real) = ifelse(iszero(a) && signbit(a), copysign(a, 1), a)
+Interval(x::Irrational) = Interval{default_bound()}(x)
 
 """
     is_valid_interval(a::Real, b::Real)
@@ -95,8 +128,7 @@ is_valid_interval(a::Real) = true
 """
     interval(a, b)
 
-`interval(a, b)` checks whether [a, b] is a valid `Interval`, using the
-(non-exported) `is_valid_interval` function.
+Create an interval, checking whether [a, b] is a valid `Interval`
 If so, then an `Interval(a, b)` object is returned;
 if not, a warning is printed and the empty interval is returned.
 """
@@ -111,8 +143,6 @@ end
 
 interval(a::Real) = interval(a, a)
 
-# TODO Choose a good name
-# NOTE We use a different name in tests for easier refactor
 const checked_interval = interval
 
 "Make an interval even if a > b"
@@ -136,7 +166,66 @@ number (like `0.1`).
 """
 ..(a, b) = checked_interval(a, b)
 
-# TODO Document and find ref in the standard
+# TODO Find ref in the standard
+"""
+    a ± b
+
+Create the interval `[a - b, a + b]`.
+
+Despite using the center-radius notation for its creation, the interval is
+still represented by its bound internally.
+"""
 a ± b = checked_interval(-(a, b, RoundDown), +(a, b, RoundUp))
 ±(a::Interval, b) = Interval(-(a.lo, b, RoundDown), +(a.hi, b, RoundUp))
 
+"""
+    atomic(::Type{<:Interval}, x)
+
+Construct the tightest interval of a given type that contains the value `x`.
+
+If `x` is an `AbstractString`, the interval is created by calling `parse`.
+
+If `x` is an `AbstractFloat`, the interval is widen to two eps to be sure
+to contain the number that was typed in.
+
+Otherwise it is the same as using the `Interval` constructor directly.
+"""
+atomic(::Type{F}, x) where {F<:Interval} = F(x)
+atomic(::Type{F}, x::AbstractString) where {F<:Interval} = parse(F, x)
+
+function atomic(::Type{F}, x::AbstractFloat) where {T, F<:Interval{T}}
+    lo = T(x, RoundDown)
+    hi = T(x, RoundUp)
+    if x == lo
+        lo = prevfloat(lo)
+    end
+    if x == hi
+        hi = nextfloat(hi)
+    end
+    return Interval(lo, hi)
+end
+
+"""
+    big53(x::Interval{Float64})
+
+Create an equivalent `BigFloat` interval to a given `Float64` interval.
+"""
+function big53(a::Interval{Float64})
+    return setprecision(BigFloat, 53) do  # precision of Float64
+        return Interval{BigFloat}(a)
+    end
+end
+
+"""
+    big53(x::Float64)
+
+Convert `x` to `BigFloat`.
+"""
+function big53(x::Float64)
+    return setprecision(BigFloat, 53) do
+        return BigFloat(x)
+    end
+end
+
+float(x::Interval{T}) where T = atomic(Interval{float(T)}, x)
+big(x::Interval) = atomic(Interval{BigFloat}, x)

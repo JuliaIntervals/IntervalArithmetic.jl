@@ -28,7 +28,7 @@ import Base:
     sinh, cosh, tanh, coth, csch, sech, asinh, acosh, atanh, sinpi, cospi,
     union, intersect, isempty,
     convert, promote_rule, eltype, size,
-    BigFloat, float, widen, big,
+    BigFloat, float, big,
     ∩, ∪, ⊆, ⊇, ∈, eps,
     floor, ceil, trunc, sign, round, copysign, flipsign, signbit,
     expm1, log1p,
@@ -59,7 +59,7 @@ export
     isweaklyless, isstrictless,
     ≛,
     RR, isentire, nai, isnai, isthin, iscommon, isatomic,
-    widen, inf, sup, bisect, mince,
+    inf, sup, bisect, mince,
     eps, dist,
     midpoint_radius,
     RoundTiesToEven, RoundTiesToAway,
@@ -105,6 +105,10 @@ function __init__()
     setrounding(BigFloat, RoundNearest)
 end
 
+function Base.setrounding(f::Function, ::Type{Rational{T}}, 
+    rounding_mode::RoundingMode) where T
+    return setrounding(f, float(Rational{T}), rounding_mode)
+end
 
 ## Includes
 
@@ -125,16 +129,5 @@ include("plot_recipes/plot_recipes.jl")
     Region{T} = Union{Interval{T}, IntervalBox{T}}
 """
 const Region{T} = Union{Interval{T}, IntervalBox{T}}
-
-
-# These definitions has been put there because generated functions must be
-# defined after all methods they use.
-@generated function Interval{T}(x::Irrational) where T
-    res = atomic(Interval{T}, x())  # Precompute the interval
-    return :(return $res)  # Set body of the function to return the precomputed result
-end
-
-Interval{BigFloat}(x::Irrational) = atomic(Interval{BigFloat}, x)
-Interval(x::Irrational) = Interval{Float64}(x)
 
 end # module IntervalArithmetic

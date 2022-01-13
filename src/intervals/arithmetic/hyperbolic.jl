@@ -67,7 +67,6 @@ end
 for f in (:tanh, :asinh, :acosh, :atanh)
     @eval function ($f)(a::F) where {F<:Interval{Float64}}
         isempty(a) && return a
-
-        return atomic(F, ($f)(big53(a)) )
+        return F(($f)(big53(a)) )
     end
 end

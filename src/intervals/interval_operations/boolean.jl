@@ -204,6 +204,7 @@ function iscommon(x::Interval)
     (isentire(x) || isempty(x) || isunbounded(x)) && return false
     return true
 end
+
 """
     isatomic(x::Interval)
 
@@ -211,7 +212,6 @@ Check whether an interval `x` is *atomic*, i.e. is unable to be split.
 This occurs when the interval is empty, or when the upper bound equals the lower
 bound or the bounds are consecutive floating point numbers.
 """
-
 isatomic(x::Interval) = isempty(x) || (inf(x) == sup(x)) || (sup(x) == nextfloat(inf(x)))
 
 """

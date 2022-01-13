@@ -19,6 +19,7 @@ Review intervals folder:
       ✔ It is fine actually @done(22-01-10 00:55)
     ✔ Decide if `inf` and `sup` should be used as default or rather `x.lo` and `x.hi` @done(21-12-29 23:29)
       ✔ `inf` and `sup` should be strict equivalent to `x.lo` and `x.hi` @done(21-12-29 23:29)
+    ☐ Deprecate `interval` in favor of `checked_interval`?
 
   Global precision:
     ✔ Get rid of it @done(19-08-20 16:49)

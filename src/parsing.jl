@@ -25,9 +25,9 @@ function parse(::Type{DecoratedInterval{T}}, s::AbstractString) where T
 end
 
 """
-    parse(DecoratedInterval, s::AbstractString)
+    parse(Interval, s::AbstractString)
 
-Parse a string of as an `Interval`, according to the grammar specified
+Parse a string as an `Interval`, according to the grammar specified
 in Section 9.7 of the IEEE Std 1788-2015, with some extensions.
 
 The created interval is tight around the value described by the string,

@@ -30,8 +30,7 @@ in the interval; cf. the formula for sine of an interval in
 Tucker, *Validated Numerics*.
 """
 function find_quadrants(::Type{F}, x) where {F<:Interval}
-    temp = atomic(F, x) / half_pi(F)
-
+    temp = F(x) / half_pi(F)
     return floor(temp.lo), floor(temp.hi)
 end
 
@@ -327,7 +326,7 @@ end
 function atan(y::Interval{T}, x::Interval{S}) where {T, S}
     F = Interval{promote_type(T, S)}
     (isempty(y) || isempty(x)) && return emptyinterval(F)
-    return atomic(F, atan(big(y), big(x)))
+    return F(atan(big(y), big(x)))
 end
 
 function atan(y::Interval{BigFloat}, x::Interval{BigFloat})

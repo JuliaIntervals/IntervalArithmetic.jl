@@ -2,7 +2,6 @@
 include("construction.jl")
 include("construction_macros.jl")
 include("real_interface.jl")
-include("conversion.jl")
 
 # Rounding
 include("rounding.jl")

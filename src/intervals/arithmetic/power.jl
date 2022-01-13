@@ -10,7 +10,7 @@
 
 # Write explicitly like this to avoid ambiguity warnings:
 for T in (:Integer, :Float64, :BigFloat, :Interval)
-    @eval ^(a::Interval{Float64}, x::$T) = atomic(Interval{Float64}, big53(a)^x)
+    @eval ^(a::Interval{Float64}, x::$T) = Interval{Float64}(big53(a)^x)
 end
 
 
@@ -29,11 +29,11 @@ Base.literal_pow(::typeof(^), x::Interval{T}, ::Val{p}) where {T,p} = x^p
 
 Implement the `pow` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-^(a::F, b::F) where {F<:Interval} = atomic(F, big53(a)^b)
+^(a::F, b::F) where {F<:Interval} = F(big53(a)^b)
 ^(a::F, x::AbstractFloat) where {F<:Interval{BigFloat}} = a^big(x)
 
 for T in (:AbstractFloat, :Integer)
-    @eval ^(a::F, x::$T) where {F<:Interval} = atomic(F, big53(a)^x)
+    @eval ^(a::F, x::$T) where {F<:Interval} = F(big53(a)^x)
 end
 
 function ^(a::F, n::Integer) where {F<:Interval{BigFloat}}
@@ -85,7 +85,6 @@ end
 
 # Floating-point power of a BigFloat interval:
 function ^(a::F, x::BigFloat) where {F<:Interval{BigFloat}}
-
     domain = F(0, Inf)
 
     if isthinzero(a)
@@ -100,33 +99,29 @@ function ^(a::F, x::BigFloat) where {F<:Interval{BigFloat}}
     a = a ∩ domain
     (isempty(x) || isempty(a)) && return emptyinterval(F)
 
-    xx = atomic(F, x)
+    xx = F(x)
 
     # @round() can't be used directly, because both arguments may
     # Inf or -Inf, which throws an error
     # lo = @round(a.lo^xx.lo, a.lo^xx.lo)
     lolod = @round_down(a.lo^xx.lo)
     lolou = @round_up(a.lo^xx.lo)
-    lo = (lolod == Inf || lolou == -Inf) ?
-        wideinterval(lolod) : F(lolod, lolou)
+    lo = (lolod == Inf) ? F(prefloat(Inf), Inf) : F(lolod, lolou)
 
     # lo1 = @round(a.lo^xx.hi, a.lo^xx.hi)
     lohid = @round_down(a.lo^xx.hi)
     lohiu = @round_up(a.lo^xx.hi)
-    lo1 = (lohid == Inf || lohiu == -Inf) ?
-        wideinterval(lohid) : F(lohid, lohiu)
+    lo1 = (lohid == Inf) ? F(prefloat(Inf), Inf) : F(lohid, lohiu)
 
     # hi = @round(a.hi^xx.lo, a.hi^xx.lo)
     hilod = @round_down(a.hi^xx.lo)
     hilou = @round_up(a.hi^xx.lo)
-    hi = (hilod == Inf || hilou == -Inf) ?
-        wideinterval(hilod) : F(hilod, hilou)
+    hi = (hilod == Inf) ? F(prefloat(Inf), Inf) : F(hilod, hilou)
 
     # hi1 = @round(a.hi^xx.hi, a.hi^xx.hi)
     hihid = @round_down(a.hi^xx.hi)
     hihiu = @round_up(a.hi^xx.hi)
-    hi1 = (hihid == Inf || hihiu == -Inf) ?
-        wideinterval(hihid) : F(hihid, hihiu)
+    hi1 = (hihid == Inf) ? F(prefloat(Inf), Inf) : F(hihid, hihiu)
 
     lo = hull(lo, lo1)
     hi = hull(hi, hi1)
@@ -138,8 +133,7 @@ function ^(a::Interval{Rational{T}}, x::AbstractFloat) where {T<:Integer}
     # TODO Check wheter the type should be hardcoded here or be the 
     # default bound type
     a = Interval{Float64}(a.lo.num/a.lo.den, a.hi.num/a.hi.den)
-    a = a^x
-    return atomic(F, a)
+    return F(a^x)
 end
 
 # Rational power
@@ -269,7 +263,7 @@ for f in (:exp2, :exp10, :cbrt)
             end
         end
 
-    @eval ($f)(a::F) where {F<:Interval} = atomic(F, $f(big(a)))  # no CRlibm version
+    @eval ($f)(a::F) where {F<:Interval} = F($f(big(a)))  # no CRlibm version
 
     @eval function ($f)(a::F) where {F<:Interval{BigFloat}}
             isempty(a) && return a

@@ -24,7 +24,6 @@ end
 
     @test isa(@floatinterval(0.1), Interval)
     @test c ≛ Interval(prevfloat(0.1), nextfloat(0.2))
-    @test widen(c) ≛ Interval(prevfloat(0.1, 2), nextfloat(0.2, 2))
 
     @test Interval{Float64}(pi) ≛ Interval(3.141592653589793, 3.1415926535897936)
 end
