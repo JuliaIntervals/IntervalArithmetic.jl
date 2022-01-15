@@ -11,7 +11,6 @@ Review intervals folder:
     ✔ Check if intervals of different flavor type can/should be equal in the sense of `isidentical` @done(19-12-08 01:12)
     ✔ Operation on different flavors of interval should always error. @done(21-12-29 23:29)
     ☐ Check if `signbit` is in the standard
-    ☐ Test that definition of the default bound and flavor works
     ✔ Distribute functions from `special.jl` and `misc.jl` somewhere more informative @done(22-01-10 02:12)
   
   Discussion:
@@ -36,8 +35,8 @@ Review intervals folder:
     ✔ Define the flavor dependent symbols like ==, <, <= @done(21-12-29 23:28)
     
   intervals.jl:
-    ☐ Split constructors from the includes
-    ☐ Put helper, utils function (e.g. `eltype`) somewhere else
+    ✔ Split constructors from the includes @done(22-01-15 19:26)
+    ✔ Put helper, utils function (e.g. `eltype`) somewhere else @done(22-01-15 19:26)
   
   macros.jl:
     ✔ Review @done(19-08-23 01:57)
@@ -213,7 +212,7 @@ Review other folders:
 
 Bugs:
   ✔ `Int` times `Interval` errors (e.g. `2*a`) @done(19-12-14 23:50)
-  ☐ `(1..1) * pi` is not equal to `Interval(pi)`
+  ✔ `(1..1) * pi` is not equal to `Interval(pi)` @done(22-01-15 20:49)
   ☐ Find why 5 of the hyperb tests are failing only when put within the same testset as the others
 
 Documentation:
@@ -226,3 +225,6 @@ Tests:
   Dropped support for Complex for now
   ✔ Use `===` or `≛` instead of `==` @done(21-12-29 23:26)
   ☐ Test all flavors
+  ☐ Test switching the default bound
+  ☐ Test switching the interval rounding
+  ☐ Test switchign the pointwise politic

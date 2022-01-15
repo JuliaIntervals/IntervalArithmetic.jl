@@ -79,6 +79,15 @@ end
     @test (1..1) / 10.0 ≛ Interval(0.09999999999999999, 0.1)
 end
 
+@testset "Arithmetic with irrational" begin
+    @test (1..1) * π ≛ Interval(π)
+    @test π * (1..1) ≛ Interval(π)
+    @test π + (0..0) ≛ Interval(π)
+    @test (0..0) + π ≛ Interval(π)
+    @test π - (0..0) ≛ Interval(π)
+    @test (0..0) - π ≛ -Interval(π)
+end
+
 @testset "Power tests" begin
     @test Interval(0,3) ^ 2 ≛ Interval(0, 9)
     @test Interval(2,3) ^ 2 ≛ Interval(4, 9)

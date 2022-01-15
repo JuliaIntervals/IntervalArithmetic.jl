@@ -23,11 +23,12 @@ Implement the `neg` function of the IEEE Std 1788-2015 (Table 9.1).
 
 Implement the `add` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function +(a::F, b::Real) where {F<:Interval}
+function +(a::F, b::T) where {T, F<:Interval{T}}
     isempty(a) && return emptyinterval(F)
     return @round(F, a.lo + b, a.hi + b)
 end
-+(b::Real, a::F) where {F<:Interval} = a + b
++(a::Interval{T}, b::S) where {T, S<:Real} = a + Interval{T}(b)
++(b::Real, a::Interval) = a + b
 
 function +(a::F, b::F) where {F<:Interval}
     (isempty(a) || isempty(b)) && return emptyinterval(F)
@@ -51,10 +52,13 @@ function -(b::Real, a::F) where {F<:Interval}
     return @round(F, b - a.hi, b - a.lo)
 end
 
-function -(a::F, b::F) where {F<:Interval}
+function -(a::F, b::F) where {T<:Real, F<:Interval{T}}
     (isempty(a) || isempty(b)) && return emptyinterval(F)
     return @round(F, a.lo - b.hi, a.hi - b.lo)
 end
+
+-(a::Interval{T}, b::S) where {T<:Real, S<:Real} = a - Interval{T}(b)
+-(a::T, b::Interval{S}) where {T<:Real, S<:Real} = Interval{S}(a) - b
 
 """
     scale(α, a::Interval)
@@ -85,7 +89,7 @@ function *(x::T, a::F) where {T<:Real, F<:Interval{T}}
     end
 end
 
-*(x::T, a::F) where {T<:Real, S, F<:Interval{S}} = convert(S, x)*a
+*(x::T, a::F) where {T<:Real, S, F<:Interval{S}} = Interval{S}(x) * a
 *(a::F, x::T) where {T<:Real, S, F<:Interval{S}} = x*a
 
 function *(a::F, b::F) where {F<:Interval}

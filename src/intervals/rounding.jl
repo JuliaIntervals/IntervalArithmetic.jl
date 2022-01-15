@@ -11,18 +11,22 @@ interval rounding types, e.g.
 +(IntervalRounding{:none}(), a, b, RoundDown)
 
 The current allowed rounding types are
-- :fast     # fast, tight (correct) rounding with errorfree arithmetic via FastRounding.jl
-- :tight # tight (correct) rounding with improved errorfree arithmetic via RoundingEmulator.jl
-- :accurate # fast "accurate" rounding using prevfloat and nextfloat  (slightly wider than needed)
-- :slow    # tight (correct) rounding by changing rounding mode (slow)
-- :none     # no rounding (for speed comparisons; no enclosure is guaranteed)
+- :fast  # fast, tight (correct) rounding with errorfree arithmetic via FastRounding.jl
+- :tight  # tight (correct) rounding with improved errorfree arithmetic via RoundingEmulator.jl
+- :accurate  # fast "accurate" rounding using prevfloat and nextfloat  (slightly wider than needed)
+- :slow  # tight (correct) rounding by changing rounding mode (slow)
+- :none  # no rounding (for speed comparisons; no enclosure is guaranteed)
 
-The function `setrounding(Interval, rounding_type)` then defines rounded
- functions *without* an explicit rounding type, e.g.
+All function on intervals are then defined by default as
+    +(IntervalArithmetic.interval_rounding(), a, b, RoundDown)
 
-sin(x, r::RoundingMode) = sin(IntervalRounding{:slow}, x, r)
+By rededfining `IntervalArithmetic.interval_rounding()`, the user can
+select the default.
 
-These are overwritten when `setrounding(Interval, rounding_type)` is called again.
+Moreover the `:slow` rounding mode is used as a fallback if the chosen
+rounding mode is not available.
+This is done by defining the generic case as
+    +(::IntervalRounding, a, b, RoundDown) = +(IntervalRounding{:slow}(), a, b, RoundDown)
 =#
 
 
@@ -82,7 +86,7 @@ zero(a::Interval{T}, ::RoundingMode) where {T<:AbstractFloat} = zero(T)
 zero(::Type{T}, ::RoundingMode) where {T<:AbstractFloat} = zero(T)
 
 ## Rationals
-# TODO (?) Restore support for rational intervals
+# TODO Restore full support for rational intervals
 # no-ops for rational rounding:
 for f in (:+, :-, :*, :/)
     @eval $f(a::T, b::T, ::RoundingMode) where {T<:Rational} = $f(a, b)
@@ -99,7 +103,6 @@ rounding_directions = [
     (:up, RoundingMode{:Up}, nextfloat)
 ]
 
-# TODO Check what type restriction are actually needed here
 for (dir, RoundingDirection, outfloat) in rounding_directions
     #= :fast and :tight for functions supported by FastRounding.jl
         and RoundingEmulator.jl respectively =#
