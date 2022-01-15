@@ -29,6 +29,13 @@ Implement the `sup` function of the IEEE Std 1788-2015 (Table 9.2).
 sup(a::Interval) = a.hi
 
 """
+    bounds(a::Interval)
+
+Bounds of an interval as a tuple.
+"""
+bounds(a::Interval) = (a.lo, a.hi)
+
+"""
     mid(a::Interval)
 
 Find the midpoint of interval `a`.
@@ -90,7 +97,7 @@ Implement the `wid` function of the IEEE Std 1788-2015 (Table 9.2).
 """
 function diam(a::F) where {T, F<:Interval{T}}
     isempty(a) && return convert(T, NaN)
-    @round_up(a.hi - a.lo)  # IEEE1788 section 12.12.8
+    return -(a.hi, a.lo, RoundUp)  # IEEE1788 section 12.12.8
 end
 
 """

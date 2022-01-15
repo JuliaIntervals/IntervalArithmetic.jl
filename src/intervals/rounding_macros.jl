@@ -53,12 +53,3 @@ macro round(ex1, ex2)
     F = Interval{default_bound()}
     :($(esc(F))($(round_expr(ex1, RoundDown)), $(round_expr(ex2, RoundUp))))
 end
-
-# TODO These two are barely use, they should be removed
-macro round_down(ex1)
-     round_expr(ex1, RoundDown)
-end
-
-macro round_up(ex1)
-     round_expr(ex1, RoundUp)
-end

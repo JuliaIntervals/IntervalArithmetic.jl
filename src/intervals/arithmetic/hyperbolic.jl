@@ -53,8 +53,7 @@ function atanh(a::F) where {F<:Interval}
 
     isempty(a) && return a
 
-    res_lo = @round_down(atanh(a.lo))
-    res_hi = @round_up(atanh(a.hi))
+    res_lo, res_hi = extrema(@round(F, atanh(a.lo), atanh(a.hi)))
 
     # The IEEE Std 1788-2015 does not allow intervals like of the
     # form Interval(∞,∞) and Interval(-∞,-∞) for set based intervals

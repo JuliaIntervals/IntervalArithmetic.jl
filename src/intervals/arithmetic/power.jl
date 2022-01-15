@@ -101,27 +101,17 @@ function ^(a::F, x::BigFloat) where {F<:Interval{BigFloat}}
 
     xx = F(x)
 
-    # @round() can't be used directly, because both arguments may
-    # Inf or -Inf, which throws an error
-    # lo = @round(a.lo^xx.lo, a.lo^xx.lo)
-    lolod = @round_down(a.lo^xx.lo)
-    lolou = @round_up(a.lo^xx.lo)
-    lo = (lolod == Inf) ? F(prefloat(Inf), Inf) : F(lolod, lolou)
+    lo = @round(F, a.lo^xx.lo, a.lo^xx.lo)
+    lo = (lo.lo == Inf) ? F(prefloat(Inf), Inf) : lo
 
-    # lo1 = @round(a.lo^xx.hi, a.lo^xx.hi)
-    lohid = @round_down(a.lo^xx.hi)
-    lohiu = @round_up(a.lo^xx.hi)
-    lo1 = (lohid == Inf) ? F(prefloat(Inf), Inf) : F(lohid, lohiu)
+    lo1 = @round(F, a.lo^xx.hi, a.lo^xx.hi)
+    lo1 = (lo1.lo == Inf) ? F(prefloat(Inf), Inf) : lo1
 
-    # hi = @round(a.hi^xx.lo, a.hi^xx.lo)
-    hilod = @round_down(a.hi^xx.lo)
-    hilou = @round_up(a.hi^xx.lo)
-    hi = (hilod == Inf) ? F(prefloat(Inf), Inf) : F(hilod, hilou)
+    hi = @round(F, a.hi^xx.lo, a.hi^xx.lo)
+    hi = (hi.lo == Inf) ? F(prefloat(Inf), Inf) : hi
 
-    # hi1 = @round(a.hi^xx.hi, a.hi^xx.hi)
-    hihid = @round_down(a.hi^xx.hi)
-    hihiu = @round_up(a.hi^xx.hi)
-    hi1 = (hihid == Inf) ? F(prefloat(Inf), Inf) : F(hihid, hihiu)
+    hi1 = @round(F, a.hi^xx.hi, a.hi^xx.hi)
+    hi1 = (hi1.lo == Inf) ? F(prefloat(Inf), Inf) : hi1
 
     lo = hull(lo, lo1)
     hi = hull(hi, hi1)

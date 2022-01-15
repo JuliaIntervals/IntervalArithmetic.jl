@@ -19,16 +19,13 @@ function cancelminus(a::F, b::F) where {F<:Interval}
 
     diam(a) < diam(b) && return RR(F)
 
-    c_lo = @round_down(a.lo - b.lo)
-    c_hi = @round_up(a.hi - b.hi)
-
+    c_lo, c_hi = bounds(@round(F, a.lo - b.lo, a.hi - b.hi))
     c_lo > c_hi && return RR(F)
 
     c_lo == Inf && return F(prevfloat(c_lo), c_hi)
     c_hi == -Inf && return F(c_lo, nextfloat(c_hi))
 
-    a_lo = @round_down(b.lo + c_lo)
-    a_hi = @round_up(b.hi + c_hi)
+    a_lo, a_hi = bounds(@round(b.lo + c_lo, b.hi + c_hi))
 
     if a_lo ≤ a.lo ≤ a.hi ≤ a_hi
         if nextfloat(a.hi) < a_hi || prevfloat(a.lo) > a_hi
