@@ -1,5 +1,3 @@
-# This file is part of the IntervalArithmetic.jl package; MIT licensed
-
 """
     @interval
 
@@ -7,14 +5,6 @@ Macro creating an interval.
 
 Walk through the expression to convert each number literal into an interval
 construct.
-
-Example
-=======
-    @interval sin(0.1) + cos(0.2)
-
-is equivalent to
-
-    sin(I"0.1") + cos(I"0.2")
 """
 macro interval(expr)
     return wrap_literals(Interval{default_bound()}, expr)

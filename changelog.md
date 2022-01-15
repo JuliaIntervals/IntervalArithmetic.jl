@@ -13,17 +13,19 @@ Changelog
 - Renamed `entireinterval` -> `RR`
 - Rewritten and much simplified parser for interval from string, using CombinedParsers.jl
 - Rewritten and simplified `atomic`
-- `atomic` of float now return an interval that is 2 eps wide, to ensure any possible input is included in the returned interval (`@interval` follow the same mechanism)
-- As a consequence, `@interval` has been repalced by bare `Interval` in many places in the tests, or equality of interval has been replaced by inclusion
+- `atomic` of float now return an interval that is 2 eps wide, to ensure any possible input is included in the returned interval (`@interval` follow the same mechanism).
+- As a consequence, `@interval` has been replaced by bare `Interval` in many places in the tests, or equality of interval has been replaced by inclusion
 - Aliased `..` to `checked_interval(a, b)`, that is no smart thing is done anymore
 - Tests that seemed to have been tailored to the behavior of the old `@interval` have been modified or marked as `@test_broken` when the expected value can not be easily derived
 - As a result of the aboves it seems like parsing is now tighter than before
-- Introduced overwrittable functions for default flavor, bound type and pointwise politic
-- Removed `setrounding(Interval, mode)` and simplified `rouding.jl`
 - Introduced the concept of pointwise politic i.e. what to do with boolean operation generally used for control flow, like `==`. Use ternary logic as default
+- Introduced overwrittable functions for choosing used flavor, default bound type and pointwise politic
+- Removed `setrounding(Interval, mode)` and simplified `rouding.jl`
 - Identity of intervals now use the `\stareq` infix operator, `==` being reserved for pointwise equality test
 - Removed all promotion mechanism involving intervals (to more easily ensure correctness, most of the things not explicitly define now error)
 - (temporarily?) Dropped support for rational and complex intervals.
 - `interval` aliased to the more explicit `checked_interval`
 - Removed conversion from string to decorated interval, in favor of parsing.
+- Removed `convert`, `widen` and `wideinterval`.
 - Removed `interval_from_midpoint_radius`. It is implemented by `±`.
+- Removed `force_interval`

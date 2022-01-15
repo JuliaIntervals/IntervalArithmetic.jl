@@ -145,12 +145,6 @@ interval(a::Real) = interval(a, a)
 
 const checked_interval = interval
 
-"Make an interval even if a > b"
-function force_interval(a, b)
-    a > b && return interval(b, a)  # check == true to check for NaN
-    return interval(a, b)
-end
-
 """
     a..b
     ..(a, b)

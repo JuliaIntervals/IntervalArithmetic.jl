@@ -283,15 +283,6 @@ end
     @test_logs (:warn,) @test isempty(3..2)
 end
 
-import IntervalArithmetic: force_interval
-@testset "force_interval" begin
-    @test force_interval(4, 3) ≛ Interval(3, 4)
-    @test force_interval(4, Inf) ≛ Interval(4, Inf)
-    @test force_interval(Inf, 4) ≛ Interval(4, Inf)
-    @test force_interval(Inf, -Inf) ≛ Interval(-Inf, Inf)
-    @test_logs (:warn,) @test isempty(force_interval(NaN, 3))
-end
-
 @testset "Zero interval" begin
     @test zero(Interval{Float64}) ≛ Interval{Float64}(0, 0)
     @test zero(0 .. 1) ≛ Interval{Float64}(0, 0)
