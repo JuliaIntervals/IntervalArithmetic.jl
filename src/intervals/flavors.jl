@@ -1,6 +1,3 @@
-# TODO Add support for Cset flavor
-# TODO Properly document everything
-# TODO Make Cset the default ?
 """
     Flavor{F}
 
@@ -20,12 +17,13 @@ Currently only Flavor{:set_based} is supported.
     by a thin zero return the empty interval.
     The edge cases are
         - `x/(0..0) ≛ ∅`
-        - `(0..0)/(0..0) ≛ ∅`  # TODO Find ref for that It is not consistent with what we test for extended div !
+        - `(0..0)/(0..0) ≛ ∅`
         - `(0..0)*(-Inf..Inf) ≛ 0`
         - `Inf ∈ (0..Inf) == false`
+    This flavor is described and required in part 2 of the IEEE Std 1799-2015.
 - `:cset` (not implemented) : Elements of an interval are either real numbers
     or `±Inf`, applying standard rule for arithmetic with infinity.
-    The edge cases are  # TODO Check those rules
+    The edge cases are
         - `x/(0..0) ≛ (-Inf..Inf)`
         - `(0..0)/(0..0) ≛ (-Inf..Inf)`
         - `(0..0)*(-Inf..Inf) ≛ (-Inf..Inf)`
@@ -35,10 +33,12 @@ struct Flavor{F} end
 
 current_flavor() = Flavor{:set_based}()
 
+# :set_based
 """
-    zero_times_infinity(::Flavor, x)
+    zero_times_infinity(::Flavor, ::Type{T})
 
-Return the result of zero times positive infinity for the given flavor.
+Return the result of zero times positive infinity for the given flavor
+and number type `T`.
 """
 zero_times_infinity(::Flavor{:set_based}, ::Type{T}) where T = zero(T)
 
@@ -52,3 +52,8 @@ function div_by_thin_zero(::Flavor{:set_based}, x::Interval{T}) where T
 end
 
 contains_infinity(::Flavor{:set_based}, x::Interval) = false
+
+# Default
+zero_times_infinity(T) = zero_times_infinity(current_flavor(), T)
+div_by_thin_zero(x) = div_by_thin_zero(current_flavor(), x)
+contains_infinity(x) = contains_infinity(current_flavor(), x)

@@ -45,6 +45,20 @@ For the most part, it can be used as a drop-in replacement for real numbers.
 
 The computation is guaranteed in the sense that the image of the input
 interval is guaranteed to lie inside the returned interval.
+
+The validity of the interval is *not* tested by this bare constructor.
+For a constructor that complies with the requirement of a constructor
+according to the IEEE Std 1788-2015, use one of the other convenience
+constructors:
+- `checked_interval(a, b)` Explicitly checked interval.
+- `a..b` Better looking alias of `checked_interval`.
+- `m ± r` Midpoint radius representation.
+- `@interval(expr)` Convenience macro replacing all number literal in `expr`
+    by intervals.
+- `I"desc"` Parse the string `"desc"` according to the standard, allowing
+    more flexible syntax and guaranteeing that the typed decimal numbers
+    are included in the interval even if they can not be represented as
+    floating point numbers.
 """
 struct Interval{T} <: Real
     lo::T
@@ -160,14 +174,13 @@ number (like `0.1`).
 """
 ..(a, b) = checked_interval(a, b)
 
-# TODO Find ref in the standard
 """
     a ± b
 
 Create the interval `[a - b, a + b]`.
 
 Despite using the center-radius notation for its creation, the interval is
-still represented by its bound internally.
+still represented by its bounds internally.
 """
 a ± b = checked_interval(-(a, b, RoundDown), +(a, b, RoundUp))
 ±(a::Interval, b) = Interval(-(a.lo, b, RoundDown), +(a.hi, b, RoundUp))

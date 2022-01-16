@@ -97,12 +97,13 @@ end
 >=(::PointwisePolitic{:ternary}, x::Interval, y::Interval) = !<(PointwisePolitic{:ternary}(), x, y)
 
 # Boolean functions
-# TODO this interacts with flavors
+# NOTE this interacts with flavors.
 function isinf(::PointwisePolitic{:ternary}, x::Interval)
-    if x.lo === -Inf || x.hi === Inf
-        isthin(x) && return true
+    if contains_infinity(x)
+        isthing(x) && return true
         return missing
     end
+    
     return false
 end
 

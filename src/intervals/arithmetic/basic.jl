@@ -105,8 +105,8 @@ end
 
 # Helper functions for multiplication
 function unbounded_mult(::Type{F}, x::T, y::T, r::RoundingMode) where {T, F<:Interval{T}}
-    iszero(x) && return sign(y)*zero_times_infinity(current_flavor(), T)
-    iszero(y) && return sign(x)*zero_times_infinity(current_flavor(), Transpose)
+    iszero(x) && return sign(y)*zero_times_infinity(T)
+    iszero(y) && return sign(x)*zero_times_infinity(T)
     return *(x, y, r)
 end
 
@@ -138,7 +138,7 @@ Note: the behavior of the division is flavor dependent for some edge cases.
 """
 function /(a::F, x::Real) where {F<:Interval}
     isempty(a) && return emptyinterval(T)
-    iszero(x) && return div_by_thin_zero(current_flavor(), a)
+    iszero(x) && return div_by_thin_zero(a)
 
     if x ≥ 0.0
         return @round(F, a.lo/x, a.hi/x)
@@ -151,7 +151,7 @@ end
 
 function /(a::F, b::F) where {T, F<:Interval{T}}
     (isempty(a) || isempty(b)) && return emptyinterval(F)
-    isthinzero(b) && return div_by_thin_zero(current_flavor(), a)
+    isthinzero(b) && return div_by_thin_zero(a)
 
     if b.lo > zero(T) # b strictly positive
         a.lo >= zero(T) && return @round(F, a.lo/b.hi, a.hi/b.lo)
@@ -197,7 +197,7 @@ function inv(a::F) where {T, F<:Interval{T}}
         a.lo < zero(T) == a.hi && return @round(F, T(-Inf), inv(a.lo))
         a.lo == zero(T) < a.hi && return @round(F, inv(a.hi), T(Inf))
         a.lo < zero(T) < a.hi && return RR(F)
-        isthinzero(a) && return div_by_thin_zero(current_flavor(), one(F))
+        isthinzero(a) && return div_by_thin_zero(one(F))
     end
 
     return @round(F, inv(a.hi), inv(a.lo))

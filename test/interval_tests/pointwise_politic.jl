@@ -35,7 +35,6 @@ a = Interval(-1, 0)
 b = Interval(-0.5, 0.5)
 c = Interval(0.5, 2)
 d = Interval(0.25, 0.8)
-e = Interval(Inf, -Inf)
 f = Interval(1)
 z = zero(Interval{Float64})
 
@@ -69,20 +68,6 @@ for politic in (:is_all, :interval, :ternary)
             @test isunkown(iszero(b))
         end
 
-        # TODO Uncomment this when checking the standard for signbit
-        @testset "Test sign" begin
-            #=
-            @test signbit(c) == false
-            @test signbit(-a) == false
-            @test signbit(-c) == true
-            @test isunkown(signbit(a))
-            @test sign(c) == 1
-            @test sign(z) == 0
-            @test sign(-c) == -1
-            @test isunkown(sign(b))
-            =#
-        end
-
         @testset "isinteger" begin
             @test istrue(isinteger(z))
             @test istrue(isinteger(Interval(4)))
@@ -96,9 +81,9 @@ for politic in (:is_all, :interval, :ternary)
             @test istrue(isfinite(b))
             @test istrue(isfinite(c))
             @test istrue(isfinite(z))
-            # TODO Those depend on the flavor
-            # @test isunkown(isfinite(e))
-            # @test istrue(isfinite(Interval(0., Inf)))
+            # NOTE This depends on the flavor. We test it here for the
+            # :set_based flavor only
+            @test istrue(isfinite(Interval(0., Inf)))
         end
     end
 end

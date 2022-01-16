@@ -121,7 +121,7 @@ Example
 julia> I"[3, 4]"
 [3, 4]
 
-julia> I"0.1"
+julia> I"0.1"  # 0.1 can not be represented as Float64
 [0.0999999, 0.100001]
 """
 macro I_str(ex)

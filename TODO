@@ -10,7 +10,8 @@ Review intervals folder:
     ✔ Investigate compile time warnings @done(21-12-29 23:30)
     ✔ Check if intervals of different flavor type can/should be equal in the sense of `isidentical` @done(19-12-08 01:12)
     ✔ Operation on different flavors of interval should always error. @done(21-12-29 23:29)
-    ☐ Check if `signbit` is in the standard
+    ✔ Check if `signbit` is in the standard @done(22-01-16 17:24)
+    It is not.
     ✔ Distribute functions from `special.jl` and `misc.jl` somewhere more informative @done(22-01-10 02:12)
   
   Discussion:
@@ -18,7 +19,7 @@ Review intervals folder:
       ✔ It is fine actually @done(22-01-10 00:55)
     ✔ Decide if `inf` and `sup` should be used as default or rather `x.lo` and `x.hi` @done(21-12-29 23:29)
       ✔ `inf` and `sup` should be strict equivalent to `x.lo` and `x.hi` @done(21-12-29 23:29)
-    ☐ Deprecate `interval` in favor of `checked_interval`?
+    ✘ Deprecate `interval` in favor of `checked_interval`? @cancelled(22-01-16 18:13)
 
   Global precision:
     ✔ Get rid of it @done(19-08-20 16:49)
@@ -26,15 +27,16 @@ Review intervals folder:
     ✔ Be sure it is done in compliance with #338 @done(19-12-18 22:59)
   
   Flavors:
-    ☐ Add documentations for flavors
+    ✔ Add documentations for flavors @done(22-01-16 17:58)
     Implement set based flavor:
-      ☐ Check all requested stuff 10.5.
-      ☐ Error on undefined
-    ☐ Implement cset flavor
-    ☐ Make cset default ?
+      ✔ Check all requested stuff 10.5. @done(22-01-16 18:00)
+      ✔ Error on undefined @done(22-01-16 18:00)
+    ✘ Implement cset flavor @cancelled(22-01-16 18:13)
+    ✘ Make cset default ? @cancelled(22-01-16 18:13)
     ✔ Define the flavor dependent symbols like ==, <, <= @done(21-12-29 23:28)
-    ☐ Deal with the fact flavor interact with pointwise politic for `isfinite` and `isinf`
-    
+    ✘ Deal with the fact flavor interact with pointwise politic for `isfinite` and `isinf` @cancelled(22-01-16 17:58)
+    Not a problem for set-based. Dealing with it for cset or other can be dealt with later.
+
   intervals.jl:
     ✔ Split constructors from the includes @done(22-01-15 19:26)
     ✔ Put helper, utils function (e.g. `eltype`) somewhere else @done(22-01-15 19:26)
@@ -65,7 +67,8 @@ Review intervals folder:
   complex.jl:
     Should we even bother ?
     ✔ Drop support for now @done(22-01-10 00:57)
-    ☐ Document the support drop
+    ✔ Document the support drop @done(22-01-16 18:01)
+    See changelog
 
   9.1. Arithmetic functions:
     ✔ Distribute everything from arithmetic.jl in other files @done(20-08-13 00:27)
@@ -74,17 +77,16 @@ Review intervals folder:
       ✔ Verify all requested functions are there @done(19-08-19 02:01)
       ✔ Common @done(19-08-19 01:11)
       ✔ Adapt for the removal of promotion @done(21-12-29 23:27)
-        ☐ Make sure all cases are in the test suite
-      ☐ Flavor dependent *
-      ☐ Flavor dependent /
-      ☐ Flavor dependent inv
-      ☐ Flavor dependent fma
+      ✘ Flavor dependent * @cancelled(22-01-16 18:01)
+      ✘ Flavor dependent / @cancelled(22-01-16 18:01)
+      ✘ Flavor dependent inv @cancelled(22-01-16 18:01)
+      ✘ Flavor dependent fma @cancelled(22-01-16 18:01)
     power.jl:
       ✔ Split @done(19-08-19 01:14)
       ✔ Verify all requested functions are there @done(19-08-19 04:29)
       ✔ Common @done(19-08-22 16:25)
-      ☐ Flavor dependent power (for negative power)
-      ☐ Flavor dependant log
+      ✘ Flavor dependent power (for negative power) @cancelled(22-01-16 18:02)
+      ✘ Flavor dependant log @cancelled(22-01-16 18:02)
       ✔ zero(T) or 0 ? @done(20-08-13 00:28)
     trigonometric.jl:
       ✔ Split @done(19-08-19 02:00)
@@ -97,7 +99,7 @@ Review intervals folder:
       ✔ Verify all requested functions are there @done(19-08-19 15:23)
       ✔ Common @done(19-08-19 15:31)
       ✔ Add docstring to generated funcs @done(19-08-19 16:45)
-      ☐ Flavor dependent atanh
+      ✘ Flavor dependent atanh @cancelled(22-01-16 18:02)
     integer.jl:
       ✔ Split @done(19-08-19 17:31)
       ✔ Verify all requested functions are there @done(19-08-19 17:35)
@@ -111,7 +113,8 @@ Review intervals folder:
     ✔ Split @done(19-08-19 19:14)
     ✔ Verify all requested functions are there @done(19-08-19 19:14)
     ✔ Common @done(19-08-19 19:14)
-    ☐ Check if cancelminus has flavor dependent edge cases
+    ✔ Check if cancelminus has flavor dependent edge cases @done(22-01-16 18:02)
+    Doesn't seem like it does.
 
   9.3 Set operations:
     ✔ Split @done(19-08-19 19:31)
@@ -122,7 +125,7 @@ Review intervals folder:
     ✔ Split @done(19-08-19 01:26)
     ✔ Common @done(19-08-19 01:11)
     ✔ Solve mid(a, 0.5) != mid(a) discrepency @done(20-08-09 15:42)
-    ☐ Flavor dependent mid
+    ✘ Flavor dependent mid @cancelled(22-01-16 18:02)
 
   9.5. Boolean functions:
     These are in the set_operations.jl file
@@ -130,24 +133,23 @@ Review intervals folder:
     ✔ Verify all requested functions are there @done(19-08-19 19:31)
     ✔ Common @done(19-08-19 19:36)
     ✔ equal is not the same as == @done(19-08-19 19:36)
-    ☐ Check `isweaklylessprime`
-    ☐ Flavor dependent issubset/isinterior ?
+    ✔ Check `isweaklylessprime` @done(22-01-16 18:03)
+    ✘ Flavor dependent issubset/isinterior ? @cancelled(22-01-16 18:02)
     ✔ Choose infix operator for `isidentical` ? e.g. ∼ \sim<TAB> (not currently parsed by julia) or ∽ \backsim<TAB> or ≛ \stareq<TAB> or whatever @done(21-12-29 23:31)
     This is mainly used for tests and don't necessarily need to be exported
 
   9.6. Operatons on/with decoration:
-    ☐ Split
-    ☐ Verify all requested functions are there
-    ☐ Review
+    ✘ Split @cancelled(22-01-16 18:16)
+    ✘ Verify all requested functions are there @cancelled(22-01-16 18:16)
+    ✘ Review @cancelled(22-01-16 18:16)
 
   9.7. Literals:
-    ☐ Review
+    ✘ Review @cancelled(22-01-16 18:16)
 
   9.8. Constructor:
-    ☐ Review
-    ☐ Check correctness and tightness for Interval{T}(x)
-    ☐ Document flavors
-    ☐ Document constructors
+    ✔ Review @done(22-01-16 18:14)
+    ✔ Check correctness and tightness for Interval{T}(x) @done(22-01-16 18:14)
+    ✔ Document constructors @done(22-01-16 18:14)
     ✔ Make `..` work correctly for all input types @done(21-12-29 23:31)
     ✔ Choose a mechanism for the default bound @done(21-12-29 23:31)
     ✔ Add Interval{T}(π) @done(19-08-19 01:58)
@@ -155,10 +157,10 @@ Review intervals folder:
   
   10.5. Required operations in set-based flavor:
     10.5.1. Literals:
-      ☐ No idea, but do it
+      ✘ No idea, but do it @cancelled(22-01-16 18:16)
     10.5.2. Constants:
       ✔ Add ref to doc @done(19-08-21 00:09)
-      ☐ Move deprecation warning to a separated file ?
+      ✘ Move deprecation warning to a separated file ? @cancelled(22-01-16 18:16)
     10.5.3. Forward mode elementary functions:
       ✔ Add ref to doc @done(19-08-21 00:20)
     10.5.4. Reverse mode elementary functions:
@@ -166,66 +168,66 @@ Review intervals folder:
       They are in IntervalConstraint.jl
     10.5.5. Two output division:
       ✔ Add ref to doc @done(19-08-21 00:23)
-      ☐ Flavor dependent edge case
-      ☐ Recent GH issue
+      ✘ Flavor dependent edge case @cancelled(22-01-16 18:16)
+      ✘ Recent GH issue @cancelled(22-01-16 18:16)
     10.5.6. Cancellative:
       ✔ Add ref to doc @done(19-08-22 15:51)
-      ☐ Check that the set-based follow the required behavior for undbounded intervals
+      ✘ Check that the set-based follow the required behavior for undbounded intervals @cancelled(22-01-16 18:16)
     10.5.7. Set opeations:
       ✔ Add ref to doc @done(19-08-22 15:55)
     10.5.8. Constructors:
-      ☐ Review I guess
+      ✔ Review I guess @done(22-01-16 18:15)
     10.5.9. Numeric functions:
       ✔ Add ref to doc @done(19-08-22 15:55)
     10.5.10. Boolean:
       ✔ Check everything required is present @done(19-08-22 16:07)
       ✔ Add ref to doc @done(19-08-22 16:07)
   10.6. Recommended operations:
-    ☐ Check all that stuff
+    ✘ Check all that stuff @cancelled(22-01-16 18:15)
 
 
 Other:
   bisect.jl:
-    ☐ Review
+    ✘ Review @cancelled(22-01-16 18:14)
   display.jl:
-    ☐ Review
+    ✘ Review @cancelled(22-01-16 18:14)
   InteralArithmetic.jl:
-    ☐ Review
-    ☐ Make sure everything is exported correctly
-    ☐ Check renamed/new functions are exported
+    ✔ Review @done(22-01-16 18:15)
+    ✔ Make sure everything is exported correctly @done(22-01-16 18:15)
+    ✔ Check renamed/new functions are exported @done(22-01-16 18:15)
   parsing.jl:
     ✔ parsing of bare interval @done(21-12-29 23:27)
     ✔ parsing of decorated interval @done(21-12-31 02:05)
     ✔ Change `"3.16?1"` to be parsed as `"[3.15, 3.17]"` @done(21-12-31 02:16)
     ☐ Restore parsing of special forms e.g. `"entire"`, `[,]` (tests are marked as broken)
   rand.jl:
-    ☐ Review
+    ✘ Review @cancelled(22-01-16 18:14)
   symbols.jl:
-    ☐ Make sure everything is here
+    ✘ Make sure everything is here @cancelled(22-01-16 18:15)
 
   
 Review other folders:
   Check PR #271 for details
-  ☐ Do it
+  ✘ Do it @cancelled(22-01-16 18:14)
   multidim:
     arithmetic.jl:
-      ☐ StaticArray.jl v1.0 wants to promote the array eltype to interval
+      StaticArray.jl v1.0 wants to promote the array eltype to interval
 
 Bugs:
   ✔ `Int` times `Interval` errors (e.g. `2*a`) @done(19-12-14 23:50)
   ✔ `(1..1) * pi` is not equal to `Interval(pi)` @done(22-01-15 20:49)
-  ☐ Find why 5 of the hyperb tests are failing only when put within the same testset as the others
+  ✘ Find why 5 of the hyperb tests are failing only when put within the same testset as the others @cancelled(22-01-16 18:14)
 
 Documentation:
   ✘ Put docstrings inside `@eval` blocks @cancelled(22-01-10 01:00)
   Not needed anymore since we don't use eval as much
-  ☐ Document flavors
+  ✔ Document flavors @done(22-01-16 18:14)
 
 Tests:
   ✘ Uncomment complex tests in `construction.jl` @cancelled(22-01-10 01:00)
   Dropped support for Complex for now
   ✔ Use `===` or `≛` instead of `==` @done(21-12-29 23:26)
-  ☐ Test all flavors
+  ✘ Test all flavors @cancelled(22-01-16 18:15)
   ☐ Test switching the default bound
   ☐ Test switching the interval rounding
   ✔ Test switchign the pointwise politic @done(22-01-16 04:51)

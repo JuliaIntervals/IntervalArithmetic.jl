@@ -19,6 +19,8 @@ for f in (:sign, :ceil, :floor, :trunc)
     end
 end 
 
+# NOTE this is note strictly needed as per the standard. It is documented
+# in the docstring of round and could be removed
 const RoundTiesToEven = RoundNearest
 const RoundTiesToAway = RoundNearestTiesAway
 
