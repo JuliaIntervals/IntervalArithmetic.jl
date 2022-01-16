@@ -48,6 +48,6 @@ and uses three-way logic by default.
 """
 hash(x::Interval, h::UInt) = hash(x.hi, hash(x.lo, hash(Interval, h)))
 
-# TODO No idea what this comes from. Need to check the standard for this.
+# TODO No idea where this comes from and if it is the correct place to put it.
 dist(a::Interval, b::Interval) = max(abs(a.lo-b.lo), abs(a.hi-b.hi))
 

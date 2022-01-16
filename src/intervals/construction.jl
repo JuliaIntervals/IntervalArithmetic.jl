@@ -118,28 +118,6 @@ end
 Interval(x::Irrational) = Interval{default_bound()}(x)
 
 """
-    is_valid_interval(a::Real, b::Real)
-
-Check if `(a, b)` constitute a valid interval.
-"""
-function is_valid_interval(a::Real, b::Real)
-    if isnan(a) || isnan(b)
-        return false
-    end
-
-    a > b && return false
-
-    # TODO Check if this is necessary
-    if a == Inf || b == -Inf
-        return false
-    end
-
-    return true
-end
-
-is_valid_interval(a::Real) = true
-
-"""
     interval(a, b)
 
 Create an interval, checking whether [a, b] is a valid `Interval`

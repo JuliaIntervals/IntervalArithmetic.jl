@@ -127,7 +127,6 @@ Implement the `strictLess` function of the IEEE Std 1788-2015 (Table 10.3).
 function isstrictless(a::F, b::F) where {F<:Interval}
     isempty(a) && isempty(b) && return true
     (isempty(a) || isempty(b)) && return false
-    # TODO check the following line in the standard
     return isweaklylessprime(a.lo, b.lo) && isweaklylessprime(a.hi, b.hi)
 end
 

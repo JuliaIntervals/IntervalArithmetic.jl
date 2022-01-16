@@ -70,8 +70,6 @@ big(X::IntervalBox) = big.(X)
 
 
 ## set operations
-
-# TODO: Update to use generator
 for (op, dotop) in ((:⊆, :.⊆), (:⊂, :.⊂), (:⊃, :.⊃))
     @eval $(op)(X::IntervalBox{N}, Y::IntervalBox{N}) where N = all($(dotop)(X, Y))
 end

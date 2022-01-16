@@ -23,9 +23,6 @@
     We define every operations using the default `PointwisePolitic{:ternary}()`
     and then use it to define all the others.
 =#
-
-# TODO Fetch the tests from NumberInterval.jl for the ternary politic
-# TODO More globally, test the file (especially isinf and isfinite)
 """
     PointwisePolitic{P}
 
@@ -103,7 +100,7 @@ function isinf(::PointwisePolitic{:ternary}, x::Interval)
         isthing(x) && return true
         return missing
     end
-    
+
     return false
 end
 

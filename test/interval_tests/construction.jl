@@ -129,7 +129,6 @@ end
     @test typeof(a) == Complex{Interval{Float64}}
     @test a ≛ Interval(3) + im*Interval(4)
 
-    # TODO; Uncomment these tests
     # b = exp(a)
     # @test real(b) == Interval(-13.12878308146216, -13.128783081462153)
     # @test imag(b) == Interval(-15.200784463067956, -15.20078446306795)

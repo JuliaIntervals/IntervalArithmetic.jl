@@ -120,8 +120,6 @@ function ^(a::F, x::BigFloat) where {F<:Interval{BigFloat}}
 end
 
 function ^(a::Interval{Rational{T}}, x::AbstractFloat) where {T<:Integer}
-    # TODO Check wheter the type should be hardcoded here or be the 
-    # default bound type
     a = Interval{Float64}(a.lo.num/a.lo.den, a.hi.num/a.hi.den)
     return F(a^x)
 end

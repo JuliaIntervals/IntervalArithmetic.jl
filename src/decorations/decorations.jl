@@ -1,7 +1,6 @@
 include("intervals.jl")
 include("functions.jl")
 
-# TODO Check if it is consistent with #386
 isnan(x::Interval) = false  # NaI is always decorated
 
 """`NaI` not-an-interval: [NaN, NaN]."""

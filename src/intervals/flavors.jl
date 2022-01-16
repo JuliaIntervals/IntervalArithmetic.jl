@@ -53,7 +53,28 @@ end
 
 contains_infinity(::Flavor{:set_based}, x::Interval) = false
 
+"""
+    is_valid_interval(a::Real, b::Real)
+
+Check if `(a, b)` constitute a valid interval.
+"""
+function is_valid_interval(::Flavor{:set_based}, a::Real, b::Real)
+    if isnan(a) || isnan(b)
+        return false
+    end
+
+    a > b && return false
+
+    if a == Inf || b == -Inf
+        return false
+    end
+
+    return true
+end
+
 # Default
 zero_times_infinity(T) = zero_times_infinity(current_flavor(), T)
 div_by_thin_zero(x) = div_by_thin_zero(current_flavor(), x)
 contains_infinity(x) = contains_infinity(current_flavor(), x)
+is_valid_interval(a, b) = is_valid_interval(current_flavor(), a, b)
+is_valid_interval(a::Real) = is_valid_interval(a, a)

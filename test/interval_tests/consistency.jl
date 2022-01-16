@@ -56,7 +56,7 @@ using Test
         @test inv(Interval(-4.0, 0.0)) ≛ Interval(-Inf, -0.25)
         @test inv(Interval(0.0, 4.0)) ≛ Interval(0.25, Inf)
         @test inv(Interval(-4.0, 4.0)) ≛ entireinterval(Float64)
-        @test Interval(0)/Interval(0) ≛ emptyinterval()  # TODO Is this really correct ?
+        @test Interval(0)/Interval(0) ≛ emptyinterval()  # According to the standard for :set_based flavor
         @test typeof(emptyinterval()) == Interval{Float64}
     end
 
