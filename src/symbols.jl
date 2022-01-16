@@ -33,6 +33,6 @@ const ∞ = Inf
 
 Entire interval of defaul flavor and default bounds.
 
-Alias of `RR()`. Can be typed as `\\bbR<TAB>`.
+Alias of `entireinterval()`. Can be typed as `\\bbR<TAB>`.
 """
-const ℝ = RR()
+const ℝ = entireinterval()

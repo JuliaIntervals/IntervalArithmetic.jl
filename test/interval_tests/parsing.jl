@@ -10,8 +10,8 @@ setformat(:standard, decorations=true, sigfigs=6)
     @test parse(Interval{Float64}, "[1,+infinity]") ≛ Interval(1.0, Inf)
     @test parse(Interval{Float64}, "[1.234e5,Inf]") ≛ Interval(123400.0, Inf)
     @test_broken parse(Interval{Float64}, "[]") ≛ ∅
-    @test_broken parse(Interval{Float64}, "[,]") ≛ RR(Float64)
-    @test_broken parse(Interval{Float64}, "[ entire ]") ≛ RR(Float64)
+    @test_broken parse(Interval{Float64}, "[,]") ≛ entireinterval(Float64)
+    @test_broken parse(Interval{Float64}, "[ entire ]") ≛ entireinterval(Float64)
     @test parse(Interval{Float64}, "3.56?1") ≛ Interval(0x3.8ccccccccccccp+0, 0x3.91eb851eb8520p+0)
     @test parse(Interval{Float64}, "3.56?1e2") ≛ Interval(355.0, 357.0)
     @test parse(Interval{Float64}, "3.560?2") ≛ Interval(0x3.8ed916872b020p+0, 0x3.8fdf3b645a1ccp+0)
@@ -44,7 +44,7 @@ end
 @testset "Parse string to DecoratedInterval" begin
     @test_broken parse(DecoratedInterval{Float64}, "[ ]") ≛ DecoratedInterval(∅, trv)
     @test_broken parse(DecoratedInterval{Float64}, "[entire]") ≛ DecoratedInterval(Interval(-Inf, Inf), dac)
-    @test_broken parse(DecoratedInterval{Float64}, "[,]") ≛ DecoratedInterval(RR(Float64), dac)
+    @test_broken parse(DecoratedInterval{Float64}, "[,]") ≛ DecoratedInterval(entireinterval(Float64), dac)
     @test_broken isnai(parse(DecoratedInterval{Float64}, "[nai]"))
     
     @test parse(DecoratedInterval{Float64}, "[3]") ≛ DecoratedInterval(3)

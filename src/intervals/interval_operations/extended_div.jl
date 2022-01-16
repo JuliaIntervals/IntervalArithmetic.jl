@@ -21,7 +21,7 @@ function extended_div(a::F, b::F) where {T, F<:Interval{T}}
 
         end
     elseif 0 ∈ a && 0 ∈ b
-        return (RR(F), emptyinterval(F))
+        return (entireinterval(F), emptyinterval(F))
     else
         return (a / b, emptyinterval(F))
     end

@@ -55,12 +55,12 @@ end
 
 @testset "tan" begin
     @test tan(Interval(0.5)) ≛ Interval(0.54630248984379048, 0.5463024898437906)
-    @test tan(Interval(0.5, 1.67)) ≛ RR()
+    @test tan(Interval(0.5, 1.67)) ≛ entireinterval()
     @test tan(Interval(1.67, 3.2)) ≛ Interval(-10.047182299210307, 0.05847385445957865)
-    @test tan(Interval(6.638314112824137, 8.38263151220128)) ≛ RR()  # https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/20
+    @test tan(Interval(6.638314112824137, 8.38263151220128)) ≛ entireinterval()  # https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/20
 
     @test tan(Interval{BigFloat}(0.5)) ⊆ tan(Interval(0.5))
-    @test tan(Interval{BigFloat}(0.5, 1.67)) ≛ RR(BigFloat)
+    @test tan(Interval{BigFloat}(0.5, 1.67)) ≛ entireinterval(BigFloat)
     @test tan(Interval{BigFloat}(0.5, 1.67)) ⊆ tan(Interval(0.5, 1.67))
     @test tan(Interval{BigFloat}(1.67, 3.2)) ⊆ tan(Interval(1.67, 3.2))
     @test tan(Interval{BigFloat}(2.1, 5.6)) ⊆ tan(Interval(2.1, 5.6))
@@ -94,8 +94,8 @@ end
 end
 
 @testset "atan" begin
-    @test atan(∅, RR()) ≛ ∅
-    @test atan(RR(), ∅) ≛ ∅
+    @test atan(∅, entireinterval()) ≛ ∅
+    @test atan(entireinterval(), ∅) ≛ ∅
     @test atan(Interval(0.0, 1.0), Interval{BigFloat}(0.0)) ≛ Interval{BigFloat}(pi)/2
     @test atan(Interval(0.0, 1.0), Interval(0.0)) ≛ Interval(pi)/2
     @test atan(Interval(-1.0, -0.1), Interval(0.0)) ≛ -Interval(pi)/2

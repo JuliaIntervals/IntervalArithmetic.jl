@@ -57,7 +57,7 @@ function ^(a::F, n::Integer) where {F<:Interval{BigFloat}}
                 iszero(a.hi) && return @round(F, -Inf, a.lo^n)
                 return @round(F, a.hi^n, a.lo^n)
             else
-                return RR(a)
+                return entireinterval(a)
             end
         end
 

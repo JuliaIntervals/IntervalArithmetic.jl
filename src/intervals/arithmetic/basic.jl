@@ -169,15 +169,15 @@ function /(a::F, b::F) where {T, F<:Interval{T}}
         if iszero(b.lo)
             a.lo >= zero(T) && return @round(F, a.lo/b.hi, T(Inf))
             a.hi <= zero(T) && return @round(F, T(-Inf), a.hi/b.hi)
-            return RR(F)
+            return entireinterval(F)
 
         elseif iszero(b.hi)
             a.lo >= zero(T) && return @round(F, T(-Inf), a.lo/b.lo)
             a.hi <= zero(T) && return @round(F, a.hi/b.lo, T(Inf))
-            return RR(F)
+            return entireinterval(F)
 
         else
-            return RR(F)
+            return entireinterval(F)
 
         end
     end
@@ -196,7 +196,7 @@ function inv(a::F) where {T, F<:Interval{T}}
     if zero(T) ∈ a
         a.lo < zero(T) == a.hi && return @round(F, T(-Inf), inv(a.lo))
         a.lo == zero(T) < a.hi && return @round(F, inv(a.hi), T(Inf))
-        a.lo < zero(T) < a.hi && return RR(F)
+        a.lo < zero(T) < a.hi && return entireinterval(F)
         isthinzero(a) && return div_by_thin_zero(one(F))
     end
 
@@ -226,10 +226,10 @@ function fma(a::F, b::F, c::F) where {T, F<:Interval{T}}
 
     if isentire(a)
         isthinzero(b) && return c
-        return RR(F)
+        return entireinterval(F)
     elseif isentire(b)
         isthinzero(a) && return c
-        return RR(F)
+        return entireinterval(F)
     end
 
     lo = setrounding(T, RoundDown) do

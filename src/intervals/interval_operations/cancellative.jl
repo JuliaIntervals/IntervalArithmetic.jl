@@ -15,12 +15,12 @@ Implement the `cancelMinus` function of the IEEE Std 1788-2015 (section 9.2).
 function cancelminus(a::F, b::F) where {F<:Interval}
     (isempty(a) && (isempty(b) || !isunbounded(b))) && return emptyinterval(F)
 
-    (isunbounded(a) || isunbounded(b) || isempty(b)) && return RR(F)
+    (isunbounded(a) || isunbounded(b) || isempty(b)) && return entireinterval(F)
 
-    diam(a) < diam(b) && return RR(F)
+    diam(a) < diam(b) && return entireinterval(F)
 
     c_lo, c_hi = bounds(@round(F, a.lo - b.lo, a.hi - b.hi))
-    c_lo > c_hi && return RR(F)
+    c_lo > c_hi && return entireinterval(F)
 
     c_lo == Inf && return F(prevfloat(c_lo), c_hi)
     c_hi == -Inf && return F(c_lo, nextfloat(c_hi))
@@ -29,13 +29,13 @@ function cancelminus(a::F, b::F) where {F<:Interval}
 
     if a_lo ≤ a.lo ≤ a.hi ≤ a_hi
         if nextfloat(a.hi) < a_hi || prevfloat(a.lo) > a_hi
-            return RR(F)
+            return entireinterval(F)
         else
             return F(c_lo, c_hi)
         end
      end
 
-    return RR(F)
+    return entireinterval(F)
 end
 cancelminus(a::Interval, b::Interval) = cancelminus(promote(a, b)...)
 

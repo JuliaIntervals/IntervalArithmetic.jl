@@ -25,7 +25,7 @@ setrounding(Interval, :tight)
 
 # According to the examples in Section 7.4.2, unbounded intervals can be constructed with non-common inputs.
 @testset "IEEE1788.a" begin
-    @test Interval(-Inf, Inf) == RR(Float64)
+    @test Interval(-Inf, Inf) == entireinterval(Float64)
 end
 
 # Examples from Sections 9.7.1 and 9.8
@@ -77,8 +77,8 @@ end
     @test decoration(@decorated("[-Inf, 2/3]")) == decoration(DecoratedInterval(Interval(-Inf, +0xa.aaaaaaaaaaab0p-4), dac))
     @test @decorated("[0x1.3p-1,]") == DecoratedInterval(Interval(0x1.3p-1, Inf), dac)
     @test decoration(@decorated("[0x1.3p-1,]")) == decoration(DecoratedInterval(Interval(0x1.3p-1, Inf), dac))
-    @test @decorated("[,]") == DecoratedInterval(RR(Float64), dac)
-    @test decoration(@decorated("[,]")) == decoration(DecoratedInterval(RR(Float64), dac))
+    @test @decorated("[,]") == DecoratedInterval(entireinterval(Float64), dac)
+    @test decoration(@decorated("[,]")) == decoration(DecoratedInterval(entireinterval(Float64), dac))
     @test @decorated("3.56?1") == DecoratedInterval(Interval(0x3.8ccccccccccccp+0, 0x3.91eb851eb8520p+0), com)
     @test decoration(@decorated("3.56?1")) == decoration(DecoratedInterval(Interval(0x3.8ccccccccccccp+0, 0x3.91eb851eb8520p+0), com))
     @test @decorated("3.56?1e2") == DecoratedInterval(Interval(355.0, 357.0), com)
@@ -109,7 +109,7 @@ end
     @test @interval("[]") == ∅
     @test @interval("[empty]") == ∅
     @test @interval("[ empty ]") == ∅
-    @test @interval("[,]") == RR(Float64)
-    @test @interval("[ entire ]") == RR(Float64)
+    @test @interval("[,]") == entireinterval(Float64)
+    @test @interval("[ entire ]") == entireinterval(Float64)
 end
 # FactCheck.exitstatus()

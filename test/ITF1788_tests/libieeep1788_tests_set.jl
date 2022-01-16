@@ -39,10 +39,10 @@ setrounding(Interval, :tight)
     @test ∩(Interval(1.0, 3.0), Interval(3.0, 4.0)) == Interval(3.0, 3.0)
     @test intersect(Interval(1.0, 3.0), ∅) == ∅
     @test ∩(Interval(1.0, 3.0), ∅) == ∅
-    @test intersect(RR(Float64), ∅) == ∅
-    @test ∩(RR(Float64), ∅) == ∅
-    @test intersect(Interval(1.0, 3.0), RR(Float64)) == Interval(1.0, 3.0)
-    @test ∩(Interval(1.0, 3.0), RR(Float64)) == Interval(1.0, 3.0)
+    @test intersect(entireinterval(Float64), ∅) == ∅
+    @test ∩(entireinterval(Float64), ∅) == ∅
+    @test intersect(Interval(1.0, 3.0), entireinterval(Float64)) == Interval(1.0, 3.0)
+    @test ∩(Interval(1.0, 3.0), entireinterval(Float64)) == Interval(1.0, 3.0)
 end
 
 @testset "minimal_intersection_dec_test" begin
@@ -58,14 +58,14 @@ end
     @test decoration(intersect(DecoratedInterval(Interval(1.0, 3.0), def), DecoratedInterval(∅, trv))) == decoration(DecoratedInterval(∅, trv))
     @test ∩(DecoratedInterval(Interval(1.0, 3.0), def), DecoratedInterval(∅, trv)) == DecoratedInterval(∅, trv)
     @test decoration(∩(DecoratedInterval(Interval(1.0, 3.0), def), DecoratedInterval(∅, trv))) == decoration(DecoratedInterval(∅, trv))
-    @test intersect(DecoratedInterval(RR(Float64), def), DecoratedInterval(∅, trv)) == DecoratedInterval(∅, trv)
-    @test decoration(intersect(DecoratedInterval(RR(Float64), def), DecoratedInterval(∅, trv))) == decoration(DecoratedInterval(∅, trv))
-    @test ∩(DecoratedInterval(RR(Float64), def), DecoratedInterval(∅, trv)) == DecoratedInterval(∅, trv)
-    @test decoration(∩(DecoratedInterval(RR(Float64), def), DecoratedInterval(∅, trv))) == decoration(DecoratedInterval(∅, trv))
-    @test intersect(DecoratedInterval(Interval(1.0, 3.0), dac), DecoratedInterval(RR(Float64), def)) == DecoratedInterval(Interval(1.0, 3.0), trv)
-    @test decoration(intersect(DecoratedInterval(Interval(1.0, 3.0), dac), DecoratedInterval(RR(Float64), def))) == decoration(DecoratedInterval(Interval(1.0, 3.0), trv))
-    @test ∩(DecoratedInterval(Interval(1.0, 3.0), dac), DecoratedInterval(RR(Float64), def)) == DecoratedInterval(Interval(1.0, 3.0), trv)
-    @test decoration(∩(DecoratedInterval(Interval(1.0, 3.0), dac), DecoratedInterval(RR(Float64), def))) == decoration(DecoratedInterval(Interval(1.0, 3.0), trv))
+    @test intersect(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(∅, trv)) == DecoratedInterval(∅, trv)
+    @test decoration(intersect(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(∅, trv))) == decoration(DecoratedInterval(∅, trv))
+    @test ∩(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(∅, trv)) == DecoratedInterval(∅, trv)
+    @test decoration(∩(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(∅, trv))) == decoration(DecoratedInterval(∅, trv))
+    @test intersect(DecoratedInterval(Interval(1.0, 3.0), dac), DecoratedInterval(entireinterval(Float64), def)) == DecoratedInterval(Interval(1.0, 3.0), trv)
+    @test decoration(intersect(DecoratedInterval(Interval(1.0, 3.0), dac), DecoratedInterval(entireinterval(Float64), def))) == decoration(DecoratedInterval(Interval(1.0, 3.0), trv))
+    @test ∩(DecoratedInterval(Interval(1.0, 3.0), dac), DecoratedInterval(entireinterval(Float64), def)) == DecoratedInterval(Interval(1.0, 3.0), trv)
+    @test decoration(∩(DecoratedInterval(Interval(1.0, 3.0), dac), DecoratedInterval(entireinterval(Float64), def))) == decoration(DecoratedInterval(Interval(1.0, 3.0), trv))
 end
 
 @testset "minimal_convexHull_test" begin
@@ -77,8 +77,8 @@ end
     @test ∪(Interval(1.0, 3.0), ∅) == Interval(1.0, 3.0)
     @test hull(∅, ∅) == ∅
     @test ∪(∅, ∅) == ∅
-    @test hull(Interval(1.0, 3.0), RR(Float64)) == RR(Float64)
-    @test ∪(Interval(1.0, 3.0), RR(Float64)) == RR(Float64)
+    @test hull(Interval(1.0, 3.0), entireinterval(Float64)) == entireinterval(Float64)
+    @test ∪(Interval(1.0, 3.0), entireinterval(Float64)) == entireinterval(Float64)
 end
 
 @testset "minimal_convexHull_dec_test" begin
@@ -98,9 +98,9 @@ end
     @test decoration(hull(DecoratedInterval(∅, trv), DecoratedInterval(∅, trv))) == decoration(DecoratedInterval(∅, trv))
     @test ∪(DecoratedInterval(∅, trv), DecoratedInterval(∅, trv)) == DecoratedInterval(∅, trv)
     @test decoration(∪(DecoratedInterval(∅, trv), DecoratedInterval(∅, trv))) == decoration(DecoratedInterval(∅, trv))
-    @test hull(DecoratedInterval(Interval(1.0, 3.0), trv), DecoratedInterval(RR(Float64), def)) == DecoratedInterval(RR(Float64), trv)
-    @test decoration(hull(DecoratedInterval(Interval(1.0, 3.0), trv), DecoratedInterval(RR(Float64), def))) == decoration(DecoratedInterval(RR(Float64), trv))
-    @test ∪(DecoratedInterval(Interval(1.0, 3.0), trv), DecoratedInterval(RR(Float64), def)) == DecoratedInterval(RR(Float64), trv)
-    @test decoration(∪(DecoratedInterval(Interval(1.0, 3.0), trv), DecoratedInterval(RR(Float64), def))) == decoration(DecoratedInterval(RR(Float64), trv))
+    @test hull(DecoratedInterval(Interval(1.0, 3.0), trv), DecoratedInterval(entireinterval(Float64), def)) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(hull(DecoratedInterval(Interval(1.0, 3.0), trv), DecoratedInterval(entireinterval(Float64), def))) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test ∪(DecoratedInterval(Interval(1.0, 3.0), trv), DecoratedInterval(entireinterval(Float64), def)) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(∪(DecoratedInterval(Interval(1.0, 3.0), trv), DecoratedInterval(entireinterval(Float64), def))) == decoration(DecoratedInterval(entireinterval(Float64), trv))
 end
 # FactCheck.exitstatus()

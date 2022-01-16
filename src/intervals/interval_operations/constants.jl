@@ -28,7 +28,7 @@ emptyinterval() = emptyinterval(default_bound())
 
 
 """
-    RR()
+    entireinterval()
 
 `RR` represent the entire real line [-Inf, Inf].
 
@@ -41,7 +41,7 @@ of `Interval` for more information about the default interval falvor.
 
 Implement the `entire` function of the IEEE Std 1788-2015 (section 10.5.2).
 """
-RR(::Type{F}) where {T, F<:Interval{T}} = F(-Inf, Inf)
-RR(::F) where {F<:Interval} = RR(F)
-RR(::Type{T}) where T = Interval{T}(-Inf, Inf)
-RR() = RR(default_bound())
+entireinterval(::Type{F}) where {T, F<:Interval{T}} = F(-Inf, Inf)
+entireinterval(::F) where {F<:Interval} = entireinterval(F)
+entireinterval(::Type{T}) where T = Interval{T}(-Inf, Inf)
+entireinterval() = entireinterval(default_bound())

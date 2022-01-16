@@ -58,7 +58,7 @@ export
     precedes, strictprecedes, ≺, ⊂, ⊃, ⊇, contains_zero, isthinzero,
     isweaklyless, isstrictless,
     ≛,
-    RR, isentire, nai, isnai, isthin, iscommon, isatomic,
+    entireinterval, isentire, nai, isnai, isthin, iscommon, isatomic,
     inf, sup, bounds, bisect, mince,
     eps, dist,
     midpoint_radius,
