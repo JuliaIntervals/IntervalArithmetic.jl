@@ -230,6 +230,12 @@ function pow(x::F, n::Integer) where {F<:Interval}
     end
 end
 
+function pow(x::Interval, y::Interval)  # fast real power, including for y an Interval
+    isempty(x) && return x
+    isthininteger(y) && return pow(x, Int(y.lo))
+    return exp(y * log(x))
+end
+
 function pow(x::Interval, y)  # fast real power, including for y an Interval
     isempty(x) && return x
     isinteger(y) && return pow(x, Int(y.lo))

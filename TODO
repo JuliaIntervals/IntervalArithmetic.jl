@@ -33,6 +33,7 @@ Review intervals folder:
     ☐ Implement cset flavor
     ☐ Make cset default ?
     ✔ Define the flavor dependent symbols like ==, <, <= @done(21-12-29 23:28)
+    ☐ Deal with the fact flavor interact with pointwise politic for `isfinite` and `isinf`
     
   intervals.jl:
     ✔ Split constructors from the includes @done(22-01-15 19:26)
@@ -40,7 +41,7 @@ Review intervals folder:
   
   macros.jl:
     ✔ Review @done(19-08-23 01:57)
-    ☐ Clean or open issue for cleaning of the file
+    ✔ Clean or open issue for cleaning of the file @done(22-01-15 21:25)
   
   precision.jl:
     ✔ Review @done(19-08-19 01:49)
@@ -52,7 +53,7 @@ Review intervals folder:
     ✔ Check with latest discussion if everything is up to date @done(22-01-10 00:56)
     ✔ Remove default round method once it is not needed anymore @done(21-12-29 23:34)
     ✔ Test new mechanism @done(22-01-10 01:18)
-    ☐ Remove `@round_up` and `@round_down`
+    ✔ Remove `@round_up` and `@round_down` @done(22-01-16 04:51)
 
   conversion.jl:
     ✔ Review @done(19-08-23 03:25)
@@ -227,4 +228,4 @@ Tests:
   ☐ Test all flavors
   ☐ Test switching the default bound
   ☐ Test switching the interval rounding
-  ☐ Test switchign the pointwise politic
+  ✔ Test switchign the pointwise politic @done(22-01-16 04:51)

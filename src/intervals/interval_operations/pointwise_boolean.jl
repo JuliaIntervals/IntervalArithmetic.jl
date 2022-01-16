@@ -1,7 +1,7 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
 #=  This file contains functions not specified in the IEEE Std 1788-2015,
-    extending real boolean operations to intervals.
+    extending boolean operations defined for reals to intervals.
 
     This is different from what is described in sections 9.5 of the
     IEEE Std 1788-2015 (Boolean functions of intervals), since we deal here
@@ -12,79 +12,93 @@
     Essentially, julia is better at composability and we are more ambitious
     that what the standard ever expected, so we have some extra problems
     to solve.
+
+    We use a trait system, defining the operation with an extra
+    `PointwisePolitic` argument defining how it should be handled.
+
+    The default operations use `IntervalArithmetic.pointwise_politic()`,
+    so in order to change the default behavior this function has to be
+    redefined.
+
+    We define every operations using the default `PointwisePolitic{:ternary}()`
+    and then use it to define all the others.
 =#
 
-# TODO Need help for the names x_x
 # TODO Fetch the tests from NumberInterval.jl for the ternary politic
 # TODO More globally, test the file (especially isinf and isfinite)
-# TODO Add a :ternary_with_warning politic for the default?
-# TODO Add iszero
 """
     PointwisePolitic{P}
 
 Define which politic we use to extend pointwise comparison of 
 
 Valid value for the politic identifier `P` are
-    - `:binary_consistent` : A pointwise boolean operation `B` is interpreted
-        as `B(X::Interval) = all(B(x) for x in X)`.
+    - `:is_all` : A boolean operation is extended by asking "is it true for
+        all elements of the interval(s) involved".
         This is self-consistent, but breaks the usual rules for negation.
-        For example with this politic, `iszero((-1..3)) == false` and
-        `(!iszero)((-1..3)) == false`.
-        This *silently* breaks any code relying on such operation conditional
-        statements.
-    - `:boolean_intervals` : A pointwise boolean operation `B` return the set
-        of all outcomes `B(X) = {B(x) | x ∈ X}`.
-        This is safe, erroring whenever an invterval is used in a conditional
-        statement.
-    - `:ternary_logic` (default) : With this politics we use the same logic as for
-        `:boolean_intervals`, with the following substitutions to get
-        normal `Bool` whenever possible:
-            - `{true}` -> `true`
-            - `{false}` -> `false`
-            - `{true, false}` -> `missing`
-        This only causes error in conditional statements when hitting `missing`
-        and it is safe.
+        For example with this politic, `((-1..3) == 0) == false` because it
+        answers the question "are all elements in (-1..3) equal to zero".
+        However its negation is `false` too: `((-1..3) != 0) == false`.
+        This *silently* breaks any code relying on such operation in conditional
+        statements like `if x == 0 ... else ... end`.
+    - `:interval` : A pointwise boolean operation `B` return the set of all
+        possible outcome as a `BooleanInterval`.
+        This is safe but very strict, always erroring when an interval is used
+        in a conditional statement.
+    - `:ternary` (default) : With this politics return `missing` when the
+        boolean operation does not return the same answer for all elements
+        of the involved interval(s).
+        This only causes error in conditional statements when hitting `missing`.
+        When it does not error it is safe.
+
+The current pointwise politic can be changed by overriding the function
+`IntervalArithmetic.pointwise_politic()`.
+
+Example
+=======
+
+          | (-1..3) > 2   | (-1..3) <= 2  | (-1..1) > 2 | (-1..1) < 2 |
+----------|---------------|---------------|-------------|-------------|
+:is_all   | false         | false         | false       | true        |
+:interval | [true, false] | [true, false] | [false]     | [true]      |
+:ternary  | missing       | missing       | false       | true        |
+
 """
 struct PointwisePolitic{P} end
-
-const BinaryConsistent = PointwisePolitic{:binary_consistent}
-const BooleanIntervals = PointwisePolitic{:boolean_intervals}
-const TernaryLogic = PointwisePolitic{:ternary_logic}
 
 pointwise_bool_operations = [
     :(==), :(!=), :<, :(<=), :>, :(>=)
 ]
 
 pointwise_bool_functions = [
-    :isinf, :isfinite, :isinteger
+    :isinf, :isfinite, :isinteger, :iszero
 ]
 
-## Ternary logic
-
-function ==(::TernaryLogic, x::Interval, y::Interval)
+## :ternary
+function ==(::PointwisePolitic{:ternary}, x::Interval, y::Interval)
     isthin(x) && isthin(y) && x.lo == y.lo && return true
+    (x.hi < y.lo || x.lo > y.hi) && return false
     return missing
 end
 
-function <(::TernaryLogic, x::Interval, y::Interval)
+function <(::PointwisePolitic{:ternary}, x::Interval, y::Interval)
     strictprecedes(x, y) && return true
     precedes(y, x) && return false
     return missing
 end
 
-function <=(::TernaryLogic, x::Interval, y::Interval)
+function <=(::PointwisePolitic{:ternary}, x::Interval, y::Interval)
     precedes(x, y) && return true
     strictprecedes(y, x) && return false
     return missing
 end
 
-# TODO We got a warning in VSCode there
-!=(::TernaryLogic, x::Interval, y::Interval) = !(==(TernaryLogic(), x, y))
->(::TernaryLogic, x::Interval, y::Interval) = !<(TernaryLogic(), x, y)
->=(::TernaryLogic, x::Interval, y::Interval) = !<=(TernaryLogic(), x, y)
+!=(::PointwisePolitic{:ternary}, x::Interval, y::Interval) = !(==(PointwisePolitic{:ternary}(), x, y))
+>(::PointwisePolitic{:ternary}, x::Interval, y::Interval) = !<=(PointwisePolitic{:ternary}(), x, y)
+>=(::PointwisePolitic{:ternary}, x::Interval, y::Interval) = !<(PointwisePolitic{:ternary}(), x, y)
 
 # Boolean functions
-function isinf(::TernaryLogic, x::Interval)
+# TODO this interacts with flavors
+function isinf(::PointwisePolitic{:ternary}, x::Interval)
     if x.lo === -Inf || x.hi === Inf
         isthin(x) && return true
         return missing
@@ -92,48 +106,76 @@ function isinf(::TernaryLogic, x::Interval)
     return false
 end
 
-isfinite(::TernaryLogic, x::Interval) = !isinf(TernaryLogic(), x)
-isinteger(::TernaryLogic, a::Interval) = (a.lo == a.hi) && isinteger(a.lo)
+isfinite(::PointwisePolitic{:ternary}, x::Interval) = !isinf(PointwisePolitic{:ternary}(), x)
+iszero(::PointwisePolitic{:ternary}, x::Interval) = ==(PointwisePolitic{:ternary}(), x, 0)
 
-## Boolean Intervals
+function isinteger(::PointwisePolitic{:ternary}, x::Interval)
+    (x.lo == x.hi) && isinteger(x.lo) && return true
+    floor(x.hi) < ceil(x.lo) && return false
+    return missing
+end
+
+
+## :interval
+"""
+    BooleanInterval
+
+Type representing a set containing `true` and/or `false`.
+
+Test what it contains using `in`. For example `true in BooleanInterval(true, false)`.
+"""
 struct BooleanInterval
     has_true::Bool
     has_false::Bool
+
+    function BooleanInterval(a::Bool, b::Bool)
+        a == b && throw(ArgumentError("boolean interval with content [$a, $b] doesn't make sense."))
+        return new(true, true)
+    end
+
+    function BooleanInterval(a::Bool)
+        a && return new(true, false)
+        return new(false, true)
+    end
+
+    BooleanInterval(::Missing) = new(true, true)
 end
 
-function BooleanInterval(arg)
-    ismissing(arg) && return BooleanInterval(true, true)
-    arg && return BooleanInterval(true, false)
-    return BooleanInterval(false, true)
+in(bool::Bool, bi::BooleanInterval) = bool ? bi.has_true : bi.has_false
+
+function show(io::IO, bi::BooleanInterval)
+    true in bi && false in bi && return print(io, "[true, false]")
+    true in bi && return print(io, "[true]")
+    false in bi && return print(io, "[false]")
 end
 
 for op in pointwise_bool_operations
-    @eval function $op(::BooleanIntervals, x::Interval, y::Interval)
-        return BooleanInterval($op(TernaryLogic(), x, y))
+    @eval function $op(::PointwisePolitic{:interval}, x::Interval, y::Interval)
+        return BooleanInterval($op(PointwisePolitic{:ternary}(), x, y))
     end
 end
 
 for f in pointwise_bool_functions
-    @eval function $f(::BooleanInterval, x::Interval)
-        return BooleanInterval($f(TernaryLogic(), x))
+    @eval function $f(::PointwisePolitic{:interval}, x::Interval)
+        return BooleanInterval($f(PointwisePolitic{:ternary}(), x))
     end
 end
 
 
-## Binary consistent
+## :is_all
 for op in pointwise_bool_operations
-    @eval function $op(::BinaryConsistent, x::Interval, y::Interval)
-        ternary_res = $op(TernaryLogic, x, y)
+    @eval function $op(::PointwisePolitic{:is_all}, x::Interval, y::Interval)
+        ternary_res = $op(PointwisePolitic{:ternary}(), x, y)
         ismissing(ternary_res) && return false
-        return BooleanInterval(ternary_res)
+        return ternary_res
     end
 end
 
 for f in pointwise_bool_functions
-    @eval function $f(::BinaryConsistent, x::Interval, y::Interval)
-        ternary_res = $f(TernaryLogic, x)
+    @eval function $f(::PointwisePolitic{:is_all}, x::Interval)
+        ternary_res = $f(PointwisePolitic{:ternary}(), x)
         ismissing(ternary_res) && return false
-        return BooleanInterval(ternary_res)
+        return ternary_res
     end
 end
 
@@ -151,7 +193,7 @@ end
 
 
 ## Default behaviors
-pointwise_politic() = TernaryLogic()
+pointwise_politic() = PointwisePolitic{:ternary}()
 
 for op in pointwise_bool_operations
     @eval $op(x::Interval, y::Interval) = $op(pointwise_politic(), x, y)

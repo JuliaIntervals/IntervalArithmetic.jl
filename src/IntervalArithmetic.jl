@@ -50,7 +50,7 @@ import Base.MPFR: MPFRRoundUp, MPFRRoundDown, MPFRRoundNearest, MPFRRoundToZero,
 import .Broadcast: broadcasted
 
 export
-    Interval,
+    Interval, BooleanInterval,
     interval, checked_interval,
     @interval, @biginterval, @floatinterval,
     diam, radius, mid, scaled_mid, mag, mig, hull,
@@ -64,6 +64,7 @@ export
     midpoint_radius,
     RoundTiesToEven, RoundTiesToAway,
     IntervalRounding,
+    PointwisePolitic,
     cancelminus, cancelplus, isbounded, isunbounded,
     .., @I_str, ±,
     pow, extended_div, nthroot,

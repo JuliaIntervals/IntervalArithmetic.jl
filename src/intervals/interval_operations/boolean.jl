@@ -212,11 +212,18 @@ Check whether an interval `x` is *atomic*, i.e. is unable to be split.
 This occurs when the interval is empty, or when the upper bound equals the lower
 bound or the bounds are consecutive floating point numbers.
 """
-isatomic(x::Interval) = isempty(x) || (inf(x) == sup(x)) || (sup(x) == nextfloat(inf(x)))
+isatomic(x::Interval) = isempty(x) || (x.lo == x.hi) || (x.hi == nextfloat(x.lo))
 
 """
     isthinzero(x)
 
-Return wether the interval only contains zero.
+Return whether the interval only contains zero.
 """
 isthinzero(x::Interval) = iszero(x.lo) && iszero(x.hi)
+
+"""
+    isthininteger(x)
+
+Return whether the inverval only contains a single integer.
+"""
+isthininteger(x::Interval) = (x.lo == x.hi) && isinteger(x.lo)
