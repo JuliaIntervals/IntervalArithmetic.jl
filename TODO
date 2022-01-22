@@ -12,7 +12,7 @@ Review intervals folder:
     ✔ Check if `signbit` is in the standard @done(22-01-16 17:24)
     It is not.
     ✔ Distribute functions from `special.jl` and `misc.jl` somewhere more informative @done(22-01-10 02:12)
-  
+    ☐ Check the display of all docstrings
   Discussion:
     ✔ Do we want to keep `@floatinterval` and `@biginteral` or use `@interval(F, expr1, expr2)` instead ? @done(22-01-10 00:55)
       ✔ It is fine actually @done(22-01-10 00:55)

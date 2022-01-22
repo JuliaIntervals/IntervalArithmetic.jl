@@ -19,7 +19,7 @@ end
 
 Checks if the intervals `a` and `b` are identical.
 
-Typed as \\stareq<TAB>.
+Typed as \\starequal<TAB>.
 
 Implement the `equal` function of the IEEE Std 1788-2015  (Table 9.3).
 
@@ -156,7 +156,7 @@ function isdisjoint(a::Interval, b::Interval)
 end
 
 function isdisjoint(a::Complex{F}, b::Complex{F}) where {F<:Interval}
-    return isdisjoint(real(a),real(b)) || isdisjoint(imag(a),imag(b))
+    return isdisjoint(real(a), real(b)) || isdisjoint(imag(a), imag(b))
 end
 
 """
@@ -168,7 +168,7 @@ Checks if the number `x` is a member of the interval `a`, treated as a set.
 Implement the `isMember` function of the IEEE Std 1788-2015 (section 10.6.3).
 """
 function in(x::Real, a::Interval)
-    isinf(x) && return false
+    isinf(x) && return contains_infinity(a)
     return a.lo <= x <= a.hi
 end
 

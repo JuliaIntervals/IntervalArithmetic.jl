@@ -3,7 +3,7 @@
 
 Super type of all interval flavors.
 
-A flavor defines (following the IEEE Std 1788-2015) how an interval behave
+A flavor defines (following the IEEE Std 1788-2015) how an interval behaves
 in edge cases. This mostly makes a difference when dealing with
 infinity and division by zero.
 
@@ -14,7 +14,7 @@ Currently only Flavor{:set_based} is supported.
     shorthand.
     For example, the interval `(2..Inf)` contain all real number greater than 2.
     In particular, this means that `(Inf..Inf)` is an empty interval, and division
-    by a thin zero return the empty interval.
+    by a thin zero returns the empty interval.
     The edge cases are
         - `x/(0..0) ≛ ∅`
         - `(0..0)/(0..0) ≛ ∅`

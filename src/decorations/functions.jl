@@ -10,13 +10,13 @@ one(a::DecoratedInterval{T}) where T<:Real = DecoratedInterval(one(T))
 one(::Type{DecoratedInterval{T}}) where T<:Real = DecoratedInterval(one(T))
 
 ## Bool functions
-bool_functions = (
+const bool_functions = (
     :isempty, :isentire, :isunbounded,
     :isfinite, :isnan,
     :isthin, :iscommon
 )
 
-bool_binary_functions = (
+const bool_binary_functions = (
     :<, :>, :!=, :⊆, :<=,
     :isinterior, :isdisjoint, :precedes, :strictprecedes,
     :≛

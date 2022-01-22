@@ -108,14 +108,14 @@ Interval{T}(x::Interval) where T = Interval{T}(x.lo, x.hi)
 #= Complex =#
 Interval(x::Complex) = Interval(real(x)) + im*Interval(imag(x))
 
-# These definitions has been put there because generated functions must be
+# These definitions have been put there because generated functions must be
 # defined after all methods they use.
+Interval(x::Irrational) = Interval{default_bound()}(x)
+
 @generated function Interval{T}(x::Irrational) where T
     res = Interval{T}(x(), x())  # Precompute the interval
     return :(return $res)  # Set body of the function to return the precomputed result
 end
-
-Interval(x::Irrational) = Interval{default_bound()}(x)
 
 """
     interval(a, b)
@@ -149,6 +149,27 @@ the fact that floating point literals are rounded to nearest when parsed.
 Use the string macro `I"[a, b]"` to ensure tight enclosure around the number
 that is typed in, even when it is not exactly representable as a floating point
 number (like `0.1`).
+
+Example
+=======
+julia> dump(0.1 .. 0.3)
+Interval{Float64}
+  lo: Float64 0.1
+  hi: Float64 0.3
+
+julia> dump(I"[0.1,0.3]"
+  lo: Float64 0.09999999999999999
+  hi: Float64 0.30000000000000004
+
+julia> dump(0.2 ± 0.1)
+Interval{Float64}
+  lo: Float64 0.1
+  hi: Float64 0.30000000000000004
+
+julia> dump(±(I"[0.2]", 0.1))
+Interval{Float64}
+  lo: Float64 0.09999999999999998
+  hi: Float64 0.30000000000000004
 """
 ..(a, b) = checked_interval(a, b)
 

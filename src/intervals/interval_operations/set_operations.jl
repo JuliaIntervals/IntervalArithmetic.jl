@@ -36,8 +36,8 @@ If your use case needs to splat the input, as in `intersect(a...)`, consider
 `reduce(intersect, a)` instead, because you save the cost of splatting.
 """
 function intersect(a::F...) where {F<:Interval}
-    low = maximum(broadcast(ai -> ai.lo, a))
-    high = minimum(broadcast(ai -> ai.hi, a))
+    low = maximum(inf.(a))
+    high = minimum(sup.(a))
 
     !is_valid_interval(low, high) && return emptyinterval(F)
     return Interval(low, high)

@@ -22,8 +22,8 @@ half_range_atan(::Type{F}) where {F<:Interval} = range_atan(F) / 2
 
 Finds the quadrant(s) corresponding to a given floating-point
 number. The quadrants are labelled as 0 for x ∈ [0, π/2], etc.
-For numbers very near a boundary of the quadrant, a tuple of two quadrants
-is returned. The minimum or maximum must then be chosen appropriately.
+A tuple of two quadrants is returned.
+The minimum or maximum must then be chosen appropriately.
 
 This is a rather indirect way to determine if π/2 and 3π/2 are contained
 in the interval; cf. the formula for sine of an interval in
@@ -136,7 +136,7 @@ end
 function sinpi(a::Interval{T}) where T
     isempty(a) && return a
     w = a * Interval{T}(π)
-    return(sin(w))
+    return sin(w)
 end
 
 """
@@ -228,7 +228,7 @@ end
 function cospi(a::Interval{T}) where T
     isempty(a) && return a
     w = a * Interval{T}(π)
-    return(cos(w))
+    return cos(w)
 end
 
 """

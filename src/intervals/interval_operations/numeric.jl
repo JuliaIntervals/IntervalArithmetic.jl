@@ -137,7 +137,7 @@ Implement the `mag` function of the IEEE Std 1788-2015 (Table 9.2).
 """
 function mag(a::F) where {T, F<:Interval{T}}
     isempty(a) && return convert(T, NaN)
-    max( abs(a.lo), abs(a.hi) )
+    return max( abs(a.lo), abs(a.hi) )
 end
 
 """
@@ -150,5 +150,5 @@ Implement the `mig` function of the IEEE Std 1788-2015 (Table 9.2).
 function mig(a::F) where {T, F<:Interval{T}}
     isempty(a) && return convert(T, NaN)
     contains_zero(a) && return zero(T)
-    min( abs(a.lo), abs(a.hi) )
+    return min( abs(a.lo), abs(a.hi) )
 end

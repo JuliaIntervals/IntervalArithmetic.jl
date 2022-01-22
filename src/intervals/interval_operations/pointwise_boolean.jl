@@ -31,10 +31,12 @@ Define which politic we use to extend pointwise comparison of
 Valid value for the politic identifier `P` are
     - `:is_all` : A boolean operation is extended by asking "is it true for
         all elements of the interval(s) involved".
-        This is self-consistent, but breaks the usual rules for negation.
+        This is self-consistent, but breaks the usual rules for negation of
+        boolean operations.
         For example with this politic, `((-1..3) == 0) == false` because it
         answers the question "are all elements in (-1..3) equal to zero".
-        However its negation is `false` too: `((-1..3) != 0) == false`.
+        However we also have `((-1..3) != 0) == false`, contrary to what is
+        usually expected for the symbols `==` and `!=`.
         This *silently* breaks any code relying on such operation in conditional
         statements like `if x == 0 ... else ... end`.
     - `:interval` : A pointwise boolean operation `B` return the set of all
@@ -62,13 +64,13 @@ Example
 """
 struct PointwisePolitic{P} end
 
-pointwise_bool_operations = [
+const pointwise_bool_operations = (
     :(==), :(!=), :<, :(<=), :>, :(>=)
-]
+)
 
-pointwise_bool_functions = [
+const pointwise_bool_functions = (
     :isinf, :isfinite, :isinteger, :iszero
-]
+)
 
 ## :ternary
 function ==(::PointwisePolitic{:ternary}, x::Interval, y::Interval)

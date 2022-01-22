@@ -297,7 +297,7 @@ end
 
 
 function representation(a::DecoratedInterval{T}, format=nothing) where T
-    if format === nothing
+    if isnothing(format)
         format = display_params.format  # default
     end
 

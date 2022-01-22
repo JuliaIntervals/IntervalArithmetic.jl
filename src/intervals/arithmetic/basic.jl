@@ -42,23 +42,23 @@ end
 
 Implement the `sub` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function -(a::F, b::Real) where {F<:Interval}
+function -(a::F, b::T) where {T<:Real, F<:Interval{T}}
     isempty(a) && return emptyinterval(F)
     return @round(F, a.lo - b, a.hi - b)
 end
 
-function -(b::Real, a::F) where {F<:Interval}
+function -(b::T, a::F) where {T, F<:Interval{T}}
     isempty(a) && return emptyinterval(F)
     return @round(F, b - a.hi, b - a.lo)
 end
 
-function -(a::F, b::F) where {T<:Real, F<:Interval{T}}
+function -(a::F, b::F) where {F<:Interval}
     (isempty(a) || isempty(b)) && return emptyinterval(F)
     return @round(F, a.lo - b.hi, a.hi - b.lo)
 end
 
--(a::Interval{T}, b::S) where {T<:Real, S<:Real} = a - Interval{T}(b)
--(a::T, b::Interval{S}) where {T<:Real, S<:Real} = Interval{S}(a) - b
+-(a::F, b::Real) where {F<:Interval} = a - F(b)
+-(a::Real, b::F) where {F<:Interval} = F(a) - b
 
 """
     scale(α, a::Interval)
@@ -67,7 +67,7 @@ Multiply an interval by a positive scalar.
 
 For efficiency, does not check that the constant is positive.
 """
-scale(α, a::F) where {F<:Interval}= @round(F, α*a.lo, α*a.hi)
+@inline scale(α, a::F) where {F<:Interval} = @round(F, α*a.lo, α*a.hi)
 
 """
     *(a::Interval, b::Real)
@@ -76,7 +76,7 @@ scale(α, a::F) where {F<:Interval}= @round(F, α*a.lo, α*a.hi)
 
 Implement the `mul` function of the IEEE Std 1788-2015 (Table 9.1).
 
-Note: the behavior of the multiplication if flavor dependent for some edge cases.
+Note: the behavior of the multiplication is flavor dependent for some edge cases.
 """
 function *(x::T, a::F) where {T<:Real, F<:Interval{T}}
     isempty(a) && return emptyinterval(F)
@@ -275,6 +275,7 @@ Compute the real n-th root of Interval.
 """
 function nthroot(a::Interval{BigFloat}, n::Integer)
     n == 1 && return a
+    n == 2 && return sqrt(a)
     n < 0 && isthinzero(a) && return emptyinterval(a)
     isempty(a) && return a
     if n > 0
@@ -297,6 +298,8 @@ function nthroot(a::Interval{BigFloat}, n::Integer)
 end
 
 function nthroot(a::Interval{T}, n::Integer) where T
+    n == 1 && return a
+    n == 2 && return sqrt(a)
     b = nthroot(big(a), n)
     return convert(Interval{T}, b)
 end

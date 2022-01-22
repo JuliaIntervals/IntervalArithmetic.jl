@@ -83,7 +83,6 @@ function ^(a::F, n::Integer) where {F<:Interval{BigFloat}}
     end
 end
 
-# Floating-point power of a BigFloat interval:
 function ^(a::F, x::BigFloat) where {F<:Interval{BigFloat}}
     domain = F(0, Inf)
 
@@ -219,8 +218,8 @@ function pow(x::F, n::Integer) where {F<:Interval}
 
     if iseven(n) && 0 ∈ x
         return hull(zero(x),
-                    hull(Base.power_by_squaring(F(mig(x)), n),
-                        Base.power_by_squaring(F(mag(x)), n))
+                    Base.power_by_squaring(F(mig(x)), n),
+                    Base.power_by_squaring(F(mag(x)), n)
             )
     else
       return hull( Base.power_by_squaring(F(x.lo), n),
