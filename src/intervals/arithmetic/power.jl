@@ -101,16 +101,16 @@ function ^(a::F, x::BigFloat) where {F<:Interval{BigFloat}}
     xx = F(x)
 
     lo = @round(F, a.lo^xx.lo, a.lo^xx.lo)
-    lo = (lo.lo == Inf) ? F(prefloat(Inf), Inf) : lo
+    lo = (lo.lo == Inf) ? F(prevfloat(Inf), Inf) : lo
 
     lo1 = @round(F, a.lo^xx.hi, a.lo^xx.hi)
-    lo1 = (lo1.lo == Inf) ? F(prefloat(Inf), Inf) : lo1
+    lo1 = (lo1.lo == Inf) ? F(prevfloat(Inf), Inf) : lo1
 
     hi = @round(F, a.hi^xx.lo, a.hi^xx.lo)
-    hi = (hi.lo == Inf) ? F(prefloat(Inf), Inf) : hi
+    hi = (hi.lo == Inf) ? F(prevfloat(Inf), Inf) : hi
 
     hi1 = @round(F, a.hi^xx.hi, a.hi^xx.hi)
-    hi1 = (hi1.lo == Inf) ? F(prefloat(Inf), Inf) : hi1
+    hi1 = (hi1.lo == Inf) ? F(prevfloat(Inf), Inf) : hi1
 
     lo = hull(lo, lo1)
     hi = hull(hi, hi1)
@@ -182,7 +182,6 @@ end
 
 # Interval power of an interval:
 function ^(a::F, x::Interval) where {F<:Interval{BigFloat}}
-    T = BigFloat
     domain = F(0, Inf)
 
     a = a ∩ domain
