@@ -17,7 +17,7 @@ const bool_functions = (
 )
 
 const bool_binary_functions = (
-    :<, :>, :!=, :⊆, :<=,
+    :<, :>, :!=, :⊆, :<=, :(==),
     :isinterior, :isdisjoint, :precedes, :strictprecedes,
     :≛
 )
@@ -60,6 +60,8 @@ for f in arithm_functions
         dec = min(decoration(xx), decoration(yy), decoration(r))
         DecoratedInterval(r, dec)
     end
+    @eval $(f)(xx::Real, yy::DecoratedInterval) = $(f)(DecoratedInterval(xx), yy)
+    @eval $(f)(xx::DecoratedInterval, yy::Real) = $(f)(xx, DecoratedInterval(yy))
 end
 
 # Division
@@ -71,6 +73,8 @@ function inv(xx::DecoratedInterval{T}) where T
     dx = min(decoration(r), dx)
     DecoratedInterval( r, dx )
 end
+/(xx::Real, yy::DecoratedInterval) = DecoratedInterval(xx) / yy
+/(xx::DecoratedInterval, yy::Real) = xx / DecoratedInterval(yy)
 function /(xx::DecoratedInterval{T}, yy::DecoratedInterval{T}) where T
     x = interval(xx)
     y = interval(yy)
@@ -103,7 +107,7 @@ function ^(xx::DecoratedInterval{T}, q::AbstractFloat) where T
     x = interval(xx)
     r = x^q
     d = min(decoration(xx), decoration(r))
-    if x > zero(T) || (x.lo ≥ zero(T) && q > zero(T)) ||
+    if x.lo > zero(T) || (x.lo ≥ zero(T) && q > zero(T)) ||
             (isinteger(q) && q > zero(q)) || (isinteger(q) && zero(T) ∉ x)
         return DecoratedInterval(r, d)
     end
@@ -114,7 +118,7 @@ function ^(xx::DecoratedInterval{T}, q::Rational{S}) where {T, S<:Integer}
     x = interval(xx)
     r = x^q
     d = min(decoration(xx), decoration(r))
-    if x > zero(T) || (x.lo ≥ zero(T) && q > zero(T)) ||
+    if x.lo > zero(T) || (x.lo ≥ zero(T) && q > zero(T)) ||
             (isinteger(q) && q > zero(q)) || (isinteger(q) && zero(T) ∉ x)
         return DecoratedInterval(r, d)
     end

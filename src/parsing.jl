@@ -21,7 +21,7 @@ function parse(::Type{DecoratedInterval{T}}, s::AbstractString) where T
 
     interval_string, dec = split(s, "_")
     interval = parse(Interval{T}, interval_string)
-    return DecoratedInterval(interval, decorations[dec])
+    return DecoratedInterval(interval, decorations[lowercase(dec)])
 end
 
 """
@@ -43,7 +43,7 @@ Roughly speaking, the valid forms are
         Strangely enough, according to the standard, the default
         value is `0.5` (e.g. `2.3? == 2.3 ± 0.05`).
         The direction of the uncertainty can be given by adding 'u' or 'd' at
-        the end for the error going only up or down respectively (e.g. 
+        the end for the error going only up or down respectively (e.g.
         `4.5?5u == [4.5, 5]`).
 """
 function parse(::Type{Interval{T}}, s::AbstractString) where T
@@ -147,7 +147,7 @@ function interval_parser(::Type{Interval{T}}) where T
         b = parse(T, join(seq[3]))
         return a ± b
     end
-    
+
     return Sequence(
         first,
         Either(pm_interval, uncert_interval, infsup_interval, point_interval),

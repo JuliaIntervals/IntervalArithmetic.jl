@@ -10,5 +10,5 @@ nai(::Interval{T}) where T<:Real = nai(T)
 nai(::DecoratedInterval{T}) where T<:Real = nai(T)
 nai() = nai(Interval{default_bound()})
 
-isnai(x::Interval) = isnan(x.lo) || isnan(x.hi) || x.lo > x.hi || (isinf(x.lo) && x.lo == x.hi)
-isnai(x::DecoratedInterval) = isnai(interval(x)) && x.decoration == ill
+isnai(x::Interval) = isnan(x.lo) || isnan(x.hi) #|| x.lo > x.hi || (isinf(x.lo) && x.lo == x.hi)
+isnai(x::DecoratedInterval) = isnai(interval(x)) || x.decoration == ill
