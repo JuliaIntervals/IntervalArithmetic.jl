@@ -26,7 +26,7 @@
 """
     PointwisePolitic{P}
 
-Define which politic we use to extend pointwise comparison of 
+Define which politic we use to extend pointwise comparison of
 
 Valid value for the politic identifier `P` are
     - `:is_all` : A boolean operation is extended by asking "is it true for
@@ -72,6 +72,28 @@ const pointwise_bool_functions = (
     :isinf, :isfinite, :isinteger, :iszero
 )
 
+## :ieee1788
+# See Table 10.3
+==(::PointwisePolitic{:ieee1788}, x::Interval, y::Interval) = x.lo == y.lo && x.hi == y.hi
+
+<(::PointwisePolitic{:ieee1788}, x::Interval, y::Interval) = isstrictless(x, y)
+
+<=(::PointwisePolitic{:ieee1788}, x::Interval, y::Interval) = isweaklyless(x, y)
+
+!=(::PointwisePolitic{:ieee1788}, x::Interval, y::Interval) = !(==(PointwisePolitic{:ieee1788}(), x, y))
+>(::PointwisePolitic{:ieee1788}, x::Interval, y::Interval) = !<=(PointwisePolitic{:ieee1788}(), x, y)
+>=(::PointwisePolitic{:ieee1788}, x::Interval, y::Interval) = !<(PointwisePolitic{:ieee1788}(), x, y)
+
+# Boolean functions
+# NOTE this interacts with flavors.
+isinf(::PointwisePolitic{:ieee1788}, x::Interval) = contains_infinity(x) && isthin(x)
+
+isfinite(::PointwisePolitic{:ieee1788}, x::Interval) = !isinf(PointwisePolitic{:ieee1788}(), x)
+iszero(::PointwisePolitic{:ieee1788}, x::Interval) = isthinzero(x)
+
+isinteger(::PointwisePolitic{:ieee1788}, x::Interval) = (x.lo == x.hi) && isinteger(x.lo)
+
+
 ## :ternary
 function ==(::PointwisePolitic{:ternary}, x::Interval, y::Interval)
     isthin(x) && isthin(y) && x.lo == y.lo && return true
@@ -99,7 +121,7 @@ end
 # NOTE this interacts with flavors.
 function isinf(::PointwisePolitic{:ternary}, x::Interval)
     if contains_infinity(x)
-        isthing(x) && return true
+        isthin(x) && return true
         return missing
     end
 
@@ -193,7 +215,7 @@ end
 
 
 ## Default behaviors
-pointwise_politic() = PointwisePolitic{:ternary}()
+pointwise_politic() = PointwisePolitic{:ieee1788}()
 
 for op in pointwise_bool_operations
     @eval $op(x::Interval, y::Interval) = $op(pointwise_politic(), x, y)
