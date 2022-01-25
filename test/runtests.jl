@@ -20,8 +20,9 @@ include_test("rand.jl")
 # Display tests:
 include_test("display_tests/display.jl")
 
-# ITF1788 tests
-
-# include_test("ITF1788_tests/ITF1788_tests.jl")  # TODO fix these tests
-
+# Multidim tests
 include_test("multidim_tests/multidim.jl")
+
+# ITF1788 tests
+include_test("test_ITF1788/run_ITF1788.jl")  # TODO fix these tests
+
