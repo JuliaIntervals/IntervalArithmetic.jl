@@ -326,33 +326,33 @@ end
 
 @testset "minimal_interval_part_test" begin
 
-    @test_skip interval_part(DecoratedInterval(interval(-0x1.99999A842549Ap+4,0x1.9999999999999P-4), trv)) === Interval(-0x1.99999A842549Ap+4,0x1.9999999999999P-4)
+    @test interval(DecoratedInterval(interval(-0x1.99999A842549Ap+4,0x1.9999999999999P-4), trv)) === Interval(-0x1.99999A842549Ap+4,0x1.9999999999999P-4)
 
-    @test_skip interval_part(DecoratedInterval(interval(-0x1.99999C0000000p+4,0x1.9999999999999P-4), com)) === Interval(-0x1.99999C0000000p+4,0x1.9999999999999P-4)
+    @test interval(DecoratedInterval(interval(-0x1.99999C0000000p+4,0x1.9999999999999P-4), com)) === Interval(-0x1.99999C0000000p+4,0x1.9999999999999P-4)
 
-    @test_skip interval_part(DecoratedInterval(interval(-0x1.99999A842549Ap+4,0x1.99999A0000000p-4), dac)) === Interval(-0x1.99999A842549Ap+4,0x1.99999A0000000p-4)
+    @test interval(DecoratedInterval(interval(-0x1.99999A842549Ap+4,0x1.99999A0000000p-4), dac)) === Interval(-0x1.99999A842549Ap+4,0x1.99999A0000000p-4)
 
-    @test_skip interval_part(DecoratedInterval(interval(-0x1.99999C0000000p+4,0x1.99999A0000000p-4), def)) === Interval(-0x1.99999C0000000p+4,0x1.99999A0000000p-4)
+    @test interval(DecoratedInterval(interval(-0x1.99999C0000000p+4,0x1.99999A0000000p-4), def)) === Interval(-0x1.99999C0000000p+4,0x1.99999A0000000p-4)
 
-    @test_skip interval_part(DecoratedInterval(interval(-0x0.0000000000001p-1022,-0x0.0000000000001p-1022), trv)) === Interval(-0x0.0000000000001p-1022,-0x0.0000000000001p-1022)
+    @test interval(DecoratedInterval(interval(-0x0.0000000000001p-1022,-0x0.0000000000001p-1022), trv)) === Interval(-0x0.0000000000001p-1022,-0x0.0000000000001p-1022)
 
-    @test_skip interval_part(DecoratedInterval(interval(-0x0.0000000000001p-1022,0x0.0000000000001p-1022), trv)) === Interval(-0x0.0000000000001p-1022,0x0.0000000000001p-1022)
+    @test interval(DecoratedInterval(interval(-0x0.0000000000001p-1022,0x0.0000000000001p-1022), trv)) === Interval(-0x0.0000000000001p-1022,0x0.0000000000001p-1022)
 
-    @test_skip interval_part(DecoratedInterval(interval(0x0.0000000000001p-1022,0x0.0000000000001p-1022), trv)) === Interval(0x0.0000000000001p-1022,0x0.0000000000001p-1022)
+    @test interval(DecoratedInterval(interval(0x0.0000000000001p-1022,0x0.0000000000001p-1022), trv)) === Interval(0x0.0000000000001p-1022,0x0.0000000000001p-1022)
 
-    @test_skip interval_part(DecoratedInterval(interval(-0x1.fffffffffffffp+1023,-0x1.fffffffffffffp+1023), trv)) === Interval(-0x1.fffffffffffffp+1023,-0x1.fffffffffffffp+1023)
+    @test interval(DecoratedInterval(interval(-0x1.fffffffffffffp+1023,-0x1.fffffffffffffp+1023), trv)) === Interval(-0x1.fffffffffffffp+1023,-0x1.fffffffffffffp+1023)
 
-    @test_skip interval_part(DecoratedInterval(interval(-0x1.fffffffffffffp+1023,0x1.fffffffffffffp+1023), trv)) === Interval(-0x1.fffffffffffffp+1023,0x1.fffffffffffffp+1023)
+    @test interval(DecoratedInterval(interval(-0x1.fffffffffffffp+1023,0x1.fffffffffffffp+1023), trv)) === Interval(-0x1.fffffffffffffp+1023,0x1.fffffffffffffp+1023)
 
-    @test_skip interval_part(DecoratedInterval(interval(0x1.fffffffffffffp+1023,0x1.fffffffffffffp+1023), trv)) === Interval(0x1.fffffffffffffp+1023,0x1.fffffffffffffp+1023)
+    @test interval(DecoratedInterval(interval(0x1.fffffffffffffp+1023,0x1.fffffffffffffp+1023), trv)) === Interval(0x1.fffffffffffffp+1023,0x1.fffffffffffffp+1023)
 
-    @test_skip interval_part(DecoratedInterval(interval(-Inf,Inf), trv)) === Interval(-Inf,Inf)
+    @test interval(DecoratedInterval(interval(-Inf,Inf), trv)) === Interval(-Inf,Inf)
 
-    @test_skip interval_part(DecoratedInterval(emptyinterval(), trv)) === emptyinterval()
+    @test interval(DecoratedInterval(emptyinterval(), trv)) === emptyinterval()
 
-    @test_skip interval_part(DecoratedInterval(interval(-0x1.99999C0000000p+4,0x1.9999999999999P-4), com)) === Interval(-0x1.99999C0000000p+4,0x1.9999999999999P-4)
+    @test interval(DecoratedInterval(interval(-0x1.99999C0000000p+4,0x1.9999999999999P-4), com)) === Interval(-0x1.99999C0000000p+4,0x1.9999999999999P-4)
 
-    @test_logs (:warn, ) @test_skip interval_part(nai()) === emptyinterval()
+    @test_logs (:warn, ) @test_skip interval(nai()) === emptyinterval()
 
 end
 

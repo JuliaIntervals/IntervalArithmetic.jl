@@ -266,7 +266,7 @@ end
 
     @test isnan(midpoint_radius(emptyinterval())[1]) && isnan(midpoint_radius(emptyinterval())[2])
 
-    @test_skip isnan(midpoint_radius(nai(), nai())[1]) && isnan(midpoint_radius(nai(), nai())[2])
+    @test isnan(midpoint_radius(nai())[1]) && isnan(midpoint_radius(nai())[2])
 
     @test midpoint_radius(DecoratedInterval(interval(-Inf,Inf), def))[1] === 0.0 && midpoint_radius(DecoratedInterval(interval(-Inf,Inf), def))[2] === Inf
 
