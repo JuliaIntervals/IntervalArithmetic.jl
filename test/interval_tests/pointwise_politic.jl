@@ -87,3 +87,52 @@ for politic in (:is_all, :interval, :ternary)
         end
     end
 end
+
+let politic = :ieee1788
+    @eval istrue(bool) = istrue($(QuoteNode(politic)), bool)
+    @eval isfalse(bool) = isfalse($(QuoteNode(politic)), bool)
+
+    @eval IntervalArithmetic.pointwise_politic() = PointwisePolitic{$(QuoteNode(politic))}()
+    @show(IntervalArithmetic.pointwise_politic())
+    @testset ":$politic pointwise politic" begin
+        @testset "Number comparison" begin
+            @test istrue(a < c)
+            @test istrue(c > a)
+            @test istrue(a < b)
+            @test istrue(c > b)
+            @test isfalse(c < a)
+            @test isfalse(a > c)
+            @test istrue(z == z)
+            @test istrue(z != c)
+            @test isfalse(a == b)
+            @test istrue(b != c)
+            @test istrue(b <= c)
+            @test isfalse(f < f)
+        end
+
+        @testset "Testing for zero" begin
+            @test isfalse(iszero(c))
+            @test istrue(iszero(z))
+            @test isfalse(iszero(a))
+            @test isfalse(iszero(b))
+        end
+
+        @testset "isinteger" begin
+            @test istrue(isinteger(z))
+            @test istrue(isinteger(Interval(4)))
+            @test isfalse(isinteger(Interval(4.5)))
+            @test isfalse(isinteger(c))
+            @test isfalse(isinteger(d))
+        end
+
+        @testset "isfinite" begin
+            @test istrue(isfinite(a))
+            @test istrue(isfinite(b))
+            @test istrue(isfinite(c))
+            @test istrue(isfinite(z))
+            # NOTE This depends on the flavor. We test it here for the
+            # :set_based flavor only
+            @test istrue(isfinite(Interval(0., Inf)))
+        end
+    end
+end
