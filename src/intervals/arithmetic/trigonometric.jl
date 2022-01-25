@@ -285,6 +285,145 @@ function tan(a::F) where {F<:Interval{Float64}}
 end
 
 """
+    cot(a::Interval)
+
+Implement the `cot` function of the IEEE Std 1788-2015 (Table 9.1).
+"""
+function cot(a::F) where {F<:Interval}
+    isempty(a) && return a
+
+    diam(a) > F(π).lo && return entireinterval(a)
+
+    isthinzero(a) && return emptyinterval(a)
+
+    lo_quadrant = minimum(find_quadrants(F, a.lo))
+    hi_quadrant = maximum(find_quadrants(F, a.hi))
+
+    lo_quadrant = mod(lo_quadrant, 4)
+    hi_quadrant = mod(hi_quadrant, 4)
+
+    # Different cases depending on the two quadrants:
+    if lo_quadrant == hi_quadrant
+        iszero(a.lo) && return @round(F, cot(a.hi), Inf)
+
+        return @round(F, cot(a.hi), cot(a.lo))
+
+    elseif (lo_quadrant == 3 && iszero(hi_quadrant)) || (lo_quadrant == 1 && hi_quadrant ==2)
+        iszero(a.hi) && return @round(F, -Inf, cot(a.lo))
+
+        return entireinterval(a)
+
+    elseif (iszero(lo_quadrant) && hi_quadrant == 1) || (lo_quadrant == 2 && hi_quadrant == 3)
+        return @round(F, cot(a.hi), cot(a.lo))
+
+    elseif ( lo_quadrant == 2 && iszero(hi_quadrant))
+        iszero(a.hi) && return @round(F, -Inf, cot(a.lo))
+
+        return entireinterval(a)
+
+    else
+        return entireinterval(a)
+    end
+end
+
+function cot(a::F) where {F<:Interval{Float64}}
+    return atomic(F, cot(big(a)) )
+end
+
+"""
+    sec(a::Interval)
+
+Implement the `sec` function of the IEEE Std 1788-2015 (Table 9.1).
+"""
+function sec(a::F) where {F<:Interval}
+    isempty(a) && return a
+
+    diam(a) > F(π).lo && return entireinterval(a)
+
+    lo_quadrant = minimum(find_quadrants(F, a.lo))
+    hi_quadrant = maximum(find_quadrants(F, a.hi))
+
+    lo_quadrant = mod(lo_quadrant, 4)
+    hi_quadrant = mod(hi_quadrant, 4)
+
+    # Different cases depending on the two quadrants:
+    if lo_quadrant == hi_quadrant  # Interval limits in the same quadrant
+        lo = @round(F, sec(a.lo), sec(a.lo))
+        hi = @round(F, sec(a.hi), sec(a.hi))
+        return hull(lo, hi)
+
+    elseif (iszero(lo_quadrant) && hi_quadrant == 1) || (lo_quadrant == 2 && hi_quadrant ==3)
+        return entireinterval(a)
+
+    elseif lo_quadrant == 3 && iszero(hi_quadrant)
+        return @round(F, 1, max(sec(a.lo), sec(a.hi)))
+
+    elseif lo_quadrant == 1 && hi_quadrant == 2
+        return @round(F, min(sec(a.lo), sec(a.hi)), -1)
+
+    else
+        return entireinterval(a)
+    end
+end
+
+function sec(a::F) where {F<:Interval{Float64}}
+    return atomic(F, sec(big(a)) )
+end
+
+"""
+    csc(a::Interval)
+
+Implement the `csc` function of the IEEE Std 1788-2015 (Table 9.1).
+"""
+function csc(a::F) where {F<:Interval}
+    isempty(a) && return a
+
+    diam(a) > F(π).lo && return entireinterval(a)
+
+    isthinzero(a) && return emptyinterval(a)
+
+    lo_quadrant = minimum(find_quadrants(F, a.lo))
+    hi_quadrant = maximum(find_quadrants(F, a.hi))
+
+    lo_quadrant = mod(lo_quadrant, 4)
+    hi_quadrant = mod(hi_quadrant, 4)
+
+    # Different cases depending on the two quadrants:
+    if lo_quadrant == hi_quadrant
+        iszero(a.lo) && return @round(F, csc(a.hi), Inf)
+
+        lo = @round(F, csc(a.lo), csc(a.lo))
+        hi = @round(F, csc(a.hi), csc(a.hi))
+        return hull(lo, hi)
+
+    elseif (lo_quadrant == 3 && iszero(hi_quadrant)) || (lo_quadrant == 1 && hi_quadrant ==2)
+        iszero(a.hi) && return @round(F, -Inf, csc(a.lo))
+
+        return entireinterval(a)
+
+    elseif iszero(lo_quadrant) && hi_quadrant == 1
+        return @round(F, 1, max(csc(a.lo), csc(a.hi)))
+
+    elseif lo_quadrant == 2 && hi_quadrant == 3
+        return @round(F, min(csc(a.lo), csc(a.hi)), -1)
+
+    elseif ( lo_quadrant == 2 && iszero(hi_quadrant))
+        iszero(a.hi) && return @round(F, -Inf, -1)
+
+        return entireinterval(a)
+
+    else
+        return entireinterval(a)
+    end
+end
+
+function csc(a::F) where {F<:Interval{Float64}}
+    return atomic(F, csc(big(a)) )
+end
+
+
+
+"""
     asin(a::Interval)
 
 Implement the `asin` function of the IEEE Std 1788-2015 (Table 9.1).
