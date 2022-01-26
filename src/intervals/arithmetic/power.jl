@@ -204,6 +204,14 @@ function sqr(a::Interval)
 end
 
 """
+    hypot(x::Interval, n::Integer)
+
+Direct implemntation of `hypot` using intervals.
+"""
+hypot(x::Interval, y::Interval) = sqrt(sqr(x) + sqr(y))
+
+
+"""
     pow(x::Interval, n::Integer)
 
 A faster implementation of `x^n`, currently using `power_by_squaring`.
