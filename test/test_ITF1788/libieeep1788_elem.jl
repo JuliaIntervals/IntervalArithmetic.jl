@@ -2758,7 +2758,7 @@ end
 
     @test ^(interval(0x1.FFFFFFFFFFFFFp1023,0x1.FFFFFFFFFFFFFp1023), -3) === Interval(0x0P+0,0x0.0000000000001P-1022)
 
-    @test_skip ^(interval(-0x1.FFFFFFFFFFFFFp1023,-0x1.FFFFFFFFFFFFFp1023), -3) === Interval(-0x0.0000000000001P-1022,-0x0P+0)
+    @test ^(interval(-0x1.FFFFFFFFFFFFFp1023,-0x1.FFFFFFFFFFFFFp1023), -3) === Interval(-0x0.0000000000001P-1022,-0x0P+0)
 
     @test ^(interval(0.0,Inf), -3) === Interval(0.0,Inf)
 
@@ -2788,7 +2788,7 @@ end
 
     @test ^(interval(0x1.FFFFFFFFFFFFFp1023,0x1.FFFFFFFFFFFFFp1023), -7) === Interval(0x0P+0,0x0.0000000000001P-1022)
 
-    @test_skip ^(interval(-0x1.FFFFFFFFFFFFFp1023,-0x1.FFFFFFFFFFFFFp1023), -7) === Interval(-0x0.0000000000001P-1022,-0x0P+0)
+    @test ^(interval(-0x1.FFFFFFFFFFFFFp1023,-0x1.FFFFFFFFFFFFFp1023), -7) === Interval(-0x0.0000000000001P-1022,-0x0P+0)
 
     @test ^(interval(0.0,Inf), -7) === Interval(0.0,Inf)
 
@@ -7422,55 +7422,55 @@ end
 
     @test atanh(emptyinterval()) === emptyinterval()
 
-    @test_skip atanh(interval(0.0,Inf)) === Interval(0.0,Inf)
+    @test atanh(interval(0.0,Inf)) === Interval(0.0,Inf)
 
-    @test_skip atanh(interval(-0.0,Inf)) === Interval(0.0,Inf)
+    @test atanh(interval(-0.0,Inf)) === Interval(0.0,Inf)
 
     @test atanh(interval(1.0,Inf)) === emptyinterval()
 
-    @test_skip atanh(interval(-Inf,0.0)) === Interval(-Inf,0.0)
+    @test atanh(interval(-Inf,0.0)) === Interval(-Inf,0.0)
 
-    @test_skip atanh(interval(-Inf,-0.0)) === Interval(-Inf,0.0)
+    @test atanh(interval(-Inf,-0.0)) === Interval(-Inf,0.0)
 
     @test atanh(interval(-Inf,-1.0)) === emptyinterval()
 
-    @test_skip atanh(interval(-1.0,1.0)) === entireinterval()
+    @test atanh(interval(-1.0,1.0)) === entireinterval()
 
-    @test_skip atanh(interval(0.0,0.0)) === Interval(0.0,0.0)
+    @test atanh(interval(0.0,0.0)) === Interval(0.0,0.0)
 
-    @test_skip atanh(interval(-0.0,-0.0)) === Interval(0.0,0.0)
+    @test atanh(interval(-0.0,-0.0)) === Interval(0.0,0.0)
 
     @test atanh(interval(-1.0,-1.0)) === emptyinterval()
 
     @test atanh(interval(1.0,1.0)) === emptyinterval()
 
-    @test_skip atanh(entireinterval()) === entireinterval()
+    @test atanh(entireinterval()) === entireinterval()
 
-    @test_skip atanh(interval(0x1.4C0420F6F08CCP-2,0x1.FFFFFFFFFFFFFP-1)) === Interval(0x1.5871DD2DF9102P-2,0x1.2B708872320E2P+4)
+    @test atanh(interval(0x1.4C0420F6F08CCP-2,0x1.FFFFFFFFFFFFFP-1)) === Interval(0x1.5871DD2DF9102P-2,0x1.2B708872320E2P+4)
 
-    @test_skip atanh(interval(-0x1.FFB88E9EB6307P-1,0x1.999999999999AP-4)) === Interval(-0x1.06A3A97D7979CP+2,0x1.9AF93CD234413P-4)
+    @test atanh(interval(-0x1.FFB88E9EB6307P-1,0x1.999999999999AP-4)) === Interval(-0x1.06A3A97D7979CP+2,0x1.9AF93CD234413P-4)
 
 end
 
 @testset "minimal_atanh_dec_test" begin
 
-    @test_skip atanh(DecoratedInterval(interval(0.0,Inf), dac)) === DecoratedInterval(Interval(0.0,Inf), trv)
+    @test atanh(DecoratedInterval(interval(0.0,Inf), dac)) === DecoratedInterval(Interval(0.0,Inf), trv)
 
-    @test_skip atanh(DecoratedInterval(interval(-Inf,0.0), def)) === DecoratedInterval(Interval(-Inf,0.0), trv)
+    @test atanh(DecoratedInterval(interval(-Inf,0.0), def)) === DecoratedInterval(Interval(-Inf,0.0), trv)
 
-    @test_skip atanh(DecoratedInterval(interval(-1.0,1.0), com)) === DecoratedInterval(entireinterval(), trv)
+    @test atanh(DecoratedInterval(interval(-1.0,1.0), com)) === DecoratedInterval(entireinterval(), trv)
 
-    @test_skip atanh(DecoratedInterval(interval(0.0,0.0), com)) === DecoratedInterval(Interval(0.0,0.0), com)
+    @test atanh(DecoratedInterval(interval(0.0,0.0), com)) === DecoratedInterval(Interval(0.0,0.0), com)
 
     @test atanh(DecoratedInterval(interval(1.0,1.0), def)) === DecoratedInterval(emptyinterval(), trv)
 
-    @test_skip atanh(DecoratedInterval(interval(0x1.4C0420F6F08CCP-2,0x1.FFFFFFFFFFFFFP-1), com)) === DecoratedInterval(Interval(0x1.5871DD2DF9102P-2,0x1.2B708872320E2P+4), com)
+    @test atanh(DecoratedInterval(interval(0x1.4C0420F6F08CCP-2,0x1.FFFFFFFFFFFFFP-1), com)) === DecoratedInterval(Interval(0x1.5871DD2DF9102P-2,0x1.2B708872320E2P+4), com)
 
-    @test_skip atanh(DecoratedInterval(interval(-1.0,0x1.FFFFFFFFFFFFFP-1), com)) === DecoratedInterval(Interval(-Inf,0x1.2B708872320E2P+4), trv)
+    @test atanh(DecoratedInterval(interval(-1.0,0x1.FFFFFFFFFFFFFP-1), com)) === DecoratedInterval(Interval(-Inf,0x1.2B708872320E2P+4), trv)
 
-    @test_skip atanh(DecoratedInterval(interval(-0x1.FFB88E9EB6307P-1,0x1.999999999999AP-4), def)) === DecoratedInterval(Interval(-0x1.06A3A97D7979CP+2,0x1.9AF93CD234413P-4), def)
+    @test atanh(DecoratedInterval(interval(-0x1.FFB88E9EB6307P-1,0x1.999999999999AP-4), def)) === DecoratedInterval(Interval(-0x1.06A3A97D7979CP+2,0x1.9AF93CD234413P-4), def)
 
-    @test_skip atanh(DecoratedInterval(interval(-0x1.FFB88E9EB6307P-1,1.0), com)) === DecoratedInterval(Interval(-0x1.06A3A97D7979CP+2,Inf), trv)
+    @test atanh(DecoratedInterval(interval(-0x1.FFB88E9EB6307P-1,1.0), com)) === DecoratedInterval(Interval(-0x1.06A3A97D7979CP+2,Inf), trv)
 
 end
 

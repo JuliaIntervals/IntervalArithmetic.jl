@@ -316,23 +316,23 @@ end
 
 @testset "mpfi_atanh" begin
 
-    @test_skip atanh(interval(-1.0, 0.0)) === Interval(-Inf, 0.0)
+    @test atanh(interval(-1.0, 0.0)) === Interval(-Inf, 0.0)
 
-    @test_skip atanh(interval(0.0, 0.0)) === Interval(0.0, 0.0)
+    @test atanh(interval(0.0, 0.0)) === Interval(0.0, 0.0)
 
-    @test_skip atanh(interval(0.0, +1.0)) === Interval(0.0, +Inf)
+    @test atanh(interval(0.0, +1.0)) === Interval(0.0, +Inf)
 
-    @test_skip atanh(interval(-1.0, -0.5)) === Interval(-Inf, -0x8c9f53d568185p-52)
+    @test atanh(interval(-1.0, -0.5)) === Interval(-Inf, -0x8c9f53d568185p-52)
 
-    @test_skip atanh(interval(-0.75, -0.25)) === Interval(-0x3e44e55c64b4bp-50, -0x1058aefa811451p-54)
+    @test atanh(interval(-0.75, -0.25)) === Interval(-0x3e44e55c64b4bp-50, -0x1058aefa811451p-54)
 
-    @test_skip atanh(interval(-0.5, 0.5)) === Interval(-0x1193ea7aad030bp-53, 0x1193ea7aad030bp-53)
+    @test atanh(interval(-0.5, 0.5)) === Interval(-0x1193ea7aad030bp-53, 0x1193ea7aad030bp-53)
 
-    @test_skip atanh(interval(0.25, 0.625)) === Interval(0x1058aefa811451p-54, 0x2eec3bb76c2b3p-50)
+    @test atanh(interval(0.25, 0.625)) === Interval(0x1058aefa811451p-54, 0x2eec3bb76c2b3p-50)
 
-    @test_skip atanh(interval(-1.0, 1.0)) === entireinterval()
+    @test atanh(interval(-1.0, 1.0)) === entireinterval()
 
-    @test_skip atanh(interval(0.125, 1.0)) === Interval(0x1015891c9eaef7p-55, +Inf)
+    @test atanh(interval(0.125, 1.0)) === Interval(0x1015891c9eaef7p-55, +Inf)
 
 end
 
@@ -568,7 +568,7 @@ end
 
 @testset "mpfi_coth" begin
 
-    @test_skip coth(interval(-Inf, -7.0)) === Interval(-0x100001be6c882fp-52, -1.0)
+    @test coth(interval(-Inf, -7.0)) === Interval(-0x100001be6c882fp-52, -1.0)
 
     @test coth(interval(-Inf, 0.0)) === Interval(-Inf, -1.0)
 
@@ -580,11 +580,11 @@ end
 
     @test coth(interval(-3.0, 0.0)) === Interval(-Inf, -0x10145b3cc9964bp-52)
 
-    @test_skip coth(interval(-1.0, 0.0)) === Interval(-Inf, -0x150231499b6b1dp-52)
+    @test coth(interval(-1.0, 0.0)) === Interval(-Inf, -0x150231499b6b1dp-52)
 
     @test coth(interval(0.0, 0.0)) === emptyinterval()
 
-    @test_skip coth(interval(0.0, +1.0)) === Interval(0x150231499b6b1dp-52, +Inf)
+    @test coth(interval(0.0, +1.0)) === Interval(0x150231499b6b1dp-52, +Inf)
 
     @test coth(interval(0.0, +3.0)) === Interval(0x10145b3cc9964bp-52, +Inf)
 
@@ -594,9 +594,9 @@ end
 
     @test coth(interval(-3.0, 2.0)) === entireinterval()
 
-    @test_skip coth(interval(-10.0, -8.0)) === Interval(-0x1000003c6ab7e8p-52, -0x100000011b4865p-52)
+    @test coth(interval(-10.0, -8.0)) === Interval(-0x1000003c6ab7e8p-52, -0x100000011b4865p-52)
 
-    @test_skip coth(interval(7.0, 17.0)) === Interval(0x1000000000000fp-52, 0x100001be6c882fp-52)
+    @test coth(interval(7.0, 17.0)) === Interval(0x1000000000000fp-52, 0x100001be6c882fp-52)
 
     @test coth(interval(0x10000000000001p-58, 0x10000000000001p-53)) === Interval(0x114fc6ceb099bdp-51, 0x10005554fa502fp-46)
 
@@ -616,13 +616,13 @@ end
 
     @test csc(interval(-3.0, 0.0)) === Interval(-Inf, -1.0)
 
-    @test_skip csc(interval(-1.0, 0.0)) === Interval(-Inf, -0x1303aa9620b223p-52)
+    @test csc(interval(-1.0, 0.0)) === Interval(-Inf, -0x1303aa9620b223p-52)
 
     @test csc(interval(0.0, 0.0)) === emptyinterval()
 
-    @test_skip csc(interval(0.0, +1.0)) === Interval(0x1303aa9620b223p-52, +Inf)
+    @test csc(interval(0.0, +1.0)) === Interval(0x1303aa9620b223p-52, +Inf)
 
-    @test_skip csc(interval(0.0, 3.0)) === Interval(1.0, +Inf)
+    @test csc(interval(0.0, 3.0)) === Interval(1.0, +Inf)
 
     @test csc(interval(0.0, 8.0)) === entireinterval()
 
@@ -650,11 +650,11 @@ end
 
     @test csc(interval(-6.0, -3.0)) === entireinterval()
 
-    @test_skip csc(interval(-6.0, -4.0)) === Interval(1.0, 0x1ca19615f903dap-51)
+    @test csc(interval(-6.0, -4.0)) === Interval(1.0, 0x1ca19615f903dap-51)
 
-    @test_skip csc(interval(-6.0, -5.0)) === Interval(0x10af73f9df86b7p-52, 0x1ca19615f903dap-51)
+    @test csc(interval(-6.0, -5.0)) === Interval(0x10af73f9df86b7p-52, 0x1ca19615f903dap-51)
 
-    @test_skip csc(interval(-6.0, -6.0)) === Interval(0x1ca19615f903d9p-51, 0x1ca19615f903dap-51)
+    @test csc(interval(-6.0, -6.0)) === Interval(0x1ca19615f903d9p-51, 0x1ca19615f903dap-51)
 
     @test csc(interval(-5.0, 7.0)) === entireinterval()
 
@@ -678,9 +678,9 @@ end
 
     @test csc(interval(-5.0, -3.0)) === entireinterval()
 
-    @test_skip csc(interval(-5.0, -4.0)) === Interval(1.0, 0x15243e8b2f4642p-52)
+    @test csc(interval(-5.0, -4.0)) === Interval(1.0, 0x15243e8b2f4642p-52)
 
-    @test_skip csc(interval(-5.0, -5.0)) === Interval(0x10af73f9df86b7p-52, 0x10af73f9df86b8p-52)
+    @test csc(interval(-5.0, -5.0)) === Interval(0x10af73f9df86b7p-52, 0x10af73f9df86b8p-52)
 
     @test csc(interval(-4.0, 7.0)) === entireinterval()
 
@@ -704,7 +704,7 @@ end
 
     @test csc(interval(-4.0, -3.0)) === entireinterval()
 
-    @test_skip csc(interval(-4.0, -4.0)) === Interval(0x15243e8b2f4641p-52, 0x15243e8b2f4642p-52)
+    @test csc(interval(-4.0, -4.0)) === Interval(0x15243e8b2f4641p-52, 0x15243e8b2f4642p-52)
 
     @test csc(interval(-3.0, 7.0)) === entireinterval()
 
@@ -722,11 +722,11 @@ end
 
     @test csc(interval(-3.0, 0.0)) === Interval(-Inf, -1.0)
 
-    @test_skip csc(interval(-3.0, -1.0)) === Interval(-0x1c583c440ab0dap-50, -1.0)
+    @test csc(interval(-3.0, -1.0)) === Interval(-0x1c583c440ab0dap-50, -1.0)
 
-    @test_skip csc(interval(-3.0, -2.0)) === Interval(-0x1c583c440ab0dap-50, -0x119893a272f912p-52)
+    @test csc(interval(-3.0, -2.0)) === Interval(-0x1c583c440ab0dap-50, -0x119893a272f912p-52)
 
-    @test_skip csc(interval(-3.0, -3.0)) === Interval(-0x1c583c440ab0dap-50, -0x1c583c440ab0d9p-50)
+    @test csc(interval(-3.0, -3.0)) === Interval(-0x1c583c440ab0dap-50, -0x1c583c440ab0d9p-50)
 
     @test csc(interval(-2.0, 7.0)) === entireinterval()
 
@@ -744,9 +744,9 @@ end
 
     @test csc(interval(-2.0, 0.0)) === Interval(-Inf, -1.0)
 
-    @test_skip csc(interval(-2.0, -1.0)) === Interval(-0x1303aa9620b224p-52, -1.0)
+    @test csc(interval(-2.0, -1.0)) === Interval(-0x1303aa9620b224p-52, -1.0)
 
-    @test_skip csc(interval(-2.0, -2.0)) === Interval(-0x119893a272f913p-52, -0x119893a272f912p-52)
+    @test csc(interval(-2.0, -2.0)) === Interval(-0x119893a272f913p-52, -0x119893a272f912p-52)
 
     @test csc(interval(-1.0, 7.0)) === entireinterval()
 
@@ -762,9 +762,9 @@ end
 
     @test csc(interval(-1.0, 1.0)) === entireinterval()
 
-    @test_skip csc(interval(-1.0, 0.0)) === Interval(-Inf, -0x1303aa9620b223p-52)
+    @test csc(interval(-1.0, 0.0)) === Interval(-Inf, -0x1303aa9620b223p-52)
 
-    @test_skip csc(interval(-1.0, -1.0)) === Interval(-0x1303aa9620b224p-52, -0x1303aa9620b223p-52)
+    @test csc(interval(-1.0, -1.0)) === Interval(-0x1303aa9620b224p-52, -0x1303aa9620b223p-52)
 
     @test csc(interval(1.0, 7.0)) === entireinterval()
 
@@ -774,11 +774,11 @@ end
 
     @test csc(interval(1.0, 4.0)) === entireinterval()
 
-    @test_skip csc(interval(1.0, 3.0)) === Interval(1.0, 0x1c583c440ab0dap-50)
+    @test csc(interval(1.0, 3.0)) === Interval(1.0, 0x1c583c440ab0dap-50)
 
-    @test_skip csc(interval(1.0, 2.0)) === Interval(1.0, 0x1303aa9620b224p-52)
+    @test csc(interval(1.0, 2.0)) === Interval(1.0, 0x1303aa9620b224p-52)
 
-    @test_skip csc(interval(1.0, 1.0)) === Interval(0x1303aa9620b223p-52, 0x1303aa9620b224p-52)
+    @test csc(interval(1.0, 1.0)) === Interval(0x1303aa9620b223p-52, 0x1303aa9620b224p-52)
 
     @test csc(interval(2.0, 7.0)) === entireinterval()
 
@@ -788,9 +788,9 @@ end
 
     @test csc(interval(2.0, 4.0)) === entireinterval()
 
-    @test_skip csc(interval(2.0, 3.0)) === Interval(0x119893a272f912p-52, 0x1c583c440ab0dap-50)
+    @test csc(interval(2.0, 3.0)) === Interval(0x119893a272f912p-52, 0x1c583c440ab0dap-50)
 
-    @test_skip csc(interval(2.0, 2.0)) === Interval(0x119893a272f912p-52, 0x119893a272f913p-52)
+    @test csc(interval(2.0, 2.0)) === Interval(0x119893a272f912p-52, 0x119893a272f913p-52)
 
     @test csc(interval(3.0, 7.0)) === entireinterval()
 
@@ -800,33 +800,33 @@ end
 
     @test csc(interval(3.0, 4.0)) === entireinterval()
 
-    @test_skip csc(interval(3.0, 3.0)) === Interval(0x1c583c440ab0d9p-50, 0x1c583c440ab0dap-50)
+    @test csc(interval(3.0, 3.0)) === Interval(0x1c583c440ab0d9p-50, 0x1c583c440ab0dap-50)
 
     @test csc(interval(4.0, 7.0)) === entireinterval()
 
-    @test_skip csc(interval(4.0, 6.0)) === Interval(-0x1ca19615f903dap-51, -1.0)
+    @test csc(interval(4.0, 6.0)) === Interval(-0x1ca19615f903dap-51, -1.0)
 
-    @test_skip csc(interval(4.0, 5.0)) === Interval(-0x15243e8b2f4642p-52, -1.0)
+    @test csc(interval(4.0, 5.0)) === Interval(-0x15243e8b2f4642p-52, -1.0)
 
-    @test_skip csc(interval(4.0, 4.0)) === Interval(-0x15243e8b2f4642p-52, -0x15243e8b2f4641p-52)
+    @test csc(interval(4.0, 4.0)) === Interval(-0x15243e8b2f4642p-52, -0x15243e8b2f4641p-52)
 
     @test csc(interval(5.0, 7.0)) === entireinterval()
 
-    @test_skip csc(interval(5.0, 6.0)) === Interval(-0x1ca19615f903dap-51, -0x10af73f9df86b7p-52)
+    @test csc(interval(5.0, 6.0)) === Interval(-0x1ca19615f903dap-51, -0x10af73f9df86b7p-52)
 
-    @test_skip csc(interval(5.0, 5.0)) === Interval(-0x10af73f9df86b8p-52, -0x10af73f9df86b7p-52)
+    @test csc(interval(5.0, 5.0)) === Interval(-0x10af73f9df86b8p-52, -0x10af73f9df86b7p-52)
 
     @test csc(interval(6.0, 7.0)) === entireinterval()
 
-    @test_skip csc(interval(6.0, 6.0)) === Interval(-0x1ca19615f903dap-51, -0x1ca19615f903d9p-51)
+    @test csc(interval(6.0, 6.0)) === Interval(-0x1ca19615f903dap-51, -0x1ca19615f903d9p-51)
 
-    @test_skip csc(interval(7.0, 7.0)) === Interval(+0x185a86a4ceb06cp-52, +0x185a86a4ceb06dp-52)
+    @test csc(interval(7.0, 7.0)) === Interval(+0x185a86a4ceb06cp-52, +0x185a86a4ceb06dp-52)
 
 end
 
 @testset "mpfi_csch" begin
 
-    @test_skip csch(interval(-Inf, -7.0)) === Interval(-0x1de16d3cffcd54p-62, 0.0)
+    @test csch(interval(-Inf, -7.0)) === Interval(-0x1de16d3cffcd54p-62, 0.0)
 
     @test csch(interval(-Inf, 0.0)) === Interval(-Inf, 0.0)
 
@@ -836,15 +836,15 @@ end
 
     @test csch(interval(-8.0, 0.0)) === Interval(-Inf, -0x15fc212d92371ap-63)
 
-    @test_skip csch(interval(-3.0, 0.0)) === Interval(-Inf, -0x198de80929b901p-56)
+    @test csch(interval(-3.0, 0.0)) === Interval(-Inf, -0x198de80929b901p-56)
 
-    @test_skip csch(interval(-1.0, 0.0)) === Interval(-Inf, -0x1b3ab8a78b90c0p-53)
+    @test csch(interval(-1.0, 0.0)) === Interval(-Inf, -0x1b3ab8a78b90c0p-53)
 
     @test csch(interval(0.0, 0.0)) === emptyinterval()
 
-    @test_skip csch(interval(0.0, +1.0)) === Interval(0x1b3ab8a78b90c0p-53, +Inf)
+    @test csch(interval(0.0, +1.0)) === Interval(0x1b3ab8a78b90c0p-53, +Inf)
 
-    @test_skip csch(interval(0.0, +3.0)) === Interval(0x198de80929b901p-56, +Inf)
+    @test csch(interval(0.0, +3.0)) === Interval(0x198de80929b901p-56, +Inf)
 
     @test csch(interval(0.0, +8.0)) === Interval(0x15fc212d92371ap-63, +Inf)
 
@@ -852,11 +852,11 @@ end
 
     @test csch(interval(-3.0, 2.0)) === entireinterval()
 
-    @test_skip csch(interval(-10.0, -8.0)) === Interval(-0x15fc212d92371bp-63, -0x17cd79b63733a0p-66)
+    @test csch(interval(-10.0, -8.0)) === Interval(-0x15fc212d92371bp-63, -0x17cd79b63733a0p-66)
 
-    @test_skip csch(interval(7.0, 17.0)) === Interval(0x1639e3175a68a7p-76, 0x1de16d3cffcd54p-62)
+    @test csch(interval(7.0, 17.0)) === Interval(0x1639e3175a68a7p-76, 0x1de16d3cffcd54p-62)
 
-    @test_skip csch(interval(0x10000000000001p-58, 0x10000000000001p-53)) === Interval(0x1eb45dc88defeap-52, 0x3fff555693e722p-48)
+    @test csch(interval(0x10000000000001p-58, 0x10000000000001p-53)) === Interval(0x1eb45dc88defeap-52, 0x3fff555693e722p-48)
 
 end
 
@@ -1296,7 +1296,7 @@ end
 
     @test hypot(interval(0.0, 0.0), interval(-Inf, -7.0)) === Interval(7.0, +Inf)
 
-    @test_skip hypot(interval(0.0, 3.0), interval(-4.0, 0.0)) === Interval(0.0, 5.0)
+    @test hypot(interval(0.0, 3.0), interval(-4.0, 0.0)) === Interval(0.0, 5.0)
 
     @test hypot(interval(0.0, 0.0), interval(0.0, 8.0)) === Interval(0.0, 8.0)
 
@@ -1306,19 +1306,19 @@ end
 
     @test hypot(interval(0.0, 0.0), entireinterval()) === Interval(0.0, +Inf)
 
-    @test_skip hypot(interval(0.0, 5.0), interval(0.0, 12.0)) === Interval(0.0, 13.0)
+    @test hypot(interval(0.0, 5.0), interval(0.0, 12.0)) === Interval(0.0, 13.0)
 
     @test hypot(interval(0.0, 0.0), interval(0.0, 0.0)) === Interval(0.0, 0.0)
 
     @test hypot(interval(0.0, +Inf), interval(-7.0, 8.0)) === Interval(0.0, +Inf)
 
-    @test_skip hypot(interval(-12.0, -5.0), interval(-35.0, -12.0)) === Interval(13.0, 37.0)
+    @test hypot(interval(-12.0, -5.0), interval(-35.0, -12.0)) === Interval(13.0, 37.0)
 
-    @test_skip hypot(interval(6.0, 7.0), interval(1.0, 24.0)) === Interval(0x1854bfb363dc39p-50, 25.0)
+    @test hypot(interval(6.0, 7.0), interval(1.0, 24.0)) === Interval(0x1854bfb363dc39p-50, 25.0)
 
-    @test_skip hypot(interval(-4.0, +7.0), interval(-25.0, 3.0)) === Interval(0.0, 0x19f625847a5899p-48)
+    @test hypot(interval(-4.0, +7.0), interval(-25.0, 3.0)) === Interval(0.0, 0x19f625847a5899p-48)
 
-    @test_skip hypot(interval(0x1854bfb363dc39p-50, 0x19f625847a5899p-48), interval(0x1854bfb363dc39p-50, 0x19f625847a5899p-48)) === Interval(0x113463fa37014dp-49, 0x125b89092b8fc0p-47)
+    @test hypot(interval(0x1854bfb363dc39p-50, 0x19f625847a5899p-48), interval(0x1854bfb363dc39p-50, 0x19f625847a5899p-48)) === Interval(0x113463fa37014dp-49, 0x125b89092b8fc0p-47)
 
 end
 
@@ -1982,11 +1982,11 @@ end
 
     @test sec(interval(-3.0, 0.0)) === entireinterval()
 
-    @test_skip sec(interval(-1.0, 0.0)) === Interval(1.0, 0x1d9cf0f125cc2ap-52)
+    @test sec(interval(-1.0, 0.0)) === Interval(1.0, 0x1d9cf0f125cc2ap-52)
 
-    @test_skip sec(interval(0.0, 0.0)) === Interval(1.0, 1.0)
+    @test sec(interval(0.0, 0.0)) === Interval(1.0, 1.0)
 
-    @test_skip sec(interval(0.0, +1.0)) === Interval(1.0, 0x1d9cf0f125cc2ap-52)
+    @test sec(interval(0.0, +1.0)) === Interval(1.0, 0x1d9cf0f125cc2ap-52)
 
     @test sec(interval(0.0, 3.0)) === entireinterval()
 
@@ -2018,9 +2018,9 @@ end
 
     @test sec(interval(-6.0, -4.0)) === entireinterval()
 
-    @test_skip sec(interval(-6.0, -5.0)) === Interval(0x10a9e8f3e19df1p-52, 0x1c33db0464189bp-51)
+    @test sec(interval(-6.0, -5.0)) === Interval(0x10a9e8f3e19df1p-52, 0x1c33db0464189bp-51)
 
-    @test_skip sec(interval(-6.0, -6.0)) === Interval(0x10a9e8f3e19df1p-52, 0x10a9e8f3e19df2p-52)
+    @test sec(interval(-6.0, -6.0)) === Interval(0x10a9e8f3e19df1p-52, 0x10a9e8f3e19df2p-52)
 
     @test sec(interval(-5.0, 7.0)) === entireinterval()
 
@@ -2046,7 +2046,7 @@ end
 
     @test sec(interval(-5.0, -4.0)) === entireinterval()
 
-    @test_skip sec(interval(-5.0, -5.0)) === Interval(0x1c33db0464189ap-51, 0x1c33db0464189bp-51)
+    @test sec(interval(-5.0, -5.0)) === Interval(0x1c33db0464189ap-51, 0x1c33db0464189bp-51)
 
     @test sec(interval(-4.0, 7.0)) === entireinterval()
 
@@ -2066,11 +2066,11 @@ end
 
     @test sec(interval(-4.0, -1.0)) === entireinterval()
 
-    @test_skip sec(interval(-4.0, -2.0)) === Interval(-0x133956fecf9e49p-51, -1.0)
+    @test sec(interval(-4.0, -2.0)) === Interval(-0x133956fecf9e49p-51, -1.0)
 
-    @test_skip sec(interval(-4.0, -3.0)) === Interval(-0x187a6961d2485fp-52, -1.0)
+    @test sec(interval(-4.0, -3.0)) === Interval(-0x187a6961d2485fp-52, -1.0)
 
-    @test_skip sec(interval(-4.0, -4.0)) === Interval(-0x187a6961d2485fp-52, -0x187a6961d2485ep-52)
+    @test sec(interval(-4.0, -4.0)) === Interval(-0x187a6961d2485fp-52, -0x187a6961d2485ep-52)
 
     @test sec(interval(-3.0, 7.0)) === entireinterval()
 
@@ -2090,9 +2090,9 @@ end
 
     @test sec(interval(-3.0, -1.0)) === entireinterval()
 
-    @test_skip sec(interval(-3.0, -2.0)) === Interval(-0x133956fecf9e49p-51, -0x102967b457b245p-52)
+    @test sec(interval(-3.0, -2.0)) === Interval(-0x133956fecf9e49p-51, -0x102967b457b245p-52)
 
-    @test_skip sec(interval(-3.0, -3.0)) === Interval(-0x102967b457b246p-52, -0x102967b457b245p-52)
+    @test sec(interval(-3.0, -3.0)) === Interval(-0x102967b457b246p-52, -0x102967b457b245p-52)
 
     @test sec(interval(-2.0, 7.0)) === entireinterval()
 
@@ -2112,7 +2112,7 @@ end
 
     @test sec(interval(-2.0, -1.0)) === entireinterval()
 
-    @test_skip sec(interval(-2.0, -2.0)) === Interval(-0x133956fecf9e49p-51, -0x133956fecf9e48p-51)
+    @test sec(interval(-2.0, -2.0)) === Interval(-0x133956fecf9e49p-51, -0x133956fecf9e48p-51)
 
     @test sec(interval(-1.0, 7.0)) === entireinterval()
 
@@ -2126,11 +2126,11 @@ end
 
     @test sec(interval(-1.0, 2.0)) === entireinterval()
 
-    @test_skip sec(interval(-1.0, 1.0)) === Interval(1.0, 0x1d9cf0f125cc2ap-52)
+    @test sec(interval(-1.0, 1.0)) === Interval(1.0, 0x1d9cf0f125cc2ap-52)
 
-    @test_skip sec(interval(-1.0, 0.0)) === Interval(1.0, 0x1d9cf0f125cc2ap-52)
+    @test sec(interval(-1.0, 0.0)) === Interval(1.0, 0x1d9cf0f125cc2ap-52)
 
-    @test_skip sec(interval(-1.0, -1.0)) === Interval(0x1d9cf0f125cc29p-52, 0x1d9cf0f125cc2ap-52)
+    @test sec(interval(-1.0, -1.0)) === Interval(0x1d9cf0f125cc29p-52, 0x1d9cf0f125cc2ap-52)
 
     @test sec(interval(1.0, 7.0)) === entireinterval()
 
@@ -2144,7 +2144,7 @@ end
 
     @test sec(interval(1.0, 2.0)) === entireinterval()
 
-    @test_skip sec(interval(1.0, 1.0)) === Interval(0x1d9cf0f125cc29p-52, 0x1d9cf0f125cc2ap-52)
+    @test sec(interval(1.0, 1.0)) === Interval(0x1d9cf0f125cc29p-52, 0x1d9cf0f125cc2ap-52)
 
     @test sec(interval(2.0, 7.0)) === entireinterval()
 
@@ -2152,11 +2152,11 @@ end
 
     @test sec(interval(2.0, 5.0)) === entireinterval()
 
-    @test_skip sec(interval(2.0, 4.0)) === Interval(-0x133956fecf9e49p-51, -1.0)
+    @test sec(interval(2.0, 4.0)) === Interval(-0x133956fecf9e49p-51, -1.0)
 
-    @test_skip sec(interval(2.0, 3.0)) === Interval(-0x133956fecf9e49p-51, -0x102967b457b245p-52)
+    @test sec(interval(2.0, 3.0)) === Interval(-0x133956fecf9e49p-51, -0x102967b457b245p-52)
 
-    @test_skip sec(interval(2.0, 2.0)) === Interval(-0x133956fecf9e49p-51, -0x133956fecf9e48p-51)
+    @test sec(interval(2.0, 2.0)) === Interval(-0x133956fecf9e49p-51, -0x133956fecf9e48p-51)
 
     @test sec(interval(3.0, 7.0)) === entireinterval()
 
@@ -2164,9 +2164,9 @@ end
 
     @test sec(interval(3.0, 5.0)) === entireinterval()
 
-    @test_skip sec(interval(3.0, 4.0)) === Interval(-0x187a6961d2485fp-52, -1.0)
+    @test sec(interval(3.0, 4.0)) === Interval(-0x187a6961d2485fp-52, -1.0)
 
-    @test_skip sec(interval(3.0, 3.0)) === Interval(-0x102967b457b246p-52, -0x102967b457b245p-52)
+    @test sec(interval(3.0, 3.0)) === Interval(-0x102967b457b246p-52, -0x102967b457b245p-52)
 
     @test sec(interval(4.0, 7.0)) === entireinterval()
 
@@ -2174,25 +2174,25 @@ end
 
     @test sec(interval(4.0, 5.0)) === entireinterval()
 
-    @test_skip sec(interval(4.0, 4.0)) === Interval(-0x187a6961d2485fp-52, -0x187a6961d2485ep-52)
+    @test sec(interval(4.0, 4.0)) === Interval(-0x187a6961d2485fp-52, -0x187a6961d2485ep-52)
 
-    @test_skip sec(interval(5.0, 7.0)) === Interval(1.0, 0x1c33db0464189bp-51)
+    @test sec(interval(5.0, 7.0)) === Interval(1.0, 0x1c33db0464189bp-51)
 
-    @test_skip sec(interval(5.0, 6.0)) === Interval(0x10a9e8f3e19df1p-52, 0x1c33db0464189bp-51)
+    @test sec(interval(5.0, 6.0)) === Interval(0x10a9e8f3e19df1p-52, 0x1c33db0464189bp-51)
 
-    @test_skip sec(interval(5.0, 5.0)) === Interval(0x1c33db0464189ap-51, 0x1c33db0464189bp-51)
+    @test sec(interval(5.0, 5.0)) === Interval(0x1c33db0464189ap-51, 0x1c33db0464189bp-51)
 
-    @test_skip sec(interval(6.0, 7.0)) === Interval(1.0, 0x153910a80e7db5p-52)
+    @test sec(interval(6.0, 7.0)) === Interval(1.0, 0x153910a80e7db5p-52)
 
-    @test_skip sec(interval(6.0, 6.0)) === Interval(0x10a9e8f3e19df1p-52, 0x10a9e8f3e19df2p-52)
+    @test sec(interval(6.0, 6.0)) === Interval(0x10a9e8f3e19df1p-52, 0x10a9e8f3e19df2p-52)
 
-    @test_skip sec(interval(7.0, 7.0)) === Interval(0x153910a80e7db4p-52, 0x153910a80e7db5p-52)
+    @test sec(interval(7.0, 7.0)) === Interval(0x153910a80e7db4p-52, 0x153910a80e7db5p-52)
 
 end
 
 @testset "mpfi_sech" begin
 
-    @test_skip sech(interval(-Inf, -7.0)) === Interval(0.0, 0x1de169fb49b339p-62)
+    @test sech(interval(-Inf, -7.0)) === Interval(0.0, 0x1de169fb49b339p-62)
 
     @test sech(interval(-Inf, 0.0)) === Interval(0.0, 1.0)
 
@@ -2200,13 +2200,13 @@ end
 
     @test sech(entireinterval()) === Interval(0.0, 1.0)
 
-    @test_skip sech(interval(-1.0, 0.0)) === Interval(0x14bcdc50ed6be7p-53, 1.0)
+    @test sech(interval(-1.0, 0.0)) === Interval(0x14bcdc50ed6be7p-53, 1.0)
 
     @test sech(interval(0.0, 0.0)) === Interval(1.0, 1.0)
 
-    @test_skip sech(interval(0.0, +1.0)) === Interval(0x14bcdc50ed6be7p-53, 1.0)
+    @test sech(interval(0.0, +1.0)) === Interval(0x14bcdc50ed6be7p-53, 1.0)
 
-    @test_skip sech(interval(0.0, +8.0)) === Interval(0x15fc20da8e18dbp-63, 1.0)
+    @test sech(interval(0.0, +8.0)) === Interval(0x15fc20da8e18dbp-63, 1.0)
 
     @test sech(interval(0.0, +Inf)) === Interval(0.0, 1.0)
 
@@ -2214,9 +2214,9 @@ end
 
     @test sech(interval(0.0, 0x10000000000001p-53)) === Interval(0x1c60d1ff040dcfp-53, 1.0)
 
-    @test_skip sech(interval(-4.5, -0.625)) === Interval(0x16bf984a9a2355p-58, 0x1aa0b464a5e24ap-53)
+    @test sech(interval(-4.5, -0.625)) === Interval(0x16bf984a9a2355p-58, 0x1aa0b464a5e24ap-53)
 
-    @test_skip sech(interval(1.0, 3.0)) === Interval(0x196d8e17d88eb1p-56, 0x14bcdc50ed6be8p-53)
+    @test sech(interval(1.0, 3.0)) === Interval(0x196d8e17d88eb1p-56, 0x14bcdc50ed6be8p-53)
 
     @test sech(interval(17.0, 0xb145bb71d3dbp-38)) === Interval(0x10000000000173p-1074, 0x1639e3175a6893p-76)
 
