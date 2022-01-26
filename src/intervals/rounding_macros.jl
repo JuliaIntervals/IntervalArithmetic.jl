@@ -46,10 +46,3 @@ The user-facing equivalent is `@interval`, which can handle much more general ca
 macro round(F, ex1, ex2)
      :($(esc(F))($(round_expr(ex1, RoundDown)), $(round_expr(ex2, RoundUp))))
 end
-
-# TODO Remove this method to make sure correct type is always used in @round
-# Kept there for know to avoid having to patch all @round in the code
-macro round(ex1, ex2)
-    F = Interval{default_bound()}
-    :($(esc(F))($(round_expr(ex1, RoundDown)), $(round_expr(ex2, RoundUp))))
-end
