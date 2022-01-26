@@ -15,9 +15,9 @@
 
 Infimum of an interval.
 
-Implement the `inf` function of the IEEE Std 1788-2015 (Table 9.2).
+Implement the `inf` function of the IEEE Std 1788-2015 (Table 9.2, and Section 12.12.8).
 """
-inf(a::Interval) = a.lo
+inf(a::Interval{T}) where T = ifelse(iszero(a.lo), copysign(a.lo, -1), a.lo)
 
 """
     sup(a::Interval)
@@ -50,12 +50,12 @@ function mid(a::F) where {T, F<:Interval{T}}
     a.hi == +∞ && return prevfloat(a.hi)  # IEEE-1788 section 12.12.8
 
     midpoint = (a.lo + a.hi) / 2
-    isfinite(midpoint) && return midpoint
+    isfinite(midpoint) && return _normalisezero(midpoint)
     #= Fallback in case of overflow: a.hi + a.lo == +∞ or a.hi + a.lo == -∞.
        This case can not be the default one as it does not pass several
        IEEE1788-2015 tests for small floats.
     =#
-    return a.lo / 2 + a.hi / 2
+    return _normalisezero(a.lo / 2 + a.hi / 2)
 end
 
 mid(a::F) where {T, R<:Rational{T}, F<:Interval{R}} = (1//2) * (a.lo + a.hi)
@@ -65,7 +65,7 @@ mid(a::F) where {T, R<:Rational{T}, F<:Interval{R}} = (1//2) * (a.lo + a.hi)
 
 Find an intermediate  point at a relative position `α` in the interval `a`
 instead.
-    
+
 Assume 0 ≤ α ≤ 1.
 
 Note that `scaled_mid(a, 0.5)` does not equal `mid(a)` for unbounded set-based
