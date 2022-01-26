@@ -65,9 +65,7 @@ struct Interval{T} <: Real
     hi::T
 
     function Interval{T}(a, b) where T
-        a = _normalisezero(a)
-        b = _normalisezero(b)
-        new{T}(T(a, RoundDown), T(b, RoundUp))
+        new{T}(_normalisezero(T(a, RoundDown)), _normalisezero(T(b, RoundUp)))
     end
 
     function Interval{T}(a::T, b::T) where T
