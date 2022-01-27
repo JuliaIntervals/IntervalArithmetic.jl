@@ -19,7 +19,7 @@ const bool_functions = (
 const bool_binary_functions = (
     :<, :>, :!=, :⊆, :<=, :(==),
     :isinterior, :isdisjoint, :precedes, :strictprecedes,
-    :≛
+    :≛, :overlap
 )
 
 for f in bool_functions

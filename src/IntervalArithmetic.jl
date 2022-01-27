@@ -56,7 +56,7 @@ export
     diam, radius, mid, scaled_mid, mag, mig, hull,
     emptyinterval, ∅, ∞, isempty, isinterior, isdisjoint, ⪽,
     precedes, strictprecedes, ≺, ⊂, ⊃, ⊇, contains_zero, isthinzero,
-    isweaklyless, isstrictless,
+    isweaklyless, isstrictless, overlap,
     ≛,
     entireinterval, isentire, nai, isnai, isthin, iscommon, isatomic,
     inf, sup, bounds, bisect, mince,
@@ -106,7 +106,7 @@ function __init__()
     setrounding(BigFloat, RoundNearest)
 end
 
-function Base.setrounding(f::Function, ::Type{Rational{T}}, 
+function Base.setrounding(f::Function, ::Type{Rational{T}},
     rounding_mode::RoundingMode) where T
     return setrounding(f, float(Rational{T}), rounding_mode)
 end
