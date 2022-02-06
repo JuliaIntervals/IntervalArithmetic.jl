@@ -49,4 +49,3 @@
     @test abs_rev(interval(-Inf, 1.0), entireinterval())[2] === Interval(-1.0, 1.0)
 
 end
-
