@@ -16,8 +16,8 @@ include("rand.jl")
 # Display tests:
 include("display_tests/display.jl")
 
+include("multidim_tests/multidim.jl")
+
 # ITF1788 tests
 
-include("ITF1788_tests/ITF1788_tests.jl")
-
-include("multidim_tests/multidim.jl")
+include("test_ITF1788/run_ITF1788.jl")

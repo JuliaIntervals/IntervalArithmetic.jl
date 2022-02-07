@@ -16,6 +16,7 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
 CRlibm = "0.7, 0.8, 1"
+IntervalContractors = "0.4"
 FastRounding = "0.2"
 Polynomials = "0.7"
 RecipesBase = "1.0"
@@ -25,9 +26,10 @@ StaticArrays = "0.8, 0.9, 0.10, 0.11, 0.12, 1.0"
 julia = "1.5"
 
 [extras]
+IntervalContractors = "15111844-de3b-5229-b4ba-526f2f385dc9"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Polynomials = "f27b6e38-b328-58d1-80ce-0feddd5e7a45"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["LinearAlgebra", "Test", "Polynomials"]
+test = ["IntervalContractors", "LinearAlgebra", "Test", "Polynomials"]
