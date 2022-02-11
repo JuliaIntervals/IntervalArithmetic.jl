@@ -238,8 +238,6 @@ enclosure when using multiplication with correct rounding.
 """
 function ^(::PowerType{:fast}, x::Interval{T}, n::Integer) where {T}  # fast integer power
 
-    @show x, n
-
     n == 0 && return one(x)
 
     isempty(x) && return x
