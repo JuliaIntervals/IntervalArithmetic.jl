@@ -238,6 +238,8 @@ enclosure when using multiplication with correct rounding.
 """
 function ^(::PowerType{:fast}, x::Interval{T}, n::Integer) where {T}  # fast integer power
 
+    @show x, n
+
     n == 0 && return one(x)
 
     isempty(x) && return x
@@ -335,11 +337,11 @@ function Base.power_by_squaring(x::AbstractFloat, p::Integer, r::RoundingMode)
 
     if s < 0 && isodd(p)
         # we need to reverse the rounding mode:
-        if r == RoundDown 
-            r = RoundUp 
-        
+        if r == RoundDown
+            r = RoundUp
+
         elseif r == RoundUp
-            r = RoundDown 
+            r = RoundDown
         end
     end
 
@@ -363,7 +365,7 @@ function Base.power_by_squaring(x::AbstractFloat, p::Integer, r::RoundingMode)
     end
 
     y = x
-    
+
     while p > 0
         t = trailing_zeros(p) + 1
         p >>= t
@@ -374,6 +376,9 @@ function Base.power_by_squaring(x::AbstractFloat, p::Integer, r::RoundingMode)
     end
 
     if isodd(p_orig)
-        return copysign(y, s)   
+        return copysign(y, s)
     end
+
+    return y
+
 end
