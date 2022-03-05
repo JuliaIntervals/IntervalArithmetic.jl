@@ -253,6 +253,12 @@ using Test
         @test cancelplus(Interval(0.0), Interval(1.0)) ≛ Interval(1.0)
         @test cancelminus(Interval(-5.0, 0.0), Interval(0.0, 5.0)) ≛ Interval(-5.0)
         @test cancelplus(Interval(-5.0, 0.0), Interval(0.0, 5.0)) ≛ Interval(0.0)
+        @test cancelminus(Interval(1e308), -Interval(1e308)) ≛ @interval(Inf)
+        @test cancelplus(Interval(1e308), Interval(1e308)) ≛ @interval(Inf)
+        @test cancelminus(Interval(nextfloat(1e308)), -Interval(nextfloat(1e308))) ≛ @interval(Inf)
+        @test cancelplus(Interval(nextfloat(1e308)), Interval(nextfloat(1e308))) ≛ @interval(Inf)
+        @test cancelminus(Interval(prevfloat(big(Inf))), -Interval(prevfloat(big(Inf)))) ≛ @biginterval(Inf)
+        @test cancelplus(Interval(prevfloat(big(Inf))), Interval(prevfloat(big(Inf)))) ≛ @biginterval(Inf)
     end
 
     @testset "mid and radius" begin
