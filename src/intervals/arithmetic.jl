@@ -531,21 +531,21 @@ function cancelminus(a::Interval{T}, b::Interval{T}) where T<:Real
     c_lo = @round_down(a.lo - b.lo)
     c_hi = @round_up(a.hi - b.hi)
 
+    # Interval(c_lo, c_hi) is not a proper interval
     c_lo > c_hi && return entireinterval(T)
+    c = Interval(c_lo, c_hi)
 
-    c_lo == Inf && return Interval(prevfloat(c_lo), c_hi)
-    c_hi == -Inf && return Interval(c_lo, nextfloat(c_hi))
+    # Corner case 2 (page 62), involving unbounded c
+    (c_lo == Inf || c_hi == -Inf) && return widen(c)
+    isunbounded(c) && return c
 
+    # Corner case 1 (page 62) involving finite precision for diam(a) and diam(b)
     a_lo = @round_down(b.lo + c_lo)
     a_hi = @round_up(b.hi + c_hi)
+    (diam(a) == diam(b)) && (nextfloat(a.hi) < a_hi || prevfloat(a.lo) > a_lo) &&
+        return entireinterval(T)
 
-    if a_lo ≤ a.lo ≤ a.hi ≤ a_hi
-        (nextfloat(a.hi) < a_hi || prevfloat(a.lo) > a_hi) &&
-            return entireinterval(T)
-        return Interval(c_lo, c_hi)
-     end
-
-    return entireinterval(T)
+    return c
 end
 cancelminus(a::Interval, b::Interval) = cancelminus(promote(a, b)...)
 
