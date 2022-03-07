@@ -186,6 +186,9 @@ setprecision(Interval, Float64)
         @test inf(entireinterval(a)) == -Inf
         @test sup(entireinterval(a)) == Inf
         @test isnan(sup(nai(BigFloat)))
+
+        @test inf(2.5) == 2.5
+        @test sup(2.5) == 2.5
     end
 
     @testset "mid" begin
@@ -220,6 +223,8 @@ setprecision(Interval, Float64)
         @test diam( @interval(0.1) ) == eps(0.1)
         @test isnan(diam(emptyinterval()))
         @test diam(a) == 1.0000000000000002
+
+        @test diam(0.1) == 0
     end
 
     @testset "mig and mag" begin
@@ -286,6 +291,9 @@ setprecision(Interval, Float64)
         else
             @test_throws InexactError nai(Interval(1//2))
         end
+
+        @test mid(2.125) == 2.125
+        @test radius(2.125) == 0
     end
 
     @testset "abs, min, max, sign" begin

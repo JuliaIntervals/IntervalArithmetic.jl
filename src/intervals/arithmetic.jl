@@ -305,6 +305,8 @@ end
 inf(a::Interval) = ifelse(iszero(a.lo) && !signbit(a.lo), copysign(a.lo, -1), a.lo)
 sup(a::Interval) = a.hi
 
+inf(a::Real) = a
+sup(a::Real) = a
 
 ## Functions needed for generic linear algebra routines to work
 real(a::Interval) = a
@@ -511,6 +513,10 @@ function radius(a::Interval{Rational{T}}) where T
     m = (a.lo + a.hi) / 2
     return max(m - a.lo, a.hi - m)
 end
+
+mid(a::Real) = a
+diam(a::Real) = zero(a)
+radius(a::Real) = zero(a)
 
 # cancelplus and cancelminus
 """
