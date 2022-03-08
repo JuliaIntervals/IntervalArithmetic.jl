@@ -269,6 +269,9 @@ using Test
         @test mid(entireinterval()) == 0.0
         @test isnan(mid(nai()))
         # @test_throws InexactError nai(Interval(1//2)) TODO move this test
+
+        @test mid(2.125) == 2.125
+        @test radius(2.125) == 0
     end
 
     @testset "abs, min, max, sign" begin
