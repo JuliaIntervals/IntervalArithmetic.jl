@@ -176,6 +176,9 @@ using Test
         @test inf(entireinterval(a)) == -Inf
         @test sup(entireinterval(a)) == Inf
         @test isnan(sup(nai(BigFloat)))
+
+        @test inf(2.5) == 2.5
+        @test sup(2.5) == 2.5
     end
 
     @testset "mid" begin
@@ -208,6 +211,8 @@ using Test
         @test diam( @interval(0.1) ) == 2eps(0.1)
         @test isnan(diam(emptyinterval()))
         @test diam(a) == 1.0000000000000002
+
+        @test diam(0.1) == 0
     end
 
     @testset "mig and mag" begin
