@@ -527,3 +527,15 @@ function atan(y::Interval{BigFloat}, x::Interval{BigFloat})
         end
     end
 end
+
+"""
+    acot(a::Interval)
+
+Implement the `acot` function of the IEEE Std 1788-2015 (Table 9.1).
+"""
+function acot(a::F) where {F<:Interval}
+    isempty(a) && return a
+
+    return atomic(F, Interval(acot(bigequiv(a.hi)), acot(bigequiv(a.lo))))
+    # return atomic(F, @round(Interval{BigFloat}, acot(bigequiv(a.hi)), acot(bigequiv(a.lo))))
+end
