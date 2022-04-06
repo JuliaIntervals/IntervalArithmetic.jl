@@ -13,5 +13,5 @@ b = [-2..2
     # Example from Moore et al., Introduction to Interval Analysis (2009), pg. 88:
     # TODO This is using the wrong \. I think the correct one is defined
     # elsewhere, maybe IntervalRootFinding.jl.
-    @test_broken all(A \ b .≛ [-5..5, -4..4])
+    @test_skip all(A \ b .≛ [-5..5, -4..4])
 end
