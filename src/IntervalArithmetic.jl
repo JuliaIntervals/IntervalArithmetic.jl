@@ -82,9 +82,6 @@ export
 
 export showfull
 
-import Base: rounding, setrounding, setprecision
-
-
 
 ## Multidimensional
 export

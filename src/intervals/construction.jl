@@ -220,7 +220,7 @@ Create an equivalent `BigFloat` interval to a given `AbstractFloat` interval.
 """
 function bigequiv(a::Interval{T}) where {T <: AbstractFloat}
     lock(precision_lock) do
-        return setprecision(precision(T)) do  # precision of T
+        setprecision(precision(T)) do  # precision of T
             return Interval{BigFloat}(a)
         end
     end
@@ -233,7 +233,7 @@ Convert `x` to an equivalent `BigFloat`, with the same underlying precision of `
 """
 function bigequiv(x::AbstractFloat)
     lock(precision_lock) do
-        return setprecision(precision(x)) do
+        setprecision(precision(x)) do
             return BigFloat(x)
         end
     end
