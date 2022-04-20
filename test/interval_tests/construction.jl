@@ -24,7 +24,7 @@ using Test
         @test Interval(irr, irr) ≛ Interval(irr)
         @test Interval{Float32}(irr, irr) ≛ Interval{Float32}(irr)
     end
-    
+
     @test_broken ℯ..big(4) ≛ hull(Interval{BigFloat}(π), interval(4))
     @test π..big(4) ≛ hull(Interval{BigFloat}(π), interval(4))
 
@@ -268,7 +268,7 @@ end
     @test hash(x) == hash(y)
 
     x = @interval(0.1)
-    y = IntervalArithmetic.big53(x)
+    y = IntervalArithmetic.bigequiv(x)
     @test x ≛ y
     @test hash(x) == hash(y)
 

@@ -449,4 +449,3 @@ end
     @test decoration(DecoratedInterval(interval(-1.0,3.0), com)) === com
 
 end
-

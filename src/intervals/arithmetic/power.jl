@@ -10,7 +10,7 @@
 
 # Write explicitly like this to avoid ambiguity warnings:
 for T in (:Integer, :Float64, :BigFloat, :Interval)
-    @eval ^(a::Interval{Float64}, x::$T) = Interval{Float64}(big53(a)^x)
+    @eval ^(a::Interval{Float64}, x::$T) = Interval{Float64}(bigequiv(a)^x)
 end
 
 
@@ -29,11 +29,11 @@ Base.literal_pow(::typeof(^), x::Interval{T}, ::Val{p}) where {T,p} = x^p
 
 Implement the `pow` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-^(a::F, b::F) where {F<:Interval} = F(big53(a)^b)
+^(a::F, b::F) where {F<:Interval} = F(bigequiv(a)^b)
 ^(a::F, x::AbstractFloat) where {F<:Interval{BigFloat}} = a^big(x)
 
 for T in (:AbstractFloat, :Integer)
-    @eval ^(a::F, x::$T) where {F<:Interval} = F(big53(a)^x)
+    @eval ^(a::F, x::$T) where {F<:Interval} = F(bigequiv(a)^x)
 end
 
 function ^(a::F, n::Integer) where {F<:Interval{BigFloat}}

@@ -139,6 +139,6 @@ end
 for f in (:tanh, :coth, :sech, :csch, :asinh, :acosh, :atanh)
     @eval function ($f)(a::F) where {F<:Interval{Float64}}
         isempty(a) && return a
-        return F(($f)(big53(a)) )
+        return F(($f)(bigequiv(a)) )
     end
 end

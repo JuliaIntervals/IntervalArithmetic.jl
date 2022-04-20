@@ -176,6 +176,9 @@ using Test
         @test inf(entireinterval(a)) == -Inf
         @test sup(entireinterval(a)) == Inf
         @test isnan(sup(nai(BigFloat)))
+
+        @test inf(2.5) == 2.5
+        @test sup(2.5) == 2.5
     end
 
     @testset "mid" begin
@@ -208,6 +211,8 @@ using Test
         @test diam( @interval(0.1) ) == 2eps(0.1)
         @test isnan(diam(emptyinterval()))
         @test diam(a) == 1.0000000000000002
+
+        @test diam(0.1) == 0
     end
 
     @testset "mig and mag" begin
@@ -248,6 +253,12 @@ using Test
         @test cancelplus(Interval(0.0), Interval(1.0)) ≛ Interval(1.0)
         @test cancelminus(Interval(-5.0, 0.0), Interval(0.0, 5.0)) ≛ Interval(-5.0)
         @test cancelplus(Interval(-5.0, 0.0), Interval(0.0, 5.0)) ≛ Interval(0.0)
+        @test cancelminus(Interval(1e308), -Interval(1e308)) ≛ @interval(Inf)
+        @test cancelplus(Interval(1e308), Interval(1e308)) ≛ @interval(Inf)
+        @test cancelminus(Interval(nextfloat(1e308)), -Interval(nextfloat(1e308))) ≛ @interval(Inf)
+        @test cancelplus(Interval(nextfloat(1e308)), Interval(nextfloat(1e308))) ≛ @interval(Inf)
+        @test cancelminus(Interval(prevfloat(big(Inf))), -Interval(prevfloat(big(Inf)))) ≛ @biginterval(Inf)
+        @test cancelplus(Interval(prevfloat(big(Inf))), Interval(prevfloat(big(Inf)))) ≛ @biginterval(Inf)
     end
 
     @testset "mid and radius" begin
@@ -258,6 +269,9 @@ using Test
         @test mid(entireinterval()) == 0.0
         @test isnan(mid(nai()))
         # @test_throws InexactError nai(Interval(1//2)) TODO move this test
+
+        @test mid(2.125) == 2.125
+        @test radius(2.125) == 0
     end
 
     @testset "abs, min, max, sign" begin

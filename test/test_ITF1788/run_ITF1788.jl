@@ -13,6 +13,8 @@ include("libieeep1788_rec_bool.jl")
 include("libieeep1788_reduction.jl")
 include("libieeep1788_set.jl")
 include("mpfi.jl")
+
+using IntervalContractors
 include("abs_rev.jl")
 include("libieeep1788_rev.jl")
 include("libieeep1788_mul_rev.jl")

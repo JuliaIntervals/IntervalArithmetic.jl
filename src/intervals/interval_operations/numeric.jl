@@ -19,6 +19,8 @@ Implement the `inf` function of the IEEE Std 1788-2015 (Table 9.2, and Section 1
 """
 inf(a::Interval{T}) where T = ifelse(iszero(a.lo), copysign(a.lo, -1), a.lo)
 
+inf(a::Real) = a
+
 """
     sup(a::Interval)
 
@@ -27,6 +29,8 @@ Supremum of an interval.
 Implement the `sup` function of the IEEE Std 1788-2015 (Table 9.2).
 """
 sup(a::Interval) = a.hi
+
+sup(a::Real) = a
 
 """
     bounds(a::Interval)
@@ -59,6 +63,8 @@ function mid(a::F) where {T, F<:Interval{T}}
 end
 
 mid(a::F) where {T, R<:Rational{T}, F<:Interval{R}} = (1//2) * (a.lo + a.hi)
+
+mid(a::Real) = a
 
 """
     scaled_mid(a::Interval, α)
@@ -100,6 +106,8 @@ function diam(a::F) where {T, F<:Interval{T}}
     return -(a.hi, a.lo, RoundUp)  # IEEE1788 section 12.12.8
 end
 
+diam(a::Real) = zero(a)
+
 """
     radius(a::Interval)
 
@@ -112,6 +120,8 @@ function radius(a::Interval)
     m, r = midpoint_radius(a)
     return r
 end
+
+radius(a::Real) = zero(a)
 
 """
 midpoint_radius(a::Interval)

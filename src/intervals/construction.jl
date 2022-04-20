@@ -209,25 +209,33 @@ function atomic(::Type{F}, x::AbstractFloat) where {T, F<:Interval{T}}
     return Interval(lo, hi)
 end
 
-"""
-    big53(x::Interval{Float64})
+# NOTE: prevents multiple threads from calling setprecision() concurrently;
+# it is used in `bigequiv`
+const precision_lock = ReentrantLock()
 
-Create an equivalent `BigFloat` interval to a given `Float64` interval.
 """
-function big53(a::Interval{Float64})
-    return setprecision(BigFloat, 53) do  # precision of Float64
-        return Interval{BigFloat}(a)
+    bigequiv(x::Interval{Float64})
+
+Create an equivalent `BigFloat` interval to a given `AbstractFloat` interval.
+"""
+function bigequiv(a::Interval{T}) where {T <: AbstractFloat}
+    lock(precision_lock) do
+        setprecision(precision(T)) do  # precision of T
+            return Interval{BigFloat}(a)
+        end
     end
 end
 
 """
-    big53(x::Float64)
+    bigequiv(x::AbstractFloat)
 
-Convert `x` to `BigFloat`.
+Convert `x` to an equivalent `BigFloat`, with the same underlying precision of `x`.
 """
-function big53(x::Float64)
-    return setprecision(BigFloat, 53) do
-        return BigFloat(x)
+function bigequiv(x::AbstractFloat)
+    lock(precision_lock) do
+        setprecision(precision(x)) do
+            return BigFloat(x)
+        end
     end
 end
 
