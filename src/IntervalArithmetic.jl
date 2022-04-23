@@ -67,7 +67,10 @@ export
     cancelminus, cancelplus, isbounded, isunbounded,
     .., @I_str, ±,
     pow, extended_div, nthroot,
-    setformat, @format
+    setformat, @format,
+    OverlapType, _both_empty, _first_empty, _second_empty, _before,
+    _meets, _overlaps, _starts, _contained_by, _finishes, _equals,
+    _finished_by, _contains, _started_by, _overlapped_by, _met_by, _after
 
 if VERSION >= v"1.5.0-DEV.124"
     import Base: isdisjoint

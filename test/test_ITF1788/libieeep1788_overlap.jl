@@ -1,162 +1,85 @@
 @testset "minimal_overlap_test" begin
-
-    @test_broken MISSING_overlap(emptyinterval(), emptyinterval()) === bothEmpty
-
-    @test_broken MISSING_overlap(emptyinterval(), interval(1.0,2.0)) === firstEmpty
-
-    @test_broken MISSING_overlap(interval(1.0,2.0), emptyinterval()) === secondEmpty
-
-    @test_broken MISSING_overlap(interval(-Inf,2.0), interval(3.0,Inf)) === before
-
-    @test_broken MISSING_overlap(interval(-Inf,2.0), interval(3.0,4.0)) === before
-
-    @test_broken MISSING_overlap(interval(2.0,2.0), interval(3.0,4.0)) === before
-
-    @test_broken MISSING_overlap(interval(1.0,2.0), interval(3.0,4.0)) === before
-
-    @test_broken MISSING_overlap(interval(1.0,2.0), interval(3.0,3.0)) === before
-
-    @test_broken MISSING_overlap(interval(2.0,2.0), interval(3.0,3.0)) === before
-
-    @test_broken MISSING_overlap(interval(2.0,2.0), interval(3.0,Inf)) === before
-
-    @test_broken MISSING_overlap(interval(-Inf,2.0), interval(2.0,3.0)) === meets
-
-    @test_broken MISSING_overlap(interval(1.0,2.0), interval(2.0,3.0)) === meets
-
-    @test_broken MISSING_overlap(interval(1.0,2.0), interval(2.0,Inf)) === meets
-
-    @test_broken MISSING_overlap(interval(1.0,2.0), interval(1.5,2.5)) === overlaps
-
-    @test_broken MISSING_overlap(interval(1.0,2.0), interval(1.0,Inf)) === starts
-
-    @test_broken MISSING_overlap(interval(1.0,2.0), interval(1.0,3.0)) === starts
-
-    @test_broken MISSING_overlap(interval(1.0,1.0), interval(1.0,3.0)) === starts
-
-    @test_broken MISSING_overlap(interval(1.0,2.0), entireinterval()) === containedBy
-
-    @test_broken MISSING_overlap(interval(1.0,2.0), interval(-Inf,3.0)) === containedBy
-
-    @test_broken MISSING_overlap(interval(1.0,2.0), interval(0.0,3.0)) === containedBy
-
-    @test_broken MISSING_overlap(interval(2.0,2.0), interval(0.0,3.0)) === containedBy
-
-    @test_broken MISSING_overlap(interval(2.0,2.0), interval(0.0,Inf)) === containedBy
-
-    @test_broken MISSING_overlap(interval(1.0,2.0), interval(-Inf,2.0)) === finishes
-
-    @test_broken MISSING_overlap(interval(1.0,2.0), interval(0.0,2.0)) === finishes
-
-    @test_broken MISSING_overlap(interval(2.0,2.0), interval(0.0,2.0)) === finishes
-
-    @test_broken MISSING_overlap(interval(1.0,2.0), interval(1.0,2.0)) === equals
-
-    @test_broken MISSING_overlap(interval(1.0,1.0), interval(1.0,1.0)) === equals
-
-    @test_broken MISSING_overlap(interval(-Inf,1.0), interval(-Inf,1.0)) === equals
-
-    @test_broken MISSING_overlap(entireinterval(), entireinterval()) === equals
-
-    @test_broken MISSING_overlap(interval(3.0,4.0), interval(2.0,2.0)) === after
-
-    @test_broken MISSING_overlap(interval(3.0,4.0), interval(1.0,2.0)) === after
-
-    @test_broken MISSING_overlap(interval(3.0,3.0), interval(1.0,2.0)) === after
-
-    @test_broken MISSING_overlap(interval(3.0,3.0), interval(2.0,2.0)) === after
-
-    @test_broken MISSING_overlap(interval(3.0,Inf), interval(2.0,2.0)) === after
-
-    @test_broken MISSING_overlap(interval(2.0,3.0), interval(1.0,2.0)) === metBy
-
-    @test_broken MISSING_overlap(interval(2.0,3.0), interval(-Inf,2.0)) === metBy
-
-    @test_broken MISSING_overlap(interval(1.5,2.5), interval(1.0,2.0)) === overlappedBy
-
-    @test_broken MISSING_overlap(interval(1.5,2.5), interval(-Inf,2.0)) === overlappedBy
-
-    @test_broken MISSING_overlap(interval(1.0,Inf), interval(1.0,2.0)) === startedBy
-
-    @test_broken MISSING_overlap(interval(1.0,3.0), interval(1.0,2.0)) === startedBy
-
-    @test_broken MISSING_overlap(interval(1.0,3.0), interval(1.0,1.0)) === startedBy
-
-    @test_broken MISSING_overlap(interval(-Inf,3.0), interval(1.0,2.0)) === contains
-
-    @test_broken MISSING_overlap(entireinterval(), interval(1.0,2.0)) === contains
-
-    @test_broken MISSING_overlap(interval(0.0,3.0), interval(1.0,2.0)) === contains
-
-    @test_broken MISSING_overlap(interval(0.0,3.0), interval(2.0,2.0)) === contains
-
-    @test_broken MISSING_overlap(interval(-Inf,2.0), interval(1.0,2.0)) === finishedBy
-
-    @test_broken MISSING_overlap(interval(0.0,2.0), interval(1.0,2.0)) === finishedBy
-
-    @test_broken MISSING_overlap(interval(0.0,2.0), interval(2.0,2.0)) === finishedBy
+    @test overlap(emptyinterval(), emptyinterval()) === _both_empty
+    @test overlap(emptyinterval(), interval(1.0,2.0)) === _first_empty
+    @test overlap(interval(1.0,2.0), emptyinterval()) === _second_empty
+    @test overlap(interval(-Inf,2.0), interval(3.0,Inf)) === _before
+    @test overlap(interval(-Inf,2.0), interval(3.0,4.0)) === _before
+    @test overlap(interval(2.0,2.0), interval(3.0,4.0)) === _before
+    @test overlap(interval(1.0,2.0), interval(3.0,4.0)) === _before
+    @test overlap(interval(1.0,2.0), interval(3.0,3.0)) === _before
+    @test overlap(interval(2.0,2.0), interval(3.0,3.0)) === _before
+    @test overlap(interval(2.0,2.0), interval(3.0,Inf)) === _before
+    @test overlap(interval(-Inf,2.0), interval(2.0,3.0)) === _meets
+    @test overlap(interval(1.0,2.0), interval(2.0,3.0)) === _meets
+    @test overlap(interval(1.0,2.0), interval(2.0,Inf)) === _meets
+    @test overlap(interval(1.0,2.0), interval(1.5,2.5)) === _overlaps
+    @test overlap(interval(1.0,2.0), interval(1.0,Inf)) === _starts
+    @test overlap(interval(1.0,2.0), interval(1.0,3.0)) === _starts
+    @test overlap(interval(1.0,1.0), interval(1.0,3.0)) === _starts
+    @test overlap(interval(1.0,2.0), entireinterval()) === _contained_by
+    @test overlap(interval(1.0,2.0), interval(-Inf,3.0)) === _contained_by
+    @test overlap(interval(1.0,2.0), interval(0.0,3.0)) === _contained_by
+    @test overlap(interval(2.0,2.0), interval(0.0,3.0)) === _contained_by
+    @test overlap(interval(2.0,2.0), interval(0.0,Inf)) === _contained_by
+    @test overlap(interval(1.0,2.0), interval(-Inf,2.0)) === _finishes
+    @test overlap(interval(1.0,2.0), interval(0.0,2.0)) === _finishes
+    @test overlap(interval(2.0,2.0), interval(0.0,2.0)) === _finishes
+    @test overlap(interval(1.0,2.0), interval(1.0,2.0)) === _equals
+    @test overlap(interval(1.0,1.0), interval(1.0,1.0)) === _equals
+    @test overlap(interval(-Inf,1.0), interval(-Inf,1.0)) === _equals
+    @test overlap(entireinterval(), entireinterval()) === _equals
+    @test overlap(interval(3.0,4.0), interval(2.0,2.0)) === _after
+    @test overlap(interval(3.0,4.0), interval(1.0,2.0)) === _after
+    @test overlap(interval(3.0,3.0), interval(1.0,2.0)) === _after
+    @test overlap(interval(3.0,3.0), interval(2.0,2.0)) === _after
+    @test overlap(interval(3.0,Inf), interval(2.0,2.0)) === _after
+    @test overlap(interval(2.0,3.0), interval(1.0,2.0)) === _met_by
+    @test overlap(interval(2.0,3.0), interval(-Inf,2.0)) === _met_by
+    @test overlap(interval(1.5,2.5), interval(1.0,2.0)) === _overlapped_by
+    @test overlap(interval(1.5,2.5), interval(-Inf,2.0)) === _overlapped_by
+    @test overlap(interval(1.0,Inf), interval(1.0,2.0)) === _started_by
+    @test overlap(interval(1.0,3.0), interval(1.0,2.0)) === _started_by
+    @test overlap(interval(1.0,3.0), interval(1.0,1.0)) === _started_by
+    @test overlap(interval(-Inf,3.0), interval(1.0,2.0)) === _contains
+    @test overlap(entireinterval(), interval(1.0,2.0)) === _contains
+    @test overlap(interval(0.0,3.0), interval(1.0,2.0)) === _contains
+    @test overlap(interval(0.0,3.0), interval(2.0,2.0)) === _contains
+    @test overlap(interval(-Inf,2.0), interval(1.0,2.0)) === _finished_by
+    @test overlap(interval(0.0,2.0), interval(1.0,2.0)) === _finished_by
+    @test overlap(interval(0.0,2.0), interval(2.0,2.0)) === _finished_by
 
 end
 
 @testset "minimal_overlap_dec_test" begin
-
-    @test_broken MISSING_overlap(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(emptyinterval(), trv)) === bothEmpty
-
-    @test_broken MISSING_overlap(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(1.0,2.0), com)) === firstEmpty
-
-    @test_broken MISSING_overlap(DecoratedInterval(interval(1.0,2.0), def), DecoratedInterval(emptyinterval(), trv)) === secondEmpty
-
-    @test_broken MISSING_overlap(DecoratedInterval(interval(2.0,2.0), def), DecoratedInterval(interval(3.0,4.0), def)) === before
-
-    @test_broken MISSING_overlap(DecoratedInterval(interval(1.0,2.0), dac), DecoratedInterval(interval(3.0,4.0), com)) === before
-
-    @test_broken MISSING_overlap(DecoratedInterval(interval(1.0,2.0), com), DecoratedInterval(interval(3.0,3.0), trv)) === before
-
-    @test_broken MISSING_overlap(DecoratedInterval(interval(2.0,2.0), trv), DecoratedInterval(interval(3.0,3.0), def)) === before
-
-    @test_broken MISSING_overlap(DecoratedInterval(interval(1.0,2.0), def), DecoratedInterval(interval(2.0,3.0), def)) === meets
-
-    @test_broken MISSING_overlap(DecoratedInterval(interval(1.0,2.0), dac), DecoratedInterval(interval(1.5,2.5), def)) === overlaps
-
-    @test_broken MISSING_overlap(DecoratedInterval(interval(1.0,2.0), def), DecoratedInterval(interval(1.0,3.0), com)) === starts
-
-    @test_broken MISSING_overlap(DecoratedInterval(interval(1.0,1.0), trv), DecoratedInterval(interval(1.0,3.0), def)) === starts
-
-    @test_broken MISSING_overlap(DecoratedInterval(interval(1.0,2.0), def), DecoratedInterval(interval(0.0,3.0), dac)) === containedBy
-
-    @test_broken MISSING_overlap(DecoratedInterval(interval(2.0,2.0), trv), DecoratedInterval(interval(0.0,3.0), def)) === containedBy
-
-    @test_broken MISSING_overlap(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(0.0,2.0), com)) === finishes
-
-    @test_broken MISSING_overlap(DecoratedInterval(interval(2.0,2.0), def), DecoratedInterval(interval(0.0,2.0), dac)) === finishes
-
-    @test_broken MISSING_overlap(DecoratedInterval(interval(1.0,2.0), def), DecoratedInterval(interval(1.0,2.0), def)) === equals
-
-    @test_broken MISSING_overlap(DecoratedInterval(interval(1.0,1.0), dac), DecoratedInterval(interval(1.0,1.0), dac)) === equals
-
-    @test_broken MISSING_overlap(DecoratedInterval(interval(3.0,4.0), trv), DecoratedInterval(interval(2.0,2.0), trv)) === after
-
-    @test_broken MISSING_overlap(DecoratedInterval(interval(3.0,4.0), def), DecoratedInterval(interval(1.0,2.0), def)) === after
-
-    @test_broken MISSING_overlap(DecoratedInterval(interval(3.0,3.0), com), DecoratedInterval(interval(1.0,2.0), dac)) === after
-
-    @test_broken MISSING_overlap(DecoratedInterval(interval(3.0,3.0), def), DecoratedInterval(interval(2.0,2.0), trv)) === after
-
-    @test_broken MISSING_overlap(DecoratedInterval(interval(2.0,3.0), def), DecoratedInterval(interval(1.0,2.0), trv)) === metBy
-
-    @test_broken MISSING_overlap(DecoratedInterval(interval(1.5,2.5), com), DecoratedInterval(interval(1.0,2.0), com)) === overlappedBy
-
-    @test_broken MISSING_overlap(DecoratedInterval(interval(1.0,3.0), dac), DecoratedInterval(interval(1.0,2.0), def)) === startedBy
-
-    @test_broken MISSING_overlap(DecoratedInterval(interval(1.0,3.0), com), DecoratedInterval(interval(1.0,1.0), dac)) === startedBy
-
-    @test_broken MISSING_overlap(DecoratedInterval(interval(0.0,3.0), com), DecoratedInterval(interval(1.0,2.0), dac)) === contains
-
-    @test_broken MISSING_overlap(DecoratedInterval(interval(0.0,3.0), com), DecoratedInterval(interval(2.0,2.0), def)) === contains
-
-    @test_broken MISSING_overlap(DecoratedInterval(interval(0.0,2.0), def), DecoratedInterval(interval(1.0,2.0), trv)) === finishedBy
-
-    @test_broken MISSING_overlap(DecoratedInterval(interval(0.0,2.0), dac), DecoratedInterval(interval(2.0,2.0), def)) === finishedBy
+    @test overlap(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(emptyinterval(), trv)) === _both_empty
+    @test overlap(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(1.0,2.0), com)) === _first_empty
+    @test overlap(DecoratedInterval(interval(1.0,2.0), def), DecoratedInterval(emptyinterval(), trv)) === _second_empty
+    @test overlap(DecoratedInterval(interval(2.0,2.0), def), DecoratedInterval(interval(3.0,4.0), def)) === _before
+    @test overlap(DecoratedInterval(interval(1.0,2.0), dac), DecoratedInterval(interval(3.0,4.0), com)) === _before
+    @test overlap(DecoratedInterval(interval(1.0,2.0), com), DecoratedInterval(interval(3.0,3.0), trv)) === _before
+    @test overlap(DecoratedInterval(interval(2.0,2.0), trv), DecoratedInterval(interval(3.0,3.0), def)) === _before
+    @test overlap(DecoratedInterval(interval(1.0,2.0), def), DecoratedInterval(interval(2.0,3.0), def)) === _meets
+    @test overlap(DecoratedInterval(interval(1.0,2.0), dac), DecoratedInterval(interval(1.5,2.5), def)) === _overlaps
+    @test overlap(DecoratedInterval(interval(1.0,2.0), def), DecoratedInterval(interval(1.0,3.0), com)) === _starts
+    @test overlap(DecoratedInterval(interval(1.0,1.0), trv), DecoratedInterval(interval(1.0,3.0), def)) === _starts
+    @test overlap(DecoratedInterval(interval(1.0,2.0), def), DecoratedInterval(interval(0.0,3.0), dac)) === _contained_by
+    @test overlap(DecoratedInterval(interval(2.0,2.0), trv), DecoratedInterval(interval(0.0,3.0), def)) === _contained_by
+    @test overlap(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(0.0,2.0), com)) === _finishes
+    @test overlap(DecoratedInterval(interval(2.0,2.0), def), DecoratedInterval(interval(0.0,2.0), dac)) === _finishes
+    @test overlap(DecoratedInterval(interval(1.0,2.0), def), DecoratedInterval(interval(1.0,2.0), def)) === _equals
+    @test overlap(DecoratedInterval(interval(1.0,1.0), dac), DecoratedInterval(interval(1.0,1.0), dac)) === _equals
+    @test overlap(DecoratedInterval(interval(3.0,4.0), trv), DecoratedInterval(interval(2.0,2.0), trv)) === _after
+    @test overlap(DecoratedInterval(interval(3.0,4.0), def), DecoratedInterval(interval(1.0,2.0), def)) === _after
+    @test overlap(DecoratedInterval(interval(3.0,3.0), com), DecoratedInterval(interval(1.0,2.0), dac)) === _after
+    @test overlap(DecoratedInterval(interval(3.0,3.0), def), DecoratedInterval(interval(2.0,2.0), trv)) === _after
+    @test overlap(DecoratedInterval(interval(2.0,3.0), def), DecoratedInterval(interval(1.0,2.0), trv)) === _met_by
+    @test overlap(DecoratedInterval(interval(1.5,2.5), com), DecoratedInterval(interval(1.0,2.0), com)) === _overlapped_by
+    @test overlap(DecoratedInterval(interval(1.0,3.0), dac), DecoratedInterval(interval(1.0,2.0), def)) === _started_by
+    @test overlap(DecoratedInterval(interval(1.0,3.0), com), DecoratedInterval(interval(1.0,1.0), dac)) === _started_by
+    @test overlap(DecoratedInterval(interval(0.0,3.0), com), DecoratedInterval(interval(1.0,2.0), dac)) === _contains
+    @test overlap(DecoratedInterval(interval(0.0,3.0), com), DecoratedInterval(interval(2.0,2.0), def)) === _contains
+    @test overlap(DecoratedInterval(interval(0.0,2.0), def), DecoratedInterval(interval(1.0,2.0), trv)) === _finished_by
+    @test overlap(DecoratedInterval(interval(0.0,2.0), dac), DecoratedInterval(interval(2.0,2.0), def)) === _finished_by
 
 end
 
