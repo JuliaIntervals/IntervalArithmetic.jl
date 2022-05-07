@@ -111,7 +111,7 @@ for (dir, RoundingDirection, outfloat) in rounding_directions
         @eval function $op(::IntervalRounding{:fast}, a, b, ::$RoundingDirection)
             return FastRounding.$(Symbol(f, "_round"))(a, b, $RoundingDirection())
         end
-        
+
         @eval function $op(
                 ::IntervalRounding{:tight}, a::T, b::T,
                 ::$RoundingDirection) where {T<:Union{Float32, Float64}}
@@ -161,7 +161,7 @@ for (dir, RoundingDirection, outfloat) in rounding_directions
         @eval function $f(::IntervalRounding{:accurate}, a::T, b::T, ::$RoundingDirection) where {T<:AbstractFloat}
             return $outfloat($f(a, b))
         end
-        
+
         @eval function $f(::IntervalRounding{:slow}, a::T, b::T, ::$RoundingDirection) where {T<:AbstractFloat}
             setrounding(T, $RoundingDirection()) do
                 return $f(a, b)
@@ -170,7 +170,8 @@ for (dir, RoundingDirection, outfloat) in rounding_directions
     end
 
     # Unary functions not in CRlibm
-    for f in (:sqrt, :inv, :tanh, :asinh, :acosh, :atanh, :cot)
+    for f in (:sqrt, :inv, :cot, :sec, :csc, :acot,
+            :tanh, :coth, :sech, :csch, :asinh, :acosh, :atanh, :acoth)
         @eval function $f(::IntervalRounding{:accurate}, a::AbstractFloat, ::$RoundingDirection)
             return $outfloat($f(a))
         end
@@ -196,7 +197,8 @@ end
 
 #= Default definitions, fallback and :none =#
 # Unary functions
-for f in vcat(CRlibm.functions, [:sqrt, :inv, :tanh, :asinh, :acosh, :atanh, :cot])
+for f in vcat(CRlibm.functions, [:sqrt, :inv, :cot, :sec, :csc, :acot,
+        :tanh, :coth, :sech, :csch, :asinh, :acosh, :atanh, :acoth])
     @eval $f(a::AbstractFloat, r::RoundingMode) = $f(interval_rounding(), a, r)
     @eval $f(a::Real, r::RoundingMode) = $f(interval_rounding(), float(a), r)
 

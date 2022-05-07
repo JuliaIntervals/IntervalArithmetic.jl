@@ -135,8 +135,31 @@ function atanh(a::F) where {F<:Interval}
     return F(res_lo, res_hi)
 end
 
+"""
+    acoth(a::Interval)
+
+Implement the `acoth` function of the IEEE Std 1788-2015 (Table 9.1).
+"""
+function acoth(a::F) where {F<:Interval}
+    isempty(a) && return a
+
+    domain_excluded = F(-1, 1)
+
+    a ⪽ domain_excluded && return emptyinterval(a)
+
+    !isempty(a ∩ domain_excluded) && return entireinterval(F)
+
+    res_lo, res_hi = bounds(@round(F, acoth(a.hi), acoth(a.lo)))
+
+    # The IEEE Std 1788-2015 does not allow intervals like of the
+    # form Interval(∞,∞) and Interval(-∞,-∞) for set based intervals
+    (res_lo == res_hi == Inf || res_lo == res_hi == -Inf) && return emptyinterval(a)
+
+    return F(res_lo, res_hi)
+end
+
 # Float64 versions of functions missing from CRlibm:
-for f in (:tanh, :coth, :sech, :csch, :asinh, :acosh, :atanh)
+for f in (:tanh, :coth, :sech, :csch, :asinh, :acosh, :atanh, :acoth)
     @eval function ($f)(a::F) where {F<:Interval{Float64}}
         isempty(a) && return a
         return F(($f)(bigequiv(a)) )
