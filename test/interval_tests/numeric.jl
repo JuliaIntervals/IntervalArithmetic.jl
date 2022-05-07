@@ -377,6 +377,7 @@ end
         a = Interval{Float32}(1e38)
         b = Interval{Float32}(1e2)
         @test a * b == Interval{Float32}(floatmax(Float32), Inf)
+        @test Interval(1.0f0) ^ Interval(1.0f0) == Interval(1.0f0) # test for PR #482
     end
 
 

@@ -9,7 +9,7 @@
 for T in (:Integer, :Float64, :BigFloat, :Interval)
     @eval ^(a::Interval{Float64}, x::$T) = atomic(Interval{Float64}, bigequiv(a)^x)
 end
-
+^(a::Interval{Float32}, x::Interval) = atomic(Interval{Float32}, bigequiv(a)^x)
 
 # Integer power:
 
