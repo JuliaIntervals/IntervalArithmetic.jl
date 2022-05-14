@@ -4,50 +4,57 @@
     by the IEEE Std 1788-2015 (section 10.6.4).
 =#
 
-# Define the OverlapType <: Enum{Int32} instances. They are numerated starting on 1.
-@enum OverlapType begin
-    _both_empty=1
-    _first_empty
-    _second_empty
-    _before
-    _meets
-    _overlaps
-    _starts
-    _contained_by
-    _finishes
-    _equals
-    _finished_by
-    _contains
-    _started_by
-    _overlapped_by
-    _met_by
-    _after
+"""
+    Overlap <: EnumX{Int32}
+
+Struct containing the `overlap` instances included in the IEEE Std 1788-2015.
+They are numerated starting on 1. To see the distinct instances, type
+`IntervalArithmetic.Overlap.T`.
+
+"""
+@enumx Overlap begin
+    both_empty = 1
+    first_empty
+    second_empty
+    before
+    meets
+    overlaps
+    starts
+    contained_by
+    finishes
+    equals
+    finished_by
+    contains
+    started_by
+    overlapped_by
+    met_by
+    after
 end
 
 """
     overlap(a::Interval, b::Interval)
 
-Implement the `overlap` function of the IEEE Std 1788-2015 (section 10.6.4
+Implement the `overlap` function according to the IEEE Std 1788-2015 (section 10.6.4
 and Table 10.7).
 """
 function overlap(a::Interval, b::Interval)
     # At least one interval is empty
-    isempty(a) && isempty(b) && return _both_empty
-    isempty(a) && return _first_empty
-    isempty(b) && return _second_empty
+    isempty(a) && isempty(b) && return Overlap.both_empty
+    isempty(a) && return Overlap.first_empty
+    isempty(b) && return Overlap.second_empty
 
     # States with both intervals nonempty
-    strictprecedes(a, b) && return _before
-    !isthin(a) && !isthin(b) && a.hi == b.lo && return _meets
-    a.lo < b.lo && a.hi < b.hi && a.hi > b.lo && return _overlaps
-    a.lo == b.lo && a.hi < b.hi && return _starts
-    b.lo < a.lo && a.hi < b.hi && return _contained_by
-    b.lo < a.lo && a.hi == b.hi && return _finishes
-    a ≛ b && return _equals
-    a.lo < b.lo && a.hi == b.hi && return _finished_by
-    b.lo > a.lo && a.hi > b.hi && return _contains
-    a.lo == b.lo && a.hi > b.hi && return _started_by
-    a.lo > b.lo && a.hi > b.hi && a.lo < b.hi && return _overlapped_by
-    !isthin(a) && !isthin(b) && a.lo == b.hi && return _met_by
-    strictprecedes(b, a) && return _after
+    strictprecedes(a, b) && return Overlap.before
+    !isthin(a) && !isthin(b) && sup(a) == inf(b) && return Overlap.meets
+    inf(a) < inf(b) && sup(a) < sup(b) && sup(a) > inf(b) && return Overlap.overlaps
+    inf(a) == inf(b) && sup(a) < sup(b) && return Overlap.starts
+    inf(b) < inf(a) && sup(a) < sup(b) && return Overlap.contained_by
+    inf(b) < inf(a) && sup(a) == sup(b) && return Overlap.finishes
+    a ≛ b && return Overlap.equals
+    inf(a) < inf(b) && sup(a) == sup(b) && return Overlap.finished_by
+    inf(b) > inf(a) && sup(a) > sup(b) && return Overlap.contains
+    inf(a) == inf(b) && sup(a) > sup(b) && return Overlap.started_by
+    inf(a) > inf(b) && sup(a) > sup(b) && inf(a) < sup(b) && return Overlap.overlapped_by
+    !isthin(a) && !isthin(b) && inf(a) == sup(b) && return Overlap.met_by
+    strictprecedes(b, a) && return Overlap.after
 end

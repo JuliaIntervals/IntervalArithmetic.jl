@@ -6,6 +6,7 @@ version = "0.20.5"
 [deps]
 CRlibm = "96374032-68de-5a5b-8d9e-752f78720389"
 CombinedParsers = "5ae71ed2-6f8a-4ed1-b94f-e14e8158f19e"
+EnumX = "4e289a0a-7415-4d19-859d-a7e5c4648b56"
 FastRounding = "fa42c844-2597-5d31-933b-ebd51ab2693f"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Markdown = "d6f4376e-aef5-505a-96c1-9c027394607a"
@@ -17,8 +18,9 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
 CRlibm = "0.7, 0.8, 1"
-IntervalContractors = "0.4"
+EnumX = "1"
 FastRounding = "0.2, 0.3"
+IntervalContractors = "0.4"
 Polynomials = ">= 1.0"
 RecipesBase = "1.0"
 RoundingEmulator = "0.2"
