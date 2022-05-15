@@ -66,7 +66,12 @@ let X, A  # avoid problems with global variables
         @test A ∪ B.v == B
     end
 
-
+    x = 0.5 .. 3
+    a = IntervalBox(A[1]) # 1 .. 2
+    @test !(x ⊆ a) && a ⊆ x
+    @test !(x ⊂ a) && a ⊂ x
+    @test x ∩ a == a ∩ x == A[1]
+    @test x ∪ a ==  a ∪ x == x
 
     X = IntervalBox(1..2, 3..4)
     Y = IntervalBox(3..4, 3..4)
