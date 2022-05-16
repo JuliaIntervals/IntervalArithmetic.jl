@@ -13,6 +13,7 @@ using LinearAlgebra
 using Markdown
 using StaticArrays
 using SetRounding
+using EnumX
 
 import LinearAlgebra: ×, dot, norm
 export ×, dot
@@ -55,7 +56,7 @@ export
     diam, radius, mid, scaled_mid, mag, mig, hull,
     emptyinterval, ∅, ∞, isempty, isinterior, isdisjoint, ⪽,
     precedes, strictprecedes, ≺, ⊂, ⊃, ⊇, contains_zero, isthinzero,
-    isweaklyless, isstrictless, overlap,
+    isweaklyless, isstrictless, overlap, Overlap,
     ≛,
     entireinterval, isentire, nai, isnai, isthin, iscommon, isatomic,
     inf, sup, bounds, bisect, mince,
