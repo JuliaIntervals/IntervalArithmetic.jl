@@ -68,6 +68,13 @@ let X, A  # avoid problems with global variables
         @test A ∪ B.v ≛ B
     end
 
+    x = 0.5 .. 3
+    a = IntervalBox(A[1]) # 1 .. 2
+    @test !(x ⊆ a) && a ⊆ x
+    @test !(x ⊂ a) && a ⊂ x
+    @test x ∩ a == a ∩ x == A[1]
+    @test x ∪ a ==  a ∪ x == x
+
     X = IntervalBox(1..2, 3..4)
     Y = IntervalBox(3..4, 3..4)
 
@@ -333,7 +340,7 @@ end
     @test hull(vb3...) ≛ ib3
     @test hull(vb3) ≛ ib3
     @test all(mince(ib3, (4,4,4)) .≛ vb3)
-    @test all(mince(ib3, (2,1,1)) .≛ [(-1 .. 0)×(-1 .. 1)×(-1 .. 1), 
+    @test all(mince(ib3, (2,1,1)) .≛ [(-1 .. 0)×(-1 .. 1)×(-1 .. 1),
         (0 .. 1)×(-1 .. 1)×(-1 .. 1)])
     @test hull(mince(ib3, (2,1,1))) ≛ ib3
 

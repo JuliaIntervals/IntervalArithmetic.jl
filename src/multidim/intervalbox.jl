@@ -82,6 +82,11 @@ end
 ∈(X::AbstractVector, Y::IntervalBox{N, T}) where {N, T} = all(X .∈ Y)
 ∈(X, Y::IntervalBox{N, T}) where {N, T} = throw(ArgumentError("$X ∈ $Y is not defined"))
 
+# mixing intervals with one-dimensional interval boxes
+for op in (:⊆, :⊂, :⊃, :∩, :∪)
+    @eval $(op)(a::Interval, X::IntervalBox{1}) = $(op)(a, first(X))
+    @eval $(op)(X::IntervalBox{1}, a::Interval) = $(op)(first(X), a)
+end
 
 #=
 On Julia 0.6 can now write
