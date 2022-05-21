@@ -82,8 +82,6 @@ using Test
 
     @test a ⊆ b
 
-    @test_throws ArgumentError @interval("[0.1, 0.2")
-
     # TODO Actually use the rounding mode here
     for rounding in (:wide, :narrow)
         a = @interval(0.1, 0.2)

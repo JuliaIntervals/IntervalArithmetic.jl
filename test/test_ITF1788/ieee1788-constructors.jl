@@ -48,29 +48,29 @@ end
 
     @test @interval("3.1416?1") === Interval(0x3.24395810624DCP+0, 0x3.24467381D7DC0P+0)
 
-    @test_skip @interval("[Empty]") === emptyinterval()
+    @test @interval("[Empty]") === emptyinterval()
 
 end
 
 @testset "IEEE1788.e" begin
 
-    @test_logs (:warn, ) @test isnai(DecoratedInterval(2,1))
+    @test isnai(DecoratedInterval(2,1))
 
 end
 
 @testset "IEEE1788.e" begin
 
-    @test_skip @decorated("[ ]") === DecoratedInterval(emptyinterval(), trv)
+    @test @decorated("[ ]") === DecoratedInterval(emptyinterval(), trv)
 
-    @test_skip @decorated("[entire]") === DecoratedInterval(Interval(-Inf, +Inf), dac)
+    @test @decorated("[entire]") === DecoratedInterval(Interval(-Inf, +Inf), dac)
 
     @test @decorated("[1.e-3, 1.1e-3]") === DecoratedInterval(Interval(0x4.189374BC6A7ECP-12, 0x4.816F0068DB8BCP-12), com)
 
     @test @decorated("[-Inf, 2/3]") === DecoratedInterval(Interval(-Inf, +0xA.AAAAAAAAAAAB0P-4), dac)
 
-    @test_skip @decorated("[0x1.3p-1,]") === DecoratedInterval(Interval(0x1.3p-1, Inf), dac)
+    @test @decorated("[0x1.3p-1,]") === DecoratedInterval(Interval(0x1.3p-1, Inf), dac)
 
-    @test_skip @decorated("[,]") === DecoratedInterval(entireinterval(), dac)
+    @test @decorated("[,]") === DecoratedInterval(entireinterval(), dac)
 
     @test @decorated("3.56?1") === DecoratedInterval(Interval(0x3.8CCCCCCCCCCCCP+0, 0x3.91EB851EB8520P+0), com)
 
@@ -88,11 +88,11 @@ end
 
     @test @decorated("-10?12") === DecoratedInterval(Interval(-22.0, 2.0), com)
 
-    @test_skip @decorated("-10??u") === DecoratedInterval(Interval(-10.0, Inf), dac)
+    @test @decorated("-10??u") === DecoratedInterval(Interval(-10.0, Inf), dac)
 
-    @test_skip @decorated("-10??") === DecoratedInterval(Interval(-Inf, Inf), dac)
+    @test @decorated("-10??") === DecoratedInterval(Interval(-Inf, Inf), dac)
 
-    @test_skip isnai(@decorated("[nai]"))
+    @test isnai(@decorated("[nai]"))
 
     @test @decorated("3.56?1_def") === DecoratedInterval(Interval(0x3.8CCCCCCCCCCCCP+0, 0x3.91EB851EB8520P+0), def)
 
@@ -100,15 +100,14 @@ end
 
 @testset "IEEE1788.f" begin
 
-    @test_skip @interval("[]") === emptyinterval()
+    @test @interval("[]") === emptyinterval()
 
-    @test_skip @interval("[empty]") === emptyinterval()
+    @test @interval("[empty]") === emptyinterval()
 
-    @test_skip @interval("[ empty ]") === emptyinterval()
+    @test @interval("[ empty ]") === emptyinterval()
 
-    @test_skip @interval("[,]") === entireinterval()
+    @test @interval("[,]") === entireinterval()
 
-    @test_skip @interval("[ entire ]") === entireinterval()
+    @test @interval("[ entire ]") === entireinterval()
 
 end
-
