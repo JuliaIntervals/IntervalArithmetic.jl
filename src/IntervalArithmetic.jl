@@ -8,7 +8,6 @@ import CRlibm
 import FastRounding
 import RoundingEmulator
 
-using CombinedParsers
 using LinearAlgebra
 using Markdown
 using StaticArrays
