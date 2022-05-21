@@ -134,7 +134,7 @@ Same as `parse(T, s, rounding_mode)`, but also accept string representing ration
 """
 function parse_num(T, s, rounding_mode)
     if '/' in s
-        num, denum = parse.(Int, split(s, '/'))
+        num, denum = parse.(BigInt, split(s, '/'))
         return T(num//denum, rounding_mode)
     end
     return T(parse(BigFloat, s), rounding_mode)
