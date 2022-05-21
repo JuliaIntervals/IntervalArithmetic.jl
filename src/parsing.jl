@@ -9,7 +9,7 @@ function parse(::Type{DecoratedInterval{T}}, s::AbstractString) where T
     s == "[nai]" && return nai(T)
     try
         if '_' ∉ s
-            ival = _parse(Interval{T}, s)
+            ival, _ = _parse(Interval{T}, s)
             return DecoratedInterval(ival)
         end
 
@@ -22,11 +22,19 @@ function parse(::Type{DecoratedInterval{T}}, s::AbstractString) where T
 
         interval_string, dec = split(s, "_")
 
-        ival = _parse(Interval{T}, interval_string)
+        ival, isnotcom = _parse(Interval{T}, interval_string)
         dec_calc = decoration(ival)
         dec_given = decorations[dec]
 
-        dec_given > dec_calc && throw() # by ITF1788, if I try to construct [-Inf, Inf]_com, it should error and return NaI
+        #=
+            If I try to give a decoration that is too high, e.g. [1, Inf]_com, then it
+            should error and return [NaI]. Exception to this is if the interval would be com
+            but becomes dac because of finite precision, e.g. "[1e403]_com" when parse to
+            Interval{Float64} is allowed to become [prevfloat(Inf), Inf]_dac without erroring.
+            The isnotcom flag returned by _parse is used to track if the interval was originally
+            smaller than com or became dac because of overflow.
+        =#
+        dec_given > dec_calc && isnotcom && throw()
 
         return DecoratedInterval(ival, min(dec_given, dec_calc))
     catch
@@ -47,7 +55,8 @@ including for number that have no exact float representation like "0.1".
 function parse(::Type{Interval{T}}, s::AbstractString) where T
     s = lowercase(strip(s))
     try
-        return _parse(Interval{T}, s)
+        ival, _ = _parse(Interval{T}, s)
+        return ival
     catch
         @warn "invalid input, empty interval returned"
         return emptyinterval(T)
@@ -55,23 +64,25 @@ function parse(::Type{Interval{T}}, s::AbstractString) where T
 end
 
 function _parse(::Type{Interval{T}}, s::AbstractString) where T
+    isnotcom = occursin("inf", s)
     if startswith(s, '[') && endswith(s, ']') # parse as interval
         s = strip(s[2:end-1])
         if ',' in s # infsupinterval
             lo, hi = strip.(split(s, ','))
-            isempty(lo) && (lo = "-inf")
-            isempty(hi) && (hi = "inf")
+            isempty(lo) && (lo = "-inf"; isnotcom = true)
+            isempty(hi) && (hi = "inf"; isnotcom = true)
             lo = parse_num(T, lo, RoundDown)
             hi = parse_num(T, hi, RoundUp)
         else # point interval
 
-            (s == "empty" || isempty(s)) && return emptyinterval(T) # emptyinterval
-            s == "entire" && return entireinterval(T) # entireinterval
+            (s == "empty" || isempty(s)) && return emptyinterval(T), true # emptyinterval
+            s == "entire" && return entireinterval(T), true # entireinterval
             lo = parse_num(T, s, RoundDown)
             hi = parse_num(T, s, RoundUp)
         end
     elseif '?' in s # uncertainty interval
         if occursin("??", s) # unbounded interval
+            isnotcom = true
             m, _ = split(s, "??")
             if 'u' in s # interval in the form [m, Inf]
                 lo = parse(T, m, RoundDown)
@@ -80,7 +91,7 @@ function _parse(::Type{Interval{T}}, s::AbstractString) where T
                 lo = T(-Inf)
                 hi = parse(T, m, RoundUp)
             else
-                return entireinterval(T)
+                return entireinterval(T), true
             end
         else
             m , vde = split(s, '?')
@@ -125,7 +136,7 @@ function _parse(::Type{Interval{T}}, s::AbstractString) where T
         lo = parse_num(T, s, RoundDown)
         hi = parse_num(T, s, RoundUp)
     end
-    is_valid_interval(lo, hi) && return Interval(lo, hi)
+    is_valid_interval(lo, hi) && return Interval(lo, hi), isnotcom
     throw()
 end
 

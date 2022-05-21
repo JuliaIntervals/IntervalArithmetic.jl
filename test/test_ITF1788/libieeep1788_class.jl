@@ -216,7 +216,7 @@ end
 
     @test @decorated("[-Infinity, 1.000 ]_trv") === DecoratedInterval(Interval(-Inf,1.0), trv)
 
-    @test_broken @decorated("[1.0E+400 ]_com") === DecoratedInterval(Interval(0x1.fffffffffffffp+1023,Inf), dac)
+    @test @decorated("[1.0E+400 ]_com") === DecoratedInterval(Interval(0x1.fffffffffffffp+1023,Inf), dac)
 
     @test @decorated("[ -4/2, 10/5 ]_com") === DecoratedInterval(Interval(-2.0,2.0), com)
 
@@ -266,11 +266,11 @@ end
 
     @test isnai(@decorated("[ Nai  ]"))
 
-    @test_broken @decorated("10?1800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000_com") === DecoratedInterval(Interval(-Inf,Inf), dac)
+    @test @decorated("10?1800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000_com") === DecoratedInterval(Interval(-Inf,Inf), dac)
 
     @test @decorated("10?3_com") === DecoratedInterval(Interval(7.0,13.0), com)
 
-    @test_broken @decorated("10?3e380_com") === DecoratedInterval(Interval(0x1.fffffffffffffp+1023,Inf), dac)
+    @test @decorated("10?3e380_com") === DecoratedInterval(Interval(0x1.fffffffffffffp+1023,Inf), dac)
 
     @test isnai(@decorated("[ Nai  ]_ill"))
 
