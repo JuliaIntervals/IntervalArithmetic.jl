@@ -1,19 +1,19 @@
 # Initially adapted from NumberIntervals.jl
 # https://github.com/gwater/NumberIntervals.jl
 
-function istrue(politic, bool)
-    if politic == :ternary || politic == :is_all
+function istrue(policy, bool)
+    if policy == :ternary || policy == :certainly
         return bool
     end
 
     return true in bool && !(false in bool)
 end
 
-isfalse(politic, bool) = !istrue(politic, bool)
+isfalse(policy, bool) = !istrue(policy, bool)
 
-function isunkown(politic, bool)
-    politic == :ternary && return ismissing(bool)
-    politic == :is_all && return !bool
+function isunkown(policy, bool)
+    policy == :ternary && return ismissing(bool)
+    policy == :certainly && return !bool
 
     return true in bool && false in bool
 end
@@ -38,14 +38,14 @@ d = Interval(0.25, 0.8)
 f = Interval(1)
 z = zero(Interval{Float64})
 
-for politic in (:is_all, :interval, :ternary)
-    @eval istrue(bool) = istrue($(QuoteNode(politic)), bool)
-    @eval isfalse(bool) = isfalse($(QuoteNode(politic)), bool)
-    @eval isunkown(bool) = isunkown($(QuoteNode(politic)), bool)
+for policy in (:certainly, :interval, :ternary)
+    @eval istrue(bool) = istrue($(QuoteNode(policy)), bool)
+    @eval isfalse(bool) = isfalse($(QuoteNode(policy)), bool)
+    @eval isunkown(bool) = isunkown($(QuoteNode(policy)), bool)
 
-    @eval IntervalArithmetic.pointwise_politic() = PointwisePolitic{$(QuoteNode(politic))}()
+    @eval IntervalArithmetic.pointwise_policy() = PointwisePolicy{$(QuoteNode(policy))}()
 
-    @testset ":$politic pointwise politic" begin
+    @testset ":$policy pointwise policy" begin
         @testset "Number comparison" begin
             @test istrue(a < c)
             @test istrue(c > a)
@@ -88,13 +88,13 @@ for politic in (:is_all, :interval, :ternary)
     end
 end
 
-let politic = :ieee1788
-    @eval istrue(bool) = istrue($(QuoteNode(politic)), bool)
-    @eval isfalse(bool) = isfalse($(QuoteNode(politic)), bool)
+let policy = :ieee
+    @eval istrue(bool) = istrue($(QuoteNode(policy)), bool)
+    @eval isfalse(bool) = isfalse($(QuoteNode(policy)), bool)
 
-    @eval IntervalArithmetic.pointwise_politic() = PointwisePolitic{$(QuoteNode(politic))}()
-    @show(IntervalArithmetic.pointwise_politic())
-    @testset ":$politic pointwise politic" begin
+    @eval IntervalArithmetic.pointwise_policy() = PointwisePolicy{$(QuoteNode(policy))}()
+    @show(IntervalArithmetic.pointwise_policy())
+    @testset ":$policy pointwise policy" begin
         @testset "Number comparison" begin
             @test istrue(a < c)
             @test istrue(c > a)

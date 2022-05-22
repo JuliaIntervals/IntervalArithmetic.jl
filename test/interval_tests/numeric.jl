@@ -174,9 +174,9 @@ end
 
     @test d < 3
     @test d <= 2
-    @test_skip ismissing(d < 2)  # Test depends on pointwise_politic mode
+    @test_skip ismissing(d < 2)  # Test depends on pointwise_policy mode
     @test -1 < d
-    @test_skip ismissing(d < 0.15)  # Test depends on pointwise_politic mode
+    @test_skip ismissing(d < 0.15)  # Test depends on pointwise_policy mode
 
     # abs
     @test abs(Interval(0.1, 0.2)) ≛ Interval(0.1, 0.2)

@@ -63,7 +63,7 @@ export
     midpoint_radius,
     RoundTiesToEven, RoundTiesToAway,
     IntervalRounding,
-    PointwisePolitic,
+    PointwisePolicy,
     cancelminus, cancelplus, isbounded, isunbounded,
     .., @I_str, ±,
     pow, extended_div, nthroot,
