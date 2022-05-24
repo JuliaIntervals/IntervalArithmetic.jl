@@ -435,21 +435,22 @@ end
     @test nthroot(Interval{BigFloat}(-81, -16), 1) == Interval{BigFloat}(-81, -16)
 end
 
-# approximation used in this testing (not to rely on ≈ for intervals)
-≊(x::Interval, y::Interval) = x.lo ≈ y.lo && x.hi ≈ y.hi
+# approximation used for testing (not to rely on ≈ for intervals)
+# ⪆(x, y) = (x ≈ y) && (y ⊆ x)
+⪆(x::Interval, y::Interval) = x.lo ≈ y.lo && x.hi ≈ y.hi && y ⊆ x
 
 @testset "`mod`" begin
     r = 0.0625
     x = r..(1+r)
     @test mod(x, 1) == mod(x, 1.0) == 0..1
-    @test mod(x, 2) == mod(x, 2.0) ≊ x
-    @test mod(x, 2.5) ≊ x
+    @test mod(x, 2) == mod(x, 2.0) ⪆ x
+    @test mod(x, 2.5) ⪆ x
     @test mod(x, 0.5) == 0..0.5
 
     x = (-1+r) .. -r
-    @test mod(x, 1) == mod(x, 1.0) ≊ 1+x
-    @test mod(x, 2) == mod(x, 2.0) ≊ 2+x
-    @test mod(x, 2.5) ≊ 2.5+x
+    @test mod(x, 1) == mod(x, 1.0) ⪆ 1+x
+    @test mod(x, 2) == mod(x, 2.0) ⪆ 2+x
+    @test mod(x, 2.5) ⪆ 2.5+x
     @test mod(x, 0.5) == 0..0.5
 
     x = -r .. 1-r
