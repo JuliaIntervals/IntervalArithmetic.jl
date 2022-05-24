@@ -381,5 +381,5 @@ function mod(x::Interval, y::Real)
     @assert y > 0 "modulo is currently implemented only for a positive divisor."
     division = x / y
     fl = floor(division)
-    fl.lo < fl.hi ? 0..y : y * (division - fl)
+    fl.lo < fl.hi ? Interval(zero(y), y) : y * (division - fl)
 end
