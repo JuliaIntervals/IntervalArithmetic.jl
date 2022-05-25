@@ -33,7 +33,7 @@ function parse(::Type{DecoratedInterval{T}}, s::AbstractString) where T
     try
         if '_' ∉ s
             ival, _ = _parse(Interval{T}, s)
-            return DecoratedInterval(ival)
+            return DecoratedInterval{T}(ival)
         end
 
         decorations = Dict(
@@ -61,7 +61,7 @@ function parse(::Type{DecoratedInterval{T}}, s::AbstractString) where T
         =#
         dec_given > dec_calc && isnotcom && throw(ArgumentError("invalid decoration $dec for $ival"))
 
-        return DecoratedInterval(ival, min(dec_given, dec_calc))
+        return DecoratedInterval{T}(ival, min(dec_given, dec_calc))
     catch e
         if e isa ArgumentError
             @warn "invalid input, returning [NaI]"
