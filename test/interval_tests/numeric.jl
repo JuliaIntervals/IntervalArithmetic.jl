@@ -436,8 +436,8 @@ end
 end
 
 # approximation used for testing (not to rely on ≈ for intervals)
-# ⪆(x, y) = (x ≈ y) && (y ⊆ x)
-⪆(x::Interval, y::Interval) = x.lo ≈ y.lo && x.hi ≈ y.hi && y ⊆ x
+# ⪆(x, y) = (x ≈ y) && (x ⊇ y)
+⪆(x::Interval, y::Interval) = x.lo ≈ y.lo && x.hi ≈ y.hi && x ⊇ y
 
 @testset "`mod`" begin
     r = 0.0625
