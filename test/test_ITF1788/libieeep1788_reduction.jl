@@ -32,7 +32,7 @@ end
 
     @test dot([1.0, 2.0, 3.0], [1.0, 2.0, 3.0]) === 14.0
 
-    @test_skip dot([0x10000000000001p0, 0x1p104], [0x0fffffffffffffp0, -1.0]) === -1.0
+    @test_broken dot([0x10000000000001p0, 0x1p104], [0x0fffffffffffffp0, -1.0]) === -1.0
 
     @test isnan(dot([1.0, 2.0, NaN, 3.0], [1.0, 2.0, 3.0, 4.0]))
 

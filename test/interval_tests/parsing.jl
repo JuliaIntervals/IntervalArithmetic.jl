@@ -1,67 +1,25 @@
-using IntervalArithmetic
-using Test
+@testset "parse to Interval{Float32}" begin
+    I32 = Interval{Float32}
+    DI32 = DecoratedInterval{Float32}
+    @test parse(I32, "[1, 2]") === Interval(1f0, 2f0)
+    @test parse(I32, "[1e-324, 1e400]") === Interval(0f0, Float32(Inf))
+    @test parse(I32, "[2,infinity]") === Interval(2f0, Float32(Inf))
+    @test parse(I32, "[foobar]") === emptyinterval(Float32)
 
-setformat(:standard, decorations=true, sigfigs=6)
-
-@testset "Parse string to Interval" begin
-    @test parse(Interval{Float64}, "1") ≛ Interval(1, 1)
-    @test parse(Interval{Float64}, "[1, 2]") ≛ Interval(1, 2)
-    @test parse(Interval{Float64}, "[-0x1.3p-1, 2/3]") ≛ Interval(-0x1.3p-1, Float64(2//3, RoundUp))
-    @test parse(Interval{Float64}, "[1,+infinity]") ≛ Interval(1.0, Inf)
-    @test parse(Interval{Float64}, "[1.234e5,Inf]") ≛ Interval(123400.0, Inf)
-    @test_broken parse(Interval{Float64}, "[]") ≛ ∅
-    @test_broken parse(Interval{Float64}, "[,]") ≛ entireinterval(Float64)
-    @test_broken parse(Interval{Float64}, "[ entire ]") ≛ entireinterval(Float64)
-    @test parse(Interval{Float64}, "3.56?1") ≛ Interval(0x3.8ccccccccccccp+0, 0x3.91eb851eb8520p+0)
-    @test parse(Interval{Float64}, "3.56?1e2") ≛ Interval(355.0, 357.0)
-    @test parse(Interval{Float64}, "3.560?2") ≛ Interval(0x3.8ed916872b020p+0, 0x3.8fdf3b645a1ccp+0)
-    @test parse(Interval{Float64}, "3.56?") ≛ Interval(0x3.8e147ae147ae0p+0, 0x3.90a3d70a3d70cp+0)
-    @test parse(Interval{Float64}, "3.560?2u") ≛ Interval(0x3.8f5c28f5c28f4p+0, 0x3.8fdf3b645a1ccp+0)
-    @test parse(Interval{Float64}, "-10?") ≛ Interval(-10.5, -9.5)
-    @test parse(Interval{Float64}, "-10?u") ≛ Interval(-10.0, -9.5)
-    @test parse(Interval{Float64}, "-10?12") ≛ Interval(-22.0, 2.0)
-    @test parse(Interval{Float64}, "0.0?d") ≛ Interval(-0.05, 0.0)
-    @test parse(Interval{Float64}, "2.5?d") ≛ Interval(0x1.3999999999999p+1, 2.5)
-    @test parse(Interval{Float64}, "0.000?5d") ≛ Interval(-0.005, 0.0)
-    @test parse(Interval{Float64}, "2.500?5d") ≛ Interval(0x1.3f5c28f5c28f5p+1, 2.5)
-    # NOTE Not in the standard, no sure where it comes from
-    @test_broken parse(Interval{Float64}, "2.5??d") ≛ Interval(-Inf, 2.5)
-    @test parse(Interval{Float64}, "2.500?5ue4") ≛ Interval(0x1.86ap+14, 0x1.8768p+14)
-    @test parse(Interval{Float64}, "2.500?5de-5") ≛ Interval(0x1.a2976f1cee4d5p-16, 0x1.a36e2eb1c432dp-16)
-    @test parse(Interval{Float64}, "3.1416?1") ≛ Interval(0x3.24395810624dcp+0, 0x3.24467381d7dc0p+0)
-
-    @test parse(Interval{BigFloat}, "1") ≛ Interval{BigFloat}(1)
-    @test parse(Interval{BigFloat}, "[-0x1.3p-1, 2/3]") ≛ Interval{BigFloat}(-0x1.3p-1, BigFloat(2//3, RoundUp))
-
-    @test_broken parse(Interval{Float64}, "[Empty]") ≛ emptyinterval(Float64)
-    @test_broken parse(Interval{BigFloat}, "[Empty]") ≛ emptyinterval(BigFloat)
-
-    @test parse(Interval{Float64}, "3 ±  4") ≛ 3 ± 4
-    @test parse(Interval{Float64}, "0.2 ± 0.1") ≛ 0.2 ± 0.1
-    @test parse(Interval{BigFloat}, "0.2 ± 0.1") ≛ big"0.2" ± big"0.1"
+    @test parse(DI32, "[1, 2]_com") === DecoratedInterval(Interval(1f0, 2f0), com)
+    @test isnai(parse(DI32, "[foobar]"))
 end
 
-@testset "Parse string to DecoratedInterval" begin
-    @test_broken parse(DecoratedInterval{Float64}, "[ ]") ≛ DecoratedInterval(∅, trv)
-    @test_broken parse(DecoratedInterval{Float64}, "[entire]") ≛ DecoratedInterval(Interval(-Inf, Inf), dac)
-    @test_broken parse(DecoratedInterval{Float64}, "[,]") ≛ DecoratedInterval(entireinterval(Float64), dac)
-    @test_broken isnai(parse(DecoratedInterval{Float64}, "[nai]"))
-    
-    @test parse(DecoratedInterval{Float64}, "[3]") ≛ DecoratedInterval(3)
-    @test parse(DecoratedInterval{Float64}, "[3, 4]") ≛ DecoratedInterval(3, 4)
-    @test parse(DecoratedInterval{Float64}, "[3, 4]_dac") ≛ DecoratedInterval(3, 4, dac)
-    
-    @test parse(DecoratedInterval{Float64}, "3.56?1") ≛ DecoratedInterval(Interval(0x3.8ccccccccccccp+0, 0x3.91eb851eb8520p+0), com)
-    @test parse(DecoratedInterval{Float64}, "3.56?1e2") ≛ DecoratedInterval(Interval(355.0, 357.0), com)
-    @test parse(DecoratedInterval{Float64}, "3.560?2") ≛ DecoratedInterval(Interval(0x3.8ed916872b020p+0, 0x3.8fdf3b645a1ccp+0), com)
-    @test parse(DecoratedInterval{Float64}, "3.56?") ≛ DecoratedInterval(Interval(0x3.8e147ae147ae0p+0, 0x3.90a3d70a3d70cp+0), com)
-    @test parse(DecoratedInterval{Float64}, "3.56?e2") ≛ DecoratedInterval(Interval(3.555e2, 3.565e2), com)
-    @test parse(DecoratedInterval{Float64}, "3.560?2u") ≛ DecoratedInterval(Interval(0x3.8f5c28f5c28f4p+0, 0x3.8fdf3b645a1ccp+0), com)
-    @test parse(DecoratedInterval{Float64}, "-10?") ≛ DecoratedInterval(Interval(-10.5, -9.5), com)
-    @test parse(DecoratedInterval{Float64}, "-10?e2") ≛ DecoratedInterval(Interval(-10.5e2, -9.5e2), com)
-    @test parse(DecoratedInterval{Float64}, "-10?u") ≛ DecoratedInterval(Interval(-10.0, -9.5), com)
-    @test parse(DecoratedInterval{Float64}, "-10?12") ≛ DecoratedInterval(Interval(-22.0, 2.0), com)
-    @test_broken parse(DecoratedInterval{Float64}, "-10??u") ≛ DecoratedInterval(Interval(-10.0, Inf), dac)
-    @test_broken parse(DecoratedInterval{Float64}, "-10??") ≛ DecoratedInterval(Interval(-Inf, Inf), dac)
-    @test parse(DecoratedInterval{Float64}, "3.56?1_def") ≛ DecoratedInterval(Interval(0x3.8ccccccccccccp+0, 0x3.91eb851eb8520p+0), def)
+
+@testset "parse to Interval{BigFloat}" begin
+    BI = Interval{BigFloat}
+    DBI = DecoratedInterval{BigFloat}
+
+    @test parse(BI, "[1, 2]") ≛ Interval(big(1), big(2))
+    @test parse(BI, "[1e-400, 2e400]") ≛ Interval(big"1e-400", big"2e400")
+
+    x = parse(DBI, "[1e-400, 1e400]")
+    _x = DecoratedInterval(big"1e-400", big"1e400", com)
+    @test x ≛ _x && decoration(x) == decoration(_x) && x isa DecoratedInterval{BigFloat}
+
 end

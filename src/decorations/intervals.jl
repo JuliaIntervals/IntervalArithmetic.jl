@@ -78,7 +78,7 @@ macro decorated(ex...)
             lo = :($x.lo)
             hi = :($x.hi)
         else
-            lo, hi = ex 
+            lo, hi = ex
         end
 
         return :(DecoratedInterval($lo, $hi))
