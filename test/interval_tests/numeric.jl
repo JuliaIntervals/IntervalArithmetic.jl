@@ -458,4 +458,6 @@ end
     @test mod(x, 2) == mod(x, 2.0) == 0..2
     @test mod(x, 2.5) == 0..2.5
     @test mod(x, 0.5) == 0..0.5
+
+    @test_throws AssertionError mod(x, -1)
 end
