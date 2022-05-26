@@ -378,8 +378,13 @@ end
 Calculate `x mod y` where `x` is an interval and `y` is a positive divisor.
 """
 function mod(x::Interval, y::Real)
-    @assert y > zero(y) "modulo is currently implemented only for a positive divisor."
+    @assert y != zero(y) """mod(x::Interval, y::Real) 
+is currently implemented only for a strictly positive or negative divisor y."""
     division = x / y
     fl = floor(division)
-    fl.lo < fl.hi ? Interval(zero(y), y) : y * (division - fl)
+    if !isthin(fl)
+        return y > zero(y) ? Interval(zero(y), y) : Interval(y, zero(y))
+    else
+        return y * (division - fl)
+    end
 end
