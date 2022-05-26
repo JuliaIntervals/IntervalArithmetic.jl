@@ -460,4 +460,7 @@ end
     @test mod(x, 0.5) == 0..0.5
 
     @test_throws AssertionError mod(x, -1)
+
+    # TODO - implement mod for two intervals
+    @test_throws TypeError mod(1..2, 1.4..1.5)
 end
