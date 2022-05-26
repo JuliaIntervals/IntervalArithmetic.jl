@@ -375,7 +375,7 @@ function nthroot(a::Interval{T}, n::Integer) where T
 end
 
 """
-Calculate `x mod y` where `x` is an interval and `y` is a positive divisor.
+Calculate `x::Interval mod y::Real`, limited by `y != 0`.
 """
 function mod(x::Interval, y::Real)
     @assert y != zero(y) """mod(x::Interval, y::Real) 
