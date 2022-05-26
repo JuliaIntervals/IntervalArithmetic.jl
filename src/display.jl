@@ -297,6 +297,7 @@ end
 
 
 function representation(a::DecoratedInterval{T}, format=nothing) where T
+    isnai(a) && return "[NaI]"
     if isnothing(format)
         format = display_params.format  # default
     end

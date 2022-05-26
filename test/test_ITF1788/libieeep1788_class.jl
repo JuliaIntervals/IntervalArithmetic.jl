@@ -352,7 +352,7 @@ end
 
     @test interval(DecoratedInterval(interval(-0x1.99999C0000000p+4,0x1.9999999999999P-4), com)) === Interval(-0x1.99999C0000000p+4,0x1.9999999999999P-4)
 
-    @test_broken interval(nai()) === emptyinterval()
+    @test interval(nai()) === emptyinterval()
 
 end
 
@@ -414,17 +414,17 @@ end
 
     @test DecoratedInterval(interval(-0x1.99999C0000000p+4,0x1.9999999999999P-4), com) === DecoratedInterval(Interval(-0x1.99999C0000000p+4,0x1.9999999999999P-4), com)
 
-    @test_broken DecoratedInterval(emptyinterval(), def) === DecoratedInterval(emptyinterval(), trv)
+    @test DecoratedInterval(emptyinterval(), def) === DecoratedInterval(emptyinterval(), trv)
 
-    @test_broken DecoratedInterval(emptyinterval(), dac) === DecoratedInterval(emptyinterval(), trv)
+    @test DecoratedInterval(emptyinterval(), dac) === DecoratedInterval(emptyinterval(), trv)
 
-    @test_broken DecoratedInterval(emptyinterval(), com) === DecoratedInterval(emptyinterval(), trv)
+    @test DecoratedInterval(emptyinterval(), com) === DecoratedInterval(emptyinterval(), trv)
 
-    @test_broken DecoratedInterval(interval(1.0,Inf), com) === DecoratedInterval(Interval(1.0,Inf), dac)
+    @test DecoratedInterval(interval(1.0,Inf), com) === DecoratedInterval(Interval(1.0,Inf), dac)
 
-    @test_broken DecoratedInterval(interval(-Inf,3.0), com) === DecoratedInterval(Interval(-Inf,3.0), dac)
+    @test DecoratedInterval(interval(-Inf,3.0), com) === DecoratedInterval(Interval(-Inf,3.0), dac)
 
-    @test_broken DecoratedInterval(interval(-Inf,Inf), com) === DecoratedInterval(Interval(-Inf,Inf), dac)
+    @test DecoratedInterval(interval(-Inf,Inf), com) === DecoratedInterval(Interval(-Inf,Inf), dac)
 
     @test isnai(DecoratedInterval(emptyinterval(), ill))
 

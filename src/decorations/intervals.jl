@@ -29,44 +29,51 @@ of a previously executed sequence of functions acting on an initial interval.
 struct DecoratedInterval{T}
     interval::Interval{T}
     decoration::DECORATION
+
+    function DecoratedInterval{T}(I::Interval, d::DECORATION) where T
+        dd = min(d, decoration(I))
+        dd == ill && return new{T}(Interval(T(NaN), T(NaN)), ill)
+        return new{T}(I, min(d, dd))
+    end
 end
+
+DecoratedInterval(I::Interval{T}, d::DECORATION) where T = DecoratedInterval{T}(I, d)
 
 DecoratedInterval(I::DecoratedInterval, dec::DECORATION) = DecoratedInterval(I.interval, dec)
 
-function DecoratedInterval(a::Real, b::Real, d::DECORATION)
-    is_valid_interval(a, b) || return DecoratedInterval(Interval(a,b), ill)
-    return DecoratedInterval(Interval(a,b), d)
-end
+DecoratedInterval(a::Real, b::Real, d::DECORATION) = DecoratedInterval(Interval(a, b), d)
 
 DecoratedInterval(a::Real, d::DECORATION) = DecoratedInterval(a, a, d)
 DecoratedInterval(a::Tuple, d::DECORATION) = DecoratedInterval(a..., d)
 
 function DecoratedInterval{T}(I::Interval) where {T}
     d = decoration(I)
-    d <= trv && return DecoratedInterval{T}(I, d)
-    d == ill && return DecoratedInterval{T}(nai(I), d)
     return DecoratedInterval{T}(I, d)
 end
 
-DecoratedInterval(I::Interval) = DecoratedInterval{default_bound()}(I)
+DecoratedInterval(I::Interval{T}) where T = DecoratedInterval{T}(I)
 
-function DecoratedInterval(a::Real, b::Real)
-    is_valid_interval(a, b) || return DecoratedInterval(Interval(a,b), ill)
-    return DecoratedInterval(Interval(a,b))
-end
+DecoratedInterval(a::Real, b::Real) = DecoratedInterval(Interval(a,b))
 
 DecoratedInterval(a::Real) = DecoratedInterval(a, a)
 DecoratedInterval(a::Tuple) = DecoratedInterval(a...)
 
-interval(x::DecoratedInterval) = x.interval
+function interval(x::DecoratedInterval{T}) where {T}
+    if isnai(x)
+        @warn "trying to access interval part of [NaI], returning empty interval"
+        return emptyinterval(T)
+    end
+    return x.interval
+end
+
 decoration(x::DecoratedInterval) = x.decoration
 
 # Automatic decorations for an Interval
 function decoration(I::Interval)
-    isnai(I) && return ill           # nai()
-    isempty(I) && return trv         # emptyinterval
-    isunbounded(I) && return dac     # unbounded
-    com                              # common
+    isempty(I) && return trv                         # emptyinterval
+    is_valid_interval(inf(I), sup(I)) || return ill  # invalid input
+    isunbounded(I) && return dac                     # unbounded
+    return com                                       # common
 end
 
 big(x::DecoratedInterval) = DecoratedInterval(big(interval(x)), decoration(x))

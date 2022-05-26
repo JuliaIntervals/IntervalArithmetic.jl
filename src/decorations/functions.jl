@@ -23,7 +23,7 @@ const bool_binary_functions = (
 )
 
 for f in bool_functions
-    @eval $(f)(xx::DecoratedInterval) = $(f)(interval(xx))
+    @eval $(f)(xx::DecoratedInterval) = $(f)(xx.interval)
 end
 
 for f in bool_binary_functions
@@ -42,7 +42,7 @@ scalar_functions = (
 )
 
 for f in scalar_functions
-    @eval $(f)(xx::DecoratedInterval{T}) where T = $f(interval(xx))
+    @eval $(f)(xx::DecoratedInterval{T}) where T = $f(xx.interval)
 end
 
 dist(xx::DecoratedInterval, yy::DecoratedInterval) = dist(interval(xx), interval(yy))

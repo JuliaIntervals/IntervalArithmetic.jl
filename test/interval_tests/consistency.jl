@@ -165,7 +165,7 @@ using Test
         @test !(nai(a) ≛ nai(a))
         @test nai(a) === nai(a)
         @test nai(Float64) === DecoratedInterval(NaN)
-        @test isnan(interval(nai(BigFloat)).lo)
+        @test isnan(inf(nai(BigFloat)))
         @test isnai(nai())
         @test !(isnai(a))
 

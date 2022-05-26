@@ -4,6 +4,9 @@ using Test
 let b
 
 @testset "DecoratedInterval tests" begin
+
+    @test DecoratedInterval(Interval(big(1), big(2))) isa DecoratedInterval{BigFloat}
+
     a = DecoratedInterval(@interval(1, 2), com)
     @test decoration(a) == com
 
@@ -30,6 +33,7 @@ let b
     @test isnai((DecoratedInterval(big(2), big(1))))
     @test isnai(@decorated(big(2), big(1)))
 
+    @test decoration(DecoratedInterval(DecoratedInterval(0, Inf), com)) == dac
     # Disabling the following tests, because Julia 0.5 has some strange behaviour here
     # @test_throws ArgumentError DecoratedInterval(BigInt(1), 1//10)
     # @test_throws ArgumentError @decorated(BigInt(1), 1//10)
@@ -63,6 +67,12 @@ let b
     @test isnai(@decorated(NaN, 3))
     @test isnai(@decorated(3, NaN))
     @test isnai(@decorated(NaN, NaN))
+
+    @test !isnai(Interval(1, 2))
+
+    @test decoration(Interval(3, 1)) == ill
+
+    @test decoration(DecoratedInterval(3, Inf, com)) == dac
 end
 
 end
