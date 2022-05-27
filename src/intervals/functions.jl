@@ -389,5 +389,5 @@ is currently implemented only for a strictly positive or negative divisor y."""
     end
 end
 
-mod(x::Interval, y::Interval) where T = throw(ArgumentError("mod not defined for interval as divisor `y`"))
-mod(x::Real, y::Interval) where T = throw(ArgumentError("mod not defined for interval as divisor `y`"))
+mod(x::Interval, y::Interval) = throw(ArgumentError("mod not defined for interval as divisor `y`"))
+mod(x::Real, y::Interval) = throw(ArgumentError("mod not defined for interval as divisor `y`"))
