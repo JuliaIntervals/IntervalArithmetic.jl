@@ -375,7 +375,7 @@ function nthroot(a::Interval{T}, n::Integer) where T
 end
 
 """
-Calculate `x::Interval mod y::Real`, limited by `y != 0`.
+Calculate `x::Interval mod y::Real` where y != zero(y) and y is not inteval`.
 """
 function mod(x::Interval, y::Real)
     @assert y != zero(y) """mod(x::Interval, y::Real) 
@@ -389,4 +389,5 @@ is currently implemented only for a strictly positive or negative divisor y."""
     end
 end
 
-mod(x:T, y::Interval) where T = throw(ArgumentError("mod not defined for interval as divisor `y`"))
+mod(x::Interval, y::Interval) where T = throw(ArgumentError("mod not defined for interval as divisor `y`"))
+mod(x::Real, y::Interval) where T = throw(ArgumentError("mod not defined for interval as divisor `y`"))
