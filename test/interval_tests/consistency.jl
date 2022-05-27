@@ -163,6 +163,14 @@ setprecision(Interval, Float64)
 
         @test union(1..2, 3..4) == Interval(1, 4)
         @test union(Interval(1//3, 3//4), Interval(3, 4)) == @interval(1/3, 4)
+
+        @test hull(1, 2..3) == Interval(1, 3)
+        @test hull(1..2, 3) == Interval(1, 3)
+
+        @test hull(1..2, 3, 4..5) == Interval(1, 5)
+        @test hull(1, 2..3, 4, 5) == Interval(1, 5)
+        @test hull(1..2, 3, 4..5, 6) == Interval(1, 6)
+        @test hull(1, 2..3, 4, 5..6) == Interval(1, 6)
     end
 
     @testset "Special interval tests" begin

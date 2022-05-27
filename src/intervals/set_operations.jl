@@ -120,6 +120,10 @@ Returns the "interval hull" of the intervals `a` and `b`, considered as
 all of `a` and `b`.
 """
 hull(a::Interval, b::Interval) = Interval(min(a.lo, b.lo), max(a.hi, b.hi))
+
+# Prevent using fallback from Base
+hull(a::Real, b::Interval) = hull(Interval(a), b)
+hull(a::Interval, b::Real) = hull(a, Interval(b))
 #
 # hull{T,S}(a::Interval{T}, b::Interval{S}) = hull(promote(a, b)...)
 hull(a::Complex{<:Interval},b::Complex{<:Interval}) =
