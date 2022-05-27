@@ -383,3 +383,5 @@ function mod(x::Interval, y::Real)
     fl = floor(division)
     fl.lo < fl.hi ? Interval(zero(y), y) : y * (division - fl)
 end
+
+mod(x:T, y::Interval) where T = throw(ArgumentError("mod not defined for interval as divisor `y`"))
