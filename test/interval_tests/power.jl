@@ -5,9 +5,7 @@ using Test
 using IntervalArithmetic
 
 #Preamble
-setprecision(53)
-setprecision(Interval, Float64)
-setrounding(Interval, :tight)
+
 # Set full format, and show decorations
 @format full
 @testset "rational_power_test" begin
@@ -57,4 +55,5 @@ setrounding(Interval, :tight)
         @test ^(-8 .. -2 , 3//2) == ∅
         @test ^(-8 .. -2 , -2//3) == ∅
         @test ^(-8 .. -2 , -3//2) == ∅
+        @test ^(-1..1, 1000000000000000000000000000000000000000//1) == Interval(0, 1)
 end

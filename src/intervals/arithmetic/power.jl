@@ -155,7 +155,7 @@ function ^(a::F, x::Rational) where {F<:Interval}
         end
 
         if a.lo < 0 && a.hi ≥ 0
-            isinteger(x) && return a ^ Int64(x)
+            isinteger(x) && return a ^ BigInt(x)
             a = a ∩ F(0, Inf)
             a = @biginterval(a)
             ui = convert(Culong, q)
@@ -164,12 +164,12 @@ function ^(a::F, x::Rational) where {F<:Interval}
             ccall((:mpfr_rootn_ui, :libmpfr) , Int32 , (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode) , low , a.lo , ui, MPFRRoundDown)
             ccall((:mpfr_rootn_ui, :libmpfr) , Int32 , (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode) , high , a.hi , ui, MPFRRoundUp)
             b = interval(low, high)
-            b = convert(Interval{T}, b)
+            b = convert(F, b)
             return b^p
         end
 
         if a.hi < 0
-            isinteger(x) && return a ^ Int64(x)
+            isinteger(x) && return a ^ BigInt(x)
             return emptyinterval(a)
         end
 
