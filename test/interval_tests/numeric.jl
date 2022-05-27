@@ -446,18 +446,31 @@ end
     @test mod(x, 2) == mod(x, 2.0) ⪆ x
     @test mod(x, 2.5) ⪆ x
     @test mod(x, 0.5) == 0..0.5
+    @test mod(x, -1) == mod(x, -1.0) == -1..0
+    @test mod(x, -2) == mod(x, -2.0) ⪆ -2+x
+    @test mod(x, -2.5) ⪆ -2.5+x
+    @test mod(x, -0.5) == -0.5..0
 
     x = (-1+r) .. -r
     @test mod(x, 1) == mod(x, 1.0) ⪆ 1+x
     @test mod(x, 2) == mod(x, 2.0) ⪆ 2+x
     @test mod(x, 2.5) ⪆ 2.5+x
     @test mod(x, 0.5) == 0..0.5
+    @test mod(x, -1) == mod(x, -1.0) ⪆ x
+    @test mod(x, -2) == mod(x, -2.0) ⪆ x
+    @test mod(x, -2.5) ⪆ x
+    @test mod(x, -0.5) == -0.5..0
 
     x = -r .. 1-r
     @test mod(x, 1) == mod(x, 1.0) == 0..1
     @test mod(x, 2) == mod(x, 2.0) == 0..2
     @test mod(x, 2.5) == 0..2.5
     @test mod(x, 0.5) == 0..0.5
+    @test mod(x, -1) == mod(x, -1.0) == -1..0
+    @test mod(x, -2) == mod(x, -2.0) == -2..0
+    @test mod(x, -2.5) == -2.5..0
+    @test mod(x, -0.5) == -0.5..0
 
-    @test_throws AssertionError mod(x, -1)
+    # TODO - implement mod for two intervals
+    @test_throws TypeError mod(1..2, 1.4..1.5)
 end
