@@ -488,7 +488,7 @@ function atan(y::Interval{BigFloat}, x::Interval{BigFloat})
 
     ylo, yhi = bounds(y)
     xlo, xhi = bounds(x)
-
+    z = zero(T)
 
     # Prevent nonsense results when y has a signed zero:
     if iszero(ylo)
@@ -502,42 +502,46 @@ function atan(y::Interval{BigFloat}, x::Interval{BigFloat})
     # Check cases based on x
     if isthinzero(x)
         isthinzero(y) && return emptyinterval(F)
-        ylo ≥ zero(T) && return half_pi(F)
-        yhi ≤ zero(T) && return -half_pi(F)
+        ylo ≥ z && return half_pi(F)
+        yhi ≤ z && return -half_pi(F)
         return half_range_atan(F)
 
-    elseif xlo > zero(T)
+    elseif xlo > z
         isthinzero(y) && return y
-        ylo ≥ zero(T) &&
+        ylo ≥ z &&
             return @round(F, atan(ylo, xhi), atan(yhi, xlo)) # refinement lo bound
-        yhi ≤ zero(T) &&
+        yhi ≤ z &&
             return @round(F, atan(ylo, xlo), atan(yhi, xhi))
         return @round(F, atan(ylo, xlo), atan(yhi, xlo))
 
-    elseif xhi < zero(T)
+    elseif xhi < z
         isthinzero(y) && return F(π)
-        ylo ≥ zero(T) &&
+        ylo ≥ z &&
             return @round(F, atan(yhi, xhi), atan(ylo, xlo))
-        yhi < zero(T) &&
+        yhi < z &&
             return @round(F, atan(yhi, xlo), atan(ylo, xhi))
         return range_atan(F)
 
-    else # zero(T) ∈ x
+    else # z ∈ x
         if iszero(xlo)
             isthinzero(y) && return y
-            ylo ≥ zero(T) && return @round(F, atan(ylo, xhi), half_range_atan(F).hi)
-            yhi ≤ zero(T) && return @round(F, half_range_atan(F).lo, atan(yhi, xhi))
+            ylo ≥ z &&
+                return F(atan(ylo, xhi, RoundDown), sup(half_range_atan(F)))
+            yhi ≤ z &&
+                return F(inf(half_range_atan(F)), atan(yhi, xhi, RoundUp))
             return half_range_atan(F)
 
         elseif iszero(xhi)
             isthinzero(y) && return F(π)
-            ylo ≥ zero(T) && return @round(F, half_pi(F).lo, atan(ylo, xlo))
-            yhi < zero(T) && return @round(F, atan(yhi, xlo), -(half_pi(F).lo))
+            ylo ≥ z &&
+                return F(inf(half_pi(F)), atan(ylo, xlo, RoundUp))
+            yhi < z &&
+                return F(atan(yhi, xlo, RoundDown), inf(-half_pi(F)))
             return range_atan(F)
         else
-            ylo ≥ zero(T) &&
+            ylo ≥ z &&
                 return @round(F, atan(ylo, xhi), atan(ylo, xlo))
-            yhi < zero(T) &&
+            yhi < z &&
                 return @round(F, atan(yhi, xlo), atan(yhi, xhi))
             return range_atan(F)
         end
