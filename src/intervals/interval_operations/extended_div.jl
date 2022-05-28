@@ -12,16 +12,22 @@ Two-output division.
 Implement the `mulRevToPair` function of the IEEE Std 1788-2015 (section 10.5.5).
 """
 function extended_div(a::F, b::F) where {T, F<:Interval{T}}
-    if 0 < b.hi && 0 > b.lo && 0 ∉ a
-        if a.hi < 0
-            return (F(T(-Inf), a.hi / b.hi), F(a.hi / b.lo, T(Inf)))
+    alo, ahi = bounds(a)
+    blo, bhi = bounds(b)
+    z = zero(T)
+    if 0 < bhi && 0 > blo && 0 ∉ a
 
-        elseif a.lo > 0
-            return (F(T(-Inf), a.lo / b.lo), F(a.lo / b.hi, T(Inf)))
-
+        if ahi < 0
+            return (a / Interval(z, bhi), a / Interval(blo,z))
+            # return (F(T(-Inf), ahi / bhi), F(ahi / blo, T(Inf)))
+        elseif alo > 0
+            return (a / Interval(blo,z), a / Interval(z, bhi))
+            # return (F(T(-Inf), alo / blo), F(alo / bhi, T(Inf)))
         end
+
     elseif 0 ∈ a && 0 ∈ b
         return (entireinterval(F), emptyinterval(F))
+
     else
         return (a / b, emptyinterval(F))
     end
