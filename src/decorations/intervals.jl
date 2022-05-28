@@ -33,7 +33,7 @@ struct DecoratedInterval{T}
     function DecoratedInterval{T}(I::Interval, d::DECORATION) where T
         dd = min(d, decoration(I))
         dd == ill && return new{T}(Interval(T(NaN), T(NaN)), ill)
-        return new{T}(I, min(d, dd))
+        return new{T}(I, dd)
     end
 end
 
