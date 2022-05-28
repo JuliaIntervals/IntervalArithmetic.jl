@@ -20,8 +20,10 @@ function draw(box_list::Vector{T}, color="grey", alpha=0.5) where T<:IntervalBox
     patch_list = []
     for box in box_list
         x, y = box
+        xlo, xhi = bounds(x)
+        ylo, yhi = bounds(y)
         push!(patch_list,
-            make_rectangle(x.lo, y.lo, x.hi-x.lo, y.hi-y.lo, color, alpha))
+            make_rectangle(xlo, ylo, xhi-xlo, yhi-ylo, color, alpha))
     end
 
     ax = gca()

@@ -45,17 +45,17 @@ function ^(a::F, n::Integer) where {F<:Interval{BigFloat}}
     if isodd(n) # odd power
         isentire(a) && return a
         if n > 0
-            iszero(a.lo) && return @round(F, 0, a.hi^n)
-            iszero(a.hi) && return @round(F, a.lo^n, 0)
-            return @round(F, a.lo^n, a.hi^n)
+            iszero(inf(a)) && return @round(F, 0, sup(a)^n)
+            iszero(sup(a)) && return @round(F, inf(a)^n, 0)
+            return @round(F, inf(a)^n, sup(a)^n)
         else
-            if a.lo ≥ 0
-                iszero(a.lo) && return @round(F, a.hi^n, Inf)
-                return @round(F, a.hi^n, a.lo^n)
+            if inf(a) ≥ 0
+                iszero(inf(a)) && return @round(F, sup(a)^n, Inf)
+                return @round(F, sup(a)^n, inf(a)^n)
 
-            elseif a.hi ≤ 0
-                iszero(a.hi) && return @round(F, -Inf, a.lo^n)
-                return @round(F, a.hi^n, a.lo^n)
+            elseif sup(a) ≤ 0
+                iszero(sup(a)) && return @round(F, -Inf, inf(a)^n)
+                return @round(F, sup(a)^n, inf(a)^n)
             else
                 return entireinterval(a)
             end
@@ -63,19 +63,19 @@ function ^(a::F, n::Integer) where {F<:Interval{BigFloat}}
 
     else # even power
         if n > 0
-            if a.lo ≥ 0
-                return @round(F, a.lo^n, a.hi^n)
-            elseif a.hi ≤ 0
-                return @round(F, a.hi^n, a.lo^n)
+            if inf(a) ≥ 0
+                return @round(F, inf(a)^n, sup(a)^n)
+            elseif sup(a) ≤ 0
+                return @round(F, sup(a)^n, inf(a)^n)
             else
                 return @round(F, mig(a)^n, mag(a)^n)
             end
 
         else
-            if a.lo ≥ 0
-                return @round(F, a.hi^n, a.lo^n)
-            elseif a.hi ≤ 0
-                return @round(F, a.lo^n, a.hi^n)
+            if inf(a) ≥ 0
+                return @round(F, sup(a)^n, inf(a)^n)
+            elseif sup(a) ≤ 0
+                return @round(F, inf(a)^n, sup(a)^n)
             else
                 return @round(F, mag(a)^n, mig(a)^n)
             end
@@ -100,17 +100,17 @@ function ^(a::F, x::BigFloat) where {F<:Interval{BigFloat}}
 
     xx = F(x)
 
-    lo = @round(F, a.lo^xx.lo, a.lo^xx.lo)
-    lo = (lo.lo == Inf) ? F(prevfloat(Inf), Inf) : lo
+    lo = @round(F, inf(a)^inf(xx), inf(a)^inf(xx))
+    lo = (inf(lo) == Inf) ? F(prevfloat(Inf), Inf) : lo
 
-    lo1 = @round(F, a.lo^xx.hi, a.lo^xx.hi)
-    lo1 = (lo1.lo == Inf) ? F(prevfloat(Inf), Inf) : lo1
+    lo1 = @round(F, inf(a)^sup(xx), inf(a)^sup(xx))
+    lo1 = (inf(lo1) == Inf) ? F(prevfloat(Inf), Inf) : lo1
 
-    hi = @round(F, a.hi^xx.lo, a.hi^xx.lo)
-    hi = (hi.lo == Inf) ? F(prevfloat(Inf), Inf) : hi
+    hi = @round(F, sup(a)^inf(xx), sup(a)^inf(xx))
+    hi = (inf(hi) == Inf) ? F(prevfloat(Inf), Inf) : hi
 
-    hi1 = @round(F, a.hi^xx.hi, a.hi^xx.hi)
-    hi1 = (hi1.lo == Inf) ? F(prevfloat(Inf), Inf) : hi1
+    hi1 = @round(F, sup(a)^sup(xx), sup(a)^sup(xx))
+    hi1 = (inf(hi1) == Inf) ? F(prevfloat(Inf), Inf) : hi1
 
     lo = hull(lo, lo1)
     hi = hull(hi, hi1)
@@ -119,7 +119,7 @@ function ^(a::F, x::BigFloat) where {F<:Interval{BigFloat}}
 end
 
 function ^(a::Interval{Rational{T}}, x::AbstractFloat) where {T<:Integer}
-    a = Interval{Float64}(a.lo.num/a.lo.den, a.hi.num/a.hi.den)
+    a = Interval{Float64}(inf(a).num/inf(a).den, sup(a).num/sup(a).den)
     return F(a^x)
 end
 
@@ -188,12 +188,12 @@ function ^(a::F, x::Interval) where {F<:Interval{BigFloat}}
 
     (isempty(x) || isempty(a)) && return emptyinterval(F)
 
-    lo1 = a^x.lo
-    lo2 = a^x.hi
+    lo1 = a^inf(x)
+    lo2 = a^sup(x)
     lo1 = hull(lo1, lo2)
 
-    hi1 = a^x.lo
-    hi2 = a^x.hi
+    hi1 = a^inf(x)
+    hi2 = a^sup(x)
     hi1 = hull(hi1, hi2)
 
     return hull(lo1, hi1)
@@ -229,20 +229,20 @@ function pow(x::F, n::Integer) where {F<:Interval}
                     Base.power_by_squaring(F(mag(x)), n)
             )
     else
-      return hull( Base.power_by_squaring(F(x.lo), n),
-                    Base.power_by_squaring(F(x.hi), n) )
+      return hull( Base.power_by_squaring(F(inf(x)), n),
+                    Base.power_by_squaring(F(sup(x)), n) )
     end
 end
 
 function pow(x::Interval, y::Interval)  # fast real power, including for y an Interval
     isempty(x) && return x
-    isthininteger(y) && return pow(x, Int(y.lo))
+    isthininteger(y) && return pow(x, Int(inf(y)))
     return exp(y * log(x))
 end
 
 function pow(x::Interval, y)  # fast real power, including for y an Interval
     isempty(x) && return x
-    isinteger(y) && return pow(x, Int(y.lo))
+    isinteger(y) && return pow(x, Int(inf(y)))
     return exp(y * log(x))
 end
 
@@ -250,7 +250,7 @@ for f in (:exp, :expm1)
     @eval begin
         function ($f)(a::F) where {F<:Interval}
             isempty(a) && return a
-            return @round( F, ($f)(a.lo), ($f)(a.hi) )
+            return @round( F, ($f)(inf(a)), ($f)(sup(a)) )
         end
     end
 end
@@ -267,7 +267,7 @@ for f in (:exp2, :exp10, :cbrt)
 
     @eval function ($f)(a::F) where {F<:Interval{BigFloat}}
             isempty(a) && return a
-            return @round( F, ($f)(a.lo), ($f)(a.hi) )
+            return @round( F, ($f)(inf(a)), ($f)(sup(a)) )
         end
 end
 
@@ -276,9 +276,9 @@ for f in (:log, :log2, :log10)
             domain = F(0, Inf)
             a = a ∩ domain
 
-            (isempty(a) || a.hi ≤ zero(T)) && return emptyinterval(F)
+            (isempty(a) || sup(a) ≤ zero(T)) && return emptyinterval(F)
 
-            return @round( F, ($f)(a.lo), ($f)(a.hi) )
+            return @round( F, ($f)(inf(a)), ($f)(sup(a)) )
         end
 end
 
@@ -286,9 +286,9 @@ function log1p(a::F) where {T, F<:Interval{T}}
     domain = Interval{T}(-1, Inf)
     a = a ∩ domain
 
-    (isempty(a) || a.hi ≤ -one(T)) && return emptyinterval(a)
+    (isempty(a) || sup(a) ≤ -one(T)) && return emptyinterval(a)
 
-    @round( F, log1p(a.lo), log1p(a.hi) )
+    @round( F, log1p(inf(a)), log1p(sup(a)) )
 end
 
 """

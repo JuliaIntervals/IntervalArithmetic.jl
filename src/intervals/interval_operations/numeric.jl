@@ -37,7 +37,7 @@ sup(a::Real) = a
 
 Bounds of an interval as a tuple.
 """
-bounds(a::Interval) = (a.lo, a.hi)
+bounds(a::Interval) = (a.lo, sup(a)) # Note that bounds does nothing with the sign of zero
 
 """
     mid(a::Interval)
@@ -50,19 +50,19 @@ function mid(a::F) where {T, F<:Interval{T}}
     isempty(a) && return convert(T, NaN)
     isentire(a) && return zero(T)
 
-    a.lo == -∞ && return nextfloat(a.lo)  # IEEE-1788 section 12.12.8
-    a.hi == +∞ && return prevfloat(a.hi)  # IEEE-1788 section 12.12.8
+    inf(a) == -∞ && return nextfloat(inf(a))  # IEEE-1788 section 12.12.8
+    sup(a) == +∞ && return prevfloat(sup(a))  # IEEE-1788 section 12.12.8
 
-    midpoint = (a.lo + a.hi) / 2
+    midpoint = (inf(a) + sup(a)) / 2
     isfinite(midpoint) && return _normalisezero(midpoint)
-    #= Fallback in case of overflow: a.hi + a.lo == +∞ or a.hi + a.lo == -∞.
+    #= Fallback in case of overflow: sup(a) + inf(a) == +∞ or sup(a) + inf(a) == -∞.
        This case can not be the default one as it does not pass several
        IEEE1788-2015 tests for small floats.
     =#
-    return _normalisezero(a.lo / 2 + a.hi / 2)
+    return _normalisezero(inf(a) / 2 + sup(a) / 2)
 end
 
-mid(a::F) where {T, R<:Rational{T}, F<:Interval{R}} = (1//2) * (a.lo + a.hi)
+mid(a::F) where {T, R<:Rational{T}, F<:Interval{R}} = (1//2) * (inf(a) + sup(a))
 
 mid(a::Real) = a
 
@@ -80,8 +80,8 @@ intervals.
 function scaled_mid(a::F, α) where {T, F<:Interval{T}}
     isempty(a) && return convert(T, NaN)
 
-    lo = (a.lo == -∞ ? nextfloat(a.lo) : a.lo)
-    hi = (a.hi == +∞ ? prevfloat(a.hi) : a.hi)
+    lo = (inf(a) == -∞ ? nextfloat(inf(a)) : inf(a))
+    hi = (sup(a) == +∞ ? prevfloat(sup(a)) : sup(a))
 
     β = convert(T, α)
 
@@ -103,7 +103,7 @@ Implement the `wid` function of the IEEE Std 1788-2015 (Table 9.2).
 """
 function diam(a::F) where {T, F<:Interval{T}}
     isempty(a) && return convert(T, NaN)
-    return -(a.hi, a.lo, RoundUp)  # IEEE1788 section 12.12.8
+    return -(sup(a), inf(a), RoundUp)  # IEEE1788 section 12.12.8
 end
 
 diam(a::Real) = zero(a)
@@ -134,7 +134,7 @@ flavor.
 function midpoint_radius(a::F) where {T, F<:Interval{T}}
     isempty(a) && return convert(T, NaN), convert(T, NaN)
     m = mid(a)
-    return m, max(m - a.lo, a.hi - m)
+    return m, max(m - inf(a), sup(a) - m)
 end
 
 
@@ -147,7 +147,7 @@ Implement the `mag` function of the IEEE Std 1788-2015 (Table 9.2).
 """
 function mag(a::F) where {T, F<:Interval{T}}
     isempty(a) && return convert(T, NaN)
-    return max( abs(a.lo), abs(a.hi) )
+    return max( abs(inf(a)), abs(sup(a)) )
 end
 
 """
@@ -160,5 +160,5 @@ Implement the `mig` function of the IEEE Std 1788-2015 (Table 9.2).
 function mig(a::F) where {T, F<:Interval{T}}
     isempty(a) && return convert(T, NaN)
     contains_zero(a) && return zero(T)
-    return min( abs(a.lo), abs(a.hi) )
+    return min( abs(inf(a)), abs(sup(a)) )
 end

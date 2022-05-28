@@ -101,7 +101,7 @@ end
 
 #= Interval =#
 Interval{T}(x::Interval{T}) where T = x
-Interval{T}(x::Interval) where T = Interval{T}(x.lo, x.hi)
+Interval{T}(x::Interval) where T = Interval{T}(inf(x), sup(x))
 
 #= Complex =#
 Interval(x::Complex) = Interval(real(x)) + im*Interval(imag(x))
@@ -180,7 +180,7 @@ Despite using the center-radius notation for its creation, the interval is
 still represented by its bounds internally.
 """
 a ± b = checked_interval(-(a, b, RoundDown), +(a, b, RoundUp))
-±(a::Interval, b) = Interval(-(a.lo, b, RoundDown), +(a.hi, b, RoundUp))
+±(a::Interval, b) = Interval(-(inf(a), b, RoundDown), +(sup(a), b, RoundUp))
 
 """
     atomic(::Type{<:Interval}, x)

@@ -15,9 +15,10 @@ julia> signbit(@interval(-4,5))
 [0, 1]
 ```
 """
-function signbit(a::Interval) 
+function signbit(a::Interval)
     isempty(a) && return emptyinterval(a)
-    return Interval(signbit(a.hi), signbit(a.lo))
+    alo, ahi = bounds(a)
+    return interval(signbit(ahi), signbit(alo))
 end
 
 for Typ in (:Interval, :Real, :Float64, :Float32, :Signed, :Unsigned)

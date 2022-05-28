@@ -16,7 +16,6 @@ function extended_div(a::F, b::F) where {T, F<:Interval{T}}
     blo, bhi = bounds(b)
     z = zero(T)
     if 0 < bhi && 0 > blo && 0 ∉ a
-
         if ahi < 0
             return (a / Interval(z, bhi), a / Interval(blo,z))
             # return (F(T(-Inf), ahi / bhi), F(ahi / blo, T(Inf)))

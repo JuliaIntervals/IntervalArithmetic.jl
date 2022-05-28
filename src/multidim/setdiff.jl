@@ -11,10 +11,13 @@ function _setdiff(x::Interval{T}, y::Interval{T}) where T
     isempty(intersection) && return (x, emptyinterval(T))
     intersection ≛ x && return (emptyinterval(T), emptyinterval(T))  # x is subset of y; setdiff is empty
 
-    x.lo == intersection.lo && return (Interval(intersection.hi, x.hi), emptyinterval(T))
-    x.hi == intersection.hi && return (Interval(x.lo, intersection.lo), emptyinterval(T))
+    xlo, xhi = bounds(x)
+    ylo, yhi = bounds(y)
+    intersectionlo, intersectionhi = bounds(intersection)
+    xlo == intersectionlo && return (Interval(intersectionhi, xhi), emptyinterval(T))
+    xhi == intersectionhi && return (Interval(xlo, intersectionlo), emptyinterval(T))
 
-    return (Interval(x.lo, y.lo), Interval(y.hi, x.hi))
+    return (Interval(xlo, ylo), Interval(yhi, xhi))
 end
 
 

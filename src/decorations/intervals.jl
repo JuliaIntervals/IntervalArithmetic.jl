@@ -75,8 +75,8 @@ macro decorated(ex...)
     if !(ex[1] isa String)
         if length(ex) == 1
             x = :(@interval($(esc(ex[1]))))
-            lo = :($x.lo)
-            hi = :($x.hi)
+            lo = :(inf($x))
+            hi = :(sup($x))
         else
             lo, hi = ex
         end

@@ -44,8 +44,8 @@ function overlap(a::Interval, b::Interval)
     isempty(b) && return Overlap.second_empty
 
     # States with both intervals nonempty
-    strictprecedes(a, b) && return Overlap.before
-    !isthin(a) && !isthin(b) && sup(a) == inf(b) && return Overlap.meets
+    sup(a) < inf(b) && return Overlap.before
+    inf(a) != sup(a) && inf(b) != sup(b) && sup(a) == inf(b) && return Overlap.meets
     inf(a) < inf(b) && sup(a) < sup(b) && sup(a) > inf(b) && return Overlap.overlaps
     inf(a) == inf(b) && sup(a) < sup(b) && return Overlap.starts
     inf(b) < inf(a) && sup(a) < sup(b) && return Overlap.contained_by
@@ -55,6 +55,6 @@ function overlap(a::Interval, b::Interval)
     inf(b) > inf(a) && sup(a) > sup(b) && return Overlap.contains
     inf(a) == inf(b) && sup(a) > sup(b) && return Overlap.started_by
     inf(a) > inf(b) && sup(a) > sup(b) && inf(a) < sup(b) && return Overlap.overlapped_by
-    !isthin(a) && !isthin(b) && inf(a) == sup(b) && return Overlap.met_by
-    strictprecedes(b, a) && return Overlap.after
+    inf(a) != sup(a) && inf(b) != sup(b) && inf(a) == sup(b) && return Overlap.met_by
+    sup(b) < sup(a) && return Overlap.after
 end

@@ -107,7 +107,7 @@ function ^(xx::DecoratedInterval{T}, q::AbstractFloat) where T
     x = interval(xx)
     r = x^q
     d = min(decoration(xx), decoration(r))
-    if x.lo > zero(T) || (x.lo ≥ zero(T) && q > zero(T)) ||
+    if inf(x) > zero(T) || (inf(x) ≥ zero(T) && q > zero(T)) ||
             (isinteger(q) && q > zero(q)) || (isinteger(q) && zero(T) ∉ x)
         return DecoratedInterval(r, d)
     end
@@ -118,7 +118,7 @@ function ^(xx::DecoratedInterval{T}, q::Rational{S}) where {T, S<:Integer}
     x = interval(xx)
     r = x^q
     d = min(decoration(xx), decoration(r))
-    if x.lo > zero(T) || (x.lo ≥ zero(T) && q > zero(T)) ||
+    if inf(x) > zero(T) || (inf(x) ≥ zero(T) && q > zero(T)) ||
             (isinteger(q) && q > zero(q)) || (isinteger(q) && zero(T) ∉ x)
         return DecoratedInterval(r, d)
     end
@@ -130,9 +130,9 @@ function ^(xx::DecoratedInterval{T}, qq::DecoratedInterval{S}) where {T,S}
     q = interval(qq)
     r = x^q
     d = min(decoration(xx), decoration(qq), decoration(r))
-    if x.lo > zero(T) || (x.lo ≥ zero(T) && q.lo > zero(T)) ||
-            (isthin(q) && isinteger(q.lo) && q.lo > zero(q)) ||
-            (isthin(q) && isinteger(q.lo) && zero(T) ∉ x)
+    if inf(x) > zero(T) || (inf(x) ≥ zero(T) && inf(q) > zero(T)) ||
+            (isthin(q) && isinteger(inf(q)) && inf(q) > zero(q)) ||
+            (isthin(q) && isinteger(inf(q)) && zero(T) ∉ x)
         return DecoratedInterval(r, d)
     end
     DecoratedInterval(r, trv)
@@ -152,7 +152,7 @@ function ceil(xx::DecoratedInterval{T}) where T
     x = interval(xx)
     r = ceil(x)
     d = decoration(xx)
-    if isinteger(x.hi)
+    if isinteger(sup(x))
         d = min(d, dac)
     end
     isthin(r) && return DecoratedInterval(r, d)
@@ -162,7 +162,7 @@ function floor(xx::DecoratedInterval{T}) where T
     x = interval(xx)
     r = floor(x)
     d = decoration(xx)
-    if isinteger(x.lo)
+    if isinteger(inf(x))
         d = min(d, dac)
     end
     isthin(r) && return DecoratedInterval(r, d)
@@ -172,7 +172,7 @@ function trunc(xx::DecoratedInterval{T}) where T
     x = interval(xx)
     r = trunc(x)
     d = decoration(xx)
-    if (isinteger(x.lo) && x.lo < zero(T)) || (isinteger(x.hi) && x.hi > zero(T))
+    if (isinteger(inf(x)) && inf(x) < zero(T)) || (isinteger(sup(x)) && sup(x) > zero(T))
         d = min(d, dac)
     end
     isthin(r) && return DecoratedInterval(r, d)
@@ -183,7 +183,7 @@ function round(xx::DecoratedInterval, ::RoundingMode{:Nearest})
     x = interval(xx)
     r = round(x)
     d = decoration(xx)
-    if isinteger(2*x.lo) || isinteger(2*x.hi)
+    if isinteger(2*inf(x)) || isinteger(2*sup(x))
         d = min(d, dac)
     end
     isthin(r) && return DecoratedInterval(r, d)
@@ -193,7 +193,7 @@ function round(xx::DecoratedInterval, ::RoundingMode{:NearestTiesAway})
     x = interval(xx)
     r = round(x,RoundNearestTiesAway)
     d = decoration(xx)
-    if isinteger(2*x.lo) || isinteger(2*x.hi)
+    if isinteger(2*inf(x)) || isinteger(2*sup(x))
         d = min(d, dac)
     end
     isthin(r) && return DecoratedInterval(r, d)
@@ -309,8 +309,8 @@ function atan(yy::DecoratedInterval{T}, xx::DecoratedInterval{T}) where T
     # Check cases when decoration is trv and decays (from com or dac)
     if zero(T) ∈ y
         zero(T) ∈ x && return DecoratedInterval(r, trv)
-        if x.hi < zero(T)
-            y.lo < zero(T) && return DecoratedInterval(r, min(d, def))
+        if sup(x) < zero(T)
+            inf(y) < zero(T) && return DecoratedInterval(r, min(d, def))
             return DecoratedInterval(r, min(d, dac))
         end
     end
