@@ -10,7 +10,7 @@
 
 # Write explicitly like this to avoid ambiguity warnings:
 for T in (:Integer, :Float64, :BigFloat, :Interval)
-    @eval ^(a::Interval{Float64}, x::$T) = Interval{Float64}((@biginterval(a))^x)
+    @eval ^(a::Interval{Float64}, x::$T) = Interval{Float64}((bigequiv(a))^x)
 end
 
 
@@ -29,11 +29,11 @@ Base.literal_pow(::typeof(^), x::Interval{T}, ::Val{p}) where {T,p} = x^p
 
 Implement the `pow` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-^(a::F, b::F) where {F<:Interval} = F((@biginterval(a))^b)
+^(a::F, b::F) where {F<:Interval} = F((bigequiv(a))^b)
 ^(a::F, x::AbstractFloat) where {F<:Interval{BigFloat}} = a^big(x)
 
 for T in (:AbstractFloat, :Integer)
-    @eval ^(a::F, x::$T) where {F<:Interval} = F((@biginterval(a))^x)
+    @eval ^(a::F, x::$T) where {F<:Interval} = F((bigequiv(a))^x)
 end
 
 function ^(a::F, n::Integer) where {F<:Interval{BigFloat}}
@@ -131,7 +131,7 @@ function ^(a::F, x::Rational{R}) where {F<:Interval, R<:Integer}
     isempty(a) && return emptyinterval(a)
     iszero(x) && return one(a)
     # x < 0 && return inv(a^(-x))
-    x < 0 && return F( inv( (@biginterval(a))^(-x) ) )
+    x < 0 && return F( inv( (bigequiv(a))^(-x) ) )
 
     if isthinzero(a)
         x > zero(x) && return zero(a)
@@ -152,7 +152,7 @@ function ^(a::F, x::Rational{R}) where {F<:Interval, R<:Integer}
         a = a ∩ F(0, Inf)
     end
 
-    b = nthroot( @biginterval(a), q)
+    b = nthroot( bigequiv(a), q)
 
     p == 1 && return F(b)
 
@@ -301,7 +301,7 @@ function nthroot(a::F, n::Integer) where {T, F<:Interval{T}}
     n == 1 && return a
     n == 2 && return sqrt(a)
 
-    abig = @biginterval(a)
+    abig = bigequiv(a)
     if n < 0
         issubnormal(mag(a)) && return inv(nthroot(a, -n))
         return F( inv(nthroot(abig, -n)) )
