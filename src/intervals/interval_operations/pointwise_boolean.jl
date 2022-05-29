@@ -74,7 +74,7 @@ const pointwise_bool_functions = (
 
 ## :ieee1788
 # See Table 10.3
-==(::PointwisePolitic{:ieee1788}, x::Interval, y::Interval) = x.lo == y.lo && x.hi == y.hi
+==(::PointwisePolitic{:ieee1788}, x::Interval, y::Interval) = inf(x) == inf(y) && sup(x) == sup(y)
 
 <(::PointwisePolitic{:ieee1788}, x::Interval, y::Interval) = isstrictless(x, y)
 
@@ -91,13 +91,13 @@ isinf(::PointwisePolitic{:ieee1788}, x::Interval) = contains_infinity(x) && isth
 isfinite(::PointwisePolitic{:ieee1788}, x::Interval) = !isinf(PointwisePolitic{:ieee1788}(), x)
 iszero(::PointwisePolitic{:ieee1788}, x::Interval) = isthinzero(x)
 
-isinteger(::PointwisePolitic{:ieee1788}, x::Interval) = (x.lo == x.hi) && isinteger(x.lo)
+isinteger(::PointwisePolitic{:ieee1788}, x::Interval) = (inf(x) == sup(x)) && isinteger(inf(x))
 
 
 ## :ternary
 function ==(::PointwisePolitic{:ternary}, x::Interval, y::Interval)
-    isthin(x) && isthin(y) && x.lo == y.lo && return true
-    (x.hi < y.lo || x.lo > y.hi) && return false
+    isthin(x) && isthin(y) && inf(x) == inf(y) && return true
+    (sup(x) < inf(y) || inf(x) > sup(y)) && return false
     return missing
 end
 
@@ -132,8 +132,8 @@ isfinite(::PointwisePolitic{:ternary}, x::Interval) = !isinf(PointwisePolitic{:t
 iszero(::PointwisePolitic{:ternary}, x::Interval) = ==(PointwisePolitic{:ternary}(), x, 0)
 
 function isinteger(::PointwisePolitic{:ternary}, x::Interval)
-    (x.lo == x.hi) && isinteger(x.lo) && return true
-    floor(x.hi) < ceil(x.lo) && return false
+    (inf(x) == sup(x)) && isinteger(inf(x)) && return true
+    floor(sup(x)) < ceil(inf(x)) && return false
     return missing
 end
 

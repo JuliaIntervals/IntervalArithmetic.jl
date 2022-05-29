@@ -1,6 +1,6 @@
 using Random
 
-Base.rand(X::Interval{T}) where {T} = X.lo + rand(T) * (X.hi - X.lo)
+Base.rand(X::Interval{T}) where {T} = inf(X) + rand(T) * (sup(X) - inf(X))
 
 Base.rand(X::IntervalBox) = rand.(X)
 

@@ -11,8 +11,8 @@ half_pi(::Type{F}) where {F<:Interval} = scale(0.5, F(π))
 two_pi(::Type{F}) where {F<:Interval} = scale(2, F(π))
 
 function range_atan(::Type{F}) where {F<:Interval}
-    temp = F(π)  # Using F(-π, π) converts -π to Float64 before Interval construction
-    return F(-temp.hi, temp.hi)
+    temp = sup(F(π))  # Using F(-π, π) converts -π to Float64 before Interval construction
+    return F(-temp, temp)
 end
 
 half_range_atan(::Type{F}) where {F<:Interval} = range_atan(F) / 2
@@ -31,7 +31,7 @@ Tucker, *Validated Numerics*.
 """
 function find_quadrants(::Type{F}, x) where {F<:Interval}
     temp = F(x) / half_pi(F)
-    return floor(temp.lo), floor(temp.hi)
+    return floor(inf(temp)), floor(sup(temp))
 end
 
 # Quadrant function for Float64 specialized methods
@@ -55,12 +55,13 @@ function sin(a::F) where {F<:Interval}
 
     whole_range = F(-1, 1)
 
-    diam(a) > two_pi(F).lo && return whole_range
+    diam(a) > inf(two_pi(F)) && return whole_range
 
     # The following is equiavlent to doing temp = a / half_pi  and
-    # taking floor(a.lo), floor(a.hi)
-    lo_quadrant = minimum(find_quadrants(F, a.lo))
-    hi_quadrant = maximum(find_quadrants(F, a.hi))
+    # taking floor(inf(a)), floor(sup(a))
+    alo, ahi = bounds(a)
+    lo_quadrant = minimum(find_quadrants(F, alo))
+    hi_quadrant = maximum(find_quadrants(F, ahi))
 
     if hi_quadrant - lo_quadrant > 4  # close to limits
         return whole_range
@@ -71,22 +72,22 @@ function sin(a::F) where {F<:Interval}
 
     # Different cases depending on the two quadrants:
     if lo_quadrant == hi_quadrant
-        a.hi - a.lo > F(π).lo && return whole_range  # in same quadrant but separated by almost 2pi
-        lo = @round(F, sin(a.lo), sin(a.lo))
-        hi = @round(F, sin(a.hi), sin(a.hi))
+        ahi - alo > inf(F(π)) && return whole_range  # in same quadrant but separated by almost 2pi
+        lo = @round(F, sin(alo), sin(alo))
+        hi = @round(F, sin(ahi), sin(ahi))
         return hull(lo, hi)
 
     elseif lo_quadrant == 3 && iszero(hi_quadrant)
-        return @round(F, sin(a.lo), sin(a.hi))
+        return @round(F, sin(alo), sin(ahi))
 
     elseif lo_quadrant == 1 && hi_quadrant == 2
-        return @round(F, sin(a.hi), sin(a.lo))
+        return @round(F, sin(ahi), sin(alo))
 
     elseif ( iszero(lo_quadrant) || lo_quadrant == 3 ) && ( hi_quadrant == 1 || hi_quadrant == 2 )
-        return @round(F, min(sin(a.lo), sin(a.hi)), 1)
+        return @round(F, min(sin(alo), sin(ahi)), 1)
 
     elseif ( lo_quadrant == 1 || lo_quadrant == 2 ) && ( hi_quadrant == 3 || iszero(hi_quadrant) )
-        return @round(F, -1, max(sin(a.lo), sin(a.hi)))
+        return @round(F, -1, max(sin(alo), sin(ahi)))
 
     else  # if( iszero(lo_quadrant) && hi_quadrant == 3 ) || ( lo_quadrant == 2 && hi_quadrant == 1 )
         return whole_range
@@ -98,16 +99,17 @@ function sin(a::F) where {F<:Interval{Float64}}
 
     whole_range = F(-1, 1)
 
-    diam(a) > two_pi(F).lo && return whole_range
+    diam(a) > inf(two_pi(F)) && return whole_range
 
-    lo_quadrant, lo = quadrant(a.lo)
-    hi_quadrant, hi = quadrant(a.hi)
+    alo, ahi = bounds(a)
+    lo_quadrant, lo = quadrant(alo)
+    hi_quadrant, hi = quadrant(ahi)
 
-    lo, hi = a.lo, a.hi  # should be able to use the modulo version of a, but doesn't seem to work
+    lo, hi = alo, ahi  # should be able to use the modulo version of a, but doesn't seem to work
 
     # Different cases depending on the two quadrants:
     if lo_quadrant == hi_quadrant
-        a.hi - a.lo > F(π).lo && return whole_range  #
+        ahi - alo > inf(F(π)) && return whole_range  #
 
         if lo_quadrant == 1 || lo_quadrant == 2
             # negative slope
@@ -149,10 +151,11 @@ function cos(a::F) where {F<:Interval}
 
     whole_range = F(-1, 1)
 
-    diam(a) > two_pi(F).lo && return whole_range
+    diam(a) > inf(two_pi(F)) && return whole_range
 
-    lo_quadrant = minimum(find_quadrants(F, a.lo))
-    hi_quadrant = maximum(find_quadrants(F, a.hi))
+    alo, ahi = bounds(a)
+    lo_quadrant = minimum(find_quadrants(F, alo))
+    hi_quadrant = maximum(find_quadrants(F, ahi))
 
     if hi_quadrant - lo_quadrant > 4  # close to limits
         return whole_range
@@ -163,22 +166,22 @@ function cos(a::F) where {F<:Interval}
 
     # Different cases depending on the two quadrants:
     if lo_quadrant == hi_quadrant  # Interval limits in the same quadrant
-        a.hi - a.lo > F(π).lo && return whole_range
-        lo = @round(F, cos(a.lo), cos(a.lo))
-        hi = @round(F, cos(a.hi), cos(a.hi))
+        ahi - alo > inf(F(π)) && return whole_range
+        lo = @round(F, cos(alo), cos(alo))
+        hi = @round(F, cos(ahi), cos(ahi))
         return hull(lo, hi)
 
     elseif lo_quadrant == 2 && hi_quadrant == 3
-        return @round(F, cos(a.lo), cos(a.hi))
+        return @round(F, cos(alo), cos(ahi))
 
     elseif iszero(lo_quadrant) && hi_quadrant == 1
-        return @round(F, cos(a.hi), cos(a.lo))
+        return @round(F, cos(ahi), cos(alo))
 
     elseif ( lo_quadrant == 2 || lo_quadrant == 3 ) && ( iszero(hi_quadrant) || hi_quadrant == 1 )
-        return @round(F, min(cos(a.lo), cos(a.hi)), 1)
+        return @round(F, min(cos(alo), cos(ahi)), 1)
 
     elseif ( iszero(lo_quadrant) || lo_quadrant == 1 ) && ( hi_quadrant == 2 || hi_quadrant == 3 )
-        return @round(F, -1, max(cos(a.lo), cos(a.hi)))
+        return @round(F, -1, max(cos(alo), cos(ahi)))
 
     else  # if ( lo_quadrant == 3 && hi_quadrant == 2 ) || ( lo_quadrant == 1 && iszero(hi_quadrant) )
         return whole_range
@@ -190,16 +193,17 @@ function cos(a::F) where {F<:Interval{Float64}}
 
     whole_range = F(-1, 1)
 
-    diam(a) > two_pi(F).lo && return whole_range
+    diam(a) > inf(two_pi(F)) && return whole_range
 
-    lo_quadrant, lo = quadrant(a.lo)
-    hi_quadrant, hi = quadrant(a.hi)
+    alo, ahi = bounds(a)
+    lo_quadrant, lo = quadrant(alo)
+    hi_quadrant, hi = quadrant(ahi)
 
-    lo, hi = a.lo, a.hi
+    lo, hi = alo, ahi  # should be able to use the modulo version of a, but doesn't seem to work
 
     # Different cases depending on the two quadrants:
     if lo_quadrant == hi_quadrant # Interval limits in the same quadrant
-        a.hi - a.lo > F(π).lo && return whole_range
+        ahi - alo > inf(F(π)) && return whole_range
 
         if lo_quadrant == 2 || lo_quadrant == 3
             # positive slope
@@ -209,16 +213,16 @@ function cos(a::F) where {F<:Interval{Float64}}
         end
 
     elseif lo_quadrant == 2 && hi_quadrant == 3
-        return @round(F, cos(a.lo), cos(a.hi))
+        return @round(F, cos(lo), cos(hi))
 
     elseif iszero(lo_quadrant) && hi_quadrant == 1
-        return @round(F, cos(a.hi), cos(a.lo))
+        return @round(F, cos(hi), cos(lo))
 
     elseif ( lo_quadrant == 2 || lo_quadrant == 3 ) && ( iszero(hi_quadrant) || hi_quadrant == 1 )
-        return @round(F, min(cos(a.lo), cos(a.hi)), 1)
+        return @round(F, min(cos(lo), cos(hi)), 1)
 
     elseif ( iszero(lo_quadrant) || lo_quadrant == 1 ) && ( hi_quadrant == 2 || hi_quadrant == 3 )
-        return @round(F, -1, max(cos(a.lo), cos(a.hi)))
+        return @round(F, -1, max(cos(lo), cos(hi)))
 
     else #if ( lo_quadrant == 3 && hi_quadrant == 2 ) || ( lo_quadrant == 1 && iszero(hi_quadrant) )
         return whole_range
@@ -239,10 +243,11 @@ Implement the `tan` function of the IEEE Std 1788-2015 (Table 9.1).
 function tan(a::F) where {F<:Interval}
     isempty(a) && return a
 
-    diam(a) > F(π).lo && return entireinterval(a)
+    diam(a) > inf(F(π)) && return entireinterval(a)
 
-    lo_quadrant = minimum(find_quadrants(F, a.lo))
-    hi_quadrant = maximum(find_quadrants(F, a.hi))
+    alo, ahi = bounds(a)
+    lo_quadrant = minimum(find_quadrants(F, alo))
+    hi_quadrant = maximum(find_quadrants(F, ahi))
 
     lo_quadrant_mod = mod(lo_quadrant, 2)
     hi_quadrant_mod = mod(hi_quadrant, 2)
@@ -258,16 +263,17 @@ function tan(a::F) where {F<:Interval}
         return entireinterval(F)
 
     end
-    return @round(F, tan(a.lo), tan(a.hi))
+    return @round(F, tan(alo), tan(ahi))
 end
 
 function tan(a::F) where {F<:Interval{Float64}}
     isempty(a) && return a
 
-    diam(a) > F(π).lo && return entireinterval(a)
+    diam(a) > inf(F(π)) && return entireinterval(a)
 
-    lo_quadrant, lo = quadrant(a.lo)
-    hi_quadrant, hi = quadrant(a.hi)
+    alo, ahi = bounds(a)
+    lo_quadrant, lo = quadrant(alo)
+    hi_quadrant, hi = quadrant(ahi)
 
     lo_quadrant_mod = mod(lo_quadrant, 2)
     hi_quadrant_mod = mod(hi_quadrant, 2)
@@ -281,7 +287,7 @@ function tan(a::F) where {F<:Interval{Float64}}
 
     end
 
-    return @round(F, tan(a.lo), tan(a.hi))
+    return @round(F, tan(alo), tan(ahi))
 end
 
 """
@@ -292,32 +298,33 @@ Implement the `cot` function of the IEEE Std 1788-2015 (Table 9.1).
 function cot(a::F) where {F<:Interval}
     isempty(a) && return a
 
-    diam(a) > F(π).lo && return entireinterval(a)
+    diam(a) > inf(F(π)) && return entireinterval(a)
 
     isthinzero(a) && return emptyinterval(a)
 
-    lo_quadrant = minimum(find_quadrants(F, a.lo))
-    hi_quadrant = maximum(find_quadrants(F, a.hi))
+    alo, ahi = bounds(a)
+    lo_quadrant = minimum(find_quadrants(F, alo))
+    hi_quadrant = maximum(find_quadrants(F, ahi))
 
     lo_quadrant = mod(lo_quadrant, 4)
     hi_quadrant = mod(hi_quadrant, 4)
 
     # Different cases depending on the two quadrants:
     if lo_quadrant == hi_quadrant
-        iszero(a.lo) && return @round(F, cot(a.hi), Inf)
+        iszero(alo) && return @round(F, cot(ahi), Inf)
 
-        return @round(F, cot(a.hi), cot(a.lo))
+        return @round(F, cot(ahi), cot(alo))
 
     elseif (lo_quadrant == 3 && iszero(hi_quadrant)) || (lo_quadrant == 1 && hi_quadrant ==2)
-        iszero(a.hi) && return @round(F, -Inf, cot(a.lo))
+        iszero(ahi) && return @round(F, -Inf, cot(alo))
 
         return entireinterval(a)
 
     elseif (iszero(lo_quadrant) && hi_quadrant == 1) || (lo_quadrant == 2 && hi_quadrant == 3)
-        return @round(F, cot(a.hi), cot(a.lo))
+        return @round(F, cot(ahi), cot(alo))
 
     elseif ( lo_quadrant == 2 && iszero(hi_quadrant))
-        iszero(a.hi) && return @round(F, -Inf, cot(a.lo))
+        iszero(ahi) && return @round(F, -Inf, cot(alo))
 
         return entireinterval(a)
 
@@ -338,28 +345,29 @@ Implement the `sec` function of the IEEE Std 1788-2015 (Table 9.1).
 function sec(a::F) where {F<:Interval}
     isempty(a) && return a
 
-    diam(a) > F(π).lo && return entireinterval(a)
+    diam(a) > inf(F(π)) && return entireinterval(a)
 
-    lo_quadrant = minimum(find_quadrants(F, a.lo))
-    hi_quadrant = maximum(find_quadrants(F, a.hi))
+    alo, ahi = bounds(a)
+    lo_quadrant = minimum(find_quadrants(F, alo))
+    hi_quadrant = maximum(find_quadrants(F, ahi))
 
     lo_quadrant = mod(lo_quadrant, 4)
     hi_quadrant = mod(hi_quadrant, 4)
 
     # Different cases depending on the two quadrants:
     if lo_quadrant == hi_quadrant  # Interval limits in the same quadrant
-        lo = @round(F, sec(a.lo), sec(a.lo))
-        hi = @round(F, sec(a.hi), sec(a.hi))
+        lo = @round(F, sec(alo), sec(alo))
+        hi = @round(F, sec(ahi), sec(ahi))
         return hull(lo, hi)
 
     elseif (iszero(lo_quadrant) && hi_quadrant == 1) || (lo_quadrant == 2 && hi_quadrant ==3)
         return entireinterval(a)
 
     elseif lo_quadrant == 3 && iszero(hi_quadrant)
-        return @round(F, 1, max(sec(a.lo), sec(a.hi)))
+        return @round(F, 1, max(sec(alo), sec(ahi)))
 
     elseif lo_quadrant == 1 && hi_quadrant == 2
-        return @round(F, min(sec(a.lo), sec(a.hi)), -1)
+        return @round(F, min(sec(alo), sec(ahi)), -1)
 
     else
         return entireinterval(a)
@@ -378,37 +386,38 @@ Implement the `csc` function of the IEEE Std 1788-2015 (Table 9.1).
 function csc(a::F) where {F<:Interval}
     isempty(a) && return a
 
-    diam(a) > F(π).lo && return entireinterval(a)
+    diam(a) > inf(F(π)) && return entireinterval(a)
 
     isthinzero(a) && return emptyinterval(a)
 
-    lo_quadrant = minimum(find_quadrants(F, a.lo))
-    hi_quadrant = maximum(find_quadrants(F, a.hi))
+    alo, ahi = bounds(a)
+    lo_quadrant = minimum(find_quadrants(F, alo))
+    hi_quadrant = maximum(find_quadrants(F, ahi))
 
     lo_quadrant = mod(lo_quadrant, 4)
     hi_quadrant = mod(hi_quadrant, 4)
 
     # Different cases depending on the two quadrants:
     if lo_quadrant == hi_quadrant
-        iszero(a.lo) && return @round(F, csc(a.hi), Inf)
+        iszero(alo) && return @round(F, csc(ahi), Inf)
 
-        lo = @round(F, csc(a.lo), csc(a.lo))
-        hi = @round(F, csc(a.hi), csc(a.hi))
+        lo = @round(F, csc(alo), csc(alo))
+        hi = @round(F, csc(ahi), csc(ahi))
         return hull(lo, hi)
 
     elseif (lo_quadrant == 3 && iszero(hi_quadrant)) || (lo_quadrant == 1 && hi_quadrant ==2)
-        iszero(a.hi) && return @round(F, -Inf, csc(a.lo))
+        iszero(ahi) && return @round(F, -Inf, csc(alo))
 
         return entireinterval(a)
 
     elseif iszero(lo_quadrant) && hi_quadrant == 1
-        return @round(F, 1, max(csc(a.lo), csc(a.hi)))
+        return @round(F, 1, max(csc(alo), csc(ahi)))
 
     elseif lo_quadrant == 2 && hi_quadrant == 3
-        return @round(F, min(csc(a.lo), csc(a.hi)), -1)
+        return @round(F, min(csc(alo), csc(ahi)), -1)
 
     elseif ( lo_quadrant == 2 && iszero(hi_quadrant))
-        iszero(a.hi) && return @round(F, -Inf, -1)
+        iszero(ahi) && return @round(F, -Inf, -1)
 
         return entireinterval(a)
 
@@ -434,7 +443,8 @@ function asin(a::F) where {F<:Interval}
 
     isempty(a) && return a
 
-    return @round(F, asin(a.lo), asin(a.hi))
+    alo, ahi = bounds(a)
+    return @round(F, asin(alo), asin(ahi))
 end
 
 """
@@ -448,7 +458,8 @@ function acos(a::F) where {F<:Interval}
 
     isempty(a) && return a
 
-    return @round(F, acos(a.hi), acos(a.lo))
+    alo, ahi = bounds(a)
+    return @round(F, acos(ahi), acos(alo))
 end
 
 """
@@ -459,7 +470,8 @@ Implement the `atan` function of the IEEE Std 1788-2015 (Table 9.1).
 function atan(a::F) where {F<:Interval}
     isempty(a) && return a
 
-    return @round(F, atan(a.lo), atan(a.hi))
+    alo, ahi = bounds(a)
+    return @round(F, atan(alo), atan(ahi))
 end
 
 function atan(y::Interval{T}, x::Interval{S}) where {T, S}
@@ -474,55 +486,63 @@ function atan(y::Interval{BigFloat}, x::Interval{BigFloat})
 
     (isempty(y) || isempty(x)) && return emptyinterval(F)
 
+    ylo, yhi = bounds(y)
+    xlo, xhi = bounds(x)
+    z = zero(T)
+
     # Prevent nonsense results when y has a signed zero:
-    if iszero(y.lo)
-        y = F(0, y.hi)
+    if iszero(ylo)
+        y = F(0, yhi)
     end
 
-    if iszero(y.hi)
-        y = F(y.lo, 0)
+    if iszero(yhi)
+        y = F(ylo, 0)
     end
 
     # Check cases based on x
     if isthinzero(x)
         isthinzero(y) && return emptyinterval(F)
-        y.lo ≥ zero(T) && return half_pi(F)
-        y.hi ≤ zero(T) && return -half_pi(F)
+        ylo ≥ z && return half_pi(F)
+        yhi ≤ z && return -half_pi(F)
         return half_range_atan(F)
 
-    elseif x.lo > zero(T)
+    elseif xlo > z
         isthinzero(y) && return y
-        y.lo ≥ zero(T) &&
-            return @round(F, atan(y.lo, x.hi), atan(y.hi, x.lo)) # refinement lo bound
-        y.hi ≤ zero(T) &&
-            return @round(F, atan(y.lo, x.lo), atan(y.hi, x.hi))
-        return @round(F, atan(y.lo, x.lo), atan(y.hi, x.lo))
+        ylo ≥ z &&
+            return @round(F, atan(ylo, xhi), atan(yhi, xlo)) # refinement lo bound
+        yhi ≤ z &&
+            return @round(F, atan(ylo, xlo), atan(yhi, xhi))
+        return @round(F, atan(ylo, xlo), atan(yhi, xlo))
 
-    elseif x.hi < zero(T)
+    elseif xhi < z
         isthinzero(y) && return F(π)
-        y.lo ≥ zero(T) &&
-            return @round(F, atan(y.hi, x.hi), atan(y.lo, x.lo))
-        y.hi < zero(T) &&
-            return @round(F, atan(y.hi, x.lo), atan(y.lo, x.hi))
+        ylo ≥ z &&
+            return @round(F, atan(yhi, xhi), atan(ylo, xlo))
+        yhi < z &&
+            return @round(F, atan(yhi, xlo), atan(ylo, xhi))
         return range_atan(F)
 
-    else # zero(T) ∈ x
-        if iszero(x.lo)
+    else # z ∈ x
+        if iszero(xlo)
             isthinzero(y) && return y
-            y.lo ≥ zero(T) && return @round(F, atan(y.lo, x.hi), half_range_atan(F).hi)
-            y.hi ≤ zero(T) && return @round(F, half_range_atan(F).lo, atan(y.hi, x.hi))
+            ylo ≥ z &&
+                return F(atan(ylo, xhi, RoundDown), sup(half_range_atan(F)))
+            yhi ≤ z &&
+                return F(inf(half_range_atan(F)), atan(yhi, xhi, RoundUp))
             return half_range_atan(F)
 
-        elseif iszero(x.hi)
+        elseif iszero(xhi)
             isthinzero(y) && return F(π)
-            y.lo ≥ zero(T) && return @round(F, half_pi(F).lo, atan(y.lo, x.lo))
-            y.hi < zero(T) && return @round(F, atan(y.hi, x.lo), -(half_pi(F).lo))
+            ylo ≥ z &&
+                return F(inf(half_pi(F)), atan(ylo, xlo, RoundUp))
+            yhi < z &&
+                return F(atan(yhi, xlo, RoundDown), inf(-half_pi(F)))
             return range_atan(F)
         else
-            y.lo ≥ zero(T) &&
-                return @round(F, atan(y.lo, x.hi), atan(y.lo, x.lo))
-            y.hi < zero(T) &&
-                return @round(F, atan(y.hi, x.lo), atan(y.hi, x.hi))
+            ylo ≥ z &&
+                return @round(F, atan(ylo, xhi), atan(ylo, xlo))
+            yhi < z &&
+                return @round(F, atan(yhi, xlo), atan(yhi, xhi))
             return range_atan(F)
         end
     end
@@ -536,6 +556,6 @@ Implement the `acot` function of the IEEE Std 1788-2015 (Table 9.1).
 function acot(a::F) where {F<:Interval}
     isempty(a) && return a
 
-    return atomic(F, Interval(acot(bigequiv(a.hi)), acot(bigequiv(a.lo))))
-    # return atomic(F, @round(Interval{BigFloat}, acot(bigequiv(a.hi)), acot(bigequiv(a.lo))))
+    return atomic(F, Interval(acot(bigequiv(sup(a))), acot(bigequiv(inf(a)))))
+    # return atomic(F, @round(Interval{BigFloat}, acot(bigequiv(sup(a))), acot(bigequiv(inf(a)))))
 end

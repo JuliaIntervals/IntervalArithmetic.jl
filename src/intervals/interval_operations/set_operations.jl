@@ -17,7 +17,7 @@ Implement the `intersection` function of the IEEE Std 1788-2015 (section 9.3).
 """
 function intersect(a::Interval{T}, b::Interval{S}) where {T, S}
     isdisjoint(a, b) && return emptyinterval(promote_type(T, S))
-    return Interval{promote_type(T, S)}(max(a.lo, b.lo), min(a.hi, b.hi))
+    return Interval{promote_type(T, S)}(max(inf(a), inf(b)), min(sup(a), sup(b)))
 end
 
 function intersect(a::Complex{F}, b::Complex{F}) where {F<:Interval}
@@ -52,9 +52,9 @@ all of `a` and `b`.
 
 Implement the `converxHull` function of the IEEE Std 1788-2015 (section 9.3).
 """
-hull(a::F, b::F) where {F<:Interval} = F(min(a.lo, b.lo), max(a.hi, b.hi))
+hull(a::F, b::F) where {F<:Interval} = F(min(inf(a), inf(b)), max(sup(a), sup(b)))
 hull(a::F, b::G) where {F<:Interval, G<:Interval} =
-    promote_type(F, G)(min(a.lo, b.lo), max(a.hi, b.hi))
+    promote_type(F, G)(min(inf(a), inf(b)), max(sup(a), sup(b)))
 hull(a::Complex{F},b::Complex{F}) where {F<:Interval} =
     complex(hull(real(a), real(b)), hull(imag(a), imag(b)))
 hull(a...) = reduce(hull, a)
@@ -91,9 +91,9 @@ function setdiff(x::F, y::F) where {F<:Interval}
     isempty(intersection) && return [x]
     intersection ≛ x && return F[]  # x is subset of y; setdiff is empty
 
-    x.lo == intersection.lo && return [F(intersection.hi, x.hi)]
-    x.hi == intersection.hi && return [F(x.lo, intersection.lo)]
+    inf(x) == inf(intersection) && return [F(sup(intersection), sup(x))]
+    sup(x) == sup(intersection) && return [F(inf(x), inf(intersection))]
 
-    return [F(x.lo, y.lo), F(y.hi, x.hi)]
+    return [F(inf(x), inf(y)), F(sup(y), sup(x))]
 
 end

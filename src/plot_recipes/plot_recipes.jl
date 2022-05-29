@@ -8,10 +8,12 @@ using RecipesBase
     seriesalpha --> 0.5
     seriestype := :shape
 
-    x = [x.lo, x.hi, x.hi, x.lo]
-    y = [y.lo, y.lo, y.hi, y.hi]
+    xlo, xhi = bounds(x)
+    ylo, yhi = bounds(y)
+    xv = [xlo, xhi, xhi, xlo]
+    yv = [ylo, ylo, yhi, yhi]
 
-    x, y
+    xv, yv
 end
 
 # Plot a vector of 2D IntervalBoxes:
@@ -26,9 +28,11 @@ end
     for xx in v
         (x, y) = xx
 
+        xlo, xhi = bounds(x)
+        ylo, yhi = bounds(y)
         # use NaNs to separate
-        append!(xs, [x.lo, x.hi, x.hi, x.lo, NaN])
-        append!(ys, [y.lo, y.lo, y.hi, y.hi, NaN])
+        append!(xs, [xlo, xhi, xhi, xlo, NaN])
+        append!(ys, [ylo, ylo, yhi, yhi, NaN])
 
     end
 

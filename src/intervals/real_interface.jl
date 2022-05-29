@@ -32,7 +32,7 @@ Float64
 """
 numtype(::Interval{T}) where T = T
 
-eps(a::F) where {F<:Interval} = F(max(eps(a.lo), eps(a.hi)))
+eps(a::F) where {F<:Interval} = F(max(eps(inf(a)), eps(sup(a))))
 eps(::Type{F}) where {T, F<:Interval{T}} = F(eps(T))
 
 """
@@ -46,8 +46,8 @@ Note that in `IntervalArithmetic.jl`, equality of intervals is given by
 The latter is reserved for the pointwise extension of equality to intervals
 and uses three-way logic by default.
 """
-hash(x::Interval, h::UInt) = hash(x.hi, hash(x.lo, hash(Interval, h)))
+hash(x::Interval, h::UInt) = hash(sup(x), hash(inf(x), hash(Interval, h)))
 
 # TODO No idea where this comes from and if it is the correct place to put it.
-dist(a::Interval, b::Interval) = max(abs(a.lo-b.lo), abs(a.hi-b.hi))
+dist(a::Interval, b::Interval) = max(abs(inf(a)-inf(b)), abs(sup(a)-sup(b)))
 

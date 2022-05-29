@@ -23,7 +23,7 @@ Implement the `min` function of the IEEE Std 1788-2015 (Table 9.1).
 """
 function min(a::F, b::F) where {F<:Interval}
     (isempty(a) || isempty(b)) && return emptyinterval(F)
-    return F( min(a.lo, b.lo), min(a.hi, b.hi))
+    return F( min(inf(a), inf(b)), min(sup(a), sup(b)))
 end
 
 """
@@ -33,5 +33,5 @@ Implement the `max` function of the IEEE Std 1788-2015 (Table 9.1).
 """
 function max(a::F, b::F) where {F<:Interval}
     (isempty(a) || isempty(b)) && return emptyinterval(F)
-    return F( max(a.lo, b.lo), max(a.hi, b.hi))
+    return F( max(inf(a), inf(b)), max(sup(a), sup(b)))
 end

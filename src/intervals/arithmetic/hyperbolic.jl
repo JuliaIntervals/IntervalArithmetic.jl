@@ -13,7 +13,7 @@ for f in (:sinh, :tanh, :asinh)
         """
         function ($f)(a::F) where {F<:Interval}
             isempty(a) && return a
-            return @round(F, ($f)(a.lo), ($f)(a.hi))
+            return @round(F, ($f)(inf(a)), ($f)(sup(a)))
         end
     end
 end
@@ -39,17 +39,18 @@ function coth(a::F) where {F<:Interval}
 
     isthinzero(a) && return emptyinterval(a)
 
-    a.hi > 0 > a.lo && return entireinterval(a)
+    alo, ahi = bounds(a)
+    ahi > 0 > alo && return entireinterval(a)
 
-    if iszero(a.hi)
-        return @round(F, -Inf, coth(a.lo))
+    if iszero(ahi)
+        return @round(F, -Inf, coth(alo))
 
-    elseif a.hi > 0 && iszero(a.lo)
-        return @round(F, coth(a.hi), Inf)
+    elseif ahi > 0 && iszero(alo)
+        return @round(F, coth(ahi), Inf)
 
     end
 
-    res_lo, res_hi = bounds(@round(F, coth(a.hi), coth(a.lo)))
+    res_lo, res_hi = bounds(@round(F, coth(ahi), coth(alo)))
 
     # The IEEE Std 1788-2015 does not allow intervals like of the
     # form Interval(∞,∞) and Interval(-∞,-∞) for set based intervals
@@ -66,16 +67,17 @@ Implement the `sech` function of the IEEE Std 1788-2015 (Table 9.1).
 function sech(a::F) where {F<:Interval}
     isempty(a) && return a
 
-    if a.lo ≥ 0
+    alo, ahi = bounds(a)
+    if alo ≥ 0
         # decreasing function
-        return @round(F, sech(a.hi), sech(a.lo))
+        return @round(F, sech(ahi), sech(alo))
 
-    elseif a.hi ≤ 0
+    elseif ahi ≤ 0
         # increasing function
-        return @round(F, sech(a.lo), sech(a.hi))
+        return @round(F, sech(alo), sech(ahi))
 
     else
-        return @round(F, min(sech(a.lo), sech(a.hi)), 1)
+        return @round(F, min(sech(alo), sech(ahi)), 1)
     end
 end
 
@@ -89,17 +91,19 @@ function csch(a::F) where {F<:Interval}
 
     isthinzero(a) && return emptyinterval(a)
 
-    if 0 ∈ a
-        a.hi > 0 > a.lo && return entireinterval(a)
+    alo, ahi = bounds(a)
 
-        if a.lo == 0
-            return @round(F, csch(a.hi), Inf)
+    if 0 ∈ a
+        ahi > 0 > alo && return entireinterval(a)
+
+        if alo == 0
+            return @round(F, csch(ahi), Inf)
         else
-            return @round(F, -Inf, csch(a.lo))
+            return @round(F, -Inf, csch(alo))
         end
     end
 
-    return @round(F, csch(a.hi), csch(a.lo))
+    return @round(F, csch(ahi), csch(alo))
 end
 
 """
@@ -112,7 +116,8 @@ function acosh(a::F) where {F<:Interval}
     a = a ∩ domain
     isempty(a) && return a
 
-    return @round(F, acosh(a.lo), acosh(a.hi))
+    alo, ahi = bounds(a)
+    return @round(F, acosh(alo), acosh(ahi))
 end
 
 """
@@ -126,7 +131,8 @@ function atanh(a::F) where {F<:Interval}
 
     isempty(a) && return a
 
-    res_lo, res_hi = bounds(@round(F, atanh(a.lo), atanh(a.hi)))
+    alo, ahi = bounds(a)
+    res_lo, res_hi = bounds(@round(F, atanh(alo), atanh(ahi)))
 
     # The IEEE Std 1788-2015 does not allow intervals like of the
     # form Interval(∞,∞) and Interval(-∞,-∞) for set based intervals
@@ -149,7 +155,8 @@ function acoth(a::F) where {F<:Interval}
 
     !isempty(a ∩ domain_excluded) && return entireinterval(F)
 
-    res_lo, res_hi = bounds(@round(F, acoth(a.hi), acoth(a.lo)))
+    alo, ahi = bounds(a)
+    res_lo, res_hi = bounds(@round(F, acoth(ahi), acoth(alo)))
 
     # The IEEE Std 1788-2015 does not allow intervals like of the
     # form Interval(∞,∞) and Interval(-∞,-∞) for set based intervals

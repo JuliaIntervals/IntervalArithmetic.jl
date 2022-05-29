@@ -19,7 +19,7 @@ function cancelminus(a::F, b::F) where {F<:Interval}
 
     diam(a) < diam(b) && return entireinterval(F)
 
-    c_lo, c_hi = bounds(@round(F, a.lo - b.lo, a.hi - b.hi))
+    c_lo, c_hi = bounds(@round(F, inf(a) - inf(b), sup(a) - sup(b)))
     c_lo > c_hi && return entireinterval(F)
 
     # Corner case 2 (page 62), involving unbounded c
@@ -30,8 +30,8 @@ function cancelminus(a::F, b::F) where {F<:Interval}
     isunbounded(c) && return c
 
     # Corner case 1 (page 62) involving finite precision for diam(a) and diam(b)
-    a_lo, a_hi = bounds(@round(F, b.lo + c_lo, b.hi + c_hi))
-    (diam(a) == diam(b)) && (nextfloat(a.hi) < a_hi || prevfloat(a.lo) > a_lo) && return entireinterval(F)
+    a_lo, a_hi = bounds(@round(F, inf(b) + c_lo, sup(b) + c_hi))
+    (diam(a) == diam(b)) && (nextfloat(sup(a)) < a_hi || prevfloat(inf(a)) > a_lo) && return entireinterval(F)
 
     return c
 end

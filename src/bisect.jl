@@ -12,7 +12,7 @@ function bisect(X::Interval, α=where_bisect)
 
     m = scaled_mid(X, α)
 
-    return (Interval(X.lo, m), Interval(m, X.hi))
+    return (Interval(inf(X), m), Interval(m, sup(X)))
 end
 
 """
@@ -48,7 +48,7 @@ Splits `x` in `n` intervals of the same diameter, which are returned
 as a vector.
 """
 function mince(x::Interval, n)
-    nodes = range(x.lo, x.hi, length = n+1)
+    nodes = range(inf(x), sup(x), length = n+1)
     return [Interval(nodes[i], nodes[i+1]) for i in 1:length(nodes)-1]
 end
 

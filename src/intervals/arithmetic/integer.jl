@@ -9,15 +9,15 @@ for f in (:sign, :ceil, :floor, :trunc)
     @eval begin
         """
             $($f)(a::Interval)
-    
+
         Implement the `$($f)` function of the IEEE Std 1788-2015 (Table 9.1).
         """
         function ($f)(a::F) where {F<:Interval}
             isempty(a) && return emptyinterval(F)
-            return F(($f)(a.lo), ($f)(a.hi))
+            return F(($f)(inf(a)), ($f)(sup(a)))
         end
     end
-end 
+end
 
 # NOTE this is note strictly needed as per the standard. It is documented
 # in the docstring of round and could be removed
@@ -41,10 +41,10 @@ round(a::Interval, ::RoundingMode{:Down}) = floor(a)
 
 function round(a::F, ::RoundingMode{:Nearest}) where {F<:Interval}
     isempty(a) && return emptyinterval(F)
-    return F(round(a.lo), round(a.hi))
+    return F(round(inf(a)), round(sup(a)))
 end
 
 function round(a::F, ::RoundingMode{:NearestTiesAway}) where {F<:Interval}
     isempty(a) && return emptyinterval(F)
-    return F(round(a.lo, RoundNearestTiesAway), round(a.hi, RoundNearestTiesAway))
+    return F(round(inf(a), RoundNearestTiesAway), round(sup(a), RoundNearestTiesAway))
 end

@@ -185,16 +185,18 @@ function basic_representation(a::Interval, format=nothing)
 
     local output
 
+    alo, ahi = bounds(a)
+
     if format == :standard
-        aa = round_string(a.lo, sigfigs, RoundDown)
-        bb = round_string(a.hi, sigfigs, RoundUp)
+        aa = round_string(alo, sigfigs, RoundDown)
+        bb = round_string(ahi, sigfigs, RoundUp)
 
         output = "[$aa, $bb]"
         output = replace(output, "inf" => "∞")
         output = replace(output, "Inf" => "∞")
 
     elseif format == :full
-        output = "Interval($(a.lo), $(a.hi))"
+        output = "Interval($(alo), $(ahi))"
 
     elseif format == :midpoint
         m = round_string(mid(a), sigfigs, RoundNearest)
@@ -218,15 +220,17 @@ function basic_representation(a::Interval{Float32}, format=nothing)
 
     local output
 
+    alo, ahi = bounds(a)
+
     if format == :standard
 
-        aa = round_string(a.lo, sigfigs, RoundDown)
-        bb = round_string(a.hi, sigfigs, RoundUp)
+        aa = round_string(alo, sigfigs, RoundDown)
+        bb = round_string(ahi, sigfigs, RoundUp)
 
         output = "[$(aa)f0, $(bb)f0]"
 
     elseif format == :full
-        output = "Interval($(a.lo)f0, $(a.hi)f0)"
+        output = "Interval($(alo)f0, $(ahi)f0)"
 
     elseif format == :midpoint
         m = round_string(mid(a), sigfigs, RoundNearest)
@@ -252,11 +256,13 @@ function basic_representation(a::Interval{Rational{T}}, format=nothing) where
 
     local output
 
+    alo, ahi = bounds(a)
+
     if format == :standard
-        output = "[$(a.lo), $(a.hi)]"
+        output = "[$(alo), $(ahi)]"
 
     elseif format == :full
-        output = "Interval($(a.lo), $(a.hi))"
+        output = "Interval($(alo), $(ahi))"
 
     elseif format == :midpoint
         m = mid(a)
@@ -289,7 +295,7 @@ function representation(a::Interval{BigFloat}, format=nothing)
     end
 
     if format == :standard
-        return string(basic_representation(a, format), subscriptify(precision(a.lo)))
+        return string(basic_representation(a, format), subscriptify(precision(sup(a))))
     else
         return basic_representation(a, format)
     end

@@ -13,7 +13,7 @@
 
 Implement the `neg` function of the IEEE Std 1788-2015 (Table 9.1).
 """
--(a::F) where {F<:Interval} = F(-a.hi, -a.lo)
+-(a::F) where {F<:Interval} = F(-sup(a), -inf(a))
 
 
 """
@@ -25,14 +25,14 @@ Implement the `add` function of the IEEE Std 1788-2015 (Table 9.1).
 """
 function +(a::F, b::T) where {T, F<:Interval{T}}
     isempty(a) && return emptyinterval(F)
-    return @round(F, a.lo + b, a.hi + b)
+    return @round(F, inf(a) + b, sup(a) + b)
 end
 +(a::Interval{T}, b::S) where {T, S<:Real} = a + Interval{T}(b)
 +(b::Real, a::Interval) = a + b
 
 function +(a::F, b::F) where {F<:Interval}
     (isempty(a) || isempty(b)) && return emptyinterval(F)
-    return @round(F, a.lo + b.lo, a.hi + b.hi)
+    return @round(F, inf(a) + inf(b), sup(a) + sup(b))
 end
 
 """
@@ -44,17 +44,17 @@ Implement the `sub` function of the IEEE Std 1788-2015 (Table 9.1).
 """
 function -(a::F, b::T) where {T<:Real, F<:Interval{T}}
     isempty(a) && return emptyinterval(F)
-    return @round(F, a.lo - b, a.hi - b)
+    return @round(F, inf(a) - b, sup(a) - b)
 end
 
 function -(b::T, a::F) where {T, F<:Interval{T}}
     isempty(a) && return emptyinterval(F)
-    return @round(F, b - a.hi, b - a.lo)
+    return @round(F, b - sup(a), b - inf(a))
 end
 
 function -(a::F, b::F) where {F<:Interval}
     (isempty(a) || isempty(b)) && return emptyinterval(F)
-    return @round(F, a.lo - b.hi, a.hi - b.lo)
+    return @round(F, inf(a) - sup(b), sup(a) - inf(b))
 end
 
 -(a::F, b::Real) where {F<:Interval} = a - F(b)
@@ -67,7 +67,7 @@ Multiply an interval by a positive scalar.
 
 For efficiency, does not check that the constant is positive.
 """
-@inline scale(α, a::F) where {F<:Interval} = @round(F, α*a.lo, α*a.hi)
+@inline scale(α, a::F) where {F<:Interval} = @round(F, α*inf(a), α*sup(a))
 
 """
     *(a::Interval, b::Real)
@@ -83,9 +83,9 @@ function *(x::T, a::F) where {T<:Real, F<:Interval{T}}
     (isthinzero(a) || iszero(x)) && return zero(F)
 
     if x ≥ 0.0
-        return @round(F, a.lo*x, a.hi*x)
+        return @round(F, inf(a)*x, sup(a)*x)
     else
-        return @round(F, a.hi*x, a.lo*x)
+        return @round(F, sup(a)*x, inf(a)*x)
     end
 end
 
@@ -111,19 +111,19 @@ function unbounded_mult(::Type{F}, x::T, y::T, r::RoundingMode) where {T, F<:Int
 end
 
 function mult(op, a::F, b::F) where {T, F<:Interval{T}}
-    if b.lo >= zero(T)
-        a.lo >= zero(T) && return @round(F, op(a.lo, b.lo), op(a.hi, b.hi))
-        a.hi <= zero(T) && return @round(F, op(a.lo, b.hi), op(a.hi, b.lo))
-        return @round(F, a.lo*b.hi, a.hi*b.hi)   # when zero(T) ∈ a
-    elseif b.hi <= zero(T)
-        a.lo >= zero(T) && return @round(F, op(a.hi, b.lo), op(a.lo, b.hi))
-        a.hi <= zero(T) && return @round(F, op(a.hi, b.hi), op(a.lo, b.lo))
-        return @round(F, a.hi*b.lo, a.lo*b.lo)   # when zero(T) ∈ a
+    if inf(b) >= zero(T)
+        inf(a) >= zero(T) && return @round(F, op(inf(a), inf(b)), op(sup(a), sup(b)))
+        sup(a) <= zero(T) && return @round(F, op(inf(a), sup(b)), op(sup(a), inf(b)))
+        return @round(F, inf(a)*sup(b), sup(a)*sup(b))   # when zero(T) ∈ a
+    elseif sup(b) <= zero(T)
+        inf(a) >= zero(T) && return @round(F, op(sup(a), inf(b)), op(inf(a), sup(b)))
+        sup(a) <= zero(T) && return @round(F, op(sup(a), sup(b)), op(inf(a), inf(b)))
+        return @round(F, sup(a)*inf(b), inf(a)*inf(b))   # when zero(T) ∈ a
     else
-        a.lo > zero(T) && return @round(F, op(a.hi, b.lo), op(a.hi, b.hi))
-        a.hi < zero(T) && return @round(F, op(a.lo, b.hi), op(a.lo, b.lo))
-        return @round(F, min( op(a.lo, b.hi), op(a.hi, b.lo) ),
-                         max( op(a.lo, b.lo), op(a.hi, b.hi) ))
+        inf(a) > zero(T) && return @round(F, op(sup(a), inf(b)), op(sup(a), sup(b)))
+        sup(a) < zero(T) && return @round(F, op(inf(a), sup(b)), op(inf(a), inf(b)))
+        return @round(F, min( op(inf(a), sup(b)), op(sup(a), inf(b)) ),
+                         max( op(inf(a), inf(b)), op(sup(a), sup(b)) ))
     end
 end
 
@@ -141,9 +141,9 @@ function /(a::F, x::Real) where {F<:Interval}
     iszero(x) && return div_by_thin_zero(a)
 
     if x ≥ 0.0
-        return @round(F, a.lo/x, a.hi/x)
+        return @round(F, inf(a)/x, sup(a)/x)
     else
-        return @round(F, a.hi/x, a.lo/x)
+        return @round(F, sup(a)/x, inf(a)/x)
     end
 end
 
@@ -153,27 +153,27 @@ function /(a::F, b::F) where {T, F<:Interval{T}}
     (isempty(a) || isempty(b)) && return emptyinterval(F)
     isthinzero(b) && return div_by_thin_zero(a)
 
-    if b.lo > zero(T) # b strictly positive
-        a.lo >= zero(T) && return @round(F, a.lo/b.hi, a.hi/b.lo)
-        a.hi <= zero(T) && return @round(F, a.lo/b.lo, a.hi/b.hi)
-        return @round(F, a.lo/b.lo, a.hi/b.lo)  # zero(T) ∈ a
+    if inf(b) > zero(T) # b strictly positive
+        inf(a) >= zero(T) && return @round(F, inf(a)/sup(b), sup(a)/inf(b))
+        sup(a) <= zero(T) && return @round(F, inf(a)/inf(b), sup(a)/sup(b))
+        return @round(F, inf(a)/inf(b), sup(a)/inf(b))  # zero(T) ∈ a
 
-    elseif b.hi < zero(T) # b strictly negative
-        a.lo >= zero(T) && return @round(F, a.hi/b.hi, a.lo/b.lo)
-        a.hi <= zero(T) && return @round(F, a.hi/b.lo, a.lo/b.hi)
-        return @round(F, a.hi/b.hi, a.lo/b.hi)  # zero(T) ∈ a
+    elseif sup(b) < zero(T) # b strictly negative
+        inf(a) >= zero(T) && return @round(F, sup(a)/sup(b), inf(a)/inf(b))
+        sup(a) <= zero(T) && return @round(F, sup(a)/inf(b), inf(a)/sup(b))
+        return @round(F, sup(a)/sup(b), inf(a)/sup(b))  # zero(T) ∈ a
 
     else   # b contains zero, but is not zero(b)
         isthinzero(a) && return a
 
-        if iszero(b.lo)
-            a.lo >= zero(T) && return @round(F, a.lo/b.hi, T(Inf))
-            a.hi <= zero(T) && return @round(F, T(-Inf), a.hi/b.hi)
+        if iszero(inf(b))
+            inf(a) >= zero(T) && return @round(F, inf(a)/sup(b), T(Inf))
+            sup(a) <= zero(T) && return @round(F, T(-Inf), sup(a)/sup(b))
             return entireinterval(F)
 
-        elseif iszero(b.hi)
-            a.lo >= zero(T) && return @round(F, T(-Inf), a.lo/b.lo)
-            a.hi <= zero(T) && return @round(F, a.hi/b.lo, T(Inf))
+        elseif iszero(sup(b))
+            inf(a) >= zero(T) && return @round(F, T(-Inf), inf(a)/inf(b))
+            sup(a) <= zero(T) && return @round(F, sup(a)/inf(b), T(Inf))
             return entireinterval(F)
 
         else
@@ -194,13 +194,13 @@ function inv(a::F) where {T, F<:Interval{T}}
     isempty(a) && return emptyinterval(F)
 
     if zero(T) ∈ a
-        a.lo < zero(T) == a.hi && return @round(F, T(-Inf), inv(a.lo))
-        a.lo == zero(T) < a.hi && return @round(F, inv(a.hi), T(Inf))
-        a.lo < zero(T) < a.hi && return entireinterval(F)
+        inf(a) < zero(T) == sup(a) && return @round(F, T(-Inf), inv(inf(a)))
+        inf(a) == zero(T) < sup(a) && return @round(F, inv(sup(a)), T(Inf))
+        inf(a) < zero(T) < sup(a) && return entireinterval(F)
         isthinzero(a) && return div_by_thin_zero(one(F))
     end
 
-    return @round(F, inv(a.hi), inv(a.lo))
+    return @round(F, inv(sup(a)), inv(inf(a)))
 end
 
 # Rational division
@@ -233,18 +233,18 @@ function fma(a::F, b::F, c::F) where {T, F<:Interval{T}}
     end
 
     lo = setrounding(T, RoundDown) do
-        lo1 = fma(a.lo, b.lo, c.lo)
-        lo2 = fma(a.lo, b.hi, c.lo)
-        lo3 = fma(a.hi, b.lo, c.lo)
-        lo4 = fma(a.hi, b.hi, c.lo)
+        lo1 = fma(inf(a), inf(b), inf(c))
+        lo2 = fma(inf(a), sup(b), inf(c))
+        lo3 = fma(sup(a), inf(b), inf(c))
+        lo4 = fma(sup(a), sup(b), inf(c))
         min_ignore_nans(lo1, lo2, lo3, lo4)
     end
 
     hi = setrounding(T, RoundUp) do
-        hi1 = fma(a.lo, b.lo, c.hi)
-        hi2 = fma(a.lo, b.hi, c.hi)
-        hi3 = fma(a.hi, b.lo, c.hi)
-        hi4 = fma(a.hi, b.hi, c.hi)
+        hi1 = fma(inf(a), inf(b), sup(c))
+        hi2 = fma(inf(a), sup(b), sup(c))
+        hi3 = fma(sup(a), inf(b), sup(c))
+        hi4 = fma(sup(a), sup(b), sup(c))
         max_ignore_nans(hi1, hi2, hi3, hi4)
     end
 
@@ -264,5 +264,5 @@ function sqrt(a::F) where {F<:Interval}
 
     isempty(a) && return a
 
-    return @round(F, sqrt(a.lo), sqrt(a.hi))  # `sqrt` is correctly-rounded
+    return @round(F, sqrt(inf(a)), sqrt(sup(a)))  # `sqrt` is correctly-rounded
 end
