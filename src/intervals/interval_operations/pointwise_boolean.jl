@@ -3,9 +3,9 @@
 #=  This file contains boolean operations defined for intervals.
 
     As there is no common consensus on how these operations should be defined for intervals,
-    in addition to the behavior defined by the standard (sec. ), the file also implements
-    different policies to handle these operations, giving the user to choose the one most
-    suited for their use case.
+    in addition to the behavior defined by the IEEE Std 1788-2015 (sec. 10.5.10),
+    the file also implements different policies to handle these operations, allowing the user
+    to choose the one most suited for their use case.
 
     We use a trait system, defining the operation with an extra
     `PointwisePolicy` argument defining how it should be handled.
@@ -19,8 +19,8 @@
 
 Define which policy we use to extend pointwise comparison of
 
-Valid value for the policy identifier `P` are
-    - `:ieee` (default): Boolean operations as defined in the standard,
+Valid values for the policy identifier `P` are
+    - `:ieee` (default): Boolean operations as defined in the IEEE Std 1788-2015,
       see section 10.5.10
     - `:certainly` : A boolean operation is extended by asking "is it true for
         all elements of the interval(s) involved".
@@ -36,7 +36,7 @@ Valid value for the policy identifier `P` are
         possible outcome as a `BooleanInterval`.
         This is safe but very strict, always erroring when an interval is used
         in a conditional statement.
-    - `:ternary`: With this policys return `missing` when the
+    - `:ternary`: With this policy return `missing` when the
         boolean operation does not return the same answer for all elements
         of the involved interval(s).
         This only causes error in conditional statements when hitting `missing`.
@@ -67,11 +67,7 @@ const pointwise_bool_functions = (
 
 ## :ieee
 # See Table 10.3
-<<<<<<< HEAD
 ==(::PointwisePolicy{:ieee}, x::Interval, y::Interval) = inf(x) == inf(y) && sup(x) == sup(y)
-=======
-==(::PointwisePolicy{:ieee}, x::Interval, y::Interval) = x.lo == y.lo && x.hi == y.hi
->>>>>>> d3e3427 (renamed is_all -> certainly, ieee1788 -> ieee and added more context to the beginning of the file.)
 
 <(::PointwisePolicy{:ieee}, x::Interval, y::Interval) = isstrictless(x, y)
 
