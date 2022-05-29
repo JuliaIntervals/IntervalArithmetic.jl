@@ -128,7 +128,11 @@ hull(a::Interval, b::Real) = hull(a, Interval(b))
 # hull{T,S}(a::Interval{T}, b::Interval{S}) = hull(promote(a, b)...)
 hull(a::Complex{<:Interval},b::Complex{<:Interval}) =
     complex(hull(real(a),real(b)),hull(imag(a),imag(b)))
-hull(a...) = reduce(hull, a)
+
+tointerval(x) = Interval(x)
+tointerval(x::Interval) = x
+
+hull(a...) = reduce(hull, tointerval.(a))
 hull(a::Vector{Interval{T}}) where {T} = reduce(hull, a)
 
 """

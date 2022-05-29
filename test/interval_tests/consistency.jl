@@ -171,6 +171,9 @@ setprecision(Interval, Float64)
         @test hull(1, 2..3, 4, 5) == Interval(1, 5)
         @test hull(1..2, 3, 4..5, 6) == Interval(1, 6)
         @test hull(1, 2..3, 4, 5..6) == Interval(1, 6)
+
+        @test hull(1, 2, 3, 4..5) == 1..5
+        @test hull(1, 1) == 1..1
     end
 
     @testset "Special interval tests" begin

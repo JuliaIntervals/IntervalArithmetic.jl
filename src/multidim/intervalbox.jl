@@ -45,7 +45,7 @@ numtype(x::IntervalBox{N, T}) where {N, T<:Real} = T
 
 length(X::IntervalBox{N,T}) where {N,T} = N
 
-
+tointerval(x::IntervalBox) = x
 
 # IntervalBox(xx) = IntervalBox(Interval.(xx))
 # IntervalBox(xx::SVector) where {N,T} = IntervalBox(Interval.(xx))
