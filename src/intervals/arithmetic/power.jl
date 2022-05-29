@@ -10,7 +10,7 @@
 
 # Write explicitly like this to avoid ambiguity warnings:
 for T in (:Integer, :Float64, :BigFloat, :Interval)
-    @eval ^(a::Interval{Float64}, x::$T) = Interval{Float64}(bigequiv(a)^x)
+    @eval ^(a::Interval{Float64}, x::$T) = Interval{Float64}((@biginterval(a))^x)
 end
 
 
@@ -29,11 +29,11 @@ Base.literal_pow(::typeof(^), x::Interval{T}, ::Val{p}) where {T,p} = x^p
 
 Implement the `pow` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-^(a::F, b::F) where {F<:Interval} = F(bigequiv(a)^b)
+^(a::F, b::F) where {F<:Interval} = F((@biginterval(a))^b)
 ^(a::F, x::AbstractFloat) where {F<:Interval{BigFloat}} = a^big(x)
 
 for T in (:AbstractFloat, :Integer)
-    @eval ^(a::F, x::$T) where {F<:Interval} = F(bigequiv(a)^x)
+    @eval ^(a::F, x::$T) where {F<:Interval} = F((@biginterval(a))^x)
 end
 
 function ^(a::F, n::Integer) where {F<:Interval{BigFloat}}
@@ -131,7 +131,7 @@ function ^(a::F, x::Rational{R}) where {F<:Interval, R<:Integer}
     isempty(a) && return emptyinterval(a)
     iszero(x) && return one(a)
     # x < 0 && return inv(a^(-x))
-    x < 0 && return F( inv(bigequiv(a^(-x)) ) )
+    x < 0 && return F( inv( (@biginterval(a))^(-x) ) )
 
     if isthinzero(a)
         x > zero(x) && return zero(a)
@@ -152,16 +152,11 @@ function ^(a::F, x::Rational{R}) where {F<:Interval, R<:Integer}
         a = a ∩ F(0, Inf)
     end
 
-    abig = bigequiv(a)
-    abiglo, abighi = bounds(abig)
-    ui = convert(Culong, q)
-    low = BigFloat()
-    high = BigFloat()
-    ccall((:mpfr_rootn_ui, :libmpfr) , Int32 , (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode) , low , abiglo , ui, MPFRRoundDown)
-    ccall((:mpfr_rootn_ui, :libmpfr) , Int32 , (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode) , high , abighi , ui, MPFRRoundUp)
-    b = interval(low, high) ^ p
-    return F(b)
+    b = nthroot( @biginterval(a), q)
 
+    p == 1 && return F(b)
+
+    return F(b^p)
 end
 
 # Interval power of an interval:
@@ -276,11 +271,11 @@ function log1p(a::F) where {T, F<:Interval{T}}
 end
 
 """
-    nthroot(a::Interval{BigFloat}, n::Integer)
+    nthroot(a::Interval, n::Integer)
 
 Compute the real n-th root of Interval.
 """
-function nthroot(a::Interval{BigFloat}, n::Integer)
+function nthroot(a::F, n::Integer) where {F<:Interval{BigFloat}}
     isempty(a) && return a
     n == 1 && return a
     n == 2 && return sqrt(a)
@@ -291,7 +286,7 @@ function nthroot(a::Interval{BigFloat}, n::Integer)
     alo, ahi = bounds(a)
     ahi < 0 && iseven(n) && return emptyinterval(BigFloat)
     if alo < 0 && ahi >= 0 && iseven(n)
-        a = a ∩ Interval{BigFloat}(0, Inf)
+        a = a ∩ F(0, Inf)
         alo, ahi = bounds(a)
     end
     ui = convert(Culong, n)
@@ -305,8 +300,13 @@ end
 function nthroot(a::F, n::Integer) where {T, F<:Interval{T}}
     n == 1 && return a
     n == 2 && return sqrt(a)
-    n < 0 && return inv(nthroot(a, -n))
+
     abig = @biginterval(a)
+    if n < 0
+        issubnormal(mag(a)) && return inv(nthroot(a, -n))
+        return F( inv(nthroot(abig, -n)) )
+    end
+
     b = nthroot(abig, n)
     return F(b)
 end
