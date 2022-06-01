@@ -301,12 +301,11 @@ function nthroot(a::F, n::Integer) where {T, F<:Interval{T}}
     n == 1 && return a
     n == 2 && return sqrt(a)
 
-    abig = bigequiv(a)
     if n < 0
         issubnormal(mag(a)) && return inv(nthroot(a, -n))
         return F( inv(nthroot(abig, -n)) )
     end
 
-    b = nthroot(abig, n)
+    b = nthroot(bigequiv(a), n)
     return F(b)
 end
