@@ -39,7 +39,9 @@ setprecision(Interval, Float64)
         @test @biginterval(1, Inf) == Interval{BigFloat}(1.0, Inf)
         @test @biginterval(-Inf, 1) == Interval{BigFloat}(-Inf, 1.0)
         @test @interval(-Inf, Inf) == entireinterval(Float64)
+        @test entireinterval(Int) == entireinterval(Float64)
         @test emptyinterval(Rational{Int}) == ∅
+        @test emptyinterval(Int) == ∅
 
         @test 1 == zero(a)+one(b)
         @test Interval(0,1) + emptyinterval(a) == emptyinterval(a)
@@ -171,10 +173,9 @@ setprecision(Interval, Float64)
         @test !(isentire(a))
         @test Interval(-Inf, Inf) ⪽ Interval(-Inf, Inf)
 
-        @test !(nai(a) == nai(a))
         @test nai(a) === nai(a)
-        @test nai(Float64) === Interval(NaN)
-        @test isnan(nai(BigFloat).lo)
+        @test nai(Float64) === DecoratedInterval(NaN)
+        @test isnan(interval(nai(BigFloat)).lo)
         @test isnai(nai())
         @test !(isnai(a))
 
@@ -185,6 +186,9 @@ setprecision(Interval, Float64)
         @test inf(entireinterval(a)) == -Inf
         @test sup(entireinterval(a)) == Inf
         @test isnan(sup(nai(BigFloat)))
+
+        @test inf(2.5) == 2.5
+        @test sup(2.5) == 2.5
     end
 
     @testset "mid" begin
@@ -219,6 +223,8 @@ setprecision(Interval, Float64)
         @test diam( @interval(0.1) ) == eps(0.1)
         @test isnan(diam(emptyinterval()))
         @test diam(a) == 1.0000000000000002
+
+        @test diam(0.1) == 0
     end
 
     @testset "mig and mag" begin
@@ -261,6 +267,16 @@ setprecision(Interval, Float64)
         @test cancelplus(Interval(0.0), Interval(1.0)) == Interval(1.0)
         @test cancelminus(Interval(-5.0, 0.0), Interval(0.0, 5.0)) == Interval(-5.0)
         @test cancelplus(Interval(-5.0, 0.0), Interval(0.0, 5.0)) == Interval(0.0)
+        @test cancelminus(Interval(1e308), -Interval(1e308)) == widen(Interval(Inf))
+        @test cancelplus(Interval(1e308), Interval(1e308)) == widen(Interval(Inf))
+        @test cancelminus(Interval(nextfloat(1e308)), -Interval(nextfloat(1e308))) ==
+                widen(Interval(Inf))
+        @test cancelplus(Interval(nextfloat(1e308)), Interval(nextfloat(1e308))) ==
+                widen(Interval(Inf))
+        @test cancelminus(Interval(prevfloat(big(Inf))), -Interval(prevfloat(big(Inf)))) ==
+                widen(Interval(big(Inf)))
+        @test cancelplus(Interval(prevfloat(big(Inf))), Interval(prevfloat(big(Inf)))) ==
+                widen(Interval(big(Inf)))
     end
 
     @testset "mid and radius" begin
@@ -275,6 +291,9 @@ setprecision(Interval, Float64)
         else
             @test_throws InexactError nai(Interval(1//2))
         end
+
+        @test mid(2.125) == 2.125
+        @test radius(2.125) == 0
     end
 
     @testset "abs, min, max, sign" begin
@@ -381,10 +400,10 @@ setprecision(Interval, Float64)
         @test interval(1, 2) == Interval(1, 2)
 
         @test inf(Interval(3, 2)) == 3
-        @test_throws ArgumentError interval(3, 2)
+        @test_logs (:warn,) @test isempty(interval(3, 2))
 
         @test sup(Interval(Inf, Inf)) == Inf
-        @test_throws ArgumentError interval(Inf, Inf)
+        @test_logs (:warn,) @test isempty(interval(Inf, Inf))
 
     end
 

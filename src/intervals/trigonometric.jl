@@ -323,10 +323,10 @@ end
 
 #atan{T<:Real, S<:Real}(y::Interval{T}, x::Interval{S}) = atan(promote(y, x)...)
 
-function atan(y::Interval{Float64}, x::Interval{Float64})
-    (isempty(y) || isempty(x)) && return emptyinterval(Float64)
+function atan(y::Interval{T}, x::Interval{T}) where T
+    (isempty(y) || isempty(x)) && return emptyinterval(T)
 
-    atomic(Interval{Float64}, atan(big53(y), big53(x)))
+    atomic(Interval{T}, atan(bigequiv(y), bigequiv(x)))
 end
 
 
@@ -392,5 +392,44 @@ function atan(y::Interval{BigFloat}, x::Interval{BigFloat})
             return range_atan(T)
         end
 
+    end
+end
+
+function cot(a::Interval{BigFloat})
+    isempty(a) && return a
+
+    diam(a) > Interval{BigFloat}(π).lo && return entireinterval(a)
+
+    lo_quadrant, lo = quadrant(Float64(a.lo))
+    hi_quadrant, hi = quadrant(Float64(a.hi))
+
+
+
+    lo_quadrant_mod = mod(lo_quadrant, 2)
+    hi_quadrant_mod = mod(hi_quadrant, 2)
+    
+    if(lo_quadrant_mod == 1 && hi_quadrant_mod == 0)
+        if(lo_quadrant < hi_quadrant)
+            return entireinterval(a)
+        else
+            return @round(-Inf, cot(a.lo))
+        end
+    elseif(lo_quadrant_mod == 0 && hi_quadrant_mod == 0 && lo_quadrant > hi_quadrant)
+        return @round(-Inf, cot(a.lo))
+    end 
+
+    return @round(cot(a.hi), cot(a.lo))
+end
+
+csc(a::Interval{BigFloat}) = 1/sin(a)
+
+sec(a::Interval{BigFloat}) = 1/cos(a)
+
+for f in (:cot, :csc, :sec)
+
+    @eval function ($f)(a::Interval{T}) where T
+        isempty(a) && return a
+
+        atomic(Interval{T}, ($f)(bigequiv(a)) )
     end
 end

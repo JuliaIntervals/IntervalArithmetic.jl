@@ -284,7 +284,7 @@ end
 ## Scalar functions on intervals (no directed rounding used)
 
 function mag(a::Interval{T}) where T<:Real
-    isempty(a) && return convert(eltype(a), NaN)
+    isempty(a) && return convert(T, NaN)
     # r1, r2 = setrounding(T, RoundUp) do
     #     abs(a.lo), abs(a.hi)
     # end
@@ -292,7 +292,7 @@ function mag(a::Interval{T}) where T<:Real
 end
 
 function mig(a::Interval{T}) where T<:Real
-    isempty(a) && return convert(eltype(a), NaN)
+    isempty(a) && return convert(T, NaN)
     zero(a.lo) ∈ a && return zero(a.lo)
     r1, r2 = setrounding(T, RoundDown) do
         abs(a.lo), abs(a.hi)
@@ -302,9 +302,11 @@ end
 
 
 # Infimum and supremum of an interval
-inf(a::Interval) = a.lo
+inf(a::Interval) = ifelse(iszero(a.lo) && !signbit(a.lo), copysign(a.lo, -1), a.lo)
 sup(a::Interval) = a.hi
 
+inf(a::Real) = a
+sup(a::Real) = a
 
 ## Functions needed for generic linear algebra routines to work
 real(a::Interval) = a
@@ -501,8 +503,8 @@ end
 Return the radius of the `Interval` `a`, such that
 `a ⊆ m ± radius`, where `m = mid(a)` is the midpoint.
 """
-function radius(a::Interval)
-    isempty(a) && return convert(eltype(a), NaN)
+function radius(a::Interval{T}) where {T<:Real}
+    isempty(a) && return convert(T, NaN)
     m = mid(a)
     return max(m - a.lo, a.hi - m)
 end
@@ -511,6 +513,10 @@ function radius(a::Interval{Rational{T}}) where T
     m = (a.lo + a.hi) / 2
     return max(m - a.lo, a.hi - m)
 end
+
+mid(a::Real) = a
+diam(a::Real) = zero(a)
+radius(a::Real) = zero(a)
 
 # cancelplus and cancelminus
 """
@@ -531,21 +537,21 @@ function cancelminus(a::Interval{T}, b::Interval{T}) where T<:Real
     c_lo = @round_down(a.lo - b.lo)
     c_hi = @round_up(a.hi - b.hi)
 
+    # Interval(c_lo, c_hi) is not a proper interval
     c_lo > c_hi && return entireinterval(T)
+    c = Interval(c_lo, c_hi)
 
-    c_lo == Inf && return Interval(prevfloat(c_lo), c_hi)
-    c_hi == -Inf && return Interval(c_lo, nextfloat(c_hi))
+    # Corner case 2 (page 62), involving unbounded c
+    (c_lo == Inf || c_hi == -Inf) && return widen(c)
+    isunbounded(c) && return c
 
+    # Corner case 1 (page 62) involving finite precision for diam(a) and diam(b)
     a_lo = @round_down(b.lo + c_lo)
     a_hi = @round_up(b.hi + c_hi)
+    (diam(a) == diam(b)) && (nextfloat(a.hi) < a_hi || prevfloat(a.lo) > a_lo) &&
+        return entireinterval(T)
 
-    if a_lo ≤ a.lo ≤ a.hi ≤ a_hi
-        (nextfloat(a.hi) < a_hi || prevfloat(a.lo) > a_hi) &&
-            return entireinterval(T)
-        return Interval(c_lo, c_hi)
-     end
-
-    return entireinterval(T)
+    return c
 end
 cancelminus(a::Interval, b::Interval) = cancelminus(promote(a, b)...)
 
@@ -575,7 +581,7 @@ convert(::Type{Integer}, a::Interval) = isinteger(a) ?
 Splits `x` in `n` intervals of the same diameter, which are returned
 as a vector.
 """
-function mince(x::Interval, n)
+@inline function mince(x::Interval, n)
     nodes = range(x.lo, x.hi, length = n+1)
-    return [Interval(nodes[i], nodes[i+1]) for i in 1:length(nodes)-1]
+    return Interval.(nodes[1:n], nodes[2:n+1])
 end

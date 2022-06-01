@@ -12,3 +12,4 @@ end
 
 @deprecate infimum inf
 @deprecate supremum sup 
+@deprecate interval_part interval

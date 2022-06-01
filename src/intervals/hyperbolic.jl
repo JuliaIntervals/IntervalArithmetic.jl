@@ -16,7 +16,7 @@ end
 # function tanh(a::Interval{Float64})
 #     isempty(a) && return a
 #
-#     float(tanh(big53(a)))
+#     float(tanh(bigequiv(a)))
 # end
 
 function tanh(a::Interval{BigFloat})
@@ -34,7 +34,7 @@ end
 
 
 function acosh(a::Interval{BigFloat})
-    domain = Interval(one(eltype(a)), Inf)
+    domain = Interval(one(BigFloat), Inf)
     a = a ∩ domain
     isempty(a) && return a
 
@@ -43,7 +43,7 @@ end
 
 
 function atanh(a::Interval{BigFloat})
-    domain = Interval(-one(eltype(a)), one(eltype(a)))
+    domain = Interval(-one(BigFloat), one(BigFloat))
     a = a ∩ domain
 
     isempty(a) && return a
@@ -58,12 +58,17 @@ function atanh(a::Interval{BigFloat})
     return Interval(res_lo, res_hi)
 end
 
-# Float64 versions of functions missing from CRlibm:
-for f in (:tanh, :asinh, :acosh, :atanh)
+coth(a::Interval{BigFloat}) = 1/tanh(a)
 
-    @eval function ($f)(a::Interval{Float64})
+csch(a::Interval{BigFloat}) = 1/sinh(a)
+
+sech(a::Interval{BigFloat}) = 1/cosh(a)
+# Float64 versions of functions missing from CRlibm:
+for f in (:tanh, :asinh, :acosh, :atanh, :coth, :csch, :sech)
+
+    @eval function ($f)(a::Interval{T}) where T
         isempty(a) && return a
 
-        atomic(Interval{Float64}, ($f)(big53(a)) )
+        atomic(Interval{T}, ($f)(bigequiv(a)) )
     end
 end

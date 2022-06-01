@@ -12,7 +12,8 @@ struct PowerType{T} end
 # Write explicitly like this to avoid ambiguity warnings:
 
 for T in (:Integer, :Float64, :BigFloat, :Interval)
-    @eval ^(::PowerType{:tight}, a::Interval{Float64}, x::$T) = atomic(Interval{Float64}, big53(a)^x)
+    @eval ^(::PowerType{:tight}, a::Interval{Float64}, x::$T) = atomic(Interval{Float64}, bigequiv(a)^x)
+    @eval ^(::PowerType{:tight}, a::Interval{Float32}, x::$T) = atomic(Interval{Float64}, bigequiv(a)^x)
 end
 
 
@@ -22,9 +23,6 @@ end
 # https://github.com/JuliaLang/julia/pull/24240:
 
 Base.literal_pow(::typeof(^), x::Interval{T}, ::Val{p}) where {T,p} = x^p
-
-
-Base.eltype(x::Interval{T}) where {T<:Real} = T
 
 
 

@@ -66,7 +66,12 @@ let X, A  # avoid problems with global variables
         @test A ∪ B.v == B
     end
 
-
+    x = 0.5 .. 3
+    a = IntervalBox(A[1]) # 1 .. 2
+    @test !(x ⊆ a) && a ⊆ x
+    @test !(x ⊂ a) && a ⊂ x
+    @test x ∩ a == a ∩ x == A[1]
+    @test x ∪ a ==  a ∪ x == x
 
     X = IntervalBox(1..2, 3..4)
     Y = IntervalBox(3..4, 3..4)
@@ -108,34 +113,34 @@ end
 @testset "setdiff for IntervalBox" begin
     X = IntervalBox(2..4, 3..5)
     Y = IntervalBox(3..5, 4..6)
-    @test setdiff(X, Y) == [ IntervalBox(3..4, 3..4),
-                              IntervalBox(2..3, 3..5) ]
+    @test Set(setdiff(X, Y)) == Set([ IntervalBox(3..4, 3..4),
+                              IntervalBox(2..3, 3..5) ])
 
-    @test setdiff(X.v, Y) == [ IntervalBox(3..4, 3..4),
-                              IntervalBox(2..3, 3..5) ]
+    @test Set(setdiff(X.v, Y)) == Set([ IntervalBox(3..4, 3..4),
+                              IntervalBox(2..3, 3..5) ])
 
-    @test setdiff(X, Y.v) == [ IntervalBox(3..4, 3..4),
-                              IntervalBox(2..3, 3..5) ]
+    @test Set(setdiff(X, Y.v)) == Set([ IntervalBox(3..4, 3..4),
+                              IntervalBox(2..3, 3..5) ])
 
     X = IntervalBox(2..5, 3..6)
     Y = IntervalBox(-10..10, 4..5)
-    @test setdiff(X, Y) == [ IntervalBox(2..5, 3..4),
-                              IntervalBox(2..5, 5..6) ]
+    @test Set(setdiff(X, Y)) == Set([ IntervalBox(2..5, 3..4),
+                              IntervalBox(2..5, 5..6) ])
 
 
     X = IntervalBox(2..5, 3..6)
     Y = IntervalBox(4..6, 4..5)
-    @test setdiff(X, Y) == [ IntervalBox(4..5, 3..4),
+    @test Set(setdiff(X, Y)) == Set([ IntervalBox(4..5, 3..4),
                               IntervalBox(4..5, 5..6),
-                              IntervalBox(2..4, 3..6) ]
+                              IntervalBox(2..4, 3..6) ])
 
 
     X = IntervalBox(2..5, 3..6)
     Y = IntervalBox(3..4, 4..5)
-    @test setdiff(X, Y) == [ IntervalBox(3..4, 3..4),
+    @test Set(setdiff(X, Y)) == Set([ IntervalBox(3..4, 3..4),
                               IntervalBox(3..4, 5..6),
                               IntervalBox(2..3, 3..6),
-                              IntervalBox(4..5, 3..6) ]
+                              IntervalBox(4..5, 3..6) ])
 
 
     X = IntervalBox(2..5, 3..6)
@@ -150,14 +155,20 @@ end
 
     X = IntervalBox(1..4, 3..6, 7..10)
     Y = IntervalBox(2..3, 4..5, 8..9)
-    @test setdiff(X, Y) == [ IntervalBox(2..3, 4..5, 7..8),
+    @test Set(setdiff(X, Y)) == Set([ IntervalBox(2..3, 4..5, 7..8),
                               IntervalBox(2..3, 4..5, 9..10),
                               IntervalBox(2..3, 3..4, 7..10),
                               IntervalBox(2..3, 5..6, 7..10),
                               IntervalBox(1..2, 3..6, 7..10),
-                              IntervalBox(3..4, 3..6, 7..10) ]
+                              IntervalBox(3..4, 3..6, 7..10) ])
 
 
+    X = IntervalBox(-Inf..Inf, 1..2)
+    Y = IntervalBox(1..2, -1..1.5)
+
+    @test Set(setdiff(X, Y)) == Set([IntervalBox(-Inf..1, 1..2),
+                              IntervalBox(2..Inf, 1..2),
+                              IntervalBox(1..2, 1.5..2)])
 end
 
 @testset "mid, diam, × for IntervalBox" begin
@@ -300,18 +311,34 @@ end
     @test vb2 == vv
     @test hull(vb2...) == ib2
     @test hull(vb2) == ib2
+    @test mince(ib2, (4,4)) == vb2
+    @test mince(ib2, (1,4)) == [ (-1 .. 1)×(-1 .. -0.5), (-1 .. 1)×(-0.5 .. 0),
+        (-1 .. 1)×(0 .. 0.5), (-1 .. 1)×(0.5 .. 1)]
+    @test hull(mince(ib2, (1,4))) == ib2
 
     ib3 = IntervalBox(-1..1, 3)
     vb3 = mince(ib3, 4)
     @test length(vb3) == 4^3
     @test hull(vb3...) == ib3
     @test hull(vb3) == ib3
+    @test mince(ib3, (4,4,4)) == vb3
+    @test mince(ib3, (2,1,1)) == [(-1 .. 0)×(-1 .. 1)×(-1 .. 1), 
+        (0 .. 1)×(-1 .. 1)×(-1 .. 1)]
+    @test hull(mince(ib3, (2,1,1))) == ib3
 
     ib4 = IntervalBox(-1..1, 4)
     vb4 = mince(ib4, 4)
     @test length(vb4) == 4^4
     @test hull(vb4...) == ib4
     @test hull(vb4) == ib4
+    @test mince(ib4,(4,4,4,4)) == vb4
+    @test mince(ib4,(1,1,1,1)) == [ib4]
+end
+
+@testset "Special box constructors" begin
+    @test zero(IntervalBox{2, Float64}) === IntervalBox(0 .. 0, 2)
+    @test zero((0..1) × (0..1)) === IntervalBox(0 .. 0, 2)
+    @test symmetric_box(2, Float64) === IntervalBox(-1 .. 1, 2)
 end
 
 end

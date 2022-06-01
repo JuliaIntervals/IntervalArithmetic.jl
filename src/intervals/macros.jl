@@ -1,23 +1,30 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
-"""The `@interval` macro is the main method to create an interval.
-It converts each expression into a narrow interval that is guaranteed to contain the true value passed by the user in the one or two expressions passed to it.
+"""The `@interval` macro converts an expression into a narrow interval that is guaranteed to contain the true value of the expression.
 When passed two expressions, it takes the hull of the resulting intervals
 to give a guaranteed containing interval.
 
 Examples:
 ```
-    @interval(0.1)
-
-    @interval(0.1, 0.2)
-
-    @interval(1/3, 1/6)
-
-    @interval(1/3^2)
+    @interval sin(0.1) + cos(0.2)
 ```
+
+is equivalent to
+```
+    sin(0.1..0.1) + cos(0.2..0.2)
+```
+
+NOTE! `@interval` should be used only to create intervals from an expression, as in the example
+before. To construct an interval from single numbers, the `..` is preferred, e.g. `0.1..0.2`
 """
-macro interval(expr1, expr2...)
-    make_interval(:(parameters.precision_type), expr1, expr2)
+macro interval(expr1)
+    make_interval(:(parameters.precision_type), expr1, ())
+end
+macro interval(expr1, expr2)
+    make_interval(:(parameters.precision_type), expr1, (expr2, ))
+end
+macro interval(T, expr1, expr2)
+    make_interval(T, expr1, (expr2, ))
 end
 
 "The `@floatinterval` macro constructs an interval with `Float64` entries."
@@ -78,7 +85,7 @@ end
 and making each literal (0.1, 1, etc.) into a corresponding interval construction,
 by calling `transform`."""
 function make_interval(T, expr1, expr2)
-    # @show expr1, expr2
+    # @show T, expr1, expr2
 
     expr1 = transform(expr1, :atomic, :(Interval{$T}))
 

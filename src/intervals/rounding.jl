@@ -53,15 +53,21 @@ parse(::Type{T}, x::AbstractString, rounding_mode::RoundingMode) where {T} = set
     parse(T, x)
 end
 
-# use BigFloat parser to get round issues on Windows:
-function parse(::Type{Float64}, s::AbstractString, r::RoundingMode)
-    a = setprecision(BigFloat, 53) do
-            setrounding(BigFloat, r) do
-                parse(BigFloat, s)   # correctly takes account of rounding mode
+# use higher precision float parser to get round issues on Windows
+@static if Sys.iswindows()
+    function parse(::Type{Float64}, s::AbstractString, r::RoundingMode)
+        a = setprecision(BigFloat, 53) do
+                setrounding(BigFloat, r) do
+                    parse(BigFloat, s)   # correctly takes account of rounding mode
+                end
             end
-        end
 
-    return Float64(a, r)
+        return Float64(a, r)
+    end
+
+    function parse(::Type{T}, s::AbstractString, r::RoundingMode) where {T <: Union{Float16, Float32}}
+        return T(parse(Float64, s, r), r)
+    end
 end
 
 
@@ -120,7 +126,7 @@ end
 
 # improved error-free arithmetic by RoundingEmulator.jl:
 for T in (Float32, Float64)
-    for (op, f) in ( (:+, :add), (:-, :sub), (:*, :mul), (:/, :div), (:sqrt, :sqrt), (:cbrt, :cbrt) )
+    for (op, f) in ( (:+, :add), (:-, :sub), (:*, :mul), (:/, :div), (:sqrt, :sqrt))
         for (mode, suffix) in zip((:Down, :Up), (:_down, :_up))
             mode1 = Expr(:quote, mode)
             mode1 = :(::RoundingMode{$mode1})
@@ -206,7 +212,7 @@ for mode in (:Down, :Up)
 
 
     # functions not in CRlibm:
-    for f in (:sqrt, :inv, :tanh, :asinh, :acosh, :atanh, :cbrt)
+    for f in (:sqrt, :inv, :tanh, :asinh, :acosh, :atanh, :cot)
 
 
         @eval function $f(::DirectedRounding{:slow},
@@ -275,7 +281,7 @@ function _set_directed_rounding(rounding_type::Symbol)
 
     # unary functions:
 
-    for f in (:sqrt, :inv, :cbrt)
+    for f in (:sqrt, :inv)
         @eval $f(a::T, r::RoundingMode) where {T<:AbstractFloat} = $f($roundtype, a, r)
     end
 
@@ -294,7 +300,7 @@ function _set_directed_rounding(rounding_type::Symbol)
 
     # unary functions:
     for f in vcat(CRlibm.functions,
-                    [:tanh, :asinh, :acosh, :atanh])
+                    [:tanh, :asinh, :acosh, :atanh, :cot])
 
         @eval $f(a::T, r::RoundingMode) where {T<:AbstractFloat} = $f($roundtype, a, r)
 

@@ -42,7 +42,8 @@ end
 eltype(::Type{IntervalBox{N,T}}) where {N,T} = Interval{T} # Note that this is defined for the type
 
 
-Base.eltype(x::IntervalBox{T}) where {T<:Real} = T
+Base.eltype(x::IntervalBox{N, T}) where {N, T<:Real} = Interval{T}
+numtype(x::IntervalBox{N, T}) where {N, T<:Real} = T
 
 length(X::IntervalBox{N,T}) where {N,T} = N
 
@@ -82,6 +83,11 @@ end
 ∈(X::AbstractVector, Y::IntervalBox{N,T}) where {N,T} = all(X .∈ Y)
 ∈(X, Y::IntervalBox{N,T}) where {N,T} = throw(ArgumentError("$X ∈ $Y is not defined"))
 
+# mixing intervals with one-dimensional interval boxes
+for op in (:⊆, :⊂, :⊃, :∩, :∪)
+    @eval $(op)(a::Interval, X::IntervalBox{1}) = $(op)(a, first(X))
+    @eval $(op)(X::IntervalBox{1}, a::Interval) = $(op)(first(X), a)
+end
 
 #=
 On Julia 0.6 can now write
@@ -117,28 +123,48 @@ Base.:(==)(x::IntervalBox, y::IntervalBox) = x.v == y.v
 
 
 """
-    mince(x::IntervalBox, n)
+    mince(x::IntervalBox, n::Int)
 
 Splits `x` in `n` intervals in each dimension of the same diameter. These
 intervals are combined in all possible `IntervalBox`-es, which are returned
 as a vector.
 """
-@generated function mince(x::IntervalBox{N,T}, n) where {N,T}
-    quote
-        nodes_matrix = Array{Interval{T},2}(undef, n, N)
-        for i in 1:N
-            nodes_matrix[1:n,i] .= mince(x[i], n)
-        end
+@inline mince(x::IntervalBox{N,T}, n::Int) where {N,T} =
+    mince(x, ntuple(_ -> n, N))
 
-        nodes = IntervalBox{$N,T}[]
-        Base.Cartesian.@nloops $N i _->(1:n) begin
-            Base.Cartesian.@nextract $N ival d->nodes_matrix[i_d, d]
-            ibox = Base.Cartesian.@ncall $N IntervalBox ival
-            push!(nodes, ibox)
-        end
-        nodes
+"""
+    mince(x::IntervalBox, ncuts::::NTuple{N,Int})
+
+Splits `x[i]` in `ncuts[i]` intervals . These intervals are
+combined in all possible `IntervalBox`-es, which are returned
+as a vector.
+"""
+@inline function mince(x::IntervalBox{N,T}, ncuts::NTuple{N,Int}) where {N,T}
+    minced_intervals = [mince(x[i], ncuts[i]) for i in 1:N]
+    minced_boxes = Vector{IntervalBox{N,T}}(undef, prod(ncuts))
+
+    for (k, cut_indices) in enumerate(CartesianIndices(ncuts))
+        minced_boxes[k] = IntervalBox([minced_intervals[i][cut_indices[i]] for i in 1:N])
     end
+    return minced_boxes
 end
+
 
 hull(a::IntervalBox{N,T}, b::IntervalBox{N,T}) where {N,T} = IntervalBox(hull.(a[:], b[:]))
 hull(a::Vector{IntervalBox{N,T}}) where {N,T} = hull(a...)
+
+"""
+    zero(IntervalBox{N, T})
+
+Return the zero interval box of dimension `N` in the numeric type `T`.
+"""
+zero(::Type{IntervalBox{N, T}}) where {N, T} = IntervalBox(zero(Interval{T}), N)
+zero(x::IntervalBox{N, T}) where {N, T} = zero(typeof(x))
+
+"""
+    symmetric_box(N, T)
+
+Return the symmetric interval box of dimension `N` in the numeric type `T`,
+each side is `Interval(-1, 1)`.
+"""
+symmetric_box(N, ::Type{T}) where T<:Real = IntervalBox(Interval{T}(-1, 1), N)

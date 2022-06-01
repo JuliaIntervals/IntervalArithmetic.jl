@@ -22,10 +22,10 @@ import Base:
     +, -, *, /, //, fma,
     <, >, ==, !=, ⊆, ^, <=,
     in, zero, one, eps, typemin, typemax, abs, abs2, real, min, max,
-    sqrt, exp, log, sin, cos, tan, inv, cbrt,
+    sqrt, exp, log, sin, cos, tan, cot, inv, cbrt, csc, hypot, sec,
     exp2, exp10, log2, log10,
     asin, acos, atan,
-    sinh, cosh, tanh, asinh, acosh, atanh, sinpi, cospi,
+    sinh, cosh, tanh, coth, csch, sech, asinh, acosh, atanh, sinpi, cospi,
     union, intersect, isempty,
     convert, promote_rule, eltype, size,
     BigFloat, float, widen, big,
@@ -53,13 +53,13 @@ import .Broadcast: broadcasted
 export
     AbstractInterval, Interval,
     interval,
-    @interval, @biginterval, @floatinterval, @make_interval,
+    @interval, @biginterval, @floatinterval,
     diam, radius, mid, mag, mig, hull,
-    emptyinterval, ∅, ∞, isempty, isinterior, ⪽,
+    emptyinterval, ∅, ∞, isempty, isinterior, ⪽, nthroot,
     precedes, strictprecedes, ≼, ≺, ⊂, ⊃, ⊇, contains_zero,
     entireinterval, isentire, nai, isnai, isthin, iscommon, isatomic,
     widen, inf, sup, bisect, mince,
-    parameters, eps, dist,
+    parameters, eps, dist, #numtype,
     midpoint_radius, interval_from_midpoint_radius,
     RoundTiesToEven, RoundTiesToAway,
     cancelminus, cancelplus, isunbounded,
@@ -87,12 +87,12 @@ import Base: setprecision
 
 ## Multidimensional
 export
-    IntervalBox
+    IntervalBox, symmetric_box
 
 ## Decorations
 export
     @decorated,
-    interval_part, decoration, DecoratedInterval,
+    interval, decoration, DecoratedInterval,
     com, dac, def, trv, ill
 
 ## Union type

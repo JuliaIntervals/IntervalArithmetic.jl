@@ -27,8 +27,6 @@ and feed an interval in. Since at each step of the process, the result is an int
 
 For example,
 ```
-using IntervalArithmetic
-
 julia> using IntervalArithmetic
 
 julia> f(x) = x^2 - 2

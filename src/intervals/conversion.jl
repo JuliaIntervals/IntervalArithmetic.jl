@@ -150,3 +150,6 @@ atomic(::Type{Interval{Rational{T}}}, x::S) where {T<:Integer, S<:Float64} =
 
 atomic(::Type{Interval{Rational{T}}}, x::S) where {T<:Integer, S<:BigFloat} =
     Interval(rationalize(T, x))
+
+atomic(::Type{Interval{Rational{T}}}, x::Interval{Rational{T}}) where {T<:Integer} =
+    Interval(x)

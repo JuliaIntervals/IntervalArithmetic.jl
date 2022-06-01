@@ -70,6 +70,30 @@ setprecision(Interval, Float64)
         @test string(a) == "19//24 ± 11//24"
     end
 
+    @testset "Interval{Float32}" begin
+        a = Interval{Float32}(1, 2)
+        b = Interval{Float32}(-1, Inf)
+        setformat(:standard)
+        @test string(a) == "[1f0, 2f0]"
+        @test string(b) == "[-1f0, ∞]"
+
+        setformat(:full)
+        @test string(a) == "Interval(1.0f0, 2.0f0)"
+        @test string(b) == "Interval(-1.0f0, ∞)"
+
+        setformat(:midpoint)
+        @test string(a) == "1.5f0 ± 0.5f0"
+    end
+
+    @testset "Complex{Interval}" begin
+        a = Complex(Interval(0, 2), 1)
+        @test typeof(a) == Complex{Interval{Float64}}
+        setformat(:standard)
+        @test string(a) == "[0, 2] + [1, 1]im"
+
+        setformat(:midpoint)
+        @test string(a) == "(1 ± 1) + (1 ± 0)im"
+    end
 
     setprecision(Interval, 256)
 
@@ -148,11 +172,31 @@ setprecision(Interval, Float64)
         @test string(X) == "[1.09999, 1.20001] × [2.09999, 2.20001]"
 
         X = IntervalBox(-Inf..Inf, -Inf..Inf)
-        @test string(X) == "[-∞, ∞] × [-∞, ∞]"
+        @test string(X) == "[-∞, ∞]²"
 
         setformat(:full)
-        @test string(X) == "IntervalBox(Interval(-Inf, Inf), Interval(-Inf, Inf))"
+        @test string(X) == "IntervalBox(Interval(-Inf, Inf), 2)"
 
+
+        setformat(:standard)
+        a = IntervalBox(1..2, 2..3)
+        @test string(a) == "[1, 2] × [2, 3]"
+
+        b = IntervalBox(emptyinterval(), 2)
+        @test string(b) == "∅²"
+
+        c = IntervalBox(1..2, 1)
+        @test string(c) == "[1, 2]¹"
+
+        setformat(:full)
+        @test string(a) == "IntervalBox(Interval(1.0, 2.0), Interval(2.0, 3.0))"
+        @test string(b) == "IntervalBox(∅, 2)"
+        @test string(c) == "IntervalBox(Interval(1.0, 2.0), 1)"
+
+        setformat(:midpoint)
+        @test string(a) == "(1.5 ± 0.5) × (2.5 ± 0.5)"
+        @test string(b) == "∅²"
+        @test string(c) == "(1.5 ± 0.5)¹"
     end
 end
 
@@ -178,6 +222,14 @@ end
 
     setformat(decorations=true)
     @test string(x) == "[0, 1]₁₂₈_def"
+
+    a = IntervalBox(1..2, 2..3)
+    b = IntervalBox(emptyinterval(), 2)
+    c = IntervalBox(1..2, 1)
+
+    @test sprint(showfull, a) == "IntervalBox(Interval(1.0, 2.0), Interval(2.0, 3.0))"
+    @test sprint(showfull, b) == "IntervalBox(∅, 2)"
+    @test sprint(showfull, c) == "IntervalBox(Interval(1.0, 2.0), 1)"
 
 end
 
