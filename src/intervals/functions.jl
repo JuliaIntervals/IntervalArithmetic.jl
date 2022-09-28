@@ -278,9 +278,10 @@ function pow(x::Interval, n::Integer)  # fast integer power
 
 end
 
-function pow(x::Interval, y::Real)  # fast real power, including for y an Interval
+function pow(x::Interval{T}, y::Real) where T # fast real power, including for y an Interval
 
     isempty(x) && return x
+    x.hi == zero(T) && !isnan(x.lo) && y > zero(y) && return Interval{T}(0)
     isinteger(y) && return pow(x, Int(y.lo))
     return exp(y * log(x))
 
