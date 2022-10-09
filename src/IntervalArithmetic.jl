@@ -1,7 +1,5 @@
 # This file is part of the IntervalArithmetic.jl package; MIT licensed
 
-__precompile__(true)
-
 module IntervalArithmetic
 
 import CRlibm
@@ -66,12 +64,7 @@ export
     pow, extended_div,
     setformat, @format
 
-if VERSION >= v"1.5.0-DEV.124"
-    import Base: isdisjoint
-else
-    export isdisjoint
-end
-
+import Base: isdisjoint
 
 export
     setindex   # re-export from StaticArrays for IntervalBox
