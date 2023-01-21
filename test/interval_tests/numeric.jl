@@ -40,6 +40,12 @@ end
     @test a + b ≛ Interval(+(a.lo, b.lo, RoundDown), +(a.hi, b.hi, RoundUp))
     @test -a ≛ Interval(-a.hi, -a.lo)
     @test a - b ≛ Interval(-(a.lo, b.hi, RoundDown), -(a.hi, b.lo, RoundUp))
+    for f in (:+, :-, :*, :/)
+        @eval begin
+            @test $f(Interval{Float64}(pi), Interval{Float32}(pi)) ≛
+                $f(Interval{Float64}(pi), Interval{Float64}(Interval{Float32}(pi)))
+        end
+    end
     @test Interval(1//4,1//2) + Interval(2//3) ≛ Interval(11//12, 7//6)
     @test_broken Interval(1//4,1//2) - Interval(2//3) ≛ Interval(-5//12, -1//6)
 

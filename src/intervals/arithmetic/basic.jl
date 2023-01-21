@@ -9,16 +9,8 @@
 +(a::Interval) = a  # Not in the IEEE standard
 
 """
-    -(a::Interval)
-
-Implement the `neg` function of the IEEE Std 1788-2015 (Table 9.1).
-"""
--(a::F) where {F<:Interval} = F(-sup(a), -inf(a))
-
-
-"""
     +(a::Interval, b::Real)
-    +(a::Real, a::Interval)
+    +(a::Real, b::Interval)
     +(a::Interval, b::Interval)
 
 Implement the `add` function of the IEEE Std 1788-2015 (Table 9.1).
@@ -34,10 +26,18 @@ function +(a::F, b::F) where {F<:Interval}
     (isempty(a) || isempty(b)) && return emptyinterval(F)
     return @round(F, inf(a) + inf(b), sup(a) + sup(b))
 end
++(a::Interval, b::Interval) = +(promote(a, b)...)
+
+"""
+    -(a::Interval)
+
+Implement the `neg` function of the IEEE Std 1788-2015 (Table 9.1).
+"""
+-(a::F) where {F<:Interval} = F(-sup(a), -inf(a))
 
 """
     -(a::Interval, b::Real)
-    -(a::Real, a::Interval)
+    -(a::Real, b::Interval)
     -(a::Interval, b::Interval)
 
 Implement the `sub` function of the IEEE Std 1788-2015 (Table 9.1).
@@ -46,19 +46,18 @@ function -(a::F, b::T) where {T<:Real, F<:Interval{T}}
     isempty(a) && return emptyinterval(F)
     return @round(F, inf(a) - b, sup(a) - b)
 end
-
 function -(b::T, a::F) where {T, F<:Interval{T}}
     isempty(a) && return emptyinterval(F)
     return @round(F, b - sup(a), b - inf(a))
 end
+-(a::F, b::Real) where {F<:Interval} = a - F(b)
+-(a::Real, b::F) where {F<:Interval} = F(a) - b
 
 function -(a::F, b::F) where {F<:Interval}
     (isempty(a) || isempty(b)) && return emptyinterval(F)
     return @round(F, inf(a) - sup(b), sup(a) - inf(b))
 end
-
--(a::F, b::Real) where {F<:Interval} = a - F(b)
--(a::Real, b::F) where {F<:Interval} = F(a) - b
+-(a::Interval, b::Interval) = -(promote(a, b)...)
 
 """
     scale(α, a::Interval)
@@ -71,7 +70,7 @@ For efficiency, does not check that the constant is positive.
 
 """
     *(a::Interval, b::Real)
-    *(a::Real, a::Interval)
+    *(a::Real, b::Interval)
     *(a::Interval, b::Interval)
 
 Implement the `mul` function of the IEEE Std 1788-2015 (Table 9.1).
@@ -88,25 +87,21 @@ function *(x::T, a::F) where {T<:Real, F<:Interval{T}}
         return @round(F, sup(a)*x, inf(a)*x)
     end
 end
-
 *(x::T, a::F) where {T<:Real, S, F<:Interval{S}} = Interval{S}(x) * a
 *(a::F, x::T) where {T<:Real, S, F<:Interval{S}} = x*a
 
 function *(a::F, b::F) where {F<:Interval}
     (isempty(a) || isempty(b)) && return emptyinterval(F)
-
     (isthinzero(a) || isthinzero(b)) && return zero(F)
-
     (isbounded(a) && isbounded(b)) && return mult(*, a, b)
-
     return mult((x, y, r) -> unbounded_mult(F, x, y, r), a, b)
 end
-
+*(a::Interval, b::Interval) = *(promote(a, b)...)
 
 # Helper functions for multiplication
 function unbounded_mult(::Type{F}, x::T, y::T, r::RoundingMode) where {T, F<:Interval{T}}
-    iszero(x) && return sign(y)*zero_times_infinity(T)
-    iszero(y) && return sign(x)*zero_times_infinity(T)
+    iszero(x) && return sign(y) * zero_times_infinity(T)
+    iszero(y) && return sign(x) * zero_times_infinity(T)
     return *(x, y, r)
 end
 
@@ -114,11 +109,11 @@ function mult(op, a::F, b::F) where {T, F<:Interval{T}}
     if inf(b) >= zero(T)
         inf(a) >= zero(T) && return @round(F, op(inf(a), inf(b)), op(sup(a), sup(b)))
         sup(a) <= zero(T) && return @round(F, op(inf(a), sup(b)), op(sup(a), inf(b)))
-        return @round(F, inf(a)*sup(b), sup(a)*sup(b))   # when zero(T) ∈ a
+        return @round(F, inf(a)*sup(b), sup(a)*sup(b))   # zero(T) ∈ a
     elseif sup(b) <= zero(T)
         inf(a) >= zero(T) && return @round(F, op(sup(a), inf(b)), op(inf(a), sup(b)))
         sup(a) <= zero(T) && return @round(F, op(sup(a), sup(b)), op(inf(a), inf(b)))
-        return @round(F, sup(a)*inf(b), inf(a)*inf(b))   # when zero(T) ∈ a
+        return @round(F, sup(a)*inf(b), inf(a)*inf(b))   # zero(T) ∈ a
     else
         inf(a) > zero(T) && return @round(F, op(sup(a), inf(b)), op(sup(a), sup(b)))
         sup(a) < zero(T) && return @round(F, op(inf(a), sup(b)), op(inf(a), inf(b)))
@@ -129,7 +124,7 @@ end
 
 """
     /(a::Interval, b::Real)
-    /(a::Real, a::Interval)
+    /(a::Real, b::Interval)
     /(a::Interval, b::Interval)
 
 Implement the `div` function of the IEEE Std 1788-2015 (Table 9.1).
@@ -182,6 +177,7 @@ function /(a::F, b::F) where {T, F<:Interval{T}}
         end
     end
 end
+/(a::Interval, b::Interval) = /(promote(a, b)...)
 
 """
     inv(a::Interval)
