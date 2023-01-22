@@ -18,9 +18,6 @@ typemax(::Type{F}) where {T<:Real, F<:Interval{T}} = F(prevfloat(typemax(T)), ty
 typemin(::Type{F}) where {T<:Integer, F<:Interval{T}} = F(typemin(T))
 typemax(::Type{F}) where {T<:Integer, F<:Interval{T}} = F(typemax(T))
 
-size(::Interval) = (1,)
-eltype(::F) where {F<:Interval} = F
-
 """
     numtype(::Interval{T}) where {T}
 
@@ -53,4 +50,3 @@ hash(x::Interval, h::UInt) = hash(sup(x), hash(inf(x), hash(Interval, h)))
 
 # TODO No idea where this comes from and if it is the correct place to put it.
 dist(a::Interval, b::Interval) = max(abs(inf(a)-inf(b)), abs(sup(a)-sup(b)))
-
