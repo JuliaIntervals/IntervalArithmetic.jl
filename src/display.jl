@@ -106,19 +106,20 @@ Display parameters:
 julia> x
 Interval(0.09999999999999999, 0.30000000000000004)
 
-julia> @format standard 3  # Equivalent to `setformat(:standard; sigdigits = 3)`
+julia> y = DecoratedInterval(x)
+[0.0999, 0.301]
+
+julia> @format standard true 3  # Equivalent to `setformat(:standard; decorations = true, sigdigits = 3)`
 Display parameters:
   - format: standard
-  - decorations: false
+  - decorations: true
   - significant digits: 3
 
-julia> x
-[0.0999, 0.301]
+julia> y
+[0.0999, 0.301]_com
 ```
 """
 macro format(expr...)
-    n = length(expr)
-    n > 3 && return :(throw(ArgumentError("Expect at most 3 arguments but received $($n).")))
     format = Meta.quot(display_params.format)
     decorations = display_params.decorations
     sigdigits = display_params.sigdigits
@@ -166,7 +167,7 @@ end
 function representation(a::DecoratedInterval, format::Symbol)
     # `format` is either :standard, :midpoint or :full
     var_interval = representation(interval(a), format)
-    format === :full && return string("DecoratedInterval(", var_interval, decoration(a), ")")
+    format === :full && return string("DecoratedInterval(", var_interval, ", ", decoration(a), ")")
     display_params.decorations && return string(var_interval, "_", decoration(a))
     return var_interval
 end
@@ -194,21 +195,23 @@ end
 
 # `String` representation of an `Interval`
 
-function basic_representation(a::Interval{Float64}, format::Symbol)
+function basic_representation(a::Interval, format::Symbol)
     isempty(a) && return "∅"
     sigdigits = display_params.sigdigits
     if format === :full
-        return string("Interval(", inf(a), ", ", sup(a), ")")
+        # Do not use `inf(a)` to avoid -0.0
+        return string("Interval(", a.lo, ", ", sup(a), ")")
     elseif format === :midpoint
         m = round_string(mid(a), sigdigits, RoundNearest)
         r = round_string(radius(a), sigdigits, RoundUp)
         output = string(m, " ± ", r)
-        return replace(output, "Inf" => "∞")
+        return replace(output, "Inf" => '∞')
     else  # format === :standard
-        lo = round_string(inf(a), sigdigits, RoundDown)
+        # Do not use `inf(a)` to avoid -0.0
+        lo = round_string(a.lo, sigdigits, RoundDown)
         hi = round_string(sup(a), sigdigits, RoundUp)
         output = string("[", lo, ", ", hi, "]")
-        return replace(output, "Inf" => "∞")
+        return replace(output, "Inf" => '∞')
     end
 end
 
@@ -216,101 +219,340 @@ function basic_representation(a::Interval{Float32}, format::Symbol)
     isempty(a) && return "∅"
     sigdigits = display_params.sigdigits
     if format === :full
-        output = string("Interval(", inf(a), "f0, ", sup(a), "f0)")
-        return replace(replace(output, "NaNf0" => "NaN32"), "Inff0" => "Inf32")
+        # Do not use `inf(a)` to avoid -0.0
+        output = string("Interval(", a.lo, "f0, ", sup(a), "f0)")
+        return replace(replace(output, "NaNf0" => "NaN32"), "Inff0" => '∞')
     elseif format === :midpoint
         m = round_string(mid(a), sigdigits, RoundNearest)
         r = round_string(radius(a), sigdigits, RoundUp)
         output = string(m, "f0 ± ", r, "f0")
-        return replace(replace(output, "NaNf0" => "NaN32"), "Inff0" => "Inf32")
+        return replace(replace(output, "NaNf0" => "NaN32"), "Inff0" => '∞')
     else  # format === :standard
-        lo = round_string(inf(a), sigdigits, RoundDown)
+        # Do not use `inf(a)` to avoid -0.0
+        lo = round_string(a.lo, sigdigits, RoundDown)
         hi = round_string(sup(a), sigdigits, RoundUp)
         output = string("[", lo, "f0, ", hi, "f0]")
-        return replace(replace(output, "NaNf0" => "NaN32"), "Inff0" => "Inf32")
+        return replace(replace(output, "NaNf0" => "NaN32"), "Inff0" => '∞')
     end
 end
 
 function basic_representation(a::Interval{<:Rational}, format::Symbol)
     isempty(a) && return "∅"
     if format === :full
-        return string("Interval(", inf(a), ", ", sup(a), ")")
+        # Do not use `inf(a)` to avoid -0.0
+        return string("Interval(", a.lo, ", ", sup(a), ")")
     elseif format === :midpoint
         return string(mid(a), " ± ", radius(a))
     else  # format === :standard
-        return string("[", inf(a), ", ", sup(a), "]")
+        # Do not use `inf(a)` to avoid -0.0
+        return string("[", a.lo, ", ", sup(a), "]")
     end
 end
 
 # Round to the prescribed significant digits
+# Code inspired by `_string(x::BigFloat, k::Integer)` in base/mpfr.jl
 
-round_string(x::AbstractFloat, sigdigits::Int, r::RoundingMode) = round_string(big(x), sigdigits, r)
+function round_string(x::AbstractFloat, sigdigits::Int, r::RoundingMode)
+    precision_sigdigits = ceil(Int, log10(2)*precision(x))
+    k = sigdigits#min(sigdigits, precision_sigdigits)  # Do not exceed the precision
 
-round_string(x::BigFloat, sigdigits::Int, ::RoundingMode{:Nearest}) = Base.MPFR._string(x, sigdigits-1)
+    str_digits = replace(replace(string(x), '.' => ""), '-' => "")
+    if (isinteger(x) || ispow2(x)) && k ≥ length(str_digits) # `x` is exactly representable
+        return round_string(big(x), k, RoundNearest)
+    else
+        return round_string(big(x), k, r)
+    end
+end
+
+function round_string(x::BigFloat, sigdigits::Int, ::RoundingMode{:Nearest})
+    precision_sigdigits = ceil(Int, log10(2)*precision(x))
+    k = sigdigits#min(sigdigits, precision_sigdigits)  # Do not exceed the precision
+
+    return Base.MPFR._string(x, k-1)  # `k-1` digits after the decimal, so `k` significant digits
+end
 
 function round_string(x::BigFloat, sigdigits::Int, r::RoundingMode)
-    #= code adapted from `_string(x::BigFloat, k::Integer)` in base/mpfr.jl =#
-    isfinite(x) || return string(Float64(x))
-    return _prettify_bigfloat(Base.MPFR.string_mpfr(x, "%.$(sigdigits-1)Re"), r)
-end
-
-function _prettify_bigfloat(s::String, ::RoundingMode{:Up})::String
-    #= code adapted from `_prettify_bigfloat(s::String)::String` in base/mpfr.jl =#
-    mantissa, exponent = eachsplit(s, 'e')
-    rev_mantissa = reverse(mantissa)
-    idx = findfirst(v -> v != '9' && v != '.', rev_mantissa)
-    if idx == 1
-        mantissa = string(mantissa[begin:end-1], parse(Int, mantissa[end])+1)  # Round up
-        string(mantissa, 'e', exponent)
+    if !isfinite(x)
+        return string(Float64(x))
     else
-        if isnothing(idx)  # Change the exponent
-            neg = startswith(mantissa, '-')
-            mantissa = string(neg ? '-' : "", "1.", '0'^length(mantissa[begin+neg+2:end]))
-            expo = parse(Int, exponent) + 1
-            exponent = string(expo < 0 ? "" : '+', string(expo; pad = 2))
-            return string(mantissa, 'e', exponent)
-        elseif idx ≥ length(mantissa)-1  # `idx` is after the decimal point
-            mantissa = reverse(string('0'^length(rev_mantissa[begin:idx-2]), '.',
-                parse(Int, rev_mantissa[idx])+1,
-                rev_mantissa[idx+1:end]))  # Round up
-            string(mantissa, 'e', exponent)
-        else  # `idx` is before the decimal point
-            mantissa = reverse(string('0'^length(rev_mantissa[begin:idx-1]),
-                parse(Int, rev_mantissa[idx])+1,
-                rev_mantissa[idx+1:end]))  # Round up
-            string(mantissa, 'e', exponent)
+        precision_sigdigits = ceil(Int, log10(2)*precision(x))
+        k = sigdigits#min(sigdigits, precision_sigdigits)  # Do not exceed the precision
+        str_digits = replace(replace(string(x), '.' => ""), '-' => "")
+        if (isinteger(x) || ispow2(x)) && k ≥ length(str_digits) # `x` is exactly representable
+            return round_string(x, k, RoundNearest)
+        else
+            # `k` digits after the decimal, so `k+1` significant digits
+            str = Base.MPFR.string_mpfr(x, "%.$(k)Re")
+            rounded_str = round_string(str, r)
+            return Base.MPFR._prettify_bigfloat(rounded_str)
         end
     end
 end
 
-function _prettify_bigfloat(s::String, ::RoundingMode{:Down})::String
-    #= code adapted from `_prettify_bigfloat(s::String)::String` in base/mpfr.jl =#
+round_string(s::String, ::RoundingMode{:Up}) =
+    startswith(s, '-') ? string('-', round_string_down(s[2:end])) : round_string_up(s)
+
+round_string(s::String, ::RoundingMode{:Down}) =
+    startswith(s, '-') ? string('-', round_string_up(s[2:end])) : round_string_down(s)
+
+function round_string_up(s::String)
+    # NOTE: `s` has 1 extra significant digit to control the rounding
     mantissa, exponent = eachsplit(s, 'e')
-    rev_mantissa = reverse(mantissa)
-    idx = findfirst(v -> v != '0' && v != '.' && v != '-', rev_mantissa)
-    if idx == 1
-        mantissa = string(mantissa[begin:end-1], parse(Int, mantissa[end])-1)  # Round down
-        string(mantissa, 'e', exponent)
+    mantissa = mantissa[1:end-1]
+    len = length(mantissa)
+    idx = findlast(d -> (d !== '9') & (d !== '.'), mantissa)
+    if idx == len  # Last significant digit is not 9
+        d = parse(Int, mantissa[len]) + 1  # Increase the last significant digit
+        return string(view(mantissa, 1:len-1), d, 'e', exponent)
+
     else
-        if isnothing(idx)  # Change the exponent
-            neg = startswith(mantissa, '-')
-            mantissa = string(neg ? '-' : "", "9.", '9'^length(mantissa[begin+neg+2:end]))
-            expo = parse(Int, exponent) - 1
-            exponent = string(expo < 0 ? "" : '+', string(expo; pad = 2))
-            return string(mantissa, 'e', exponent)
-        elseif idx ≥ length(mantissa)-1  # `idx` is after the decimal point
-            mantissa = reverse(string('9'^length(rev_mantissa[begin:idx-2]), '.',
-                parse(Int, rev_mantissa[idx])-1,
-                rev_mantissa[idx+1:end]))  # Round down
-            string(mantissa, 'e', exponent)
-        else  # `idx` is before the decimal point
-            mantissa = reverse(string('9'^length(rev_mantissa[begin:idx-1]),
-                parse(Int, rev_mantissa[idx])-1,
-                rev_mantissa[idx+1:end]))  # Round down
-            string(mantissa, 'e', exponent)
+        if isnothing(idx)  # All significant digits are 9
+            expo = parse(Int, exponent) + 1  # Increase the exponent by 1
+            expo_str = string(expo; pad = 2)
+            exponent = expo < 0 ? expo_str : string('+', expo_str)
+            return string("1.", '0'^(len - 2), 'e', exponent)
+
+        else
+            new_mantissa = string(
+                view(mantissa, 1:idx-1),
+                parse(Int, mantissa[idx]) + 1,
+                # Add "." if the last significant digit not equal to 9 is before the decimal point
+                idx == 1 ? "." : "",
+                '0'^(len - idx))
+            return string(new_mantissa, 'e', exponent)
+
         end
     end
 end
+
+function round_string_down(s::String)
+    # NOTE: `s` has 1 extra significant digit to control the rounding
+    mantissa, exponent = eachsplit(s, 'e')
+    len = length(mantissa)
+    idx = findlast(d -> (d !== '0') & (d !== '.'), mantissa)
+    if idx == len  # The extra significant digit is not 0
+        # d = parse(Int, mantissa[len]) - 1
+        # return string(view(mantissa, 1:len-1-1*(1)), d, 'e', exponent)
+        return string(view(mantissa, 1:len-1), 'e', exponent)  # Truncate
+
+    else
+        if isnothing(idx)  # All significant digits are 0
+            expo = parse(Int, exponent) - 1  # Decrease the exponent by 1
+            expo_str = string(expo; pad = 2)
+            exponent = expo < 0 ? expo_str : string('+', expo_str)
+            return string("9.", '9'^(len - 3), 'e', exponent)
+
+        else
+            new_mantissa = string(
+                    view(mantissa, 1:idx-1),
+                    parse(Int, mantissa[idx]) - 1,
+                    # Add '.' if the last significant digit not equal to 0 is before the decimal point
+                    idx == 1 ? "." : "",
+                    '9'^(len - (idx + 1)))
+            return string(new_mantissa, 'e', exponent)
+
+        end
+    end
+end
+# function round_string(s::String, ::RoundingMode{:Up})
+#     # NOTE: `s` has 1 extra significant digit to control the rounding
+#     mantissa, exponent = eachsplit(s, 'e')
+#     #mantissa = mantissa[begin:end-1]  # Since Base.MPFR._string returned sigdigits+1 significant digits
+#     neg = startswith(mantissa, '-')
+#     #neg && return s  # Since the number is negative, truncation is sufficiant to round up ### NOT ALWAAYS TRUYE
+#     len = length(mantissa)
+#     if neg
+#         idx = findlast(d -> (d !== '0') & (d !== '.') & (d !== '-'), mantissa)
+#         if idx == len  # Last digit of the mantissa is not 0
+#             # d = parse(Int, mantissa[len]) - 1
+#             # return string(view(mantissa, 1:len-1-1*(1)), d, 'e', exponent)
+#             return string(mantissa[begin:end-1], 'e', exponent)  # Truncate to the significant digits
+
+#         else
+#             if isnothing(idx)  # All digits of the mantissa are 0
+#                 expo = parse(Int, exponent) - 1  # Decrease the exponent by 1
+#                 expo_str = string(expo; pad = 2)
+#                 exponent = expo < 0 ? expo_str : string('+', expo_str)
+#                 return string(string(neg ? '-' : "", "9.", '9'^(len-neg-1        -1*(1))), 'e', exponent)
+
+#             else
+#                 new_mantissa = string(
+#                         view(mantissa, 1:idx-1),
+#                         # Add '.' if the last digit not equal to 0 of the mantissa is before the decimal point
+#                         idx == 2 ? '.' : "",
+#                         parse(Int, mantissa[idx]) - 1,
+#                         '9'^(len-(idx+1)      -0*(1)))
+#                 return string(new_mantissa, 'e', exponent)
+
+#             end
+#         end
+#     else
+#         # idx = findlast(d -> (d !== '9') & (d !== '.') & (d !== '-'), mantissa)
+
+#         # if idx == len  # Last digit of the mantissa is not 9
+#         #     d = parse(Int, mantissa[len]) + 1
+#         #     return string(view(mantissa, 1:len-1), d, 'e', exponent)
+
+#         # else
+#         #     if isnothing(idx)  # All digits of the mantissa are 9
+#         #         expo = parse(Int, exponent) + 1  # Increase the exponent by 1
+#         #         expo_str = string(expo; pad = 2)
+#         #         exponent = expo < 0 ? expo_str : string('+', expo_str)
+#         #         return string(string(neg ? '-' : "", "1.", '0'^(len-neg-1)), 'e', exponent)
+
+#         #     else
+#         #         new_mantissa = string(
+#         #                 view(mantissa, 1:idx-1),
+#         #                 parse(Int, mantissa[idx]) + 1,
+#         #                 # Add '.' if the last digit not equal to 9 of the mantissa is before the decimal point ### NOT ALWAAYS TRUYE
+#         #                 idx ≤ 1+neg ? '.' : "",
+#         #                 '0'^(len-(idx+1)))
+#         #         return string(new_mantissa, 'e', exponent)
+
+#         #     end
+#         # end
+#         idx = findlast(d -> (d !== '9') & (d !== '.') & (d !== '-'), mantissa)
+#         if idx == len  # Last digit of the mantissa is not 9
+#             d = parse(Int, mantissa[len]) + 1
+#             return string(view(mantissa, 1:len-1          -(1)), d, 'e', exponent)
+
+#         else
+#             if isnothing(idx)  # All digits of the mantissa are 9
+#                 expo = parse(Int, exponent) + 1  # Increase the exponent by 1
+#                 expo_str = string(expo; pad = 2)
+#                 exponent = expo < 0 ? expo_str : string('+', expo_str)
+#                 return string(string(neg ? '-' : "", "1.", '0'^(len-neg-1      -(1))), 'e', exponent)
+
+#             else
+#                 new_mantissa = string(
+#                         view(mantissa, 1:idx-1),
+#                         parse(Int, mantissa[idx]) + 1,
+#                         # Add '.' if the last digit not equal to 9 of the mantissa is before the decimal point ### NOT ALWAAYS TRUYE
+#                         idx ≤ 1+neg ? '.' : "",
+#                         '0'^(len-(idx+1)      -0*(1)))
+#                 return string(new_mantissa, 'e', exponent)
+
+#             end
+#         end
+#     end
+# end
+
+# function round_string(s::String, ::RoundingMode{:Down})
+#     # NOTE: `s` has 1 extra significant digit to control the rounding
+#     mantissa, exponent = eachsplit(s, 'e')
+#     #mantissa = mantissa[begin:end-1]  # Since Base.MPFR._string returned sigdigits+1 significant digits
+#     neg = startswith(mantissa, '-')
+#     #!neg && return string(mantissa, 'e', exponent)  # Since the number is positive, truncation is sufficiant to round down
+#     len = length(mantissa)
+#     if neg
+#         idx = findlast(d -> (d !== '9') & (d !== '.') & (d !== '-'), mantissa)
+#         if idx == len  # Last digit of the mantissa is not 9
+#             d = parse(Int, mantissa[len]) + 1
+#             return string(view(mantissa, 1:len-1          -(1)), d, 'e', exponent)
+
+#         else
+#             if isnothing(idx)  # All digits of the mantissa are 9
+#                 expo = parse(Int, exponent) + 1  # Increase the exponent by 1
+#                 expo_str = string(expo; pad = 2)
+#                 exponent = expo < 0 ? expo_str : string('+', expo_str)
+#                 return string(string(neg ? '-' : "", "1.", '0'^(len-neg-1      -(1))), 'e', exponent)
+
+#             else
+#                 new_mantissa = string(
+#                         view(mantissa, 1:idx-1),
+#                         parse(Int, mantissa[idx]) + 1,
+#                         # Add '.' if the last digit not equal to 9 of the mantissa is before the decimal point ### NOT ALWAAYS TRUYE
+#                         idx ≤ 1+neg ? '.' : "",
+#                         '0'^(len-(idx+1)      -0*(1)))
+#                 return string(new_mantissa, 'e', exponent)
+
+#             end
+#         end
+#     else
+#         idx = findlast(d -> (d !== '0') & (d !== '.') & (d !== '-'), mantissa)
+#         if idx == len  # Last digit of the mantissa is not 0
+#             # d = parse(Int, mantissa[len]) - 1
+#             # return string(view(mantissa, 1:len-1-1*(1)), d, 'e', exponent)
+#             return string(mantissa[begin:end-1], 'e', exponent)  # Truncate to the significant digits
+
+#         else
+#             if isnothing(idx)  # All digits of the mantissa are 0
+#                 expo = parse(Int, exponent) - 1  # Decrease the exponent by 1
+#                 expo_str = string(expo; pad = 2)
+#                 exponent = expo < 0 ? expo_str : string('+', expo_str)
+#                 return string(string(neg ? '-' : "", "9.", '9'^(len-neg-1        -1*(1))), 'e', exponent)
+
+#             else
+#                 new_mantissa = string(
+#                         view(mantissa, 1:idx-1),
+#                         # Add '.' if the last digit not equal to 0 of the mantissa is before the decimal point
+#                         idx == 1 ? '.' : "",
+#                         parse(Int, mantissa[idx]) - 1,
+#                         '9'^(len-(idx+1)      -0*(1)))
+#                 return string(new_mantissa, 'e', exponent)
+
+#             end
+#         end
+#     end
+# end
+
+# function round_string_up(s::String)
+#     mantissa, exponent = eachsplit(s, 'e')
+#     rev_mantissa = reverse(mantissa)
+#     idx = findfirst(v -> v != '9' && v != '.', rev_mantissa)
+#     op = +
+#     if idx == 1
+#         mantissa = string(mantissa[begin:end-1], op(parse(Int, mantissa[end])+1))  # Round up
+#         string(mantissa, 'e', exponent)
+#     else
+#         if isnothing(idx)  # Change the exponent
+#             neg = startswith(mantissa, '-')
+#             mantissa = string(neg ? '-' : "", "1.", '0'^length(mantissa[begin+neg+2:end]))
+#             expo = op(parse(Int, exponent), 1)
+#             exponent = string(expo < 0 ? "" : '+', string(expo; pad = 2))
+#             return string(mantissa, 'e', exponent)
+#         elseif idx ≥ length(mantissa)-1  # `idx` is after the decimal point
+#             mantissa = reverse(string('0'^length(rev_mantissa[begin:idx-2]), '.',
+#                 op(parse(Int, rev_mantissa[idx]), 1),
+#                 rev_mantissa[idx+1:end]))  # Round up
+#             string(mantissa, 'e', exponent)
+#         else  # `idx` is before the decimal point
+#             mantissa = reverse(string('0'^length(rev_mantissa[begin:idx-1]),
+#                 op(parse(Int, rev_mantissa[idx]), 1),
+#                 rev_mantissa[idx+1:end]))  # Round up
+#             string(mantissa, 'e', exponent)
+#         end
+#     end
+# end
+
+# function round_string_down(s::String)
+#     mantissa, exponent = eachsplit(s, 'e')
+#     rev_mantissa = reverse(mantissa)
+#     idx = findfirst(v -> v != '0' && v != '.' && v != '-', rev_mantissa)
+#     op = -
+#     if idx == 1
+#         mantissa = string(mantissa[begin:end-1], op(parse(Int, mantissa[end]), 1))  # Round down
+#         string(mantissa, 'e', exponent)
+#     else
+#         if isnothing(idx)  # Change the exponent
+#             neg = startswith(mantissa, '-')
+#             mantissa = string(neg ? '-' : "", "9.", '9'^length(mantissa[begin+neg+2:end]))
+#             expo = op(parse(Int, exponent), 1)
+#             exponent = string(expo < 0 ? "" : '+', string(expo; pad = 2))
+#             return string(mantissa, 'e', exponent)
+#         elseif idx ≥ length(mantissa)-1  # `idx` is after the decimal point
+#             mantissa = reverse(string('9'^length(rev_mantissa[begin:idx-2]), '.',
+#                 op(parse(Int, rev_mantissa[idx]), 1),
+#                 rev_mantissa[idx+1:end]))  # Round down
+#             string(mantissa, 'e', exponent)
+#         else  # `idx` is before the decimal point
+#             mantissa = reverse(string('9'^length(rev_mantissa[begin:idx-1]),
+#                 op(parse(Int, rev_mantissa[idx]), 1),
+#                 rev_mantissa[idx+1:end]))  # Round down
+#             string(mantissa, 'e', exponent)
+#         end
+#     end
+# end
 
 # Utilities
 
