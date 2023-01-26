@@ -125,12 +125,12 @@ const Region{T} = Union{Interval{T}, IntervalBox{T}}
 
 # These definitions has been put there because generated functions must be
 # defined after all methods they use.
-@generated function Interval{T}(x::Irrational) where T
+@generated function Interval{T}(x::AbstractIrrational) where T
     res = atomic(Interval{T}, x())  # Precompute the interval
     return :(return $res)  # Set body of the function to return the precomputed result
 end
 
-Interval{BigFloat}(x::Irrational) = atomic(Interval{BigFloat}, x)
-Interval(x::Irrational) = Interval{Float64}(x)
+Interval{BigFloat}(x::AbstractIrrational) = atomic(Interval{BigFloat}, x)
+Interval(x::AbstractIrrational) = Interval{Float64}(x)
 
 end # module IntervalArithmetic
