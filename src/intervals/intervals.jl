@@ -53,16 +53,16 @@ Interval(a::T, b::S) where {T<:Real, S<:Real} = Interval(promote(a,b)...)
 # BigFloat or Rational{Integer} intervals.
 Interval(a::T, b::T) where T<:Integer = Interval(float(a), float(b))
 
-# Constructors for Irrational
-# Single argument Irrational constructor are in IntervalArithmetic.jl
+# Constructors for AbstractIrrational
+# Single argument AbstractIrrational constructor are in IntervalArithmetic.jl
 # as generated functions need to be define last.
-Interval{T}(a::Irrational, b::Irrational) where {T<:Real} = Interval{T}(T(a, RoundDown), T(b, RoundUp))
-Interval{T}(a::Irrational, b::Real) where {T<:Real} = Interval{T}(T(a, RoundDown), b)
-Interval{T}(a::Real, b::Irrational) where {T<:Real} = Interval{T}(a, T(b, RoundUp))
+Interval{T}(a::AbstractIrrational, b::AbstractIrrational) where {T<:Real} = Interval{T}(T(a, RoundDown), T(b, RoundUp))
+Interval{T}(a::AbstractIrrational, b::Real) where {T<:Real} = Interval{T}(T(a, RoundDown), b)
+Interval{T}(a::Real, b::AbstractIrrational) where {T<:Real} = Interval{T}(a, T(b, RoundUp))
 
-Interval(a::Irrational, b::Irrational) = Interval{Float64}(a, b)
-Interval(a::Irrational, b::Real) = Interval{Float64}(a, b)
-Interval(a::Real, b::Irrational) = Interval{Float64}(a, b)
+Interval(a::AbstractIrrational, b::AbstractIrrational) = Interval{Float64}(a, b)
+Interval(a::AbstractIrrational, b::Real) = Interval{Float64}(a, b)
+Interval(a::Real, b::AbstractIrrational) = Interval{Float64}(a, b)
 
 Interval(x::Interval) = x
 Interval(x::Complex) = Interval(real(x)) + im*Interval(imag(x))
@@ -144,25 +144,25 @@ function ..(a::T, b::S) where {T, S}
     Interval(atomic(Interval{T}, a).lo, atomic(Interval{S}, b).hi)
 end
 
-function ..(a::T, b::Irrational{S}) where {T, S}
+function ..(a::T, b::S) where {T, S<:AbstractIrrational}
     if !is_valid_interval(a, b)
         @warn "Invalid input, empty interval is returned"
-        return emptyinterval(promote_type(T, Irrational{S}))
+        return emptyinterval(promote_type(T, S))
     end
-    R = promote_type(T, Irrational{S})
+    R = promote_type(T, S)
     Interval(atomic(Interval{R}, a).lo, R(b, RoundUp))
 end
 
-function ..(a::Irrational{T}, b::S) where {T, S}
+function ..(a::T, b::S) where {T<:AbstractIrrational, S}
     if !is_valid_interval(a, b)
         @warn "Invalid input, empty interval is returned"
-        return emptyinterval(promote_type(Irrational{T}, S))
+        return emptyinterval(promote_type(T, S))
     end
-    R = promote_type(Irrational{T}, S)
+    R = promote_type(T, S)
     return Interval(R(a, RoundDown), atomic(Interval{R}, b).hi)
 end
 
-function ..(a::Irrational{T}, b::Irrational{S}) where {T, S}
+function ..(a::T, b::S) where {T<:AbstractIrrational, S<:AbstractIrrational}
     return interval(a, b)
 end
 

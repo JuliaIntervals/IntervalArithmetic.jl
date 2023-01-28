@@ -83,7 +83,7 @@ atomic(::Type{Interval{T}}, x::AbstractString) where T<:AbstractFloat =
                      parse(T, string(x), RoundUp) )
     end
 
-    function atomic(::Type{Interval{T}}, x::Union{Irrational,Rational}) where {T<:AbstractFloat}
+    function atomic(::Type{Interval{T}}, x::Union{AbstractIrrational,Rational}) where {T<:AbstractFloat}
         isinf(x) && return wideinterval(T(x))
 
         Interval{T}( T(x, RoundDown), T(x, RoundUp) )
@@ -116,7 +116,7 @@ function atomic(::Type{Interval{T}}, x::S) where {T<:AbstractFloat, S<:AbstractF
     return atomic(Interval{T}, xrat)
 end
 
-atomic(::Type{Interval{Irrational{T}}}, x::Irrational{S}) where {T, S} =
+atomic(::Type{Interval{T}}, x::S) where {T<:AbstractIrrational, S<:AbstractIrrational} =
     float(atomic(Interval{Float64}, x))
 
 function atomic(::Type{Interval{T}}, x::Interval) where T<:AbstractFloat
@@ -129,12 +129,12 @@ atomic(::Type{Interval{T}}, x::Complex{Bool}) where T<:AbstractFloat =
 
 
 # Rational intervals
-function atomic(::Type{Interval{Rational{Int}}}, x::Irrational)
+function atomic(::Type{Interval{Rational{Int}}}, x::AbstractIrrational)
     a = float(atomic(Interval{BigFloat}, x))
     atomic(Interval{Rational{Int}}, a)
 end
 
-function atomic(::Type{Interval{Rational{BigInt}}}, x::Irrational)
+function atomic(::Type{Interval{Rational{BigInt}}}, x::AbstractIrrational)
     a = atomic(Interval{BigFloat}, x)
     atomic(Interval{Rational{BigInt}}, a)
 end
