@@ -5,6 +5,7 @@ using Test
 
 @testset "Constructing intervals" begin
     # Naive constructors, with no conversion involved
+    @test Interval(1.0) ≛ Interval(Interval(1.0)) ≛ Interval{Float64}(Interval(1.0))
     @test Interval(1) ≛ Interval(1.0, 1.0)
     @test size(Interval(1)) == ()  # Match the `size` behaviour of `Number`
     @test Interval(big(1)) ≛ Interval(1.0, 1.0)

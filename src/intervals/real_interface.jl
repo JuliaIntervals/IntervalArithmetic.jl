@@ -1,16 +1,13 @@
-# This file is part of the IntervalArithmetic.jl package; MIT licensed
-
-#=
-Description:
-
-This file contains the functions that must be defined on `Interval`s so that
-they behave like `Real` in julia.
+#= This file contains the function that must be defined on Intervals
+    so that they behave like Real in julia.
 =#
 
-zero(::F) where {T<:Real, F<:Interval{T}} = F(zero(T))
+real(a::Interval) = a
+
+zero(a::F) where {T<:Real, F<:Interval{T}} = F(zero(T))
 zero(::Type{F}) where {T<:Real, F<:Interval{T}} = F(zero(T))
 
-one(::F) where {T<:Real, F<:Interval{T}} = F(one(T))
+one(a::F) where {T<:Real, F<:Interval{T}} = F(one(T))
 one(::Type{F}) where {T<:Real, F<:Interval{T}} = F(one(T))
 
 typemin(::Type{F}) where {T<:Real, F<:Interval{T}} = F(typemin(T), nextfloat(typemin(T)))
@@ -19,11 +16,11 @@ typemin(::Type{F}) where {T<:Integer, F<:Interval{T}} = F(typemin(T))
 typemax(::Type{F}) where {T<:Integer, F<:Interval{T}} = F(typemax(T))
 
 """
-    numtype(::Interval{T}) where {T}
+    numtype(x::Interval)
 
-Return the type `T` of the bounds of the interval.
+Returns the type of the bounds of the interval.
 
-# Example
+### Example
 
 ```julia
 julia> numtype(1..2)
@@ -38,8 +35,8 @@ eps(::Type{F}) where {T, F<:Interval{T}} = F(eps(T))
 """
     hash(x::Interval, h)
 
-Compute the integer hash code for an interval using the method for composite
-types used in `AutoHashEquals.jl`.
+Computes the integer hash code for an interval using the method for composite
+types used in `AutoHashEquals.jl`
 
 Note that in `IntervalArithmetic.jl`, equality of intervals is given by
 `≛` rather than the `==` operator.

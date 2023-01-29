@@ -34,7 +34,7 @@ Interval{Float64}
 """
 default_bound() = Float64
 
-@inline _normalisezero(a::Real) = ifelse(iszero(a) && signbit(a), copysign(a, 1), a)
+@inline _normalisezero(a::Real) = ifelse(iszero(a), zero(a), a)
 
 """
     Interval
@@ -64,18 +64,11 @@ struct Interval{T} <: Real
     lo::T
     hi::T
 
-    function Interval{T}(a, b) where T
-        new{T}(_normalisezero(T(a, RoundDown)), _normalisezero(T(b, RoundUp)))
-    end
-
-    function Interval{T}(a::T, b::T) where T
-        a = _normalisezero(a)
-        b = _normalisezero(b)
-        new{T}(a, b)
-    end
+    Interval{T}(a::T, b::T) where T = new{T}(_normalisezero(a), _normalisezero(b))
 end
 
 #= Outer constructors =#
+Interval{T}(a, b) where T = Interval{T}(T(a, RoundDown), T(b, RoundUp))
 Interval{T}(a) where T = Interval{T}(a, a)
 Interval(a) = Interval(a, a)
 Interval(a::Tuple) = Interval(a...)
@@ -100,6 +93,7 @@ function Interval(a::Irrational, b::Irrational)
 end
 
 #= Interval =#
+Interval(x::Interval) = x
 Interval{T}(x::Interval{T}) where T = x
 Interval{T}(x::Interval) where T = Interval{T}(inf(x), sup(x))
 
