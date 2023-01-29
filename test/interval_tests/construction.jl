@@ -6,7 +6,7 @@ using Test
 @testset "Constructing intervals" begin
     # Naive constructors, with no conversion involved
     @test Interval(1) ≛ Interval(1.0, 1.0)
-    @test size(Interval(1)) == (1,)
+    @test size(Interval(1)) == ()  # Match the `size` behaviour of `Number`
     @test Interval(big(1)) ≛ Interval(1.0, 1.0)
     @test_broken Interval(1//10) ≛ Interval{Rational{Int}}(1//10, 1//10)
     @test_broken Interval(BigInt(1)//10) ≛ Interval{Rational{BigInt}}(1//10, 1//10)
