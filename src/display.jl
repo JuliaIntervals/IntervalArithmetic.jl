@@ -136,8 +136,13 @@ end
 
 # Printing mechanism for various types of intervals
 
-show(io::IO, a::Union{Interval,Complex{<:Interval},DecoratedInterval,IntervalBox}) =
+show(io::IO, ::MIME"text/plain", a::Union{Interval,Complex{<:Interval},DecoratedInterval,IntervalBox}) =
     print(io, representation(a, display_params.format))
+
+function show(io::IO, a::Union{Interval,Complex{<:Interval},DecoratedInterval,IntervalBox})
+    get(io, :compact, false) && return print(io, representation(a, display_params.format))
+    return print(io, representation(a, :full))
+end
 
 showfull(io::IO, a::Union{Interval,Complex{<:Interval},DecoratedInterval,IntervalBox}) =
     print(io, representation(a, :full))
@@ -175,18 +180,20 @@ function representation(X::IntervalBox{N}, format::Symbol) where {N}
         isempty(X) && return string("IntervalBox(∅, ", N, ")")
         x = first(X)
         all(y -> x ≛ y, X) && return string("IntervalBox(", representation(x, format), ", ", N, ")")
-        full_str = representation.(X.v, :full)
-        return string("IntervalBox(", join(full_str, ", "), ")")
+        str = representation.(X.v, format)
+        return string("IntervalBox(", join(str, ", "), ")")
     elseif format === :midpoint
         isempty(X) && return string("∅", supscriptify(N))
         x = first(X)
         all(y -> x ≛ y, X) && return string("(", representation(x, format), ")", supscriptify(N))
-        return string("(", join(X.v, ") × ("), ")")
+        str = representation.(X.v, format)
+        return string("(", join(str, ") × ("), ")")
     else  # format === :standard
         isempty(X) && return string("∅", supscriptify(N))
         x = first(X)
         all(y -> x ≛ y, X) && return string(representation(x, format), supscriptify(N))
-        return join(X.v, " × ")
+        str = representation.(X.v, format)
+        return join(str, " × ")
     end
 end
 
