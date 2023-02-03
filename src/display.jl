@@ -19,7 +19,7 @@ const display_params = DisplayParameters(:standard, false, 6)  # Default
 
 Change the format used by `show` to display intervals.
 
-Initially, the display options are `format = : standard`, `decorations = false`
+Initially, the display options are `format = :standard`, `decorations = false`
 and `sigdigits = 6`.
 
 If any of the three argument `format`, `decorations` and `sigdigits` is omitted,
