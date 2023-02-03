@@ -119,7 +119,10 @@ end
 Base.promote_rule(::Type{Interval{T}}, ::Type{Interval{S}}) where {T,S} =
     Interval{promote_type(T, S)}
 Base.promote_rule(::Type{Interval{T}}, ::Type{<:Real}) where {T} = Interval{T}
-Base.promote_rule(::Type{<:Real}, ::Type{Interval{T}}) where {T} = Interval{T}
+#=
+Do not define `Base.promote_rule(::Type{<:Real}, ::Type{Interval{T}}) where {T} = Interval{T}`
+It is superfluous and leads to ambiguities, e.g. `promote_type(Bool, Interval{Float64})`
+=#
 
 """
     interval(a, b)
