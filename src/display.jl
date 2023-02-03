@@ -1,7 +1,7 @@
 mutable struct DisplayParameters
-    format :: Symbol
-    decorations :: Bool
-    sigdigits :: Int
+    format::Symbol
+    decorations::Bool
+    sigdigits::Int
 end
 
 function Base.show(io::IO, ::MIME"text/plain", params::DisplayParameters)
