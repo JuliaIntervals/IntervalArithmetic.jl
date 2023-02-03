@@ -8,6 +8,7 @@ let x, b
         a = 1..2
         b = -1.1..1.3
         c = Interval(pi)
+        large_expo = IntervalArithmetic.atomic(Interval{BigFloat}, -Inf)
 
         @testset "6 significant digits" begin
             setformat(:standard; sigdigits = 6)
@@ -15,6 +16,7 @@ let x, b
             @test string(a) == "[1.0, 2.0]"
             @test string(b) == "[-1.10001, 1.30001]"
             @test string(c) == "[3.14159, 3.1416]"
+            @test string(large_expo) == "[-∞, -5.87565e+1388255822130839282]₂₅₆"
         end
 
         @testset "10 significant digits" begin
@@ -23,6 +25,7 @@ let x, b
             @test string(a) == "[1.0, 2.0]"
             @test string(b) == "[-1.100000001, 1.300000001]"
             @test string(c) == "[3.141592653, 3.141592654]"
+            @test string(large_expo) == "[-∞, -5.875653789e+1388255822130839282]₂₅₆"
         end
 
         @testset "20 significant digits" begin
@@ -31,6 +34,7 @@ let x, b
             @test string(a) == "[1.0, 2.0]"
             @test string(b) == "[-1.1000000000000000889, 1.3000000000000000445]"
             @test string(c) == "[3.1415926535897931159, 3.1415926535897935601]"
+            @test string(large_expo) == "[-∞, -5.8756537891115875909e+1388255822130839282]₂₅₆"
         end
 
         @testset "Full" begin
@@ -39,6 +43,8 @@ let x, b
             @test string(a) == "Interval(1.0, 2.0)"
             @test string(b) == "Interval(-1.1, 1.3)"
             @test string(c) == "Interval(3.141592653589793, 3.1415926535897936)"
+            @test string(large_expo) ==
+                "Interval(-Inf, -5.875653789111587590936911998878442589938516392745498308333779606469323584389875e+1388255822130839282)"
         end
 
         @testset "Midpoint" begin
@@ -47,6 +53,7 @@ let x, b
             @test string(a) == "1.5 ± 0.5"
             @test string(b) == "0.1 ± 1.20001"
             @test string(c) == "3.14159 ± 4.4409e-16"
+            @test string(large_expo) == "-5.87565e+1388255822130839282 ± ∞"
 
             # issue 175:
             @test string(@biginterval(1, 2)) == "1.5 ± 0.5"
