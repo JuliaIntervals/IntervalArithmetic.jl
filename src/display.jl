@@ -385,7 +385,8 @@ function supscript_digit(i::Integer)
     i == 6 && return "⁶"
     i == 7 && return "⁷"
     i == 8 && return "⁸"
-    return "⁹"
+    i == 9 && return "⁹"
+    return throw(DomainError(i, "supscript_digit only accept integers between 0 and 9 (included)"))
 end
 
 function subscript_digit(i::Integer)
@@ -398,5 +399,6 @@ function subscript_digit(i::Integer)
     i == 6 && return "₆"
     i == 7 && return "₇"
     i == 8 && return "₈"
-    return "₉"
+    i == 9 && return "₉"
+    return throw(DomainError(i, "subscript_digit only accept integers between 0 and 9 (included)"))
 end
