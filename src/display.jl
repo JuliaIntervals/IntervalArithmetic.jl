@@ -144,12 +144,6 @@ function show(io::IO, a::Union{Interval,Complex{<:Interval},DecoratedInterval,In
     return print(io, representation(a, :full))
 end
 
-showfull(io::IO, a::Union{Interval,Complex{<:Interval},DecoratedInterval,IntervalBox}) =
-    print(io, representation(a, :full))
-
-showfull(a::Union{Interval,Complex{<:Interval},DecoratedInterval,IntervalBox}) =
-    showfull(stdout, a)
-
 # `String` representation of various types of intervals
 
 representation(a::Interval, format::Symbol) = basic_representation(a, format)

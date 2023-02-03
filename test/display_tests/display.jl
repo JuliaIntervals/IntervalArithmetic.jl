@@ -194,25 +194,25 @@ let x, b
     end
 end
 
-@testset "showfull" begin
+@testset "show" begin
     setformat(:standard; decorations = false, sigdigits = 6)
     setprecision(BigFloat, 128)
 
     x = 0..1
     @test sprint(show, MIME("text/plain"), x) == "[0.0, 1.0]"
-    @test sprint(showfull, x) == "Interval(0.0, 1.0)"
+    @test sprint(show, x) == "Interval(0.0, 1.0)"
 
     x = @biginterval(0, 1)
     @test sprint(show, MIME("text/plain"), x) == "[0.0, 1.0]₁₂₈"
-    @test sprint(showfull, x) == "Interval(0.0, 1.0)"
+    @test sprint(show, x) == "Interval(0.0, 1.0)"
 
     x = DecoratedInterval(0, 1, dac)
     @test sprint(show, MIME("text/plain"), x) == "[0.0, 1.0]"
-    @test sprint(showfull, x) == "DecoratedInterval(Interval(0.0, 1.0), dac)"
+    @test sprint(show, x) == "DecoratedInterval(Interval(0.0, 1.0), dac)"
 
     x = DecoratedInterval(big(0), big(1), def)
     @test sprint(show, MIME("text/plain"), x) == "[0.0, 1.0]₁₂₈"
-    @test sprint(showfull, x) == "DecoratedInterval(Interval(0.0, 1.0), def)"
+    @test sprint(show, x) == "DecoratedInterval(Interval(0.0, 1.0), def)"
 
     setformat(; decorations = true)
     @test sprint(show, MIME("text/plain"), x) == "[0.0, 1.0]₁₂₈_def"
@@ -221,9 +221,9 @@ end
     b = IntervalBox(emptyinterval(), 2)
     c = IntervalBox(1..2, 1)
 
-    @test sprint(showfull, a) == "IntervalBox(Interval(1.0, 2.0), Interval(2.0, 3.0))"
-    @test sprint(showfull, b) == "IntervalBox(∅, 2)"
-    @test sprint(showfull, c) == "IntervalBox(Interval(1.0, 2.0), 1)"
+    @test sprint(show, a) == "IntervalBox(Interval(1.0, 2.0), Interval(2.0, 3.0))"
+    @test sprint(show, b) == "IntervalBox(∅, 2)"
+    @test sprint(show, c) == "IntervalBox(Interval(1.0, 2.0), 1)"
 
 end
 

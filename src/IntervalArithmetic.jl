@@ -79,7 +79,6 @@ end
 export
     setindex   # re-export from StaticArrays for IntervalBox
 
-export showfull
 
 
 ## Multidimensional
