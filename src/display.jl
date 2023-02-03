@@ -106,17 +106,14 @@ Display parameters:
 julia> x
 Interval(0.09999999999999999, 0.30000000000000004)
 
-julia> y = DecoratedInterval(x)
-[0.0999, 0.301]
-
 julia> @format standard true 3  # Equivalent to `setformat(:standard; decorations = true, sigdigits = 3)`
 Display parameters:
   - format: standard
   - decorations: true
   - significant digits: 3
 
-julia> y
-[0.0999, 0.301]_com
+julia> x
+[0.0999, 0.301]
 ```
 """
 macro format(expr...)
