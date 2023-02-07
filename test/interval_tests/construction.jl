@@ -167,6 +167,16 @@ end
     @test convert(Interval{BigFloat}, x) === x
 end
 
+@testset "Promotion between intervals" begin
+    x = Interval{Float64}(π)
+    y = Interval{BigFloat}(π)
+    x_, y_ = promote(x, y)
+
+    @test promote_type(typeof(x), typeof(y)) == Interval{BigFloat}
+    @test bounds(x_) == (BigFloat(inf(x), RoundDown), BigFloat(sup(x), RoundUp))
+    @test y_ ≛ y
+end
+
 @testset "Typed intervals" begin
     @test typeof(@interval Float64 1 2) == Interval{Float64}
     @test typeof(@interval         1 2) == Interval{Float64}
