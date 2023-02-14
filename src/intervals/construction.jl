@@ -109,6 +109,11 @@ Interval(x::Irrational) = Interval{default_bound()}(x)
     return :(return $res)  # Set body of the function to return the precomputed result
 end
 
+# promotion
+
+Base.promote_rule(::Type{Interval{T}}, ::Type{Interval{S}}) where {T,S} =
+    Interval{promote_type(T, S)}
+
 """
     interval(a, b)
 
@@ -117,15 +122,13 @@ If so, then an `Interval(a, b)` object is returned;
 if not, a warning is printed and the empty interval is returned.
 """
 function interval(a::T, b::S) where {T<:Real, S<:Real}
-    if !is_valid_interval(a, b)
-        @warn "Invalid input, empty interval is returned"
-        return emptyinterval(promote_type(T, S))
-    end
-
-    return Interval(a, b)
+    is_valid_interval(a, b) && return Interval(a, b)
+    @warn "Invalid input, empty interval is returned"
+    return emptyinterval(promote_type(T, S))
 end
 
 interval(a::Real) = interval(a, a)
+interval(a::Interval) = interval(inf(a), sup(a))  # Check the validity of the interval
 
 const checked_interval = interval
 

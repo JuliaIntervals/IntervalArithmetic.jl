@@ -40,6 +40,9 @@ using Test
     @test big(ℯ) in Interval{Float32}(0, ℯ)
     @test big(π) in Interval{Float32}(π, 4)
 
+    @test interval(Interval(pi)) ≛ Interval(pi)
+    @test interval(Interval(NaN, -Inf)) ≛ emptyinterval()
+
     # a < Inf and b > -Inf
     @test @interval("1e300") ≛ Interval(9.999999999999999e299, 1.0e300)
     @test @interval("-1e307") ≛ Interval(-1.0000000000000001e307, -1.0e307)
@@ -165,6 +168,16 @@ end
     @test convert(Interval{BigFloat}, x) === x
 end
 
+@testset "Promotion between intervals" begin
+    x = Interval{Float64}(π)
+    y = Interval{BigFloat}(π)
+    x_, y_ = promote(x, y)
+
+    @test promote_type(typeof(x), typeof(y)) == Interval{BigFloat}
+    @test bounds(x_) == (BigFloat(inf(x), RoundDown), BigFloat(sup(x), RoundUp))
+    @test y_ ≛ y
+end
+
 @testset "Typed intervals" begin
     @test typeof(@interval Float64 1 2) == Interval{Float64}
     @test typeof(@interval         1 2) == Interval{Float64}
@@ -186,6 +199,11 @@ end
 
     a = convert(Interval{Float64}, @biginterval(3, 4))
     @test typeof(a) == Interval{Float64}
+
+    pi64, pi32 = Interval{Float64}(pi), Interval{Float32}(pi)
+    x, y = promote(pi64, pi32)
+    @test x ≛ pi64
+    @test y ≛ Interval{Float64}(pi32)
 end
 
 @testset "Interval{T} constructor" begin
