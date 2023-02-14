@@ -8,7 +8,9 @@ let x, b
         a = 1..2
         b = -1.1..1.3
         c = Interval(pi)
-        large_expo = IntervalArithmetic.atomic(Interval{BigFloat}, -Inf)
+        # large_expo = IntervalArithmetic.atomic(Interval{BigFloat}, -Inf)
+        # Use smaller exponent, cf. JuliaLang/julia#48678
+        large_expo = Interval(0, big"1e123456789")
 
         @testset "6 significant digits" begin
             setformat(:standard; sigdigits = 6)
@@ -17,7 +19,7 @@ let x, b
             @test sprint(show, MIME("text/plain"), b) == "[-1.10001, 1.30001]"
             @test sprint(show, MIME("text/plain"), c) == "[3.14159, 3.1416]"
             @test sprint(show, MIME("text/plain"), large_expo) ==
-                "[-∞, -5.87565e+1388255822130839282]₂₅₆"
+                "[0.0, 1.00001e+123456789]₂₅₆"
         end
 
         @testset "10 significant digits" begin
@@ -27,7 +29,7 @@ let x, b
             @test sprint(show, MIME("text/plain"), b) == "[-1.100000001, 1.300000001]"
             @test sprint(show, MIME("text/plain"), c) == "[3.141592653, 3.141592654]"
             @test sprint(show, MIME("text/plain"), large_expo) ==
-                "[-∞, -5.875653789e+1388255822130839282]₂₅₆"
+                "[0.0, 1.000000001e+123456789]₂₅₆"
         end
 
         @testset "20 significant digits" begin
@@ -37,7 +39,7 @@ let x, b
             @test sprint(show, MIME("text/plain"), b) == "[-1.1000000000000000889, 1.3000000000000000445]"
             @test sprint(show, MIME("text/plain"), c) == "[3.1415926535897931159, 3.1415926535897935601]"
             @test sprint(show, MIME("text/plain"), large_expo) ==
-                "[-∞, -5.8756537891115875909e+1388255822130839282]₂₅₆"
+                "[0.0, 1.0000000000000000001e+123456789]₂₅₆"
         end
 
         @testset "Full" begin
@@ -47,7 +49,7 @@ let x, b
             @test sprint(show, MIME("text/plain"), b) == "Interval(-1.1, 1.3)"
             @test sprint(show, MIME("text/plain"), c) == "Interval(3.141592653589793, 3.1415926535897936)"
             @test sprint(show, MIME("text/plain"), large_expo) ==
-                "Interval(-Inf, -5.875653789111587590936911998878442589938516392745498308333779606469323584389875e+1388255822130839282)"
+                "Interval(0.0, 1.000000000000000000000000000000000000000000000000000000000000000000000000000004e+123456789)"
         end
 
         @testset "Midpoint" begin
@@ -56,7 +58,7 @@ let x, b
             @test sprint(show, MIME("text/plain"), a) == "1.5 ± 0.5"
             @test sprint(show, MIME("text/plain"), b) == "0.1 ± 1.20001"
             @test sprint(show, MIME("text/plain"), c) == "3.14159 ± 4.4409e-16"
-            @test sprint(show, MIME("text/plain"), large_expo) == "-5.87565e+1388255822130839282 ± ∞"
+            @test sprint(show, MIME("text/plain"), large_expo) == "5.0e+123456788 ± 5.00001e+123456788"
 
             # issue 175:
             @test sprint(show, MIME("text/plain"), @biginterval(1, 2)) == "1.5 ± 0.5"
