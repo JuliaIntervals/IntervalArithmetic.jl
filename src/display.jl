@@ -151,16 +151,35 @@ representation(a::Interval, format::Symbol) = basic_representation(a, format)
 function representation(a::Interval{T}, format::Symbol) where {T<:BigFloat}
     # `format` is either :standard, :midpoint or :full
     format === :standard && return string(basic_representation(a, format), subscriptify(precision(T)))
+    format === :midpoint && return string("(", basic_representation(a, format), ")", subscriptify(precision(T)))
     return basic_representation(a, format)
 end
 
 function representation(x::Complex{<:Interval}, format::Symbol)
     # `format` is either :standard, :midpoint or :full
-    format === :midpoint && return string("(", basic_representation(real(x), format), ") + (", basic_representation(imag(x), format), ")im")
-    return string(basic_representation(real(x), format), " + ", basic_representation(imag(x), format), "im")
+    format === :midpoint && return string("(", representation(real(x), format), ") + (", representation(imag(x), format), ")im")
+    return string(representation(real(x), format), " + ", representation(imag(x), format), "im")
+end
+
+# No extra brackets for `:midpoint` and `BigFloat`: the display of the precision add some
+function representation(x::Complex{Interval{BigFloat}}, format::Symbol)
+    # `format` is either :standard, :midpoint or :full
+    return string(representation(real(x), format), " + ", representation(imag(x), format), "im")
 end
 
 function representation(a::DecoratedInterval, format::Symbol)
+    # `format` is either :standard, :midpoint or :full
+    var_interval = representation(interval(a), format)
+    format === :full && return string("DecoratedInterval(", var_interval, ", ", decoration(a), ")")
+    if format === :midpoint  # Add extra brackets
+        var_interval = string("(", var_interval, ")")
+    end
+    display_params.decorations && return string(var_interval, "_", decoration(a))
+    return var_interval
+end
+
+# No extra brackets for `:midpoint` and `BigFloat`: the display of the precision add some
+function representation(a::DecoratedInterval{BigFloat}, format::Symbol)
     # `format` is either :standard, :midpoint or :full
     var_interval = representation(interval(a), format)
     format === :full && return string("DecoratedInterval(", var_interval, ", ", decoration(a), ")")

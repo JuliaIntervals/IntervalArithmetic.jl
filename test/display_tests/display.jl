@@ -58,10 +58,10 @@ let x, b
             @test sprint(show, MIME("text/plain"), a) == "1.5 ± 0.5"
             @test sprint(show, MIME("text/plain"), b) == "0.1 ± 1.20001"
             @test sprint(show, MIME("text/plain"), c) == "3.14159 ± 4.4409e-16"
-            @test sprint(show, MIME("text/plain"), large_expo) == "5.0e+123456788 ± 5.00001e+123456788"
+            @test sprint(show, MIME("text/plain"), large_expo) == "(5.0e+123456788 ± 5.00001e+123456788)₂₅₆"
 
             # issue 175:
-            @test sprint(show, MIME("text/plain"), @biginterval(1, 2)) == "1.5 ± 0.5"
+            @test sprint(show, MIME("text/plain"), @biginterval(1, 2)) == "(1.5 ± 0.5)₂₅₆"
         end
     end
 
@@ -118,10 +118,13 @@ let x, b
         setformat(; decorations = true)
         @test sprint(show, MIME("text/plain"), a) == "[1.0, 2.0]_com"
 
+        setformat(:midpoint; decorations = true)
+        @test sprint(show, MIME("text/plain"), a) == "(1.5 ± 0.5)_com"
+
         # issue 131:
         a = DecoratedInterval(big(2), big(3), com)
 
-        setformat(; decorations = false)
+        setformat(:standard; decorations = false)
         @test sprint(show, MIME("text/plain"), a) == "[2.0, 3.0]₂₅₆"
 
         setformat(; decorations = true)
@@ -131,10 +134,10 @@ let x, b
         @test sprint(show, MIME("text/plain"), a) == "DecoratedInterval(Interval(2.0, 3.0), com)"
 
         setformat(:midpoint)
-        @test sprint(show, MIME("text/plain"), a) == "2.5 ± 0.5_com"
+        @test sprint(show, MIME("text/plain"), a) == "(2.5 ± 0.5)₂₅₆_com"
 
         setformat(; decorations = false)
-        @test sprint(show, MIME("text/plain"), a) == "2.5 ± 0.5"
+        @test sprint(show, MIME("text/plain"), a) == "(2.5 ± 0.5)₂₅₆"
     end
 
     setprecision(BigFloat, 128)
