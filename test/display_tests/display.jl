@@ -7,10 +7,10 @@ let x, b
     @testset "Interval" begin
         a = 1..2
         b = -1.1..1.3
-        c = Interval(pi)
+        c = interval(pi)
         # large_expo = IntervalArithmetic.atomic(Interval{BigFloat}, -Inf)
         # Use smaller exponent, cf. JuliaLang/julia#48678
-        large_expo = Interval(0, big"1e123456789")
+        large_expo = interval(0, big"1e123456789")
 
         @testset "6 significant digits" begin
             setformat(:standard; sigdigits = 6)
@@ -66,7 +66,7 @@ let x, b
     end
 
     @testset "Interval{Rational{T}}" begin
-        a = Interval(1//3, 5//4)
+        a = interval(1//3, 5//4)
         @test_broken typeof(a) == Interval{Rational{Int}}
 
         setformat(:standard)
@@ -96,7 +96,7 @@ let x, b
     end
 
     @testset "Complex{Interval}" begin
-        a = Complex(Interval(0, 2), Interval(1))
+        a = Complex(interval(0, 2), interval(1))
         @test typeof(a) == Complex{Interval{Float64}}
 
         setformat(:standard)
@@ -143,7 +143,7 @@ let x, b
     setprecision(BigFloat, 128)
 
     @testset "BigFloat intervals" begin
-        a = Interval(big(1))
+        a = interval(big(1))
         @test typeof(a) == Interval{BigFloat}
 
         setformat(:standard; decorations = false)

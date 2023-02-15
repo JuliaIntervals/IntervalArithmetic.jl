@@ -13,7 +13,7 @@ let b
 
     a = DecoratedInterval(@interval(-1, 1), com)
     b = sqrt(a)
-    @test interval(b) ≛ sqrt(Interval(0, 1))
+    @test interval(b) ≛ sqrt(interval(0, 1))
     @test decoration(b) == trv
 
     d = DecoratedInterval(a, dac)
@@ -41,13 +41,13 @@ let b
     @test @decorated(-3,-2) ^ -3 ≛ DecoratedInterval(-1/8.,-1/27)
     @test @decorated(0,3) ^ 2 ≛ DecoratedInterval(0, 9)
     @test @decorated(0,3) ^ -2 ≛ DecoratedInterval(1/9, Inf, trv)
-    @test @decorated(2,3)^Interval(0.0, 1.0) ≛ DecoratedInterval(1.0,3.0)
+    @test @decorated(2,3)^interval(0.0, 1.0) ≛ DecoratedInterval(1.0,3.0)
     @test @decorated(2,3)^@decorated(0.0, 1.0) ≛ DecoratedInterval(1.0,3.0)
-    @test @decorated(0, 2)^Interval(0.0, 1.0) ≛ DecoratedInterval(0.0,2.0, trv)
+    @test @decorated(0, 2)^interval(0.0, 1.0) ≛ DecoratedInterval(0.0,2.0, trv)
     @test @decorated(0, 2)^@decorated(0.0, 1.0) ≛ DecoratedInterval(0.0,2.0, trv)
-    @test @decorated(-3, 2)^Interval(0.0, 1.0) ≛ DecoratedInterval(0.0,2.0, trv)
+    @test @decorated(-3, 2)^interval(0.0, 1.0) ≛ DecoratedInterval(0.0,2.0, trv)
     @test @decorated(-3, 2)^@decorated(0.0, 1.0) ≛ DecoratedInterval(0.0,2.0, trv)
-    @test @decorated(-3, 2)^Interval(-1.0, 1.0) ≛ DecoratedInterval(0.0,Inf, trv)
+    @test @decorated(-3, 2)^interval(-1.0, 1.0) ≛ DecoratedInterval(0.0,Inf, trv)
     @test @decorated(-3, 2)^@decorated(-1.0, 1.0) ≛ DecoratedInterval(0.0, Inf, trv)
 
     a = @decorated 1 2
