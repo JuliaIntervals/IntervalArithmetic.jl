@@ -11,7 +11,7 @@ function Base.show(io::IO, ::MIME"text/plain", params::DisplayParameters)
     print(io, "  - significant digits: ", params.sigdigits)
 end
 
-const display_params = DisplayParameters(:standard, false, 6)  # Default
+const display_params = DisplayParameters(:standard, true, 6)  # Default
 
 """
     setformat(format::Symbol; decorations::Bool, sigdigits::Int)
@@ -38,7 +38,7 @@ Possible options:
 
 See also: `@format`.
 
-# Example:
+# Example
 ```
 julia> x = interval(0.1, 0.3)  # Default display options
 [0.0999999, 0.300001]
@@ -46,7 +46,7 @@ julia> x = interval(0.1, 0.3)  # Default display options
 julia> setformat(:full)  # Equivalent to `@format full`
 Display parameters:
   - format: full
-  - decorations: false
+  - decorations: true
   - significant digits: 6
 
 julia> x
@@ -55,7 +55,7 @@ Interval(0.09999999999999999, 0.30000000000000004)
 julia> setformat(:standard; sigdigits = 3)  # Equivalent to `@format standard 3`
 Display parameters:
   - format: standard
-  - decorations: false
+  - decorations: true
   - significant digits: 3
 
 julia> x
@@ -100,7 +100,7 @@ julia> x = interval(0.1, 0.3)  # Default display options
 julia> @format full  # Equivalent to `setformat(:full)``
 Display parameters:
   - format: full
-  - decorations: false
+  - decorations: true
   - significant digits: 6
 
 julia> x
