@@ -7,12 +7,12 @@ const where_bisect = 0.49609375
 Split the interval `X` at position α; α=0.5 corresponds to the midpoint.
 Returns a tuple of the new intervals.
 """
-function bisect(X::Interval, α=where_bisect)
+function bisect(X::F, α=where_bisect) where {F<:Interval}
     @assert 0 ≤ α ≤ 1
 
     m = scaled_mid(X, α)
 
-    return (Interval(inf(X), m), Interval(m, sup(X)))
+    return (F(inf(X), m), F(m, sup(X)))
 end
 
 """
@@ -47,9 +47,9 @@ end
 Splits `x` in `n` intervals of the same diameter, which are returned
 as a vector.
 """
-function mince(x::Interval, n)
+function mince(x::F, n) where {F<:Interval}
     nodes = range(inf(x), sup(x), length = n+1)
-    return [Interval(nodes[i], nodes[i+1]) for i in 1:length(nodes)-1]
+    return [F(nodes[i], nodes[i+1]) for i in 1:length(nodes)-1]
 end
 
 """

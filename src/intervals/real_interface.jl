@@ -7,16 +7,23 @@ This file contains the functions that must be defined on `Interval`s so that
 they behave like `Real` in julia.
 =#
 
-zero(::F) where {T<:Real, F<:Interval{T}} = F(zero(T))
-zero(::Type{F}) where {T<:Real, F<:Interval{T}} = F(zero(T))
+zero(::F) where {F<:Interval} = zero(F)
+function zero(::Type{F}) where {T<:Real, F<:Interval{T}}
+    x = zero(T)
+    return F(x, x)
+end
 
-one(::F) where {T<:Real, F<:Interval{T}} = F(one(T))
-one(::Type{F}) where {T<:Real, F<:Interval{T}} = F(one(T))
+one(::F) where {F<:Interval} = one(F)
+function one(::Type{F}) where {T<:Real, F<:Interval{T}}
+    x = one(T)
+    return F(x, x)
+end
 
 typemin(::Type{F}) where {T<:Real, F<:Interval{T}} = F(typemin(T), nextfloat(typemin(T)))
 typemax(::Type{F}) where {T<:Real, F<:Interval{T}} = F(prevfloat(typemax(T)), typemax(T))
-typemin(::Type{F}) where {T<:Integer, F<:Interval{T}} = F(typemin(T))
-typemax(::Type{F}) where {T<:Integer, F<:Interval{T}} = F(typemax(T))
+# No support for bounds of type integers
+# typemin(::Type{F}) where {T<:Integer, F<:Interval{T}} = interval(T, typemin(T))
+# typemax(::Type{F}) where {T<:Integer, F<:Interval{T}} = interval(T, typemax(T))
 
 """
     numtype(::Interval{T}) where {T}
@@ -30,10 +37,16 @@ julia> numtype(1..2)
 Float64
 ```
 """
-numtype(::Interval{T}) where T = T
+numtype(::Interval{T}) where {T} = T
 
-eps(a::F) where {F<:Interval} = F(max(eps(inf(a)), eps(sup(a))))
-eps(::Type{F}) where {T, F<:Interval{T}} = F(eps(T))
+function eps(a::F) where {F<:Interval}
+    x = max(eps(inf(a)), eps(sup(a)))
+    return F(x, x)
+end
+function eps(::Type{F}) where {T, F<:Interval{T}}
+    x = eps(T)
+    return F(x, x)
+end
 
 """
     hash(x::Interval, h)

@@ -19,8 +19,8 @@ function +(a::F, b::T) where {T, F<:Interval{T}}
     isempty(a) && return emptyinterval(F)
     return @round(F, inf(a) + b, sup(a) + b)
 end
-+(a::Interval{T}, b::S) where {T, S<:Real} = a + Interval{T}(b)
-+(b::Real, a::Interval) = a + b
++(a::Interval{T}, b::Real) where {T} = a + interval(T, b)
++(a::Real, b::Interval{T}) where {T} = b + a
 
 function +(a::F, b::F) where {F<:Interval}
     (isempty(a) || isempty(b)) && return emptyinterval(F)
@@ -50,8 +50,8 @@ function -(b::T, a::F) where {T, F<:Interval{T}}
     isempty(a) && return emptyinterval(F)
     return @round(F, b - sup(a), b - inf(a))
 end
--(a::F, b::Real) where {F<:Interval} = a - F(b)
--(a::Real, b::F) where {F<:Interval} = F(a) - b
+-(a::Interval{T}, b::Real) where {T} = a - interval(T, b)
+-(a::Real, b::Interval{T}) where {T} = interval(T, a) - b
 
 function -(a::F, b::F) where {F<:Interval}
     (isempty(a) || isempty(b)) && return emptyinterval(F)
@@ -77,18 +77,18 @@ Implement the `mul` function of the IEEE Std 1788-2015 (Table 9.1).
 
 Note: the behavior of the multiplication is flavor dependent for some edge cases.
 """
-function *(x::T, a::F) where {T<:Real, F<:Interval{T}}
+function *(a::F, b::T) where {T<:Real, F<:Interval{T}}
     isempty(a) && return emptyinterval(F)
-    (isthinzero(a) || iszero(x)) && return zero(F)
+    (isthinzero(a) || iszero(b)) && return zero(F)
 
-    if x ≥ 0.0
-        return @round(F, inf(a)*x, sup(a)*x)
+    if b ≥ 0.0
+        return @round(F, inf(a)*b, sup(a)*b)
     else
-        return @round(F, sup(a)*x, inf(a)*x)
+        return @round(F, sup(a)*b, inf(a)*b)
     end
 end
-*(x::T, a::F) where {T<:Real, S, F<:Interval{S}} = Interval{S}(x) * a
-*(a::F, x::T) where {T<:Real, S, F<:Interval{S}} = x*a
+*(a::Interval{T}, b::Real) where {T} = a * interval(T, b)
+*(a::Real, b::Interval{T}) where {T} = b * a
 
 function *(a::F, b::F) where {F<:Interval}
     (isempty(a) || isempty(b)) && return emptyinterval(F)
@@ -131,18 +131,18 @@ Implement the `div` function of the IEEE Std 1788-2015 (Table 9.1).
 
 Note: the behavior of the division is flavor dependent for some edge cases.
 """
-function /(a::F, x::Real) where {F<:Interval}
+function /(a::F, b::Real) where {F<:Interval}
     isempty(a) && return emptyinterval(T)
-    iszero(x) && return div_by_thin_zero(a)
+    iszero(b) && return div_by_thin_zero(a)
 
-    if x ≥ 0.0
-        return @round(F, inf(a)/x, sup(a)/x)
+    if b ≥ 0
+        return @round(F, inf(a)/b, sup(a)/b)
     else
-        return @round(F, sup(a)/x, inf(a)/x)
+        return @round(F, sup(a)/b, inf(a)/b)
     end
 end
 
-/(x::Real, a::Interval) = x*inv(a)
+/(a::Real, b::Interval) = a * inv(b)
 
 function /(a::F, b::F) where {T, F<:Interval{T}}
     (isempty(a) || isempty(b)) && return emptyinterval(F)

@@ -35,13 +35,7 @@ This function is applicable to any number of input intervals, as in
 If your use case needs to splat the input, as in `intersect(a...)`, consider
 `reduce(intersect, a)` instead, because you save the cost of splatting.
 """
-function intersect(a::F...) where {F<:Interval}
-    low = maximum(inf.(a))
-    high = minimum(sup.(a))
-
-    !is_valid_interval(low, high) && return emptyinterval(F)
-    return Interval(low, high)
-end
+intersect(a::Interval...) = interval(maximum(inf.(a)), minimum(sup.(a)))
 
 """
     hull(a, b)

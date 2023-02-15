@@ -41,4 +41,4 @@ end
 # NOTE This is needed for static array that otherwise require promotion
 # between the matrix eltype and intervals
 # TODO This must be discussed in term of performance and design
-*(A::AbstractMatrix, X::IntervalBox) = IntervalBox(Interval.(A) * X.v)
+*(A::AbstractMatrix, X::IntervalBox) = IntervalBox(interval.(A) * X.v)

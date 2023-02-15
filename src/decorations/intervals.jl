@@ -33,9 +33,25 @@ end
 
 DecoratedInterval(I::DecoratedInterval, dec::DECORATION) = DecoratedInterval(I.interval, dec)
 
-function DecoratedInterval(a::Real, b::Real, d::DECORATION)
-    is_valid_interval(a, b) || return DecoratedInterval(Interval(a,b), ill)
-    return DecoratedInterval(Interval(a,b), d)
+function DecoratedInterval(a::T, b::S, d::DECORATION) where {T<:Real, S<:Real}
+    BoundsType = promote_type(default_bound(), T, S)
+    is_valid_interval(a, b) || return DecoratedInterval(Interval{BoundsType}(a, b), ill)
+    return DecoratedInterval(Interval{BoundsType}(a, b), d)
+end
+function DecoratedInterval(a::T, b::S, d::DECORATION) where {T<:AbstractFloat, S<:Real}
+    BoundsType = promote_type(T, S)
+    is_valid_interval(a, b) || return DecoratedInterval(Interval{BoundsType}(a, b), ill)
+    return DecoratedInterval(Interval{BoundsType}(a, b), d)
+end
+function DecoratedInterval(a::T, b::S, d::DECORATION) where {T<:Real, S<:AbstractFloat}
+    BoundsType = promote_type(T, S)
+    is_valid_interval(a, b) || return DecoratedInterval(Interval{BoundsType}(a, b), ill)
+    return DecoratedInterval(Interval{BoundsType}(a, b), d)
+end
+function DecoratedInterval(a::T, b::S, d::DECORATION) where {T<:AbstractFloat, S<:AbstractFloat}
+    BoundsType = promote_type(T, S)
+    is_valid_interval(a, b) || return DecoratedInterval(Interval{BoundsType}(a, b), ill)
+    return DecoratedInterval(Interval{BoundsType}(a, b), d)
 end
 
 DecoratedInterval(a::Real, d::DECORATION) = DecoratedInterval(a, a, d)
@@ -50,9 +66,25 @@ end
 
 DecoratedInterval(I::Interval) = DecoratedInterval{default_bound()}(I)
 
-function DecoratedInterval(a::Real, b::Real)
-    is_valid_interval(a, b) || return DecoratedInterval(Interval(a,b), ill)
-    return DecoratedInterval(Interval(a,b))
+function DecoratedInterval(a::T, b::S) where {T<:Real, S<:Real}
+    BoundsType = promote_type(default_bound(), T, S)
+    is_valid_interval(a, b) || return DecoratedInterval(Interval{BoundsType}(a, b), ill)
+    return DecoratedInterval(Interval{BoundsType}(a, b))
+end
+function DecoratedInterval(a::T, b::S) where {T<:AbstractFloat, S<:Real}
+    BoundsType = promote_type(T, S)
+    is_valid_interval(a, b) || return DecoratedInterval(Interval{BoundsType}(a, b), ill)
+    return DecoratedInterval(Interval{BoundsType}(a, b))
+end
+function DecoratedInterval(a::T, b::S) where {T<:Real, S<:AbstractFloat}
+    BoundsType = promote_type(T, S)
+    is_valid_interval(a, b) || return DecoratedInterval(Interval{BoundsType}(a, b), ill)
+    return DecoratedInterval(Interval{BoundsType}(a, b))
+end
+function DecoratedInterval(a::T, b::S) where {T<:AbstractFloat, S<:AbstractFloat}
+    BoundsType = promote_type(T, S)
+    is_valid_interval(a, b) || return DecoratedInterval(Interval{BoundsType}(a, b), ill)
+    return DecoratedInterval(Interval{BoundsType}(a, b))
 end
 
 DecoratedInterval(a::Real) = DecoratedInterval(a, a)

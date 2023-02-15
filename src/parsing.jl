@@ -225,7 +225,7 @@ function _parse(::Type{Interval{T}}, s::AbstractString) where T
         lo = parse_num(T, s, RoundDown)
         hi = parse_num(T, s, RoundUp)
     end
-    is_valid_interval(lo, hi) && return Interval(lo, hi), isnotcom
+    is_valid_interval(lo, hi) && return Interval{T}(lo, hi), isnotcom
     throw(ArgumentError("input $s can not be parsed as an interval."))
 end
 

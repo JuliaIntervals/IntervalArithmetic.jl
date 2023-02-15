@@ -64,71 +64,68 @@ struct Interval{T} <: Real
     lo::T
     hi::T
 
-    Interval{T}(a::T, b::T) where T = new{T}(_normalisezero(a), _normalisezero(b))
+    Interval{T}(a::T, b::T) where {T} = new{T}(_normalisezero(a), _normalisezero(b))
 end
 
-#= Outer constructors =#
-Interval{T}(a, b) where T = Interval{T}(T(a, RoundDown), T(b, RoundUp))
-Interval{T}(a) where T = Interval{T}(a, a)
-Interval(a) = Interval(a, a)
-Interval(a::Tuple) = Interval(a...)
+Interval{T}(a, b) where {T} = Interval{T}(T(a, RoundDown), T(b, RoundUp))
 
-Interval(a::T, b::S) where {T<:AbstractFloat, S} = Interval{promote_type(T, S)}(a, b)
-Interval(a::T, b::S) where {T, S<:AbstractFloat} = Interval{promote_type(T, S)}(a, b)
-Interval(a::T, b::S) where {T<:AbstractFloat, S<:AbstractFloat} = Interval{promote_type(T, S)}(a, b)
-Interval(a::T, b::T) where {T<:AbstractFloat} = Interval{T}(a, b)
-
-Interval(a::T, b::S) where {T, S} = Interval{promote_type(default_bound(), T, S)}(a, b)
-Interval(a::T, b::T) where T = Interval{promote_type(default_bound(), T)}(a, b)
-
-#= Irrational =#
-# Single argument Irrational constructor are in IntervalArithmetic.jl
-# as generated functions need to be define last.
-Interval(a::Irrational, b::T) where {T<:AbstractFloat} = Interval{T}(T(a, RoundDown), b)
-Interval(a::T, b::Irrational) where {T<:AbstractFloat} = Interval{T}(a, T(b, RoundUp))
-
-function Interval(a::Irrational, b::Irrational)
-    T = default_bound()
-    return Interval{T}(a, b)
-end
-
-#= Interval =#
-Interval(x::Interval) = x
-Interval{T}(x::Interval{T}) where T = x
-Interval{T}(x::Interval) where T = Interval{T}(inf(x), sup(x))
-
-#= Complex =#
-Interval(x::Complex) = Interval(real(x)) + im*Interval(imag(x))
-
-# These definitions have been put there because generated functions must be
-# defined after all methods they use.
-Interval(x::Irrational) = Interval{default_bound()}(x)
-
-@generated function Interval{T}(x::Irrational) where T
-    res = Interval{T}(x(), x())  # Precompute the interval
-    return :(return $res)  # Set body of the function to return the precomputed result
-end
+Interval{T}(x::Interval) where {T} = Interval{T}(inf(x), sup(x))
 
 # promotion
 
-Base.promote_rule(::Type{Interval{T}}, ::Type{Interval{S}}) where {T,S} =
+Base.promote_rule(::Type{Interval{T}}, ::Type{Interval{S}}) where {T, S} =
     Interval{promote_type(T, S)}
 
 """
-    interval(a, b)
+    interval(::Type{T}, a, b)
 
 Create an interval, checking whether [a, b] is a valid `Interval`
-If so, then an `Interval(a, b)` object is returned;
+If so, then an `Interval{T}(a, b)` object is returned;
 if not, a warning is printed and the empty interval is returned.
 """
-function interval(a::T, b::S) where {T<:Real, S<:Real}
-    is_valid_interval(a, b) && return Interval(a, b)
+function interval(::Type{T}, a, b) where {T}
+    is_valid_interval(a, b) && return Interval{T}(a, b)
     @warn "Invalid input, empty interval is returned"
-    return emptyinterval(promote_type(T, S))
+    return emptyinterval(T)
 end
+interval(a::T, b::S) where {T<:AbstractFloat, S<:AbstractFloat} =
+    interval(promote_type(T, S), a, b)
+interval(a::T, b::S) where {T<:AbstractFloat, S} = interval(promote_type(T, S), a, b)
+interval(a::T, b::S) where {T, S<:AbstractFloat} = interval(promote_type(T, S), a, b)
+interval(a::T, b::S) where {T, S} = interval(promote_type(default_bound(), T, S), a, b)
 
-interval(a::Real) = interval(a, a)
-interval(a::Interval) = interval(inf(a), sup(a))  # Check the validity of the interval
+# Real: `is_valid_interval(a, a) != true`
+interval(::Type{T}, a::Real) where {T} = interval(T, a, a)
+interval(a) = interval(a, a)
+# Prevent ambiguity error between `interval(a::T, b::S) where {T, S<:AbstractFloat}`
+# and `interval(::Type{T}, a::Real) where {T}`
+interval(::Type{T}, a::AbstractFloat) where {T} = interval(T, a, a)
+
+# Interval: check the validity of the interval
+interval(::Type{T}, a::Interval) where {T} = interval(T, inf(a), sup(a))
+interval(a::Interval) = interval(inf(a), sup(a))
+
+# Complex
+interval(::Type{T}, a::Complex) where {T} = complex(interval(T, real(a)), interval(T, imag(a)))
+interval(a::Complex) = complex(interval(real(a)), interval(imag(a)))
+interval(::Type{T}, a::Complex, b::Complex) where {T} = complex(interval(T, real(a), real(b)), interval(T, imag(a), imag(b)))
+interval(a::Complex, b::Complex) = complex(interval(real(a), real(b)), interval(imag(a), imag(b)))
+interval(::Type{T}, a::Complex, b::Real) where {T} = complex(interval(T, real(a), b), interval(T, imag(a), b))
+interval(a::Complex, b::Real) = complex(interval(real(a), b), interval(imag(a), b))
+interval(::Type{T}, a::Real, b::Complex) where {T} = complex(interval(T, a, real(b)), interval(T, a, imag(b)))
+interval(a::Real, b::Complex) = complex(interval(a, real(b)), interval(a, imag(b)))
+
+# Irrational
+# The following function is put here because generated functions must be defined
+# after all the methods they use
+@generated function interval(::Type{T}, a::Irrational) where {T}
+    res = Interval{T}(a(), a())  # Precompute the interval
+    return :($res)  # Set body of the function to return the precomputed result
+end
+interval(a::Irrational) = interval(default_bound(), a)
+
+# Some useful extra constructor
+interval(a::Tuple) = interval(a...)
 
 const checked_interval = interval
 
@@ -166,7 +163,7 @@ Interval{Float64}
   lo: Float64 0.09999999999999998
   hi: Float64 0.30000000000000004
 """
-..(a, b) = checked_interval(a, b)
+const .. = interval
 
 """
     a ± b
@@ -176,8 +173,8 @@ Create the interval `[a - b, a + b]`.
 Despite using the center-radius notation for its creation, the interval is
 still represented by its bounds internally.
 """
-a ± b = checked_interval(-(a, b, RoundDown), +(a, b, RoundUp))
-±(a::Interval, b) = Interval(-(inf(a), b, RoundDown), +(sup(a), b, RoundUp))
+±(a, b) = interval(-(a, b, RoundDown), +(a, b, RoundUp))
+±(a::Interval, b) = interval(-(inf(a), b, RoundDown), +(sup(a), b, RoundUp))
 
 """
     atomic(::Type{<:Interval}, x)
@@ -191,10 +188,10 @@ to contain the number that was typed in.
 
 Otherwise it is the same as using the `Interval` constructor directly.
 """
-atomic(::Type{F}, x) where {F<:Interval} = F(x)
-atomic(::Type{F}, x::AbstractString) where {F<:Interval} = parse(F, x)
+atomic(::Type{Interval{T}}, x) where {T} = interval(T, x)
+atomic(::Type{Interval{T}}, x::AbstractString) where {T} = parse(Interval{T}, x)
 
-function atomic(::Type{F}, x::AbstractFloat) where {T, F<:Interval{T}}
+function atomic(::Type{Interval{T}}, x::AbstractFloat) where {T}
     lo = T(x, RoundDown)
     hi = T(x, RoundUp)
     if x == lo
@@ -203,7 +200,7 @@ function atomic(::Type{F}, x::AbstractFloat) where {T, F<:Interval{T}}
     if x == hi
         hi = nextfloat(hi)
     end
-    return Interval(lo, hi)
+    return Interval{T}(lo, hi)
 end
 
 # NOTE: prevents multiple threads from calling setprecision() concurrently;
@@ -215,7 +212,7 @@ const precision_lock = ReentrantLock()
 
 Create an equivalent `BigFloat` interval to a given `AbstractFloat` interval.
 """
-function bigequiv(a::Interval{T}) where {T <: AbstractFloat}
+function bigequiv(a::Interval{T}) where {T<:AbstractFloat}
     lock(precision_lock) do
         setprecision(precision(T)) do  # precision of T
             return Interval{BigFloat}(a)
@@ -236,5 +233,5 @@ function bigequiv(x::AbstractFloat)
     end
 end
 
-float(x::Interval{T}) where T = atomic(Interval{float(T)}, x)
+float(x::Interval{T}) where {T} = atomic(Interval{float(T)}, x)
 big(x::Interval) = atomic(Interval{BigFloat}, x)
