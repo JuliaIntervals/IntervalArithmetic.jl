@@ -66,14 +66,14 @@ let x, b
     end
 
     @testset "Interval{Rational{T}}" begin
-        a = interval(Rational{Int64}, 1//3, 5//4)
+        a = interval(Rational{Int}, 1//3, 5//4)
         @test typeof(a) == Interval{Rational{Int}}
 
         setformat(:standard)
         @test sprint(show, MIME("text/plain"), a) == "[1//3, 5//4]"
 
         setformat(:full)
-        @test sprint(show, MIME("text/plain"), a) == "Interval{Rational{Int64}}(1//3, 5//4)"
+        @test sprint(show, MIME("text/plain"), a) == string(typeof(a), "(1//3, 5//4)")
 
         setformat(:midpoint)
         @test sprint(show, MIME("text/plain"), a) == "19//24 ± 11//24"
