@@ -9,10 +9,9 @@ using Test
         interval(Float64, interval(1.0))
     @test size(interval(1)) == ()  # Match the `size` behaviour of `Number`
     @test interval(big(1)) ≛ Interval{Float64}(1.0, 1.0)
-    @test_broken interval(1//10) ≛ Interval{Rational{Int}}(1//10, 1//10)
-    @test_broken interval(BigInt(1)//10) ≛ Interval{Rational{BigInt}}(1//10, 1//10)
+    @test interval(Rational{Int}, 1//10) ≛ Interval{Rational{Int}}(1//10, 1//10)
+    @test_broken interval(Rational{BigInt}, BigInt(1)//10) ≛ Interval{Rational{BigInt}}(1//10, 1//10)
     @test interval( (1.0, 2.0) ) ≛ Interval{Float64}(1.0, 2.0)
-    @test_broken interval(Rational{Int}, 1) ≛ interval(1//1)
     @test interval(BigFloat, 1) ≛ Interval{BigFloat}(big(1.0), big(1.0))
 
     # Irrational

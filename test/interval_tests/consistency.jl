@@ -67,7 +67,9 @@ using Test
         @test fma(zero(a), entireinterval(), b) ≛ b
         @test fma(one(a), entireinterval(), b) ≛ entireinterval()
         @test fma(a, zero(a), c) ≛ c
-        @test_broken fma(interval(1//2), interval(1//3), interval(1//12)) ≛ interval(3//12)
+        @test fma(Interval{Rational{Int}}(1//2, 1//2),
+            Interval{Rational{Int}}(1//3, 1//3),
+            Interval{Rational{Int}}(1//12, 1//12)) ≛ Interval{Rational{Int}}(3//12, 3//12)
     end
 
     @testset "∈ tests" begin
@@ -182,7 +184,7 @@ using Test
     end
 
     @testset "mid" begin
-        @test mid(interval(1//2)) == 1//2
+        @test mid(interval(Rational{Int}, 1//2)) == 1//2
         @test mid(1..2) == 1.5
         @test mid(0.1..0.3) == 0.2
         @test mid(-10..5) == -2.5
@@ -206,7 +208,7 @@ using Test
     end
 
     @testset "diam" begin
-        @test diam( interval(1//2) ) == 0//1
+        @test diam( interval(Rational{Int}, 1//2) ) == 0//1
         @test diam( @interval(1//10) ) == eps(0.1)
         @test diam( @interval(0.1) ) == 2eps(0.1)
         @test isnan(diam(emptyinterval()))
@@ -217,10 +219,10 @@ using Test
 
     @testset "mig and mag" begin
         @test mig(@interval(-2,2)) == BigFloat(0.0)
-        @test mig( interval(1//2) ) == 1//2
+        @test mig( interval(Rational{Int}, 1//2) ) == 1//2
         @test isnan(mig(emptyinterval()))
         @test mag(-b) == b.hi
-        @test mag( interval(1//2) ) == 1//2
+        @test mag( interval(Rational{Int}, 1//2) ) == 1//2
         @test isnan(mag(emptyinterval()))
     end
 
@@ -262,7 +264,7 @@ using Test
     end
 
     @testset "mid and radius" begin
-        @test radius(interval(-1//10,1//10)) == diam(interval(-1//10,1//10))/2
+        @test radius(interval(Rational{Int}, -1//10,1//10)) == diam(interval(Rational{Int}, -1//10,1//10))/2
         @test isnan(IntervalArithmetic.radius(emptyinterval()))
         @test mid(c) == 2.125
         @test isnan(mid(emptyinterval()))
@@ -334,7 +336,7 @@ using Test
 
     @testset "isthinzero" begin
         @test isthinzero(interval(0))
-        @test isthinzero(interval(0//1))
+        @test isthinzero(interval(Rational{Int}, 0//1))
         @test isthinzero(interval(big(0)))
         @test isthinzero(interval(-0.0))
         @test isthinzero(interval(-0.0, 0.0))

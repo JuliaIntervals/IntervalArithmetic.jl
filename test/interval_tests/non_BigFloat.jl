@@ -2,12 +2,12 @@ using IntervalArithmetic
 using Test
 
 @testset "Tests with rational intervals" begin
-    a = interval(1//2, 3//4)
-    b = interval(3//7, 9//12)
+    a = interval(Rational{Int}, 1//2, 3//4)
+    b = interval(Rational{Int}, 3//7, 9//12)
 
-    @test a + b ≛ interval(13//14, 3//2)  # exact
+    @test a + b ≛ interval(Rational{Int}, 13//14, 3//2)  # exact
 
-    @test sqrt(a + b) ≛ interval(0.9636241116594314, 1.2247448713915892)
+    @test sqrt(a + b) ≛ interval(0.9636241116594315, 1.2247448713915892)
 
     X = interval(1//3)
     @test sqrt(X) ≛ interval(0.5773502691896257, 0.5773502691896258)

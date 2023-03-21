@@ -46,8 +46,8 @@ end
                 $f(interval(Float64, pi), Interval{Float64}(interval(Float32, pi)))
         end
     end
-    @test interval(1//4,1//2) + interval(2//3) ≛ interval(11//12, 7//6)
-    @test_broken interval(1//4,1//2) - interval(2//3) ≛ interval(-5//12, -1//6)
+    @test interval(Rational{Int}, 1//4, 1//2) + interval(Rational{Int}, 2//3) ≛ interval(Rational{Int}, 11//12, 7//6)
+    @test interval(Rational{Int}, 1//4, 1//2) - interval(Rational{Int}, 2//3) ≛ interval(Rational{Int}, -5//12, -1//6)
 
     @test interval(-30.0,-15.0) / interval(-5.0,-3.0) ≛ interval(3.0, 10.0)
     @test interval(-30,-15) / interval(-5,-3) ≛ interval(3.0, 10.0)

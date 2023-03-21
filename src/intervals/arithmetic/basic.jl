@@ -255,10 +255,11 @@ Square root of an interval.
 Implement the `sqrt` function of the IEEE Std 1788-2015 (Table 9.1).
 """
 function sqrt(a::F) where {F<:Interval}
-    domain = F(0, Inf)
+    G = float(F)
+    domain = G(0, Inf)
     a = a ∩ domain
 
     isempty(a) && return a
 
-    return @round(F, sqrt(inf(a)), sqrt(sup(a)))  # `sqrt` is correctly-rounded
+    return @round(G, sqrt(inf(a)), sqrt(sup(a)))  # `sqrt` is correctly-rounded
 end
