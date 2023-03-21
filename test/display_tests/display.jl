@@ -66,7 +66,7 @@ let x, b
     end
 
     @testset "Interval{Rational{T}}" begin
-        a = Interval{Rational{Int64}}(1//3, 5//4)
+        a = interval(Rational{Int64}, 1//3, 5//4)
         @test typeof(a) == Interval{Rational{Int}}
 
         setformat(:standard)
