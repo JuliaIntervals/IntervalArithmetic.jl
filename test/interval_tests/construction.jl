@@ -24,7 +24,7 @@ using Test
         @test Interval{Float32}(irr, irr) ≛ interval(Float32, irr)
     end
 
-    @test_broken ℯ..big(4) ≛ hull(interval(BigFloat, π), interval(4))
+    @test ℯ..big(4) ≛ hull(interval(BigFloat, ℯ), interval(4))
     @test π..big(4) ≛ hull(interval(BigFloat, π), interval(4))
 
     @test ℯ..pi ≛ hull(@interval(ℯ), interval(Float64, π))
