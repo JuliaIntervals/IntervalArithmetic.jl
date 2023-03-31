@@ -116,6 +116,16 @@ interval(::Type{T}, a::Real, b::Complex) where {T} = complex(interval(T, a, real
 interval(a::Real, b::Complex) = complex(interval(a, real(b)), interval(a, imag(b)))
 
 # Irrational
+# By-pass the absence of `BigFloat(..., ROUNDING_MODE)` (cf. base/irrationals.jl)
+# for some irrationals defined in MathConstants (cf. base/mathconstants.jl)
+for sym ∈ (:ℯ, :φ)
+    Interval{BigFloat}(a::Irrational{sym}, b::Irrational{sym}) =
+        Interval{BigFloat}(BigFloat(Float64(a, RoundDown), RoundDown), BigFloat(Float64(b, RoundUp), RoundUp))
+    Interval{BigFloat}(a::Irrational{sym}, b) =
+        Interval{BigFloat}(BigFloat(Float64(a, RoundDown), RoundDown), BigFloat(b, RoundUp))
+    Interval{BigFloat}(a, b::Irrational{sym}) =
+        Interval{BigFloat}(BigFloat(a, RoundDown), BigFloat(Float64(b, RoundUp), RoundUp))
+end
 # The following function is put here because generated functions must be defined
 # after all the methods they use
 @generated function interval(::Type{T}, a::Irrational) where {T}
