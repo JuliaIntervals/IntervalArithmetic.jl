@@ -34,7 +34,7 @@ end
 DecoratedInterval(I::DecoratedInterval, dec::DECORATION) = DecoratedInterval(I.interval, dec)
 
 function DecoratedInterval(a::T, b::S, d::DECORATION) where {T<:Real, S<:Real}
-    BoundsType = boundstype(T, S)
+    BoundsType = getnumtype(T, S)
     is_valid_interval(a, b) || return DecoratedInterval(Interval{BoundsType}(a, b), ill)
     return DecoratedInterval(Interval{BoundsType}(a, b), d)
 end
@@ -52,7 +52,7 @@ end
 DecoratedInterval(I::Interval) = DecoratedInterval{default_bound()}(I)
 
 function DecoratedInterval(a::T, b::S) where {T<:Real, S<:Real}
-    BoundsType = boundstype(T, S)
+    BoundsType = getnumtype(T, S)
     is_valid_interval(a, b) || return DecoratedInterval(Interval{BoundsType}(a, b), ill)
     return DecoratedInterval(Interval{BoundsType}(a, b))
 end
