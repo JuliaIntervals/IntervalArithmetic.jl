@@ -35,10 +35,10 @@ Interval{Float64}
 default_bound() = Float64
 
 # Produce the type of the bounds of an interval when not explicitly imposed
-getnumtype(::Type{T}, ::Type{S}) where {T<:AbstractFloat, S<:AbstractFloat} = promote_type(T, S)
-getnumtype(::Type{T}, ::Type{S}) where {T<:AbstractFloat, S} = promote_type(T, S)
-getnumtype(::Type{T}, ::Type{S}) where {T, S<:AbstractFloat} = promote_type(T, S)
-getnumtype(::Type{T}, ::Type{S}) where {T, S} = promote_type(default_bound(), T, S)
+promote_numtype(::Type{T}, ::Type{S}) where {T<:AbstractFloat, S<:AbstractFloat} = promote_type(T, S)
+promote_numtype(::Type{T}, ::Type{S}) where {T<:AbstractFloat, S} = promote_type(T, S)
+promote_numtype(::Type{T}, ::Type{S}) where {T, S<:AbstractFloat} = promote_type(T, S)
+promote_numtype(::Type{T}, ::Type{S}) where {T, S} = promote_type(default_bound(), T, S)
 
 @inline _normalisezero(a::Real) = ifelse(iszero(a), zero(a), a)
 
@@ -94,7 +94,7 @@ function interval(::Type{T}, a, b) where {T}
     @warn "Invalid input, empty interval is returned"
     return emptyinterval(T)
 end
-interval(a::T, b::S) where {T, S} = interval(getnumtype(T, S), a, b)
+interval(a::T, b::S) where {T, S} = interval(promote_numtype(T, S), a, b)
 
 # Real: `is_valid_interval(a, a) != true`
 interval(::Type{T}, a::Real) where {T} = interval(T, a, a)
