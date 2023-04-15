@@ -95,7 +95,7 @@ let X, A  # avoid problems with global variables
     Y = IntervalBox(1..2)  # single interval
     @test isa(Y, IntervalBox)
     @test length(Y) == 1
-    @test Y ≛ IntervalBox( (Interval(1., 2.),) )
+    @test Y ≛ IntervalBox( (interval(1., 2.),) )
     @test typeof(Y) == IntervalBox{1, Float64}
 end
 
@@ -199,7 +199,7 @@ end
 @testset "mid, diam, × for IntervalBox" begin
     X = (0..2) × (3..5)
     @test length(X) == 2
-    @test X ≛ IntervalBox(Interval(0, 2), Interval(3, 5))
+    @test X ≛ IntervalBox(interval(0, 2), interval(3, 5))
 
     @test diam(X) == 2
     @test mid(X) == [1, 4]
@@ -207,25 +207,25 @@ end
     Y = X × (4..8)
     @test isa(Y, IntervalBox)
     @test length(Y) == 3
-    @test Y ≛ IntervalBox(Interval(0, 2), Interval(3, 5), Interval(4, 8))
+    @test Y ≛ IntervalBox(interval(0, 2), interval(3, 5), interval(4, 8))
     @test diam(Y) == 4
 
     Z = X × Y
     @test isa(Z, IntervalBox)
     @test length(Z) == 5
-    @test Z ≛ IntervalBox(Interval(0, 2), Interval(3, 5), Interval(0, 2), Interval(3, 5), Interval(4, 8))
+    @test Z ≛ IntervalBox(interval(0, 2), interval(3, 5), interval(0, 2), interval(3, 5), interval(4, 8))
     @test diam(Z) == 4
 
     Z = X × Y.v
     @test isa(Z, IntervalBox)
     @test length(Z) == 5
-    @test Z ≛ IntervalBox(Interval(0, 2), Interval(3, 5), Interval(0, 2), Interval(3, 5), Interval(4, 8))
+    @test Z ≛ IntervalBox(interval(0, 2), interval(3, 5), interval(0, 2), interval(3, 5), interval(4, 8))
     @test diam(Z) == 4
 
     Z = X.v × Y
     @test isa(Z, IntervalBox)
     @test length(Z) == 5
-    @test Z ≛ IntervalBox(Interval(0, 2), Interval(3, 5), Interval(0, 2), Interval(3, 5), Interval(4, 8))
+    @test Z ≛ IntervalBox(interval(0, 2), interval(3, 5), interval(0, 2), interval(3, 5), interval(4, 8))
     @test diam(Z) == 4
 
     @test scaled_mid(IntervalBox(0..1, 3), 0.75) == [0.75, 0.75, 0.75]
@@ -240,9 +240,9 @@ end
     @test IntervalBox((1..2, 2..3)) ≛ IntervalBox(1..2, 2..3)
     @test IntervalBox((1, 2)) ≛ IntervalBox(1..1, 2..2)
     @test IntervalBox( (1, 2, 3) ) ≛ IntervalBox(1..1, 2..2, 3..3)
-    @test IntervalBox( (1, 2, 3.1) ) ≛ IntervalBox(1..1, 2..2, Interval(3.1))
-    @test IntervalBox( SVector(1, 2, 3.1) ) ≛ IntervalBox(1..1, 2..2, Interval(3.1))
-    @test IntervalBox( Interval.(SVector(1, 2, 3.1)) ) ≛ IntervalBox(1..1, 2..2, Interval(3.1))
+    @test IntervalBox( (1, 2, 3.1) ) ≛ IntervalBox(1..1, 2..2, interval(3.1))
+    @test IntervalBox( SVector(1, 2, 3.1) ) ≛ IntervalBox(1..1, 2..2, interval(3.1))
+    @test IntervalBox( interval.(SVector(1, 2, 3.1)) ) ≛ IntervalBox(1..1, 2..2, interval(3.1))
     @test IntervalBox(3) ≛ IntervalBox(3..3)
     @test IntervalBox(1:5) ≛ IntervalBox(1..1, 2..2, 3..3, 4..4, 5..5)
     @test IntervalBox([1:5...]) ≛ IntervalBox(1..1, 2..2, 3..3, 4..4, 5..5)

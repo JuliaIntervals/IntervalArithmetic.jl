@@ -323,23 +323,22 @@ end
 
 # The function is unbounded at the bounded edges of the domain
 restricted_functions1 = Dict(
-    :log   => [0, Inf],
-    :log2  => [0, Inf],
-    :log10 => [0, Inf],
-    :atanh => [-1, 1]
+    :log   => Interval{Float64}(0.0, Inf),
+    :log2  => Interval{Float64}(0.0, Inf),
+    :log10 => Interval{Float64}(0.0, Inf),
+    :atanh => Interval{Float64}(-1.0, 1.0)
 )
 
 # The function is bounded at the bounded edge(s) of the domain
 restricted_functions2 = Dict(
-    :sqrt  => [0, Inf],
-    :asin  => [-1, 1],
-    :acos  => [-1, 1],
-    :acosh => [1, Inf]
+    :sqrt  => Interval{Float64}(0.0, Inf),
+    :asin  => Interval{Float64}(-1.0, 1.0),
+    :acos  => Interval{Float64}(-1.0, 1.0),
+    :acosh => Interval{Float64}(1.0, Inf)
 )
 
 # Define functions with restricted domains on DecoratedInterval's:
 for (f, domain) in restricted_functions1
-    domain = Interval(domain...)
     @eval function Base.$(f)(xx::DecoratedInterval{T}) where T
         x = interval(xx)
         r = $(f)(x)
@@ -350,7 +349,6 @@ for (f, domain) in restricted_functions1
 end
 
 for (f, domain) in restricted_functions2
-    domain = Interval(domain...)
     @eval function Base.$(f)(xx::DecoratedInterval{T}) where T
         x = interval(xx)
         r = $(f)(x)

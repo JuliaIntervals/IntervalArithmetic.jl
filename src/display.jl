@@ -212,12 +212,12 @@ end
 
 # `String` representation of an `Interval`
 
-function basic_representation(a::Interval, format::Symbol)
+function basic_representation(a::Interval{T}, format::Symbol) where {T}
     isempty(a) && return "∅"
     sigdigits = display_params.sigdigits
     if format === :full
         # Do not use `inf(a)` to avoid -0.0
-        return string("Interval(", a.lo, ", ", sup(a), ")")
+        return string("Interval{", T, "}(", a.lo, ", ", sup(a), ")")
     elseif format === :midpoint
         m = round_string(mid(a), sigdigits, RoundNearest)
         r = round_string(radius(a), sigdigits, RoundUp)
@@ -237,8 +237,8 @@ function basic_representation(a::Interval{Float32}, format::Symbol)
     sigdigits = display_params.sigdigits
     if format === :full
         # Do not use `inf(a)` to avoid -0.0
-        output = string("Interval(", a.lo, "f0, ", sup(a), "f0)")
-        return replace(replace(output, "NaNf0" => "NaN32"), "Inff0" => '∞')
+        output = string("Interval{Float32}(", a.lo, "f0, ", sup(a), "f0)")
+        return replace(replace(output, "NaNf0" => "NaN32"), "Inff0" => "Inf32")
     elseif format === :midpoint
         m = round_string(mid(a), sigdigits, RoundNearest)
         r = round_string(radius(a), sigdigits, RoundUp)
@@ -253,11 +253,11 @@ function basic_representation(a::Interval{Float32}, format::Symbol)
     end
 end
 
-function basic_representation(a::Interval{<:Rational}, format::Symbol)
+function basic_representation(a::Interval{T}, format::Symbol) where {T<:Rational}
     isempty(a) && return "∅"
     if format === :full
         # Do not use `inf(a)` to avoid -0.0
-        return string("Interval(", a.lo, ", ", sup(a), ")")
+        return string("Interval{", T, "}(", a.lo, ", ", sup(a), ")")
     elseif format === :midpoint
         return string(mid(a), " ± ", radius(a))
     else  # format === :standard

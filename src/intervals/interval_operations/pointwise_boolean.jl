@@ -198,11 +198,11 @@ end
 ## Number-interval comparisons
 for op in pointwise_bool_operations
     @eval function $op(P::PointwisePolicy, x::F, y::Real) where {F<:Interval}
-        return $op(P, x, F(y))
+        return $op(P, x, F(y, y))
     end
 
     @eval function $op(P::PointwisePolicy, x::Real, y::F) where {F<:Interval}
-        return $op(P, F(x), y)
+        return $op(P, F(x, x), y)
     end
 end
 

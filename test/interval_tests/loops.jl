@@ -5,7 +5,7 @@ using Test
 @testset "Interval loop tests" begin
     i = 1
 
-    @test Interval(i,i).lo == 1
+    @test interval(i,i).lo == 1
     @test @interval(i).lo == 1
 
 

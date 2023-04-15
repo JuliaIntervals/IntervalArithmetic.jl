@@ -7,11 +7,11 @@
 
 const halfpi = pi / 2.0
 
-half_pi(::Type{F}) where {F<:Interval} = scale(0.5, F(π))
-two_pi(::Type{F}) where {F<:Interval} = scale(2, F(π))
+half_pi(::Type{Interval{T}}) where {T} = scale(0.5, interval(T, π))
+two_pi(::Type{Interval{T}}) where {T} = scale(2, interval(T, π))
 
-function range_atan(::Type{F}) where {F<:Interval}
-    temp = sup(F(π))  # Using F(-π, π) converts -π to Float64 before Interval construction
+function range_atan(::Type{F}) where {T, F<:Interval{T}}
+    temp = sup(interval(T, π))  # Using F(-π, π) converts -π to Float64 before Interval construction
     return F(-temp, temp)
 end
 
@@ -30,7 +30,7 @@ in the interval; cf. the formula for sine of an interval in
 Tucker, *Validated Numerics*.
 """
 function find_quadrants(::Type{F}, x) where {F<:Interval}
-    temp = F(x) / half_pi(F)
+    temp = F(x, x) / half_pi(F)
     return floor(inf(temp)), floor(sup(temp))
 end
 
@@ -50,7 +50,7 @@ end
 
 Implement the `sin` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function sin(a::F) where {F<:Interval}
+function sin(a::F) where {T, F<:Interval{T}}
     isempty(a) && return a
 
     whole_range = F(-1, 1)
@@ -72,7 +72,7 @@ function sin(a::F) where {F<:Interval}
 
     # Different cases depending on the two quadrants:
     if lo_quadrant == hi_quadrant
-        ahi - alo > inf(F(π)) && return whole_range  # in same quadrant but separated by almost 2pi
+        ahi - alo > inf(interval(T, π)) && return whole_range  # in same quadrant but separated by almost 2pi
         lo = @round(F, sin(alo), sin(alo))
         hi = @round(F, sin(ahi), sin(ahi))
         return hull(lo, hi)
@@ -109,7 +109,7 @@ function sin(a::F) where {F<:Interval{Float64}}
 
     # Different cases depending on the two quadrants:
     if lo_quadrant == hi_quadrant
-        ahi - alo > inf(F(π)) && return whole_range  #
+        ahi - alo > inf(interval(Float64, π)) && return whole_range
 
         if lo_quadrant == 1 || lo_quadrant == 2
             # negative slope
@@ -135,9 +135,9 @@ function sin(a::F) where {F<:Interval{Float64}}
     end
 end
 
-function sinpi(a::Interval{T}) where T
+function sinpi(a::Interval{T}) where {T}
     isempty(a) && return a
-    w = a * Interval{T}(π)
+    w = a * interval(T, π)
     return sin(w)
 end
 
@@ -146,7 +146,7 @@ end
 
 Implement the `cos` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function cos(a::F) where {F<:Interval}
+function cos(a::F) where {T, F<:Interval{T}}
     isempty(a) && return a
 
     whole_range = F(-1, 1)
@@ -166,7 +166,7 @@ function cos(a::F) where {F<:Interval}
 
     # Different cases depending on the two quadrants:
     if lo_quadrant == hi_quadrant  # Interval limits in the same quadrant
-        ahi - alo > inf(F(π)) && return whole_range
+        ahi - alo > inf(interval(T, π)) && return whole_range
         lo = @round(F, cos(alo), cos(alo))
         hi = @round(F, cos(ahi), cos(ahi))
         return hull(lo, hi)
@@ -203,7 +203,7 @@ function cos(a::F) where {F<:Interval{Float64}}
 
     # Different cases depending on the two quadrants:
     if lo_quadrant == hi_quadrant # Interval limits in the same quadrant
-        ahi - alo > inf(F(π)) && return whole_range
+        ahi - alo > inf(interval(Float64, π)) && return whole_range
 
         if lo_quadrant == 2 || lo_quadrant == 3
             # positive slope
@@ -231,7 +231,7 @@ end
 
 function cospi(a::Interval{T}) where T
     isempty(a) && return a
-    w = a * Interval{T}(π)
+    w = a * interval(T, π)
     return cos(w)
 end
 
@@ -240,10 +240,10 @@ end
 
 Implement the `tan` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function tan(a::F) where {F<:Interval}
+function tan(a::F) where {T, F<:Interval{T}}
     isempty(a) && return a
 
-    diam(a) > inf(F(π)) && return entireinterval(a)
+    diam(a) > inf(interval(T, π)) && return entireinterval(a)
 
     alo, ahi = bounds(a)
     lo_quadrant = minimum(find_quadrants(F, alo))
@@ -269,7 +269,7 @@ end
 function tan(a::F) where {F<:Interval{Float64}}
     isempty(a) && return a
 
-    diam(a) > inf(F(π)) && return entireinterval(a)
+    diam(a) > inf(interval(Float64, π)) && return entireinterval(a)
 
     alo, ahi = bounds(a)
     lo_quadrant, lo = quadrant(alo)
@@ -295,10 +295,10 @@ end
 
 Implement the `cot` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function cot(a::F) where {F<:Interval}
+function cot(a::F) where {T, F<:Interval{T}}
     isempty(a) && return a
 
-    diam(a) > inf(F(π)) && return entireinterval(a)
+    diam(a) > inf(interval(T, π)) && return entireinterval(a)
 
     isthinzero(a) && return emptyinterval(a)
 
@@ -333,19 +333,17 @@ function cot(a::F) where {F<:Interval}
     end
 end
 
-function cot(a::F) where {F<:Interval{Float64}}
-    return atomic(F, cot(big(a)) )
-end
+cot(a::F) where {F<:Interval{Float64}} = atomic(F, cot(big(a)))
 
 """
     sec(a::Interval)
 
 Implement the `sec` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function sec(a::F) where {F<:Interval}
+function sec(a::F) where {T, F<:Interval{T}}
     isempty(a) && return a
 
-    diam(a) > inf(F(π)) && return entireinterval(a)
+    diam(a) > inf(interval(T, π)) && return entireinterval(a)
 
     alo, ahi = bounds(a)
     lo_quadrant = minimum(find_quadrants(F, alo))
@@ -374,19 +372,17 @@ function sec(a::F) where {F<:Interval}
     end
 end
 
-function sec(a::F) where {F<:Interval{Float64}}
-    return atomic(F, sec(big(a)) )
-end
+sec(a::F) where {F<:Interval{Float64}} = atomic(F, sec(big(a)))
 
 """
     csc(a::Interval)
 
 Implement the `csc` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function csc(a::F) where {F<:Interval}
+function csc(a::F) where {T, F<:Interval{T}}
     isempty(a) && return a
 
-    diam(a) > inf(F(π)) && return entireinterval(a)
+    diam(a) > inf(interval(T, π)) && return entireinterval(a)
 
     isthinzero(a) && return emptyinterval(a)
 
@@ -426,11 +422,7 @@ function csc(a::F) where {F<:Interval}
     end
 end
 
-function csc(a::F) where {F<:Interval{Float64}}
-    return atomic(F, csc(big(a)) )
-end
-
-
+csc(a::F) where {F<:Interval{Float64}} = atomic(F, csc(big(a)))
 
 """
     asin(a::Interval)
@@ -480,15 +472,12 @@ function atan(y::Interval{T}, x::Interval{S}) where {T, S}
     return F(atan(big(y), big(x)))
 end
 
-function atan(y::Interval{BigFloat}, x::Interval{BigFloat})
-    F = Interval{BigFloat}
-    T = BigFloat
-
+function atan(y::F, x::F) where {F<:Interval{BigFloat}}
     (isempty(y) || isempty(x)) && return emptyinterval(F)
 
     ylo, yhi = bounds(y)
     xlo, xhi = bounds(x)
-    z = zero(T)
+    z = zero(BigFloat)
 
     # Prevent nonsense results when y has a signed zero:
     if iszero(ylo)
@@ -515,7 +504,7 @@ function atan(y::Interval{BigFloat}, x::Interval{BigFloat})
         return @round(F, atan(ylo, xlo), atan(yhi, xlo))
 
     elseif xhi < z
-        isthinzero(y) && return F(π)
+        isthinzero(y) && return interval(BigFloat, π)
         ylo ≥ z &&
             return @round(F, atan(yhi, xhi), atan(ylo, xlo))
         yhi < z &&
@@ -532,7 +521,7 @@ function atan(y::Interval{BigFloat}, x::Interval{BigFloat})
             return half_range_atan(F)
 
         elseif iszero(xhi)
-            isthinzero(y) && return F(π)
+            isthinzero(y) && return interval(BigFloat, π)
             ylo ≥ z &&
                 return F(inf(half_pi(F)), atan(ylo, xlo, RoundUp))
             yhi < z &&
@@ -556,6 +545,6 @@ Implement the `acot` function of the IEEE Std 1788-2015 (Table 9.1).
 function acot(a::F) where {F<:Interval}
     isempty(a) && return a
 
-    return atomic(F, Interval(acot(bigequiv(sup(a))), acot(bigequiv(inf(a)))))
+    return atomic(F, interval(acot(bigequiv(sup(a))), acot(bigequiv(inf(a)))))
     # return atomic(F, @round(Interval{BigFloat}, acot(bigequiv(sup(a))), acot(bigequiv(inf(a)))))
 end

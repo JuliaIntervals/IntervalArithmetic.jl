@@ -26,7 +26,7 @@ function cancelminus(a::F, b::F) where {F<:Interval}
     c_lo == Inf && return F(prevfloat(c_lo), c_hi)
     c_hi == -Inf && return F(c_lo, nextfloat(c_hi))
 
-    c = Interval(c_lo, c_hi)
+    c = F(c_lo, c_hi)
     isunbounded(c) && return c
 
     # Corner case 1 (page 62) involving finite precision for diam(a) and diam(b)

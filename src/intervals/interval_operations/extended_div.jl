@@ -17,10 +17,10 @@ function extended_div(a::F, b::F) where {T, F<:Interval{T}}
     z = zero(T)
     if 0 < bhi && 0 > blo && 0 ∉ a
         if ahi < 0
-            return (a / Interval(z, bhi), a / Interval(blo,z))
+            return (a / F(z, bhi), a / F(blo, z))
             # return (F(T(-Inf), ahi / bhi), F(ahi / blo, T(Inf)))
         elseif alo > 0
-            return (a / Interval(blo,z), a / Interval(z, bhi))
+            return (a / F(blo, z), a / F(z, bhi))
             # return (F(T(-Inf), alo / blo), F(alo / bhi, T(Inf)))
         end
 

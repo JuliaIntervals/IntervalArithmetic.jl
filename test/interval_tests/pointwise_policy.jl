@@ -31,11 +31,11 @@ end
     @test_throws ArgumentError BooleanInterval(false, false)
 end
 
-a = Interval(-1, 0)
-b = Interval(-0.5, 0.5)
-c = Interval(0.5, 2)
-d = Interval(0.25, 0.8)
-f = Interval(1)
+a = interval(-1, 0)
+b = interval(-0.5, 0.5)
+c = interval(0.5, 2)
+d = interval(0.25, 0.8)
+f = interval(1)
 z = zero(Interval{Float64})
 
 for policy in (:certainly, :interval, :ternary)
@@ -70,8 +70,8 @@ for policy in (:certainly, :interval, :ternary)
 
         @testset "isinteger" begin
             @test istrue(isinteger(z))
-            @test istrue(isinteger(Interval(4)))
-            @test isfalse(isinteger(Interval(4.5)))
+            @test istrue(isinteger(interval(4)))
+            @test isfalse(isinteger(interval(4.5)))
             @test isunkown(isinteger(c))
             @test isfalse(isinteger(d))
         end
@@ -83,7 +83,7 @@ for policy in (:certainly, :interval, :ternary)
             @test istrue(isfinite(z))
             # NOTE This depends on the flavor. We test it here for the
             # :set_based flavor only
-            @test istrue(isfinite(Interval(0., Inf)))
+            @test istrue(isfinite(interval(0., Inf)))
         end
     end
 end
@@ -119,8 +119,8 @@ let policy = :ieee
 
         @testset "isinteger" begin
             @test istrue(isinteger(z))
-            @test istrue(isinteger(Interval(4)))
-            @test isfalse(isinteger(Interval(4.5)))
+            @test istrue(isinteger(interval(4)))
+            @test isfalse(isinteger(interval(4.5)))
             @test isfalse(isinteger(c))
             @test isfalse(isinteger(d))
         end
@@ -132,7 +132,7 @@ let policy = :ieee
             @test istrue(isfinite(z))
             # NOTE This depends on the flavor. We test it here for the
             # :set_based flavor only
-            @test istrue(isfinite(Interval(0., Inf)))
+            @test istrue(isfinite(interval(0., Inf)))
         end
     end
 end

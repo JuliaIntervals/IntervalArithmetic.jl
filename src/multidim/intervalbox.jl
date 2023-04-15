@@ -10,9 +10,9 @@ end
 # IntervalBox(x::Interval) = IntervalBox( SVector(x) )  # single interval treated as tuple with one element
 
 IntervalBox(x::Interval...) = IntervalBox(SVector(x))
-IntervalBox(x::SVector) = IntervalBox(Interval.(x))
+IntervalBox(x::SVector) = IntervalBox(interval.(x))
 IntervalBox(x::Tuple) = IntervalBox(SVector(x))
-IntervalBox(x::Real) = IntervalBox(Interval.(x))
+IntervalBox(x::Real) = IntervalBox(interval.(x))
 IntervalBox(x...) = IntervalBox(x)
 IntervalBox(x) = IntervalBox(x...)
 IntervalBox(X::IntervalBox, n) = foldl(×, Iterators.repeated(X, n))
@@ -22,7 +22,7 @@ function IntervalBox(los::AbstractVector, his::AbstractVector)
     xs = map(los, his) do lo, hi
         # Allow the creation of the intervals even when the bounds are in the
         # wrong order
-        return lo <= hi ? Interval(lo, hi) : Interval(hi, lo)
+        return lo <= hi ? interval(lo, hi) : interval(hi, lo)
     end
     return IntervalBox(xs...)
 end

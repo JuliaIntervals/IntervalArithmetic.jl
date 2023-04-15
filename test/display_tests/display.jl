@@ -7,10 +7,10 @@ let x, b
     @testset "Interval" begin
         a = 1..2
         b = -1.1..1.3
-        c = Interval(pi)
+        c = interval(pi)
         # large_expo = IntervalArithmetic.atomic(Interval{BigFloat}, -Inf)
         # Use smaller exponent, cf. JuliaLang/julia#48678
-        large_expo = Interval(0, big"1e123456789")
+        large_expo = interval(0, big"1e123456789")
 
         @testset "6 significant digits" begin
             setformat(:standard; sigdigits = 6)
@@ -45,11 +45,11 @@ let x, b
         @testset "Full" begin
             setformat(:full)
 
-            @test sprint(show, MIME("text/plain"), a) == "Interval(1.0, 2.0)"
-            @test sprint(show, MIME("text/plain"), b) == "Interval(-1.1, 1.3)"
-            @test sprint(show, MIME("text/plain"), c) == "Interval(3.141592653589793, 3.1415926535897936)"
+            @test sprint(show, MIME("text/plain"), a) == "Interval{Float64}(1.0, 2.0)"
+            @test sprint(show, MIME("text/plain"), b) == "Interval{Float64}(-1.1, 1.3)"
+            @test sprint(show, MIME("text/plain"), c) == "Interval{Float64}(3.141592653589793, 3.1415926535897936)"
             @test sprint(show, MIME("text/plain"), large_expo) ==
-                "Interval(0.0, 1.000000000000000000000000000000000000000000000000000000000000000000000000000004e+123456789)"
+                "Interval{BigFloat}(0.0, 1.000000000000000000000000000000000000000000000000000000000000000000000000000004e+123456789)"
         end
 
         @testset "Midpoint" begin
@@ -66,17 +66,17 @@ let x, b
     end
 
     @testset "Interval{Rational{T}}" begin
-        a = Interval(1//3, 5//4)
-        @test_broken typeof(a) == Interval{Rational{Int}}
+        a = interval(Rational{Int}, 1//3, 5//4)
+        @test typeof(a) == Interval{Rational{Int}}
 
         setformat(:standard)
-        @test_broken sprint(show, MIME("text/plain"), a) == "[1//3, 5//4]"
+        @test sprint(show, MIME("text/plain"), a) == "[1//3, 5//4]"
 
         setformat(:full)
-        @test_broken sprint(show, MIME("text/plain"), a) == "Interval(1//3, 5//4)"
+        @test sprint(show, MIME("text/plain"), a) == string(typeof(a), "(1//3, 5//4)")
 
         setformat(:midpoint)
-        @test_broken sprint(show, MIME("text/plain"), a) == "19//24 ± 11//24"
+        @test sprint(show, MIME("text/plain"), a) == "19//24 ± 11//24"
     end
 
     @testset "Interval{Float32}" begin
@@ -88,15 +88,15 @@ let x, b
         @test sprint(show, MIME("text/plain"), b) == "[-1.0f0, ∞]"
 
         setformat(:full)
-        @test sprint(show, MIME("text/plain"), a) == "Interval(1.0f0, 2.0f0)"
-        @test sprint(show, MIME("text/plain"), b) == "Interval(-1.0f0, ∞)"
+        @test sprint(show, MIME("text/plain"), a) == "Interval{Float32}(1.0f0, 2.0f0)"
+        @test sprint(show, MIME("text/plain"), b) == "Interval{Float32}(-1.0f0, Inf32)"
 
         setformat(:midpoint)
         @test sprint(show, MIME("text/plain"), a) == "1.5f0 ± 0.5f0"
     end
 
     @testset "Complex{Interval}" begin
-        a = Complex(Interval(0, 2), Interval(1))
+        a = Complex(interval(0, 2), interval(1))
         @test typeof(a) == Complex{Interval{Float64}}
 
         setformat(:standard)
@@ -131,7 +131,7 @@ let x, b
         @test sprint(show, MIME("text/plain"), a) == "[2.0, 3.0]₂₅₆_com"
 
         setformat(:full)
-        @test sprint(show, MIME("text/plain"), a) == "DecoratedInterval(Interval(2.0, 3.0), com)"
+        @test sprint(show, MIME("text/plain"), a) == "DecoratedInterval(Interval{BigFloat}(2.0, 3.0), com)"
 
         setformat(:midpoint)
         @test sprint(show, MIME("text/plain"), a) == "(2.5 ± 0.5)₂₅₆_com"
@@ -143,14 +143,14 @@ let x, b
     setprecision(BigFloat, 128)
 
     @testset "BigFloat intervals" begin
-        a = Interval(big(1))
+        a = interval(big(1))
         @test typeof(a) == Interval{BigFloat}
 
         setformat(:standard; decorations = false)
         @test sprint(show, MIME("text/plain"), a) == "[1.0, 1.0]₁₂₈"
 
         setformat(:full)
-        @test sprint(show, MIME("text/plain"), a) == "Interval(1.0, 1.0)"
+        @test sprint(show, MIME("text/plain"), a) == "Interval{BigFloat}(1.0, 1.0)"
 
         a = DecoratedInterval(big(2), big(3), com)
         @test typeof(a) == DecoratedInterval{BigFloat}
@@ -162,7 +162,7 @@ let x, b
         @test sprint(show, MIME("text/plain"), a) == "[2.0, 3.0]₁₂₈_com"
 
         setformat(:full)
-        @test sprint(show, MIME("text/plain"), a) == "DecoratedInterval(Interval(2.0, 3.0), com)"
+        @test sprint(show, MIME("text/plain"), a) == "DecoratedInterval(Interval{BigFloat}(2.0, 3.0), com)"
     end
 
     @testset "IntervalBox" begin
@@ -177,7 +177,7 @@ let x, b
         @test sprint(show, MIME("text/plain"), X) == "[-∞, ∞]²"
 
         setformat(:full)
-        @test sprint(show, MIME("text/plain"), X) == "IntervalBox(Interval(-Inf, Inf), 2)"
+        @test sprint(show, MIME("text/plain"), X) == "IntervalBox(Interval{Float64}(-Inf, Inf), 2)"
 
         setformat(:standard)
         a = IntervalBox(1..2, 2..3)
@@ -188,9 +188,9 @@ let x, b
         @test sprint(show, MIME("text/plain"), c) == "[1.0, 2.0]¹"
 
         setformat(:full)
-        @test sprint(show, MIME("text/plain"), a) == "IntervalBox(Interval(1.0, 2.0), Interval(2.0, 3.0))"
+        @test sprint(show, MIME("text/plain"), a) == "IntervalBox(Interval{Float64}(1.0, 2.0), Interval{Float64}(2.0, 3.0))"
         @test sprint(show, MIME("text/plain"), b) == "IntervalBox(∅, 2)"
-        @test sprint(show, MIME("text/plain"), c) == "IntervalBox(Interval(1.0, 2.0), 1)"
+        @test sprint(show, MIME("text/plain"), c) == "IntervalBox(Interval{Float64}(1.0, 2.0), 1)"
 
         setformat(:midpoint)
         @test sprint(show, MIME("text/plain"), a) == "(1.5 ± 0.5) × (2.5 ± 0.5)"
@@ -205,19 +205,19 @@ end
 
     x = 0..1
     @test sprint(show, MIME("text/plain"), x) == "[0.0, 1.0]"
-    @test sprint(show, x) == "Interval(0.0, 1.0)"
+    @test sprint(show, x) == "Interval{Float64}(0.0, 1.0)"
 
     x = @biginterval(0, 1)
     @test sprint(show, MIME("text/plain"), x) == "[0.0, 1.0]₁₂₈"
-    @test sprint(show, x) == "Interval(0.0, 1.0)"
+    @test sprint(show, x) == "Interval{BigFloat}(0.0, 1.0)"
 
     x = DecoratedInterval(0, 1, dac)
     @test sprint(show, MIME("text/plain"), x) == "[0.0, 1.0]"
-    @test sprint(show, x) == "DecoratedInterval(Interval(0.0, 1.0), dac)"
+    @test sprint(show, x) == "DecoratedInterval(Interval{Float64}(0.0, 1.0), dac)"
 
     x = DecoratedInterval(big(0), big(1), def)
     @test sprint(show, MIME("text/plain"), x) == "[0.0, 1.0]₁₂₈"
-    @test sprint(show, x) == "DecoratedInterval(Interval(0.0, 1.0), def)"
+    @test sprint(show, x) == "DecoratedInterval(Interval{BigFloat}(0.0, 1.0), def)"
 
     setformat(; decorations = true)
     @test sprint(show, MIME("text/plain"), x) == "[0.0, 1.0]₁₂₈_def"
@@ -226,9 +226,9 @@ end
     b = IntervalBox(emptyinterval(), 2)
     c = IntervalBox(1..2, 1)
 
-    @test sprint(show, a) == "IntervalBox(Interval(1.0, 2.0), Interval(2.0, 3.0))"
+    @test sprint(show, a) == "IntervalBox(Interval{Float64}(1.0, 2.0), Interval{Float64}(2.0, 3.0))"
     @test sprint(show, b) == "IntervalBox(∅, 2)"
-    @test sprint(show, c) == "IntervalBox(Interval(1.0, 2.0), 1)"
+    @test sprint(show, c) == "IntervalBox(Interval{Float64}(1.0, 2.0), 1)"
 
 end
 
@@ -236,7 +236,7 @@ end
     x = prevfloat(0.1)..nextfloat(0.3)
 
     @format full
-    @test sprint(show, MIME("text/plain"), x) == "Interval(0.09999999999999999, 0.30000000000000004)"
+    @test sprint(show, MIME("text/plain"), x) == "Interval{Float64}(0.09999999999999999, 0.30000000000000004)"
 
     @format standard 3
     @test sprint(show, MIME("text/plain"), x) == "[0.0999, 0.301]"

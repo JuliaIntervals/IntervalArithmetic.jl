@@ -40,7 +40,7 @@ function ^(a::F, n::Integer) where {F<:Interval{BigFloat}}
     isempty(a) && return a
     iszero(n) && return one(F)
     n == 1 && return a
-    n < 0 && isthinzero(a) && return emptyinterval(F)
+    (n < 0 && isthinzero(a)) && return emptyinterval(F)
 
     if isodd(n) # odd power
         isentire(a) && return a
@@ -98,7 +98,7 @@ function ^(a::F, x::BigFloat) where {F<:Interval{BigFloat}}
     a = a ∩ domain
     (isempty(x) || isempty(a)) && return emptyinterval(F)
 
-    xx = F(x)
+    xx = F(x, x)
 
     lo = @round(F, inf(a)^inf(xx), inf(a)^inf(xx))
     lo = (inf(lo) == Inf) ? F(prevfloat(Inf), Inf) : lo
@@ -167,20 +167,10 @@ function ^(a::F, x::Interval) where {F<:Interval{BigFloat}}
 
     (isempty(x) || isempty(a)) && return emptyinterval(F)
 
-    lo1 = a^inf(x)
-    lo2 = a^sup(x)
-    lo1 = hull(lo1, lo2)
-
-    hi1 = a^inf(x)
-    hi2 = a^sup(x)
-    hi1 = hull(hi1, hi2)
-
-    return hull(lo1, hi1)
+    return hull(a^inf(x), a^sup(x))
 end
 
-function sqr(a::Interval)
-    return a^2
-end
+sqr(a::Interval) = a^2
 
 """
     hypot(x::Interval, n::Integer)
@@ -203,13 +193,16 @@ function pow(x::F, n::Integer) where {F<:Interval}
     isempty(x) && return x
 
     if iseven(n) && 0 ∈ x
+        xmig = mig(x)
+        xmag = mag(x)
         return hull(zero(x),
-                    Base.power_by_squaring(F(mig(x)), n),
-                    Base.power_by_squaring(F(mag(x)), n)
-            )
+                    Base.power_by_squaring(F(xmig, xmig), n),
+                    Base.power_by_squaring(F(xmag, xmag), n))
     else
-      return hull( Base.power_by_squaring(F(inf(x)), n),
-                    Base.power_by_squaring(F(sup(x)), n) )
+        xinf = inf(x)
+        xsup = sup(x)
+        return hull(Base.power_by_squaring(F(xinf, xinf), n),
+                    Base.power_by_squaring(F(xsup, xsup), n))
     end
 end
 
@@ -262,7 +255,7 @@ for f in (:log, :log2, :log10)
 end
 
 function log1p(a::F) where {T, F<:Interval{T}}
-    domain = Interval{T}(-1, Inf)
+    domain = F(-1, Inf)
     a = a ∩ domain
 
     (isempty(a) || sup(a) ≤ -one(T)) && return emptyinterval(a)
