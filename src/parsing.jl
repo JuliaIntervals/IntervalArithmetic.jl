@@ -27,7 +27,7 @@ julia> parse(DecoratedInterval{Float64}, "foobar")
 [NaN, NaN]_ill
 ```
 """
-function parse(::Type{DecoratedInterval{T}}, s::AbstractString) where T
+function parse(::Type{DecoratedInterval{T}}, s::AbstractString) where {T<:NumTypes}
     s = lowercase(strip(s))
     s == "[nai]" && return nai(T)
     try
@@ -123,7 +123,7 @@ julia> parse(Interval{Float64}, "foobar")
 ∅
 ```
 """
-function parse(::Type{Interval{T}}, s::AbstractString) where T
+function parse(::Type{Interval{T}}, s::AbstractString) where {T<:NumTypes}
     s = lowercase(strip(s))
     try
         ival, _ = _parse(Interval{T}, s)
@@ -152,7 +152,7 @@ error if an invalid string is given.
   unbounded (e.g. input `"[3, infinity]"`) or becomes unbounded because of overflow
   (e.g. the input `"[3, 1e400]", which is parse to `[3, ∞]` when using `Float64`).
 """
-function _parse(::Type{Interval{T}}, s::AbstractString) where T
+function _parse(::Type{Interval{T}}, s::AbstractString) where {T<:NumTypes}
     isnotcom = occursin("inf", s)
     if startswith(s, '[') && endswith(s, ']') # parse as interval
         s = strip(s[2:end-1])

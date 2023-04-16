@@ -120,11 +120,11 @@ end
 
 function ^(a::Interval{Rational{T}}, x::AbstractFloat) where {T<:Integer}
     a = Interval{Float64}(inf(a).num/inf(a).den, sup(a).num/sup(a).den)
-    return F(a^x)
+    return a^x
 end
 
 # Rational power
-function ^(a::F, x::Rational{R}) where {F<:Interval, R<:Integer}
+function ^(a::F, x::Rational{R}) where {F<:Interval,R<:Integer}
     p = x.num
     q = x.den
 
@@ -244,7 +244,7 @@ for f in (:exp2, :exp10, :cbrt)
 end
 
 for f in (:log, :log2, :log10)
-    @eval function ($f)(a::F) where {T, F<:Interval{T}}
+    @eval function ($f)(a::F) where {T<:NumTypes,F<:Interval{T}}
             domain = F(0, Inf)
             a = a ∩ domain
 
@@ -254,7 +254,7 @@ for f in (:log, :log2, :log10)
         end
 end
 
-function log1p(a::F) where {T, F<:Interval{T}}
+function log1p(a::F) where {T<:NumTypes,F<:Interval{T}}
     domain = F(-1, Inf)
     a = a ∩ domain
 
@@ -290,7 +290,7 @@ function nthroot(a::F, n::Integer) where {F<:Interval{BigFloat}}
     return interval(low , high)
 end
 
-function nthroot(a::F, n::Integer) where {T, F<:Interval{T}}
+function nthroot(a::F, n::Integer) where {T<:NumTypes,F<:Interval{T}}
     n == 1 && return a
     n == 2 && return sqrt(a)
 

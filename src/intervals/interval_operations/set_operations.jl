@@ -15,13 +15,13 @@ the points common in `a` and `b`.
 
 Implement the `intersection` function of the IEEE Std 1788-2015 (section 9.3).
 """
-function intersect(a::Interval{T}, b::Interval{S}) where {T, S}
-    isdisjoint(a, b) && return emptyinterval(promote_type(T, S))
-    return Interval{promote_type(T, S)}(max(inf(a), inf(b)), min(sup(a), sup(b)))
+function intersect(a::F, b::G) where {F<:Interval,G<:Interval}
+    isdisjoint(a, b) && return emptyinterval(promote_type(F, G))
+    return promote_type(F, G)(max(inf(a), inf(b)), min(sup(a), sup(b)))
 end
 
-function intersect(a::Complex{F}, b::Complex{F}) where {F<:Interval}
-    isdisjoint(a, b) && return emptyinterval(Complex{F})
+function intersect(a::Complex{F}, b::Complex{G}) where {F<:Interval,G<:Interval}
+    isdisjoint(a, b) && return emptyinterval(Complex{promote_type(F, G)})
     return complex(intersect(real(a), real(b)), intersect(imag(a), imag(b)))
 end
 
@@ -47,9 +47,9 @@ all of `a` and `b`.
 Implement the `converxHull` function of the IEEE Std 1788-2015 (section 9.3).
 """
 hull(a::F, b::F) where {F<:Interval} = F(min(inf(a), inf(b)), max(sup(a), sup(b)))
-hull(a::F, b::G) where {F<:Interval, G<:Interval} =
+hull(a::F, b::G) where {F<:Interval,G<:Interval} =
     promote_type(F, G)(min(inf(a), inf(b)), max(sup(a), sup(b)))
-hull(a::Complex{F},b::Complex{F}) where {F<:Interval} =
+hull(a::Complex{F}, b::Complex{F}) where {F<:Interval} =
     complex(hull(real(a), real(b)), hull(imag(a), imag(b)))
 hull(a...) = reduce(hull, a)
 hull(a::Vector{F}) where {F<:Interval} = reduce(hull, a)
@@ -64,7 +64,7 @@ to `hull(a,b)`.
 Implement the `converxHull` function of the IEEE Std 1788-2015 (section 9.3).
 """
 union(a::Interval, b::Interval) = hull(a, b)
-union(a::Complex{<:Interval},b::Complex{<:Interval}) = hull(a, b)
+union(a::Complex{<:Interval}, b::Complex{<:Interval}) = hull(a, b)
 
 """
     setdiff(x::Interval, y::Interval)

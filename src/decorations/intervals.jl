@@ -26,7 +26,7 @@ a flag that records the status of the interval when thought of as the result
 of a previously executed sequence of functions acting on an initial interval.
 """
 
-struct DecoratedInterval{T}
+struct DecoratedInterval{T<:NumTypes}
     interval::Interval{T}
     decoration::DECORATION
 end
@@ -34,9 +34,9 @@ end
 DecoratedInterval(I::DecoratedInterval, dec::DECORATION) = DecoratedInterval(I.interval, dec)
 
 function DecoratedInterval(a::T, b::S, d::DECORATION) where {T<:Real, S<:Real}
-    BoundsType = promote_numtype(T, S)
-    is_valid_interval(a, b) || return DecoratedInterval(Interval{BoundsType}(a, b), ill)
-    return DecoratedInterval(Interval{BoundsType}(a, b), d)
+    NumType = promote_numtype(T, S)
+    is_valid_interval(a, b) || return DecoratedInterval(Interval{NumType}(a, b), ill)
+    return DecoratedInterval(Interval{NumType}(a, b), d)
 end
 
 DecoratedInterval(a::Real, d::DECORATION) = DecoratedInterval(a, a, d)
@@ -49,12 +49,12 @@ function DecoratedInterval{T}(I::Interval) where {T}
     return DecoratedInterval{T}(I, d)
 end
 
-DecoratedInterval(I::Interval) = DecoratedInterval{default_bound()}(I)
+DecoratedInterval(I::Interval{T}) where {T<:NumTypes} = DecoratedInterval{T}(I)
 
 function DecoratedInterval(a::T, b::S) where {T<:Real, S<:Real}
-    BoundsType = promote_numtype(T, S)
-    is_valid_interval(a, b) || return DecoratedInterval(Interval{BoundsType}(a, b), ill)
-    return DecoratedInterval(Interval{BoundsType}(a, b))
+    NumType = promote_numtype(T, S)
+    is_valid_interval(a, b) || return DecoratedInterval(Interval{NumType}(a, b), ill)
+    return DecoratedInterval(Interval{NumType}(a, b))
 end
 
 DecoratedInterval(a::Real) = DecoratedInterval(a, a)

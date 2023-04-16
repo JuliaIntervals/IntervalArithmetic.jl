@@ -5,7 +5,7 @@ Computes the set difference x\\y and always returns a tuple of two intervals.
 If the set difference is only one interval or is empty, then the returned tuple contains 1
 or 2 empty intervals.
 """
-function _setdiff(x::F, y::F) where {T, F<:Interval{T}}
+function _setdiff(x::F, y::F) where {T<:NumTypes,F<:Interval{T}}
     intersection = x ∩ y
 
     isempty(intersection) && return (x, emptyinterval(T))
@@ -30,7 +30,7 @@ i.e. the set of `x` that are in `A` but not in `B`.
 Algorithm: Start from the total overlap (in all directions);
 expand each direction in turn.
 """
-function setdiff(A::IntervalBox{N,T}, B::IntervalBox{N,T}) where {N,T}
+function setdiff(A::IntervalBox{N,T}, B::IntervalBox{N,T}) where {N,T<:NumTypes}
 
     intersection = A ∩ B
     isempty(intersection) && return [A]

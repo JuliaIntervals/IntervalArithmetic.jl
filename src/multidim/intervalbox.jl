@@ -3,8 +3,8 @@
 """An `IntervalBox` is an `N`-dimensional rectangular box, given
 by a Cartesian product of a vector of `N` `Interval`s.
 """
-struct IntervalBox{N,T}
-    v::SVector{N, Interval{T}}
+struct IntervalBox{N,T<:NumTypes}
+    v::SVector{N,Interval{T}}
 end
 
 # IntervalBox(x::Interval) = IntervalBox( SVector(x) )  # single interval treated as tuple with one element
@@ -32,21 +32,21 @@ Base.@propagate_inbounds Base.getindex(X::IntervalBox, i) = X.v[i]
 setindex(X::IntervalBox, y, i) = IntervalBox( setindex(X.v, y, i) )
 
 # iteration:
-iterate(X::IntervalBox{N,T}) where {N, T} = (X[1], 1)
+iterate(X::IntervalBox) = (X[1], 1)
 
-function iterate(X::IntervalBox{N,T}, state) where {N,T}
+function iterate(X::IntervalBox{N}, state) where {N}
     (state == N) && return nothing
 
     return X[state+1], state+1
 end
 
-eltype(::Type{IntervalBox{N,T}}) where {N,T} = Interval{T} # Note that this is defined for the type
+eltype(::Type{IntervalBox{N,T}}) where {N,T<:NumTypes} = Interval{T} # Note that this is defined for the type
 
 
-Base.eltype(x::IntervalBox{N, T}) where {N, T<:Real} = Interval{T}
-numtype(x::IntervalBox{N, T}) where {N, T<:Real} = T
+eltype(::IntervalBox{N,T}) where {N,T<:NumTypes} = Interval{T}
+numtype(::IntervalBox{N,T}) where {N,T<:NumTypes} = T
 
-length(X::IntervalBox{N,T}) where {N,T} = N
+length(::IntervalBox{N}) where {N} = N
 
 
 
@@ -71,16 +71,14 @@ big(X::IntervalBox) = big.(X)
 
 ## set operations
 for (op, dotop) in ((:⊆, :.⊆), (:⊂, :.⊂), (:⊃, :.⊃))
-    @eval $(op)(X::IntervalBox{N}, Y::IntervalBox{N}) where N = all($(dotop)(X, Y))
+    @eval $(op)(X::IntervalBox{N}, Y::IntervalBox{N}) where {N} = all($(dotop)(X, Y))
 end
 
-∩(X::IntervalBox{N}, Y::IntervalBox{N}) where N =
-    IntervalBox(X.v .∩ Y.v)
-∪(X::IntervalBox{N}, Y::IntervalBox{N}) where N =
-    IntervalBox(X.v .∪ Y.v)
+∩(X::IntervalBox{N}, Y::IntervalBox{N}) where {N} = IntervalBox(X.v .∩ Y.v)
+∪(X::IntervalBox{N}, Y::IntervalBox{N}) where {N} = IntervalBox(X.v .∪ Y.v)
 
-∈(X::AbstractVector, Y::IntervalBox{N, T}) where {N, T} = all(X .∈ Y)
-∈(X, Y::IntervalBox{N, T}) where {N, T} = throw(ArgumentError("$X ∈ $Y is not defined"))
+∈(X::AbstractVector, Y::IntervalBox) = all(X .∈ Y)
+∈(X, Y::IntervalBox) = throw(ArgumentError("$X ∈ $Y is not defined"))
 
 # mixing intervals with one-dimensional interval boxes
 for op in (:⊆, :⊂, :⊃, :∩, :∪)
@@ -98,11 +96,11 @@ isempty(X::IntervalBox) = any(isempty, X.v)
 
 diam(X::IntervalBox) = maximum(diam.(X.v))
 
-emptyinterval(X::IntervalBox{N,T}) where {N, T} = IntervalBox(emptyinterval.(X.v))
+emptyinterval(X::IntervalBox) = IntervalBox(emptyinterval.(X.v))
 
 isinf(X::IntervalBox) = any(isinf.(X))
 
-isinterior(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) where {N, T} = all(isinterior.(X, Y))
+isinterior(X::IntervalBox{N}, Y::IntervalBox{N}) where {N} = all(isinterior.(X, Y))
 
 contains_zero(X::SVector) = all(contains_zero.(X))
 contains_zero(X::IntervalBox) = all(contains_zero.(X))
@@ -119,7 +117,6 @@ IntervalBox(x::Interval, n::Int) = IntervalBox(x, Val(n))
 dot(x::IntervalBox, y::IntervalBox) = dot(x.v, y.v)
 
 ==(x::IntervalBox, y::IntervalBox) = all(x.v .== y.v)
-!=(x::IntervalBox, y::IntervalBox) = all(x.v .!= y.v)
 ≛(x::IntervalBox, y::IntervalBox) = all(x.v .≛ y.v)
 
 """
@@ -129,8 +126,7 @@ Splits `x` in `n` intervals in each dimension of the same diameter. These
 intervals are combined in all possible `IntervalBox`-es, which are returned
 as a vector.
 """
-@inline mince(x::IntervalBox{N,T}, n::Int) where {N,T} =
-    mince(x, ntuple(_ -> n, N))
+@inline mince(x::IntervalBox{N}, n::Int) where {N} = mince(x, ntuple(_ -> n, N))
 
 """
     mince(x::IntervalBox, ncuts::::NTuple{N,Int})
@@ -139,7 +135,7 @@ Splits `x[i]` in `ncuts[i]` intervals . These intervals are
 combined in all possible `IntervalBox`-es, which are returned
 as a vector.
 """
-@inline function mince(x::IntervalBox{N,T}, ncuts::NTuple{N,Int}) where {N,T}
+@inline function mince(x::IntervalBox{N,T}, ncuts::NTuple{N,Int}) where {N,T<:NumTypes}
     minced_intervals = [mince(x[i], ncuts[i]) for i in 1:N]
     minced_boxes = Vector{IntervalBox{N,T}}(undef, prod(ncuts))
 
@@ -150,16 +146,16 @@ as a vector.
 end
 
 
-hull(a::IntervalBox{N,T}, b::IntervalBox{N,T}) where {N,T} = IntervalBox(hull.(a[:], b[:]))
-hull(a::Vector{IntervalBox{N,T}}) where {N,T} = hull(a...)
+hull(a::IntervalBox{N,T}, b::IntervalBox{N,T}) where {N,T<:NumTypes} = IntervalBox(hull.(a[:], b[:]))
+hull(a::Vector{IntervalBox{N,T}}) where {N,T<:NumTypes} = hull(a...)
 
 """
     zero(IntervalBox{N, T})
 
 Return the zero interval box of dimension `N` in the numeric type `T`.
 """
-zero(::Type{IntervalBox{N, T}}) where {N, T} = IntervalBox(zero(Interval{T}), N)
-zero(x::IntervalBox{N, T}) where {N, T} = zero(typeof(x))
+zero(::Type{IntervalBox{N,T}}) where {N,T<:NumTypes} = IntervalBox(zero(Interval{T}), N)
+zero(x::IntervalBox) = zero(typeof(x))
 
 """
     symmetric_box(N, T)
@@ -167,4 +163,4 @@ zero(x::IntervalBox{N, T}) where {N, T} = zero(typeof(x))
 Return the symmetric interval box of dimension `N` in the numeric type `T`,
 each side is `Interval(-1, 1)`.
 """
-symmetric_box(N, ::Type{T}) where T<:Real = IntervalBox(Interval{T}(-1, 1), N)
+symmetric_box(N, ::Type{T}) where {T<:NumTypes} = IntervalBox(Interval{T}(-one(T), one(T)), N)

@@ -17,7 +17,7 @@ Infimum of an interval.
 
 Implement the `inf` function of the IEEE Std 1788-2015 (Table 9.2, and Section 12.12.8).
 """
-inf(a::Interval{T}) where T = ifelse(iszero(a.lo), copysign(a.lo, -1), a.lo)
+inf(a::Interval{T}) where {T<:NumTypes} = ifelse(iszero(a.lo), copysign(a.lo, -1), a.lo)
 
 inf(a::Real) = a
 
@@ -46,7 +46,7 @@ Find the midpoint of interval `a`.
 
 Implement the `mid` function of the IEEE Std 1788-2015 (Table 9.2).
 """
-function mid(a::F) where {T, F<:Interval{T}}
+function mid(a::F) where {T<:NumTypes, F<:Interval{T}}
     isempty(a) && return convert(T, NaN)
     isentire(a) && return zero(T)
 
@@ -62,7 +62,7 @@ function mid(a::F) where {T, F<:Interval{T}}
     return _normalisezero(inf(a) / 2 + sup(a) / 2)
 end
 
-mid(a::F) where {T, R<:Rational{T}, F<:Interval{R}} = (1//2) * (inf(a) + sup(a))
+mid(a::Interval{<:Rational}) = (1//2) * (inf(a) + sup(a))
 
 mid(a::Real) = a
 
@@ -77,7 +77,7 @@ Assume 0 ≤ α ≤ 1.
 Note that `scaled_mid(a, 0.5)` does not equal `mid(a)` for unbounded set-based
 intervals.
 """
-function scaled_mid(a::F, α) where {T, F<:Interval{T}}
+function scaled_mid(a::F, α) where {T<:NumTypes, F<:Interval{T}}
     isempty(a) && return convert(T, NaN)
 
     lo = (inf(a) == -∞ ? nextfloat(inf(a)) : inf(a))
@@ -101,7 +101,7 @@ Return the diameter (length) of the interval `a`.
 
 Implement the `wid` function of the IEEE Std 1788-2015 (Table 9.2).
 """
-function diam(a::F) where {T, F<:Interval{T}}
+function diam(a::F) where {T<:NumTypes, F<:Interval{T}}
     isempty(a) && return convert(T, NaN)
     return -(sup(a), inf(a), RoundUp)  # IEEE1788 section 12.12.8
 end
@@ -131,7 +131,7 @@ Return the midpoint of an interval `a` together with its radius.
 Function required by the  IEEE Std 1788-2015 in section 10.5.9 for the set-based
 flavor.
 """
-function midpoint_radius(a::F) where {T, F<:Interval{T}}
+function midpoint_radius(a::F) where {T<:NumTypes, F<:Interval{T}}
     isempty(a) && return convert(T, NaN), convert(T, NaN)
     m = mid(a)
     return m, max(m - inf(a), sup(a) - m)
@@ -145,7 +145,7 @@ Magnitude of an interval. Return `NaN` for empty intervals.
 
 Implement the `mag` function of the IEEE Std 1788-2015 (Table 9.2).
 """
-function mag(a::F) where {T, F<:Interval{T}}
+function mag(a::F) where {T<:NumTypes, F<:Interval{T}}
     isempty(a) && return convert(T, NaN)
     return max( abs(inf(a)), abs(sup(a)) )
 end
@@ -157,7 +157,7 @@ Mignitude of an interval. Return `NaN` for empty intervals.
 
 Implement the `mig` function of the IEEE Std 1788-2015 (Table 9.2).
 """
-function mig(a::F) where {T, F<:Interval{T}}
+function mig(a::F) where {T<:NumTypes, F<:Interval{T}}
     isempty(a) && return convert(T, NaN)
     contains_zero(a) && return zero(T)
     return min( abs(inf(a)), abs(sup(a)) )

@@ -7,10 +7,10 @@
 
 const halfpi = pi / 2.0
 
-half_pi(::Type{Interval{T}}) where {T} = scale(0.5, interval(T, π))
-two_pi(::Type{Interval{T}}) where {T} = scale(2, interval(T, π))
+half_pi(::Type{Interval{T}}) where {T<:NumTypes} = scale(0.5, interval(T, π))
+two_pi(::Type{Interval{T}}) where {T<:NumTypes} = scale(2, interval(T, π))
 
-function range_atan(::Type{F}) where {T, F<:Interval{T}}
+function range_atan(::Type{F}) where {T,F<:Interval{T}}
     temp = sup(interval(T, π))  # Using F(-π, π) converts -π to Float64 before Interval construction
     return F(-temp, temp)
 end
@@ -50,7 +50,7 @@ end
 
 Implement the `sin` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function sin(a::F) where {T, F<:Interval{T}}
+function sin(a::F) where {T<:NumTypes,F<:Interval{T}}
     isempty(a) && return a
 
     whole_range = F(-1, 1)
@@ -135,7 +135,7 @@ function sin(a::F) where {F<:Interval{Float64}}
     end
 end
 
-function sinpi(a::Interval{T}) where {T}
+function sinpi(a::Interval{T}) where {T<:NumTypes}
     isempty(a) && return a
     w = a * interval(T, π)
     return sin(w)
@@ -146,7 +146,7 @@ end
 
 Implement the `cos` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function cos(a::F) where {T, F<:Interval{T}}
+function cos(a::F) where {T<:NumTypes,F<:Interval{T}}
     isempty(a) && return a
 
     whole_range = F(-1, 1)
@@ -229,7 +229,7 @@ function cos(a::F) where {F<:Interval{Float64}}
     end
 end
 
-function cospi(a::Interval{T}) where T
+function cospi(a::Interval{T}) where {T<:NumTypes}
     isempty(a) && return a
     w = a * interval(T, π)
     return cos(w)
@@ -240,7 +240,7 @@ end
 
 Implement the `tan` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function tan(a::F) where {T, F<:Interval{T}}
+function tan(a::F) where {T<:NumTypes,F<:Interval{T}}
     isempty(a) && return a
 
     diam(a) > inf(interval(T, π)) && return entireinterval(a)
@@ -295,7 +295,7 @@ end
 
 Implement the `cot` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function cot(a::F) where {T, F<:Interval{T}}
+function cot(a::F) where {T<:NumTypes,F<:Interval{T}}
     isempty(a) && return a
 
     diam(a) > inf(interval(T, π)) && return entireinterval(a)
@@ -340,7 +340,7 @@ cot(a::F) where {F<:Interval{Float64}} = atomic(F, cot(big(a)))
 
 Implement the `sec` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function sec(a::F) where {T, F<:Interval{T}}
+function sec(a::F) where {T<:NumTypes,F<:Interval{T}}
     isempty(a) && return a
 
     diam(a) > inf(interval(T, π)) && return entireinterval(a)
@@ -379,7 +379,7 @@ sec(a::F) where {F<:Interval{Float64}} = atomic(F, sec(big(a)))
 
 Implement the `csc` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function csc(a::F) where {T, F<:Interval{T}}
+function csc(a::F) where {T<:NumTypes,F<:Interval{T}}
     isempty(a) && return a
 
     diam(a) > inf(interval(T, π)) && return entireinterval(a)
@@ -466,7 +466,7 @@ function atan(a::F) where {F<:Interval}
     return @round(F, atan(alo), atan(ahi))
 end
 
-function atan(y::Interval{T}, x::Interval{S}) where {T, S}
+function atan(y::Interval{T}, x::Interval{S}) where {T<:NumTypes,S<:NumTypes}
     F = Interval{promote_type(T, S)}
     (isempty(y) || isempty(x)) && return emptyinterval(F)
     return F(atan(big(y), big(x)))

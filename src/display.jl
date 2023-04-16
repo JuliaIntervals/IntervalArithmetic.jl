@@ -212,7 +212,7 @@ end
 
 # `String` representation of an `Interval`
 
-function basic_representation(a::Interval{T}, format::Symbol) where {T}
+function basic_representation(a::Interval{T}, format::Symbol) where {T<:AbstractFloat}
     isempty(a) && return "∅"
     sigdigits = display_params.sigdigits
     if format === :full
