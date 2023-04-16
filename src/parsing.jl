@@ -175,9 +175,9 @@ function _parse(::Type{Interval{T}}, s::AbstractString) where {T<:NumTypes}
             m, _ = split(s, "??")
             if 'u' in s # interval in the form [m, Inf]
                 lo = parse(T, m, RoundDown)
-                hi = T(Inf)
+                hi = typemax(T)
             elseif 'd' in s # interval in the form [-Inf, m]
-                lo = T(-Inf)
+                lo = typemin(T)
                 hi = parse(T, m, RoundUp)
             else
                 return entireinterval(T), true

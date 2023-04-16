@@ -164,13 +164,13 @@ function /(a::F, b::F) where {T<:NumTypes,F<:Interval{T}}
         isthinzero(a) && return a
 
         if iszero(inf(b))
-            inf(a) >= zero(T) && return @round(F, inf(a)/sup(b), T(Inf))
-            sup(a) <= zero(T) && return @round(F, T(-Inf), sup(a)/sup(b))
+            inf(a) >= zero(T) && return @round(F, inf(a)/sup(b), typemax(T))
+            sup(a) <= zero(T) && return @round(F, typemin(T), sup(a)/sup(b))
             return entireinterval(F)
 
         elseif iszero(sup(b))
-            inf(a) >= zero(T) && return @round(F, T(-Inf), inf(a)/inf(b))
-            sup(a) <= zero(T) && return @round(F, sup(a)/inf(b), T(Inf))
+            inf(a) >= zero(T) && return @round(F, typemin(T), inf(a)/inf(b))
+            sup(a) <= zero(T) && return @round(F, sup(a)/inf(b), typemax(T))
             return entireinterval(F)
 
         else
@@ -192,8 +192,8 @@ function inv(a::F) where {T<:NumTypes,F<:Interval{T}}
     isempty(a) && return emptyinterval(F)
 
     if zero(T) ∈ a
-        inf(a) < zero(T) == sup(a) && return @round(F, T(-Inf), inv(inf(a)))
-        inf(a) == zero(T) < sup(a) && return @round(F, inv(sup(a)), T(Inf))
+        inf(a) < zero(T) == sup(a) && return @round(F, typemin(T), inv(inf(a)))
+        inf(a) == zero(T) < sup(a) && return @round(F, inv(sup(a)), typemax(T))
         inf(a) < zero(T) < sup(a) && return entireinterval(F)
         isthinzero(a) && return div_by_thin_zero(one(F))
     end
