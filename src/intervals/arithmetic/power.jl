@@ -19,7 +19,7 @@ end
 # overwrite new behaviour for small integer powers from
 # https://github.com/JuliaLang/julia/pull/24240:
 
-Base.literal_pow(::typeof(^), x::Interval{T}, ::Val{p}) where {T,p} = x^p
+Base.literal_pow(::typeof(^), x::Interval{T}, ::Val{p}) where {T<:NumTypes,p} = x^p
 
 # CRlibm does not contain a correctly-rounded ^ function for Float64
 # Use the BigFloat version from MPFR instead, which is correctly-rounded.
@@ -118,9 +118,9 @@ function ^(a::F, x::BigFloat) where {F<:Interval{BigFloat}}
     return hull(lo, hi)
 end
 
-function ^(a::Interval{Rational{T}}, x::AbstractFloat) where {T<:Integer}
-    a = Interval{Float64}(inf(a).num/inf(a).den, sup(a).num/sup(a).den)
-    return a^x
+function ^(a::F, x::AbstractFloat) where {F<:Interval{<:Rational}}
+    a = float(F)(inf(a).num/inf(a).den, sup(a).num/sup(a).den)
+    return F(a^x)
 end
 
 # Rational power

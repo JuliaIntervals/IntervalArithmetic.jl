@@ -229,13 +229,13 @@ end
 const precision_lock = ReentrantLock()
 
 """
-    bigequiv(x::Interval{Float64})
+    bigequiv(x::Interval)
 
-Create an equivalent `BigFloat` interval to a given `AbstractFloat` interval.
+Create an equivalent `BigFloat` interval to a given interval.
 """
-function bigequiv(a::Interval{T}) where {T<:AbstractFloat}
+function bigequiv(a::Interval{T}) where {T<:NumTypes}
     lock(precision_lock) do
-        setprecision(precision(T)) do  # precision of T
+        setprecision(precision(float(T))) do  # precision of T
             return Interval{BigFloat}(a)
         end
     end
