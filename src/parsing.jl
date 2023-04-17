@@ -123,15 +123,15 @@ julia> parse(Interval{Float64}, "foobar")
 ∅
 ```
 """
-function parse(::Type{Interval{T}}, s::AbstractString) where {T<:NumTypes}
+function parse(::Type{F}, s::AbstractString) where {F<:Interval}
     s = lowercase(strip(s))
     try
-        ival, _ = _parse(Interval{T}, s)
+        ival, _ = _parse(F, s)
         return ival
     catch e
         if e isa ArgumentError
-            @warn "invalid input, empty interval returned"
-            return emptyinterval(T)
+            @warn "invalid input, empty interval is returned"
+            return emptyinterval(F)
         else
             rethrow(e)
         end
@@ -234,7 +234,7 @@ Same as `parse(T, s, rounding_mode)`, but also accept string representing ration
 """
 function parse_num(T, s, rounding_mode)
     if '/' in s
-        num, denum = parse.(BigInt, split(s, '/'))
+        num, denum = parse.(BigInt, split(s, '/'; keepempty = false))
         return T(num//denum, rounding_mode)
     end
     return T(parse(BigFloat, s), rounding_mode)

@@ -99,7 +99,7 @@ if not, a warning is printed and the empty interval is returned.
 """
 function interval(::Type{T}, a, b) where {T<:NumTypes}
     is_valid_interval(a, b) && return Interval{T}(a, b)
-    @warn "Invalid input, empty interval is returned"
+    @warn "invalid input, empty interval is returned"
     return emptyinterval(T)
 end
 interval(a::T, b::S) where {T, S} = interval(promote_numtype(T, S), a, b)
