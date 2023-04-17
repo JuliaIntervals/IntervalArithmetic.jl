@@ -211,7 +211,6 @@ Otherwise it is the same as using the `Interval` constructor directly.
 atomic(::Type{Interval{T}}, x) where {T<:NumTypes} = interval(T, x)
 atomic(::Type{Interval{T}}, x::AbstractString) where {T<:NumTypes} = parse(Interval{T}, x)
 
-atomic(::Type{Interval{T}}, x::AbstractFloat) where {T<:Rational} = Interval{T}(lo, hi)
 function atomic(::Type{Interval{T}}, x::AbstractFloat) where {T<:AbstractFloat}
     lo = T(x, RoundDown)
     hi = T(x, RoundUp)
