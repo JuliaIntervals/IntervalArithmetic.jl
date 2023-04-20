@@ -232,7 +232,7 @@ end
 """
 Same as `parse(T, s, rounding_mode)`, but also accept string representing rational numbers.
 """
-function parse_num(T, s, rounding_mode)
+function parse_num(::Type{T}, s::AbstractString, rounding_mode::RoundingMode) where {T<:AbstractFloat}
     if '/' in s
         num, denum = parse.(BigInt, split(s, '/'; keepempty = false))
         return T(num//denum, rounding_mode)
