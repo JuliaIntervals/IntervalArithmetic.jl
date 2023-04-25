@@ -97,7 +97,7 @@ using Test
         c = @interval("0.1", "0.2")
         @test c ⊆ a   # c is narrower than a
         @test interval(1//2) ≛ interval(0.5)
-        @test_broken interval(1//10).lo == rationalize(0.1)
+        @test interval(1//10).lo == rationalize(0.1)
     end
 
     @test string(emptyinterval()) == "∅"

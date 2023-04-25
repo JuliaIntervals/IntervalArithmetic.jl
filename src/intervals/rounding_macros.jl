@@ -13,6 +13,8 @@ function round_expr(ex::Expr, rounding_mode::RoundingMode)
         if op ∈ (:min, :max)
             mapped_args = round_expr.(ex.args[2:end], rounding_mode)
             return :($op($(mapped_args...)))
+        elseif op ∈ (:typemin, :typemax)
+            return :( $(esc(ex)) )
         end
 
         if length(ex.args) == 3  # binary operator

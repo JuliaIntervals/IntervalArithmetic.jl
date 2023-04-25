@@ -1,4 +1,3 @@
-
 const where_bisect = 0.49609375
 
 """
@@ -59,7 +58,7 @@ Splits `x` in `n` intervals in each dimension of the same diameter. These
 intervals are combined in all possible `IntervalBox`-es, which are returned
 as a vector.
 """
-@generated function mince(x::IntervalBox{N,T}, n) where {N,T}
+@generated function mince(x::IntervalBox{N,T}, n) where {N,T<:NumTypes}
     quote
         nodes_matrix = Array{Interval{T},2}(undef, n, N)
         for i in 1:N

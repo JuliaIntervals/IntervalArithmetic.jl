@@ -173,10 +173,10 @@ function in(x::Real, a::Interval)
 end
 
 in(x::Interval, y::Interval) = throw(ArgumentError("$x ∈ $y is not defined, maybe you meant `⊂`"))
-in(x::Real, a::Complex{F}) where {F<:Interval} = x ∈ real(a) && 0 ∈ imag(a)
-in(x::Complex{T}, a::Complex{F}) where {T<:Real, F<:Interval} = real(x) ∈ real(a) && imag(x) ∈ imag(a)
+in(x::Real, a::Complex{<:Interval}) = x ∈ real(a) && 0 ∈ imag(a)
+in(x::Complex, a::Complex{<:Interval}) = real(x) ∈ real(a) && imag(x) ∈ imag(a)
 
-contains_zero(x::Interval{T}) where T = zero(T) ∈ x
+contains_zero(x::Interval{T}) where {T<:NumTypes} = zero(T) ∈ x
 
 isempty(x::Interval) = (inf(x) == Inf && sup(x) == -Inf)
 isentire(x::Interval) = (inf(x) == -Inf && sup(x) == Inf)

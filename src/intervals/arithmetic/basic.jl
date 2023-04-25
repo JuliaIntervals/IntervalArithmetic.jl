@@ -15,12 +15,12 @@
 
 Implement the `add` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function +(a::F, b::T) where {T, F<:Interval{T}}
+function +(a::F, b::T) where {T<:NumTypes,F<:Interval{T}}
     isempty(a) && return emptyinterval(F)
     return @round(F, inf(a) + b, sup(a) + b)
 end
-+(a::Interval{T}, b::Real) where {T} = a + interval(T, b)
-+(a::Real, b::Interval{T}) where {T} = b + a
++(a::Interval{T}, b::Real) where {T<:NumTypes} = a + interval(T, b)
++(a::Real, b::Interval{T}) where {T<:NumTypes} = b + a
 
 function +(a::F, b::F) where {F<:Interval}
     (isempty(a) || isempty(b)) && return emptyinterval(F)
@@ -42,16 +42,16 @@ Implement the `neg` function of the IEEE Std 1788-2015 (Table 9.1).
 
 Implement the `sub` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function -(a::F, b::T) where {T<:Real, F<:Interval{T}}
+function -(a::F, b::T) where {T<:NumTypes,F<:Interval{T}}
     isempty(a) && return emptyinterval(F)
     return @round(F, inf(a) - b, sup(a) - b)
 end
-function -(b::T, a::F) where {T, F<:Interval{T}}
+function -(b::T, a::F) where {T<:NumTypes,F<:Interval{T}}
     isempty(a) && return emptyinterval(F)
     return @round(F, b - sup(a), b - inf(a))
 end
--(a::Interval{T}, b::Real) where {T} = a - interval(T, b)
--(a::Real, b::Interval{T}) where {T} = interval(T, a) - b
+-(a::Interval{T}, b::Real) where {T<:NumTypes} = a - interval(T, b)
+-(a::Real, b::Interval{T}) where {T<:NumTypes} = interval(T, a) - b
 
 function -(a::F, b::F) where {F<:Interval}
     (isempty(a) || isempty(b)) && return emptyinterval(F)
@@ -77,7 +77,7 @@ Implement the `mul` function of the IEEE Std 1788-2015 (Table 9.1).
 
 Note: the behavior of the multiplication is flavor dependent for some edge cases.
 """
-function *(a::F, b::T) where {T<:Real, F<:Interval{T}}
+function *(a::F, b::T) where {T<:NumTypes,F<:Interval{T}}
     isempty(a) && return emptyinterval(F)
     (isthinzero(a) || iszero(b)) && return zero(F)
 
@@ -87,8 +87,8 @@ function *(a::F, b::T) where {T<:Real, F<:Interval{T}}
         return @round(F, sup(a)*b, inf(a)*b)
     end
 end
-*(a::Interval{T}, b::Real) where {T} = a * interval(T, b)
-*(a::Real, b::Interval{T}) where {T} = b * a
+*(a::Interval{T}, b::Real) where {T<:NumTypes} = a * interval(T, b)
+*(a::Real, b::Interval{T}) where {T<:NumTypes} = b * a
 
 function *(a::F, b::F) where {F<:Interval}
     (isempty(a) || isempty(b)) && return emptyinterval(F)
@@ -99,13 +99,13 @@ end
 *(a::Interval, b::Interval) = *(promote(a, b)...)
 
 # Helper functions for multiplication
-function unbounded_mult(::Type{F}, x::T, y::T, r::RoundingMode) where {T, F<:Interval{T}}
+function unbounded_mult(::Type{F}, x::T, y::T, r::RoundingMode) where {T<:NumTypes,F<:Interval{T}}
     iszero(x) && return sign(y) * zero_times_infinity(T)
     iszero(y) && return sign(x) * zero_times_infinity(T)
     return *(x, y, r)
 end
 
-function mult(op, a::F, b::F) where {T, F<:Interval{T}}
+function mult(op, a::F, b::F) where {T<:NumTypes,F<:Interval{T}}
     if inf(b) >= zero(T)
         inf(a) >= zero(T) && return @round(F, op(inf(a), inf(b)), op(sup(a), sup(b)))
         sup(a) <= zero(T) && return @round(F, op(inf(a), sup(b)), op(sup(a), inf(b)))
@@ -131,7 +131,7 @@ Implement the `div` function of the IEEE Std 1788-2015 (Table 9.1).
 
 Note: the behavior of the division is flavor dependent for some edge cases.
 """
-function /(a::F, b::Real) where {F<:Interval}
+function /(a::F, b::T) where {T<:NumTypes,F<:Interval{T}}
     isempty(a) && return emptyinterval(T)
     iszero(b) && return div_by_thin_zero(a)
 
@@ -142,9 +142,11 @@ function /(a::F, b::Real) where {F<:Interval}
     end
 end
 
+/(a::Interval{T}, b::Real) where {T<:NumTypes} = a / interval(T, b)
+
 /(a::Real, b::Interval) = a * inv(b)
 
-function /(a::F, b::F) where {T, F<:Interval{T}}
+function /(a::F, b::F) where {T<:NumTypes,F<:Interval{T}}
     (isempty(a) || isempty(b)) && return emptyinterval(F)
     isthinzero(b) && return div_by_thin_zero(a)
 
@@ -162,13 +164,13 @@ function /(a::F, b::F) where {T, F<:Interval{T}}
         isthinzero(a) && return a
 
         if iszero(inf(b))
-            inf(a) >= zero(T) && return @round(F, inf(a)/sup(b), T(Inf))
-            sup(a) <= zero(T) && return @round(F, T(-Inf), sup(a)/sup(b))
+            inf(a) >= zero(T) && return @round(F, inf(a)/sup(b), typemax(T))
+            sup(a) <= zero(T) && return @round(F, typemin(T), sup(a)/sup(b))
             return entireinterval(F)
 
         elseif iszero(sup(b))
-            inf(a) >= zero(T) && return @round(F, T(-Inf), inf(a)/inf(b))
-            sup(a) <= zero(T) && return @round(F, sup(a)/inf(b), T(Inf))
+            inf(a) >= zero(T) && return @round(F, typemin(T), inf(a)/inf(b))
+            sup(a) <= zero(T) && return @round(F, sup(a)/inf(b), typemax(T))
             return entireinterval(F)
 
         else
@@ -186,12 +188,12 @@ Implement the `recip` function of the IEEE Std 1788-2015 (Table 9.1).
 
 Note: the behavior of this function is flavor dependent for some edge cases.
 """
-function inv(a::F) where {T, F<:Interval{T}}
+function inv(a::F) where {T<:NumTypes,F<:Interval{T}}
     isempty(a) && return emptyinterval(F)
 
     if zero(T) ∈ a
-        inf(a) < zero(T) == sup(a) && return @round(F, T(-Inf), inv(inf(a)))
-        inf(a) == zero(T) < sup(a) && return @round(F, inv(sup(a)), T(Inf))
+        inf(a) < zero(T) == sup(a) && return @round(F, typemin(T), inv(inf(a)))
+        inf(a) == zero(T) < sup(a) && return @round(F, inv(sup(a)), typemax(T))
         inf(a) < zero(T) < sup(a) && return entireinterval(F)
         isthinzero(a) && return div_by_thin_zero(one(F))
     end
@@ -217,7 +219,7 @@ Fused multiply-add.
 
 Implement the `fma` function of the IEEE Std 1788-2015 (Table 9.1).
 """
-function fma(a::F, b::F, c::F) where {T, F<:Interval{T}}
+function fma(a::F, b::F, c::F) where {T<:NumTypes,F<:Interval{T}}
     (isempty(a) || isempty(b) || isempty(c)) && return emptyinterval(F)
 
     if isentire(a)

@@ -16,15 +16,12 @@ argument given, the default interval bound type is used.
 
 Implement the `empty` function of the IEEE Std 1788-2015 (section 10.5.2).
 """
-emptyinterval(::Type{F}) where {F<:Interval} = F(Inf, -Inf)
-emptyinterval(::F) where {F<:Interval} = emptyinterval(F)
-emptyinterval(::Type{Complex{F}}) where {F<:Interval} = complex(emptyinterval(F), emptyinterval(F))
-
-# NOTE Here the restriction should be any allowed bound type. Using
-# AbstractFloat for simplicity for now
-emptyinterval(::Type{T}) where {T<:AbstractFloat} = emptyinterval(Interval{T})
+emptyinterval(::Type{F}) where {T<:NumTypes,F<:Interval{T}} = F(typemax(T), typemin(T))
+emptyinterval(::Type{T}) where {T<:NumTypes} = emptyinterval(Interval{T})
 emptyinterval(::Type{<:Real}) = emptyinterval(default_bound())
 emptyinterval() = emptyinterval(default_bound())
+emptyinterval(::Type{Complex{T}}) where {T<:Real} = complex(emptyinterval(T), emptyinterval(T))
+emptyinterval(::T) where {T} = emptyinterval(T)
 
 
 """
@@ -41,7 +38,9 @@ of `Interval` for more information about the default interval falvor.
 
 Implement the `entire` function of the IEEE Std 1788-2015 (section 10.5.2).
 """
-entireinterval(::Type{F}) where {T, F<:Interval{T}} = F(-Inf, Inf)
-entireinterval(::F) where {F<:Interval} = entireinterval(F)
-entireinterval(::Type{T}) where T = Interval{T}(-Inf, Inf)
+entireinterval(::Type{F}) where {T<:NumTypes,F<:Interval{T}} = F(typemin(T), typemax(T))
+entireinterval(::Type{T}) where {T<:NumTypes} = entireinterval(Interval{T})
+entireinterval(::Type{<:Real}) = entireinterval(default_bound())
 entireinterval() = entireinterval(default_bound())
+entireinterval(::Type{Complex{T}}) where {T<:Real} = complex(entireinterval(T), entireinterval(T))
+entireinterval(::T) where {T} = entireinterval(T)

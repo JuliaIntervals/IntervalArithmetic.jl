@@ -11,7 +11,7 @@ Two-output division.
 
 Implement the `mulRevToPair` function of the IEEE Std 1788-2015 (section 10.5.5).
 """
-function extended_div(a::F, b::F) where {T, F<:Interval{T}}
+function extended_div(a::F, b::F) where {T<:NumTypes,F<:Interval{T}}
     alo, ahi = bounds(a)
     blo, bhi = bounds(b)
     z = zero(T)
