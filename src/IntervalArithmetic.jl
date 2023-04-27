@@ -21,7 +21,7 @@ export ×, dot
 import Base:
     +, -, *, /, //, fma,
     <, >, ==, !=, ⊆, ^, <=, >=,
-    in, zero, one, eps, typemin, typemax, abs, abs2, real, min, max,
+    in, zero, one, eps, typemin, typemax, abs, abs2, min, max,
     sqrt, exp, log, exp2, exp10, log2, log10, inv, cbrt, hypot,
     sin, cos, tan, cot, csc, sec, asin, acos, atan, acot, sinpi, cospi,
     sinh, cosh, tanh, coth, csch, sech, asinh, acosh, atanh, acoth,
@@ -50,8 +50,7 @@ import .Broadcast: broadcasted
 
 export
     Interval, BooleanInterval,
-    interval, checked_interval,
-    @interval, @biginterval, @floatinterval,
+    interval, @interval, @tinterval,
     diam, radius, mid, scaled_mid, mag, mig, hull,
     emptyinterval, ∅, ∞, isempty, isinterior, isdisjoint, ⪽,
     precedes, strictprecedes, ≺, ⊂, ⊃, ⊇, contains_zero, isthinzero,

@@ -5,7 +5,7 @@ Computes the set difference x\\y and always returns a tuple of two intervals.
 If the set difference is only one interval or is empty, then the returned tuple contains 1
 or 2 empty intervals.
 """
-function _setdiff(x::F, y::F) where {T<:NumTypes,F<:Interval{T}}
+function _setdiff(x::Interval{T}, y::Interval{T}) where {T<:NumTypes}
     intersection = x ∩ y
 
     isempty(intersection) && return (x, emptyinterval(T))
@@ -14,10 +14,10 @@ function _setdiff(x::F, y::F) where {T<:NumTypes,F<:Interval{T}}
     xlo, xhi = bounds(x)
     ylo, yhi = bounds(y)
     intersectionlo, intersectionhi = bounds(intersection)
-    xlo == intersectionlo && return (F(intersectionhi, xhi), emptyinterval(T))
-    xhi == intersectionhi && return (F(xlo, intersectionlo), emptyinterval(T))
+    xlo == intersectionlo && return (unsafe_interval(T, intersectionhi, xhi), emptyinterval(T))
+    xhi == intersectionhi && return (unsafe_interval(T, xlo, intersectionlo), emptyinterval(T))
 
-    return (F(xlo, ylo), F(yhi, xhi))
+    return (unsafe_interval(T, xlo, ylo), unsafe_interval(T, yhi, xhi))
 end
 
 

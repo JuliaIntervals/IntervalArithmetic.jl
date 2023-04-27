@@ -1,5 +1,5 @@
-using IntervalArithmetic
 using Test
+using IntervalArithmetic
 
 A = [ 2..4   -2..1
      -1..2    2..4]

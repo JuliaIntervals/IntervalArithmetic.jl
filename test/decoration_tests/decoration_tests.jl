@@ -1,5 +1,5 @@
-using IntervalArithmetic
 using Test
+using IntervalArithmetic
 
 let b
 

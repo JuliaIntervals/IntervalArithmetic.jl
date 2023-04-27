@@ -1,5 +1,5 @@
-using IntervalArithmetic
 using Test
+using IntervalArithmetic
 using StaticArrays
 using Random
 
@@ -10,7 +10,7 @@ using Random
         @test rand(X) ∈ X
     end
 
-    Y = IntervalBox(3..4, 5..6)
+    Y = IntervalBox(interval(3, 4), interval(5, 6))
     for i in 1:100
         @test rand(Y) ∈ Y
     end
@@ -26,7 +26,7 @@ using Random
 #     end
 
     for T in (Float32, Float64, BigFloat)
-        X = Interval{T}(3, 4)
+        X = interval(T, 3, 4)
         @test rand(X) isa T
 
         Y = IntervalBox(X, X)
@@ -34,9 +34,9 @@ using Random
     end
 
     for T in (Float32, Float64, BigFloat)
-        X = Interval{T}(3, 7)
+        X = interval(T, 3, 7)
         Y = rand(X, 7)
-        @test Y isa Array{T, 1} 
+        @test Y isa Array{T, 1}
         for x in Y
             @test x isa T
         end

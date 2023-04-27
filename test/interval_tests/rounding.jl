@@ -1,7 +1,5 @@
-using IntervalArithmetic
 using Test
-
-setformat(:full)
+using IntervalArithmetic
 
 x = interval(0.5)
 

@@ -1,18 +1,17 @@
-# This file is part of the IntervalArithmetic.jl package; MIT licensed
-
-using IntervalArithmetic
 using Test
+using IntervalArithmetic
+import IntervalArithmetic: unsafe_interval
 
 @testset "Constructing intervals" begin
     # Naive constructors, with no conversion involved
-    @test Interval{Float64}(1.0, 1.0) ≛ interval(1) ≛ interval(interval(1.0)) ≛
+    @test interval(Float64, 1.0, 1.0) ≛ interval(1) ≛ interval(interval(1.0)) ≛
         interval(Float64, interval(1.0))
     @test size(interval(1)) == ()  # Match the `size` behaviour of `Number`
-    @test interval(big(1)) ≛ Interval{Float64}(1.0, 1.0)
-    @test interval(Rational{Int}, 1//10) ≛ Interval{Rational{Int}}(1//10, 1//10)
-    @test_broken interval(Rational{BigInt}, BigInt(1)//10) ≛ Interval{Rational{BigInt}}(1//10, 1//10)
-    @test interval( (1.0, 2.0) ) ≛ Interval{Float64}(1.0, 2.0)
-    @test interval(BigFloat, 1) ≛ Interval{BigFloat}(big(1.0), big(1.0))
+    @test interval(big(1)) ≛ interval(Float64, 1.0, 1.0)
+    @test interval(Rational{Int}, 1//10) ≛ interval(Rational{Int}, 1//10, 1//10)
+    @test interval(Rational{BigInt}, BigInt(1)//10) ≛ interval(Rational{BigInt}, 1//10, 1//10)
+    @test interval( (1.0, 2.0) ) ≛ interval(Float64, 1.0, 2.0)
+    @test interval(BigFloat, 1) ≛ interval(BigFloat, big(1.0), big(1.0))
 
     # Irrational
     for irr in (π, ℯ)
@@ -21,7 +20,7 @@ using Test
         @test (1.2..irr).hi == @interval(1.2, irr).hi
         @test irr..irr ≛ interval(Float64, irr)
         @test interval(irr) ≛ @interval(irr) ≛ interval(irr, irr)
-        @test Interval{Float32}(irr, irr) ≛ interval(Float32, irr)
+        @test interval(Float32, irr, irr) ≛ interval(Float32, irr)
     end
 
     @test ℯ..big(4) ≛ hull(interval(BigFloat, ℯ), interval(4))
@@ -33,17 +32,22 @@ using Test
     @test big(ℯ) in interval(0, ℯ)
     @test big(π) in interval(π, 4)
 
-    @test big(ℯ) in Interval{Float32}(ℯ, π)
-    @test big(π) in Interval{Float32}(ℯ, π)
-    @test big(ℯ) in Interval{Float32}(0, ℯ)
-    @test big(π) in Interval{Float32}(π, 4)
+    @test big(ℯ) in interval(Float32, ℯ, π)
+    @test big(π) in interval(Float32, ℯ, π)
+    @test big(ℯ) in interval(Float32, 0, ℯ)
+    @test big(π) in interval(Float32, π, 4)
 
     @test interval(interval(π)) ≛ interval(π)
-    @test interval(Interval{Float64}(NaN, -Inf)) ≛ emptyinterval()
+    @test interval(unsafe_interval(Float64, NaN, -Inf)) ≛ emptyinterval()
+
+    # with rational
+    @test @interval(1//2) ≛ I"0.5" ⪽ @interval(0.5)
+    @test 0.1 ∈ @tinterval(Rational{Int64}, 0.1)
+    @test @tinterval(Rational{Int64}, "0.1", "0.3") ≛ interval(Rational{Int64}, 1//10, 3//10)
 
     # a < Inf and b > -Inf
-    @test @interval("1e300") ≛ Interval{Float64}(9.999999999999999e299, 1.0e300)
-    @test @interval("-1e307") ≛ Interval{Float64}(-1.0000000000000001e307, -1.0e307)
+    @test @interval("1e300") ≛ unsafe_interval(Float64, 9.999999999999999e299, 1.0e300)
+    @test @interval("-1e307") ≛ unsafe_interval(Float64, -1.0000000000000001e307, -1.0e307)
 
     # Disallowed construction with a > b
     @test_logs (:warn,) @test isempty(@interval(2, 1))
@@ -61,18 +65,18 @@ using Test
     @test_throws MethodError convert(Interval, ℯ)
     @test_throws MethodError convert(Interval, BigInt(1))
     @test_throws MethodError convert(Interval, 1//10)
-    @test convert(Interval, Interval{Float64}(0.1, 0.2)) === Interval{Float64}(0.1, 0.2)
+    @test convert(Interval, interval(Float64, 0.1, 0.2)) === interval(Float64, 0.1, 0.2)
 
     a = @interval(0.1)
     b = @interval(π)
 
-    @test @floatinterval("0.1") ⊆ a
+    @test @tinterval(Float64, "0.1") ⊆ a
     @test typeof(a) == Interval{Float64}
     @test nextfloat(a.lo, 2) == a.hi
-    @test b ≛ @floatinterval(pi)
+    @test b ≛ @tinterval(Float64, π)
     @test nextfloat(b.lo) == b.hi
     x = typemax(Int64)
-    @test @interval(x) ≛ @floatinterval(x)
+    @test @interval(x) ≛ @tinterval(Float64, x)
     @test !isthin(@interval(x))
     x = rand()
     c = @interval(x)
@@ -110,17 +114,17 @@ end
 end
 
 @testset "Big intervals" begin
-    a = @floatinterval(3)
+    a = @tinterval(Float64, 3)
     @test typeof(a)== Interval{Float64}
     @test typeof(big(a)) == Interval{BigFloat}
 
-    @test @floatinterval(123412341234123412341241234) ≛ interval(1.234123412341234e26, 1.2341234123412342e26)
-    @test @interval(big"3") ≛ @floatinterval(3)
+    @test @tinterval(Float64, 123412341234123412341241234) ≛ interval(1.234123412341234e26, 1.2341234123412342e26)
+    @test @interval(big"3") ≛ @tinterval(Float64, 3)
 
-    @test @floatinterval(big"1e10000") ≛ interval(prevfloat(∞), ∞)
+    @test @tinterval(Float64, big"1e10000") ≛ interval(prevfloat(∞), ∞)
 
     a = big(10)^10000
-    @test @floatinterval(a) ≛ interval(prevfloat(∞), ∞)
+    @test @tinterval(Float64, a) ≛ interval(prevfloat(∞), ∞)
 end
 
 #=
@@ -145,11 +149,11 @@ end
     @test_logs (:warn, ) @test isempty(4..π)
     @test_logs (:warn, ) @test isempty(NaN..3)
     @test_logs (:warn, ) @test isempty(3..NaN)
-    @test 1..π ≛ Interval{Float64}(1, π)
+    @test 1..π ≛ interval(Float64, 1, π)
 end
 
 @testset "± tests" begin
-    @test 3 ± 1 ≛ Interval{Float64}(2.0, 4.0)
+    @test 3 ± 1 ≛ interval(Float64, 2.0, 4.0)
     @test 3 ± 0.5 ≛ 2.5..3.5
     @test 3 ± 0.1 ≛ 2.9..3.1
     @test 0.5 ± 1 ≛ -0.5..1.5
@@ -177,10 +181,10 @@ end
 end
 
 @testset "Typed intervals" begin
-    @test typeof(@interval Float64 1 2) == Interval{Float64}
+    @test typeof(@tinterval Float64 1 2) == Interval{Float64}
     @test typeof(@interval         1 2) == Interval{Float64}
-    @test typeof(@interval Float32 1 2) == Interval{Float32}
-    @test typeof(@interval Float16 1 2) == Interval{Float16}
+    @test typeof(@tinterval Float32 1 2) == Interval{Float32}
+    @test typeof(@tinterval Float16 1 2) == Interval{Float16}
 
     # PR 496
     @test eltype(interval(1, 2)) == Interval{Float64}
@@ -195,7 +199,7 @@ end
     a = convert(Interval{BigFloat}, 3..4)
     @test typeof(a) == Interval{BigFloat}
 
-    a = convert(Interval{Float64}, @biginterval(3, 4))
+    a = convert(Interval{Float64}, @tinterval(BigFloat, 3, 4))
     @test typeof(a) == Interval{Float64}
 
     pi64, pi32 = interval(Float64, pi), interval(Float32, pi)
@@ -205,12 +209,12 @@ end
 end
 
 @testset "Interval{T} constructor" begin
-    @test Interval{Float64}(1, 1) ≛ 1..1
+    @test interval(Float64, 1, 1) ≛ 1..1
     # no rounding
-    @test bounds(Interval{Float64}(1.1, 1.1)) == (1.1, 1.1)
+    @test bounds(interval(Float64, 1.1, 1.1)) == (1.1, 1.1)
 
-    @test Interval{BigFloat}(1, 1) ≛ @biginterval(1, 1)
-    @test bounds(Interval{BigFloat}(big"1.1", big"1.1")) == (big"1.1", big"1.1")
+    @test interval(BigFloat, 1, 1) ≛ @tinterval(BigFloat, 1, 1)
+    @test bounds(interval(BigFloat, big"1.1", big"1.1")) == (big"1.1", big"1.1")
 end
 
 # issue 206:
@@ -252,8 +256,8 @@ end
 end
 
 @testset "Interval{T}(x::Interval)" begin
-    @test Interval{Float64}(3..4) ≛ Interval{Float64}(3.0, 4.0)
-    @test Interval{BigFloat}(3..4) ≛ Interval{BigFloat}(3, 4)
+    @test Interval{Float64}(3..4) ≛ interval(Float64, 3.0, 4.0)
+    @test Interval{BigFloat}(3..4) ≛ interval(BigFloat, 3, 4)
 end
 
 @testset "@interval with fields" begin
@@ -277,8 +281,8 @@ end
 end
 
 @testset "Hashing of Intervals" begin
-    x = Interval{Float64}(1, 2)
-    y = Interval{BigFloat}(1, 2)
+    x = interval(Float64, 1, 2)
+    y = interval(BigFloat, 1, 2)
     @test x ≛ y
     @test hash(x) == hash(y)
 
@@ -298,6 +302,6 @@ end
 end
 
 @testset "Zero interval" begin
-    @test zero(Interval{Float64}) ≛ Interval{Float64}(0, 0)
-    @test zero(0 .. 1) ≛ Interval{Float64}(0, 0)
+    @test zero(Interval{Float64}) ≛ interval(Float64, 0, 0)
+    @test zero(0 .. 1) ≛ interval(Float64, 0, 0)
 end

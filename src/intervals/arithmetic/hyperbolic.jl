@@ -1,19 +1,18 @@
-# This file is part of the IntervalArithmetic.jl package; MIT licensed
+# This file contains the functions described as "Hyperbolic functions" in
+# Section 9.1 of the IEEE Standard 1788-2015 and required for set-based flavor
+# in Section 10.5.3
 
-#=  This file contains the functions described as "Hyperbolic functions"
-    in the IEEE Std 1788-2015 (sections 9.1) and required for set-based flavor
-    in section 10.5.3.
-=#
 for f in (:sinh, :tanh, :asinh)
     @eval begin
         """
             $($f)(a::Interval)
 
-        Implement the `$($f)` function of the IEEE Std 1788-2015 (Table 9.1).
+        Implement the `$($f)` function of the IEEE Standard 1788-2015 (Table 9.1).
         """
-        function ($f)(a::F) where {F<:Interval}
+        function ($f)(a::Interval{T}) where {T<:NumTypes}
             isempty(a) && return a
-            return @round(F, ($f)(inf(a)), ($f)(sup(a)))
+            lo, hi = bounds(a)
+            return @round(T, ($f)(lo), ($f)(hi))
         end
     end
 end
@@ -21,154 +20,119 @@ end
 """
     cosh(a::Interval)
 
-Implement the `cosh` function of the IEEE Std 1788-2015 (Table 9.1).
+Implement the `cosh` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function cosh(a::F) where {F<:Interval}
+function cosh(a::Interval{T}) where {T<:NumTypes}
     isempty(a) && return a
-
-    return @round(F, cosh(mig(a)), cosh(mag(a)))
+    return @round(T, cosh(mig(a)), cosh(mag(a)))
 end
 
 """
     coth(a::Interval)
 
-Implement the `coth` function of the IEEE Std 1788-2015 (Table 9.1).
+Implement the `coth` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function coth(a::F) where {F<:Interval}
+function coth(a::Interval{T}) where {T<:NumTypes}
     isempty(a) && return a
-
-    isthinzero(a) && return emptyinterval(a)
-
-    alo, ahi = bounds(a)
-    ahi > 0 > alo && return entireinterval(a)
-
-    if iszero(ahi)
-        return @round(F, -Inf, coth(alo))
-
-    elseif ahi > 0 && iszero(alo)
-        return @round(F, coth(ahi), Inf)
-
+    isthinzero(a) && return emptyinterval(T)
+    lo, hi = bounds(a)
+    if hi > 0 > lo
+        return entireinterval(T)
+    elseif hi == 0
+        return @round(T, typemin(T), coth(lo))
+    elseif hi > 0 && lo == 0
+        return @round(T, coth(hi), typemax(T))
+    else
+        res_lo, res_hi = bounds(@round(T, coth(hi), coth(lo)))
+        return interval(T, res_lo, res_hi)
     end
-
-    res_lo, res_hi = bounds(@round(F, coth(ahi), coth(alo)))
-
-    # The IEEE Std 1788-2015 does not allow intervals like of the
-    # form Interval(∞,∞) and Interval(-∞,-∞) for set based intervals
-    isinf(res_lo) && isinf(res_hi) && return emptyinterval(a)
-
-    return F(res_lo, res_hi)
 end
 
 """
     sech(a::Interval)
 
-Implement the `sech` function of the IEEE Std 1788-2015 (Table 9.1).
+Implement the `sech` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function sech(a::F) where {F<:Interval}
+function sech(a::Interval{T}) where {T<:NumTypes}
     isempty(a) && return a
-
-    alo, ahi = bounds(a)
-    if alo ≥ 0
-        # decreasing function
-        return @round(F, sech(ahi), sech(alo))
-
-    elseif ahi ≤ 0
-        # increasing function
-        return @round(F, sech(alo), sech(ahi))
-
+    lo, hi = bounds(a)
+    if lo ≥ 0 # decreasing function
+        return @round(T, sech(hi), sech(lo))
+    elseif hi ≤ 0 # increasing function
+        return @round(T, sech(lo), sech(hi))
     else
-        return @round(F, min(sech(alo), sech(ahi)), 1)
+        return @round(T, min(sech(lo), sech(hi)), one(T))
     end
 end
 
 """
     csch(a::Interval)
 
-Implement the `csch` function of the IEEE Std 1788-2015 (Table 9.1).
+Implement the `csch` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function csch(a::F) where {F<:Interval}
+function csch(a::Interval{T}) where {T<:NumTypes}
     isempty(a) && return a
-
-    isthinzero(a) && return emptyinterval(a)
-
-    alo, ahi = bounds(a)
-
+    isthinzero(a) && return emptyinterval(T)
+    lo, hi = bounds(a)
     if 0 ∈ a
-        ahi > 0 > alo && return entireinterval(a)
-
-        if alo == 0
-            return @round(F, csch(ahi), Inf)
+        if hi > 0 > lo
+            return entireinterval(T)
+        elseif lo == 0
+            return @round(T, csch(hi), typemax(T))
         else
-            return @round(F, -Inf, csch(alo))
+            return @round(T, typemin(T), csch(lo))
         end
+    else
+        return @round(T, csch(hi), csch(lo))
     end
-
-    return @round(F, csch(ahi), csch(alo))
 end
 
 """
     acosh(a::Interval)
 
-Implement the `acosh` function of the IEEE Std 1788-2015 (Table 9.1).
+Implement the `acosh` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function acosh(a::F) where {F<:Interval}
-    domain = F(1, Inf)
-    a = a ∩ domain
-    isempty(a) && return a
-
-    alo, ahi = bounds(a)
-    return @round(F, acosh(alo), acosh(ahi))
+function acosh(a::Interval{T}) where {T<:NumTypes}
+    domain = unsafe_interval(T, one(T), typemax(T))
+    x = a ∩ domain
+    isempty(x) && return x
+    lo, hi = bounds(x)
+    return @round(T, acosh(lo), acosh(hi))
 end
 
 """
     atanh(a::Interval)
 
-Implement the `atanh` function of the IEEE Std 1788-2015 (Table 9.1).
+Implement the `atanh` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function atanh(a::F) where {F<:Interval}
-    domain = F(-1, 1)
-    a = a ∩ domain
-
-    isempty(a) && return a
-
-    alo, ahi = bounds(a)
-    res_lo, res_hi = bounds(@round(F, atanh(alo), atanh(ahi)))
-
-    # The IEEE Std 1788-2015 does not allow intervals like of the
-    # form Interval(∞,∞) and Interval(-∞,-∞) for set based intervals
-    (res_lo == res_hi == Inf || res_lo == res_hi == -Inf) && return emptyinterval(a)
-
-    return F(res_lo, res_hi)
+function atanh(a::Interval{T}) where {T<:NumTypes}
+    domain = unsafe_interval(T, -one(T), one(T))
+    x = a ∩ domain
+    isempty(x) && return x
+    lo, hi = bounds(x)
+    res_lo, res_hi = bounds(@round(T, atanh(lo), atanh(hi)))
+    return interval(T, res_lo, res_hi)
 end
 
 """
     acoth(a::Interval)
 
-Implement the `acoth` function of the IEEE Std 1788-2015 (Table 9.1).
+Implement the `acoth` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function acoth(a::F) where {F<:Interval}
+function acoth(a::Interval{T}) where {T<:NumTypes}
     isempty(a) && return a
-
-    domain_excluded = F(-1, 1)
-
-    a ⪽ domain_excluded && return emptyinterval(a)
-
-    !isempty(a ∩ domain_excluded) && return entireinterval(F)
-
-    alo, ahi = bounds(a)
-    res_lo, res_hi = bounds(@round(F, acoth(ahi), acoth(alo)))
-
-    # The IEEE Std 1788-2015 does not allow intervals like of the
-    # form Interval(∞,∞) and Interval(-∞,-∞) for set based intervals
-    (res_lo == res_hi == Inf || res_lo == res_hi == -Inf) && return emptyinterval(a)
-
-    return F(res_lo, res_hi)
+    domain_excluded = unsafe_interval(T, -one(T), one(T))
+    a ⪽ domain_excluded && return emptyinterval(T)
+    !isempty(a ∩ domain_excluded) && return entireinterval(T)
+    lo, hi = bounds(a)
+    res_lo, res_hi = bounds(@round(T, acoth(hi), acoth(lo)))
+    return interval(T, res_lo, res_hi)
 end
 
-# Float64 versions of functions missing from CRlibm:
+# Float64 versions of functions missing from CRlibm
 for f in (:tanh, :coth, :sech, :csch, :asinh, :acosh, :atanh, :acoth)
-    @eval function ($f)(a::F) where {F<:Interval{Float64}}
+    @eval function ($f)(a::Interval{Float64})
         isempty(a) && return a
-        return F(($f)(bigequiv(a)) )
+        return Interval{Float64}(($f)(bigequiv(a)))
     end
 end

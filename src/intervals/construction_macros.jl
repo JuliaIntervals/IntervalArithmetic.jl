@@ -1,64 +1,31 @@
-"""
-    @interval
-
-Macro creating an interval.
-
-Walk through the expression to convert each number literal into an interval
-construct.
-"""
-macro interval(expr)
-    return wrap_literals(Interval{default_bound()}, expr)
-end
-
-macro interval(expr1, expr2)
-    return wrap_literals(Interval{default_bound()}, expr1, expr2)
-end
-
-macro interval(T, expr1, expr2)
-    return wrap_literals(:(Interval{$T}), expr1, expr2)
-end
+# internal mechanism
 
 """
-    @floatinterval
+    wrap_literals(T, expr1, expr2)
 
-Construct an interval with `Float64` bounds from an expression.
-
-See `@interval` for details.
+Take expressions and make each literal (e.g. 0.1, 1, etc.) into a corresponding
+interval construction.
 """
-macro floatinterval(expr)
-    return wrap_literals(Interval{Float64}, expr)
-end
+wrap_literals(T, expr) = transform(expr, :atomic, :($T))
 
-macro floatinterval(expr1, expr2)
-    return wrap_literals(Interval{Float64}, expr1, expr2)
-end
-
-"""
-    @biginterval
-
-Construct an interval with `BigFloat` bounds from an expression.
-
-See `@interval` for details.
-"""
-macro biginterval(expr)
-    return wrap_literals(Interval{BigFloat}, expr)
-end
-
-macro biginterval(expr1, expr2)
-    return wrap_literals(Interval{BigFloat}, expr1, expr2)
+function wrap_literals(T, expr1, expr2)
+    x = transform(expr1, :atomic, :($T))
+    y = transform(expr2, :atomic, :($T))
+    return :(interval($T, inf($x), sup($y)))
 end
 
 """
     transform(expr, f, T)
 
-Transform a string by applying the function `f` and type
-`T` to each argument, i.e. `:(x+y)` is transformed to `:(f(T, x) + f(T, y))`
+Transform a string by applying the function `f` and type `T` to each argument.
+For instance, `:(x + y)` is transformed into `:(f(T, x) + f(T, y))`.
 """
-transform(x::Symbol, f, T) = :($f($T, $(esc(x))))   # use if x is not an expression
 transform(x, f, T) = :($f($T, $x))
 
-function transform(expr::Expr, f::Symbol, T)
-    if expr.head in ( :(.), :ref )   # of form  a.lo  or  a[i]
+transform(x::Symbol, f, T) = :($f($T, $(esc(x))))
+
+function transform(expr::Expr, f, T)
+    if (expr.head == :(.) && expr.args[2] isa QuoteNode) || expr.head == :ref || expr.head == :macrocall
         return :($f($T, $(esc(expr))))
     end
 
@@ -66,64 +33,99 @@ function transform(expr::Expr, f::Symbol, T)
 
     first = 1  # where to start processing arguments
 
-    if expr.head == :call
-        if expr.args[1] ∈ (:+, :-, :*, :/, :^)
-            first = 2  # skip operator
-        else   # escape standard function:
+    if expr.head == :call || expr.head == :(.)
+        first = 2  # skip operator
+        if expr.args[1] ∉ (:+, :-, :*, :/, :^)  # escape standard function
             new_expr.args[1] = :($(esc(expr.args[1])))
-            first = 2
         end
     end
 
-    if expr.head == :macrocall  # handles BigInts etc.
-        return :($f($T, $(esc(expr))))  # hack: pass straight through
-    end
-
-    for (i, arg) in enumerate(expr.args)
-        i < first && continue
-        new_expr.args[i] = transform(arg, f, T)
+    for (i, arg) ∈ enumerate(expr.args)
+        if i ≥ first
+            new_expr.args[i] = transform(arg, f, T)
+        end
     end
 
     return new_expr
 end
 
+# macro constructors
 
 """
-    wrap_literals(F, expr1, expr2)
+    @interval(expr)
+    @interval(expr1, expr2)
 
-Take expressions and make each literal (0.1, 1, etc.) into a corresponding
-interval construction_macros.
+Create an interval according to the IEEE Standard 1788-2015. Each number literal
+is converted into an interval whose bound type is given by `default_numtype()`.
+
+See also: [`interval`](@ref), [`±`](@ref), [`..`](@ref), [`@tinterval`](@ref)
+and [`@I_str`](@ref).
+
+# Examples
+```jldoctest
+julia> setformat(:full);
+
+julia> @interval π-1
+Interval{Float64}(2.141592653589793, 2.1415926535897936)
+
+julia> @interval 1 2
+Interval{Float64}(1.0, 2.0)
+```
 """
-function wrap_literals(F, expr)
-    return transform(expr, :atomic, :($F))
+macro interval(expr)
+    return wrap_literals(default_numtype(), expr)
 end
 
-function wrap_literals(F, expr1, expr2)
-    expr1 = transform(expr1, :atomic, :($F))
-    expr2 = transform(expr2, :atomic, :($F))
-
-    return :(checked_interval(inf($expr1), sup($expr2)))
+macro interval(expr1, expr2)
+    return wrap_literals(default_numtype(), expr1, expr2)
 end
 
 """
-    I"expr"
+    @tinterval(T, expr)
+    @tinterval(T, expr1, expr2)
 
-Parse a string as an `Interval`, according to the grammar specified
-in Section 9.7 of the IEEE Std 1788-2015, with some extensions.
+Create an interval according to the IEEE Standard 1788-2015. Each number literal
+is converted into an interval whose bound type is given by `T`.
 
-See `parse(::Interval, ::AbstractString)` for more details.
+See also: [`interval`](@ref), [`±`](@ref), [`..`](@ref), [`@interval`](@ref) and
+[`@I_str`](@ref).
 
-Strictly guarantee that the returned interval tightly enclose the typed in
-numbers, something that constructors that do not use strings can not guarantee.
+# Examples
+```jldoctest
+julia> setformat(:full);
 
-Example
-=======
+julia> @tinterval Rational{Int32} π-1 π
+Interval{Rational{Int32}}(54633275//25510582, 85563208//27235615)
+
+julia> @tinterval Float32 π-1 π
+Interval{Float32}(2.1415925f0, 3.1415927f0)
+```
+"""
+macro tinterval(T, expr)
+    return wrap_literals(:($T), expr)
+end
+
+macro tinterval(T, expr1, expr2)
+    return wrap_literals(:($T), expr1, expr2)
+end
+
+"""
+    I"str"
+
+Create an interval according to the IEEE Standard 1788-2015. This is
+semantically equivalent to `parse(Interval{default_numtype()}, str)`.
+
+# Examples
+```jldoctest
+julia> setformat(:full);
+
 julia> I"[3, 4]"
-[3, 4]
+Interval{Float64}(3.0, 4.0)
 
-julia> I"0.1"  # 0.1 can not be represented as Float64
-[0.0999999, 0.100001]
+julia> I"0.1"
+Interval{Float64}(0.09999999999999999, 0.1)
+```
 """
-macro I_str(ex)
-    @interval(ex)
+macro I_str(str)
+    return parse(Interval{default_numtype()}, str)
 end

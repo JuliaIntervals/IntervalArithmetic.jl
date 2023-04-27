@@ -1,5 +1,5 @@
-using IntervalArithmetic
 using Test
+using IntervalArithmetic
 
 
 @testset "Interval loop tests" begin
@@ -43,36 +43,35 @@ end
 
 
 function calc_pi3(N)
-    S3 = @floatinterval(0)
+    S3 = @tinterval(Float64, 0)
 
     for i in 1:N
         S3 += 1/i^2
     end
-    S3 += @floatinterval(1/(N+1), 1/N)
+    S3 += @tinterval(Float64, 1/(N+1), 1/N)
 
     sqrt(6*S3)
 end
 
 function calc_pi4(N)
-    S4 = @floatinterval(0)
-    II = @floatinterval(1)
+    S4 = @tinterval(Float64, 0)
+    II = @tinterval(Float64, 1)
 
     for i in N:-1:1
         S4 += II / (i^2)
     end
-    S4 += II / @floatinterval(N, N+1)
+    S4 += II / @tinterval(Float64, N, N+1)
 
     sqrt(6*S4)
 end
 
 function calc_pi5(N)
-    S5 = @floatinterval(0)
-    II = @floatinterval(1)
+    S5 = @tinterval(Float64, 0)
 
     for i in N:-1:1
         S5 += 1 // (i^2)
     end
-    S5 += 1 / @floatinterval(N, N+1)
+    S5 += 1 / @tinterval(Float64, N, N+1)
 
     sqrt(6*S5)
 end

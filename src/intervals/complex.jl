@@ -118,7 +118,9 @@ abs(z::Complex{<:Interval}) = sqrt(abs2(z))
 #     return (abs(z)^(p))^(1 / p)
 # end
 
-# real functions
-mid(z::Complex{<:Interval}) = complex(mid(real(z)), mid(imag(z)))
-mag(z::Complex{<:Interval}) = sup(abs(z))
-mig(z::Complex{<:Interval}) = inf(abs(z))
+mid(z::Complex) = complex(mid(real(z)), mid(imag(z)))
+diam(z::Complex) = max(diam(real(z)), diam(imag(z)))
+radius(z::Complex) = max(radius(real(z)), radius(imag(z)))
+midpoint_radius(z::Complex) = (mid(z), radius(z))
+mag(z::Complex) = sup(abs(z))
+mig(z::Complex) = inf(abs(z))

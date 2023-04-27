@@ -1,7 +1,6 @@
+using Test
 using IntervalArithmetic
 using StaticArrays
-
-using Test
 
 let X, A  # avoid problems with global variables
 
