@@ -41,4 +41,9 @@ using Random
             @test x isa T
         end
     end
+
+    @test randn(Interval) isa Interval{Float64}
+    @test randn(Interval{Float32}) isa Interval{Float32}
+    @test randn(Random.GLOBAL_RNG, Interval) isa Interval{Float64}
+    @test randn(Random.GLOBAL_RNG, Interval{Float32}) isa Interval{Float32}
 end
