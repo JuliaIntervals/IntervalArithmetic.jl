@@ -173,7 +173,9 @@ interval(a::Tuple) = interval(a...)
 # for some irrationals defined in MathConstants (cf. base/mathconstants.jl)
 for sym ∈ (:(:ℯ), :(:φ))
     @eval begin
-        unsafe_interval(::Type{BigFloat}, a::Irrational{$sym}, b::Irrational{$sym}) =
+        unsafe_interval(::Type{BigFloat}, a::Irrational{:ℯ}, b::Irrational{$sym}) =
+            unsafe_interval(BigFloat, BigFloat(Float64(a, RoundDown), RoundDown), BigFloat(Float64(b, RoundUp), RoundUp))
+        unsafe_interval(::Type{BigFloat}, a::Irrational{:φ}, b::Irrational{$sym}) =
             unsafe_interval(BigFloat, BigFloat(Float64(a, RoundDown), RoundDown), BigFloat(Float64(b, RoundUp), RoundUp))
         unsafe_interval(::Type{BigFloat}, a::Irrational{$sym}, b) =
             unsafe_interval(BigFloat, BigFloat(Float64(a, RoundDown), RoundDown), BigFloat(b, RoundUp))
