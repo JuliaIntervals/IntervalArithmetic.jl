@@ -13,6 +13,10 @@ import IntervalArithmetic: unsafe_interval
     @test interval( (1.0, 2.0) ) ≛ interval(Float64, 1.0, 2.0)
     @test interval(BigFloat, 1) ≛ interval(BigFloat, big(1.0), big(1.0))
 
+    # constructing interval with `Interval` fails
+    @test_throws MethodError Interval(1, 2)
+    @test_throws MethodError Interval{Float64}(1.0, 2.0)
+
     # Irrational
     for irr in (π, ℯ)
         @test interval(-irr, irr).hi == (-irr..irr).hi
