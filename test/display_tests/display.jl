@@ -61,7 +61,7 @@ let x, b
             @test sprint(show, MIME("text/plain"), large_expo) == "(5.0e+123456788 ± 5.00001e+123456788)₂₅₆"
 
             # issue 175:
-            @test sprint(show, MIME("text/plain"), @tinterval(BigFloat, 1, 2)) == "(1.5 ± 0.5)₂₅₆"
+            @test sprint(show, MIME("text/plain"), interval(BigFloat, 1, 2)) == "(1.5 ± 0.5)₂₅₆"
         end
     end
 
@@ -109,7 +109,7 @@ let x, b
     setprecision(BigFloat, 256)
 
     @testset "DecoratedInterval" begin
-        a = @decorated(1, 2)
+        a = DecoratedInterval(1, 2)
         @test typeof(a) == DecoratedInterval{Float64}
 
         setformat(:standard; decorations = false)
@@ -207,7 +207,7 @@ end
     @test sprint(show, MIME("text/plain"), x) == "[0.0, 1.0]"
     @test sprint(show, x) == "Interval{Float64}(0.0, 1.0)"
 
-    x = @tinterval(BigFloat, 0, 1)
+    x = interval(BigFloat, 0, 1)
     @test sprint(show, MIME("text/plain"), x) == "[0.0, 1.0]₁₂₈"
     @test sprint(show, x) == "Interval{BigFloat}(0.0, 1.0)"
 

@@ -5,8 +5,7 @@
 Create an interval according to the IEEE Standard 1788-2015. This is
 semantically equivalent to [`interval(a, b)`](@ref).
 
-See also: [`interval`](@ref), [`@interval`](@ref), [`@tinterval`](@ref) and
-[`I_str`](@ref).
+See also: [`interval`](@ref), [`±`](@ref) and [`@I_str`](@ref).
 
 # Examples
 ```jldoctest

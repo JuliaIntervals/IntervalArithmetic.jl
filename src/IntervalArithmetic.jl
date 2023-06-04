@@ -50,7 +50,7 @@ import .Broadcast: broadcasted
 
 export
     Interval, BooleanInterval,
-    interval, @interval, @tinterval,
+    interval, ±, .., @I_str,
     diam, radius, mid, scaled_mid, mag, mig, hull,
     emptyinterval, ∅, ∞, isempty, isinterior, isdisjoint, ⪽,
     precedes, strictprecedes, ≺, ⊂, ⊃, ⊇, contains_zero, isthinzero,
@@ -64,7 +64,6 @@ export
     IntervalRounding,
     PointwisePolicy,
     cancelminus, cancelplus, isbounded, isunbounded,
-    .., @I_str, ±,
     pow, extended_div, nthroot,
     setformat, @format
 
@@ -86,7 +85,6 @@ export
 
 ## Decorations
 export
-    @decorated,
     interval, decoration, DecoratedInterval,
     com, dac, def, trv, ill
 

@@ -15,16 +15,13 @@ Constructors compliant with the IEEE Standard 1788-2015:
 - [`interval`](@ref)
 - [`..`](@ref)
 - [`±`](@ref)
-- [`@interval`](@ref)
-- [`@tinterval`](@ref)
 - [`@I_str`](@ref)
 
 !!! warning
     The internal constructor `unsafe_interval` is *not* compliant with the
     IEEE Standard 1788-2015.
 
-See also: [`interval`](@ref), [`±`](@ref), [`..`](@ref), [`@interval`](@ref),
-[`@tinterval`](@ref) and [`I"desc"`](@ref).
+See also: [`interval`](@ref), [`±`](@ref), [`..`](@ref) and [`@I_str`](@ref).
 """
 struct Interval{T<:NumTypes} <: Real
     lo::T
@@ -125,8 +122,7 @@ empty interval is returned.
     rounded to the nearest when parsed (e.g. 0.1). In such cases, use the string
     macro [`@I_str`](@ref) to ensure tight enclosure around the typed numbers.
 
-See also: [`±`](@ref), [`..`](@ref), [`@interval`](@ref), [`@tinterval`](@ref)
-and [`@I_str`](@ref).
+See also: [`±`](@ref), [`..`](@ref) and [`@I_str`](@ref).
 
 # Examples
 ```jldoctest
@@ -205,8 +201,7 @@ Despite using the midpoint-radius notation, the returned interval is still an
     rounded to the nearest when parsed (e.g. 0.1). In such cases, use the string
     macro [`@I_str`](@ref) to ensure tight enclosure around the typed numbers.
 
-See also: [`interval`](@ref), [`..`](@ref), [`@interval`](@ref),
-[`@tinterval`](@ref) and [`@I_str`](@ref).
+See also: [`interval`](@ref), [`..`](@ref) and [`@I_str`](@ref).
 
 # Examples
 ```jldoctest

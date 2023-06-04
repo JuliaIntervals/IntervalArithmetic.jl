@@ -77,20 +77,3 @@ end
 
 float(x::DecoratedInterval) = DecoratedInterval(float(interval(x)), decoration(x))
 big(x::DecoratedInterval) = DecoratedInterval(big(interval(x)), decoration(x))
-
-macro decorated(ex...)
-    if !(ex[1] isa String)
-        if length(ex) == 1
-            x = :(@interval($(esc(ex[1]))))
-            lo = :(inf($x))
-            hi = :(sup($x))
-        else
-            lo, hi = ex
-        end
-
-        return :(DecoratedInterval($lo, $hi))
-    else
-        s = ex[1]
-        parse(DecoratedInterval{Float64}, s)
-    end
-end

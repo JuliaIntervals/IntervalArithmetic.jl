@@ -42,9 +42,7 @@ themselves single operations.
 
 The macro uses the internal `round_expr` function to transform e.g.
 `a + b` into `+(a, b, RoundDown)`.
-
-The user-facing equivalent is `@interval`, which can handle much more general cases.
 """
 macro round(T, ex1, ex2)
-     :(unsafe_interval($(esc(T)), $(round_expr(ex1, RoundDown)), $(round_expr(ex2, RoundUp))))
+    return :(unsafe_interval($(esc(T)), $(round_expr(ex1, RoundDown)), $(round_expr(ex2, RoundUp))))
 end

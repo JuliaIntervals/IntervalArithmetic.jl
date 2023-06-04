@@ -1,4 +1,34 @@
 """
+    I"str"
+
+Create an interval according to the IEEE Standard 1788-2015. This is
+semantically equivalent to `parse(DecoratedInterval{default_numtype()}, str)` if
+the string contains the character `_` which delimits the interval and its
+decoration; otherwise, it is semantically equivalent to
+`parse(Interval{default_numtype()}, str)`.
+
+# Examples
+```jldoctest
+julia> setformat(:full);
+
+julia> I"[3, 4]"
+Interval{Float64}(3.0, 4.0)
+
+julia> I"0.1"
+Interval{Float64}(0.09999999999999999, 0.1)
+```
+"""
+macro I_str(str)
+    if '_' ∈ str
+        return parse(DecoratedInterval{default_numtype()}, str)
+    else
+        return parse(Interval{default_numtype()}, str)
+    end
+end
+
+#
+
+"""
     parse(Interval, s::AbstractString)
 
 Create an interval according to the IEEE Standard 1788-2015. In contrast with

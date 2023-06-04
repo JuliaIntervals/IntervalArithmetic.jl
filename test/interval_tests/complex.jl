@@ -2,9 +2,9 @@ using Test
 using IntervalArithmetic
 
 @testset "Complex interval operations" begin
-    a = @interval 1im
-    b = @interval 4im + 3
-    c = (@interval -1 4) + (@interval 0 2)*im
+    a = interval(1im)
+    b = interval(4im + 3)
+    c = interval(-1, 4) + interval(0, 2)*im
 
     @test a ⊂ c
     @test a ⊆ c
@@ -20,8 +20,8 @@ using IntervalArithmetic
     @test a / a == 1
 
     @test 3+2im ∈ c
-    @test a ∪ b == (@interval 0 3) + (@interval 1 4)*im
-    @test c ∩ (a ∪ b) == (@interval 0 3) + (@interval 1 2)*im
+    @test a ∪ b == interval(0, 3) + interval(1, 4)*im
+    @test c ∩ (a ∪ b) == interval(0, 3) + interval(1, 2)*im
     @test a ∩ b == ∅ + ∅*im
     @test isdisjoint(a,b) == true
 end
@@ -37,9 +37,9 @@ end
     @test sZ == interval(1.99999996999999951619,2.00000003000000070585) + interval(0.99999996999999984926,1.00000003000000048381)*im
     @test sqrt(-Z) == imag(sZ) - real(sZ)*im
 
-    @test sqrt((@interval -1 0) + (@interval 0)*im) .== (@interval 0 1)*im
-    @test sqrt((@interval -1 1) + (@interval 0)*im) .== (@interval 0 1) + (@interval 0 1)*im
-    @test sqrt((@interval -9//32 Inf)*im + (@interval 0)) .== (@interval 0 Inf) + (@interval -3//8 Inf)*im
+    @test sqrt(interval(-1, 0) + interval(0)*im) .== interval(0, 1)*im
+    @test sqrt(interval(-1, 1) + interval(0)*im) .== interval(0, 1) + interval(0, 1)*im
+    @test sqrt(interval(-9//32, Inf)*im) .== interval(0, Inf) + interval(-3//8, Inf)*im
 end
 
 

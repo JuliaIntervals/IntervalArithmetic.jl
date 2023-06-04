@@ -21,10 +21,10 @@ end
 end
 
 @testset "Tests with float intervals" begin
-    c = @tinterval(Float64, 0.1, 0.2)
+    c = I"[0.1, 0.2]"
 
-    @test isa(@tinterval(Float64, 0.1), Interval)
-    @test c ≛ interval(prevfloat(0.1), nextfloat(0.2))
+    @test isa(I"0.1", Interval)
+    @test c ⊆ interval(prevfloat(0.1), nextfloat(0.2))
 
     @test interval(Float64, pi) ≛ interval(3.141592653589793, 3.1415926535897936)
 end
@@ -32,9 +32,6 @@ end
 @testset "Testing functions of intervals" begin
     f(x) = x + 0.1
 
-    c = @tinterval(Float64, 0.1, 0.2)
+    c = I"[0.1, 0.2]"
     @test f(c) ≛ interval(0.19999999999999998, 0.30000000000000004)
-
-    d = @interval(0.1, 0.2)
-    @test_broken f(d) ≛ @tinterval(BigFloat, 0.2, 0.3)
 end

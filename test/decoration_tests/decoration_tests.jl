@@ -4,14 +4,14 @@ using IntervalArithmetic
 let b
 
 @testset "DecoratedInterval tests" begin
-    a = DecoratedInterval(@interval(1, 2), com)
+    a = DecoratedInterval(interval(1, 2), com)
     @test decoration(a) == com
 
     b = sqrt(a)
     @test interval(b) ≛ sqrt(interval(a))
     @test decoration(b) == com
 
-    a = DecoratedInterval(@interval(-1, 1), com)
+    a = DecoratedInterval(interval(-1, 1), com)
     b = sqrt(a)
     @test interval(b) ≛ sqrt(interval(0, 1))
     @test decoration(b) == trv
@@ -25,44 +25,41 @@ let b
     @test decoration(DecoratedInterval(2, 0.1, com)) == ill
     @test decoration(DecoratedInterval(2, 0.1)) == ill
     @test isnai(DecoratedInterval(2, 0.1))
-    @test decoration(@decorated(2, 0.1)) == ill
     @test decoration(DecoratedInterval(big(2), big(1))) == ill
     @test isnai((DecoratedInterval(big(2), big(1))))
-    @test isnai(@decorated(big(2), big(1)))
 
     # Disabling the following tests, because Julia 0.5 has some strange behaviour here
     # @test_throws ArgumentError DecoratedInterval(BigInt(1), 1//10)
-    # @test_throws ArgumentError @decorated(BigInt(1), 1//10)
 
     # Tests related to powers of decorated Intervals
-    @test @decorated(2,3) ^ 2 ≛ DecoratedInterval(4, 9)
-    @test @decorated(2,3) ^ -2 ≛ DecoratedInterval(1/9,1/4)
-    @test @decorated(-3,2) ^ 3 ≛ DecoratedInterval(-27., 8.)
-    @test @decorated(-3,-2) ^ -3 ≛ DecoratedInterval(-1/8.,-1/27)
-    @test @decorated(0,3) ^ 2 ≛ DecoratedInterval(0, 9)
-    @test @decorated(0,3) ^ -2 ≛ DecoratedInterval(1/9, Inf, trv)
-    @test @decorated(2,3)^interval(0.0, 1.0) ≛ DecoratedInterval(1.0,3.0)
-    @test @decorated(2,3)^@decorated(0.0, 1.0) ≛ DecoratedInterval(1.0,3.0)
-    @test @decorated(0, 2)^interval(0.0, 1.0) ≛ DecoratedInterval(0.0,2.0, trv)
-    @test @decorated(0, 2)^@decorated(0.0, 1.0) ≛ DecoratedInterval(0.0,2.0, trv)
-    @test @decorated(-3, 2)^interval(0.0, 1.0) ≛ DecoratedInterval(0.0,2.0, trv)
-    @test @decorated(-3, 2)^@decorated(0.0, 1.0) ≛ DecoratedInterval(0.0,2.0, trv)
-    @test @decorated(-3, 2)^interval(-1.0, 1.0) ≛ DecoratedInterval(0.0,Inf, trv)
-    @test @decorated(-3, 2)^@decorated(-1.0, 1.0) ≛ DecoratedInterval(0.0, Inf, trv)
+    @test DecoratedInterval(2, 3) ^ 2 ≛ DecoratedInterval(4, 9)
+    @test DecoratedInterval(2, 3) ^ -2 ≛ DecoratedInterval(1/9,1/4)
+    @test DecoratedInterval(-3, 2) ^ 3 ≛ DecoratedInterval(-27, 8)
+    @test DecoratedInterval(-3, -2) ^ -3 ≛ DecoratedInterval(-1/8, -1/27)
+    @test DecoratedInterval(0, 3) ^ 2 ≛ DecoratedInterval(0, 9)
+    @test DecoratedInterval(0, 3) ^ -2 ≛ DecoratedInterval(1/9, Inf, trv)
+    @test DecoratedInterval(2, 3)^interval(0, 1) ≛ DecoratedInterval(1, 3)
+    @test DecoratedInterval(2, 3)^DecoratedInterval(0, 1) ≛ DecoratedInterval(1, 3)
+    @test DecoratedInterval(0, 2)^interval(0, 1) ≛ DecoratedInterval(0, 2, trv)
+    @test DecoratedInterval(0, 2)^DecoratedInterval(0, 1) ≛ DecoratedInterval(0, 2, trv)
+    @test DecoratedInterval(-3, 2)^interval(0, 1) ≛ DecoratedInterval(0, 2, trv)
+    @test DecoratedInterval(-3, 2)^DecoratedInterval(0, 1) ≛ DecoratedInterval(0, 2, trv)
+    @test DecoratedInterval(-3, 2)^interval(-1, 1) ≛ DecoratedInterval(0, Inf, trv)
+    @test DecoratedInterval(-3, 2)^DecoratedInterval(-1, 1) ≛ DecoratedInterval(0, Inf, trv)
 
-    a = @decorated 1 2
-    b = @decorated 3 4
+    a = DecoratedInterval(1, 2)
+    b = DecoratedInterval(3, 4)
 
     @test dist(a, b) == 2.0
 
     # invalid input
-    @test isnai(@decorated(3, 1, com))
-    @test isnai(@decorated(3, 1))
-    @test isnai(@decorated(Inf, Inf))
-    @test isnai(@decorated(-Inf, -Inf))
-    @test isnai(@decorated(NaN, 3))
-    @test isnai(@decorated(3, NaN))
-    @test isnai(@decorated(NaN, NaN))
+    @test isnai(DecoratedInterval(3, 1, com))
+    @test isnai(DecoratedInterval(3, 1))
+    @test isnai(DecoratedInterval(Inf, Inf))
+    @test isnai(DecoratedInterval(-Inf, -Inf))
+    @test isnai(DecoratedInterval(NaN, 3))
+    @test isnai(DecoratedInterval(3, NaN))
+    @test isnai(DecoratedInterval(NaN, NaN))
 end
 
 end
