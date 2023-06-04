@@ -207,9 +207,9 @@ end
 # rational division
 //(a::Interval, b::Interval) = a / b
 
-min_ignore_nans(args...) = min(filter(x -> !isnan(x), args)...)
+min_ignore_nans(args...) = minimum(filter(x -> !isnan(x), args))
 
-max_ignore_nans(args...) = max(filter(x -> !isnan(x), args)...)
+max_ignore_nans(args...) = maximum(filter(x -> !isnan(x), args))
 
 """
     fma(a::Interval, b::Interval, c::Interval)
