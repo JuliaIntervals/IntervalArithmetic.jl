@@ -1,5 +1,3 @@
-# This file is part of the IntervalArithmetic.jl package; MIT licensed
-
 include_test("construction.jl")
 include_test("consistency.jl")
 include_test("numeric.jl")

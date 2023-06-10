@@ -1,36 +1,40 @@
 """
-    signbit(x::Interval)
+    signbit(a::Interval)
 
-Returns an interval containing `true` (`1`) if the value of the sign of any
-element in `x` is negative, containing `false` (`0`) if any element in `x`
-is non-negative, and an empy interval if `x` is empty.
+Return an interval containing 1 if any element in `a` is negative and containing
+0 if any element in `a` is positive. An empty interval is returned if `a` is
+empty.
 
 # Examples
 ```jldoctest
-julia> signbit(@interval(-4))
-[1, 1]
-julia> signbit(@interval(5))
-[0, 0]
-julia> signbit(@interval(-4,5))
-[0, 1]
+julia> setformat(:full);
+
+julia> signbit(interval(-4))
+Interval{Float64}(1.0, 1.0)
+
+julia> signbit(interval(5))
+Interval{Float64}(0.0, 0.0)
+
+julia> signbit(interval(-4,5))
+Interval{Float64}(0.0, 1.0)
 ```
 """
-function signbit(a::Interval)
-    isempty(a) && return emptyinterval(a)
-    alo, ahi = bounds(a)
-    return interval(signbit(ahi), signbit(alo))
+function signbit(a::Interval{T}) where {T<:NumTypes}
+    isempty(a) && return a
+    lo, hi = bounds(a)
+    return interval(T, signbit(hi), signbit(lo))
 end
 
-for Typ in (:Interval, :Real, :Float64, :Float32, :Signed, :Unsigned)
+for T ∈ (:Interval, :Real, :Float64, :Float32, :Signed, :Unsigned)
     @eval begin
-        copysign(a::$Typ, b::Interval) = abs(a)*(1-2signbit(b))
-        flipsign(a::$Typ, b::Interval) = a*(1-2signbit(b))
+        copysign(a::$T, b::Interval) = abs(a) * (1 - 2 * signbit(b))
+        flipsign(a::$T, b::Interval) = a * (1 - 2 * signbit(b))
     end
 end
 
-for Typ in (:Real, :Float64, :Float32, :Signed, :Unsigned)
+for T ∈ (:Real, :Float64, :Float32, :Signed, :Unsigned)
     @eval begin
-        copysign(a::Interval, b::$Typ) = abs(a)*(1-2signbit(b))
-        flipsign(a::Interval, b::$Typ) = a*(1-2signbit(b))
+        copysign(a::Interval, b::$T) = abs(a) * (1 - 2 * signbit(b))
+        flipsign(a::Interval, b::$T) = a * (1 - 2 * signbit(b))
     end
 end

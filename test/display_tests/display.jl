@@ -1,5 +1,5 @@
-using IntervalArithmetic
 using Test
+using IntervalArithmetic
 
 let x, b
 
@@ -61,7 +61,7 @@ let x, b
             @test sprint(show, MIME("text/plain"), large_expo) == "(5.0e+123456788 ± 5.00001e+123456788)₂₅₆"
 
             # issue 175:
-            @test sprint(show, MIME("text/plain"), @biginterval(1, 2)) == "(1.5 ± 0.5)₂₅₆"
+            @test sprint(show, MIME("text/plain"), interval(BigFloat, 1, 2)) == "(1.5 ± 0.5)₂₅₆"
         end
     end
 
@@ -80,8 +80,8 @@ let x, b
     end
 
     @testset "Interval{Float32}" begin
-        a = Interval{Float32}(1, 2)
-        b = Interval{Float32}(-1, Inf)
+        a = interval(Float32, 1, 2)
+        b = interval(Float32, -1, Inf)
 
         setformat(:standard)
         @test sprint(show, MIME("text/plain"), a) == "[1.0f0, 2.0f0]"
@@ -109,7 +109,7 @@ let x, b
     setprecision(BigFloat, 256)
 
     @testset "DecoratedInterval" begin
-        a = @decorated(1, 2)
+        a = DecoratedInterval(1, 2)
         @test typeof(a) == DecoratedInterval{Float64}
 
         setformat(:standard; decorations = false)
@@ -166,14 +166,14 @@ let x, b
     end
 
     @testset "IntervalBox" begin
-        X = IntervalBox(1..2, 3..4)
+        X = IntervalBox(interval(1, 2), interval(3, 4))
         @test typeof(X) == IntervalBox{2,Float64}
 
         setformat(:standard; sigdigits = 6)
         @test sprint(show, MIME("text/plain"), X) == "[1.0, 2.0] × [3.0, 4.0]"
-        X = IntervalBox(1.1..1.2, 2.1..2.2)
+        X = IntervalBox(interval(1.1, 1.2), interval(2.1, 2.2))
         @test sprint(show, MIME("text/plain"), X) == "[1.09999, 1.20001] × [2.09999, 2.20001]"
-        X = IntervalBox(-Inf..Inf, -Inf..Inf)
+        X = IntervalBox(interval(-Inf, Inf), interval(-Inf, Inf))
         @test sprint(show, MIME("text/plain"), X) == "[-∞, ∞]²"
 
         setformat(:full)
@@ -207,7 +207,7 @@ end
     @test sprint(show, MIME("text/plain"), x) == "[0.0, 1.0]"
     @test sprint(show, x) == "Interval{Float64}(0.0, 1.0)"
 
-    x = @biginterval(0, 1)
+    x = interval(BigFloat, 0, 1)
     @test sprint(show, MIME("text/plain"), x) == "[0.0, 1.0]₁₂₈"
     @test sprint(show, x) == "Interval{BigFloat}(0.0, 1.0)"
 
@@ -222,9 +222,9 @@ end
     setformat(; decorations = true)
     @test sprint(show, MIME("text/plain"), x) == "[0.0, 1.0]₁₂₈_def"
 
-    a = IntervalBox(1..2, 2..3)
+    a = IntervalBox(interval(1, 2), interval(2, 3))
     b = IntervalBox(emptyinterval(), 2)
-    c = IntervalBox(1..2, 1)
+    c = IntervalBox(interval(1, 2), 1)
 
     @test sprint(show, a) == "IntervalBox(Interval{Float64}(1.0, 2.0), Interval{Float64}(2.0, 3.0))"
     @test sprint(show, b) == "IntervalBox(∅, 2)"
@@ -233,7 +233,7 @@ end
 end
 
 @testset "@format tests" begin
-    x = prevfloat(0.1)..nextfloat(0.3)
+    x = interval(prevfloat(0.1), nextfloat(0.3))
 
     @format full
     @test sprint(show, MIME("text/plain"), x) == "Interval{Float64}(0.09999999999999999, 0.30000000000000004)"

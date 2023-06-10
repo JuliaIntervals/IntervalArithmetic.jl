@@ -1,7 +1,6 @@
+using Test
 using IntervalArithmetic
 using StaticArrays
-
-using Test
 
 let X, A  # avoid problems with global variables
 
@@ -25,15 +24,15 @@ let X, A  # avoid problems with global variables
     @test -A ≛ IntervalBox((-2)..(-1), (-4)..(-3))
     @test 2 - A ≛ IntervalBox(0..1, (-2)..(-1))
     @test B - 2 ≛ IntervalBox((-2)..0, 1..4)
-    @test dot(A, B) ≛ @interval(9, 28)
-    @test dot(A, B.v) ≛ @interval(9, 28)
-    @test dot(A.v, B) ≛ @interval(9, 28)
+    @test dot(A, B) ≛ interval(9, 28)
+    @test dot(A, B.v) ≛ interval(9, 28)
+    @test dot(A.v, B) ≛ interval(9, 28)
     @test A .* B ≛ IntervalBox(0..4, 9..24)
     @test A ./ A ≛ IntervalBox((0.5)..2, (0.75)..(4//3))
     @test 1 ./ B ≛ IntervalBox((0.5)..Inf, (1//6)..(1//3))
     @test B ./ 1 ≛ B
     @test A .^ 2 ≛ IntervalBox(1..4, 9..16)
-    @test B .^ 0.5 ≛ IntervalBox(@interval(0,sqrt(2)), @interval(sqrt(3),sqrt(6)))
+    @test B .^ 0.5 ≛ IntervalBox(interval(0, sqrt(interval(2))), interval(sqrt(interval(3)), sqrt(interval(6))))
 
     # TODO This is weird it is the only place we test mixing different
     # bound types for the interval
@@ -88,7 +87,7 @@ let X, A  # avoid problems with global variables
     Y = IntervalBox(3..5, 4..17)
     @test X ∩ Y ≛ IntervalBox(3..4, 4..5)
 
-    v = [@interval(i, i+1) for i in 1:10]
+    v = [interval(i, i+1) for i in 1:10]
     V = IntervalBox(v...)
     @test length(V) == 10
 

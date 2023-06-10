@@ -1,38 +1,62 @@
 """
-    ∅
+    a..b
+    ..(a, b)
 
-Empty interval of default flavor and default bounds.
+Create an interval according to the IEEE Standard 1788-2015. This is
+semantically equivalent to [`interval(a, b)`](@ref).
 
-Alias of `emptyinterval()`. Can be typed as `\\emptyset<TAB>`.
+See also: [`interval`](@ref), [`±`](@ref) and [`@I_str`](@ref).
+
+# Examples
+```jldoctest
+julia> setformat(:full);
+
+julia> (1//1)..π
+Interval{Rational{Int64}}(1//1, 85563208//27235615)
+
+julia> 0.1..0.3
+Interval{Float64}(0.1, 0.3)
+```
 """
-const ∅ = emptyinterval()
+const .. = interval
 
 """
     ≺(a, b)
 
-Alias of `strictprecedes`. Can be typed as `\\prec<TAB>`.
+Unicode alias of [`strictprecedes`](@ref).
 """
 const ≺ = strictprecedes
 
 """
     ⪽(a, b)
 
-Alias of `isinterior`. Can be typed as `\\subsetdot<TAB>`.
+Unicode alias of [`isinterior`](@ref).
 """
 const ⪽ = isinterior
 
 """
-    ∞
+    ∅
 
-Alias of `Inf`. Can be typed as `\\inf<TAB>`.
+Unicode alias of `emptyinterval()` representing an empty interval of
+default flavor and default bound type.
+
+See also: [`emptyinterval`](@ref).
 """
-const ∞ = Inf
+const ∅ = emptyinterval()
 
 """
     ℝ
 
-Entire interval of defaul flavor and default bounds.
+Unicode alias of `entireinterval()` representing an entire interval of
+default flavor and default bound type.
 
-Alias of `entireinterval()`. Can be typed as `\\bbR<TAB>`.
+See also: [`entireinterval`](@ref).
 """
 const ℝ = entireinterval()
+
+"""
+    ∞
+
+Unicode alias of `Inf`.
+"""
+const ∞ = Inf

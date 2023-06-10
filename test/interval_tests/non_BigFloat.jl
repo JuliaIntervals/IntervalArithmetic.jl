@@ -1,5 +1,6 @@
-using IntervalArithmetic
 using Test
+using IntervalArithmetic
+import IntervalArithmetic: unsafe_interval
 
 @testset "Tests with rational intervals" begin
     a = interval(Rational{Int}, 1//2, 3//4)
@@ -7,10 +8,10 @@ using Test
 
     @test a + b ≛ interval(Rational{Int}, 13//14, 3//2)  # exact
 
-    @test sqrt(a + b) ≛ interval(0.9636241116594315, 1.2247448713915892)
+    @test sqrt(a + b) ≛ unsafe_interval(Rational{Int64}, 137482504//142672337, 46099201//37639840)
 
     X = interval(1//3)
-    @test sqrt(X) ≛ interval(0.5773502691896257, 0.5773502691896258)
+    @test sqrt(X) ≛ unsafe_interval(Rational{Int64}, 29354524//50843527, 50843527//88063572)
 end
 
 @testset "Rounding rational intervals" begin
@@ -20,10 +21,10 @@ end
 end
 
 @testset "Tests with float intervals" begin
-    c = @floatinterval(0.1, 0.2)
+    c = I"[0.1, 0.2]"
 
-    @test isa(@floatinterval(0.1), Interval)
-    @test c ≛ interval(prevfloat(0.1), nextfloat(0.2))
+    @test isa(I"0.1", Interval)
+    @test c ⊆ interval(prevfloat(0.1), nextfloat(0.2))
 
     @test interval(Float64, pi) ≛ interval(3.141592653589793, 3.1415926535897936)
 end
@@ -31,9 +32,6 @@ end
 @testset "Testing functions of intervals" begin
     f(x) = x + 0.1
 
-    c = @floatinterval(0.1, 0.2)
+    c = I"[0.1, 0.2]"
     @test f(c) ≛ interval(0.19999999999999998, 0.30000000000000004)
-
-    d = @interval(0.1, 0.2)
-    @test_broken f(d) ≛ @biginterval(0.2, 0.3)
 end

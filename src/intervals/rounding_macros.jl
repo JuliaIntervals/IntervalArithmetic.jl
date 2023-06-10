@@ -13,7 +13,7 @@ function round_expr(ex::Expr, rounding_mode::RoundingMode)
         if op ∈ (:min, :max)
             mapped_args = round_expr.(ex.args[2:end], rounding_mode)
             return :($op($(mapped_args...)))
-        elseif op ∈ (:typemin, :typemax)
+        elseif op ∈ (:typemin, :typemax, :one, :zero)
             return :( $(esc(ex)) )
         end
 
@@ -42,9 +42,7 @@ themselves single operations.
 
 The macro uses the internal `round_expr` function to transform e.g.
 `a + b` into `+(a, b, RoundDown)`.
-
-The user-facing equivalent is `@interval`, which can handle much more general cases.
 """
-macro round(F, ex1, ex2)
-     :($(esc(F))($(round_expr(ex1, RoundDown)), $(round_expr(ex2, RoundUp))))
+macro round(T, ex1, ex2)
+    return :(unsafe_interval($(esc(T)), $(round_expr(ex1, RoundDown)), $(round_expr(ex2, RoundUp))))
 end

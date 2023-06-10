@@ -1,16 +1,12 @@
-# This file is part of the IntervalArithmetic.jl package; MIT licensed
-
-#=  This file contains the `overlap` function required for set-based flavor
-    by the IEEE Std 1788-2015 (section 10.6.4).
-=#
+# This file contains the `overlap` function required for set-based flavor in
+# Section 10.6.4 of the IEEE Standard 1788-2015.
 
 """
     Overlap <: EnumX{Int32}
 
-Struct containing the `overlap` instances included in the IEEE Std 1788-2015.
+Struct containing the `overlap` instances included in the IEEE Standard 1788-2015.
 They are numerated starting on 1. To see the distinct instances, type
 `IntervalArithmetic.Overlap.T`.
-
 """
 @enumx Overlap begin
     both_empty = 1
@@ -34,8 +30,8 @@ end
 """
     overlap(a::Interval, b::Interval)
 
-Implement the `overlap` function according to the IEEE Std 1788-2015 (section 10.6.4
-and Table 10.7).
+Implement the `overlap` function according to the IEEE Standard 1788-2015
+(Section 10.6.4 and Table 10.7).
 """
 function overlap(a::Interval, b::Interval)
     # At least one interval is empty

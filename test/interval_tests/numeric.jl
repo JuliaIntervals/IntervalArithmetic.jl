@@ -1,7 +1,5 @@
-# This file is part of the IntervalArithmetic.jl package; MIT licensed
-
-using IntervalArithmetic
 using Test
+using IntervalArithmetic
 
 @testset "brodcasting tests" begin
     a = 3
@@ -128,7 +126,7 @@ end
     @test interval(-3, 4) ^ 0.5 ≛ interval(-3, 4)^(1//2)
     @test interval(-3, 2) ^ interval(2) ≛ interval(0.0, 4.0)
     @test interval(-3, 4) ^ interval(0.5) ≛ interval(0, 2)
-    @test @biginterval(-3, 4) ^ 0.5 ≛ @biginterval(0, 2)
+    @test interval(BigFloat, -3, 4) ^ 0.5 ≛ interval(BigFloat, 0, 2)
 
     @test dist(interval(1,27)^interval(1/3), interval(1., 3.)) < 2*eps(interval(1,3)).lo
     @test dist(interval(1,27)^(1/3), interval(1., 3.)) < 2*eps(interval(1,3)).lo
@@ -143,30 +141,30 @@ end
     x = interval(BigFloat, 9.595703125)
     y = x^(1//3)
     @test diam(y) == 0
-    x = @biginterval(0.1)
+    x = interval(BigFloat, 0.1)
     y = x^(1//3)
     @test (0 <= diam(y) < 1e-76)
 end
 
 @testset "Exp and log tests" begin
-    @test exp(@biginterval(1//2)) ⊆ exp(interval(1//2))
+    @test exp(interval(BigFloat, 1//2)) ⊆ exp(interval(1//2))
     @test exp(big(1//2)) ∈ exp(interval(1//2))
-    @test exp(@biginterval(0.1)) ⊆ exp(interval(0.1))
+    @test exp(interval(BigFloat, 0.1)) ⊆ exp(interval(0.1))
     @test exp(interval(0.1)) ≛ interval(1.1051709180756475e+00, 1.1051709180756477e+00)
     @test diam(exp(interval(0.1))) == eps(exp(0.1))
 
-    @test log(@biginterval(1//2)) ⊆ log(interval(1//2))
+    @test log(interval(BigFloat, 1//2)) ⊆ log(interval(1//2))
     @test log(big(1//2)) ∈ log(interval(1//2))
-    @test log(@biginterval(0.1)) ⊆ log(interval(0.1))
+    @test log(interval(BigFloat, 0.1)) ⊆ log(interval(0.1))
     @test log(interval(0.1)) ≛ interval(-2.3025850929940459e+00, -2.3025850929940455e+00)
     @test diam(log(interval(0.1))) == eps(log(0.1))
 
-    @test exp2(@biginterval(1//2)) ⊆ exp2(interval(1//2))
+    @test exp2(interval(BigFloat, 1//2)) ⊆ exp2(interval(1//2))
     @test exp2(interval(1024.0)) ≛ interval(1.7976931348623157e308, Inf)
-    @test exp10(@biginterval(1//2)) ⊆ exp10(interval(1//2))
+    @test exp10(interval(BigFloat, 1//2)) ⊆ exp10(interval(1//2))
     @test exp10(interval(308.5)) ≛ interval(1.7976931348623157e308, Inf)
 
-    @test log2(@biginterval(1//2)) ⊆ log2(interval(1//2))
+    @test log2(interval(BigFloat, 1//2)) ⊆ log2(interval(1//2))
     @test log2(interval(0.25, 0.5)) ≛ interval(-2.0, -1.0)
     @test log10(big(1//10)) ∈ log10(interval(1//10))
     @test log10(interval(0.01, 0.1)) ≛ interval(log10(0.01, RoundDown), log10(0.1, RoundUp))
@@ -273,9 +271,9 @@ end
         @test pow(-2 .. -1, 4..4) ≛ 1..16
         @test pow(-2 .. -1, -1 .. -1) ≛ -1 .. -0.5
 
-        @test pow(@biginterval(-1, 2), 2) ≛ 0..4
-        @test pow(@biginterval(-1, 2), 3) ≛ -1..8
-        @test pow(@biginterval(1, 2), 2) ≛ 1..4
+        @test pow(interval(BigFloat, -1, 2), 2) ≛ 0..4
+        @test pow(interval(BigFloat, -1, 2), 3) ≛ -1..8
+        @test pow(interval(BigFloat, 1, 2), 2) ≛ 1..4
 
         x = interval(pi)
         @test x^100 ⊆ pow(x, 100)
@@ -334,7 +332,7 @@ end
 
         a = interval(Float32, 1e38)
         b = interval(Float32, 1e2)
-        @test a * b ≛ Interval{Float32}(floatmax(Float32), Inf)
+        @test a * b ≛ interval(Float32, floatmax(Float32), Inf)
     end
 
 
@@ -383,11 +381,11 @@ end
     @test nthroot(interval(-81, 81), -4) ≛ interval(1/3, Inf)
     @test nthroot(interval(-81, -16), -4) ≛ ∅
     @test nthroot(interval(-81, -16), 1) ≛ interval(-81, -16)
-    @test nthroot(Interval{BigFloat}(16, 81), 4) ≛ Interval{BigFloat}(2, 3)
-    @test nthroot(Interval{BigFloat}(0, 81), 4) ≛ Interval{BigFloat}(0, 3)
-    @test nthroot(Interval{BigFloat}(-81, 0), 4) ≛ Interval{BigFloat}(0, 0)
-    @test nthroot(Interval{BigFloat}(-81, 81), 4) ≛ Interval{BigFloat}(0, 3)
-    @test nthroot(Interval{BigFloat}(-27, 27), -3) ≛ Interval{BigFloat}(-Inf, Inf)
-    @test nthroot(Interval{BigFloat}(-81, -16), -4) ≛ ∅
-    @test nthroot(Interval{BigFloat}(-81, -16), 1) ≛ Interval{BigFloat}(-81, -16)
+    @test nthroot(interval(BigFloat, 16, 81), 4) ≛ interval(BigFloat, 2, 3)
+    @test nthroot(interval(BigFloat, 0, 81), 4) ≛ interval(BigFloat, 0, 3)
+    @test nthroot(interval(BigFloat, -81, 0), 4) ≛ interval(BigFloat, 0, 0)
+    @test nthroot(interval(BigFloat, -81, 81), 4) ≛ interval(BigFloat, 0, 3)
+    @test nthroot(interval(BigFloat, -27, 27), -3) ≛ interval(BigFloat, -Inf, Inf)
+    @test nthroot(interval(BigFloat, -81, -16), -4) ≛ ∅
+    @test nthroot(interval(BigFloat, -81, -16), 1) ≛ interval(BigFloat, -81, -16)
 end

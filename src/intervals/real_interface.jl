@@ -1,48 +1,46 @@
-# This file is part of the IntervalArithmetic.jl package; MIT licensed
-
-#=
-Description:
-
-This file contains the functions that must be defined on `Interval`s so that
-they behave like `Real` in julia.
-=#
-
-zero(::F) where {F<:Interval} = zero(F)
-function zero(::Type{F}) where {T<:NumTypes, F<:Interval{T}}
-    x = zero(T)
-    return F(x, x)
-end
-
-one(::F) where {F<:Interval} = one(F)
-function one(::Type{F}) where {T<:NumTypes, F<:Interval{T}}
-    x = one(T)
-    return F(x, x)
-end
-
-typemin(::Type{F}) where {T<:NumTypes, F<:Interval{T}} = F(typemin(T), nextfloat(typemin(T)))
-typemax(::Type{F}) where {T<:NumTypes, F<:Interval{T}} = F(prevfloat(typemax(T)), typemax(T))
-
 """
-    numtype(::Interval{T}) where {T}
+    numtype(::T)
+    numtype(::Type{T})
 
 Return the type `T` of the bounds of the interval.
 
 # Example
-
-```julia
-julia> numtype(1..2)
+```
+julia> IntervalArithmetic.numtype(interval(1, 2))
 Float64
 ```
 """
-numtype(::Interval{T}) where {T<:NumTypes} = T
+numtype(::F) where {F} = numtype(F)
+numtype(::Type{Interval{T}}) where {T<:NumTypes} = T
+numtype(::Type{T}) where {T} = T
 
-function eps(a::F) where {F<:Interval}
-    x = max(eps(inf(a)), eps(sup(a)))
-    return F(x, x)
+# standard `Real` functions
+
+float(x::Interval{T}) where {T<:NumTypes} = Interval{float(T)}(x)
+big(x::Interval{T}) where {T<:NumTypes} = Interval{big(T)}(x)
+
+zero(::F) where {F<:Interval} = zero(F)
+function zero(::Type{Interval{T}}) where {T<:NumTypes}
+    x = zero(T)
+    return unsafe_interval(T, x, x)
 end
-function eps(::Type{F}) where {T<:NumTypes,F<:Interval{T}}
+
+one(::F) where {F<:Interval} = one(F)
+function one(::Type{Interval{T}}) where {T<:NumTypes}
+    x = one(T)
+    return unsafe_interval(T, x, x)
+end
+
+typemin(::Type{Interval{T}}) where {T<:NumTypes} = unsafe_interval(T, typemin(T), nextfloat(typemin(T)))
+typemax(::Type{Interval{T}}) where {T<:NumTypes} = unsafe_interval(T, prevfloat(typemax(T)), typemax(T))
+
+function eps(a::Interval{T}) where {T<:NumTypes}
+    x = max(eps(inf(a)), eps(sup(a)))
+    return unsafe_interval(T, x, x)
+end
+function eps(::Type{Interval{T}}) where {T<:NumTypes}
     x = eps(T)
-    return F(x, x)
+    return unsafe_interval(T, x, x)
 end
 
 """

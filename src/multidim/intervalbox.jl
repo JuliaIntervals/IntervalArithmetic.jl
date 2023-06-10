@@ -163,4 +163,4 @@ zero(x::IntervalBox) = zero(typeof(x))
 Return the symmetric interval box of dimension `N` in the numeric type `T`,
 each side is `Interval(-1, 1)`.
 """
-symmetric_box(N, ::Type{T}) where {T<:NumTypes} = IntervalBox(Interval{T}(-one(T), one(T)), N)
+symmetric_box(N, ::Type{T}) where {T<:NumTypes} = IntervalBox(unsafe_interval(T, -one(T), one(T)), N)

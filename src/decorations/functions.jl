@@ -4,10 +4,10 @@ Base.literal_pow(::typeof(^), x::DecoratedInterval{T}, ::Val{p}) where {T,p} = x
 
 
 # zero, one
-zero(a::DecoratedInterval{T}) where T<:Real = DecoratedInterval(zero(T))
-zero(::Type{DecoratedInterval{T}}) where T<:Real = DecoratedInterval(zero(T))
-one(a::DecoratedInterval{T}) where T<:Real = DecoratedInterval(one(T))
-one(::Type{DecoratedInterval{T}}) where T<:Real = DecoratedInterval(one(T))
+zero(::DecoratedInterval{T}) where {T<:NumTypes} = DecoratedInterval(zero(T))
+zero(::Type{DecoratedInterval{T}}) where {T<:NumTypes} = DecoratedInterval(zero(T))
+one(::DecoratedInterval{T}) where {T<:NumTypes} = DecoratedInterval(one(T))
+one(::Type{DecoratedInterval{T}}) where {T<:NumTypes} = DecoratedInterval(one(T))
 
 ## Bool functions
 const bool_functions = (
@@ -323,18 +323,18 @@ end
 
 # The function is unbounded at the bounded edges of the domain
 restricted_functions1 = Dict(
-    :log   => Interval{Float64}(0.0, Inf),
-    :log2  => Interval{Float64}(0.0, Inf),
-    :log10 => Interval{Float64}(0.0, Inf),
-    :atanh => Interval{Float64}(-1.0, 1.0)
+    :log   => unsafe_interval(Float64, 0.0, Inf),
+    :log2  => unsafe_interval(Float64, 0.0, Inf),
+    :log10 => unsafe_interval(Float64, 0.0, Inf),
+    :atanh => unsafe_interval(Float64, -1.0, 1.0)
 )
 
 # The function is bounded at the bounded edge(s) of the domain
 restricted_functions2 = Dict(
-    :sqrt  => Interval{Float64}(0.0, Inf),
-    :asin  => Interval{Float64}(-1.0, 1.0),
-    :acos  => Interval{Float64}(-1.0, 1.0),
-    :acosh => Interval{Float64}(1.0, Inf)
+    :sqrt  => unsafe_interval(Float64, 0.0, Inf),
+    :asin  => unsafe_interval(Float64, -1.0, 1.0),
+    :acos  => unsafe_interval(Float64, -1.0, 1.0),
+    :acosh => unsafe_interval(Float64, 1.0, Inf)
 )
 
 # Define functions with restricted domains on DecoratedInterval's:

@@ -1,4 +1,94 @@
 """
+    I"str"
+
+Create an interval according to the IEEE Standard 1788-2015. This is
+semantically equivalent to `parse(DecoratedInterval{default_numtype()}, str)` if
+the string contains the character `_` which delimits the interval and its
+decoration; otherwise, it is semantically equivalent to
+`parse(Interval{default_numtype()}, str)`.
+
+# Examples
+```jldoctest
+julia> setformat(:full);
+
+julia> I"[3, 4]"
+Interval{Float64}(3.0, 4.0)
+
+julia> I"0.1"
+Interval{Float64}(0.09999999999999999, 0.1)
+```
+"""
+macro I_str(str)
+    if '_' ∈ str
+        return parse(DecoratedInterval{default_numtype()}, str)
+    else
+        return parse(Interval{default_numtype()}, str)
+    end
+end
+
+#
+
+"""
+    parse(Interval, s::AbstractString)
+
+Create an interval according to the IEEE Standard 1788-2015. In contrast with
+constructors that do not use strings, this constructor guarantees that the
+returned interval tightly encloses the values described by the string, including
+numbers that have no exact float representation (e.g. 0.1).
+
+Examples of allowed string formats:
+- `I"[1.33]"` or `I"1.33"`: the interval containing ``1.33``.
+- `I"[1.44, 2.78]"`: the interval ``[1.44, 2.78]``.
+- `I"[empty]"`: the empty interval.
+- `I"[entire]"` or `I"[,]"`: the interval ``[-\\infty, \\infty]``.
+- `I"[3,]"`: the interval ``[3, \\infty]``.
+- `I"6.42?2"`: the interval ``[6.4,  6.44]``. The number after `?` represents the
+    uncertainty in the last digit; by default this value is `0.5`. The direction
+    of the uncertainty can be given by adding `u` or `d` at the end for the error
+    to only go up or down respectively (e.g. `I"4.5?5u"` represents ``[4.5, 5]``).
+- `I"6.42?2e2"`: the interval ``[642, 644]``.
+- `I"3??u"`: the interval ``[3, \\infty]``.
+- `I"3??u"`: the interval ``[3, \\infty]``.
+- `I"3??"`: the interval ``[-\\infty, \\infty]``.
+
+For more details, see sections 9.7 and 12.11 of the IEEE Standard 1788-2015.
+
+# Examples
+```jldoctest
+julia> setformat(:full);
+
+julia> parse(Interval{Float64}, "[1, 2]")
+Interval{Float64}(1.0, 2.0)
+
+julia> parse(Interval{Float64}, "[1, 2]")
+Interval{Float64}(1.0, 2.0)
+
+julia> parse(Interval{Float64}, "[1,]")
+Interval{Float64}(1.0, Inf)
+
+julia> parse(Interval{Float64}, "[,]")
+Interval{Float64}(-Inf, Inf)
+
+julia> parse(Interval{Float64}, "6.42?2e2")
+Interval{Float64}(640.0, 644.0)
+```
+"""
+function parse(::Type{F}, str::AbstractString) where {F<:Interval}
+    str = lowercase(strip(str))
+    try
+        ival, _ = _parse(F, str)
+        return ival
+    catch e
+        if e isa ArgumentError
+            @warn "invalid input, empty interval is returned"
+            return emptyinterval(F)
+        else
+            rethrow(e)
+        end
+    end
+end
+
+"""
     parse(DecoratedInterval, s::AbstractString)
 
 Parse a string of the form `"[a, b]_dec"` as a `DecoratedInterval` with decoration `dec`.
@@ -6,25 +96,15 @@ If the decoration is not specified, it is computed based on the parsed interval.
 If the input is an invalid string, a warning is printed and [NaI] is returned. The parser is
 case unsensitive.
 
-### Examples
-
+# Examples
 ```jldoctest
-julia> @format true
-Display parameters:
-- format: standard
-- decorations: true
-- significant figures: 6
+julia> setformat(:full);
 
 julia> parse(DecoratedInterval{Float64}, "[1, 2]")
 [1, 2]_com
 
 julia> parse(DecoratedInterval{Float64}, "[1, 2]_def")
 [1, 2]_def
-
-julia> parse(DecoratedInterval{Float64}, "foobar")
-┌ Warning: invalid input, returning [NaI]
-└ @ IntervalArithmetic ~/.julia/dev/IntervalArithmetic/src/parsing.jl:44
-[NaN, NaN]_ill
 ```
 """
 function parse(::Type{DecoratedInterval{T}}, s::AbstractString) where {T<:NumTypes}
@@ -66,72 +146,6 @@ function parse(::Type{DecoratedInterval{T}}, s::AbstractString) where {T<:NumTyp
         if e isa ArgumentError
             @warn "invalid input, returning [NaI]"
             return nai(T)
-        else
-            rethrow(e)
-        end
-    end
-end
-
-"""
-    parse(Interval, s::AbstractString)
-
-Parse a string as an `Interval`, according to the grammar specified
-in Section 9.7 of the IEEE Std 1788-2015.
-
-The created interval is tight around the value described by the string,
-including for number that have no exact float representation like "0.1". If the input is
-an invalid string, a warning is printed and an empty interval is returned. The parser is
-case unsensitive.
-
-### Allowed format
-
-Here are some examples of allowed formats, for more details see sections 9.7 and 12.11 of
-the standard
-
-- `[ 1.33 ]` or simply `1.33` : The interval containing only `1.33``.
-- `[ 1.44, 2.78 ]` : The interval `[1.44, 2.78]`.
-- `[empty]` : the empty interval
-- `[entire]` or `[,]`: the interval `[-∞, ∞]`
-- `[3,]`: The interval `[3, ∞]`
-- `6.42?2` : The interval `6.42 ± 0.02`. The number after `?` represent the uncertainty in
-  the last digit. The default value is `0.5` (e.g. `2.3? == 2.3 ± 0.05`). The direction of
-  the uncertainty can be given by adding 'u' or 'd' at the end for the error going only up
-  or down respectively (e.g. `4.5?5u == [4.5, 5]`).
-- `6.42?2e2` : The interval `(6.42 ± 0.02)⋅10³ == 642 ± 2`
-- `3??u` : the interval `[3, ∞]`
-- `3??u` : the interval `[3, ∞]`
-- `3??` : the interval `[-∞, ∞]`
-
-### Examples
-
-```julia
-julia> parse(Interval{Float64}, "[1, 2]")
-[1, 2]
-
-julia> parse(Interval{Float64}, "[1,]")
-[1, ∞]
-
-julia> parse(Interval{Float64}, "[,]")
-[-∞, ∞]
-
-julia> parse(Interval{Float64}, "6.42?2e2")
-[640, 644]
-
-julia> parse(Interval{Float64}, "foobar")
-┌ Warning: invalid input, empty interval returned
-└ @ IntervalArithmetic ~/.julia/dev/IntervalArithmetic/src/parsing.jl:68
-∅
-```
-"""
-function parse(::Type{F}, s::AbstractString) where {F<:Interval}
-    s = lowercase(strip(s))
-    try
-        ival, _ = _parse(F, s)
-        return ival
-    catch e
-        if e isa ArgumentError
-            @warn "invalid input, empty interval is returned"
-            return emptyinterval(F)
         else
             rethrow(e)
         end
@@ -225,17 +239,33 @@ function _parse(::Type{Interval{T}}, s::AbstractString) where {T<:NumTypes}
         lo = parse_num(T, s, RoundDown)
         hi = parse_num(T, s, RoundUp)
     end
-    is_valid_interval(lo, hi) && return Interval{T}(lo, hi), isnotcom
+    is_valid_interval(lo, hi) && return unsafe_interval(T, lo, hi), isnotcom
     throw(ArgumentError("input $s can not be parsed as an interval."))
 end
 
 """
 Same as `parse(T, s, rounding_mode)`, but also accept string representing rational numbers.
 """
-function parse_num(::Type{T}, s::AbstractString, rounding_mode::RoundingMode) where {T<:AbstractFloat}
-    if '/' in s
-        num, denum = parse.(BigInt, split(s, '/'; keepempty = false))
+function parse_num(::Type{T}, str::AbstractString, ::RoundingMode{:Down}) where {S<:Integer,T<:Rational{S}}
+    '/' ∈ str && return parse(T, str)
+    x = parse(BigFloat, str)
+    y = prevfloat(x)
+    z = rationalize(S, y)
+    z < x && return z
+    return rationalize(S, prevfloat(y))
+end
+function parse_num(::Type{T}, str::AbstractString, ::RoundingMode{:Up}) where {S<:Integer,T<:Rational{S}}
+    '/' ∈ str && return parse(T, str)
+    x = parse(BigFloat, str)
+    y = nextfloat(x)
+    z = rationalize(S, y)
+    z > x && return z
+    return rationalize(S, nextfloat(y))
+end
+function parse_num(::Type{T}, str::AbstractString, rounding_mode::RoundingMode) where {T<:AbstractFloat}
+    if '/' ∈ str
+        num, denum = parse.(BigInt, split(str, '/'; keepempty = false))
         return T(num//denum, rounding_mode)
     end
-    return T(parse(BigFloat, s), rounding_mode)
+    return T(parse(BigFloat, str), rounding_mode)
 end
