@@ -1,6 +1,11 @@
 using Test
 using IntervalArithmetic
 
+@testset "rad2deg/deg2rad" begin
+    @test rad2deg(π .. 2π) ⊇ interval(180, 360)
+    @test deg2rad(180 .. 360) ⊇ interval(π, 2interval(π))
+end
+
 @testset "sin" begin
     @test sin(interval(0.5)) ≛ interval(0.47942553860420295, 0.47942553860420301)
     @test sin(interval(0.5, 1.67)) ≛ interval(4.7942553860420295e-01, 1.0)
@@ -37,8 +42,8 @@ end
 
 @testset "sinpi" begin
     @test sinpi(∅) ≛ ∅
-    @test sinpi(0.5 .. 1.5) ≛ interval(-1 , 1)
     @test sinpi(1 .. 2) ⊇ interval(-1 , 0)
+    @test sinpi(0.5 .. 1.5) ≛ interval(-1 , 1)
     @test sinpi(0.25 .. 0.75) ⊇ interval(1/sqrt(2) , 1)
     @test sinpi(-0.25 .. 0.25) ⊇ interval(-1/sqrt(2) , 1/sqrt(2))
 end
@@ -49,6 +54,19 @@ end
     @test cospi(0.5 .. 1.5) ⊇ interval(-1 , 0)
     @test cospi(0.25 .. 0.75) ⊇ interval(-1/sqrt(2) , 1/sqrt(2))
     @test cospi(-0.25 .. 0.25) ≛ interval(1/sqrt(2) , 1)
+end
+
+@testset "sincospi" begin
+    x = sincospi(∅)
+    @test (x[1] == ∅) & (x[2] == ∅)
+    x = sincospi(1 .. 2)
+    @test (x[1] ⊇ interval(-1 , 0)) & (x[2] ≛ interval(-1 , 1))
+    x = sincospi(0.5 .. 1.5)
+    @test (x[1] ≛ interval(-1 , 1)) & (x[2] ⊇ interval(-1 , 0))
+    x = sincospi(0.25 .. 0.75)
+    @test (x[1] ⊇ interval(1/sqrt(2) , 1)) & (x[2] ⊇ interval(-1/sqrt(2) , 1/sqrt(2)))
+    x = sincospi(-0.25 .. 0.25)
+    @test (x[1] ⊇ interval(-1/sqrt(2) , 1/sqrt(2))) & (x[2] ≛ interval(1/sqrt(2) , 1))
 end
 
 @testset "tan" begin
