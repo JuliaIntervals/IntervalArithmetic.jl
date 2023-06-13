@@ -232,19 +232,6 @@ end
 
 end
 
-@testset "@format tests" begin
-    x = interval(prevfloat(0.1), nextfloat(0.3))
-
-    @format full
-    @test sprint(show, MIME("text/plain"), x) == "Interval{Float64}(0.09999999999999999, 0.30000000000000004)"
-
-    @format standard 3
-    @test sprint(show, MIME("text/plain"), x) == "[0.0999, 0.301]"
-
-    @format standard 10
-    @test sprint(show, MIME("text/plain"), x) == "[0.09999999999, 0.3000000001]"
-end
-
 setprecision(BigFloat, 256)
 
 end

@@ -65,7 +65,7 @@ export
     PointwisePolicy,
     cancelminus, cancelplus, isbounded, isunbounded,
     pow, extended_div, nthroot,
-    setformat, @format
+    setformat
 
 if VERSION >= v"1.5.0-DEV.124"
     import Base: isdisjoint
