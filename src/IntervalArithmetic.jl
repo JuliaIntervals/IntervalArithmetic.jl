@@ -47,6 +47,8 @@ import Base.MPFR: MPFRRoundUp, MPFRRoundDown, MPFRRoundNearest, MPFRRoundToZero,
 
 import .Broadcast: broadcasted
 
+import DiffRules._abs_deriv
+
 export
     AbstractInterval, Interval,
     interval,
@@ -108,6 +110,7 @@ include("intervals/intervals.jl")
 include("multidim/multidim.jl")
 include("bisect.jl")
 include("decorations/decorations.jl")
+include("ad.jl")
 
 include("rand.jl")
 include("parsing.jl")
