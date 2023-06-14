@@ -2,6 +2,16 @@
 # Section 9.1 of the IEEE Standard 1788-2015 and required for set-based flavor
 # in Section 10.5.3
 
+# needed to prevent stack overflow
+
+rad2deg(x::Interval) = (x / π) * 180
+
+deg2rad(x::Interval) = (x * π) / 180
+
+sincospi(x::Interval) = (sinpi(x), cospi(x))
+
+#
+
 const halfpi = π / 2
 
 half_pi(::Type{T}) where {T<:NumTypes} = unsafe_scale(convert(T, 0.5), interval(T, π))
@@ -132,10 +142,7 @@ function sin(a::Interval{Float64})
     end
 end
 
-function sinpi(a::Interval{T}) where {T<:NumTypes}
-    isempty(a) && return a
-    return sin(a * interval(T, π))
-end
+sinpi(a::Interval) = sin(a * π)
 
 """
     cos(a::Interval)
@@ -225,10 +232,7 @@ function cos(a::Interval{Float64})
     end
 end
 
-function cospi(a::Interval{T}) where {T<:NumTypes}
-    isempty(a) && return a
-    return cos(a * interval(T, π))
-end
+cospi(a::Interval) = cos(a * π)
 
 """
     tan(a::Interval)
