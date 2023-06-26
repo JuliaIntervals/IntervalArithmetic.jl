@@ -30,20 +30,18 @@ are reset to the default display options.
 
 Possible options:
 - `format` can be:
-  - `:standard`: `[1, 2]`
-  - `:midpoint`: display `x::Interval` in the form "mid(x) ± radius(x)"
+  - `:standard`: `[1, 2]`.
+  - `:midpoint`: display `x::Interval` in the form "mid(x) ± radius(x)".
   - `:full`: display the entire bounds regardless of `sigdigits`.
 - `sigdigits`: number (greater or equal to 1) of significant digits to display.
 - `decorations`: display the decorations or not.
-
-See also: `@format`.
 
 # Example
 ```
 julia> x = interval(0.1, 0.3)  # Default display options
 [0.0999999, 0.300001]
 
-julia> setformat(:full)  # Equivalent to `@format full`
+julia> setformat(:full)
 Display parameters:
   - format: full
   - decorations: true
@@ -52,7 +50,7 @@ Display parameters:
 julia> x
 Interval(0.09999999999999999, 0.30000000000000004)
 
-julia> setformat(:standard; sigdigits = 3)  # Equivalent to `@format standard 3`
+julia> setformat(:standard; sigdigits = 3)
 Display parameters:
   - format: standard
   - decorations: true
@@ -74,64 +72,6 @@ function setformat(format::Symbol = display_params.format;
     display_params.sigdigits = sigdigits
 
     return display_params
-end
-
-"""
-    @format [format::Symbol] [decorations::Bool] [sigdigits::Integer]
-
-Change the format used by `show` to display intervals. These options are passed
-to the `setformat` function.
-
-Possible options:
-- `format` can be:
-    - `:standard`: `[1, 2]`
-    - `:midpoint`: display `x::Interval` in the form "mid(x) ± radius(x)"
-    - `:full`: display the entire bounds regardless of `sigdigits`.
-- `sigdigits`: number (greater or equal to 1) of significant digits to display.
-- `decorations`: display the decorations or not.
-
-See also: `setformat`.
-
-# Example
-```
-julia> x = interval(0.1, 0.3)  # Default display options
-[0.0999999, 0.300001]
-
-julia> @format full  # Equivalent to `setformat(:full)``
-Display parameters:
-  - format: full
-  - decorations: true
-  - significant digits: 6
-
-julia> x
-Interval(0.09999999999999999, 0.30000000000000004)
-
-julia> @format standard true 3  # Equivalent to `setformat(:standard; decorations = true, sigdigits = 3)`
-Display parameters:
-  - format: standard
-  - decorations: true
-  - significant digits: 3
-
-julia> x
-[0.0999, 0.301]
-```
-"""
-macro format(expr...)
-    format = Meta.quot(display_params.format)
-    decorations = display_params.decorations
-    sigdigits = display_params.sigdigits
-    for ex in expr
-        if isa(ex, Symbol)
-            format = Meta.quot(ex)
-        elseif isa(ex, Bool)
-            decorations = ex
-        elseif isa(ex, Integer)
-            sigdigits = ex
-        else
-            return :(throw(ArgumentError("Only accept arguments of type `Symbol`, `Bool` or `Int` but received $($ex)")))
-        end
-    end
-    return :(setformat($format; decorations = $decorations, sigdigits = $sigdigits))
 end
 
 # Printing mechanism for various types of intervals
