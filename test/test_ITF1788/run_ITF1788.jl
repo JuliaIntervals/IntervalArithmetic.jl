@@ -1,4 +1,4 @@
-using IntervalArithmetic, IntervalContractors
+using IntervalArithmetic
 
 include("atan2.jl")
 include("c-xsc.jl")
@@ -18,6 +18,8 @@ include("mpfi.jl")
 include("abs_rev.jl")
 
 # Need to adapt IntervalContractors for the following
+# using IntervalContractors
+#
 # include("libieeep1788_rev.jl")
 # include("libieeep1788_mul_rev.jl")
 # include("pow_rev.jl")
