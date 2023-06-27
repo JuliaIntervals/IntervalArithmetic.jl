@@ -6,6 +6,7 @@ import CRlibm
 import FastRounding
 import RoundingEmulator
 
+using Compat
 using LinearAlgebra
 using Markdown
 using StaticArrays
