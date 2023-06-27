@@ -332,11 +332,8 @@ end
         a = interval(Float32, 1e38)
         b = interval(Float32, 1e2)
         @test a * b ≛ interval(Float32, floatmax(Float32), Inf)
-        @test Interval(1.0f0) ^ Interval(1.0f0) ≛ Interval(1.0f0) # test for PR #482
+        @test interval(1.0f0) ^ interval(1.0f0) ≛ interval(1.0f0) # test for PR #482
     end
-
-
-
 end
 
 @testset "Mince for `Interval`s" begin

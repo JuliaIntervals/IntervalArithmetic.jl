@@ -361,9 +361,9 @@ end
 
     @test power_rev(interval(-10.0,-0.0), -2)[2] === emptyinterval()
 
-    @test_broken power_rev(interval(0x1.7DE3A077D1568P-8,0x1.7DE3A077D1569P-8), -2)[2] === interval(-0x1.a333333333334p+3,0x1.a333333333334p+3)
+    @test power_rev(interval(0x1.7DE3A077D1568P-8,0x1.7DE3A077D1569P-8), -2)[2] === interval(-0x1.a333333333334p+3,0x1.a333333333334p+3)
 
-    @test_broken power_rev(interval(0x1.3570290CD6E14P-26,0x1.3570290CD6E15P-26), -2)[2] === interval(-0x1.d1b251eb851edp+12,0x1.d1b251eb851edp+12)
+    @test power_rev(interval(0x1.3570290CD6E14P-26,0x1.3570290CD6E15P-26), -2)[2] === interval(-0x1.d1b251eb851edp+12,0x1.d1b251eb851edp+12)
 
     @test power_rev(interval(0x0P+0,0x0.0000000000001P-1022), -2)[2] === entireinterval()
 
@@ -384,9 +384,9 @@ end
 
     @test power_rev(interval(-0.0,-0.0), -8)[2] === emptyinterval()
 
-    @test_broken power_rev(interval(0x1.3CEF39247CA6DP-30,0x1.3CEF39247CA6EP-30), -8)[2] === interval(-0x1.a333333333334p+3,0x1.a333333333334p+3)
+    @test power_rev(interval(0x1.3CEF39247CA6DP-30,0x1.3CEF39247CA6EP-30), -8)[2] === interval(-0x1.a333333333334p+3,0x1.a333333333334p+3)
 
-    @test_broken power_rev(interval(0x1.113D9EF0A99ACP-103,0x1.113D9EF0A99ADP-103), -8)[2] === interval(-0x1.d1b251eb851edp+12,0x1.d1b251eb851edp+12)
+    @test power_rev(interval(0x1.113D9EF0A99ACP-103,0x1.113D9EF0A99ADP-103), -8)[2] === interval(-0x1.d1b251eb851edp+12,0x1.d1b251eb851edp+12)
 
     @test power_rev(interval(0x0P+0,0x0.0000000000001P-1022), -8)[2] === entireinterval()
 
@@ -434,9 +434,9 @@ end
 
     @test power_rev(interval(-0.0,-0.0), -3)[2] === emptyinterval()
 
-    @test_broken power_rev(interval(0x1.D26DF4D8B1831P-12,0x1.D26DF4D8B1832P-12), -3)[2] === interval(0x1.a333333333332p+3,0x1.a333333333334p+3)
+    @test power_rev(interval(0x1.D26DF4D8B1831P-12,0x1.D26DF4D8B1832P-12), -3)[2] === interval(0x1.a333333333332p+3,0x1.a333333333334p+3)
 
-    @test_broken power_rev(interval(-0x1.54347DED91B19P-39,-0x1.54347DED91B18P-39), -3)[2] === interval(-0x1.d1b251eb851edp+12,-0x1.d1b251eb851ebp+12)
+    @test power_rev(interval(-0x1.54347DED91B19P-39,-0x1.54347DED91B18P-39), -3)[2] === interval(-0x1.d1b251eb851edp+12,-0x1.d1b251eb851ebp+12)
 
     @test power_rev(interval(0x0P+0,0x0.0000000000001P-1022), -3)[2] === interval(0x1p+358,Inf)
 
@@ -463,13 +463,13 @@ end
 
     @test power_rev(interval(-0.0,-0.0), -7)[2] === emptyinterval()
 
-    @test_broken power_rev(interval(0x1.037D76C912DBCP-26,0x1.037D76C912DBDP-26), -7)[2] === interval(0x1.a333333333332p+3,0x1.a333333333334p+3)
+    @test power_rev(interval(0x1.037D76C912DBCP-26,0x1.037D76C912DBDP-26), -7)[2] === interval(0x1.a333333333332p+3,0x1.a333333333334p+3)
 
-    @test_broken power_rev(interval(-0x1.F10F41FB8858FP-91,-0x1.F10F41FB8858EP-91), -7)[2] === interval(-0x1.d1b251eb851edp+12,-0x1.d1b251eb851ebp+12)
+    @test power_rev(interval(-0x1.F10F41FB8858FP-91,-0x1.F10F41FB8858EP-91), -7)[2] === interval(-0x1.d1b251eb851edp+12,-0x1.d1b251eb851ebp+12)
 
-    @test power_rev(interval(0x0P+0,0x0.0000000000001P-1022), -7)[2] === interval(0x1.588cea3f093bcp+153,Inf)
+    @test_broken power_rev(interval(0x0P+0,0x0.0000000000001P-1022), -7)[2] === interval(0x1.588cea3f093bcp+153,Inf)
 
-    @test power_rev(interval(-0x0.0000000000001P-1022,-0x0P+0), -7)[2] === interval(-Inf,-0x1.588cea3f093bcp+153)
+    @test_broken power_rev(interval(-0x0.0000000000001P-1022,-0x0P+0), -7)[2] === interval(-Inf,-0x1.588cea3f093bcp+153)
 
     @test power_rev(interval(0.0,Inf), -7)[2] === interval(0.0,Inf)
 
@@ -743,9 +743,9 @@ end
 
     @test power_rev(DecoratedInterval(interval(-10.0,-0.0), def), -2)[2] === DecoratedInterval(emptyinterval(), trv)
 
-    @test_broken power_rev(DecoratedInterval(interval(0x1.7DE3A077D1568P-8,0x1.7DE3A077D1569P-8), dac), -2)[2] === DecoratedInterval(interval(-0x1.a333333333334p+3,0x1.a333333333334p+3), trv)
+    @test power_rev(DecoratedInterval(interval(0x1.7DE3A077D1568P-8,0x1.7DE3A077D1569P-8), dac), -2)[2] === DecoratedInterval(interval(-0x1.a333333333334p+3,0x1.a333333333334p+3), trv)
 
-    @test_broken power_rev(DecoratedInterval(interval(0x1.3570290CD6E14P-26,0x1.3570290CD6E15P-26), def), -2)[2] === DecoratedInterval(interval(-0x1.d1b251eb851edp+12,0x1.d1b251eb851edp+12), trv)
+    @test power_rev(DecoratedInterval(interval(0x1.3570290CD6E14P-26,0x1.3570290CD6E15P-26), def), -2)[2] === DecoratedInterval(interval(-0x1.d1b251eb851edp+12,0x1.d1b251eb851edp+12), trv)
 
     @test power_rev(DecoratedInterval(interval(0x0P+0,0x0.0000000000001P-1022), com), -2)[2] === DecoratedInterval(entireinterval(), trv)
 
@@ -766,9 +766,9 @@ end
 
     @test power_rev(DecoratedInterval(interval(-0.0,-0.0), dac), -8)[2] === DecoratedInterval(emptyinterval(), trv)
 
-    @test_broken power_rev(DecoratedInterval(interval(0x1.3CEF39247CA6DP-30,0x1.3CEF39247CA6EP-30), com), -8)[2] === DecoratedInterval(interval(-0x1.a333333333334p+3,0x1.a333333333334p+3), trv)
+    @test power_rev(DecoratedInterval(interval(0x1.3CEF39247CA6DP-30,0x1.3CEF39247CA6EP-30), com), -8)[2] === DecoratedInterval(interval(-0x1.a333333333334p+3,0x1.a333333333334p+3), trv)
 
-    @test_broken power_rev(DecoratedInterval(interval(0x1.113D9EF0A99ACP-103,0x1.113D9EF0A99ADP-103), def), -8)[2] === DecoratedInterval(interval(-0x1.d1b251eb851edp+12,0x1.d1b251eb851edp+12), trv)
+    @test power_rev(DecoratedInterval(interval(0x1.113D9EF0A99ACP-103,0x1.113D9EF0A99ADP-103), def), -8)[2] === DecoratedInterval(interval(-0x1.d1b251eb851edp+12,0x1.d1b251eb851edp+12), trv)
 
     @test power_rev(DecoratedInterval(interval(0x0P+0,0x0.0000000000001P-1022), dac), -8)[2] === DecoratedInterval(entireinterval(), trv)
 
@@ -816,9 +816,9 @@ end
 
     @test power_rev(DecoratedInterval(interval(-0.0,-0.0), dac), -3)[2] === DecoratedInterval(emptyinterval(), trv)
 
-    @test_broken power_rev(DecoratedInterval(interval(0x1.D26DF4D8B1831P-12,0x1.D26DF4D8B1832P-12), com), -3)[2] === DecoratedInterval(interval(0x1.a333333333332p+3,0x1.a333333333334p+3), trv)
+    @test power_rev(DecoratedInterval(interval(0x1.D26DF4D8B1831P-12,0x1.D26DF4D8B1832P-12), com), -3)[2] === DecoratedInterval(interval(0x1.a333333333332p+3,0x1.a333333333334p+3), trv)
 
-    @test_broken power_rev(DecoratedInterval(interval(-0x1.54347DED91B19P-39,-0x1.54347DED91B18P-39), def), -3)[2] === DecoratedInterval(interval(-0x1.d1b251eb851edp+12,-0x1.d1b251eb851ebp+12), trv)
+    @test power_rev(DecoratedInterval(interval(-0x1.54347DED91B19P-39,-0x1.54347DED91B18P-39), def), -3)[2] === DecoratedInterval(interval(-0x1.d1b251eb851edp+12,-0x1.d1b251eb851ebp+12), trv)
 
     @test power_rev(DecoratedInterval(interval(0x0P+0,0x0.0000000000001P-1022), dac), -3)[2] === DecoratedInterval(interval(0x1p+358,Inf), trv)
 
@@ -845,13 +845,13 @@ end
 
     @test power_rev(DecoratedInterval(interval(-0.0,-0.0), def), -7)[2] === DecoratedInterval(emptyinterval(), trv)
 
-    @test_broken power_rev(DecoratedInterval(interval(0x1.037D76C912DBCP-26,0x1.037D76C912DBDP-26), dac), -7)[2] === DecoratedInterval(interval(0x1.a333333333332p+3,0x1.a333333333334p+3), trv)
+    @test power_rev(DecoratedInterval(interval(0x1.037D76C912DBCP-26,0x1.037D76C912DBDP-26), dac), -7)[2] === DecoratedInterval(interval(0x1.a333333333332p+3,0x1.a333333333334p+3), trv)
 
-    @test_broken power_rev(DecoratedInterval(interval(-0x1.F10F41FB8858FP-91,-0x1.F10F41FB8858EP-91), dac), -7)[2] === DecoratedInterval(interval(-0x1.d1b251eb851edp+12,-0x1.d1b251eb851ebp+12), trv)
+    @test power_rev(DecoratedInterval(interval(-0x1.F10F41FB8858FP-91,-0x1.F10F41FB8858EP-91), dac), -7)[2] === DecoratedInterval(interval(-0x1.d1b251eb851edp+12,-0x1.d1b251eb851ebp+12), trv)
 
-    @test power_rev(DecoratedInterval(interval(0x0P+0,0x0.0000000000001P-1022), def), -7)[2] === DecoratedInterval(interval(0x1.588cea3f093bcp+153,Inf), trv)
+    @test_broken power_rev(DecoratedInterval(interval(0x0P+0,0x0.0000000000001P-1022), def), -7)[2] === DecoratedInterval(interval(0x1.588cea3f093bcp+153,Inf), trv)
 
-    @test power_rev(DecoratedInterval(interval(-0x0.0000000000001P-1022,-0x0P+0), def), -7)[2] === DecoratedInterval(interval(-Inf,-0x1.588cea3f093bcp+153), trv)
+    @test_broken power_rev(DecoratedInterval(interval(-0x0.0000000000001P-1022,-0x0P+0), def), -7)[2] === DecoratedInterval(interval(-Inf,-0x1.588cea3f093bcp+153), trv)
 
     @test power_rev(DecoratedInterval(interval(0.0,Inf), dac), -7)[2] === DecoratedInterval(interval(0.0,Inf), trv)
 
