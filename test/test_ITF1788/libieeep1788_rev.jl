@@ -20,6 +20,7 @@
 
     @test sqr_rev(interval(0.0,0x1.FFFFFFFFFFFE1P+1))[2] === interval(-0x1.ffffffffffff1p+0,0x1.ffffffffffff1p+0)
 
+
 end
 
 @testset "minimal_sqr_rev_bin_test" begin
@@ -46,6 +47,7 @@ end
 
     @test sqr_rev(interval(0.0,0x1.FFFFFFFFFFFE1P+1), interval(-0.1,Inf))[2] === interval(-0.1,0x1.ffffffffffff1p+0)
 
+
 end
 
 @testset "minimal_sqr_rev_dec_test" begin
@@ -69,6 +71,7 @@ end
     @test sqr_rev(DecoratedInterval(interval(0x1.47AE147AE147BP-7,0x1.47AE147AE147CP-7), com))[2] === DecoratedInterval(interval(-0x1.999999999999BP-4,0x1.999999999999BP-4), trv)
 
     @test sqr_rev(DecoratedInterval(interval(0.0,0x1.FFFFFFFFFFFE1P+1), def))[2] === DecoratedInterval(interval(-0x1.ffffffffffff1p+0,0x1.ffffffffffff1p+0), trv)
+
 
 end
 
@@ -96,6 +99,7 @@ end
 
     @test sqr_rev(DecoratedInterval(interval(0.0,0x1.FFFFFFFFFFFE1P+1), dac), DecoratedInterval(interval(-0.1,Inf), dac))[2] === DecoratedInterval(interval(-0.1,0x1.ffffffffffff1p+0), trv)
 
+
 end
 
 @testset "minimal_abs_rev_test" begin
@@ -115,6 +119,7 @@ end
     @test abs_rev(interval(-1.9,0.2))[2] === interval(-0.2,0.2)
 
     @test abs_rev(interval(0.0,0.2))[2] === interval(-0.2,0.2)
+
 
     @test abs_rev(interval(-1.5,Inf))[2] === entireinterval()
 
@@ -136,6 +141,7 @@ end
 
     @test abs_rev(interval(-1.9,0.2), interval(-1.1,5.0))[2] === interval(-0.2,0.2)
 
+
 end
 
 @testset "minimal_abs_rev_dec_test" begin
@@ -156,6 +162,7 @@ end
 
     @test abs_rev(DecoratedInterval(interval(0.0,0.2), def))[2] === DecoratedInterval(interval(-0.2,0.2), trv)
 
+
     @test abs_rev(DecoratedInterval(interval(-1.5,Inf), def))[2] === DecoratedInterval(entireinterval(), trv)
 
 end
@@ -175,6 +182,7 @@ end
     @test abs_rev(DecoratedInterval(interval(-1.1,0.0), def), DecoratedInterval(interval(-1.1,5.0), def))[2] === DecoratedInterval(interval(0.0,0.0), trv)
 
     @test abs_rev(DecoratedInterval(interval(-1.9,0.2), dac), DecoratedInterval(interval(-1.1,5.0), def))[2] === DecoratedInterval(interval(-0.2,0.2), trv)
+
 
 end
 
@@ -222,6 +230,7 @@ end
 
     @test power_rev(interval(-1.9,-0.33), 1)[2] === interval(-1.9,-0.33)
 
+
     @test power_rev(emptyinterval(), 2)[2] === emptyinterval()
 
     @test power_rev(interval(-5.0,-1.0), 2)[2] === emptyinterval()
@@ -248,6 +257,7 @@ end
 
     @test power_rev(interval(0x1.BE0DED288CE7P-4,0x1.CE147AE147AE1P+1), 2)[2] === interval(-0x1.e666666666667p+0,0x1.e666666666667p+0)
 
+
     @test power_rev(emptyinterval(), 8)[2] === emptyinterval()
 
     @test power_rev(entireinterval(), 8)[2] === entireinterval()
@@ -273,6 +283,7 @@ end
     @test power_rev(interval(0x1.CD2B297D889BDP-54,0x1.B253D9F33CE4DP+9), 8)[2] === interval(-0x1.2a3d70a3d70a5p+1,0x1.2a3d70a3d70a5p+1)
 
     @test power_rev(interval(0x1.26F1FCDD502A3P-13,0x1.53ABD7BFC4FC6P+7), 8)[2] === interval(-0x1.e666666666667p+0,0x1.e666666666667p+0)
+
 
     @test power_rev(emptyinterval(), 3)[2] === emptyinterval()
 
@@ -304,6 +315,7 @@ end
 
     @test power_rev(interval(-0x1.B6F9DB22D0E55P+2,-0x1.266559F6EC5B1P-5), 3)[2] === interval(-0x1.e666666666667p+0,-0x1.51eb851eb851ep-2)
 
+
     @test power_rev(emptyinterval(), 7)[2] === emptyinterval()
 
     @test power_rev(entireinterval(), 7)[2] === entireinterval()
@@ -334,6 +346,7 @@ end
 
     @test power_rev(interval(-0x1.658C775099757P+6,-0x1.BEE30301BF47AP-12), 7)[2] === interval(-0x1.e666666666667p+0,-0x1.51eb851eb851ep-2)
 
+
     @test power_rev(emptyinterval(), -2)[2] === emptyinterval()
 
     @test power_rev(interval(0.0,Inf), -2)[2] === entireinterval()
@@ -360,6 +373,7 @@ end
 
     @test power_rev(interval(0x1.1BA81104F6C8P-2,0x1.25D8FA1F801E1P+3), -2)[2] === interval(-0x1.e666666666667p+0,0x1.e666666666667p+0)
 
+
     @test power_rev(emptyinterval(), -8)[2] === emptyinterval()
 
     @test power_rev(interval(0.0,Inf), -8)[2] === entireinterval()
@@ -381,6 +395,7 @@ end
     @test power_rev(interval(0x1.2DC80DB11AB7CP-10,0x1.1C37937E08P+53), -8)[2] === interval(-0x1.2a3d70a3d70a5p+1,0x1.2a3d70a3d70a5p+1)
 
     @test power_rev(interval(0x1.81E104E61630DP-8,0x1.BC64F21560E34P+12), -8)[2] === interval(-0x1.e666666666667p+0,0x1.e666666666667p+0)
+
 
     @test power_rev(emptyinterval(), -1)[2] === emptyinterval()
 
@@ -410,6 +425,7 @@ end
 
     @test power_rev(interval(-0x1.83E0F83E0F83EP+1,-0x1.0D79435E50D79P-1), -1)[2] === interval(-0x1.e666666666667p+0,-0x1.51eb851eb851ep-2)
 
+
     @test power_rev(emptyinterval(), -3)[2] === emptyinterval()
 
     @test power_rev(entireinterval(), -3)[2] === entireinterval()
@@ -437,6 +453,7 @@ end
     @test power_rev(interval(0x1.43CFBA61AACABP-4,0x1.E848P+19), -3)[2] === interval(0x1.47ae147ae147ap-7,0x1.2a3d70a3d70a5p+1)
 
     @test power_rev(interval(-0x1.BD393CE9E8E7CP+4,-0x1.2A95F6F7C066CP-3), -3)[2] === interval(-0x1.e666666666667p+0,-0x1.51eb851eb851ep-2)
+
 
     @test power_rev(emptyinterval(), -7)[2] === emptyinterval()
 
@@ -466,6 +483,7 @@ end
 
     @test power_rev(interval(-0x1.254CDD3711DDBP+11,-0x1.6E95C4A761E19P-7), -7)[2] === interval(-0x1.e666666666667p+0,-0x1.51eb851eb851ep-2)
 
+
 end
 
 @testset "minimal_pown_rev_bin_test" begin
@@ -475,6 +493,7 @@ end
     @test power_rev(interval(1.0,1.0), interval(1.0,1.0), 0)[2] === interval(1.0,1.0)
 
     @test power_rev(interval(-1.0,5.0), interval(-51.0,12.0), 0)[2] === interval(-51.0,12.0)
+
 
     @test power_rev(interval(-1.0,0.0), interval(5.0,10.0), 0)[2] === emptyinterval()
 
@@ -487,6 +506,7 @@ end
     @test power_rev(entireinterval(), interval(-5.1,10.0), 1)[2] === interval(-5.1,10.0)
 
     @test power_rev(interval(0.0,0.0), interval(-10.0,5.1), 1)[2] === interval(0.0,0.0)
+
 
     @test power_rev(interval(-0.0,-0.0), interval(1.0,5.0), 1)[2] === emptyinterval()
 
@@ -516,6 +536,7 @@ end
 
     @test power_rev(interval(0.0,Inf), interval(-5.1,-0.1), -2)[2] === interval(-5.1,-0.1)
 
+
     @test power_rev(interval(0.0,0.0), interval(27.2,55.1), -2)[2] === emptyinterval()
 
     @test power_rev(interval(0x1.3F0C482C977C9P-17,Inf), interval(-Inf,-0x1.FFFFFFFFFFFFFp1023), -2)[2] === emptyinterval()
@@ -532,17 +553,20 @@ end
 
     @test power_rev(interval(-Inf,-0.0), interval(-1.0,1.0), -1)[2] === interval(-1.0,0.0)
 
+
     @test power_rev(interval(0x1.B77C278DBBE13P-2,0x1.9P+6), interval(-1.0,0.0), -1)[2] === emptyinterval()
 
     @test power_rev(emptyinterval(), interval(-5.1,55.5), -3)[2] === emptyinterval()
 
     @test power_rev(entireinterval(), interval(-5.1,55.5), -3)[2] === interval(-5.1,55.5)
 
+
     @test power_rev(interval(0.0,0.0), interval(-5.1,55.5), -3)[2] === emptyinterval()
 
     @test power_rev(interval(-Inf,0.0), interval(5.1,55.5), -3)[2] === emptyinterval()
 
     @test power_rev(interval(-Inf,-0.0), interval(-32.0,1.1), -3)[2] === interval(-32.0,0.0)
+
 
 end
 
@@ -590,6 +614,7 @@ end
 
     @test power_rev(DecoratedInterval(interval(-1.9,-0.33), def), 1)[2] === DecoratedInterval(interval(-1.9,-0.33), trv)
 
+
     @test power_rev(DecoratedInterval(emptyinterval(), trv), 2)[2] === DecoratedInterval(emptyinterval(), trv)
 
     @test power_rev(DecoratedInterval(interval(0.0,Inf), dac), 2)[2] === DecoratedInterval(entireinterval(), trv)
@@ -613,6 +638,7 @@ end
     @test power_rev(DecoratedInterval(interval(0x1.A36E2EB1C432CP-14,0x1.5B7318FC50482P+2), com), 2)[2] === DecoratedInterval(interval(-0x1.2a3d70a3d70a5p+1,0x1.2a3d70a3d70a5p+1), trv)
 
     @test power_rev(DecoratedInterval(interval(0x1.BE0DED288CE7P-4,0x1.CE147AE147AE1P+1), def), 2)[2] === DecoratedInterval(interval(-0x1.e666666666667p+0,0x1.e666666666667p+0), trv)
+
 
     @test power_rev(DecoratedInterval(emptyinterval(), trv), 8)[2] === DecoratedInterval(emptyinterval(), trv)
 
@@ -639,6 +665,7 @@ end
     @test power_rev(DecoratedInterval(interval(0x1.CD2B297D889BDP-54,0x1.B253D9F33CE4DP+9), com), 8)[2] === DecoratedInterval(interval(-0x1.2a3d70a3d70a5p+1,0x1.2a3d70a3d70a5p+1), trv)
 
     @test power_rev(DecoratedInterval(interval(0x1.26F1FCDD502A3P-13,0x1.53ABD7BFC4FC6P+7), dac), 8)[2] === DecoratedInterval(interval(-0x1.e666666666667p+0,0x1.e666666666667p+0), trv)
+
 
     @test power_rev(DecoratedInterval(emptyinterval(), trv), 3)[2] === DecoratedInterval(emptyinterval(), trv)
 
@@ -670,6 +697,7 @@ end
 
     @test power_rev(DecoratedInterval(interval(-0x1.B6F9DB22D0E55P+2,-0x1.266559F6EC5B1P-5), def), 3)[2] === DecoratedInterval(interval(-0x1.e666666666667p+0,-0x1.51eb851eb851ep-2), trv)
 
+
     @test power_rev(DecoratedInterval(emptyinterval(), trv), 7)[2] === DecoratedInterval(emptyinterval(), trv)
 
     @test power_rev(DecoratedInterval(entireinterval(), def), 7)[2] === DecoratedInterval(entireinterval(), trv)
@@ -700,6 +728,7 @@ end
 
     @test power_rev(DecoratedInterval(interval(-0x1.658C775099757P+6,-0x1.BEE30301BF47AP-12), def), 7)[2] === DecoratedInterval(interval(-0x1.e666666666667p+0,-0x1.51eb851eb851ep-2), trv)
 
+
     @test power_rev(DecoratedInterval(emptyinterval(), trv), -2)[2] === DecoratedInterval(emptyinterval(), trv)
 
     @test power_rev(DecoratedInterval(interval(0.0,Inf), dac), -2)[2] === DecoratedInterval(entireinterval(), trv)
@@ -726,6 +755,7 @@ end
 
     @test power_rev(DecoratedInterval(interval(0x1.1BA81104F6C8P-2,0x1.25D8FA1F801E1P+3), com), -2)[2] === DecoratedInterval(interval(-0x1.e666666666667p+0,0x1.e666666666667p+0), trv)
 
+
     @test power_rev(DecoratedInterval(emptyinterval(), trv), -8)[2] === DecoratedInterval(emptyinterval(), trv)
 
     @test power_rev(DecoratedInterval(interval(0.0,Inf), def), -8)[2] === DecoratedInterval(entireinterval(), trv)
@@ -747,6 +777,7 @@ end
     @test power_rev(DecoratedInterval(interval(0x1.2DC80DB11AB7CP-10,0x1.1C37937E08P+53), com), -8)[2] === DecoratedInterval(interval(-0x1.2a3d70a3d70a5p+1,0x1.2a3d70a3d70a5p+1), trv)
 
     @test power_rev(DecoratedInterval(interval(0x1.81E104E61630DP-8,0x1.BC64F21560E34P+12), def), -8)[2] === DecoratedInterval(interval(-0x1.e666666666667p+0,0x1.e666666666667p+0), trv)
+
 
     @test power_rev(DecoratedInterval(emptyinterval(), trv), -1)[2] === DecoratedInterval(emptyinterval(), trv)
 
@@ -776,6 +807,7 @@ end
 
     @test power_rev(DecoratedInterval(interval(-0x1.83E0F83E0F83EP+1,-0x1.0D79435E50D79P-1), com), -1)[2] === DecoratedInterval(interval(-0x1.e666666666667p+0,-0x1.51eb851eb851ep-2), trv)
 
+
     @test power_rev(DecoratedInterval(emptyinterval(), trv), -3)[2] === DecoratedInterval(emptyinterval(), trv)
 
     @test power_rev(DecoratedInterval(entireinterval(), def), -3)[2] === DecoratedInterval(entireinterval(), trv)
@@ -803,6 +835,7 @@ end
     @test power_rev(DecoratedInterval(interval(0x1.43CFBA61AACABP-4,0x1.E848P+19), com), -3)[2] === DecoratedInterval(interval(0x1.47ae147ae147ap-7,0x1.2a3d70a3d70a5p+1), trv)
 
     @test power_rev(DecoratedInterval(interval(-0x1.BD393CE9E8E7CP+4,-0x1.2A95F6F7C066CP-3), def), -3)[2] === DecoratedInterval(interval(-0x1.e666666666667p+0,-0x1.51eb851eb851ep-2), trv)
+
 
     @test power_rev(DecoratedInterval(emptyinterval(), trv), -7)[2] === DecoratedInterval(emptyinterval(), trv)
 
@@ -832,6 +865,7 @@ end
 
     @test power_rev(DecoratedInterval(interval(-0x1.254CDD3711DDBP+11,-0x1.6E95C4A761E19P-7), com), -7)[2] === DecoratedInterval(interval(-0x1.e666666666667p+0,-0x1.51eb851eb851ep-2), trv)
 
+
 end
 
 @testset "minimal_pown_rev_dec_bin_test" begin
@@ -841,6 +875,7 @@ end
     @test power_rev(DecoratedInterval(interval(1.0,1.0), dac), DecoratedInterval(interval(1.0,1.0), dac), 0)[2] === DecoratedInterval(interval(1.0,1.0), trv)
 
     @test power_rev(DecoratedInterval(interval(-1.0,5.0), def), DecoratedInterval(interval(-51.0,12.0), dac), 0)[2] === DecoratedInterval(interval(-51.0,12.0), trv)
+
 
     @test power_rev(DecoratedInterval(interval(-1.0,0.0), com), DecoratedInterval(interval(5.0,10.0), dac), 0)[2] === DecoratedInterval(emptyinterval(), trv)
 
@@ -853,6 +888,7 @@ end
     @test power_rev(DecoratedInterval(entireinterval(), def), DecoratedInterval(interval(-5.1,10.0), def), 1)[2] === DecoratedInterval(interval(-5.1,10.0), trv)
 
     @test power_rev(DecoratedInterval(interval(0.0,0.0), com), DecoratedInterval(interval(-10.0,5.1), dac), 1)[2] === DecoratedInterval(interval(0.0,0.0), trv)
+
 
     @test power_rev(DecoratedInterval(interval(-0.0,-0.0), def), DecoratedInterval(interval(1.0,5.0), dac), 1)[2] === DecoratedInterval(emptyinterval(), trv)
 
@@ -880,6 +916,7 @@ end
 
     @test power_rev(DecoratedInterval(interval(0.0,Inf), dac), DecoratedInterval(interval(-5.1,-0.1), dac), -2)[2] === DecoratedInterval(interval(-5.1,-0.1), trv)
 
+
     @test power_rev(DecoratedInterval(interval(0.0,0.0), def), DecoratedInterval(interval(27.2,55.1), dac), -2)[2] === DecoratedInterval(emptyinterval(), trv)
 
     @test power_rev(DecoratedInterval(interval(0x1.3F0C482C977C9P-17,Inf), def), DecoratedInterval(interval(-Inf,-0x1.FFFFFFFFFFFFFp1023), dac), -2)[2] === DecoratedInterval(emptyinterval(), trv)
@@ -896,17 +933,20 @@ end
 
     @test power_rev(DecoratedInterval(interval(-Inf,-0.0), dac), DecoratedInterval(interval(-1.0,1.0), com), -1)[2] === DecoratedInterval(interval(-1.0,0.0), trv)
 
+
     @test power_rev(DecoratedInterval(interval(0x1.B77C278DBBE13P-2,0x1.9P+6), def), DecoratedInterval(interval(-1.0,0.0), dac), -1)[2] === DecoratedInterval(emptyinterval(), trv)
 
     @test power_rev(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(-5.1,55.5), dac), -3)[2] === DecoratedInterval(emptyinterval(), trv)
 
     @test power_rev(DecoratedInterval(entireinterval(), def), DecoratedInterval(interval(-5.1,55.5), def), -3)[2] === DecoratedInterval(interval(-5.1,55.5), trv)
 
+
     @test power_rev(DecoratedInterval(interval(0.0,0.0), def), DecoratedInterval(interval(-5.1,55.5), def), -3)[2] === DecoratedInterval(emptyinterval(), trv)
 
     @test power_rev(DecoratedInterval(interval(-Inf,0.0), dac), DecoratedInterval(interval(5.1,55.5), com), -3)[2] === DecoratedInterval(emptyinterval(), trv)
 
     @test power_rev(DecoratedInterval(interval(-Inf,-0.0), dac), DecoratedInterval(interval(-32.0,1.1), def), -3)[2] === DecoratedInterval(interval(-32.0,0.0), trv)
+
 
 end
 
@@ -968,6 +1008,7 @@ end
 
     @test sin_rev(interval(-0x1.72CECE675D1FDP-52,-0x1.72CECE675D1FCP-52), interval(3.14,Inf))[2] === interval(0x1.921FB54442D18P+1,Inf)
 
+
 end
 
 @testset "minimal_sin_rev_dec_test" begin
@@ -1027,6 +1068,7 @@ end
     @test sin_rev(DecoratedInterval(interval(0x1.1A62633145C06P-53,0x1.1A62633145C07P-53), com), DecoratedInterval(interval(-Inf,3.15), dac))[2] === DecoratedInterval(interval(-Inf,0x1.921FB54442D19P+1), trv)
 
     @test sin_rev(DecoratedInterval(interval(-0x1.72CECE675D1FDP-52,-0x1.72CECE675D1FCP-52), com), DecoratedInterval(interval(3.14,Inf), dac))[2] === DecoratedInterval(interval(0x1.921FB54442D18P+1,Inf), trv)
+
 
 end
 
@@ -1090,6 +1132,7 @@ end
 
     @test cos_rev(interval(-0x1.72CECE675D1FDP-52,-0x1.72CECE675D1FCP-52), interval(-1.5,Inf))[2] === interval(0x1.921fb54442d19p+0,Inf)
 
+
 end
 
 @testset "minimal_cos_rev_dec_test" begin
@@ -1152,6 +1195,7 @@ end
 
     @test cos_rev(DecoratedInterval(interval(-0x1.72CECE675D1FDP-52,-0x1.72CECE675D1FCP-52), def), DecoratedInterval(interval(-1.5,Inf), dac))[2] === DecoratedInterval(interval(0x1.921fb54442d19p+0,Inf), trv)
 
+
 end
 
 @testset "minimal_tan_rev_test" begin
@@ -1189,6 +1233,7 @@ end
     @test tan_rev(interval(-0x1.D02967C31p+53,0x1.D02967C31p+53), interval(-1.5707965,1.5707965))[2] === interval(-0x1.921FB82C2BD7Fp0, +0x1.921FB82C2BD7Fp0)
 
     @test tan_rev(interval(-0x1.D02967C31CDB5P+53,0x1.D02967C31CDB5P+53), interval(-1.5707965,1.5707965))[2] === interval(-1.5707965,1.5707965)
+
 
 end
 
@@ -1228,6 +1273,7 @@ end
 
     @test tan_rev(DecoratedInterval(interval(-0x1.D02967C31CDB5P+53,0x1.D02967C31CDB5P+53), dac), DecoratedInterval(interval(-1.5707965,1.5707965), def))[2] === DecoratedInterval(interval(-1.5707965,1.5707965), trv)
 
+
 end
 
 @testset "minimal_cosh_rev_test" begin
@@ -1241,6 +1287,7 @@ end
     @test cosh_rev(interval(1.0,1.0))[2] === interval(0.0,0.0)
 
     @test cosh_rev(interval(0x1.8B07551D9F55P+0,0x1.89BCA168970C6P+432))[2] === interval(-0x1.2C903022DD7ABP+8,0x1.2C903022DD7ABP+8)
+
 
 end
 
@@ -1256,6 +1303,7 @@ end
 
     @test cosh_rev(interval(0x1.8B07551D9F55P+0,0x1.89BCA168970C6P+432), interval(-Inf,0.0))[2] === interval(-0x1.2C903022DD7ABP+8,-0x1.fffffffffffffp-1)
 
+
 end
 
 @testset "minimal_cosh_rev_dec_test" begin
@@ -1270,6 +1318,7 @@ end
 
     @test cosh_rev(DecoratedInterval(interval(0x1.8B07551D9F55P+0,0x1.89BCA168970C6P+432), com))[2] === DecoratedInterval(interval(-0x1.2C903022DD7ABP+8,0x1.2C903022DD7ABP+8), trv)
 
+
 end
 
 @testset "minimal_cosh_rev_dec_bin_test" begin
@@ -1283,6 +1332,7 @@ end
     @test cosh_rev(DecoratedInterval(interval(1.0,1.0), dac), DecoratedInterval(interval(1.0,Inf), def))[2] === DecoratedInterval(emptyinterval(), trv)
 
     @test cosh_rev(DecoratedInterval(interval(0x1.8B07551D9F55P+0,0x1.89BCA168970C6P+432), com), DecoratedInterval(interval(-Inf,0.0), dac))[2] === DecoratedInterval(interval(-0x1.2C903022DD7ABP+8,-0x1.fffffffffffffp-1), trv)
+
 
 end
 
@@ -1310,6 +1360,7 @@ end
 
     @test mul_rev_IEEE1788(interval(-Inf, 0.0), interval(-2.1, -0.4)) === interval(0.0, Inf)
 
+
     @test mul_rev_IEEE1788(interval(-Inf, 1.1), interval(-2.1, -0.4)) === entireinterval()
 
     @test mul_rev_IEEE1788(interval(-2.0, Inf), interval(-2.1, -0.4)) === entireinterval()
@@ -1322,6 +1373,7 @@ end
 
     @test mul_rev_IEEE1788(interval(-2.0, -0.1), interval(-2.1, 0.0)) === interval(0.0, 0x1.5P+4)
 
+
     @test mul_rev_IEEE1788(interval(-2.0, 0.0), interval(-2.1, 0.0)) === entireinterval()
 
     @test mul_rev_IEEE1788(interval(-2.0, 1.1), interval(-2.1, 0.0)) === entireinterval()
@@ -1333,6 +1385,7 @@ end
     @test mul_rev_IEEE1788(interval(0.0, 0.0), interval(-2.1, 0.0)) === entireinterval()
 
     @test mul_rev_IEEE1788(interval(-Inf, -0.1), interval(-2.1, 0.0)) === interval(0.0, 0x1.5P+4)
+
 
     @test mul_rev_IEEE1788(interval(-Inf, 0.0), interval(-2.1, 0.0)) === entireinterval()
 
@@ -1348,6 +1401,7 @@ end
 
     @test mul_rev_IEEE1788(interval(-2.0, -0.1), interval(-2.1, 0.12)) === interval(-0x1.3333333333333P+0, 0x1.5P+4)
 
+
     @test mul_rev_IEEE1788(interval(-2.0, 0.0), interval(-2.1, 0.12)) === entireinterval()
 
     @test mul_rev_IEEE1788(interval(-2.0, 1.1), interval(-2.1, 0.12)) === entireinterval()
@@ -1359,6 +1413,7 @@ end
     @test mul_rev_IEEE1788(interval(0.0, 0.0), interval(-2.1, 0.12)) === entireinterval()
 
     @test mul_rev_IEEE1788(interval(-Inf, -0.1), interval(-2.1, 0.12)) === interval(-0x1.3333333333333P+0, 0x1.5P+4)
+
 
     @test mul_rev_IEEE1788(interval(-Inf, 0.0), interval(-2.1, 0.12)) === entireinterval()
 
@@ -1374,6 +1429,7 @@ end
 
     @test mul_rev_IEEE1788(interval(-2.0, -0.1), interval(0.0, 0.12)) === interval(-0x1.3333333333333P+0, 0.0)
 
+
     @test mul_rev_IEEE1788(interval(-2.0, 0.0), interval(0.0, 0.12)) === entireinterval()
 
     @test mul_rev_IEEE1788(interval(-2.0, 1.1), interval(0.0, 0.12)) === entireinterval()
@@ -1385,6 +1441,7 @@ end
     @test mul_rev_IEEE1788(interval(0.0, 0.0), interval(0.0, 0.12)) === entireinterval()
 
     @test mul_rev_IEEE1788(interval(-Inf, -0.1), interval(0.0, 0.12)) === interval(-0x1.3333333333333P+0, 0.0)
+
 
     @test mul_rev_IEEE1788(interval(-Inf, 0.0), interval(0.0, 0.12)) === entireinterval()
 
@@ -1414,6 +1471,7 @@ end
 
     @test mul_rev_IEEE1788(interval(-Inf, 0.0), interval(0.01, 0.12)) === interval(-Inf, 0.0)
 
+
     @test mul_rev_IEEE1788(interval(-Inf, 1.1), interval(0.01, 0.12)) === entireinterval()
 
     @test mul_rev_IEEE1788(interval(-2.0, Inf), interval(0.01, 0.12)) === entireinterval()
@@ -1426,6 +1484,7 @@ end
 
     @test mul_rev_IEEE1788(interval(-2.0, -0.1), interval(0.0, 0.0)) === interval(0.0, 0.0)
 
+
     @test mul_rev_IEEE1788(interval(-2.0, 0.0), interval(0.0, 0.0)) === entireinterval()
 
     @test mul_rev_IEEE1788(interval(-2.0, 1.1), interval(0.0, 0.0)) === entireinterval()
@@ -1437,6 +1496,7 @@ end
     @test mul_rev_IEEE1788(interval(0.0, 0.0), interval(0.0, 0.0)) === entireinterval()
 
     @test mul_rev_IEEE1788(interval(-Inf, -0.1), interval(0.0, 0.0)) === interval(0.0, 0.0)
+
 
     @test mul_rev_IEEE1788(interval(-Inf, 0.0), interval(0.0, 0.0)) === entireinterval()
 
@@ -1466,6 +1526,7 @@ end
 
     @test mul_rev_IEEE1788(interval(-Inf, 0.0), interval(-Inf, -0.1)) === interval(0.0, Inf)
 
+
     @test mul_rev_IEEE1788(interval(-Inf, 1.1), interval(-Inf, -0.1)) === entireinterval()
 
     @test mul_rev_IEEE1788(interval(-2.0, Inf), interval(-Inf, -0.1)) === entireinterval()
@@ -1478,6 +1539,7 @@ end
 
     @test mul_rev_IEEE1788(interval(-2.0, -0.1), interval(-Inf, 0.0)) === interval(0.0, Inf)
 
+
     @test mul_rev_IEEE1788(interval(-2.0, 0.0), interval(-Inf, 0.0)) === entireinterval()
 
     @test mul_rev_IEEE1788(interval(-2.0, 1.1), interval(-Inf, 0.0)) === entireinterval()
@@ -1489,6 +1551,7 @@ end
     @test mul_rev_IEEE1788(interval(0.0, 0.0), interval(-Inf, 0.0)) === entireinterval()
 
     @test mul_rev_IEEE1788(interval(-Inf, -0.1), interval(-Inf, 0.0)) === interval(0.0, Inf)
+
 
     @test mul_rev_IEEE1788(interval(-Inf, 0.0), interval(-Inf, 0.0)) === entireinterval()
 
@@ -1504,6 +1567,7 @@ end
 
     @test mul_rev_IEEE1788(interval(-2.0, -0.1), interval(-Inf, 0.3)) === interval(-0x1.8P+1, Inf)
 
+
     @test mul_rev_IEEE1788(interval(-2.0, 0.0), interval(-Inf, 0.3)) === entireinterval()
 
     @test mul_rev_IEEE1788(interval(-2.0, 1.1), interval(-Inf, 0.3)) === entireinterval()
@@ -1515,6 +1579,7 @@ end
     @test mul_rev_IEEE1788(interval(0.0, 0.0), interval(-Inf, 0.3)) === entireinterval()
 
     @test mul_rev_IEEE1788(interval(-Inf, -0.1), interval(-Inf, 0.3)) === interval(-0x1.8P+1, Inf)
+
 
     @test mul_rev_IEEE1788(interval(-Inf, 0.0), interval(-Inf, 0.3)) === entireinterval()
 
@@ -1530,6 +1595,7 @@ end
 
     @test mul_rev_IEEE1788(interval(-2.0, -0.1), interval(-0.21, Inf)) === interval(-Inf , 0x1.0CCCCCCCCCCCDP+1)
 
+
     @test mul_rev_IEEE1788(interval(-2.0, 0.0), interval(-0.21, Inf)) === entireinterval()
 
     @test mul_rev_IEEE1788(interval(-2.0, 1.1), interval(-0.21, Inf)) === entireinterval()
@@ -1541,6 +1607,7 @@ end
     @test mul_rev_IEEE1788(interval(0.0, 0.0), interval(-0.21, Inf)) === entireinterval()
 
     @test mul_rev_IEEE1788(interval(-Inf, -0.1), interval(-0.21, Inf)) === interval(-Inf, 0x1.0CCCCCCCCCCCDP+1)
+
 
     @test mul_rev_IEEE1788(interval(-Inf, 0.0), interval(-0.21, Inf)) === entireinterval()
 
@@ -1556,6 +1623,7 @@ end
 
     @test mul_rev_IEEE1788(interval(-2.0, -0.1), interval(0.0, Inf)) === interval(-Inf, 0.0)
 
+
     @test mul_rev_IEEE1788(interval(-2.0, 0.0), interval(0.0, Inf)) === entireinterval()
 
     @test mul_rev_IEEE1788(interval(-2.0, 1.1), interval(0.0, Inf)) === entireinterval()
@@ -1567,6 +1635,7 @@ end
     @test mul_rev_IEEE1788(interval(0.0, 0.0), interval(0.0, Inf)) === entireinterval()
 
     @test mul_rev_IEEE1788(interval(-Inf, -0.1), interval(0.0, Inf)) === interval(-Inf, 0.0)
+
 
     @test mul_rev_IEEE1788(interval(-Inf, 0.0), interval(0.0, Inf)) === entireinterval()
 
@@ -1596,6 +1665,7 @@ end
 
     @test mul_rev_IEEE1788(interval(-Inf, 0.0), interval(0.04, Inf)) === interval(-Inf, 0.0)
 
+
     @test mul_rev_IEEE1788(interval(-Inf, 1.1), interval(0.04, Inf)) === entireinterval()
 
     @test mul_rev_IEEE1788(interval(-2.0, Inf), interval(0.04, Inf)) === entireinterval()
@@ -1603,6 +1673,7 @@ end
     @test mul_rev_IEEE1788(interval(0.0, Inf), interval(0.04, Inf)) === interval(0.0, Inf)
 
     @test mul_rev_IEEE1788(interval(0.01, Inf), interval(0.04, Inf)) === interval(0.0, Inf)
+
 
     @test mul_rev_IEEE1788(entireinterval(), interval(0.04, Inf)) === entireinterval()
 
@@ -1646,6 +1717,7 @@ end
 
     @test mul_rev_IEEE1788(interval(-2.0, 1.1), interval(0.04, Inf), interval(0.04, Inf)) === interval(0.04, Inf)
 
+
 end
 
 @testset "minimal_mul_rev_dec_test" begin
@@ -1670,6 +1742,7 @@ end
 
     @test mul_rev_IEEE1788(DecoratedInterval(interval(-Inf, -0.1), trv), DecoratedInterval(interval(-0.21, Inf), dac)) === DecoratedInterval(interval(-Inf, 0x1.0CCCCCCCCCCCDP+1), trv)
 
+
 end
 
 @testset "minimal_mul_rev_dec_ten_test" begin
@@ -1683,5 +1756,6 @@ end
     @test mul_rev_IEEE1788(DecoratedInterval(interval(-Inf, -0.1), dac), DecoratedInterval(interval(0.0, 0.12), com), DecoratedInterval(interval(0.0, 0.12), com)) === DecoratedInterval(interval(0.0, 0.0), trv)
 
     @test mul_rev_IEEE1788(DecoratedInterval(interval(-2.0, 1.1), def), DecoratedInterval(interval(0.04, Inf), dac), DecoratedInterval(interval(0.04, Inf), dac)) === DecoratedInterval(interval(0.04, Inf), trv)
+
 
 end

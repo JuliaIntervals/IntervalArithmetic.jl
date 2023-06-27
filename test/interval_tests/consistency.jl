@@ -264,8 +264,6 @@ import IntervalArithmetic: unsafe_interval
         @test isnan(mid(emptyinterval()))
         @test mid(entireinterval()) == 0.0
         @test isnan(mid(nai()))
-        # @test_throws InexactError nai(interval(1//2)) TODO move this test
-
         @test mid(2.125) == 2.125
         @test radius(2.125) == 0
     end

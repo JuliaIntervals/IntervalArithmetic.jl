@@ -24,6 +24,7 @@
 
     @test abs(interval(-0x123456789p-16, 0x123456799p-16)) === interval(0.0, 0x123456799p-16)
 
+
 end
 
 @testset "mpfi_acos" begin
@@ -44,6 +45,7 @@ end
 
     @test acos(interval(-1.0, 1.0)) === interval(0.0, 0x1921fb54442d19p-51)
 
+
 end
 
 @testset "mpfi_acosh" begin
@@ -57,6 +59,7 @@ end
     @test acosh(interval(1.5, 1.5)) === interval(0x1ecc2caec51609p-53, 0xf661657628b05p-52)
 
     @test acosh(interval(2.0, 1000.0)) === interval(0x544909c66010dp-50, 0x799d4ba2a13b5p-48)
+
 
 end
 
@@ -100,6 +103,7 @@ end
 
     @test +(interval(+4.0, +8.0), interval(-9.0, -8.0)) === interval(-5.0, 0.0)
 
+
 end
 
 @testset "mpfi_add_d" begin
@@ -121,6 +125,7 @@ end
     @test +(interval(-Inf, 8.0), interval(0.0, 0.0)) === interval(-Inf, 8.0)
 
     @test +(interval(-Inf, 8.0), interval(0x16345785d8a00000p0, 0x16345785d8a00000p0)) === interval(-Inf, 0x16345785d8a00100p0)
+
 
     @test +(entireinterval(), interval(-0x170ef54646d497p-105, -0x170ef54646d497p-105)) === entireinterval()
 
@@ -168,6 +173,7 @@ end
 
     @test +(interval(-0x1fffffffffffffp-52, -0x1p-550), interval(-4097.5, -4097.5)) === interval(-0x10038p-4, -0x10018p-4)
 
+
 end
 
 @testset "mpfi_asin" begin
@@ -187,6 +193,7 @@ end
     @test asin(interval(0.25, 0.625)) === interval(0x102be9ce0b87cdp-54, 0x159aad71ced00fp-53)
 
     @test asin(interval(-1.0, 1.0)) === interval(-0x1921fb54442d19p-52, 0x1921fb54442d19p-52)
+
 
 end
 
@@ -230,6 +237,7 @@ end
 
     @test asinh(interval(-42.0, 17.0)) === interval(-0x8dca6976ad6bdp-49, 0xe1be0ba541ef7p-50)
 
+
 end
 
 @testset "mpfi_atan" begin
@@ -272,6 +280,7 @@ end
 
     @test atan(interval(-42.0, 17.0)) === interval(-0x18c079f3350d27p-52, 0x1831516233f561p-52)
 
+
 end
 
 @testset "mpfi_atan2" begin
@@ -312,6 +321,7 @@ end
 
     @test atan(interval(-17.0, 5.0), interval(-4002.0, 1.0)) === interval(-0x1921fb54442d19p-51, 0x1921fb54442d19p-51)
 
+
 end
 
 @testset "mpfi_atanh" begin
@@ -333,6 +343,7 @@ end
     @test atanh(interval(-1.0, 1.0)) === entireinterval()
 
     @test atanh(interval(0.125, 1.0)) === interval(0x1015891c9eaef7p-55, +Inf)
+
 
 end
 
@@ -393,6 +404,7 @@ end
     @test cbrt(interval(-0x1856e4be527197p-354, 0xd8p0)) === interval(-0x2e5e58c0083b7bp-154, 6.0)
 
     @test cbrt(interval(0x141a9019a2184dp-1047, 0xc29c78c66ac0fp-678)) === interval(0x2b8172e535d44dp-385, 0x24cbd1c55aaa1p-258)
+
 
 end
 
@@ -490,6 +502,7 @@ end
 
     @test cos(interval(-4.0, -4.0)) === interval(-0x14eaa606db24c1p-53, -0x14eaa606db24c0p-53)
 
+
 end
 
 @testset "mpfi_cosh" begin
@@ -522,6 +535,7 @@ end
 
     @test cosh(interval(17.0, 0xb145bb71d3dbp-38)) === interval(0x1709348c0ea503p-29, 0x3ffffffffffa34p+968)
 
+
 end
 
 @testset "mpfi_cot" begin
@@ -544,6 +558,7 @@ end
 
     @test cot(interval(0.0, +3.0)) === interval(-0xe07cf2eb32f0bp-49, +Inf)
 
+
     @test cot(interval(0.0, +8.0)) === entireinterval()
 
     @test cot(interval(0.0, +Inf)) === entireinterval()
@@ -564,6 +579,7 @@ end
 
     @test cot(interval(0x13a28c59d5433bp-44, 0x9d9462ceaa19dp-43)) === interval(0x148c05d04e1fb7p-53, 0x1cefdde7c84c27p-4)
 
+
 end
 
 @testset "mpfi_coth" begin
@@ -571,6 +587,7 @@ end
     @test coth(interval(-Inf, -7.0)) === interval(-0x100001be6c882fp-52, -1.0)
 
     @test coth(interval(-Inf, 0.0)) === interval(-Inf, -1.0)
+
 
     @test coth(interval(-Inf, +8.0)) === entireinterval()
 
@@ -600,6 +617,7 @@ end
 
     @test coth(interval(0x10000000000001p-58, 0x10000000000001p-53)) === interval(0x114fc6ceb099bdp-51, 0x10005554fa502fp-46)
 
+
 end
 
 @testset "mpfi_csc" begin
@@ -623,6 +641,7 @@ end
     @test csc(interval(0.0, +1.0)) === interval(0x1303aa9620b223p-52, +Inf)
 
     @test csc(interval(0.0, 3.0)) === interval(1.0, +Inf)
+
 
     @test csc(interval(0.0, 8.0)) === entireinterval()
 
@@ -656,6 +675,7 @@ end
 
     @test csc(interval(-6.0, -6.0)) === interval(0x1ca19615f903d9p-51, 0x1ca19615f903dap-51)
 
+
     @test csc(interval(-5.0, 7.0)) === entireinterval()
 
     @test csc(interval(-5.0, 6.0)) === entireinterval()
@@ -682,6 +702,7 @@ end
 
     @test csc(interval(-5.0, -5.0)) === interval(0x10af73f9df86b7p-52, 0x10af73f9df86b8p-52)
 
+
     @test csc(interval(-4.0, 7.0)) === entireinterval()
 
     @test csc(interval(-4.0, 6.0)) === entireinterval()
@@ -706,6 +727,7 @@ end
 
     @test csc(interval(-4.0, -4.0)) === interval(0x15243e8b2f4641p-52, 0x15243e8b2f4642p-52)
 
+
     @test csc(interval(-3.0, 7.0)) === entireinterval()
 
     @test csc(interval(-3.0, 6.0)) === entireinterval()
@@ -728,6 +750,7 @@ end
 
     @test csc(interval(-3.0, -3.0)) === interval(-0x1c583c440ab0dap-50, -0x1c583c440ab0d9p-50)
 
+
     @test csc(interval(-2.0, 7.0)) === entireinterval()
 
     @test csc(interval(-2.0, 6.0)) === entireinterval()
@@ -748,6 +771,7 @@ end
 
     @test csc(interval(-2.0, -2.0)) === interval(-0x119893a272f913p-52, -0x119893a272f912p-52)
 
+
     @test csc(interval(-1.0, 7.0)) === entireinterval()
 
     @test csc(interval(-1.0, 6.0)) === entireinterval()
@@ -766,6 +790,7 @@ end
 
     @test csc(interval(-1.0, -1.0)) === interval(-0x1303aa9620b224p-52, -0x1303aa9620b223p-52)
 
+
     @test csc(interval(1.0, 7.0)) === entireinterval()
 
     @test csc(interval(1.0, 6.0)) === entireinterval()
@@ -780,6 +805,7 @@ end
 
     @test csc(interval(1.0, 1.0)) === interval(0x1303aa9620b223p-52, 0x1303aa9620b224p-52)
 
+
     @test csc(interval(2.0, 7.0)) === entireinterval()
 
     @test csc(interval(2.0, 6.0)) === entireinterval()
@@ -791,6 +817,7 @@ end
     @test csc(interval(2.0, 3.0)) === interval(0x119893a272f912p-52, 0x1c583c440ab0dap-50)
 
     @test csc(interval(2.0, 2.0)) === interval(0x119893a272f912p-52, 0x119893a272f913p-52)
+
 
     @test csc(interval(3.0, 7.0)) === entireinterval()
 
@@ -822,6 +849,7 @@ end
 
     @test csc(interval(7.0, 7.0)) === interval(+0x185a86a4ceb06cp-52, +0x185a86a4ceb06dp-52)
 
+
 end
 
 @testset "mpfi_csch" begin
@@ -829,6 +857,7 @@ end
     @test csch(interval(-Inf, -7.0)) === interval(-0x1de16d3cffcd54p-62, 0.0)
 
     @test csch(interval(-Inf, 0.0)) === interval(-Inf, 0.0)
+
 
     @test csch(interval(-Inf, +8.0)) === entireinterval()
 
@@ -858,6 +887,7 @@ end
 
     @test csch(interval(0x10000000000001p-58, 0x10000000000001p-53)) === interval(0x1eb45dc88defeap-52, 0x3fff555693e722p-48)
 
+
 end
 
 @testset "mpfi_d_div" begin
@@ -878,11 +908,13 @@ end
 
     @test /(interval(0.0, 0.0), interval(-Inf, 8.0)) === interval(0.0, 0.0)
 
+
     @test /(interval(0x16345785d8a00000p0, 0x16345785d8a00000p0), interval(-Inf, 8.0)) === entireinterval()
 
     @test /(interval(-0x170ef54646d497p-105, -0x170ef54646d497p-105), entireinterval()) === entireinterval()
 
     @test /(interval(0.0e-17, 0.0e-17), entireinterval()) === interval(0.0, 0.0)
+
 
     @test /(interval(+0x170ef54646d497p-105, +0x170ef54646d497p-105), entireinterval()) === entireinterval()
 
@@ -922,6 +954,7 @@ end
 
     @test /(interval(33.125, 33.125), interval(52.0, 54.0)) === interval(0x13a12f684bda12p-53, 0x14627627627628p-53)
 
+
 end
 
 @testset "mpfi_diam_abs" begin
@@ -953,6 +986,7 @@ end
     @test /(interval(-Inf, -7.0), interval(-1.0, +8.0)) === entireinterval()
 
     @test /(interval(-Inf, 0.0), interval(+8.0, +Inf)) === interval(-Inf, 0.0)
+
 
     @test /(interval(-Inf, +8.0), interval(0.0, +8.0)) === entireinterval()
 
@@ -1022,6 +1056,7 @@ end
 
     @test /(interval(-0xb.5b90b4d32136p-4, 0x6.e694ac6767394p+0), interval(-0xdddddddddddp0, -0xc.f459be9e80108p-4)) === interval(-0x8.85e40b3c3f63p+0, 0xe.071cbfa1de788p-4)
 
+
     @test /(interval(-0xacbp+256, 0x6f9p0), interval(-0x7p0, 0.0)) === entireinterval()
 
     @test /(interval(-0x1.25f2d73472753p+0, +0x9.9a19fd3c1fc18p-4), interval(-0x9.3b0c8074ccc18p-4, +0x4.788df5d72af78p-4)) === entireinterval()
@@ -1074,6 +1109,7 @@ end
 
     @test /(interval(0x8.440e7d65be6bp-8, 0x3.99982e9eae09ep+0), interval(0x8.29fa8d0659e48p-4, 0xc.13d2fd762e4a8p-4)) === interval(0xa.f3518768b206p-8, 0x7.0e2acad54859cp+0)
 
+
 end
 
 @testset "mpfi_div_d" begin
@@ -1093,6 +1129,7 @@ end
     @test /(interval(-Inf, 8.0), interval(0.0, 0.0)) === emptyinterval()
 
     @test /(interval(-Inf, 8.0), interval(3.0, 3.0)) === interval(-Inf, 0x15555555555556p-51)
+
 
     @test /(entireinterval(), interval(-0x170ef54646d497p-105, -0x170ef54646d497p-105)) === entireinterval()
 
@@ -1128,6 +1165,7 @@ end
 
     @test /(interval(-1.0, 0x10000000000001p-53), interval(-0x123456789abcdfp0, -0x123456789abcdfp0)) === interval(-0x1c200000000002p-106, 0x1c200000000001p-105)
 
+
 end
 
 @testset "mpfi_d_sub" begin
@@ -1149,6 +1187,7 @@ end
     @test -(interval(0.0, 0.0), interval(-Inf, 8.0)) === interval(-8.0, +Inf)
 
     @test -(interval(0x16345785d8a00000p0, 0x16345785d8a00000p0), interval(-Inf, 8.0)) === interval(0x16345785d89fff00p0, +Inf)
+
 
     @test -(interval(-0x170ef54646d497p-105, -0x170ef54646d497p-105), entireinterval()) === entireinterval()
 
@@ -1196,6 +1235,7 @@ end
 
     @test -(interval(-4097.5, -4097.5), interval(0x1p-550, 0x1fffffffffffffp-52)) === interval(-0x10038p-4, -0x10018p-4)
 
+
 end
 
 @testset "mpfi_exp" begin
@@ -1223,6 +1263,7 @@ end
     @test exp(interval(0.0, 0.25)) === interval(1.0, 0x148b5e3c3e8187p-52)
 
     @test exp(interval(0xap-47, 0xbp-47)) === interval(0x10000000000140p-52, 0x10000000000161p-52)
+
 
 end
 
@@ -1254,6 +1295,7 @@ end
 
     @test exp2(interval(0xap-47, 0xbp-47)) === interval(0x100000000000ddp-52, 0x100000000000f4p-52)
 
+
 end
 
 @testset "mpfi_expm1" begin
@@ -1281,6 +1323,7 @@ end
     @test expm1(interval(0.0, 0.25)) === interval(0.0, 0x122d78f0fa061ap-54)
 
     @test expm1(interval(0xap-47, 0xbp-47)) === interval(0x140000000000c8p-96, 0x160000000000f3p-96)
+
 
 end
 
@@ -1320,6 +1363,7 @@ end
 
     @test hypot(interval(0x1854bfb363dc39p-50, 0x19f625847a5899p-48), interval(0x1854bfb363dc39p-50, 0x19f625847a5899p-48)) === interval(0x113463fa37014dp-49, 0x125b89092b8fc0p-47)
 
+
 end
 
 @testset "mpfi_intersect" begin
@@ -1352,6 +1396,7 @@ end
 
     @test intersect(interval(0x12p0, 0x90p0), interval(-0x0dp0, 0x34p0)) === interval(0x12p0, 0x34p0)
 
+
 end
 
 @testset "mpfi_inv" begin
@@ -1359,6 +1404,7 @@ end
     @test inv(interval(-Inf, -.25)) === interval(-4.0, 0.0)
 
     @test inv(interval(-Inf, 0.0)) === interval(-Inf, 0.0)
+
 
     @test inv(interval(-Inf, +4.0)) === entireinterval()
 
@@ -1377,6 +1423,7 @@ end
     @test inv(interval(0x19f1a539c91fddp-55, +64.0)) === interval(0.015625, 0x13bc205a76b3fdp-50)
 
     @test inv(interval(-0xae83b95effd69p-52, -0x63e3cb4ed72a3p-53)) === interval(-0x1480a9b5772a23p-50, -0x177887d65484c9p-52)
+
 
 end
 
@@ -1612,6 +1659,7 @@ end
 
     @test log(interval(0x4c322657ec89bp-16, 0x4d68ba5f26bf1p-11)) === interval(0xbdee7228cfedfp-47, 0x1b3913fc99f555p-48)
 
+
 end
 
 @testset "mpfi_log1p" begin
@@ -1630,6 +1678,7 @@ end
 
     @test log1p(interval(0x4c322657ec89bp-16, 0x4d68ba5f26bf1p-11)) === interval(0x17bdce451a337fp-48, 0x1b3913fc99f6fcp-48)
 
+
 end
 
 @testset "mpfi_log2" begin
@@ -1645,6 +1694,7 @@ end
     @test log2(interval(1.0, 0x8ac74d932fae3p-21)) === interval(0.0, 0x1e1ddc27c2c70fp-48)
 
     @test log2(interval(0x4c322657ec89bp-16, 0x4d68ba5f26bf1p-11)) === interval(0x112035c9390c07p-47, 0x13a3208f61f10cp-47)
+
 
 end
 
@@ -1663,6 +1713,7 @@ end
     @test log10(interval(100.0, 0x8ac74d932fae3p-21)) === interval(2.0, 0x1221cc590b9946p-49)
 
     @test log10(interval(0x4c322657ec89bp-16, 0x4d68ba5f26bf1p-11)) === interval(0x149f1d70168f49p-49, 0x17a543a94fb65ep-49)
+
 
 end
 
@@ -1842,6 +1893,7 @@ end
 
     @test *(interval(0x3.10e8a605572p-4, 0x2.48380232f6c16p+0), interval(0xc.3d8e305214ecp-4, 0x2.9e7db05203c88p+0)) === interval(0x2.587a32d02bc04p-4, 0x5.fa216b7c20c6cp+0)
 
+
 end
 
 @testset "mpfi_mul_d" begin
@@ -1936,6 +1988,7 @@ end
 
     @test *(interval(0x10000000000001p0, 0x18888888888889p0), interval(2.125, 2.125)) === interval(0x22000000000002p0, 0x34222222222224p0)
 
+
 end
 
 @testset "mpfi_neg" begin
@@ -1956,6 +2009,7 @@ end
 
     @test -(interval(0x123456789p-16, 0x123456799p-16)) === interval(-0x123456799p-16, -0x123456789p-16)
 
+
 end
 
 @testset "mpfi_put_d" begin
@@ -1965,6 +2019,7 @@ end
     @test hull(interval(0.0, 0.0), interval(0.0, 0.0)) === interval(0.0, 0.0)
 
     @test hull(interval(+5.0, +5.0), interval(0.0, 0.0)) === interval(0.0, +5.0)
+
 
 end
 
@@ -1987,6 +2042,7 @@ end
     @test sec(interval(0.0, 0.0)) === interval(1.0, 1.0)
 
     @test sec(interval(0.0, +1.0)) === interval(1.0, 0x1d9cf0f125cc2ap-52)
+
 
     @test sec(interval(0.0, 3.0)) === entireinterval()
 
@@ -2022,6 +2078,7 @@ end
 
     @test sec(interval(-6.0, -6.0)) === interval(0x10a9e8f3e19df1p-52, 0x10a9e8f3e19df2p-52)
 
+
     @test sec(interval(-5.0, 7.0)) === entireinterval()
 
     @test sec(interval(-5.0, 6.0)) === entireinterval()
@@ -2048,6 +2105,7 @@ end
 
     @test sec(interval(-5.0, -5.0)) === interval(0x1c33db0464189ap-51, 0x1c33db0464189bp-51)
 
+
     @test sec(interval(-4.0, 7.0)) === entireinterval()
 
     @test sec(interval(-4.0, 6.0)) === entireinterval()
@@ -2072,6 +2130,7 @@ end
 
     @test sec(interval(-4.0, -4.0)) === interval(-0x187a6961d2485fp-52, -0x187a6961d2485ep-52)
 
+
     @test sec(interval(-3.0, 7.0)) === entireinterval()
 
     @test sec(interval(-3.0, 6.0)) === entireinterval()
@@ -2094,6 +2153,7 @@ end
 
     @test sec(interval(-3.0, -3.0)) === interval(-0x102967b457b246p-52, -0x102967b457b245p-52)
 
+
     @test sec(interval(-2.0, 7.0)) === entireinterval()
 
     @test sec(interval(-2.0, 6.0)) === entireinterval()
@@ -2114,6 +2174,7 @@ end
 
     @test sec(interval(-2.0, -2.0)) === interval(-0x133956fecf9e49p-51, -0x133956fecf9e48p-51)
 
+
     @test sec(interval(-1.0, 7.0)) === entireinterval()
 
     @test sec(interval(-1.0, 6.0)) === entireinterval()
@@ -2132,6 +2193,7 @@ end
 
     @test sec(interval(-1.0, -1.0)) === interval(0x1d9cf0f125cc29p-52, 0x1d9cf0f125cc2ap-52)
 
+
     @test sec(interval(1.0, 7.0)) === entireinterval()
 
     @test sec(interval(1.0, 6.0)) === entireinterval()
@@ -2146,6 +2208,7 @@ end
 
     @test sec(interval(1.0, 1.0)) === interval(0x1d9cf0f125cc29p-52, 0x1d9cf0f125cc2ap-52)
 
+
     @test sec(interval(2.0, 7.0)) === entireinterval()
 
     @test sec(interval(2.0, 6.0)) === entireinterval()
@@ -2158,6 +2221,7 @@ end
 
     @test sec(interval(2.0, 2.0)) === interval(-0x133956fecf9e49p-51, -0x133956fecf9e48p-51)
 
+
     @test sec(interval(3.0, 7.0)) === entireinterval()
 
     @test sec(interval(3.0, 6.0)) === entireinterval()
@@ -2167,6 +2231,7 @@ end
     @test sec(interval(3.0, 4.0)) === interval(-0x187a6961d2485fp-52, -1.0)
 
     @test sec(interval(3.0, 3.0)) === interval(-0x102967b457b246p-52, -0x102967b457b245p-52)
+
 
     @test sec(interval(4.0, 7.0)) === entireinterval()
 
@@ -2187,6 +2252,7 @@ end
     @test sec(interval(6.0, 6.0)) === interval(0x10a9e8f3e19df1p-52, 0x10a9e8f3e19df2p-52)
 
     @test sec(interval(7.0, 7.0)) === interval(0x153910a80e7db4p-52, 0x153910a80e7db5p-52)
+
 
 end
 
@@ -2219,6 +2285,7 @@ end
     @test sech(interval(1.0, 3.0)) === interval(0x196d8e17d88eb1p-56, 0x14bcdc50ed6be8p-53)
 
     @test sech(interval(17.0, 0xb145bb71d3dbp-38)) === interval(0x10000000000173p-1074, 0x1639e3175a6893p-76)
+
 
 end
 
@@ -2480,6 +2547,7 @@ end
 
     @test sin(interval(7.0, 7.0)) === interval(0x150608c26d0a08p-53, 0x150608c26d0a09p-53)
 
+
 end
 
 @testset "mpfi_sinh" begin
@@ -2510,6 +2578,7 @@ end
 
     @test sinh(interval(1.0, 3.0)) === interval(0x12cd9fc44eb982p-52, 0x140926e70949aep-49)
 
+
 end
 
 @testset "mpfi_sqr" begin
@@ -2536,6 +2605,7 @@ end
 
     @test interval(0x1.6b079248747a2p+0, 0x2.b041176d263f6p+0)^2 === interval(0x2.02ce7912cddf6p+0, 0x7.3a5dee779527p+0)
 
+
 end
 
 @testset "mpfi_sqrt" begin
@@ -2553,6 +2623,7 @@ end
     @test sqrt(interval(0xa.aa1p-4, 0x1.0c348f804c7a9p+0)) === interval(0xd.1p-4, 0x1.06081714eef1dp+0)
 
     @test sqrt(interval(0xe.49ae7969e41bp-4, 0x1.0c348f804c7a9p+0)) === interval(0xf.1ea42821b27a8p-4, 0x1.06081714eef1dp+0)
+
 
 end
 
@@ -2596,6 +2667,7 @@ end
 
     @test -(interval(5.0, 0x1p+70), interval(3.0, 5.0)) === interval(0.0, 0x1p+70)
 
+
 end
 
 @testset "mpfi_sub_d" begin
@@ -2617,6 +2689,7 @@ end
     @test -(interval(-Inf, 8.0), interval(0.0, 0.0)) === interval(-Inf, 8.0)
 
     @test -(interval(-Inf, 8.0), interval(0x16345785d8a00000p0, 0x16345785d8a00000p0)) === interval(-Inf, -0x16345785d89fff00p0)
+
 
     @test -(entireinterval(), interval(-0x170ef54646d497p-105, -0x170ef54646d497p-105)) === entireinterval()
 
@@ -2664,6 +2737,7 @@ end
 
     @test -(interval(-0x1fffffffffffffp-52, -0x1p-550), interval(4097.5, 4097.5)) === interval(-0x10038p-4, -0x10018p-4)
 
+
 end
 
 @testset "mpfi_tan" begin
@@ -2682,6 +2756,7 @@ end
 
     @test tan(interval(0.0, +1.0)) === interval(0.0, 0x18eb245cbee3a6p-52)
 
+
     @test tan(interval(0.0, +8.0)) === entireinterval()
 
     @test tan(interval(0.0, +Inf)) === entireinterval()
@@ -2699,6 +2774,7 @@ end
     @test tan(interval(-0.5, 0.5)) === interval(-0x117b4f5bf3474bp-53, 0x117b4f5bf3474bp-53)
 
     @test tan(interval(0x71p+76, 0x71p+76)) === interval(-0x1c8dc87ddcc134p-55, -0x1c8dc87ddcc133p-55)
+
 
     @test tan(interval(-7.0, 7.0)) === entireinterval()
 
@@ -2730,6 +2806,7 @@ end
 
     @test tan(interval(-7.0, -7.0)) === interval(-0x1be2e6e13eea79p-53, -0x1be2e6e13eea78p-53)
 
+
     @test tan(interval(-6.0, 7.0)) === entireinterval()
 
     @test tan(interval(-6.0, 6.0)) === entireinterval()
@@ -2758,6 +2835,7 @@ end
 
     @test tan(interval(-6.0, -6.0)) === interval(0x129fd86ebb95bep-54, 0x129fd86ebb95bfp-54)
 
+
     @test tan(interval(-5.0, 7.0)) === entireinterval()
 
     @test tan(interval(-5.0, 6.0)) === entireinterval()
@@ -2784,6 +2862,7 @@ end
 
     @test tan(interval(-5.0, -5.0)) === interval(0x1b0b4b739bbb06p-51, 0x1b0b4b739bbb07p-51)
 
+
     @test tan(interval(-4.0, 7.0)) === entireinterval()
 
     @test tan(interval(-4.0, 6.0)) === entireinterval()
@@ -2808,6 +2887,7 @@ end
 
     @test tan(interval(-4.0, -4.0)) === interval(-0x12866f9be4de14p-52, -0x12866f9be4de13p-52)
 
+
     @test tan(interval(-3.0, 7.0)) === entireinterval()
 
     @test tan(interval(-3.0, 6.0)) === entireinterval()
@@ -2830,6 +2910,7 @@ end
 
     @test tan(interval(-3.0, -3.0)) === interval(0x123ef71254b86fp-55, 0x123ef71254b870p-55)
 
+
     @test tan(interval(-2.0, 7.0)) === entireinterval()
 
     @test tan(interval(-2.0, 6.0)) === entireinterval()
@@ -2850,6 +2931,7 @@ end
 
     @test tan(interval(-2.0, -2.0)) === interval(0x117af62e0950f8p-51, 0x117af62e0950f9p-51)
 
+
     @test tan(interval(-1.0, 7.0)) === entireinterval()
 
     @test tan(interval(-1.0, 6.0)) === entireinterval()
@@ -2868,6 +2950,7 @@ end
 
     @test tan(interval(-1.0, -1.0)) === interval(-0x18eb245cbee3a6p-52, -0x18eb245cbee3a5p-52)
 
+
     @test tan(interval(1.0, 7.0)) === entireinterval()
 
     @test tan(interval(1.0, 6.0)) === entireinterval()
@@ -2882,6 +2965,7 @@ end
 
     @test tan(interval(1.0, 1.0)) === interval(0x18eb245cbee3a5p-52, 0x18eb245cbee3a6p-52)
 
+
     @test tan(interval(2.0, 7.0)) === entireinterval()
 
     @test tan(interval(2.0, 6.0)) === entireinterval()
@@ -2894,6 +2978,7 @@ end
 
     @test tan(interval(2.0, 2.0)) === interval(-0x117af62e0950f9p-51, -0x117af62e0950f8p-51)
 
+
     @test tan(interval(3.0, 7.0)) === entireinterval()
 
     @test tan(interval(3.0, 6.0)) === entireinterval()
@@ -2903,6 +2988,7 @@ end
     @test tan(interval(3.0, 4.0)) === interval(-0x123ef71254b870p-55, 0x12866f9be4de14p-52)
 
     @test tan(interval(3.0, 3.0)) === interval(-0x123ef71254b870p-55, -0x123ef71254b86fp-55)
+
 
     @test tan(interval(4.0, 7.0)) === entireinterval()
 
@@ -2923,6 +3009,7 @@ end
     @test tan(interval(6.0, 6.0)) === interval(-0x129fd86ebb95bfp-54, -0x129fd86ebb95bep-54)
 
     @test tan(interval(7.0, 7.0)) === interval(0x1be2e6e13eea78p-53, 0x1be2e6e13eea79p-53)
+
 
 end
 
@@ -2955,6 +3042,7 @@ end
     @test tanh(interval(1.0, 3.0)) === interval(0x185efab514f394p-53, 0x1fd77d111a0b00p-53)
 
     @test tanh(interval(17.0, 18.0)) === interval(0x1fffffffffffe1p-53, 0x1ffffffffffffcp-53)
+
 
 end
 
@@ -2989,3 +3077,4 @@ end
     @test hull(interval(0x12p0, 0x90p0), interval(-0x0dp0, 0x34p0)) === interval(-0x0dp0, 0x90p0)
 
 end
+

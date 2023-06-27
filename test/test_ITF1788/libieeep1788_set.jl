@@ -24,6 +24,7 @@ end
 
     @test intersect(DecoratedInterval(interval(1.0,3.0), dac), DecoratedInterval(entireinterval(), dac)) === DecoratedInterval(interval(1.0,3.0), trv)
 
+
 end
 
 @testset "minimal_convex_hull_test" begin
@@ -33,6 +34,7 @@ end
     @test hull(interval(1.0,1.0), interval(2.1,4.0)) === interval(1.0,4.0)
 
     @test hull(interval(1.0,3.0), emptyinterval()) === interval(1.0,3.0)
+
 
     @test hull(emptyinterval(), emptyinterval()) === emptyinterval()
 
@@ -48,8 +50,10 @@ end
 
     @test hull(DecoratedInterval(interval(1.0,3.0), trv), DecoratedInterval(emptyinterval(), trv)) === DecoratedInterval(interval(1.0,3.0), trv)
 
+
     @test hull(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(emptyinterval(), trv)) === DecoratedInterval(emptyinterval(), trv)
 
     @test hull(DecoratedInterval(interval(1.0,3.0), trv), DecoratedInterval(entireinterval(), dac)) === DecoratedInterval(entireinterval(), trv)
 
 end
+

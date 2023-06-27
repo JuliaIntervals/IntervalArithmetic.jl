@@ -75,5 +75,4 @@
     @test atan(interval(0.0, 5.0), interval(0.0, 5.0)) === interval(0x0p0, 0x1.921FB54442D19p0)
 
     @test atan(interval(-5.0, 0.0), interval(0.0, 5.0)) === interval(-0x1.921FB54442D19p0, 0x0p0)
-
 end

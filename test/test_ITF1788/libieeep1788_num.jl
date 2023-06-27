@@ -150,6 +150,7 @@ end
 
     @test mid(interval(-0x0.0000000000002P-1022,0x0.0000000000001P-1022)) === 0.0
 
+
     @test mid(interval(-0x0.0000000000001P-1022,0x0.0000000000002P-1022)) === 0.0
 
     @test mid(interval(0x1.FFFFFFFFFFFFFP+1022,0x1.FFFFFFFFFFFFFP+1023)) === 0x1.7FFFFFFFFFFFFP+1023
@@ -179,6 +180,7 @@ end
     @test mid(DecoratedInterval(interval(-Inf,1.2), trv)) === -0x1.FFFFFFFFFFFFFp1023
 
     @test mid(DecoratedInterval(interval(-0x0.0000000000002P-1022,0x0.0000000000001P-1022), trv)) === 0.0
+
 
     @test mid(DecoratedInterval(interval(-0x0.0000000000001P-1022,0x0.0000000000002P-1022), trv)) === 0.0
 
@@ -254,6 +256,7 @@ end
 
     @test midpoint_radius(interval(-0x0.0000000000002P-1022,0x0.0000000000001P-1022))[1] === 0.0 && midpoint_radius(interval(-0x0.0000000000002P-1022,0x0.0000000000001P-1022))[2] === 0x0.0000000000002P-1022
 
+
     @test midpoint_radius(interval(-0x0.0000000000001P-1022,0x0.0000000000002P-1022))[1] === 0.0 && midpoint_radius(interval(-0x0.0000000000001P-1022,0x0.0000000000002P-1022))[2] === 0x0.0000000000002P-1022
 
     @test midpoint_radius(interval(0x1.FFFFFFFFFFFFFP+1022,0x1.FFFFFFFFFFFFFP+1023))[1] === 0x1.7FFFFFFFFFFFFP+1023 && midpoint_radius(interval(0x1.FFFFFFFFFFFFFP+1022,0x1.FFFFFFFFFFFFFP+1023))[2] === 0x1.0p+1022
@@ -283,6 +286,7 @@ end
     @test midpoint_radius(DecoratedInterval(interval(-Inf, 1.2), trv))[1] === -0x1.FFFFFFFFFFFFFP+1023 && midpoint_radius(DecoratedInterval(interval(-Inf, 1.2), trv))[2] === Inf
 
     @test midpoint_radius(DecoratedInterval(interval(-0x0.0000000000002P-1022,0x0.0000000000001P-1022), trv))[1] === 0.0 && midpoint_radius(DecoratedInterval(interval(-0x0.0000000000002P-1022,0x0.0000000000001P-1022), trv))[2] === 0x0.0000000000002P-1022
+
 
     @test midpoint_radius(DecoratedInterval(interval(-0x0.0000000000001P-1022,0x0.0000000000002P-1022), trv))[1] === 0.0 && midpoint_radius(DecoratedInterval(interval(-0x0.0000000000001P-1022,0x0.0000000000002P-1022), trv))[2] === 0x0.0000000000002P-1022
 

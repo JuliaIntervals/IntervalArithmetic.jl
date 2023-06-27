@@ -34,6 +34,7 @@
 
     @test mul_rev_to_pair(interval(-2.0, -0.1), interval(-2.1, 0.0))[1] === interval(0.0, 0x1.5P+4) && mul_rev_to_pair(interval(-2.0, -0.1), interval(-2.1, 0.0))[2] === emptyinterval()
 
+
     @test mul_rev_to_pair(interval(-2.0, 0.0), interval(-2.1, 0.0))[1] === entireinterval() && mul_rev_to_pair(interval(-2.0, 0.0), interval(-2.1, 0.0))[2] === emptyinterval()
 
     @test mul_rev_to_pair(interval(-2.0, 1.1), interval(-2.1, 0.0))[1] === entireinterval() && mul_rev_to_pair(interval(-2.0, 1.1), interval(-2.1, 0.0))[2] === emptyinterval()
@@ -45,6 +46,7 @@
     @test mul_rev_to_pair(interval(0.0, 0.0), interval(-2.1, 0.0))[1] === entireinterval() && mul_rev_to_pair(interval(0.0, 0.0), interval(-2.1, 0.0))[2] === emptyinterval()
 
     @test mul_rev_to_pair(interval(-Inf, -0.1), interval(-2.1, 0.0))[1] === interval(0.0, 0x1.5P+4) && mul_rev_to_pair(interval(-Inf, -0.1), interval(-2.1, 0.0))[2] === emptyinterval()
+
 
     @test mul_rev_to_pair(interval(-Inf, 0.0), interval(-2.1, 0.0))[1] === entireinterval() && mul_rev_to_pair(interval(-Inf, 0.0), interval(-2.1, 0.0))[2] === emptyinterval()
 
@@ -60,6 +62,7 @@
 
     @test mul_rev_to_pair(interval(-2.0, -0.1), interval(-2.1, 0.12))[1] === interval(-0x1.3333333333333P+0, 0x1.5P+4) && mul_rev_to_pair(interval(-2.0, -0.1), interval(-2.1, 0.12))[2] === emptyinterval()
 
+
     @test mul_rev_to_pair(interval(-2.0, 0.0), interval(-2.1, 0.12))[1] === entireinterval() && mul_rev_to_pair(interval(-2.0, 0.0), interval(-2.1, 0.12))[2] === emptyinterval()
 
     @test mul_rev_to_pair(interval(-2.0, 1.1), interval(-2.1, 0.12))[1] === entireinterval() && mul_rev_to_pair(interval(-2.0, 1.1), interval(-2.1, 0.12))[2] === emptyinterval()
@@ -71,6 +74,7 @@
     @test mul_rev_to_pair(interval(0.0, 0.0), interval(-2.1, 0.12))[1] === entireinterval() && mul_rev_to_pair(interval(0.0, 0.0), interval(-2.1, 0.12))[2] === emptyinterval()
 
     @test mul_rev_to_pair(interval(-Inf, -0.1), interval(-2.1, 0.12))[1] === interval(-0x1.3333333333333P+0, 0x1.5P+4) && mul_rev_to_pair(interval(-Inf, -0.1), interval(-2.1, 0.12))[2] === emptyinterval()
+
 
     @test mul_rev_to_pair(interval(-Inf, 0.0), interval(-2.1, 0.12))[1] === entireinterval() && mul_rev_to_pair(interval(-Inf, 0.0), interval(-2.1, 0.12))[2] === emptyinterval()
 
@@ -86,6 +90,7 @@
 
     @test mul_rev_to_pair(interval(-2.0, -0.1), interval(0.0, 0.12))[1] === interval(-0x1.3333333333333P+0, 0.0) && mul_rev_to_pair(interval(-2.0, -0.1), interval(0.0, 0.12))[2] === emptyinterval()
 
+
     @test mul_rev_to_pair(interval(-2.0, 0.0), interval(0.0, 0.12))[1] === entireinterval() && mul_rev_to_pair(interval(-2.0, 0.0), interval(0.0, 0.12))[2] === emptyinterval()
 
     @test mul_rev_to_pair(interval(-2.0, 1.1), interval(0.0, 0.12))[1] === entireinterval() && mul_rev_to_pair(interval(-2.0, 1.1), interval(0.0, 0.12))[2] === emptyinterval()
@@ -97,6 +102,7 @@
     @test mul_rev_to_pair(interval(0.0, 0.0), interval(0.0, 0.12))[1] === entireinterval() && mul_rev_to_pair(interval(0.0, 0.0), interval(0.0, 0.12))[2] === emptyinterval()
 
     @test mul_rev_to_pair(interval(-Inf, -0.1), interval(0.0, 0.12))[1] === interval(-0x1.3333333333333P+0, 0.0) && mul_rev_to_pair(interval(-Inf, -0.1), interval(0.0, 0.12))[2] === emptyinterval()
+
 
     @test mul_rev_to_pair(interval(-Inf, 0.0), interval(0.0, 0.12))[1] === entireinterval() && mul_rev_to_pair(interval(-Inf, 0.0), interval(0.0, 0.12))[2] === emptyinterval()
 
@@ -138,6 +144,7 @@
 
     @test mul_rev_to_pair(interval(-2.0, -0.1), interval(0.0, 0.0))[1] === interval(0.0, 0.0) && mul_rev_to_pair(interval(-2.0, -0.1), interval(0.0, 0.0))[2] === emptyinterval()
 
+
     @test mul_rev_to_pair(interval(-2.0, 0.0), interval(0.0, 0.0))[1] === entireinterval() && mul_rev_to_pair(interval(-2.0, 0.0), interval(0.0, 0.0))[2] === emptyinterval()
 
     @test mul_rev_to_pair(interval(-2.0, 1.1), interval(0.0, 0.0))[1] === entireinterval() && mul_rev_to_pair(interval(-2.0, 1.1), interval(0.0, 0.0))[2] === emptyinterval()
@@ -149,6 +156,7 @@
     @test mul_rev_to_pair(interval(0.0, 0.0), interval(0.0, 0.0))[1] === entireinterval() && mul_rev_to_pair(interval(0.0, 0.0), interval(0.0, 0.0))[2] === emptyinterval()
 
     @test mul_rev_to_pair(interval(-Inf, -0.1), interval(0.0, 0.0))[1] === interval(0.0, 0.0) && mul_rev_to_pair(interval(-Inf, -0.1), interval(0.0, 0.0))[2] === emptyinterval()
+
 
     @test mul_rev_to_pair(interval(-Inf, 0.0), interval(0.0, 0.0))[1] === entireinterval() && mul_rev_to_pair(interval(-Inf, 0.0), interval(0.0, 0.0))[2] === emptyinterval()
 
@@ -190,6 +198,7 @@
 
     @test mul_rev_to_pair(interval(-2.0, -0.1), interval(-Inf, 0.0))[1] === interval(0.0, Inf) && mul_rev_to_pair(interval(-2.0, -0.1), interval(-Inf, 0.0))[2] === emptyinterval()
 
+
     @test mul_rev_to_pair(interval(-2.0, 0.0), interval(-Inf, 0.0))[1] === entireinterval() && mul_rev_to_pair(interval(-2.0, 0.0), interval(-Inf, 0.0))[2] === emptyinterval()
 
     @test mul_rev_to_pair(interval(-2.0, 1.1), interval(-Inf, 0.0))[1] === entireinterval() && mul_rev_to_pair(interval(-2.0, 1.1), interval(-Inf, 0.0))[2] === emptyinterval()
@@ -201,6 +210,7 @@
     @test mul_rev_to_pair(interval(0.0, 0.0), interval(-Inf, 0.0))[1] === entireinterval() && mul_rev_to_pair(interval(0.0, 0.0), interval(-Inf, 0.0))[2] === emptyinterval()
 
     @test mul_rev_to_pair(interval(-Inf, -0.1), interval(-Inf, 0.0))[1] === interval(0.0, Inf) && mul_rev_to_pair(interval(-Inf, -0.1), interval(-Inf, 0.0))[2] === emptyinterval()
+
 
     @test mul_rev_to_pair(interval(-Inf, 0.0), interval(-Inf, 0.0))[1] === entireinterval() && mul_rev_to_pair(interval(-Inf, 0.0), interval(-Inf, 0.0))[2] === emptyinterval()
 
@@ -216,6 +226,7 @@
 
     @test mul_rev_to_pair(interval(-2.0, -0.1), interval(-Inf, 0.3))[1] === interval(-0x1.8P+1, Inf) && mul_rev_to_pair(interval(-2.0, -0.1), interval(-Inf, 0.3))[2] === emptyinterval()
 
+
     @test mul_rev_to_pair(interval(-2.0, 0.0), interval(-Inf, 0.3))[1] === entireinterval() && mul_rev_to_pair(interval(-2.0, 0.0), interval(-Inf, 0.3))[2] === emptyinterval()
 
     @test mul_rev_to_pair(interval(-2.0, 1.1), interval(-Inf, 0.3))[1] === entireinterval() && mul_rev_to_pair(interval(-2.0, 1.1), interval(-Inf, 0.3))[2] === emptyinterval()
@@ -227,6 +238,7 @@
     @test mul_rev_to_pair(interval(0.0, 0.0), interval(-Inf, 0.3))[1] === entireinterval() && mul_rev_to_pair(interval(0.0, 0.0), interval(-Inf, 0.3))[2] === emptyinterval()
 
     @test mul_rev_to_pair(interval(-Inf, -0.1), interval(-Inf, 0.3))[1] === interval(-0x1.8P+1, Inf) && mul_rev_to_pair(interval(-Inf, -0.1), interval(-Inf, 0.3))[2] === emptyinterval()
+
 
     @test mul_rev_to_pair(interval(-Inf, 0.0), interval(-Inf, 0.3))[1] === entireinterval() && mul_rev_to_pair(interval(-Inf, 0.0), interval(-Inf, 0.3))[2] === emptyinterval()
 
@@ -242,6 +254,7 @@
 
     @test mul_rev_to_pair(interval(-2.0, -0.1), interval(-0.21, Inf))[1] === interval(-Inf , 0x1.0CCCCCCCCCCCDP+1) && mul_rev_to_pair(interval(-2.0, -0.1), interval(-0.21, Inf))[2] === emptyinterval()
 
+
     @test mul_rev_to_pair(interval(-2.0, 0.0), interval(-0.21, Inf))[1] === entireinterval() && mul_rev_to_pair(interval(-2.0, 0.0), interval(-0.21, Inf))[2] === emptyinterval()
 
     @test mul_rev_to_pair(interval(-2.0, 1.1), interval(-0.21, Inf))[1] === entireinterval() && mul_rev_to_pair(interval(-2.0, 1.1), interval(-0.21, Inf))[2] === emptyinterval()
@@ -253,6 +266,7 @@
     @test mul_rev_to_pair(interval(0.0, 0.0), interval(-0.21, Inf))[1] === entireinterval() && mul_rev_to_pair(interval(0.0, 0.0), interval(-0.21, Inf))[2] === emptyinterval()
 
     @test mul_rev_to_pair(interval(-Inf, -0.1), interval(-0.21, Inf))[1] === interval(-Inf, 0x1.0CCCCCCCCCCCDP+1) && mul_rev_to_pair(interval(-Inf, -0.1), interval(-0.21, Inf))[2] === emptyinterval()
+
 
     @test mul_rev_to_pair(interval(-Inf, 0.0), interval(-0.21, Inf))[1] === entireinterval() && mul_rev_to_pair(interval(-Inf, 0.0), interval(-0.21, Inf))[2] === emptyinterval()
 
@@ -268,6 +282,7 @@
 
     @test mul_rev_to_pair(interval(-2.0, -0.1), interval(0.0, Inf))[1] === interval(-Inf, 0.0) && mul_rev_to_pair(interval(-2.0, -0.1), interval(0.0, Inf))[2] === emptyinterval()
 
+
     @test mul_rev_to_pair(interval(-2.0, 0.0), interval(0.0, Inf))[1] === entireinterval() && mul_rev_to_pair(interval(-2.0, 0.0), interval(0.0, Inf))[2] === emptyinterval()
 
     @test mul_rev_to_pair(interval(-2.0, 1.1), interval(0.0, Inf))[1] === entireinterval() && mul_rev_to_pair(interval(-2.0, 1.1), interval(0.0, Inf))[2] === emptyinterval()
@@ -279,6 +294,7 @@
     @test mul_rev_to_pair(interval(0.0, 0.0), interval(0.0, Inf))[1] === entireinterval() && mul_rev_to_pair(interval(0.0, 0.0), interval(0.0, Inf))[2] === emptyinterval()
 
     @test mul_rev_to_pair(interval(-Inf, -0.1), interval(0.0, Inf))[1] === interval(-Inf, 0.0) && mul_rev_to_pair(interval(-Inf, -0.1), interval(0.0, Inf))[2] === emptyinterval()
+
 
     @test mul_rev_to_pair(interval(-Inf, 0.0), interval(0.0, Inf))[1] === entireinterval() && mul_rev_to_pair(interval(-Inf, 0.0), interval(0.0, Inf))[2] === emptyinterval()
 
@@ -317,6 +333,7 @@
     @test mul_rev_to_pair(interval(0.01, Inf), interval(0.04, Inf))[1] === interval(0.0, Inf) && mul_rev_to_pair(interval(0.01, Inf), interval(0.04, Inf))[2] === emptyinterval()
 
     @test mul_rev_to_pair(entireinterval(), interval(0.04, Inf))[1] === interval(-Inf, 0.0) && mul_rev_to_pair(entireinterval(), interval(0.04, Inf))[2] === interval(0.0, Inf)
+
 
     @test mul_rev_to_pair(interval(-2.0, -0.1), entireinterval())[1] === entireinterval() && mul_rev_to_pair(interval(-2.0, -0.1), entireinterval())[2] === emptyinterval()
 
@@ -388,6 +405,7 @@ end
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-2.0, -0.1), dac), DecoratedInterval(interval(-2.1, 0.0), com))[1] === DecoratedInterval(interval(0.0, 0x1.5P+4), dac) && mul_rev_to_pair(DecoratedInterval(interval(-2.0, -0.1), dac), DecoratedInterval(interval(-2.1, 0.0), com))[2] === DecoratedInterval(emptyinterval(), trv)
 
+
     @test mul_rev_to_pair(DecoratedInterval(interval(-2.0, 0.0), dac), DecoratedInterval(interval(-2.1, 0.0), com))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(-2.0, 0.0), dac), DecoratedInterval(interval(-2.1, 0.0), com))[2] === DecoratedInterval(emptyinterval(), trv)
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-2.0, 1.1), dac), DecoratedInterval(interval(-2.1, 0.0), com))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(-2.0, 1.1), dac), DecoratedInterval(interval(-2.1, 0.0), com))[2] === DecoratedInterval(emptyinterval(), trv)
@@ -399,6 +417,7 @@ end
     @test mul_rev_to_pair(DecoratedInterval(interval(0.0, 0.0), dac), DecoratedInterval(interval(-2.1, 0.0), com))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(0.0, 0.0), dac), DecoratedInterval(interval(-2.1, 0.0), com))[2] === DecoratedInterval(emptyinterval(), trv)
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-Inf, -0.1), dac), DecoratedInterval(interval(-2.1, 0.0), com))[1] === DecoratedInterval(interval(0.0, 0x1.5P+4), dac) && mul_rev_to_pair(DecoratedInterval(interval(-Inf, -0.1), dac), DecoratedInterval(interval(-2.1, 0.0), com))[2] === DecoratedInterval(emptyinterval(), trv)
+
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-Inf, 0.0), dac), DecoratedInterval(interval(-2.1, 0.0), com))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(-Inf, 0.0), dac), DecoratedInterval(interval(-2.1, 0.0), com))[2] === DecoratedInterval(emptyinterval(), trv)
 
@@ -414,6 +433,7 @@ end
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-2.0, -0.1), def), DecoratedInterval(interval(-2.1, 0.12), dac))[1] === DecoratedInterval(interval(-0x1.3333333333333P+0, 0x1.5P+4), def) && mul_rev_to_pair(DecoratedInterval(interval(-2.0, -0.1), def), DecoratedInterval(interval(-2.1, 0.12), dac))[2] === DecoratedInterval(emptyinterval(), trv)
 
+
     @test mul_rev_to_pair(DecoratedInterval(interval(-2.0, 0.0), def), DecoratedInterval(interval(-2.1, 0.12), dac))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(-2.0, 0.0), def), DecoratedInterval(interval(-2.1, 0.12), dac))[2] === DecoratedInterval(emptyinterval(), trv)
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-2.0, 1.1), def), DecoratedInterval(interval(-2.1, 0.12), dac))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(-2.0, 1.1), def), DecoratedInterval(interval(-2.1, 0.12), dac))[2] === DecoratedInterval(emptyinterval(), trv)
@@ -425,6 +445,7 @@ end
     @test mul_rev_to_pair(DecoratedInterval(interval(0.0, 0.0), def), DecoratedInterval(interval(-2.1, 0.12), dac))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(0.0, 0.0), def), DecoratedInterval(interval(-2.1, 0.12), dac))[2] === DecoratedInterval(emptyinterval(), trv)
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-Inf, -0.1), def), DecoratedInterval(interval(-2.1, 0.12), dac))[1] === DecoratedInterval(interval(-0x1.3333333333333P+0, 0x1.5P+4), def) && mul_rev_to_pair(DecoratedInterval(interval(-Inf, -0.1), def), DecoratedInterval(interval(-2.1, 0.12), dac))[2] === DecoratedInterval(emptyinterval(), trv)
+
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-Inf, 0.0), def), DecoratedInterval(interval(-2.1, 0.12), dac))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(-Inf, 0.0), def), DecoratedInterval(interval(-2.1, 0.12), dac))[2] === DecoratedInterval(emptyinterval(), trv)
 
@@ -440,6 +461,7 @@ end
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-2.0, -0.1), com), DecoratedInterval(interval(0.0, 0.12), com))[1] === DecoratedInterval(interval(-0x1.3333333333333P+0, 0.0), com) && mul_rev_to_pair(DecoratedInterval(interval(-2.0, -0.1), com), DecoratedInterval(interval(0.0, 0.12), com))[2] === DecoratedInterval(emptyinterval(), trv)
 
+
     @test mul_rev_to_pair(DecoratedInterval(interval(-2.0, 0.0), com), DecoratedInterval(interval(0.0, 0.12), com))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(-2.0, 0.0), com), DecoratedInterval(interval(0.0, 0.12), com))[2] === DecoratedInterval(emptyinterval(), trv)
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-2.0, 1.1), com), DecoratedInterval(interval(0.0, 0.12), com))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(-2.0, 1.1), com), DecoratedInterval(interval(0.0, 0.12), com))[2] === DecoratedInterval(emptyinterval(), trv)
@@ -451,6 +473,7 @@ end
     @test mul_rev_to_pair(DecoratedInterval(interval(0.0, 0.0), com), DecoratedInterval(interval(0.0, 0.12), com))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(0.0, 0.0), com), DecoratedInterval(interval(0.0, 0.12), com))[2] === DecoratedInterval(emptyinterval(), trv)
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-Inf, -0.1), dac), DecoratedInterval(interval(0.0, 0.12), com))[1] === DecoratedInterval(interval(-0x1.3333333333333P+0, 0.0), dac) && mul_rev_to_pair(DecoratedInterval(interval(-Inf, -0.1), dac), DecoratedInterval(interval(0.0, 0.12), com))[2] === DecoratedInterval(emptyinterval(), trv)
+
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-Inf, 0.0), dac), DecoratedInterval(interval(0.0, 0.12), com))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(-Inf, 0.0), dac), DecoratedInterval(interval(0.0, 0.12), com))[2] === DecoratedInterval(emptyinterval(), trv)
 
@@ -492,6 +515,7 @@ end
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-2.0, -0.1), com), DecoratedInterval(interval(0.0, 0.0), com))[1] === DecoratedInterval(interval(0.0, 0.0), com) && mul_rev_to_pair(DecoratedInterval(interval(-2.0, -0.1), com), DecoratedInterval(interval(0.0, 0.0), com))[2] === DecoratedInterval(emptyinterval(), trv)
 
+
     @test mul_rev_to_pair(DecoratedInterval(interval(-2.0, 0.0), com), DecoratedInterval(interval(0.0, 0.0), com))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(-2.0, 0.0), com), DecoratedInterval(interval(0.0, 0.0), com))[2] === DecoratedInterval(emptyinterval(), trv)
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-2.0, 1.1), com), DecoratedInterval(interval(0.0, 0.0), com))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(-2.0, 1.1), com), DecoratedInterval(interval(0.0, 0.0), com))[2] === DecoratedInterval(emptyinterval(), trv)
@@ -503,6 +527,7 @@ end
     @test mul_rev_to_pair(DecoratedInterval(interval(0.0, 0.0), com), DecoratedInterval(interval(0.0, 0.0), com))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(0.0, 0.0), com), DecoratedInterval(interval(0.0, 0.0), com))[2] === DecoratedInterval(emptyinterval(), trv)
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-Inf, -0.1), dac), DecoratedInterval(interval(0.0, 0.0), com))[1] === DecoratedInterval(interval(0.0, 0.0), dac) && mul_rev_to_pair(DecoratedInterval(interval(-Inf, -0.1), dac), DecoratedInterval(interval(0.0, 0.0), com))[2] === DecoratedInterval(emptyinterval(), trv)
+
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-Inf, 0.0), dac), DecoratedInterval(interval(0.0, 0.0), com))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(-Inf, 0.0), dac), DecoratedInterval(interval(0.0, 0.0), com))[2] === DecoratedInterval(emptyinterval(), trv)
 
@@ -544,6 +569,7 @@ end
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-2.0, -0.1), dac), DecoratedInterval(interval(-Inf, 0.0), dac))[1] === DecoratedInterval(interval(0.0, Inf), dac) && mul_rev_to_pair(DecoratedInterval(interval(-2.0, -0.1), dac), DecoratedInterval(interval(-Inf, 0.0), dac))[2] === DecoratedInterval(emptyinterval(), trv)
 
+
     @test mul_rev_to_pair(DecoratedInterval(interval(-2.0, 0.0), dac), DecoratedInterval(interval(-Inf, 0.0), dac))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(-2.0, 0.0), dac), DecoratedInterval(interval(-Inf, 0.0), dac))[2] === DecoratedInterval(emptyinterval(), trv)
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-2.0, 1.1), dac), DecoratedInterval(interval(-Inf, 0.0), dac))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(-2.0, 1.1), dac), DecoratedInterval(interval(-Inf, 0.0), dac))[2] === DecoratedInterval(emptyinterval(), trv)
@@ -555,6 +581,7 @@ end
     @test mul_rev_to_pair(DecoratedInterval(interval(0.0, 0.0), dac), DecoratedInterval(interval(-Inf, 0.0), dac))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(0.0, 0.0), dac), DecoratedInterval(interval(-Inf, 0.0), dac))[2] === DecoratedInterval(emptyinterval(), trv)
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-Inf, -0.1), dac), DecoratedInterval(interval(-Inf, 0.0), dac))[1] === DecoratedInterval(interval(0.0, Inf), dac) && mul_rev_to_pair(DecoratedInterval(interval(-Inf, -0.1), dac), DecoratedInterval(interval(-Inf, 0.0), dac))[2] === DecoratedInterval(emptyinterval(), trv)
+
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-Inf, 0.0), dac), DecoratedInterval(interval(-Inf, 0.0), dac))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(-Inf, 0.0), dac), DecoratedInterval(interval(-Inf, 0.0), dac))[2] === DecoratedInterval(emptyinterval(), trv)
 
@@ -570,6 +597,7 @@ end
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-2.0, -0.1), dac), DecoratedInterval(interval(-Inf, 0.3), dac))[1] === DecoratedInterval(interval(-0x1.8P+1, Inf), dac) && mul_rev_to_pair(DecoratedInterval(interval(-2.0, -0.1), dac), DecoratedInterval(interval(-Inf, 0.3), dac))[2] === DecoratedInterval(emptyinterval(), trv)
 
+
     @test mul_rev_to_pair(DecoratedInterval(interval(-2.0, 0.0), dac), DecoratedInterval(interval(-Inf, 0.3), dac))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(-2.0, 0.0), dac), DecoratedInterval(interval(-Inf, 0.3), dac))[2] === DecoratedInterval(emptyinterval(), trv)
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-2.0, 1.1), dac), DecoratedInterval(interval(-Inf, 0.3), dac))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(-2.0, 1.1), dac), DecoratedInterval(interval(-Inf, 0.3), dac))[2] === DecoratedInterval(emptyinterval(), trv)
@@ -581,6 +609,7 @@ end
     @test mul_rev_to_pair(DecoratedInterval(interval(0.0, 0.0), dac), DecoratedInterval(interval(-Inf, 0.3), dac))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(0.0, 0.0), dac), DecoratedInterval(interval(-Inf, 0.3), dac))[2] === DecoratedInterval(emptyinterval(), trv)
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-Inf, -0.1), dac), DecoratedInterval(interval(-Inf, 0.3), dac))[1] === DecoratedInterval(interval(-0x1.8P+1, Inf), dac) && mul_rev_to_pair(DecoratedInterval(interval(-Inf, -0.1), dac), DecoratedInterval(interval(-Inf, 0.3), dac))[2] === DecoratedInterval(emptyinterval(), trv)
+
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-Inf, 0.0), dac), DecoratedInterval(interval(-Inf, 0.3), dac))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(-Inf, 0.0), dac), DecoratedInterval(interval(-Inf, 0.3), dac))[2] === DecoratedInterval(emptyinterval(), trv)
 
@@ -596,6 +625,7 @@ end
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-2.0, -0.1), dac), DecoratedInterval(interval(-0.21, Inf), dac))[1] === DecoratedInterval(interval(-Inf , 0x1.0CCCCCCCCCCCDP+1), dac) && mul_rev_to_pair(DecoratedInterval(interval(-2.0, -0.1), dac), DecoratedInterval(interval(-0.21, Inf), dac))[2] === DecoratedInterval(emptyinterval(), trv)
 
+
     @test mul_rev_to_pair(DecoratedInterval(interval(-2.0, 0.0), dac), DecoratedInterval(interval(-0.21, Inf), dac))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(-2.0, 0.0), dac), DecoratedInterval(interval(-0.21, Inf), dac))[2] === DecoratedInterval(emptyinterval(), trv)
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-2.0, 1.1), dac), DecoratedInterval(interval(-0.21, Inf), dac))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(-2.0, 1.1), dac), DecoratedInterval(interval(-0.21, Inf), dac))[2] === DecoratedInterval(emptyinterval(), trv)
@@ -607,6 +637,7 @@ end
     @test mul_rev_to_pair(DecoratedInterval(interval(0.0, 0.0), dac), DecoratedInterval(interval(-0.21, Inf), dac))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(0.0, 0.0), dac), DecoratedInterval(interval(-0.21, Inf), dac))[2] === DecoratedInterval(emptyinterval(), trv)
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-Inf, -0.1), dac), DecoratedInterval(interval(-0.21, Inf), dac))[1] === DecoratedInterval(interval(-Inf, 0x1.0CCCCCCCCCCCDP+1), dac) && mul_rev_to_pair(DecoratedInterval(interval(-Inf, -0.1), dac), DecoratedInterval(interval(-0.21, Inf), dac))[2] === DecoratedInterval(emptyinterval(), trv)
+
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-Inf, 0.0), dac), DecoratedInterval(interval(-0.21, Inf), dac))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(-Inf, 0.0), dac), DecoratedInterval(interval(-0.21, Inf), dac))[2] === DecoratedInterval(emptyinterval(), trv)
 
@@ -622,6 +653,7 @@ end
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-2.0, -0.1), dac), DecoratedInterval(interval(0.0, Inf), dac))[1] === DecoratedInterval(interval(-Inf, 0.0), dac) && mul_rev_to_pair(DecoratedInterval(interval(-2.0, -0.1), dac), DecoratedInterval(interval(0.0, Inf), dac))[2] === DecoratedInterval(emptyinterval(), trv)
 
+
     @test mul_rev_to_pair(DecoratedInterval(interval(-2.0, 0.0), dac), DecoratedInterval(interval(0.0, Inf), dac))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(-2.0, 0.0), dac), DecoratedInterval(interval(0.0, Inf), dac))[2] === DecoratedInterval(emptyinterval(), trv)
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-2.0, 1.1), dac), DecoratedInterval(interval(0.0, Inf), dac))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(-2.0, 1.1), dac), DecoratedInterval(interval(0.0, Inf), dac))[2] === DecoratedInterval(emptyinterval(), trv)
@@ -633,6 +665,7 @@ end
     @test mul_rev_to_pair(DecoratedInterval(interval(0.0, 0.0), dac), DecoratedInterval(interval(0.0, Inf), dac))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(0.0, 0.0), dac), DecoratedInterval(interval(0.0, Inf), dac))[2] === DecoratedInterval(emptyinterval(), trv)
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-Inf, -0.1), dac), DecoratedInterval(interval(0.0, Inf), dac))[1] === DecoratedInterval(interval(-Inf, 0.0), dac) && mul_rev_to_pair(DecoratedInterval(interval(-Inf, -0.1), dac), DecoratedInterval(interval(0.0, Inf), dac))[2] === DecoratedInterval(emptyinterval(), trv)
+
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-Inf, 0.0), dac), DecoratedInterval(interval(0.0, Inf), dac))[1] === DecoratedInterval(entireinterval(), trv) && mul_rev_to_pair(DecoratedInterval(interval(-Inf, 0.0), dac), DecoratedInterval(interval(0.0, Inf), dac))[2] === DecoratedInterval(emptyinterval(), trv)
 
@@ -671,6 +704,7 @@ end
     @test mul_rev_to_pair(DecoratedInterval(interval(0.01, Inf), dac), DecoratedInterval(interval(0.04, Inf), dac))[1] === DecoratedInterval(interval(0.0, Inf), dac) && mul_rev_to_pair(DecoratedInterval(interval(0.01, Inf), dac), DecoratedInterval(interval(0.04, Inf), dac))[2] === DecoratedInterval(emptyinterval(), trv)
 
     @test mul_rev_to_pair(DecoratedInterval(entireinterval(), dac), DecoratedInterval(interval(0.04, Inf), dac))[1] === DecoratedInterval(interval(-Inf, 0.0), trv) && mul_rev_to_pair(DecoratedInterval(entireinterval(), dac), DecoratedInterval(interval(0.04, Inf), dac))[2] === DecoratedInterval(interval(0.0, Inf), trv)
+
 
     @test mul_rev_to_pair(DecoratedInterval(interval(-2.0, -0.1), dac), DecoratedInterval(entireinterval(), dac))[1] === DecoratedInterval(entireinterval(), dac) && mul_rev_to_pair(DecoratedInterval(interval(-2.0, -0.1), dac), DecoratedInterval(entireinterval(), dac))[2] === DecoratedInterval(emptyinterval(), trv)
 

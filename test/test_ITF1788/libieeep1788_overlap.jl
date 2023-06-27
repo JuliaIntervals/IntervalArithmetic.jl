@@ -48,6 +48,7 @@
     @test overlap(interval(0.0,2.0), interval(1.0,2.0)) === Overlap.finished_by
     @test overlap(interval(0.0,2.0), interval(2.0,2.0)) === Overlap.finished_by
 
+
 end
 
 @testset "minimal_overlap_dec_test" begin
@@ -80,6 +81,7 @@ end
     @test overlap(DecoratedInterval(interval(0.0,3.0), com), DecoratedInterval(interval(2.0,2.0), def)) === Overlap.contains
     @test overlap(DecoratedInterval(interval(0.0,2.0), def), DecoratedInterval(interval(1.0,2.0), trv)) === Overlap.finished_by
     @test overlap(DecoratedInterval(interval(0.0,2.0), dac), DecoratedInterval(interval(2.0,2.0), def)) === Overlap.finished_by
+
 
 end
 

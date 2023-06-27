@@ -11,7 +11,6 @@
     @test -(interval(10.0, 20.0)) === interval(-20.0, -10.0)
 
     @test +(interval(10.0, 20.0)) === interval(10.0, 20.0)
-
 end
 
 @testset "cxsc.intervalmuldiv" begin
@@ -77,7 +76,6 @@ end
     @test /(interval(-2.0, 1.0), interval(-8.0, -4.0)) === interval(-0.25, 0.5)
 
     @test /(interval(-2.0, -1.0), interval(-8.0, -4.0)) === interval(0.125, 0.5)
-
 end
 
 @testset "cxsc.intervalsetops" begin
