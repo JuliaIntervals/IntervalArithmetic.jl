@@ -373,3 +373,21 @@ function nthroot(a::Interval{T}, n::Integer) where T
     b = nthroot(bigequiv(a), n)
     return convert(Interval{T}, b)
 end
+
+"""
+Calculate `x::Interval mod y::Real` where y != zero(y) and y is not inteval`.
+"""
+function mod(x::Interval, y::Real)
+    @assert y != zero(y) """mod(x::Interval, y::Real) 
+is currently implemented only for a strictly positive or negative divisor y."""
+    division = x / y
+    fl = floor(division)
+    if !isthin(fl)
+        return y > zero(y) ? Interval(zero(y), y) : Interval(y, zero(y))
+    else
+        return y * (division - fl)
+    end
+end
+
+mod(x::Interval, y::Interval) = throw(ArgumentError("mod not defined for interval as divisor `y`"))
+mod(x::Real, y::Interval) = throw(ArgumentError("mod not defined for interval as divisor `y`"))

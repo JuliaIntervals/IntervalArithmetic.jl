@@ -22,6 +22,7 @@ import Base:
     in, zero, one, eps, typemin, typemax, abs, abs2, real, min, max,
     sqrt, exp, log, sin, cos, tan, cot, inv, cbrt, csc, hypot, sec,
     exp2, exp10, log2, log10,
+    mod,
     asin, acos, atan,
     sinh, cosh, tanh, coth, csch, sech, asinh, acosh, atanh, sinpi, cospi,
     union, intersect, isempty,
