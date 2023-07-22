@@ -42,7 +42,7 @@ function precedes(a::Interval, b::Interval)
 end
 const ≼ = precedes # \preccurlyeq
 
-# strictpreceds
+# strictprecedes
 function strictprecedes(a::Interval, b::Interval)
     (isempty(a) || isempty(b)) && return true
     # islessprime(a.hi, b.lo)
@@ -361,7 +361,7 @@ end
     signbit(x::Interval)
 
 Returns an interval containing `true` (`1`) if the value of the sign of any element in `x` is negative, containing `false` (`0`)
-if any element in `x` is non-negative, and an empy interval if `x` is empty.
+if any element in `x` is non-negative, and an empty interval if `x` is empty.
 
 # Examples
 ```jldoctest
@@ -402,7 +402,7 @@ const RoundTiesToAway = RoundNearestTiesAway
 """
     round(a::Interval[, RoundingMode])
 
-Returns the interval with rounded to an interger limits.
+Returns the interval with rounded to an integer limits.
 
 For compliance with the IEEE Std 1788-2015, "roundTiesToEven" corresponds
 to `round(a)` or `round(a, RoundNearest)`, and "roundTiesToAway"
@@ -437,7 +437,7 @@ Assumes 0 ≤ α ≤ 1.
 Warning: if the parameter `α = 0.5` is explicitly set, the behavior differs
 from the default case if the provided `Interval` is not finite, since when
 `α` is provided `mid` simply replaces `+∞` (respectively `-∞`) by `prevfloat(+∞)`
-(respecively `nextfloat(-∞)`) for the computation of the intermediate point.
+(respectively `nextfloat(-∞)`) for the computation of the intermediate point.
 """
 function mid(a::Interval{T}, α) where T
 

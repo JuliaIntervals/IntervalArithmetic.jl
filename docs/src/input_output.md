@@ -73,7 +73,7 @@
     'u'   Returns the interval with midpoint as lower bound and radius taken in upward direction.
     'C'   Returns upper case for Empty, Entire and Nai
     'c'   Returns lower case for Empty, Entire and Nai
-    '+'   Returns postitve numbers with '+' sign before the number
+    '+'   Returns positive numbers with '+' sign before the number
     '0'   Left-pads the numbers with zeros instead of spaces within the field width
 
   - The field width specifies the length of midpoint string.
