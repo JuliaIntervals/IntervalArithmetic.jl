@@ -375,7 +375,7 @@ function nthroot(a::Interval{T}, n::Integer) where T
 end
 
 """
-Calculate `x::Interval mod y::Real` where y != zero(y) and y is not inteval`.
+Calculate `x::Interval mod y::Real` where y != zero(y) and y is not interval`.
 """
 function mod(x::Interval, y::Real)
     @assert y != zero(y) """mod(x::Interval, y::Real) 

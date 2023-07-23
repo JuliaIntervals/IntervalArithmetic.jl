@@ -44,7 +44,7 @@ function sin(a::Interval{T}) where T
 
     diam(a) > two_pi(T).lo && return whole_range
 
-    # The following is equiavlent to doing temp = a / half_pi  and
+    # The following is equivalent to doing temp = a / half_pi  and
     # taking floor(a.lo), floor(a.hi)
     lo_quadrant = minimum(find_quadrants(a.lo))
     hi_quadrant = maximum(find_quadrants(a.hi))
