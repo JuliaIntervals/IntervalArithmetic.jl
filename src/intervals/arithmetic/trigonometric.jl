@@ -64,7 +64,7 @@ function sin(a::Interval{T}) where {T<:NumTypes}
 
     diam(a) > inf(two_pi(T)) && return whole_range
 
-    # The following is equiavlent to doing temp = a / half_pi  and
+    # The following is equivalent to doing temp = a / half_pi  and
     # taking floor(inf(a)), floor(sup(a))
     alo, ahi = bounds(a)
     lo_quadrant = minimum(find_quadrants(T, alo))
