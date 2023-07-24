@@ -4,7 +4,7 @@ using IntervalArithmetic
 @testset "brodcasting tests" begin
     a = 3
     b = 12
-    x = a..b
+    x = interval(a, b)
 
     for i in 1:20
         @test x.-i ≛ interval(a-i, b-i)
@@ -17,7 +17,7 @@ using IntervalArithmetic
 
     a = 4
     b = 5
-    y = a..b
+    y = interval(a, b)
     for i in 1:20
         @test y.+i ≛ interval(a+i, b+i)
     end
@@ -66,30 +66,30 @@ end
     @test extended_div(interval( 0.0, 1.0), interval(0.0,1.0)) ≛ (entireinterval(c), emptyinterval(c))
     @test extended_div(interval(-1.0, 1.0), interval(0.0,1.0)) ≛ (entireinterval(c), emptyinterval(c))
     @test extended_div(interval(-1.0, 1.0), interval(-1.0,1.0)) ≛ (entireinterval(c), emptyinterval(c))
-    @test extended_div(interval(1.0, 2.0), interval(-4.0, 4.0)) ≛ ((-∞.. -0.25), (0.25..∞))
-    @test extended_div(interval(-2.0, -1.0), interval(-2.0, 4.0)) ≛ ((-∞.. -0.25), (0.5..∞))
+    @test extended_div(interval(1.0, 2.0), interval(-4.0, 4.0)) ≛ (interval(-Inf, -0.25), interval(0.25, Inf))
+    @test extended_div(interval(-2.0, -1.0), interval(-2.0, 4.0)) ≛ (interval(-Inf, -0.25), interval(0.5, Inf))
     @test extended_div(interval(0.0, 0.0), interval(-1.0, 1.0)) ≛ (entireinterval(c), emptyinterval(c))
 
-    @test (0..∞) * (-1..∞) ≛ -∞..∞
+    @test interval(0, Inf) * interval(-1, Inf) ≛ interval(-Inf, Inf)
 end
 
 @testset "Arithmetic with constants" begin
-    x = 1..2
+    x = interval(1, 2)
 
     @test 0.1 + x ≛ interval(1.0999999999999999, 2.1)
-    @test 3.0 - x ≛ 1..2
+    @test 3.0 - x ≛ x
     @test 3.1 - x ≛ interval(1.1, 2.1)
-    @test 0.1 * (1..1) ≛ interval(0.1, 0.1)
-    @test (1..1) / 10.0 ≛ interval(0.09999999999999999, 0.1)
+    @test 0.1 * interval(1) ≛ interval(0.1, 0.1)
+    @test interval(1) / 10.0 ≛ interval(0.09999999999999999, 0.1)
 end
 
 @testset "Arithmetic with irrational" begin
-    @test (1..1) * π ≛ interval(π)
-    @test π * (1..1) ≛ interval(π)
-    @test π + (0..0) ≛ interval(π)
-    @test (0..0) + π ≛ interval(π)
-    @test π - (0..0) ≛ interval(π)
-    @test (0..0) - π ≛ -interval(π)
+    @test interval(1) * π ≛ interval(π)
+    @test π * interval(1) ≛ interval(π)
+    @test π + interval(0) ≛ interval(π)
+    @test interval(0) + π ≛ interval(π)
+    @test π - interval(0) ≛ interval(π)
+    @test interval(0) - π ≛ -interval(π)
 end
 
 @testset "Power tests" begin
@@ -115,7 +115,7 @@ end
     @test interval(0.0) ^ 0.0 ≛ emptyinterval()
     @test interval(0.0) ^ (1//10) ≛ interval(0, 0)
     @test interval(0.0) ^ (-1//10) ≛ emptyinterval()
-    @test ∅ ^ 0 ≛ ∅
+    @test emptyinterval() ^ 0 ≛ emptyinterval()
     @test interval(2.5)^3 ≛ interval(15.625, 15.625)
     @test interval(5//2)^3.0 ≛ interval(125//8)
 
@@ -170,7 +170,7 @@ end
     @test log10(interval(0.01, 0.1)) ≛ interval(log10(0.01, RoundDown), log10(0.1, RoundUp))
 
     @test log1p(interval(-0.5, 0.1)) ≛ interval(log1p(-0.5, RoundDown), log1p(0.1, RoundUp))
-    @test log1p(interval(-10.0)) ≛ ∅
+    @test log1p(interval(-10.0)) ≛ emptyinterval()
 end
 
 @testset "Comparison tests" begin
@@ -260,20 +260,20 @@ end
 @testset "Fast power" begin
 
     @testset "Fast integer powers" begin
-        x = 1..2
+        x = interval(1, 2)
         @test pow(x, 2) ≛ pow(-x, 2) ≛ interval(1, 4)
         @test pow(-x, 3) ≛ interval(-8.0, -1.0)
 
-        @test pow(-1..2, 2) ≛ 0..4
-        @test pow(-1..2, 3) ≛ -1..8
-        @test pow(-1..2, 4) ≛ 0..16
+        @test pow(interval(-1, 2), 2) ≛ interval(0, 4)
+        @test pow(interval(-1, 2), 3) ≛ interval(-1, 8)
+        @test pow(interval(-1, 2), 4) ≛ interval(0, 16)
 
-        @test pow(-2 .. -1, 4..4) ≛ 1..16
-        @test pow(-2 .. -1, -1 .. -1) ≛ -1 .. -0.5
+        @test pow(interval(-2, -1), interval(4)) ≛ interval(1, 16)
+        @test pow(interval(-2, -1), interval(-1, -1)) ≛ interval(-1, -0.5)
 
-        @test pow(interval(BigFloat, -1, 2), 2) ≛ 0..4
-        @test pow(interval(BigFloat, -1, 2), 3) ≛ -1..8
-        @test pow(interval(BigFloat, 1, 2), 2) ≛ 1..4
+        @test pow(interval(BigFloat, -1, 2), 2) ≛ interval(0, 4)
+        @test pow(interval(BigFloat, -1, 2), 3) ≛ interval(-1, 8)
+        @test pow(interval(BigFloat, 1, 2), 2) ≛ interval(1, 4)
 
         x = interval(pi)
         @test x^100 ⊆ pow(x, 100)
@@ -285,23 +285,23 @@ end
     end
 
     @testset "Fast real powers" begin
-        x = 1..2
+        x = interval(1, 2)
         @test pow(x, 0.5) ≛ interval(1.0, 1.4142135623730951)
         @test pow(x, 0.5) ≛ x^0.5
 
-        y = 2..3
+        y = interval(2, 3)
         @test pow(y, -0.5) ≛ interval(0.5773502691896257, 0.7071067811865476)
 
-        y = -2..3
+        y = interval(-2, 3)
         @test pow(y, 2.1) ≛ interval(0.0, 10.045108566305146)
         @test y^2.1 ⊆ pow(y, 2.1)
     end
 
     @testset "Fast interval powers" begin
-        x = 1..2
+        x = interval(1, 2)
         @test x^interval(-1.5, 2.5) ≛ interval(0.35355339059327373, 5.656854249492381)
 
-        y = -2..3
+        y = interval(-2, 3)
         @test pow(y, 2.1) ≛ interval(0.0, 10.045108566305146)
         @test pow(y, interval(-2, 3)) ≛ interval(0, Inf)
 
@@ -309,23 +309,23 @@ end
     end
 
     @testset "sqrt" begin
-        @test sqrt(2..3) ≛ interval(1.414213562373095, 1.7320508075688774)
+        @test sqrt(interval(2, 3)) ≛ interval(1.414213562373095, 1.7320508075688774)
 
-        @test sqrt(big(2..3)) ≛ interval(big"1.414213562373095048801688724209698078569671875376948073176679737990732478462102", big"1.732050807568877293527446341505872366942805253810380628055806979451933016908815")
+        @test sqrt(big(interval(2, 3))) ≛ interval(big"1.414213562373095048801688724209698078569671875376948073176679737990732478462102", big"1.732050807568877293527446341505872366942805253810380628055806979451933016908815")
     end
 
     @testset "cbrt" begin
-        @test cbrt(2..3) ≛ interval(1.259921049894873, 1.4422495703074085)
-        @test cbrt(big(2..3)) ≛ interval(big"1.259921049894873164767210607278228350570251464701507980081975112155299676513956", big"1.442249570307408382321638310780109588391869253499350577546416194541687596830003")
-        @test cbrt(big(2..3)) ⊆ cbrt(2..3)
-        @test_skip ismissing(cbrt(big(3..4)) == cbrt(3..4))
-        @test cbrt(2f0..3f0) ≛ interval(1.259921f0, 1.4422497f0)
-        @test cbrt(2..3) ⊆ cbrt(2f0..3f0)
+        @test cbrt(interval(2, 3)) ≛ interval(1.259921049894873, 1.4422495703074085)
+        @test cbrt(big(interval(2, 3))) ≛ interval(big"1.259921049894873164767210607278228350570251464701507980081975112155299676513956", big"1.442249570307408382321638310780109588391869253499350577546416194541687596830003")
+        @test cbrt(big(interval(2, 3))) ⊆ cbrt(interval(2, 3))
+        @test_skip ismissing(cbrt(big(interval(3, 4))) == cbrt(interval(3, 4)))
+        @test cbrt(interval(2f0, 3f0)) ≛ interval(1.259921f0, 1.4422497f0)
+        @test cbrt(interval(2, 3)) ⊆ cbrt(interval(2f0, 3f0))
     end
 
     @testset "inv" begin
-        @test inv(2..3) ≛ interval(0.3333333333333333, 0.5)
-        @test inv(big(2..3)) ≛ interval(big"3.333333333333333333333333333333333333333333333333333333333333333333333333333305e-01", big"5.0e-01")
+        @test inv(interval(2, 3)) ≛ interval(0.3333333333333333, 0.5)
+        @test inv(big(interval(2, 3))) ≛ interval(big"3.333333333333333333333333333333333333333333333333333333333333333333333333333305e-01", big"5.0e-01")
     end
 
     @testset "Float32 intervals" begin
@@ -341,9 +341,9 @@ end
 end
 
 @testset "Mince for `Interval`s" begin
-    II = -1 .. 1
+    II = interval(-1, 1)
     v = mince(II, 4)
-    @test all(v .≛ [-1 .. -0.5, -0.5 .. 0, 0 .. 0.5, 0.5 .. 1])
+    @test all(v .≛ [interval(-1, -0.5), interval(-0.5, 0), interval(0, 0.5), interval(0.5, 1)])
     @test hull(v...) ≛ II
     @test hull(v) ≛ II
     v = mince(II, 8)
@@ -353,13 +353,13 @@ end
 end
 
 @testset "nthroot test" begin
-    @test nthroot(∅, 3) ≛ ∅
-    @test nthroot(∅, 4) ≛ ∅
-    @test nthroot(∅, -3) ≛ ∅
-    @test nthroot(∅, -4) ≛ ∅
-    @test nthroot(interval(1, 2), 0) ≛ ∅
-    @test nthroot(interval(5, 8), 0) ≛ ∅
-    @test nthroot(interval(1, 7), 0) ≛ ∅
+    @test nthroot(emptyinterval(), 3) ≛ emptyinterval()
+    @test nthroot(emptyinterval(), 4) ≛ emptyinterval()
+    @test nthroot(emptyinterval(), -3) ≛ emptyinterval()
+    @test nthroot(emptyinterval(), -4) ≛ emptyinterval()
+    @test nthroot(interval(1, 2), 0) ≛ emptyinterval()
+    @test nthroot(interval(5, 8), 0) ≛ emptyinterval()
+    @test nthroot(interval(1, 7), 0) ≛ emptyinterval()
     @test nthroot(interval(8, 27), 3) ≛ interval(2, 3)
     @test nthroot(interval(0, 27), 3) ≛ interval(0, 3)
     @test nthroot(interval(-27, 0), 3) ≛ interval(-3, 0)
@@ -369,7 +369,7 @@ end
     @test nthroot(interval(0, 81), 4) ≛ interval(0, 3)
     @test nthroot(interval(-81, 0), 4) ≛ interval(0)
     @test nthroot(interval(-81, 81), 4) ≛ interval(0, 3)
-    @test nthroot(interval(-81, -16), 4) ≛ ∅
+    @test nthroot(interval(-81, -16), 4) ≛ emptyinterval()
     @test nthroot(interval(8, 27), -3) ≛ interval(1/3, 1/2)
     @test nthroot(interval(0, 27), -3) ≛ interval(1/3, Inf)
     @test nthroot(interval(-27, 0), -3) ≛ interval(-Inf, -1/3)
@@ -377,16 +377,16 @@ end
     @test nthroot(interval(-27, -8), -3) ≛ interval(-1/2, -1/3)
     @test nthroot(interval(16, 81), -4) ≛ interval(1/3, 1/2)
     @test nthroot(interval(0, 81), -4) ≛ interval(1/3, Inf)
-    @test nthroot(interval(-81, 0), -4) ≛ ∅
+    @test nthroot(interval(-81, 0), -4) ≛ emptyinterval()
     @test nthroot(interval(-81, 1), 1) ≛ interval(-81, 1)
     @test nthroot(interval(-81, 81), -4) ≛ interval(1/3, Inf)
-    @test nthroot(interval(-81, -16), -4) ≛ ∅
+    @test nthroot(interval(-81, -16), -4) ≛ emptyinterval()
     @test nthroot(interval(-81, -16), 1) ≛ interval(-81, -16)
     @test nthroot(interval(BigFloat, 16, 81), 4) ≛ interval(BigFloat, 2, 3)
     @test nthroot(interval(BigFloat, 0, 81), 4) ≛ interval(BigFloat, 0, 3)
     @test nthroot(interval(BigFloat, -81, 0), 4) ≛ interval(BigFloat, 0, 0)
     @test nthroot(interval(BigFloat, -81, 81), 4) ≛ interval(BigFloat, 0, 3)
     @test nthroot(interval(BigFloat, -27, 27), -3) ≛ interval(BigFloat, -Inf, Inf)
-    @test nthroot(interval(BigFloat, -81, -16), -4) ≛ ∅
+    @test nthroot(interval(BigFloat, -81, -16), -4) ≛ emptyinterval()
     @test nthroot(interval(BigFloat, -81, -16), 1) ≛ interval(BigFloat, -81, -16)
 end

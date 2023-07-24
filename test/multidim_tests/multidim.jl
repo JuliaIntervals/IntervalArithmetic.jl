@@ -1,5 +1,6 @@
 using Test
 using IntervalArithmetic
+using IntervalArithmetic.Symbols
 using StaticArrays
 
 let X, A  # avoid problems with global variables

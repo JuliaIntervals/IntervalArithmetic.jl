@@ -2,8 +2,8 @@ using Test
 using IntervalArithmetic
 
 @testset "rad2deg/deg2rad" begin
-    @test rad2deg(π .. 2π) ⊇ interval(180, 360)
-    @test deg2rad(180 .. 360) ⊇ interval(π, 2interval(π))
+    @test rad2deg(interval(π, 2π)) ⊇ interval(180, 360)
+    @test deg2rad(interval(180, 360)) ⊇ interval(π, 2interval(π))
 end
 
 @testset "sin" begin
@@ -41,31 +41,31 @@ end
 end
 
 @testset "sinpi" begin
-    @test sinpi(∅) ≛ ∅
-    @test sinpi(1 .. 2) ⊇ interval(-1 , 0)
-    @test sinpi(0.5 .. 1.5) ≛ interval(-1 , 1)
-    @test sinpi(0.25 .. 0.75) ⊇ interval(1/sqrt(2) , 1)
-    @test sinpi(-0.25 .. 0.25) ⊇ interval(-1/sqrt(2) , 1/sqrt(2))
+    @test sinpi(emptyinterval()) ≛ emptyinterval()
+    @test sinpi(interval(1, 2)) ⊇ interval(-1 , 0)
+    @test sinpi(interval(0.5, 1.5)) ≛ interval(-1 , 1)
+    @test sinpi(interval(0.25, 0.75)) ⊇ interval(1/sqrt(2) , 1)
+    @test sinpi(interval(-0.25, 0.25)) ⊇ interval(-1/sqrt(2) , 1/sqrt(2))
 end
 
 @testset "cospi" begin
-    @test cospi(∅) ≛ ∅
-    @test cospi(1 .. 2) ≛ interval(-1 , 1)
-    @test cospi(0.5 .. 1.5) ⊇ interval(-1 , 0)
-    @test cospi(0.25 .. 0.75) ⊇ interval(-1/sqrt(2) , 1/sqrt(2))
-    @test cospi(-0.25 .. 0.25) ≛ interval(1/sqrt(2) , 1)
+    @test cospi(emptyinterval()) ≛ emptyinterval()
+    @test cospi(interval(1, 2)) ≛ interval(-1 , 1)
+    @test cospi(interval(0.5, 1.5)) ⊇ interval(-1 , 0)
+    @test cospi(interval(0.25, 0.75)) ⊇ interval(-1/sqrt(2) , 1/sqrt(2))
+    @test cospi(interval(-0.25, 0.25)) ≛ interval(1/sqrt(2) , 1)
 end
 
 @testset "sincospi" begin
-    x = sincospi(∅)
-    @test (x[1] == ∅) & (x[2] == ∅)
-    x = sincospi(1 .. 2)
+    x = sincospi(emptyinterval())
+    @test (x[1] == emptyinterval()) & (x[2] == emptyinterval())
+    x = sincospi(interval(1, 2))
     @test (x[1] ⊇ interval(-1 , 0)) & (x[2] ≛ interval(-1 , 1))
-    x = sincospi(0.5 .. 1.5)
+    x = sincospi(interval(0.5, 1.5))
     @test (x[1] ≛ interval(-1 , 1)) & (x[2] ⊇ interval(-1 , 0))
-    x = sincospi(0.25 .. 0.75)
+    x = sincospi(interval(0.25, 0.75))
     @test (x[1] ⊇ interval(1/sqrt(2) , 1)) & (x[2] ⊇ interval(-1/sqrt(2) , 1/sqrt(2)))
-    x = sincospi(-0.25 .. 0.25)
+    x = sincospi(interval(-0.25, 0.25))
     @test (x[1] ⊇ interval(-1/sqrt(2) , 1/sqrt(2))) & (x[2] ≛ interval(1/sqrt(2) , 1))
 end
 
@@ -89,7 +89,7 @@ end
 @testset "Inverse trig" begin
     @test asin(interval(1)) ≛ interval(pi)/2
     @test asin(interval(0.9, 2)) ≛ asin(interval(0.9, 1))
-    @test asin(interval(3, 4)) ≛ ∅
+    @test asin(interval(3, 4)) ≛ emptyinterval()
 
     @test asin(interval(BigFloat, 1, 1)) ⊆ asin(interval(1))
     @test asin(interval(BigFloat, 0.9, 2)) ⊆ asin(interval(0.9, 2))
@@ -97,7 +97,7 @@ end
 
     @test acos(interval(1)) ≛ interval(0., 0.)
     @test acos(interval(-2, -0.9)) ≛ acos(interval(-1, -0.9))
-    @test acos(interval(3, 4)) ≛ ∅
+    @test acos(interval(3, 4)) ≛ emptyinterval()
 
     @test acos(interval(BigFloat, 1, 1)) ⊆ acos(interval(1))
     @test acos(interval(BigFloat, -2, -0.9)) ⊆ acos(interval(-2, -0.9))
@@ -110,12 +110,12 @@ end
 end
 
 @testset "atan" begin
-    @test atan(∅, entireinterval()) ≛ ∅
-    @test atan(entireinterval(), ∅) ≛ ∅
-    @test atan(interval(0.0, 1.0), interval(BigFloat, 0.0, 0.0)) ≛ interval(BigFloat, pi)/2
-    @test atan(interval(0.0, 1.0), interval(0.0)) ≛ interval(pi)/2
-    @test atan(interval(-1.0, -0.1), interval(0.0)) ≛ -interval(pi)/2
-    @test atan(interval(-1.0, 1.0), interval(0.0)) ≛ (-0.5..0.5) * interval(pi)
+    @test atan(emptyinterval(), entireinterval()) ≛ emptyinterval()
+    @test atan(entireinterval(), emptyinterval()) ≛ emptyinterval()
+    @test atan(interval(0.0, 1.0), interval(BigFloat, 0.0, 0.0)) ≛ interval(BigFloat, π)/2
+    @test atan(interval(0.0, 1.0), interval(0.0)) ≛ interval(π)/2
+    @test atan(interval(-1.0, -0.1), interval(0.0)) ≛ -interval(π)/2
+    @test atan(interval(-1.0, 1.0), interval(0.0)) ≛ interval(-0.5, 0.5) * interval(π)
     @test atan(interval(0.0), interval(0.1, 1.0)) ≛ interval(0.0)
     @test atan(interval(BigFloat, 0.0, 0.1), interval(BigFloat, 0.1, 1.0)) ⊆
         atan(interval(0.0, 0.1), interval(0.1, 1.0))
@@ -136,11 +136,11 @@ end
     @test atan(interval(BigFloat, -0.1, 0.0), interval(BigFloat, -2.0, -0.1)) ⊆
         atan(interval(-0.1, 0.0), interval(-2.0, -0.1))
     @test atan(interval(-0.1, 0.0), interval(-2.0, -0.1)) ≛
-        (-1..1) * interval(pi)
+        interval(-1, 1) * interval(π)
     @test atan(interval(BigFloat, -0.1, 0.1), interval(BigFloat, -Inf, -0.1)) ⊆
         atan(interval(-0.1, 0.1), interval(-Inf, -0.1))
     @test atan(interval(-0.1, 0.1), interval(-Inf, -0.1)) ≛
-        (-1..1) * interval(pi)
+        interval(-1, 1) * interval(π)
 
     @test atan(interval(BigFloat, 0.0, 0.0), interval(BigFloat, -2.0, 0.0)) ⊆
         atan(interval(0.0, 0.0), interval(-2.0, 0.0))
@@ -157,7 +157,7 @@ end
     @test atan(interval(BigFloat, -0.1, 0.1), interval(BigFloat, -2.0, 0.0)) ⊆
         atan(interval(-0.1, 0.1), interval(-2.0, 0.0))
     @test atan(interval(-0.1, 0.1), interval(-2.0, 0.0)) ≛
-        (-1..1) * interval(pi)
+        interval(-1, 1) * interval(π)
 
     @test atan(interval(BigFloat, 0.0, 0.0), interval(BigFloat, -2.0, 0.0)) ⊆
         atan(interval(0.0, 0.0), interval(-2.0, 0.0))
@@ -174,7 +174,7 @@ end
     @test atan(interval(BigFloat, -0.1, 0.1), interval(BigFloat, -2.0, 0.0)) ⊆
         atan(interval(-0.1, 0.1), interval(-2.0, 0.0))
     @test atan(interval(-0.1, 0.1), interval(-2.0, 0.0)) ≛
-        (-1..1) * interval(pi)
+        interval(-1, 1) * interval(π)
     @test atan(interval(BigFloat, 0.0, 0.1), interval(BigFloat, -2.0, 0.1)) ⊆
         atan(interval(0.0, 0.1), interval(-2.0, 0.1))
     @test atan(interval(-0.0, 0.1), interval(-2.0, 0.1)) ≛
@@ -185,7 +185,7 @@ end
         interval(-2.3561944901923453, Float64(-big(pi)/4, RoundUp))
     @test atan(interval(BigFloat, -0.1, 0.1), interval(BigFloat, -2.0, 0.1)) ⊆
         atan(interval(-0.1, 0.1), interval(-2.0, 0.1))
-    @test (-1..1) * interval(π) ≛ atan(interval(-0.1, 0.1), interval(-2.0, 0.1))
+    @test interval(-1, 1) * interval(π) ≛ atan(interval(-0.1, 0.1), interval(-2.0, 0.1))
 
     @test atan(interval(-0.1, 0.1), interval(0.1, 0.1)) ≛
         interval(-0.7853981633974484, 0.7853981633974484)
@@ -234,8 +234,8 @@ end
     @test cos(x) ≛ interval(0.9872460775989135, 0.9872460775989136)
     @test tan(x) ≛ interval(-0.16125837995065806, -0.16125837995065803)
 
-    x = interval(prevfloat(∞), ∞)
-    @test sin(x) ≛ -1..1
-    @test cos(x) ≛ -1..1
-    @test tan(x) ≛ -∞..∞
+    x = interval(prevfloat(Inf), Inf)
+    @test sin(x) ≛ interval(-1, 1)
+    @test cos(x) ≛ interval(-1, 1)
+    @test tan(x) ≛ interval(-Inf, Inf)
 end

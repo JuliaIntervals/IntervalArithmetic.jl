@@ -26,7 +26,7 @@ import IntervalArithmetic: unsafe_interval
         @test typemax(a) === typemax(typeof(a))
 
         @test a ≛ interval(a.lo, a.hi)
-        @test emptyinterval(Rational{Int}) ≛ ∅
+        @test emptyinterval(Rational{Int}) ≛ emptyinterval()
 
         @test (zero(a) + one(b)).lo == 1
         @test (zero(a) + one(b)).hi == 1
@@ -73,7 +73,7 @@ import IntervalArithmetic: unsafe_interval
         @test !(-Inf ∈ entireinterval())
         @test !(Inf ∈ entireinterval())
 
-        @test_throws ArgumentError (3..4) ∈ (3..4)
+        @test_throws ArgumentError interval(3, 4) ∈ interval(3, 4)
     end
 
     @testset "Inclusion tests" begin
@@ -81,9 +81,9 @@ import IntervalArithmetic: unsafe_interval
         @test emptyinterval(c) ⊆ c
         @test !(c ⊆ emptyinterval(c))
         @test isinterior(b,c)
-        @test !(b ⪽ emptyinterval(b))
-        @test emptyinterval(c) ⪽ c
-        @test emptyinterval(c) ⪽ emptyinterval(c)
+        @test !isinterior(b, emptyinterval(b))
+        @test isinterior(emptyinterval(c), c)
+        @test isinterior(emptyinterval(c), emptyinterval(c))
         @test b ⊂ c
         @test !(b ⊂ b)
         @test emptyinterval(c) ⊂ c
@@ -105,22 +105,22 @@ import IntervalArithmetic: unsafe_interval
     @testset "Comparison tests" begin
         @test IntervalArithmetic.isweaklylessprime(a.lo, b.lo) == (a.lo < b.lo)
         @test IntervalArithmetic.isweaklylessprime(Inf, Inf)
-        @test isweaklyless(∅, ∅)
-        @test !isweaklyless(interval(1.0,2.0), ∅)
+        @test isweaklyless(emptyinterval(), emptyinterval())
+        @test !isweaklyless(interval(1, 2), emptyinterval())
         @test isweaklyless(interval(-Inf,Inf), interval(-Inf,Inf))
-        @test precedes(∅,∅)
-        @test precedes(interval(3.0,4.0),∅)
-        @test !(precedes(interval(0.0,2.0),interval(-Inf,Inf)))
-        @test precedes(interval(1.0,3.0),interval(3.0,4.0))
-        @test strictprecedes(interval(3.0,4.0),∅)
-        @test !(strictprecedes(interval(-3.0,-1.0),interval(-1.0,0.0)))
+        @test precedes(emptyinterval(), emptyinterval())
+        @test precedes(interval(3, 4), emptyinterval())
+        @test !(precedes(interval(0, 2),interval(-Inf,Inf)))
+        @test precedes(interval(1, 3),interval(3, 4))
+        @test strictprecedes(interval(3, 4), emptyinterval())
+        @test !(strictprecedes(interval(-3, -1),interval(-1, 0)))
         @test !(iscommon(emptyinterval()))
         @test !(iscommon(entireinterval()))
         @test iscommon(a)
         @test !(isunbounded(emptyinterval()))
         @test isunbounded(entireinterval())
-        @test isunbounded(interval(-Inf, 0.0))
-        @test isunbounded(interval(0.0, Inf))
+        @test isunbounded(interval(-Inf, 0))
+        @test isunbounded(interval(0, Inf))
         @test !(isunbounded(a))
     end
 
@@ -140,14 +140,14 @@ import IntervalArithmetic: unsafe_interval
                         interval(-1.0, 5.0),
                         interval(1.8, 3.0)) ≛ interval(1.8, 2.0)
         @test intersect(a, emptyinterval(), b) ≛ emptyinterval()
-        @test intersect(0..1, 3..4, 0..1, 0..1) ≛ emptyinterval()
+        @test intersect(interval(0, 1), interval(3, 4), interval(0, 1), interval(0, 1)) ≛ emptyinterval()
     end
 
     @testset "Hull and union tests" begin
-        @test hull(1..2, 3..4) ≛ interval(1, 4)
+        @test hull(interval(1, 2), interval(3, 4)) ≛ interval(1, 4)
         @test hull(interval(1//3, 3//4), interval(3, 4)) ≛ interval(1/3, 4)
 
-        @test union(1..2, 3..4) ≛ interval(1, 4)
+        @test union(interval(1, 2), interval(3, 4)) ≛ interval(1, 4)
         @test union(interval(1//3, 3//4), interval(3, 4)) ≛ interval(1/3, 4)
     end
 
@@ -156,7 +156,7 @@ import IntervalArithmetic: unsafe_interval
         @test isentire(entireinterval(a))
         @test isentire(interval(-Inf, Inf))
         @test !(isentire(a))
-        @test interval(-Inf, Inf) ⪽ interval(-Inf, Inf)
+        @test isinterior(interval(-Inf, Inf), interval(-Inf, Inf))
 
         @test !(nai(a) ≛ nai(a))
         @test nai(a) === nai(a)
@@ -179,26 +179,26 @@ import IntervalArithmetic: unsafe_interval
 
     @testset "mid" begin
         @test mid(interval(Rational{Int}, 1//2)) == 1//2
-        @test mid(1..2) == 1.5
-        @test mid(0.1..0.3) == 0.2
-        @test mid(-10..5) == -2.5
-        @test mid(-∞..1) == nextfloat(-∞)
-        @test mid(1..∞) == prevfloat(∞)
+        @test mid(interval(1, 2)) == 1.5
+        @test mid(interval(0.1, 0.3)) == 0.2
+        @test mid(interval(-10, 5)) == -2.5
+        @test mid(interval(-Inf, 1)) == nextfloat(-Inf)
+        @test mid(interval(1, Inf)) == prevfloat(Inf)
         @test isnan(mid(emptyinterval()))
     end
 
     @testset "scaled mid" begin
-        @test scaled_mid(0..1, 0.75) == 0.75
-        @test scaled_mid(1..∞, 0.75) > 0
-        @test scaled_mid(-∞..∞, 0.75) > 0
-        @test scaled_mid(-∞..∞, 0.25) < 0
+        @test scaled_mid(interval(0, 1), 0.75) == 0.75
+        @test scaled_mid(interval(1, Inf), 0.75) > 0
+        @test scaled_mid(interval(-Inf, Inf), 0.75) > 0
+        @test scaled_mid(interval(-Inf, Inf), 0.25) < 0
     end
 
     @testset "mid with large floats" begin
-        @test mid(0.8e308..1.2e308) == 1e308
-        @test mid(-1e308..1e308) == 0
-        @test isfinite(scaled_mid(0.8e308..1.2e308, 0.75))
-        @test isfinite(scaled_mid(-1e308..1e308, 0.75))
+        @test mid(interval(0.8e308, 1.2e308)) == 1e308
+        @test mid(interval(-1e308, 1e308)) == 0
+        @test isfinite(scaled_mid(interval(0.8e308, 1.2e308), 0.75))
+        @test isfinite(scaled_mid(interval(-1e308, 1e308), 0.75))
     end
 
     @testset "diam" begin
@@ -317,9 +317,9 @@ import IntervalArithmetic: unsafe_interval
         @test isatomic(interval(1))
         @test isatomic(interval(2.3, 2.3))
         @test isatomic(emptyinterval())
-        @test isatomic(interval(∞))  # interval(floatmax(), Inf)
+        @test isatomic(interval(Inf))  # interval(floatmax(), Inf)
 
-        @test !isatomic(1..2)
+        @test !isatomic(interval(1, 2))
         @test !isatomic(interval(1, nextfloat(1.0, 2)))
 
     end
@@ -331,7 +331,7 @@ import IntervalArithmetic: unsafe_interval
         @test isthinzero(interval(-0.0))
         @test isthinzero(interval(-0.0, 0.0))
 
-        @test !isthinzero(1..2)
+        @test !isthinzero(interval(1, 2))
         @test !isthinzero(interval(0.0, nextfloat(0.0)))
     end
 
@@ -348,7 +348,7 @@ import IntervalArithmetic: unsafe_interval
     @testset "Type stability" begin
         for T in (Float32, Float64, BigFloat)
 
-            xs = [3..4, 0..4, 0..0, -4..0, -4..4, -Inf..4, 4..Inf, -Inf..Inf]
+            xs = [interval(3, 4), interval(0, 4), interval(0), interval(-4, 0), interval(-4, 4), interval(-Inf, 4), interval(4, Inf), interval(-Inf, Inf)]
 
             for x in xs
                 for y in xs

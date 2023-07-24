@@ -19,18 +19,18 @@ import IntervalArithmetic: unsafe_interval
 
     # Irrational
     for irr in (π, ℯ)
-        @test interval(-irr, irr).hi == (-irr..irr).hi
-        @test 0..irr ≛ hull(interval(0), interval(Float64, irr))
-        @test (1.2..irr).hi == interval(1.2, irr).hi
-        @test irr..irr ≛ interval(Float64, irr)
+        @test interval(-irr, irr).hi == IntervalArithmetic.Symbols.:(..)(-irr, irr).hi
+        @test IntervalArithmetic.Symbols.:(..)(0, irr) ≛ hull(interval(0), interval(Float64, irr))
+        @test IntervalArithmetic.Symbols.:(..)(1.2, irr).hi == interval(1.2, irr).hi
+        @test IntervalArithmetic.Symbols.:(..)(irr, irr) ≛ interval(Float64, irr)
         @test interval(irr) ≛ interval(irr, irr)
         @test interval(Float32, irr, irr) ≛ interval(Float32, irr)
     end
 
-    @test ℯ..big(4) ≛ hull(interval(BigFloat, ℯ), interval(4))
-    @test π..big(4) ≛ hull(interval(BigFloat, π), interval(4))
+    @test IntervalArithmetic.Symbols.:(..)(ℯ, big(4)) ≛ hull(interval(BigFloat, ℯ), interval(4))
+    @test IntervalArithmetic.Symbols.:(..)(π, big(4)) ≛ hull(interval(BigFloat, π), interval(4))
 
-    @test ℯ..pi ≛ hull(interval(ℯ), interval(Float64, π))
+    @test IntervalArithmetic.Symbols.:(..)(ℯ, π) ≛ hull(interval(ℯ), interval(Float64, π))
     @test big(ℯ) in interval(ℯ, π)
     @test big(π) in interval(ℯ, π)
     @test big(ℯ) in interval(0, ℯ)
@@ -119,10 +119,10 @@ end
     @test I"123412341234123412341241234" ≛ interval(1.234123412341234e26, 1.2341234123412342e26)
     @test interval(big"3") ≛ interval(3)
 
-    @test interval(Float64, big"1e10000") ≛ interval(prevfloat(∞), ∞)
+    @test interval(Float64, big"1e10000") ≛ interval(prevfloat(Inf), Inf)
 
     a = big(10)^10000
-    @test interval(Float64, a) ≛ interval(prevfloat(∞), ∞)
+    @test interval(Float64, a) ≛ interval(prevfloat(Inf), Inf)
 end
 
 #=
@@ -138,33 +138,33 @@ end
 =#
 
 @testset ".. tests" begin
-    a = big(0.1)..2
+    a = IntervalArithmetic.Symbols.:(..)(big(0.1), 2)
     @test typeof(a) == Interval{BigFloat}
 
-    @test_logs (:warn, ) @test isempty(2..1)
-    @test_logs (:warn, ) @test isempty(π..1)
-    @test_logs (:warn, ) @test isempty(π..ℯ)
-    @test_logs (:warn, ) @test isempty(4..π)
-    @test_logs (:warn, ) @test isempty(NaN..3)
-    @test_logs (:warn, ) @test isempty(3..NaN)
-    @test 1..π ≛ interval(Float64, 1, π)
+    @test_logs (:warn, ) @test isempty(IntervalArithmetic.Symbols.:(..)(2, 1))
+    @test_logs (:warn, ) @test isempty(IntervalArithmetic.Symbols.:(..)(π, 1))
+    @test_logs (:warn, ) @test isempty(IntervalArithmetic.Symbols.:(..)(π, ℯ))
+    @test_logs (:warn, ) @test isempty(IntervalArithmetic.Symbols.:(..)(4, π))
+    @test_logs (:warn, ) @test isempty(IntervalArithmetic.Symbols.:(..)(NaN, 3))
+    @test_logs (:warn, ) @test isempty(IntervalArithmetic.Symbols.:(..)(3, NaN))
+    @test IntervalArithmetic.Symbols.:(..)(1, π) ≛ interval(Float64, 1, π)
 end
 
 @testset "± tests" begin
     @test 3 ± 1 ≛ interval(Float64, 2.0, 4.0)
-    @test 3 ± 0.5 ≛ 2.5..3.5
-    @test 3 ± 0.1 ≛ 2.9..3.1
-    @test 0.5 ± 1 ≛ -0.5..1.5
+    @test 3 ± 0.5 ≛ IntervalArithmetic.Symbols.:(..)(2.5, 3.5)
+    @test 3 ± 0.1 ≛ IntervalArithmetic.Symbols.:(..)(2.9, 3.1)
+    @test 0.5 ± 1 ≛ IntervalArithmetic.Symbols.:(..)(-0.5, 1.5)
 
     # issue 172:
-    @test (1..1) ± 1 ≛ 0..2
+    @test IntervalArithmetic.Symbols.:(..)(1, 1) ± 1 ≛ IntervalArithmetic.Symbols.:(..)(0, 2)
 end
 
 @testset "Conversion to interval of same type" begin
-    x = 3..4
+    x = IntervalArithmetic.Symbols.:(..)(3, 4)
     @test convert(Interval{Float64}, x) === x
 
-    x = big(3)..big(4)
+    x = IntervalArithmetic.Symbols.:(..)(big(3), big(4))
     @test convert(Interval{BigFloat}, x) === x
 end
 
@@ -187,14 +187,14 @@ end
     # PR 496
     @test eltype(interval(1, 2)) == Interval{Float64}
     @test IntervalArithmetic.numtype(interval(1, 2)) == Float64
-    @test all([1 2; 3 4] * interval(-1, 1) .≛ [-1..1 -2..2;-3..3 -4..4])
+    @test all([1 2; 3 4] * interval(-1, 1) .≛ [interval(-1, 1) interval(-2, 2) ; interval(-3, 3) interval(-4, 4)])
 
-    @test eltype(IntervalBox(1..2, 2..3)) == Interval{Float64}
-    @test IntervalArithmetic.numtype(IntervalBox(1..2, 2..3)) == Float64
+    @test eltype(IntervalBox(interval(1, 2), interval(2, 3))) == Interval{Float64}
+    @test IntervalArithmetic.numtype(IntervalBox(interval(1, 2), interval(2, 3))) == Float64
 end
 
 @testset "Conversions between different types of interval" begin
-    a = convert(Interval{BigFloat}, 3..4)
+    a = convert(Interval{BigFloat}, interval(3, 4))
     @test typeof(a) == Interval{BigFloat}
 
     a = convert(Interval{Float64}, interval(BigFloat, 3, 4))
@@ -207,7 +207,7 @@ end
 end
 
 @testset "Interval{T} constructor" begin
-    @test interval(Float64, 1, 1) ≛ 1..1
+    @test interval(Float64, 1, 1) ≛ interval(1)
     # no rounding
     @test bounds(interval(Float64, 1.1, 1.1)) == (1.1, 1.1)
 
@@ -230,30 +230,30 @@ end
 end
 
 @testset "setdiff tests" begin
-    x = 1..3
-    y = 2..4
-    @test all(setdiff(x, y) .≛ [1..2])
-    @test all(setdiff(y, x) .≛ [3..4])
+    x = interval(1, 3)
+    y = interval(2, 4)
+    @test all(setdiff(x, y) .≛ [interval(1, 2)])
+    @test all(setdiff(y, x) .≛ [interval(3, 4)])
 
     @test setdiff(x, x) == Interval{Float64}[]
 
     @test all(setdiff(x, emptyinterval(x)) .≛ [x])
 
-    z = 0..5
+    z = interval(0, 5)
     @test setdiff(x, z) == Interval{Float64}[]
-    @test all(setdiff(z, x) .≛ [0..1, 3..5])
+    @test all(setdiff(z, x) .≛ [interval(0, 1), interval(3, 5)])
 end
 
 @testset "Interval{T}(x::Interval)" begin
-    @test Interval{Float64}(3..4) ≛ interval(Float64, 3.0, 4.0)
-    @test Interval{BigFloat}(3..4) ≛ interval(BigFloat, 3, 4)
+    @test Interval{Float64}(interval(3, 4)) ≛ interval(Float64, 3.0, 4.0)
+    @test Interval{BigFloat}(interval(3, 4)) ≛ interval(BigFloat, 3, 4)
 end
 
 
 @testset "@interval with user-defined function" begin
     f(x) = x.lo == Inf ? one(x) : x/(1+x)  # monotonic
 
-    x = 3..4
+    x = interval(3, 4)
     @test interval(0.75, 0.8) ⊆ interval(f(interval(x.lo)), f(interval(x.hi)))
 end
 
@@ -275,17 +275,17 @@ end
     @test x ≛ y
     @test hash(x) == hash(y)
 
-    x = 1..2
-    y = 1..3
+    x = interval(1, 2)
+    y = interval(1, 3)
     @test !(x ≛ y)
     @test hash(x) != hash(y)
 end
 
 @testset "a..b with a > b" begin
-    @test_logs (:warn,) @test isempty(3..2)
+    @test_logs (:warn,) @test isempty(interval(3, 2))
 end
 
 @testset "Zero interval" begin
     @test zero(Interval{Float64}) ≛ interval(Float64, 0, 0)
-    @test zero(0 .. 1) ≛ interval(Float64, 0, 0)
+    @test zero(interval(0, 1)) ≛ interval(Float64, 0, 0)
 end

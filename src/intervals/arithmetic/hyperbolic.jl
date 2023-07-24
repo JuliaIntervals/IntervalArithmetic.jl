@@ -122,7 +122,7 @@ Implement the `acoth` function of the IEEE Standard 1788-2015 (Table 9.1).
 function acoth(a::Interval{T}) where {T<:NumTypes}
     isempty(a) && return a
     domain_excluded = unsafe_interval(T, -one(T), one(T))
-    a ⪽ domain_excluded && return emptyinterval(T)
+    isinterior(a, domain_excluded) && return emptyinterval(T)
     !isempty(a ∩ domain_excluded) && return entireinterval(T)
     lo, hi = bounds(a)
     res_lo, res_hi = bounds(@round(T, acoth(hi), acoth(lo)))
