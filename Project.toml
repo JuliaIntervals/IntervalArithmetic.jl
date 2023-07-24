@@ -1,7 +1,7 @@
 name = "IntervalArithmetic"
 uuid = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
 repo = "https://github.com/JuliaIntervals/IntervalArithmetic.jl.git"
-version = "0.20.10"
+version = "0.21.0"
 
 [deps]
 CRlibm = "96374032-68de-5a5b-8d9e-752f78720389"
@@ -23,4 +23,4 @@ RecipesBase = "1.0"
 RoundingEmulator = "0.2"
 SetRounding = "0.2"
 StaticArrays = "1.0"
-julia = "1.7"
+julia = "1.8"

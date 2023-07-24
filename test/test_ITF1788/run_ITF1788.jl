@@ -17,10 +17,8 @@ include("libieeep1788_set.jl")
 include("mpfi.jl")
 
 # Need to adapt IntervalContractors for the following
-using IntervalContractors
-
-include("abs_rev.jl")
-
+# using IntervalContractors
+# include("abs_rev.jl")
 # Need to be regenerated to be compatible with the latest version
 # include("libieeep1788_rev.jl")
 # include("libieeep1788_mul_rev.jl")
