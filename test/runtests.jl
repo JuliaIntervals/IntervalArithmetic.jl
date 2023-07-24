@@ -23,7 +23,5 @@ include_test("display_tests/display.jl")
 # Multidim tests
 include_test("multidim_tests/multidim.jl")
 
-include("multidim_tests/multidim.jl")
-
 # ITF1788 tests
-include("test_ITF1788/run_ITF1788.jl")
+include_test("test_ITF1788/run_ITF1788.jl")  # TODO fix these tests

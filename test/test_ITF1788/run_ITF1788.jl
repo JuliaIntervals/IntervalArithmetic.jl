@@ -1,5 +1,3 @@
-using IntervalArithmetic
-
 include("atan2.jl")
 include("c-xsc.jl")
 include("fi_lib.jl")
@@ -16,10 +14,9 @@ include("libieeep1788_reduction.jl")
 include("libieeep1788_set.jl")
 include("mpfi.jl")
 
-# Need to adapt IntervalContractors for the following
+# TODO: CHECK CONTRACTORS
 # using IntervalContractors
 # include("abs_rev.jl")
-# Need to be regenerated to be compatible with the latest version
 # include("libieeep1788_rev.jl")
 # include("libieeep1788_mul_rev.jl")
 # include("pow_rev.jl")

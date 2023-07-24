@@ -220,7 +220,6 @@ end
 
     @test -(interval(-0x1.FFFFFFFFFFFFP+0,0x1.FFFFFFFFFFFFP+0), interval(0x1.999999999999AP-4,0x1.999999999999AP-4)) === interval(-0x1.0CCCCCCCCCCC5P+1,0x1.E666666666657P+0)
 
-
 end
 
 @testset "minimal_sub_dec_test" begin
@@ -232,7 +231,6 @@ end
     @test -(DecoratedInterval(interval(-1.0,2.0), com), DecoratedInterval(interval(5.0,0x1.FFFFFFFFFFFFFp1023), com)) === DecoratedInterval(interval(-Inf,-3.0), dac)
 
     @test -(DecoratedInterval(interval(-0x1.FFFFFFFFFFFFFp1023,2.0), com), DecoratedInterval(interval(-1.0, 5.0), com)) === DecoratedInterval(interval(-Inf,3.0), dac)
-
 
     @test -(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(emptyinterval(), trv)) === DecoratedInterval(emptyinterval(), trv)
 
@@ -264,7 +262,6 @@ end
 
     @test *(entireinterval(), interval(-0.0,-0.0)) === interval(0.0,0.0)
 
-
     @test *(entireinterval(), interval(-5.0, -1.0)) === entireinterval()
 
     @test *(entireinterval(), interval(-5.0, 3.0)) === entireinterval()
@@ -293,7 +290,6 @@ end
 
     @test *(interval(1.0,Inf), interval(-Inf, -1.0)) === interval(-Inf,-1.0)
 
-
     @test *(interval(1.0,Inf), interval(-Inf, 3.0)) === entireinterval()
 
     @test *(interval(1.0,Inf), interval(-5.0, Inf)) === entireinterval()
@@ -311,7 +307,6 @@ end
     @test *(interval(-1.0,Inf), interval(-5.0, 3.0)) === entireinterval()
 
     @test *(interval(-1.0,Inf), interval(1.0, 3.0)) === interval(-3.0,Inf)
-
 
     @test *(interval(-1.0,Inf), interval(-Inf, -1.0)) === entireinterval()
 
@@ -332,7 +327,6 @@ end
     @test *(interval(-Inf,3.0), interval(-5.0, 3.0)) === entireinterval()
 
     @test *(interval(-Inf,3.0), interval(1.0, 3.0)) === interval(-Inf,9.0)
-
 
     @test *(interval(-Inf,3.0), interval(-Inf, -1.0)) === entireinterval()
 
@@ -355,7 +349,6 @@ end
     @test *(interval(-Inf,-3.0), interval(1.0, 3.0)) === interval(-Inf,-3.0)
 
     @test *(interval(-Inf,-3.0), interval(-Inf, -1.0)) === interval(3.0,Inf)
-
 
     @test *(interval(-Inf,-3.0), interval(-Inf, 3.0)) === entireinterval()
 
@@ -441,7 +434,6 @@ end
 
     @test *(interval(-1.0,5.0), interval(1.0, 3.0)) === interval(-3.0,15.0)
 
-
     @test *(interval(-1.0,5.0), interval(-Inf, -1.0)) === entireinterval()
 
     @test *(interval(-1.0,5.0), interval(-Inf, 3.0)) === entireinterval()
@@ -480,7 +472,6 @@ end
 
     @test *(interval(-0x1.FFFFFFFFFFFFP+0,-0x1.999999999999AP-4), interval(0x1.999999999999AP-4,0x1.FFFFFFFFFFFFP+0)) === interval(-0x1.FFFFFFFFFFFE1P+1,-0x1.47AE147AE147BP-7)
 
-
 end
 
 @testset "minimal_mul_dec_test" begin
@@ -492,7 +483,6 @@ end
     @test *(DecoratedInterval(interval(1.0,2.0), com), DecoratedInterval(interval(5.0,0x1.FFFFFFFFFFFFFp1023), com)) === DecoratedInterval(interval(5.0,Inf), dac)
 
     @test *(DecoratedInterval(interval(-0x1.FFFFFFFFFFFFFp1023,2.0), com), DecoratedInterval(interval(-1.0, 5.0), com)) === DecoratedInterval(interval(-Inf,0x1.FFFFFFFFFFFFFp1023), dac)
-
 
     @test *(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(emptyinterval(), trv)) === DecoratedInterval(emptyinterval(), trv)
 
@@ -586,7 +576,6 @@ end
 
     @test /(interval(-30.0,-15.0), interval(-Inf, -0.0)) === interval(0.0,Inf)
 
-
     @test /(interval(-30.0,-15.0), interval(-Inf, 3.0)) === entireinterval()
 
     @test /(interval(-30.0,-15.0), interval(-3.0, Inf)) === entireinterval()
@@ -604,7 +593,6 @@ end
     @test /(interval(-30.0,15.0), interval(-Inf, -3.0)) === interval(-5.0,10.0)
 
     @test /(interval(-30.0,15.0), interval(3.0,Inf)) === interval(-10.0,5.0)
-
 
     @test /(interval(-30.0,15.0), interval(0.0,0.0)) === emptyinterval()
 
@@ -659,7 +647,6 @@ end
     @test /(interval(15.0,30.0), interval(-0.0, 3.0)) === interval(5.0,Inf)
 
     @test /(interval(15.0,30.0), interval(-Inf, -0.0)) === interval(-Inf,0.0)
-
 
     @test /(interval(15.0,30.0), interval(-Inf, 3.0)) === entireinterval()
 
@@ -769,7 +756,6 @@ end
 
     @test /(interval(-Inf,-15.0), interval(-Inf, -0.0)) === interval(0.0,Inf)
 
-
     @test /(interval(-Inf,-15.0), interval(-Inf, 3.0)) === entireinterval()
 
     @test /(interval(-Inf,-15.0), interval(-3.0, Inf)) === entireinterval()
@@ -787,7 +773,6 @@ end
     @test /(interval(-Inf,15.0), interval(-Inf, -3.0)) === interval(-5.0,Inf)
 
     @test /(interval(-Inf,15.0), interval(3.0,Inf)) === interval(-Inf,5.0)
-
 
     @test /(interval(-Inf,15.0), interval(0.0,0.0)) === emptyinterval()
 
@@ -824,7 +809,6 @@ end
     @test /(interval(-15.0,Inf), interval(-Inf, -3.0)) === interval(-Inf,5.0)
 
     @test /(interval(-15.0,Inf), interval(3.0,Inf)) === interval(-5.0,Inf)
-
 
     @test /(interval(-15.0,Inf), interval(0.0,0.0)) === emptyinterval()
 
@@ -880,7 +864,6 @@ end
 
     @test /(interval(15.0,Inf), interval(-Inf, -0.0)) === interval(-Inf,0.0)
 
-
     @test /(interval(15.0,Inf), interval(-Inf, 3.0)) === entireinterval()
 
     @test /(interval(15.0,Inf), interval(-3.0, Inf)) === entireinterval()
@@ -916,7 +899,6 @@ end
     @test /(interval(-30.0,0.0), interval(-0.0, 3.0)) === interval(-Inf,0.0)
 
     @test /(interval(-30.0,0.0), interval(-Inf, -0.0)) === interval(0.0,Inf)
-
 
     @test /(interval(-30.0,0.0), interval(-Inf, 3.0)) === entireinterval()
 
@@ -954,7 +936,6 @@ end
 
     @test /(interval(-30.0,-0.0), interval(-Inf, -0.0)) === interval(0.0,Inf)
 
-
     @test /(interval(-30.0,-0.0), interval(-Inf, 3.0)) === entireinterval()
 
     @test /(interval(-30.0,-0.0), interval(-3.0, Inf)) === entireinterval()
@@ -990,7 +971,6 @@ end
     @test /(interval(0.0,30.0), interval(-0.0, 3.0)) === interval(0.0,Inf)
 
     @test /(interval(0.0,30.0), interval(-Inf, -0.0)) === interval(-Inf,0.0)
-
 
     @test /(interval(0.0,30.0), interval(-Inf, 3.0)) === entireinterval()
 
@@ -1028,7 +1008,6 @@ end
 
     @test /(interval(-0.0,30.0), interval(-Inf, -0.0)) === interval(-Inf,0.0)
 
-
     @test /(interval(-0.0,30.0), interval(-Inf, 3.0)) === entireinterval()
 
     @test /(interval(-0.0,30.0), interval(-3.0, Inf)) === entireinterval()
@@ -1064,7 +1043,6 @@ end
     @test /(interval(-Inf,0.0), interval(-0.0, 3.0)) === interval(-Inf,0.0)
 
     @test /(interval(-Inf,0.0), interval(-Inf, -0.0)) === interval(0.0,Inf)
-
 
     @test /(interval(-Inf,0.0), interval(-Inf, 3.0)) === entireinterval()
 
@@ -1102,7 +1080,6 @@ end
 
     @test /(interval(-Inf,-0.0), interval(-Inf, -0.0)) === interval(0.0,Inf)
 
-
     @test /(interval(-Inf,-0.0), interval(-Inf, 3.0)) === entireinterval()
 
     @test /(interval(-Inf,-0.0), interval(-3.0, Inf)) === entireinterval()
@@ -1138,7 +1115,6 @@ end
     @test /(interval(0.0,Inf), interval(-0.0, 3.0)) === interval(0.0,Inf)
 
     @test /(interval(0.0,Inf), interval(-Inf, -0.0)) === interval(-Inf,0.0)
-
 
     @test /(interval(0.0,Inf), interval(-Inf, 3.0)) === entireinterval()
 
@@ -1176,7 +1152,6 @@ end
 
     @test /(interval(-0.0,Inf), interval(-Inf, -0.0)) === interval(-Inf,0.0)
 
-
     @test /(interval(-0.0,Inf), interval(-Inf, 3.0)) === entireinterval()
 
     @test /(interval(-0.0,Inf), interval(-3.0, Inf)) === entireinterval()
@@ -1199,7 +1174,6 @@ end
 
     @test /(interval(-Inf,-1.0), interval(1.0, 3.0)) === interval(-Inf,-0x1.5555555555555P-2)
 
-
 end
 
 @testset "minimal_div_dec_test" begin
@@ -1211,7 +1185,6 @@ end
     @test /(DecoratedInterval(interval(-2.0,-1.0), com), DecoratedInterval(interval(0.0, 10.0), com)) === DecoratedInterval(interval(-Inf,-0x1.9999999999999P-4), trv)
 
     @test /(DecoratedInterval(interval(1.0,3.0), def), DecoratedInterval(interval(-Inf, -10.0), dac)) === DecoratedInterval(interval(-0x1.3333333333334P-2,0.0), def)
-
 
     @test /(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(emptyinterval(), trv)) === DecoratedInterval(emptyinterval(), trv)
 
@@ -1228,7 +1201,6 @@ end
     @test inv(interval(-Inf, -10.0)) === interval(-0x1.999999999999AP-4,0.0)
 
     @test inv(interval(10.0,Inf)) === interval(0.0,0x1.999999999999AP-4)
-
 
     @test inv(interval(0.0,0.0)) === emptyinterval()
 
@@ -1248,7 +1220,6 @@ end
 
     @test inv(interval(-Inf, -0.0)) === interval(-Inf,0.0)
 
-
     @test inv(interval(-Inf, 10.0)) === entireinterval()
 
     @test inv(interval(-10.0, Inf)) === entireinterval()
@@ -1256,7 +1227,6 @@ end
     @test inv(interval(0.0, Inf)) === interval(0.0,Inf)
 
     @test inv(interval(-0.0, Inf)) === interval(0.0,Inf)
-
 
     @test inv(entireinterval()) === entireinterval()
 
@@ -1277,7 +1247,6 @@ end
     @test inv(DecoratedInterval(interval(-10.0, Inf), dac)) === DecoratedInterval(entireinterval(), trv)
 
     @test inv(DecoratedInterval(interval(-0.0, Inf), dac)) === DecoratedInterval(interval(0.0,Inf), trv)
-
 
     @test inv(DecoratedInterval(entireinterval(), dac)) === DecoratedInterval(entireinterval(), trv)
 
@@ -1309,7 +1278,6 @@ end
 
     @test interval(-0x1.FFFFFFFFFFFFP+0,-0x1.FFFFFFFFFFFFP+0)^2 === interval(0x1.FFFFFFFFFFFEP+1,0x1.FFFFFFFFFFFE1P+1)
 
-
 end
 
 @testset "minimal_sqr_dec_test" begin
@@ -1321,7 +1289,6 @@ end
     @test DecoratedInterval(interval(-5.0,3.0), com)^2 === DecoratedInterval(interval(0.0,25.0), com)
 
     @test DecoratedInterval(interval(0x1.999999999999AP-4,0x1.999999999999AP-4), com)^2 === DecoratedInterval(interval(0x1.47AE147AE147BP-7,0x1.47AE147AE147CP-7), com)
-
 
 end
 
@@ -1353,7 +1320,6 @@ end
 
     @test sqrt(interval(0x1.999999999999AP-4,0x1.FFFFFFFFFFFFP+0)) === interval(0x1.43D136248490FP-2,0x1.6A09E667F3BC7P+0)
 
-
 end
 
 @testset "minimal_sqrt_dec_test" begin
@@ -1365,7 +1331,6 @@ end
     @test sqrt(DecoratedInterval(interval(0.0,25.0), def)) === DecoratedInterval(interval(0.0,5.0), def)
 
     @test sqrt(DecoratedInterval(interval(-5.0,Inf), dac)) === DecoratedInterval(interval(0.0,Inf), trv)
-
 
 end
 
@@ -1617,7 +1582,6 @@ end
 
     @test fma(entireinterval(), interval(-0.0,-0.0), interval(-Inf,2.0)) === interval(-Inf,2.0)
 
-
     @test fma(entireinterval(), interval(-5.0, -1.0), interval(-Inf,2.0)) === entireinterval()
 
     @test fma(entireinterval(), interval(-5.0, 3.0), interval(-Inf,2.0)) === entireinterval()
@@ -1640,13 +1604,11 @@ end
 
     @test fma(interval(1.0,Inf), interval(-5.0, -1.0), interval(-Inf,2.0)) === interval(-Inf,1.0)
 
-
     @test fma(interval(1.0,Inf), interval(-5.0, 3.0), interval(-Inf,2.0)) === entireinterval()
 
     @test fma(interval(1.0,Inf), interval(1.0, 3.0), interval(-Inf,2.0)) === entireinterval()
 
     @test fma(interval(1.0,Inf), interval(-Inf, -1.0), interval(-Inf,2.0)) === interval(-Inf,1.0)
-
 
     @test fma(interval(1.0,Inf), interval(-Inf, 3.0), interval(-Inf,2.0)) === entireinterval()
 
@@ -1661,7 +1623,6 @@ end
     @test fma(interval(-1.0,Inf), interval(-0.0,-0.0), interval(-Inf,2.0)) === interval(-Inf,2.0)
 
     @test fma(interval(-1.0,Inf), interval(-5.0, -1.0), interval(-Inf,2.0)) === interval(-Inf,7.0)
-
 
     @test fma(interval(-1.0,Inf), interval(-5.0, 3.0), interval(-Inf,2.0)) === entireinterval()
 
@@ -1681,13 +1642,11 @@ end
 
     @test fma(interval(-Inf,3.0), interval(-0.0,-0.0), interval(-Inf,2.0)) === interval(-Inf,2.0)
 
-
     @test fma(interval(-Inf,3.0), interval(-5.0, -1.0), interval(-Inf,2.0)) === entireinterval()
 
     @test fma(interval(-Inf,3.0), interval(-5.0, 3.0), interval(-Inf,2.0)) === entireinterval()
 
     @test fma(interval(-Inf,3.0), interval(1.0, 3.0), interval(-Inf,2.0)) === interval(-Inf,11.0)
-
 
     @test fma(interval(-Inf,3.0), interval(-Inf, -1.0), interval(-Inf,2.0)) === entireinterval()
 
@@ -1703,13 +1662,11 @@ end
 
     @test fma(interval(-Inf,-3.0), interval(-0.0,-0.0), interval(-Inf,2.0)) === interval(-Inf,2.0)
 
-
     @test fma(interval(-Inf,-3.0), interval(-5.0, -1.0), interval(-Inf,2.0)) === entireinterval()
 
     @test fma(interval(-Inf,-3.0), interval(-5.0, 3.0), interval(-Inf,2.0)) === entireinterval()
 
     @test fma(interval(-Inf,-3.0), interval(1.0, 3.0), interval(-Inf,2.0)) === interval(-Inf,-1.0)
-
 
     @test fma(interval(-Inf,-3.0), interval(-Inf, -1.0), interval(-Inf,2.0)) === entireinterval()
 
@@ -1775,7 +1732,6 @@ end
 
     @test fma(interval(1.0,5.0), interval(-Inf, 3.0), interval(-Inf,2.0)) === interval(-Inf,17.0)
 
-
     @test fma(interval(1.0,5.0), interval(-5.0, Inf), interval(-Inf,2.0)) === entireinterval()
 
     @test fma(interval(1.0,5.0), interval(1.0, Inf), interval(-Inf,2.0)) === entireinterval()
@@ -1798,7 +1754,6 @@ end
 
     @test fma(interval(-1.0,5.0), interval(1.0, 3.0), interval(-Inf,2.0)) === interval(-Inf,17.0)
 
-
     @test fma(interval(-1.0,5.0), interval(-Inf, -1.0), interval(-Inf,2.0)) === entireinterval()
 
     @test fma(interval(-1.0,5.0), interval(-Inf, 3.0), interval(-Inf,2.0)) === entireinterval()
@@ -1819,7 +1774,6 @@ end
 
     @test fma(interval(-10.0,-5.0), interval(1.0, 3.0), interval(-Inf,2.0)) === interval(-Inf,-3.0)
 
-
     @test fma(interval(-10.0,-5.0), interval(-Inf, -1.0), interval(-Inf,2.0)) === entireinterval()
 
     @test fma(interval(-10.0,-5.0), interval(-Inf, 3.0), interval(-Inf,2.0)) === entireinterval()
@@ -1827,7 +1781,6 @@ end
     @test fma(interval(-10.0,-5.0), interval(-5.0, Inf), interval(-Inf,2.0)) === interval(-Inf,52.0)
 
     @test fma(interval(-10.0,-5.0), interval(1.0, Inf), interval(-Inf,2.0)) === interval(-Inf,-3.0)
-
 
     @test fma(interval(-10.0,-5.0), entireinterval(), interval(-Inf,2.0)) === entireinterval()
 
@@ -1852,7 +1805,6 @@ end
     @test fma(entireinterval(), interval(0.0,0.0), interval(-2.0,2.0)) === interval(-2.0,2.0)
 
     @test fma(entireinterval(), interval(-0.0,-0.0), interval(-2.0,2.0)) === interval(-2.0,2.0)
-
 
     @test fma(entireinterval(), interval(-5.0, -1.0), interval(-2.0,2.0)) === entireinterval()
 
@@ -1882,7 +1834,6 @@ end
 
     @test fma(interval(1.0,Inf), interval(-Inf, -1.0), interval(-2.0,2.0)) === interval(-Inf,1.0)
 
-
     @test fma(interval(1.0,Inf), interval(-Inf, 3.0), interval(-2.0,2.0)) === entireinterval()
 
     @test fma(interval(1.0,Inf), interval(-5.0, Inf), interval(-2.0,2.0)) === entireinterval()
@@ -1900,7 +1851,6 @@ end
     @test fma(interval(-1.0,Inf), interval(-5.0, 3.0), interval(-2.0,2.0)) === entireinterval()
 
     @test fma(interval(-1.0,Inf), interval(1.0, 3.0), interval(-2.0,2.0)) === interval(-5.0,Inf)
-
 
     @test fma(interval(-1.0,Inf), interval(-Inf, -1.0), interval(-2.0,2.0)) === entireinterval()
 
@@ -1921,7 +1871,6 @@ end
     @test fma(interval(-Inf,3.0), interval(-5.0, 3.0), interval(-2.0,2.0)) === entireinterval()
 
     @test fma(interval(-Inf,3.0), interval(1.0, 3.0), interval(-2.0,2.0)) === interval(-Inf,11.0)
-
 
     @test fma(interval(-Inf,3.0), interval(-Inf, -1.0), interval(-2.0,2.0)) === entireinterval()
 
@@ -1944,7 +1893,6 @@ end
     @test fma(interval(-Inf,-3.0), interval(1.0, 3.0), interval(-2.0,2.0)) === interval(-Inf,-1.0)
 
     @test fma(interval(-Inf,-3.0), interval(-Inf, -1.0), interval(-2.0,2.0)) === interval(1.0,Inf)
-
 
     @test fma(interval(-Inf,-3.0), interval(-Inf, 3.0), interval(-2.0,2.0)) === entireinterval()
 
@@ -2030,7 +1978,6 @@ end
 
     @test fma(interval(-1.0,5.0), interval(1.0, 3.0), interval(-2.0,2.0)) === interval(-5.0,17.0)
 
-
     @test fma(interval(-1.0,5.0), interval(-Inf, -1.0), interval(-2.0,2.0)) === entireinterval()
 
     @test fma(interval(-1.0,5.0), interval(-Inf, 3.0), interval(-2.0,2.0)) === entireinterval()
@@ -2059,7 +2006,6 @@ end
 
     @test fma(interval(-10.0,-5.0), interval(1.0, Inf), interval(-2.0,2.0)) === interval(-Inf,-3.0)
 
-
     @test fma(interval(-10.0,-5.0), entireinterval(), interval(-2.0,2.0)) === entireinterval()
 
     @test fma(emptyinterval(), emptyinterval(), interval(-2.0,Inf)) === emptyinterval()
@@ -2084,7 +2030,6 @@ end
 
     @test fma(entireinterval(), interval(-0.0,-0.0), interval(-2.0,Inf)) === interval(-2.0,Inf)
 
-
     @test fma(entireinterval(), interval(-5.0, -1.0), interval(-2.0,Inf)) === entireinterval()
 
     @test fma(entireinterval(), interval(-5.0, 3.0), interval(-2.0,Inf)) === entireinterval()
@@ -2105,13 +2050,11 @@ end
 
     @test fma(interval(1.0,Inf), interval(-0.0,-0.0), interval(-2.0,Inf)) === interval(-2.0,Inf)
 
-
     @test fma(interval(1.0,Inf), interval(-5.0, -1.0), interval(-2.0,Inf)) === entireinterval()
 
     @test fma(interval(1.0,Inf), interval(-5.0, 3.0), interval(-2.0,Inf)) === entireinterval()
 
     @test fma(interval(1.0,Inf), interval(1.0, 3.0), interval(-2.0,Inf)) === interval(-1.0,Inf)
-
 
     @test fma(interval(1.0,Inf), interval(-Inf, -1.0), interval(-2.0,Inf)) === entireinterval()
 
@@ -2127,13 +2070,11 @@ end
 
     @test fma(interval(-1.0,Inf), interval(-0.0,-0.0), interval(-2.0,Inf)) === interval(-2.0,Inf)
 
-
     @test fma(interval(-1.0,Inf), interval(-5.0, -1.0), interval(-2.0,Inf)) === entireinterval()
 
     @test fma(interval(-1.0,Inf), interval(-5.0, 3.0), interval(-2.0,Inf)) === entireinterval()
 
     @test fma(interval(-1.0,Inf), interval(1.0, 3.0), interval(-2.0,Inf)) === interval(-5.0,Inf)
-
 
     @test fma(interval(-1.0,Inf), interval(-Inf, -1.0), interval(-2.0,Inf)) === entireinterval()
 
@@ -2150,7 +2091,6 @@ end
     @test fma(interval(-Inf,3.0), interval(-0.0,-0.0), interval(-2.0,Inf)) === interval(-2.0,Inf)
 
     @test fma(interval(-Inf,3.0), interval(-5.0, -1.0), interval(-2.0,Inf)) === interval(-17.0,Inf)
-
 
     @test fma(interval(-Inf,3.0), interval(-5.0, 3.0), interval(-2.0,Inf)) === entireinterval()
 
@@ -2172,13 +2112,11 @@ end
 
     @test fma(interval(-Inf,-3.0), interval(-5.0, -1.0), interval(-2.0,Inf)) === interval(1.0,Inf)
 
-
     @test fma(interval(-Inf,-3.0), interval(-5.0, 3.0), interval(-2.0,Inf)) === entireinterval()
 
     @test fma(interval(-Inf,-3.0), interval(1.0, 3.0), interval(-2.0,Inf)) === entireinterval()
 
     @test fma(interval(-Inf,-3.0), interval(-Inf, -1.0), interval(-2.0,Inf)) === interval(1.0,Inf)
-
 
     @test fma(interval(-Inf,-3.0), interval(-Inf, 3.0), interval(-2.0,Inf)) === entireinterval()
 
@@ -2238,7 +2176,6 @@ end
 
     @test fma(interval(1.0,5.0), interval(1.0, 3.0), interval(-2.0,Inf)) === interval(-1.0,Inf)
 
-
     @test fma(interval(1.0,5.0), interval(-Inf, -1.0), interval(-2.0,Inf)) === entireinterval()
 
     @test fma(interval(1.0,5.0), interval(-Inf, 3.0), interval(-2.0,Inf)) === entireinterval()
@@ -2265,7 +2202,6 @@ end
 
     @test fma(interval(-1.0,5.0), interval(1.0, 3.0), interval(-2.0,Inf)) === interval(-5.0,Inf)
 
-
     @test fma(interval(-1.0,5.0), interval(-Inf, -1.0), interval(-2.0,Inf)) === entireinterval()
 
     @test fma(interval(-1.0,5.0), interval(-Inf, 3.0), interval(-2.0,Inf)) === entireinterval()
@@ -2289,7 +2225,6 @@ end
     @test fma(interval(-10.0,-5.0), interval(-Inf, -1.0), interval(-2.0,Inf)) === interval(3.0,Inf)
 
     @test fma(interval(-10.0,-5.0), interval(-Inf, 3.0), interval(-2.0,Inf)) === interval(-32.0,Inf)
-
 
     @test fma(interval(-10.0,-5.0), interval(-5.0, Inf), interval(-2.0,Inf)) === entireinterval()
 
@@ -2529,7 +2464,6 @@ end
 
     @test fma(interval(-0.5,-0.1), interval(-Inf, 3.0), interval(-0.1,0.1)) === interval(-0x1.999999999999AP+0,Inf)
 
-
 end
 
 @testset "minimal_fma_dec_test" begin
@@ -2539,7 +2473,6 @@ end
     @test fma(DecoratedInterval(interval(1.0,2.0), com), DecoratedInterval(interval(1.0, 0x1.FFFFFFFFFFFFFp1023), com), DecoratedInterval(interval(0.0,1.0), com)) === DecoratedInterval(interval(1.0,Inf), dac)
 
     @test fma(DecoratedInterval(interval(1.0,2.0), com), DecoratedInterval(interval(1.0, 2.0), com), DecoratedInterval(interval(2.0,5.0), com)) === DecoratedInterval(interval(3.0,9.0), com)
-
 
 end
 
@@ -2631,7 +2564,6 @@ end
 
     @test ^(interval(-1.9,-0.33), 8) === interval(0x1.26F1FCDD502A3P-13,0x1.53ABD7BFC4FC6P+7)
 
-
     @test ^(emptyinterval(), 1) === emptyinterval()
 
     @test ^(entireinterval(), 1) === entireinterval()
@@ -2662,7 +2594,6 @@ end
 
     @test ^(interval(-1.9,-0.33), 1) === interval(-1.9,-0.33)
 
-
     @test ^(emptyinterval(), 3) === emptyinterval()
 
     @test ^(entireinterval(), 3) === entireinterval()
@@ -2692,7 +2623,6 @@ end
     @test ^(interval(0.01,2.33), 3) === interval(0x1.0C6F7A0B5ED8DP-20,0x1.94C75E6362A6P+3)
 
     @test ^(interval(-1.9,-0.33), 3) === interval(-0x1.B6F9DB22D0E55P+2,-0x1.266559F6EC5B1P-5)
-
 
     @test ^(emptyinterval(), 7) === emptyinterval()
 
@@ -2728,7 +2658,6 @@ end
 
     @test ^(entireinterval(), -2) === interval(0.0,Inf)
 
-
     @test ^(interval(0.0,0.0), -2) === emptyinterval()
 
     @test ^(interval(-0.0,-0.0), -2) === emptyinterval()
@@ -2759,7 +2688,6 @@ end
 
     @test ^(entireinterval(), -8) === interval(0.0,Inf)
 
-
     @test ^(interval(0.0,0.0), -8) === emptyinterval()
 
     @test ^(interval(-0.0,-0.0), -8) === emptyinterval()
@@ -2785,7 +2713,6 @@ end
     @test ^(interval(0.01,2.33), -8) === interval(0x1.2DC80DB11AB7CP-10,0x1.1C37937E08P+53)
 
     @test ^(interval(-1.9,-0.33), -8) === interval(0x1.81E104E61630DP-8,0x1.BC64F21560E34P+12)
-
 
     @test ^(emptyinterval(), -1) === emptyinterval()
 
@@ -2817,7 +2744,6 @@ end
 
     @test ^(interval(-1.9,-0.33), -1) === interval(-0x1.83E0F83E0F83EP+1,-0x1.0D79435E50D79P-1)
 
-
     @test ^(emptyinterval(), -3) === emptyinterval()
 
     @test ^(entireinterval(), -3) === entireinterval()
@@ -2847,7 +2773,6 @@ end
     @test ^(interval(0.01,2.33), -3) === interval(0x1.43CFBA61AACABP-4,0x1.E848P+19)
 
     @test ^(interval(-1.9,-0.33), -3) === interval(-0x1.BD393CE9E8E7CP+4,-0x1.2A95F6F7C066CP-3)
-
 
     @test ^(emptyinterval(), -7) === emptyinterval()
 
@@ -5811,7 +5736,6 @@ end
 
     @test exp(interval(0x1.78025C8B3FD39P+3,0x1.9FD8EEF3FA79BP+4)) === interval(0x1.EF461A783114CP+16,0x1.691D36C6B008CP+37)
 
-
 end
 
 @testset "minimal_exp_dec_test" begin
@@ -5831,6 +5755,7 @@ end
     @test exp2(interval(-Inf,-0.0)) === interval(0.0,1.0)
 
     @test exp2(interval(0.0,Inf)) === interval(1.0,Inf)
+
     @test exp2(interval(-0.0,Inf)) === interval(1.0,Inf)
 
     @test exp2(entireinterval()) === interval(0.0,Inf)
@@ -5858,6 +5783,14 @@ end
     @test exp2(interval(0x1.87F42B972949CP-1,0x1.8B55484710029P+6)) === interval(0x1.B333333333332P+0,0x1.C81FD88228B4FP+98)
 
     @test exp2(interval(0x1.78025C8B3FD39P+3,0x1.9FD8EEF3FA79BP+4)) === interval(0x1.AEA0000721857P+11,0x1.FCA0555555559P+25)
+
+end
+
+@testset "minimal_exp2_dec_test" begin
+
+    @test exp2(DecoratedInterval(interval(1024.0,1024.0), com)) === DecoratedInterval(interval(0x1.FFFFFFFFFFFFFP+1023,Inf), dac)
+
+    @test exp2(DecoratedInterval(interval(0x1.87F42B972949CP-1,0x1.8B55484710029P+6), def)) === DecoratedInterval(interval(0x1.B333333333332P+0,0x1.C81FD88228B4FP+98), def)
 
 end
 
@@ -6179,7 +6112,6 @@ end
 
     @test sin(interval(2.0,3.0)) === interval(0x1.210386DB6D55BP-3,0x1.D18F6EAD1B446P-1)
 
-
 end
 
 @testset "minimal_sin_dec_test" begin
@@ -6189,7 +6121,6 @@ end
     @test sin(DecoratedInterval(interval(-Inf,-0.0), trv)) === DecoratedInterval(interval(-1.0,1.0), trv)
 
     @test sin(DecoratedInterval(entireinterval(), dac)) === DecoratedInterval(interval(-1.0,1.0), dac)
-
 
 end
 
@@ -6299,7 +6230,6 @@ end
 
     @test cos(interval(2.0,3.0)) === interval(-0x1.FAE04BE85E5D3P-1,-0x1.AA22657537204P-2)
 
-
 end
 
 @testset "minimal_cos_dec_test" begin
@@ -6309,7 +6239,6 @@ end
     @test cos(DecoratedInterval(interval(-Inf,-0.0), def)) === DecoratedInterval(interval(-1.0,1.0), def)
 
     @test cos(DecoratedInterval(entireinterval(), dac)) === DecoratedInterval(interval(-1.0,1.0), dac)
-
 
 end
 
@@ -6345,7 +6274,6 @@ end
 
     @test tan(interval(-0.0,0x1.921FB54442D18P+0)) === interval(0.0,0x1.D02967C31CDB5P+53)
 
-
     @test tan(interval(0.0,0x1.921FB54442D19P+0)) === entireinterval()
 
     @test tan(interval(-0.0,0x1.921FB54442D19P+0)) === entireinterval()
@@ -6368,7 +6296,6 @@ end
 
     @test tan(interval(-0x1.921FB54442D18P+0,0x1.921FB54442D18P+0)) === interval(-0x1.D02967C31CDB5P+53,0x1.D02967C31CDB5P+53)
 
-
     @test tan(interval(-0x1.921FB54442D18P+0,0x1.921FB54442D19P+0)) === entireinterval()
 
     @test tan(interval(-0x1.921FB54442D19P+0,0x1.921FB54442D18P+0)) === entireinterval()
@@ -6382,7 +6309,6 @@ end
     @test tan(interval(0x1.4E18E147AE148P+12,0x1.546028F5C28F6P+12)) === entireinterval()
 
     @test tan(interval(0x1.FAE147AE147AEP-1,0x1.028F5C28F5C29P+0)) === interval(0x1.860FADCC59064P+0,0x1.979AD0628469DP+0)
-
 
 end
 
@@ -6418,7 +6344,6 @@ end
 
     @test tan(DecoratedInterval(interval(-0.0,0x1.921FB54442D18P+0), com)) === DecoratedInterval(interval(0.0,0x1.D02967C31CDB5P+53), com)
 
-
     @test tan(DecoratedInterval(interval(0.0,0x1.921FB54442D19P+0), trv)) === DecoratedInterval(entireinterval(), trv)
 
     @test tan(DecoratedInterval(interval(-0.0,0x1.921FB54442D19P+0), def)) === DecoratedInterval(entireinterval(), trv)
@@ -6441,7 +6366,6 @@ end
 
     @test tan(DecoratedInterval(interval(-0x1.921FB54442D18P+0,0x1.921FB54442D18P+0), com)) === DecoratedInterval(interval(-0x1.D02967C31CDB5P+53,0x1.D02967C31CDB5P+53), com)
 
-
     @test tan(DecoratedInterval(interval(-0x1.921FB54442D18P+0,0x1.921FB54442D19P+0), trv)) === DecoratedInterval(entireinterval(), trv)
 
     @test tan(DecoratedInterval(interval(-0x1.921FB54442D19P+0,0x1.921FB54442D18P+0), def)) === DecoratedInterval(entireinterval(), trv)
@@ -6455,7 +6379,6 @@ end
     @test tan(DecoratedInterval(interval(0x1.4E18E147AE148P+12,0x1.546028F5C28F6P+12), def)) === DecoratedInterval(entireinterval(), trv)
 
     @test tan(DecoratedInterval(interval(0x1.FAE147AE147AEP-1,0x1.028F5C28F5C29P+0), trv)) === DecoratedInterval(interval(0x1.860FADCC59064P+0,0x1.979AD0628469DP+0), trv)
-
 
 end
 
@@ -6487,7 +6410,6 @@ end
 
     @test asin(interval(-0.0,-0.0)) === interval(0.0,0.0)
 
-
     @test asin(interval(-Inf,-0x1.0000000000001P+0)) === emptyinterval()
 
     @test asin(interval(0x1.0000000000001P+0,Inf)) === emptyinterval()
@@ -6497,7 +6419,6 @@ end
     @test asin(interval(-0x1.51EB851EB851FP-2,0x1.FFFFFFFFFFFFFP-1)) === interval(-0x1.585FF6E341C3FP-2,0x1.921FB50442D19P+0)
 
     @test asin(interval(-0x1.FFFFFFFFFFFFFP-1,0x1.FFFFFFFFFFFFFP-1)) === interval(-0x1.921FB50442D19P+0,0x1.921FB50442D19P+0)
-
 
 end
 
@@ -6512,7 +6433,6 @@ end
     @test asin(DecoratedInterval(entireinterval(), dac)) === DecoratedInterval(interval(-0x1.921FB54442D19P+0,0x1.921FB54442D19P+0), trv)
 
     @test asin(DecoratedInterval(interval(-0x1.51EB851EB851FP-2,0x1.FFFFFFFFFFFFFP-1), def)) === DecoratedInterval(interval(-0x1.585FF6E341C3FP-2,0x1.921FB50442D19P+0), def)
-
 
 end
 
@@ -6544,7 +6464,6 @@ end
 
     @test acos(interval(-0.0,-0.0)) === interval(0x1.921FB54442D18P+0,0x1.921FB54442D19P+0)
 
-
     @test acos(interval(-Inf,-0x1.0000000000001P+0)) === emptyinterval()
 
     @test acos(interval(0x1.0000000000001P+0,Inf)) === emptyinterval()
@@ -6554,7 +6473,6 @@ end
     @test acos(interval(-0x1.51EB851EB851FP-2,0x1.FFFFFFFFFFFFFP-1)) === interval(0x1P-26,0x1.E837B2FD13428P+0)
 
     @test acos(interval(-0x1.FFFFFFFFFFFFFP-1,0x1.FFFFFFFFFFFFFP-1)) === interval(0x1P-26,0x1.921FB52442D19P+1)
-
 
 end
 
@@ -6569,7 +6487,6 @@ end
     @test acos(DecoratedInterval(entireinterval(), dac)) === DecoratedInterval(interval(0.0,0x1.921FB54442D19P+1), trv)
 
     @test acos(DecoratedInterval(interval(-0x1.51EB851EB851FP-2,0x1.FFFFFFFFFFFFFP-1), def)) === DecoratedInterval(interval(0x1P-26,0x1.E837B2FD13428P+0), def)
-
 
 end
 
@@ -6595,7 +6512,6 @@ end
 
     @test atan(interval(-0x1.FD219490EAAC1P+38,-0x1.1AF1C9D74F06DP+9)) === interval(-0x1.921FB54440CEBP+0,-0x1.91ABE5C1E4C6DP+0)
 
-
 end
 
 @testset "minimal_atan_dec_test" begin
@@ -6609,7 +6525,6 @@ end
     @test atan(DecoratedInterval(interval(1.0,0x1.4C2463567C5ACP+25), trv)) === DecoratedInterval(interval(0x1.921FB54442D18P-1,0x1.921FB4E19ABD7P+0), trv)
 
     @test atan(DecoratedInterval(interval(-0x1.FD219490EAAC1P+38,-0x1.1AF1C9D74F06DP+9), com)) === DecoratedInterval(interval(-0x1.921FB54440CEBP+0,-0x1.91ABE5C1E4C6DP+0), com)
-
 
 end
 
@@ -6671,7 +6586,6 @@ end
 
     @test atan(interval(0.0, 0.0), entireinterval()) === interval(0.0,0x1.921FB54442D19P+1)
 
-
     @test atan(interval(0.0, 0.0), interval(0.0, 0.0)) === emptyinterval()
 
     @test atan(interval(0.0, 0.0), interval(-0.0, 0.0)) === emptyinterval()
@@ -6697,7 +6611,6 @@ end
     @test atan(interval(-0.0, 0.0), emptyinterval()) === emptyinterval()
 
     @test atan(interval(-0.0, 0.0), entireinterval()) === interval(0.0,0x1.921FB54442D19P+1)
-
 
     @test atan(interval(-0.0, 0.0), interval(0.0, 0.0)) === emptyinterval()
 
@@ -6725,7 +6638,6 @@ end
 
     @test atan(interval(0.0, -0.0), entireinterval()) === interval(0.0,0x1.921FB54442D19P+1)
 
-
     @test atan(interval(0.0, -0.0), interval(0.0, 0.0)) === emptyinterval()
 
     @test atan(interval(0.0, -0.0), interval(-0.0, 0.0)) === emptyinterval()
@@ -6751,7 +6663,6 @@ end
     @test atan(interval(-0.0, -0.0), emptyinterval()) === emptyinterval()
 
     @test atan(interval(-0.0, -0.0), entireinterval()) === interval(0.0,0x1.921FB54442D19P+1)
-
 
     @test atan(interval(-0.0, -0.0), interval(0.0, 0.0)) === emptyinterval()
 
@@ -6957,7 +6868,6 @@ end
 
     @test atan(interval(0.1, 1.0), interval(0.1, 1.0)) === interval(0x1.983E282E2CC4CP-4, 0x1.789BD2C160054P+0)
 
-
 end
 
 @testset "minimal_atan2_dec_test" begin
@@ -7018,7 +6928,6 @@ end
 
     @test atan(DecoratedInterval(interval(0.0, 0.0), dac), DecoratedInterval(entireinterval(), dac)) === DecoratedInterval(interval(0.0,0x1.921FB54442D19P+1), trv)
 
-
     @test atan(DecoratedInterval(interval(0.0, 0.0), def), DecoratedInterval(interval(0.0, 0.0), trv)) === DecoratedInterval(emptyinterval(), trv)
 
     @test atan(DecoratedInterval(interval(0.0, 0.0), trv), DecoratedInterval(interval(-0.0, 0.0), dac)) === DecoratedInterval(emptyinterval(), trv)
@@ -7044,7 +6953,6 @@ end
     @test atan(DecoratedInterval(interval(-0.0, 0.0), com), DecoratedInterval(emptyinterval(), trv)) === DecoratedInterval(emptyinterval(), trv)
 
     @test atan(DecoratedInterval(interval(-0.0, 0.0), dac), DecoratedInterval(entireinterval(), dac)) === DecoratedInterval(interval(0.0,0x1.921FB54442D19P+1), trv)
-
 
     @test atan(DecoratedInterval(interval(-0.0, 0.0), def), DecoratedInterval(interval(0.0, 0.0), com)) === DecoratedInterval(emptyinterval(), trv)
 
@@ -7072,7 +6980,6 @@ end
 
     @test atan(DecoratedInterval(interval(0.0, -0.0), dac), DecoratedInterval(entireinterval(), dac)) === DecoratedInterval(interval(0.0,0x1.921FB54442D19P+1), trv)
 
-
     @test atan(DecoratedInterval(interval(0.0, -0.0), def), DecoratedInterval(interval(0.0, 0.0), dac)) === DecoratedInterval(emptyinterval(), trv)
 
     @test atan(DecoratedInterval(interval(0.0, -0.0), trv), DecoratedInterval(interval(-0.0, 0.0), com)) === DecoratedInterval(emptyinterval(), trv)
@@ -7098,7 +7005,6 @@ end
     @test atan(DecoratedInterval(interval(-0.0, -0.0), com), DecoratedInterval(emptyinterval(), trv)) === DecoratedInterval(emptyinterval(), trv)
 
     @test atan(DecoratedInterval(interval(-0.0, -0.0), def), DecoratedInterval(entireinterval(), dac)) === DecoratedInterval(interval(0.0,0x1.921FB54442D19P+1), trv)
-
 
     @test atan(DecoratedInterval(interval(-0.0, -0.0), dac), DecoratedInterval(interval(0.0, 0.0), com)) === DecoratedInterval(emptyinterval(), trv)
 
@@ -7304,7 +7210,6 @@ end
 
     @test atan(DecoratedInterval(interval(0.1, 1.0), dac), DecoratedInterval(interval(0.1, 1.0), def)) === DecoratedInterval(interval(0x1.983E282E2CC4CP-4, 0x1.789BD2C160054P+0), def)
 
-
 end
 
 @testset "minimal_sinh_test" begin
@@ -7331,7 +7236,6 @@ end
 
     @test sinh(interval(-0x1.199999999999AP+0,0x1.2666666666666P+1)) === interval(-0x1.55ECFE1B2B215P+0,0x1.3BF72EA61AF1BP+2)
 
-
 end
 
 @testset "minimal_sinh_dec_test" begin
@@ -7345,7 +7249,6 @@ end
     @test sinh(DecoratedInterval(interval(1.0,0x1.2C903022DD7AAP+8), com)) === DecoratedInterval(interval(0x1.2CD9FC44EB982P+0,0x1.89BCA168970C6P+432), com)
 
     @test sinh(DecoratedInterval(interval(-0x1.FD219490EAAC1P+38,-0x1.1AF1C9D74F06DP+9), com)) === DecoratedInterval(interval(-Inf,-0x1.53045B4F849DEP+815), dac)
-
 
 end
 
@@ -7373,7 +7276,6 @@ end
 
     @test cosh(interval(-0x1.199999999999AP+0,0x1.2666666666666P+1)) === interval(1.0,0x1.4261D2B7D6181P+2)
 
-
 end
 
 @testset "minimal_cosh_dec_test" begin
@@ -7387,7 +7289,6 @@ end
     @test cosh(DecoratedInterval(interval(1.0,0x1.2C903022DD7AAP+8), def)) === DecoratedInterval(interval(0x1.8B07551D9F55P+0,0x1.89BCA168970C6P+432), def)
 
     @test cosh(DecoratedInterval(interval(-0x1.FD219490EAAC1P+38,-0x1.1AF1C9D74F06DP+9), com)) === DecoratedInterval(interval(0x1.53045B4F849DEP+815,Inf), dac)
-
 
 end
 
@@ -7415,7 +7316,6 @@ end
 
     @test tanh(interval(-0x1.199999999999AP+0,0x1.2666666666666P+1)) === interval(-0x1.99DB01FDE2406P-1,0x1.F5CF31E1C8103P-1)
 
-
 end
 
 @testset "minimal_tanh_dec_test" begin
@@ -7429,7 +7329,6 @@ end
     @test tanh(DecoratedInterval(interval(1.0,0x1.2C903022DD7AAP+8), com)) === DecoratedInterval(interval(0x1.85EFAB514F394P-1,0x1P+0), com)
 
     @test tanh(DecoratedInterval(interval(-0x1.FD219490EAAC1P+38,-0x1.1AF1C9D74F06DP+9), trv)) === DecoratedInterval(interval(-0x1P+0,-0x1.FFFFFFFFFFFFFP-1), trv)
-
 
 end
 
@@ -7457,7 +7356,6 @@ end
 
     @test asinh(interval(-0x1.199999999999AP+0,0x1.2666666666666P+1)) === interval(-0x1.E693DF6EDF1E7P-1,0x1.91FDC64DE0E51P+0)
 
-
 end
 
 @testset "minimal_asinh_dec_test" begin
@@ -7471,7 +7369,6 @@ end
     @test asinh(DecoratedInterval(interval(1.0,0x1.2C903022DD7AAP+8), com)) === DecoratedInterval(interval(0x1.C34366179D426P-1,0x1.9986127438A87P+2), com)
 
     @test asinh(DecoratedInterval(interval(-0x1.FD219490EAAC1P+38,-0x1.1AF1C9D74F06DP+9), def)) === DecoratedInterval(interval(-0x1.BB86380A6CC45P+4,-0x1.C204D8EB20827P+2), def)
-
 
 end
 
@@ -7499,7 +7396,6 @@ end
 
     @test acosh(interval(0x1.14D4E82B2B26FP+15,0x1.72DBE91C837B5P+29)) === interval(0x1.656510B4BAEC3P+3,0x1.52A415EE8455AP+4)
 
-
 end
 
 @testset "minimal_acosh_dec_test" begin
@@ -7520,7 +7416,6 @@ end
 
     @test acosh(DecoratedInterval(interval(0x1.14D4E82B2B26FP+15,0x1.72DBE91C837B5P+29), def)) === DecoratedInterval(interval(0x1.656510B4BAEC3P+3,0x1.52A415EE8455AP+4), def)
 
-
 end
 
 @testset "minimal_atanh_test" begin
@@ -7537,7 +7432,6 @@ end
 
     @test atanh(interval(-Inf,-0.0)) === interval(-Inf,0.0)
 
-
     @test atanh(interval(-Inf,-1.0)) === emptyinterval()
 
     @test atanh(interval(-1.0,1.0)) === entireinterval()
@@ -7545,7 +7439,6 @@ end
     @test atanh(interval(0.0,0.0)) === interval(0.0,0.0)
 
     @test atanh(interval(-0.0,-0.0)) === interval(0.0,0.0)
-
 
     @test atanh(interval(-1.0,-1.0)) === emptyinterval()
 
@@ -7556,7 +7449,6 @@ end
     @test atanh(interval(0x1.4C0420F6F08CCP-2,0x1.FFFFFFFFFFFFFP-1)) === interval(0x1.5871DD2DF9102P-2,0x1.2B708872320E2P+4)
 
     @test atanh(interval(-0x1.FFB88E9EB6307P-1,0x1.999999999999AP-4)) === interval(-0x1.06A3A97D7979CP+2,0x1.9AF93CD234413P-4)
-
 
 end
 
@@ -7579,7 +7471,6 @@ end
     @test atanh(DecoratedInterval(interval(-0x1.FFB88E9EB6307P-1,0x1.999999999999AP-4), def)) === DecoratedInterval(interval(-0x1.06A3A97D7979CP+2,0x1.9AF93CD234413P-4), def)
 
     @test atanh(DecoratedInterval(interval(-0x1.FFB88E9EB6307P-1,1.0), com)) === DecoratedInterval(interval(-0x1.06A3A97D7979CP+2,Inf), trv)
-
 
 end
 
@@ -7607,7 +7498,6 @@ end
 
     @test sign(entireinterval()) === interval(-1.0,1.0)
 
-
 end
 
 @testset "minimal_sign_dec_test" begin
@@ -7625,7 +7515,6 @@ end
     @test sign(DecoratedInterval(interval(-5.0,-2.0), trv)) === DecoratedInterval(interval(-1.0,-1.0), trv)
 
     @test sign(DecoratedInterval(interval(0.0,0.0), dac)) === DecoratedInterval(interval(0.0,0.0), dac)
-
 
 end
 
@@ -7661,7 +7550,6 @@ end
 
     @test ceil(interval(-Inf,-0x1.FFFFFFFFFFFFFp1023)) === interval(-Inf,-0x1.FFFFFFFFFFFFFp1023)
 
-
 end
 
 @testset "minimal_ceil_dec_test" begin
@@ -7694,7 +7582,6 @@ end
 
     @test ceil(DecoratedInterval(interval(-Inf,-0x1.FFFFFFFFFFFFFp1023), dac)) === DecoratedInterval(interval(-Inf,-0x1.FFFFFFFFFFFFFp1023), def)
 
-
 end
 
 @testset "minimal_floor_test" begin
@@ -7725,7 +7612,6 @@ end
 
     @test floor(interval(-Inf,2.2)) === interval(-Inf,2.0)
 
-
 end
 
 @testset "minimal_floor_dec_test" begin
@@ -7753,7 +7639,6 @@ end
     @test floor(DecoratedInterval(interval(-Inf,2.2), trv)) === DecoratedInterval(interval(-Inf,2.0), trv)
 
     @test floor(DecoratedInterval(interval(-0x1.FFFFFFFFFFFFFp1023,-0x1.FFFFFFFFFFFFFp1023), com)) === DecoratedInterval(interval(-0x1.FFFFFFFFFFFFFp1023,-0x1.FFFFFFFFFFFFFp1023), dac)
-
 
 end
 
@@ -7785,7 +7670,6 @@ end
 
     @test trunc(interval(-Inf,2.2)) === interval(-Inf,2.0)
 
-
 end
 
 @testset "minimal_trunc_dec_test" begin
@@ -7813,7 +7697,6 @@ end
     @test trunc(DecoratedInterval(interval(0x1.FFFFFFFFFFFFFp1023,0x1.FFFFFFFFFFFFFp1023), com)) === DecoratedInterval(interval(0x1.FFFFFFFFFFFFFp1023,0x1.FFFFFFFFFFFFFp1023), dac)
 
     @test trunc(DecoratedInterval(interval(0x1.FFFFFFFFFFFFFp1023,Inf), dac)) === DecoratedInterval(interval(0x1.FFFFFFFFFFFFFp1023,Inf), def)
-
 
 end
 
@@ -7855,7 +7738,6 @@ end
 
     @test round(interval(-Inf,2.2)) === interval(-Inf,2.0)
 
-
 end
 
 @testset "minimal_round_ties_to_even_dec_test" begin
@@ -7871,7 +7753,6 @@ end
     @test round(DecoratedInterval(interval(-1.5,Inf), dac)) === DecoratedInterval(interval(-2.0,Inf), def)
 
     @test round(DecoratedInterval(interval(-Inf,2.2), trv)) === DecoratedInterval(interval(-Inf,2.0), trv)
-
 
 end
 
@@ -7913,7 +7794,6 @@ end
 
     @test round(interval(-Inf,2.2), RoundNearestTiesAway) === interval(-Inf,2.0)
 
-
 end
 
 @testset "minimal_round_ties_to_away_dec_test" begin
@@ -7931,7 +7811,6 @@ end
     @test round(DecoratedInterval(interval(-1.5,Inf), dac), RoundNearestTiesAway) === DecoratedInterval(interval(-2.0,Inf), def)
 
     @test round(DecoratedInterval(interval(-Inf,2.2), def), RoundNearestTiesAway) === DecoratedInterval(interval(-Inf,2.0), def)
-
 
 end
 
@@ -7961,7 +7840,6 @@ end
 
     @test abs(interval(-Inf,-2.2)) === interval(2.2,Inf)
 
-
 end
 
 @testset "minimal_abs_dec_test" begin
@@ -7982,7 +7860,6 @@ end
 
     @test abs(DecoratedInterval(interval(-1.5,Inf), dac)) === DecoratedInterval(interval(0.0,Inf), dac)
 
-
 end
 
 @testset "minimal_min_test" begin
@@ -7996,7 +7873,6 @@ end
     @test min(entireinterval(), interval(1.0,2.0)) === interval(-Inf,2.0)
 
     @test min(interval(1.0,2.0), entireinterval()) === interval(-Inf,2.0)
-
 
     @test min(entireinterval(), entireinterval()) === entireinterval()
 
@@ -8018,7 +7894,6 @@ end
 
     @test min(interval(-7.0,-0.0), interval(2.0,4.0)) === interval(-7.0,0.0)
 
-
 end
 
 @testset "minimal_min_dec_test" begin
@@ -8030,7 +7905,6 @@ end
     @test min(DecoratedInterval(interval(-7.0,0.0), dac), DecoratedInterval(interval(2.0,4.0), def)) === DecoratedInterval(interval(-7.0,0.0), def)
 
     @test min(DecoratedInterval(interval(-7.0,-0.0), com), DecoratedInterval(interval(2.0,4.0), com)) === DecoratedInterval(interval(-7.0,0.0), com)
-
 
 end
 
@@ -8045,7 +7919,6 @@ end
     @test max(entireinterval(), interval(1.0,2.0)) === interval(1.0,Inf)
 
     @test max(interval(1.0,2.0), entireinterval()) === interval(1.0,Inf)
-
 
     @test max(entireinterval(), entireinterval()) === entireinterval()
 
@@ -8067,7 +7940,6 @@ end
 
     @test max(interval(-7.0,-5.0), interval(-2.0,-0.0)) === interval(-2.0,0.0)
 
-
 end
 
 @testset "minimal_max_dec_test" begin
@@ -8081,4 +7953,3 @@ end
     @test max(DecoratedInterval(interval(3.0,3.5), com), DecoratedInterval(interval(2.0,4.0), com)) === DecoratedInterval(interval(3.0,4.0), com)
 
 end
-

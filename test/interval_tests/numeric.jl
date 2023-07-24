@@ -329,11 +329,15 @@ end
     end
 
     @testset "Float32 intervals" begin
+
         a = interval(Float32, 1e38)
         b = interval(Float32, 1e2)
         @test a * b ≛ interval(Float32, floatmax(Float32), Inf)
         @test interval(1.0f0) ^ interval(1.0f0) ≛ interval(1.0f0) # test for PR #482
     end
+
+
+
 end
 
 @testset "Mince for `Interval`s" begin
@@ -385,86 +389,4 @@ end
     @test nthroot(interval(BigFloat, -27, 27), -3) ≛ interval(BigFloat, -Inf, Inf)
     @test nthroot(interval(BigFloat, -81, -16), -4) ≛ ∅
     @test nthroot(interval(BigFloat, -81, -16), 1) ≛ interval(BigFloat, -81, -16)
-end
-
-# approximation used for testing (not to rely on ≈ for intervals)
-# ⪆(x, y) = (x ≈ y) && (x ⊇ y)
-⪆(x::Interval, y::Interval) = x.lo ≈ y.lo && x.hi ≈ y.hi && x ⊇ y
-
-@testset "`mod`" begin
-    r = 0.0625
-    x = r..(1+r)
-    @test mod(x, 1) == mod(x, 1.0) == 0..1
-    @test mod(x, 2) == mod(x, 2.0) ⪆ x
-    @test mod(x, 2.5) ⪆ x
-    @test mod(x, 0.5) == 0..0.5
-    @test mod(x, -1) == mod(x, -1.0) == -1..0
-    @test mod(x, -2) == mod(x, -2.0) ⪆ -2+x
-    @test mod(x, -2.5) ⪆ -2.5+x
-    @test mod(x, -0.5) == -0.5..0
-
-    x = (-1+r) .. -r
-    @test mod(x, 1) == mod(x, 1.0) ⪆ 1+x
-    @test mod(x, 2) == mod(x, 2.0) ⪆ 2+x
-    @test mod(x, 2.5) ⪆ 2.5+x
-    @test mod(x, 0.5) == 0..0.5
-    @test mod(x, -1) == mod(x, -1.0) ⪆ x
-    @test mod(x, -2) == mod(x, -2.0) ⪆ x
-    @test mod(x, -2.5) ⪆ x
-    @test mod(x, -0.5) == -0.5..0
-
-    x = -r .. 1-r
-    @test mod(x, 1) == mod(x, 1.0) == 0..1
-    @test mod(x, 2) == mod(x, 2.0) == 0..2
-    @test mod(x, 2.5) == 0..2.5
-    @test mod(x, 0.5) == 0..0.5
-    @test mod(x, -1) == mod(x, -1.0) == -1..0
-    @test mod(x, -2) == mod(x, -2.0) == -2..0
-    @test mod(x, -2.5) == -2.5..0
-    @test mod(x, -0.5) == -0.5..0
-
-    # TODO - implement mod for two intervals
-    @test_throws ArgumentError mod(1..2, 1.4..1.5)
-    @test_throws ArgumentError mod(1.0, 1.4..1.5)
-end
-
-# approximation used for testing (not to rely on ≈ for intervals)
-# ⪆(x, y) = (x ≈ y) && (x ⊇ y)
-⪆(x::Interval, y::Interval) = x.lo ≈ y.lo && x.hi ≈ y.hi && x ⊇ y
-
-@testset "`mod`" begin
-    r = 0.0625
-    x = r..(1+r)
-    @test mod(x, 1) == mod(x, 1.0) == 0..1
-    @test mod(x, 2) == mod(x, 2.0) ⪆ x
-    @test mod(x, 2.5) ⪆ x
-    @test mod(x, 0.5) == 0..0.5
-    @test mod(x, -1) == mod(x, -1.0) == -1..0
-    @test mod(x, -2) == mod(x, -2.0) ⪆ -2+x
-    @test mod(x, -2.5) ⪆ -2.5+x
-    @test mod(x, -0.5) == -0.5..0
-
-    x = (-1+r) .. -r
-    @test mod(x, 1) == mod(x, 1.0) ⪆ 1+x
-    @test mod(x, 2) == mod(x, 2.0) ⪆ 2+x
-    @test mod(x, 2.5) ⪆ 2.5+x
-    @test mod(x, 0.5) == 0..0.5
-    @test mod(x, -1) == mod(x, -1.0) ⪆ x
-    @test mod(x, -2) == mod(x, -2.0) ⪆ x
-    @test mod(x, -2.5) ⪆ x
-    @test mod(x, -0.5) == -0.5..0
-
-    x = -r .. 1-r
-    @test mod(x, 1) == mod(x, 1.0) == 0..1
-    @test mod(x, 2) == mod(x, 2.0) == 0..2
-    @test mod(x, 2.5) == 0..2.5
-    @test mod(x, 0.5) == 0..0.5
-    @test mod(x, -1) == mod(x, -1.0) == -1..0
-    @test mod(x, -2) == mod(x, -2.0) == -2..0
-    @test mod(x, -2.5) == -2.5..0
-    @test mod(x, -0.5) == -0.5..0
-
-    # TODO - implement mod for two intervals
-    @test_throws ArgumentError mod(1..2, 1.4..1.5)
-    @test_throws ArgumentError mod(1.0, 1.4..1.5)
 end
