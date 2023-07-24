@@ -15,11 +15,13 @@ include("libieeep1788_rec_bool.jl")
 include("libieeep1788_reduction.jl")
 include("libieeep1788_set.jl")
 include("mpfi.jl")
-include("abs_rev.jl")
 
 # Need to adapt IntervalContractors for the following
-# using IntervalContractors
-#
+using IntervalContractors
+
+include("abs_rev.jl")
+
+# Need to be regenerated to be compatible with the latest version
 # include("libieeep1788_rev.jl")
 # include("libieeep1788_mul_rev.jl")
 # include("pow_rev.jl")
