@@ -1,11 +1,10 @@
-
 for op in (:⊆, :⊂, :⪽)
-    @eval function $(op)(x::Complex{Interval{T}}, y::Complex{Interval{S}}) where {T, S}
+    @eval function $(op)(x::Complex{<:Interval}, y::Complex{<:Interval})
         return $(op)(real(x), real(y)) && $(op)(imag(x), imag(y))
     end
 end
 
-function ^(x::Complex{Interval{T}}, n::Integer) where {T}
+function ^(x::Complex{<:Interval}, n::Integer)
     if n < 0
         return inv(x)^n
     end
@@ -13,11 +12,11 @@ function ^(x::Complex{Interval{T}}, n::Integer) where {T}
     return Base.power_by_squaring(x, n)
 end
 
-function ^(x::Complex{Interval{T}}, y::Real) where {T}
+function ^(x::Complex{<:Interval}, y::Real)
     return exp(y*log(x))
 end
 
-function ^(x::Complex{Interval{T}}, y::Complex) where {T}
+function ^(x::Complex{<:Interval}, y::Complex)
     return exp(y*log(x))
 end
 
@@ -57,11 +56,11 @@ function sqrt_realpart(x::T, y::T,RND::RoundingMode) where T<:AbstractFloat
     ρ = ldexp(sqrt(ρ,RND),k) #sqrt((abs(z)+abs(x))/2) without over/underflow
 end
 
-function sqrt(z::Complex{Interval{T}}) where T<:AbstractFloat
+function sqrt(z::Complex{Interval{T}}) where {T<:AbstractFloat}
     x, y = reim(z)
 
     (inf(x) < 0 && inf(y) < 0 && sup(y) >= 0) && error("Interval lies across branch cut")
-    x == y == 0 && return Complex(zero(x),y)
+    iszero(x) && iszero(y) && return Complex(zero(x),y)
 
     (inf(x) < 0 && sup(x) > 0) && return sqrt((inf(x)..0) + im*y) ∪ sqrt((0..sup(x)) + im*y)
 
@@ -101,7 +100,7 @@ function sqrt(z::Complex{Interval{T}}) where T<:AbstractFloat
 end
 
 
-function log(z::Complex{T}) where T<:Interval
+function log(z::Complex{<:Interval})
     ρ = abs(z)
     θ = angle(z)
 
@@ -109,20 +108,19 @@ function log(z::Complex{T}) where T<:Interval
 end
 
 
-function abs2(z::Complex{T}) where T<:Interval
-    return real(z)^2 + imag(z)^2
-end
+abs2(z::Complex{<:Interval}) = real(z)^2 + imag(z)^2
 
-function abs(z::Complex{T}) where T<:Interval
-    return sqrt(abs2(z))
-end
+abs(z::Complex{<:Interval}) = sqrt(abs2(z))
+
 #
 # # \left( |x|^p \right)^{1/p}.
 # function norm(z::Complex{T}, p=2) where T<:Interval
 #     return (abs(z)^(p))^(1 / p)
 # end
 
-# real functions
-mid(z::Complex{T}) where {T <: Interval} = mid(real(z)) + mid(imag(z)) * im
-mag(z::Complex{T}) where {T <: Interval} = sup(abs(z))
-mig(z::Complex{T}) where {T <: Interval} = inf(abs(z))
+mid(z::Complex) = complex(mid(real(z)), mid(imag(z)))
+diam(z::Complex) = max(diam(real(z)), diam(imag(z)))
+radius(z::Complex) = max(radius(real(z)), radius(imag(z)))
+midpoint_radius(z::Complex) = (mid(z), radius(z))
+mag(z::Complex) = sup(abs(z))
+mig(z::Complex) = inf(abs(z))

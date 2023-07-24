@@ -1,384 +1,364 @@
 mutable struct DisplayParameters
     format::Symbol
     decorations::Bool
-    sigfigs::Int
+    sigdigits::Int
 end
 
-function Base.show(io::IO, params::DisplayParameters)
-    println(io, "Display parameters:")
-    println(io, "- format: $(params.format)")
-    println(io, "- decorations: $(params.decorations)")
-    print(io, "- significant figures: $(params.sigfigs)")
+function Base.show(io::IO, ::MIME"text/plain", params::DisplayParameters)
+    println(io, "Display options:")
+    println(io, "  - format: ", params.format)
+    println(io, "  - decorations: ", params.decorations)
+    print(io, "  - significant digits: ", params.sigdigits)
 end
 
-const display_params = DisplayParameters(:standard, false, 6)
-
-const display_options = (:standard, :full, :midpoint)
+const display_params = DisplayParameters(:standard, true, 6)  # Default
 
 """
-    setformat(format=none; decorations=none, sigfigs=none)
+    setformat(format::Symbol; decorations::Bool, sigdigits::Int)
+    setformat()
 
-`setformat` changes how intervals are displayed.
-It returns the new `DisplayParameters` object.
+Change the format used by `show` to display intervals.
 
-Note that The `@format` macro is more user-friendly.
+Initially, the display options are `format = :standard`, `decorations = false`
+and `sigdigits = 6`.
 
-The following options are available:
+If any of the three argument `format`, `decorations` and `sigdigits` is omitted,
+then their value is left unchanged.
 
-- `format`: interval output format
+If the three arguments are omitted, i.e. calling `setformat()`, then the values
+are reset to the default display options.
 
-    - `:standard`: `[1, 2]`
-    - `:full`: `Interval(1, 2)`
-    - `:midpoint`: 1.5 ± 0.5
+Possible options:
+- `format` can be:
+  - `:standard`: `[1, 2]`.
+  - `:midpoint`: display `x::Interval` in the form "mid(x) ± radius(x)".
+  - `:full`: display the entire bounds regardless of `sigdigits`.
+- `sigdigits`: number (greater or equal to 1) of significant digits to display.
+- `decorations`: display the decorations or not.
 
-- `sigfigs`: number of significant figures to show in `standard` mode; the default is 6
-
-- `decorations` (boolean):  show decorations or not
-
-Example:
+# Example
 ```
-julia> setformat(:full, decorations=true)
+julia> x = interval(0.1, 0.3)  # Default display options
+[0.0999999, 0.300001]
+
+julia> setformat(:full)
 Display parameters:
-- format: full
-- decorations: true
-- significant figures: 6
-```
-"""
-function setformat(format = nothing;
-                    decorations = nothing,
-                    sigfigs = nothing)
-
-
-    if format != nothing
-        if format ∉ display_options
-            throw(ArgumentError("Allowed format option is one of  $display_options."))
-        else
-            display_params.format = format
-        end
-    end
-
-    if decorations !=  nothing
-        if decorations ∉ (true, false)
-            throw(ArgumentError("`decorations` must be `true` or `false`"))
-        end
-
-        display_params.decorations = decorations
-
-    end
-
-    if sigfigs != nothing
-        if sigfigs < 1
-            throw(ArgumentError("`sigfigs` must be `>= 1`"))
-        end
-
-        display_params.sigfigs = sigfigs
-
-    end
-
-    return display_params
-end
-
-"""
-    @format [style::Symbol] [decorations::Bool] [sigfigs::Integer]
-
-The `@format` macro provides a simple interface to control the output format
-for intervals. These options are passed to the `setformat` function.
-It returns the new `DisplayParameters` object.
-
-The arguments may be in any order and of type:
-
-- `Symbol`: the output format (`:full`, `:standard` or `:midpoint`)
-- `Bool`: whether to display decorations
-- `Integer`: the number of significant figures
-
-E.g.
-```
-julia> x = 0.1..0.3
-@[0.0999999, 0.300001]
-
-julia> @format full
-Display parameters:
-- format: full
-- decorations: false
-- significant figures: 6
+  - format: full
+  - decorations: true
+  - significant digits: 6
 
 julia> x
 Interval(0.09999999999999999, 0.30000000000000004)
 
-julia> @format standard 3
+julia> setformat(:standard; sigdigits = 3)
 Display parameters:
-- format: standard
-- decorations: false
-- significant figures: 3
+  - format: standard
+  - decorations: true
+  - significant digits: 3
 
 julia> x
 [0.0999, 0.301]
 ```
 """
-macro format(expr...)
+function setformat(format::Symbol = display_params.format;
+        decorations::Bool = display_params.decorations,
+        sigdigits::Int = display_params.sigdigits)
 
-    format = Meta.quot(display_params.format)
-    decorations = display_params.decorations
-    sigfigs = display_params.sigfigs
+    format ∉ (:standard, :midpoint, :full) && return throw(ArgumentError("`format` must be `:standard`, `:midpoint` or `:full`."))
+    sigdigits < 1 && return throw(ArgumentError("`sigdigits` must be `≥ 1`."))
 
-    for ex in expr
+    display_params.format = format
+    display_params.decorations = decorations
+    display_params.sigdigits = sigdigits
 
-        if isa(ex, Symbol)
-            format = Meta.quot(ex)
+    return display_params
+end
 
-        elseif isa(ex, Bool)
-            decorations = ex
+# Printing mechanism for various types of intervals
 
-        elseif isa(ex, Integer)
-            sigfigs = ex
+show(io::IO, ::MIME"text/plain", a::Union{Interval,Complex{<:Interval},DecoratedInterval,IntervalBox}) =
+    print(io, representation(a, display_params.format))
+
+function show(io::IO, a::Union{Interval,Complex{<:Interval},DecoratedInterval,IntervalBox})
+    get(io, :compact, false) && return print(io, representation(a, display_params.format))
+    return print(io, representation(a, :full))
+end
+
+# `String` representation of various types of intervals
+
+representation(a::Interval, format::Symbol) = basic_representation(a, format)
+
+function representation(a::Interval{T}, format::Symbol) where {T<:BigFloat}
+    # `format` is either :standard, :midpoint or :full
+    format === :standard && return string(basic_representation(a, format), subscriptify(precision(T)))
+    format === :midpoint && return string("(", basic_representation(a, format), ")", subscriptify(precision(T)))
+    return basic_representation(a, format)
+end
+
+function representation(x::Complex{<:Interval}, format::Symbol)
+    # `format` is either :standard, :midpoint or :full
+    format === :midpoint && return string("(", representation(real(x), format), ") + (", representation(imag(x), format), ")im")
+    return string(representation(real(x), format), " + ", representation(imag(x), format), "im")
+end
+
+# No extra brackets for `:midpoint` and `BigFloat`: the display of the precision add some
+function representation(x::Complex{Interval{BigFloat}}, format::Symbol)
+    # `format` is either :standard, :midpoint or :full
+    return string(representation(real(x), format), " + ", representation(imag(x), format), "im")
+end
+
+function representation(a::DecoratedInterval, format::Symbol)
+    # `format` is either :standard, :midpoint or :full
+    var_interval = representation(interval(a), format)
+    format === :full && return string("DecoratedInterval(", var_interval, ", ", decoration(a), ")")
+    if format === :midpoint  # Add extra brackets
+        var_interval = string("(", var_interval, ")")
+    end
+    display_params.decorations && return string(var_interval, "_", decoration(a))
+    return var_interval
+end
+
+# No extra brackets for `:midpoint` and `BigFloat`: the display of the precision add some
+function representation(a::DecoratedInterval{BigFloat}, format::Symbol)
+    # `format` is either :standard, :midpoint or :full
+    var_interval = representation(interval(a), format)
+    format === :full && return string("DecoratedInterval(", var_interval, ", ", decoration(a), ")")
+    display_params.decorations && return string(var_interval, "_", decoration(a))
+    return var_interval
+end
+
+function representation(X::IntervalBox{N}, format::Symbol) where {N}
+    # `format` is either :standard, :midpoint or :full
+    if format === :full
+        isempty(X) && return string("IntervalBox(∅, ", N, ")")
+        x = first(X)
+        all(y -> x ≛ y, X) && return string("IntervalBox(", representation(x, format), ", ", N, ")")
+        str = representation.(X.v, format)
+        return string("IntervalBox(", join(str, ", "), ")")
+    elseif format === :midpoint
+        isempty(X) && return string("∅", supscriptify(N))
+        x = first(X)
+        all(y -> x ≛ y, X) && return string("(", representation(x, format), ")", supscriptify(N))
+        str = representation.(X.v, format)
+        return string("(", join(str, ") × ("), ")")
+    else  # format === :standard
+        isempty(X) && return string("∅", supscriptify(N))
+        x = first(X)
+        all(y -> x ≛ y, X) && return string(representation(x, format), supscriptify(N))
+        str = representation.(X.v, format)
+        return join(str, " × ")
+    end
+end
+
+# `String` representation of an `Interval`
+
+function basic_representation(a::Interval{T}, format::Symbol) where {T<:AbstractFloat}
+    isempty(a) && return "∅"
+    sigdigits = display_params.sigdigits
+    if format === :full
+        # Do not use `inf(a)` to avoid -0.0
+        return string("Interval{", T, "}(", a.lo, ", ", sup(a), ")")
+    elseif format === :midpoint
+        m = round_string(mid(a), sigdigits, RoundNearest)
+        r = round_string(radius(a), sigdigits, RoundUp)
+        output = string(m, " ± ", r)
+        return replace(output, "Inf" => '∞')
+    else  # format === :standard
+        # Do not use `inf(a)` to avoid -0.0
+        lo = round_string(a.lo, sigdigits, RoundDown)
+        hi = round_string(sup(a), sigdigits, RoundUp)
+        output = string("[", lo, ", ", hi, "]")
+        return replace(output, "Inf" => '∞')
+    end
+end
+
+function basic_representation(a::Interval{Float32}, format::Symbol)
+    isempty(a) && return "∅"
+    sigdigits = display_params.sigdigits
+    if format === :full
+        # Do not use `inf(a)` to avoid -0.0
+        output = string("Interval{Float32}(", a.lo, "f0, ", sup(a), "f0)")
+        return replace(replace(output, "NaNf0" => "NaN32"), "Inff0" => "Inf32")
+    elseif format === :midpoint
+        m = round_string(mid(a), sigdigits, RoundNearest)
+        r = round_string(radius(a), sigdigits, RoundUp)
+        output = string(m, "f0 ± ", r, "f0")
+        return replace(replace(output, "NaNf0" => "NaN32"), "Inff0" => '∞')
+    else  # format === :standard
+        # Do not use `inf(a)` to avoid -0.0
+        lo = round_string(a.lo, sigdigits, RoundDown)
+        hi = round_string(sup(a), sigdigits, RoundUp)
+        output = string("[", lo, "f0, ", hi, "f0]")
+        return replace(replace(output, "NaNf0" => "NaN32"), "Inff0" => '∞')
+    end
+end
+
+function basic_representation(a::Interval{T}, format::Symbol) where {T<:Rational}
+    isempty(a) && return "∅"
+    if format === :full
+        # Do not use `inf(a)` to avoid -0.0
+        return string("Interval{", T, "}(", a.lo, ", ", sup(a), ")")
+    elseif format === :midpoint
+        return string(mid(a), " ± ", radius(a))
+    else  # format === :standard
+        # Do not use `inf(a)` to avoid -0.0
+        return string("[", a.lo, ", ", sup(a), "]")
+    end
+end
+
+# Round to the prescribed significant digits
+# Code inspired by `_string(x::BigFloat, k::Integer)` in base/mpfr.jl
+
+function round_string(x::AbstractFloat, sigdigits::Int, r::RoundingMode)
+    str_digits = replace(replace(string(x), '.' => ""), '-' => "")
+    if (isinteger(x) || ispow2(x)) && sigdigits ≥ length(str_digits) # `x` is exactly representable
+        return round_string(big(x), sigdigits, RoundNearest)
+    else
+        return round_string(big(x), sigdigits, r)
+    end
+end
+
+round_string(x::BigFloat, sigdigits::Int, ::RoundingMode{:Nearest}) =
+    Base.MPFR._string(x, sigdigits-1)  # `sigdigits-1` digits after the decimal
+
+function round_string(x::BigFloat, sigdigits::Int, r::RoundingMode)
+    if !isfinite(x)
+        return string(Float64(x))
+    else
+        str_digits = replace(replace(string(x), '.' => ""), '-' => "")
+        if (isinteger(x) || ispow2(x)) && sigdigits ≥ length(str_digits) # `x` is exactly representable
+            return round_string(x, sigdigits, RoundNearest)
+        else
+            # `sigdigits` digits after the decimal
+            str = Base.MPFR.string_mpfr(x, "%.$(sigdigits)Re")
+            rounded_str = round_string(str, r)
+            return Base.MPFR._prettify_bigfloat(rounded_str)
         end
-
     end
-
-    format_code = :(setformat($format, decorations=$decorations, sigfigs=$sigfigs))
-
-    return format_code
 end
 
+round_string(s::String, ::RoundingMode{:Up}) =
+    startswith(s, '-') ? string('-', round_string_down(s[2:end])) : round_string_up(s)
 
-if VERSION < v"1.1.0-DEV.683"
-    to_mpfr(r) = Base.MPFR.to_mpfr(r)
-else
-    to_mpfr(r) = convert(Base.MPFR.MPFRRoundingMode, r)
+round_string(s::String, ::RoundingMode{:Down}) =
+    startswith(s, '-') ? string('-', round_string_up(s[2:end])) : round_string_down(s)
+
+function round_string_up(s::String)
+    # NOTE: `s` has 1 extra significant digit to control the rounding
+    mantissa, exponent = eachsplit(s, 'e')
+    mantissa = mantissa[1:end-1]
+    len = length(mantissa)
+    idx = findlast(d -> (d !== '9') & (d !== '.'), mantissa)
+    if idx == len  # Last significant digit is not 9
+        d = parse(Int, mantissa[len]) + 1  # Increase the last significant digit
+        return string(view(mantissa, 1:len-1), d, 'e', exponent)
+
+    else
+        if isnothing(idx)  # All significant digits are 9
+            expo = parse(Int, exponent) + 1  # Increase the exponent by 1
+            expo_str = string(expo; pad = 2)
+            exponent = expo < 0 ? expo_str : string('+', expo_str)
+            return string("1.", '0'^(len - 2), 'e', exponent)
+
+        else
+            new_mantissa = string(
+                view(mantissa, 1:idx-1),
+                parse(Int, mantissa[idx]) + 1,
+                # Add "." if the last significant digit not equal to 9 is before the decimal point
+                idx == 1 ? "." : "",
+                '0'^(len - idx))
+            return string(new_mantissa, 'e', exponent)
+
+        end
+    end
 end
 
-## Output
+function round_string_down(s::String)
+    # NOTE: `s` has 1 extra significant digit to control the rounding
+    mantissa, exponent = eachsplit(s, 'e')
+    len = length(mantissa)
+    idx = findlast(d -> (d !== '0') & (d !== '.'), mantissa)
+    if idx == len  # The extra significant digit is not 0
+        return string(view(mantissa, 1:len-1), 'e', exponent)  # Truncate
 
-# round to given number of significant digits
-# basic structure taken from string(x::BigFloat) in base/mpfr.jl
-function round_string(x::BigFloat, digits::Int, r::RoundingMode)
+    else
+        if isnothing(idx)  # All significant digits are 0
+            expo = parse(Int, exponent) - 1  # Decrease the exponent by 1
+            expo_str = string(expo; pad = 2)
+            exponent = expo < 0 ? expo_str : string('+', expo_str)
+            return string("9.", '9'^(len - 3), 'e', exponent)
 
-    lng = digits + Int32(8)
-    buf = Array{UInt8}(undef, lng + 1)
+        else
+            new_mantissa = string(
+                    view(mantissa, 1:idx-1),
+                    parse(Int, mantissa[idx]) - 1,
+                    # Add '.' if the last significant digit not equal to 0 is before the decimal point
+                    idx == 1 ? "." : "",
+                    '9'^(len - (idx + 1)))
+            return string(new_mantissa, 'e', exponent)
 
-    lng = @ccall "libmpfr".mpfr_snprintf(buf::Ptr{UInt8},
-                                         (lng + 1)::Csize_t,
-                                         "%.$(digits)R*g"::Ptr{UInt8};
-                                         to_mpfr(r)::Cint,
-                                         x::Ref{BigFloat})::Cint
-
-    repr = unsafe_string(pointer(buf))
-
-    repr = replace(repr, "nan" => "NaN")
-
-    return repr
+        end
+    end
 end
 
-round_string(x::Real, digits::Int, r::RoundingMode) = round_string(big(x), digits, r)
-
-
-function basic_representation(a::Interval, format=nothing)
-    if isempty(a)
-        return "∅"
-    end
-
-    if format == nothing
-        format = display_params.format  # default
-    end
-
-    sigfigs = display_params.sigfigs
-
-    local output
-
-    if format == :standard
-
-        aa = round_string(a.lo, sigfigs, RoundDown)
-        bb = round_string(a.hi, sigfigs, RoundUp)
-
-        output = "[$aa, $bb]"
-        output = replace(output, "inf" => "∞")
-        output = replace(output, "Inf" => "∞")
-
-    elseif format == :full
-        output = "Interval($(a.lo), $(a.hi))"
-
-    elseif format == :midpoint
-        m = round_string(mid(a), sigfigs, RoundNearest)
-        r = round_string(radius(a), sigfigs, RoundUp)
-        output = "$m ± $r"
-    end
-
-    output
-end
-
-function basic_representation(a::Interval{Float32}, format=nothing)
-    if isempty(a)
-        return "∅"
-    end
-
-    if format == nothing
-        format = display_params.format  # default
-    end
-
-    sigfigs = display_params.sigfigs
-
-    local output
-
-    if format == :standard
-
-        aa = round_string(a.lo, sigfigs, RoundDown)
-        bb = round_string(a.hi, sigfigs, RoundUp)
-
-        output = "[$(aa)f0, $(bb)f0]"
-
-    elseif format == :full
-        output = "Interval($(a.lo)f0, $(a.hi)f0)"
-
-    elseif format == :midpoint
-        m = round_string(mid(a), sigfigs, RoundNearest)
-        r = round_string(radius(a), sigfigs, RoundUp)
-        output = "$(m)f0 ± $(r)f0"
-    end
-    output = replace(output, "inff0" => "∞")
-    output = replace(output, "Inff0" => "∞")
-    output = replace(output, "Inf32f0" => "∞")
-    output
-end
-
-function basic_representation(a::Interval{Rational{T}}, format=nothing) where
-        T<:Integer
-
-    if isempty(a)
-        return "∅"
-    end
-
-    if format == nothing
-        format = display_params.format  # default
-    end
-
-    local output
-
-    if format == :standard
-        output = "[$(a.lo), $(a.hi)]"
-
-    elseif format == :full
-        output = "Interval($(a.lo), $(a.hi))"
-
-    elseif format == :midpoint
-        m = mid(a)
-        r = radius(a)
-        output = "$m ± $r"
-    end
-
-    output
-end
+# Utilities
 
 function subscriptify(n::Integer)
-    dig = reverse(digits(n))
-    subscript_0 = Int('₀')    # 0x2080
-    join( [Char(subscript_0 + i) for i in dig])
-end
-
-function superscriptify(n::Integer)
-    exps = ['⁰', '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹']
-    dig = reverse(digits(n))
-    return join([exps[d+1] for d in dig])
-end
-
-# fall-back:
-representation(a::Interval{T}, format=nothing) where T =
-    basic_representation(a, format)
-
-function representation(a::Interval{BigFloat}, format=nothing)
-
-    if format == nothing
-        format = display_params.format  # default
-    end
-
-
-    if format == :standard
-
-        return string(basic_representation(a, format), subscriptify(precision(a.lo)))
-
+    if 0 ≤ n ≤ 9
+        return subscript_digit(n)
     else
-
-        return basic_representation(a, format)
-
-    end
-end
-
-
-function representation(a::DecoratedInterval{T}, format=nothing) where T
-
-    if format == nothing
-        format = display_params.format  # default
-    end
-
-    if format==:full
-        return "DecoratedInterval($(representation(interval(a), format)), $(decoration(a)))"
-    end
-
-    var_interval = representation(interval(a), format)
-
-    if display_params.decorations
-        string(var_interval, "_", decoration(a))
-    else
-        var_interval
-    end
-
-end
-
-
-function representation(X::IntervalBox{N, T}, format=nothing) where {N, T}
-
-    if format == nothing
-        format = display_params.format  # default
-    end
-
-    n = format == :full ? N : superscriptify(N)
-
-    if isempty(X)
-        format == :full && return string("IntervalBox(∅, ", n, ")")
-        return string("∅", n)
-    end
-
-    x = first(X)
-    if all(==(x), X)
-        if format == :full
-            return string("IntervalBox(", representation(x, format), ", ", n, ")")
-        elseif format == :midpoint
-            return string("(", representation(x, format), ")", n)
-        else
-            return string(representation(x, format), n)
+        len = ndigits(n)
+        x = Vector{String}(undef, len)
+        i = 0
+        while n > 0
+            n, d = divrem(n, 10)
+            x[len-i] = subscript_digit(d)
+            i += 1
         end
+        return join(x)
     end
+end
 
-    if format == :full
-        full_str = representation.(X.v, :full)
-        return string("IntervalBox(", join(full_str, ", "), ")")
-    elseif format == :midpoint
-        return string("(", join(X.v, ") × ("), ")")
+function supscriptify(n::Integer)
+    if 0 ≤ n ≤ 9
+        return supscript_digit(n)
     else
-        return join(X.v, " × ")
+        len = ndigits(n)
+        x = Vector{String}(undef, len)
+        i = 0
+        while n > 0
+            n, d = divrem(n, 10)
+            x[len-i] = supscript_digit(d)
+            i += 1
+        end
+        return join(x)
     end
-
 end
 
-function representation(x::Complex{<:Interval}, format=nothing)
-
-    if format == nothing
-        format = display_params.format
-    end
-
-    format == :midpoint && return string('(', x.re, ')', " + ", '(', x.im, ')', "im")
-
-    return string(x.re, " + ", x.im, "im")
+function supscript_digit(i::Integer)
+    i == 0 && return "⁰"
+    i == 1 && return "¹"
+    i == 2 && return "²"
+    i == 3 && return "³"
+    i == 4 && return "⁴"
+    i == 5 && return "⁵"
+    i == 6 && return "⁶"
+    i == 7 && return "⁷"
+    i == 8 && return "⁸"
+    i == 9 && return "⁹"
+    return throw(DomainError(i, "supscript_digit only accept integers between 0 and 9 (included)"))
 end
 
-for T in (Interval, DecoratedInterval)
-    @eval show(io::IO, a::$T{S}) where S = print(io, representation(a))
-    @eval showfull(io::IO, a::$T{S}) where S = print(io, representation(a, :full))
-    @eval showfull(a::$T{S}) where S = showfull(stdout, a)
-end
-
-for T in (IntervalBox, Complex{<:Interval})
-    @eval show(io::IO, a::$T) = print(io, representation(a))
-    @eval show(io::IO, ::MIME"text/plain", a::$T) = print(io, representation(a))
-    @eval showfull(io::IO, a::$T) = print(io, representation(a, :full))
-    @eval showfull(a::$T) = showfull(stdout, a)
+function subscript_digit(i::Integer)
+    i == 0 && return "₀"
+    i == 1 && return "₁"
+    i == 2 && return "₂"
+    i == 3 && return "₃"
+    i == 4 && return "₄"
+    i == 5 && return "₅"
+    i == 6 && return "₆"
+    i == 7 && return "₇"
+    i == 8 && return "₈"
+    i == 9 && return "₉"
+    return throw(DomainError(i, "subscript_digit only accept integers between 0 and 9 (included)"))
 end

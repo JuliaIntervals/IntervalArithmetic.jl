@@ -1,267 +1,271 @@
-# Functions to parse strings to intervals
-
 """
-    parse{T}(DecoratedInterval{T}, s::AbstractString)
+    I"str"
 
-Parse a string of the form `"[a, b]_dec"` as a `DecoratedInterval`
-with decoration `dec`.
+Create an interval according to the IEEE Standard 1788-2015. This is
+semantically equivalent to `parse(DecoratedInterval{default_numtype()}, str)` if
+the string contains the character `_` which delimits the interval and its
+decoration; otherwise, it is semantically equivalent to
+`parse(Interval{default_numtype()}, str)`.
+
+# Examples
+```jldoctest
+julia> setformat(:full);
+
+julia> I"[3, 4]"
+Interval{Float64}(3.0, 4.0)
+
+julia> I"0.1"
+Interval{Float64}(0.09999999999999999, 0.1)
+```
 """
-function parse(::Type{DecoratedInterval{T}}, s::AbstractString) where T
-    m = match(r"(\[.*\])(\_.*)?", s)
-
-    if m == nothing  # matched
-
-        m = match(r"(.*\?[a-z0-9]*)(\_.*)?", s)
-
-        if m == nothing
-            throw(ArgumentError("Unable to process string $x as decorated interval"))
-        end
-
-    end
-
-    if m.captures[1] == "[nai]" || m.captures[1] == "[Nai]"
-        return nai(T)
-    end
-
-    interval_string, decoration_string = m.captures
-    interval = parse(Interval{T}, interval_string)
-
-    # type unstable:
-    if decoration_string != nothing
-        decoration_string = lowercase(decoration_string)
-        decoration_symbol = Symbol(decoration_string[2:end])
-        decoration = getfield(IntervalArithmetic, decoration_symbol)
-        return DecoratedInterval(interval, decoration)
+macro I_str(str)
+    if '_' ∈ str
+        return parse(DecoratedInterval{default_numtype()}, str)
     else
-        DecoratedInterval(interval)
+        return parse(Interval{default_numtype()}, str)
     end
+end
 
+#
+
+"""
+    parse(Interval, s::AbstractString)
+
+Create an interval according to the IEEE Standard 1788-2015. In contrast with
+constructors that do not use strings, this constructor guarantees that the
+returned interval tightly encloses the values described by the string, including
+numbers that have no exact float representation (e.g. 0.1).
+
+Examples of allowed string formats:
+- `I"[1.33]"` or `I"1.33"`: the interval containing ``1.33``.
+- `I"[1.44, 2.78]"`: the interval ``[1.44, 2.78]``.
+- `I"[empty]"`: the empty interval.
+- `I"[entire]"` or `I"[,]"`: the interval ``[-\\infty, \\infty]``.
+- `I"[3,]"`: the interval ``[3, \\infty]``.
+- `I"6.42?2"`: the interval ``[6.4,  6.44]``. The number after `?` represents the
+    uncertainty in the last digit; by default this value is `0.5`. The direction
+    of the uncertainty can be given by adding `u` or `d` at the end for the error
+    to only go up or down respectively (e.g. `I"4.5?5u"` represents ``[4.5, 5]``).
+- `I"6.42?2e2"`: the interval ``[642, 644]``.
+- `I"3??u"`: the interval ``[3, \\infty]``.
+- `I"3??u"`: the interval ``[3, \\infty]``.
+- `I"3??"`: the interval ``[-\\infty, \\infty]``.
+
+For more details, see sections 9.7 and 12.11 of the IEEE Standard 1788-2015.
+
+# Examples
+```jldoctest
+julia> setformat(:full);
+
+julia> parse(Interval{Float64}, "[1, 2]")
+Interval{Float64}(1.0, 2.0)
+
+julia> parse(Interval{Float64}, "[1, 2]")
+Interval{Float64}(1.0, 2.0)
+
+julia> parse(Interval{Float64}, "[1,]")
+Interval{Float64}(1.0, Inf)
+
+julia> parse(Interval{Float64}, "[,]")
+Interval{Float64}(-Inf, Inf)
+
+julia> parse(Interval{Float64}, "6.42?2e2")
+Interval{Float64}(640.0, 644.0)
+```
+"""
+function parse(::Type{F}, str::AbstractString) where {F<:Interval}
+    str = lowercase(strip(str))
+    try
+        ival, _ = _parse(F, str)
+        return ival
+    catch e
+        if e isa ArgumentError
+            @warn "invalid input, empty interval is returned"
+            return emptyinterval(F)
+        else
+            rethrow(e)
+        end
+    end
 end
 
 """
-    parse{T}(Interval{T}, s::AbstractString)
+    parse(DecoratedInterval, s::AbstractString)
 
-Parse a string as an interval. Formats allowed include:
-- "1"
-- "[1]"
-- "[3.5, 7.2]"
-- "[-0x1.3p-1, 2/3]"  # use numerical expressions
+Parse a string of the form `"[a, b]_dec"` as a `DecoratedInterval` with decoration `dec`.
+If the decoration is not specified, it is computed based on the parsed interval.
+If the input is an invalid string, a warning is printed and [NaI] is returned. The parser is
+case unsensitive.
+
+# Examples
+```jldoctest
+julia> setformat(:full);
+
+julia> parse(DecoratedInterval{Float64}, "[1, 2]")
+[1, 2]_com
+
+julia> parse(DecoratedInterval{Float64}, "[1, 2]_def")
+[1, 2]_def
+```
 """
-function parse(::Type{Interval{T}}, s::AbstractString) where T
-
-    # Check version!
-    if !(occursin("[", s))  # string like "3.1"
-
-        m = match(r"(.*)±(.*)", s)
-        if m != nothing
-            a = parse(T, strip(m.captures[1]))
-            b = parse(T, strip(m.captures[2]))
-
-            return a ± b
-
-        a = parse(T, s, RoundDown)
-        b = parse(T, s, RoundUp)
-
-        return Interval(a, b)
-
+function parse(::Type{DecoratedInterval{T}}, s::AbstractString) where {T<:NumTypes}
+    s = lowercase(strip(s))
+    s == "[nai]" && return nai(T)
+    try
+        if '_' ∉ s
+            ival, _ = _parse(Interval{T}, s)
+            return DecoratedInterval{T}(ival)
         end
 
-        if m == nothing
+        decorations = Dict(
+            "ill" => ill,
+            "trv" => trv,
+            "def" => def,
+            "dac" => dac,
+            "com" => com)
 
-            m = match(r"(\-?\d*\.?\d*)\?\?([ud]?)", s)   # match with string of form "34??"
+        interval_string, dec = split(s, "_")
 
-            if m!= nothing
-                if m.captures[2] == ""    # strings of the form "10??"
-                    return entireinterval(T)
-                end
-                if m.captures[2] == "u"   # strings of the form "10??u"
-                    lo = parse(Float64, m.captures[1])
-                    hi = Inf
-                    interval = eval(make_interval(T, lo, [hi]))
-                    return interval
-                end
-                if m.captures[2] == "d"   # strings of the form "10??d"
-                    lo = -Inf
-                    hi = parse(Float64, m.captures[1])
-                    interval = eval(make_interval(T, lo, [hi]))
-                    return interval
-                end
+        ival, isnotcom = _parse(Interval{T}, interval_string)
+        dec_calc = decoration(ival)
+
+        haskey(decorations, dec) || throw(ArgumentError("invalid decoration $dec"))
+        dec_given = decorations[dec]
+
+        #=
+            If I try to give a decoration that is too high, e.g. [1, Inf]_com, then it
+            should error and return [NaI]. Exception to this is if the interval would be com
+            but becomes dac because of finite precision, e.g. "[1e403]_com" when parse to
+            Interval{Float64} is allowed to become [prevfloat(Inf), Inf]_dac without erroring.
+            The isnotcom flag returned by _parse is used to track if the interval was originally
+            smaller than com or became dac because of overflow.
+        =#
+        dec_given > dec_calc && isnotcom && throw(ArgumentError("invalid decoration $dec for $ival"))
+
+        return DecoratedInterval{T}(ival, min(dec_given, dec_calc))
+    catch e
+        if e isa ArgumentError
+            @warn "invalid input, returning [NaI]"
+            return nai(T)
+        else
+            rethrow(e)
+        end
+    end
+end
+
+"""
+    _parse(::Type{Interval{T}}, s::AbstractString) where T
+
+tries to parse the string `s` to an interval of type `Interval{T}` and throws an argument
+error if an invalid string is given.
+
+### Output
+
+- the parsed interval
+- a flag `isnotcom`, which is set to true if the input interval is not `com` and to false
+  otherwise. This is used to distinguish the case when an interval is supposed to be
+  unbounded (e.g. input `"[3, infinity]"`) or becomes unbounded because of overflow
+  (e.g. the input `"[3, 1e400]", which is parse to `[3, ∞]` when using `Float64`).
+"""
+function _parse(::Type{Interval{T}}, s::AbstractString) where {T<:NumTypes}
+    isnotcom = occursin("inf", s)
+    if startswith(s, '[') && endswith(s, ']') # parse as interval
+        s = strip(s[2:end-1])
+        if ',' in s # infsupinterval
+            lo, hi = strip.(split(s, ','))
+            isempty(lo) && (lo = "-inf"; isnotcom = true)
+            isempty(hi) && (hi = "inf"; isnotcom = true)
+            lo = parse_num(T, lo, RoundDown)
+            hi = parse_num(T, hi, RoundUp)
+        else # point interval
+
+            (s == "empty" || isempty(s)) && return emptyinterval(T), true # emptyinterval
+            s == "entire" && return entireinterval(T), true # entireinterval
+            lo = parse_num(T, s, RoundDown)
+            hi = parse_num(T, s, RoundUp)
+        end
+    elseif '?' in s # uncertainty interval
+        if occursin("??", s) # unbounded interval
+            isnotcom = true
+            m, _ = split(s, "??")
+            if 'u' in s # interval in the form [m, Inf]
+                lo = parse(T, m, RoundDown)
+                hi = typemax(T)
+            elseif 'd' in s # interval in the form [-Inf, m]
+                lo = typemin(T)
+                hi = parse(T, m, RoundUp)
+            else
+                return entireinterval(T), true
+            end
+        else
+            m , vde = split(s, '?')
+
+            # ulp computation
+            if '.' in m # ulp is last decimal position
+                ulp = 1/(big(10.0)^length(split(m, '.')[2]))
+            else # no decimal, hence ulp is unit
+                ulp = big(1.0)
+            end
+            m = parse(BigFloat, m)
+
+            if 'e' in vde
+                vd, e = split(vde, 'e')
+                e = big(10.0) ^ parse(Int, e)
+            else
+                vd = vde
+                e = big(1.0)
             end
 
-            m = match(r"(\-?\d*)\.?(\d*)\?(\d*)([ud]?)(e-?\d*)?", s) # match with strings like "3.56?1u" or "3.56?1e2"
-
-            if m != nothing  # matched
-                if m.captures[3] != "" && m.captures[4] == "" && m.captures[5] == nothing # string of form "3.4?1" or "10?2"
-                    d = length(m.captures[2])
-                    x = parse(Float64, m.captures[3] * "e-$d")
-                    n = parse(Float64, m.captures[1]*"."*m.captures[2])
-                    lo = n - x
-                    hi = n + x
-                    interval = eval(make_interval(T, lo, [hi]))
-                    return interval
-                end
-
-                if m.captures[3] == "" && m.captures[4] == "" && m.captures[5] == nothing  # strings of the form "3.46?"
-                    d = length(m.captures[2])
-                    x = parse(Float64, "0.5" * "e-$d")
-                    n = parse(Float64, m.captures[1]*"." * m.captures[2])
-                    lo = n - x
-                    hi = n + x
-                    interval = eval(make_interval(T, lo, [hi]))
-                    return interval
-                end
-
-                if m.captures[3] == "" && m.captures[4] == "" && m.captures[5] != nothing  # strings of the form "3.46?e2"
-                    d = length(m.captures[2])
-                    x = parse(Float64, "0.5" * "e-$d")
-                    n = parse(Float64, m.captures[1]*"." * m.captures[2])
-                    lo = parse(Float64, string(n-x) * m.captures[5])
-                    hi = parse(Float64, string(n+x) * m.captures[5])
-                    interval = eval(make_interval(T, lo, [hi]))
-                    return interval
-                end
-
-                if m.captures[3] == "" && m.captures[4] == "u" && m.captures[5] == nothing # strings of the form "3.4?u"
-                    d = length(m.captures[2])
-                    x = parse(Float64, "0.5" * "e-$d")
-                    n = parse(Float64, m.captures[1]*"."*m.captures[2])
-                    lo = n
-                    hi = n+x
-                    interval = eval(make_interval(T, lo, [hi]))
-                    return interval
-                end
-
-                if m.captures[3] == "" && m.captures[4] == "d" && m.captures[5] == nothing # strings of the form "3.4?d"
-                        d = length(m.captures[2])
-                        x = parse(Float64, "0.5" * "e-$d")
-                        n = parse(Float64, m.captures[1]*"."*m.captures[2])
-                        lo = n - x
-                        hi = n
-                        interval = eval(make_interval(T, lo, [hi]))
-                        return interval
-                end
-
-                if m.captures[3] != ""
-                    if m.captures[4] == "u" && m.captures[5] != nothing    #strings of the form "3.46?1u"
-                        d = length(m.captures[2])
-                        x = parse(Float64, m.captures[3] * "e-$d")
-                        n = parse(Float64, m.captures[1]*"."*m.captures[2])
-                        lo = parse(Float64, string(n) * m.captures[5])
-                        hi = parse(Float64, string(n+x) * m.captures[5])
-                        interval = eval(make_interval(T, lo, [hi]))
-                        return interval
-                    end
-
-                    if m.captures[4] == "u" && m.captures[5] == nothing    #strings of the form "3.46?1u"
-                        d = length(m.captures[2])
-                        x = parse(Float64, m.captures[3] * "e-$d")
-                        n = parse(Float64, m.captures[1]*"."*m.captures[2])
-                        lo = n
-                        hi = n+x
-                        interval = eval(make_interval(T, lo, [hi]))
-                        return interval
-                    end
-
-                    if m.captures[4] == "d" && m.captures[5] != nothing  #strings of the form "3.46?1d"
-                        d = length(m.captures[2])
-                        x = parse(Float64, m.captures[3] * "e-$d")
-                        n = parse(Float64, m.captures[1]*"."*m.captures[2])
-                        lo = parse(Float64, string(n-x) * m.captures[5])
-                        hi = parse(Float64, string(n) * m.captures[5])
-                        interval = eval(make_interval(T, lo, [hi]))
-                        return interval
-                    end
-
-                    if m.captures[4] == "d" && m.captures[5] == nothing  #strings of the form "3.46?1d"
-                        d = length(m.captures[2])
-                        x = parse(Float64, m.captures[3] * "e-$d")
-                        n = parse(Float64, m.captures[1]*"."*m.captures[2])
-                        lo = n-x
-                        hi = n
-                        interval = eval(make_interval(T, lo, [hi]))
-                        return interval
-                    end
-
-                    if m.captures[4] == "" && m.captures[5] != nothing    # strings of the form "3.56?1e2"
-                        d = length(m.captures[2])
-                        x = parse(Float64, m.captures[3] * "e-$d")
-                        n = parse(Float64, m.captures[1]*"."*m.captures[2])
-                        lo = parse(Float64, string(n-x)*m.captures[5])
-                        hi = parse(Float64, string(n+x)*m.captures[5])
-                        interval = eval(make_interval(T, lo, [hi]))
-                        return interval
-                    end
-                end
+            if 'u' in vd || 'd' in vd
+                d = last(vd)
+                v = vd[1:end-1]
+            else
+                d = 'b' # both directions
+                v = vd
             end
 
-            m = match(r"(-?\d*\.?\d*)", s)  # match strings of form "1" and "2.4"
-
-            if m != nothing
-                lo = parse(Float64, m.captures[1])
-                hi = lo
+            v = isempty(v) ? 1//2 : parse(BigInt, v)
+            if d == 'd'
+                lo = T((m - v * ulp) * e, RoundDown)
+                hi = T(m * e, RoundUp)
+            elseif d == 'u'
+                lo = T(m * e, RoundDown)
+                hi = T((m + v * ulp) * e, RoundUp)
+            else
+                lo = T((m - v * ulp) * e, RoundDown)
+                hi = T((m + v * ulp) * e, RoundUp)
             end
-
-            if m == nothing
-                throw(ArgumentError("Unable to process string $s as interval"))
-            end
-
-            interval = eval(make_interval(T, lo, [hi]))
-            return interval
         end
+    else # number
+        lo = parse_num(T, s, RoundDown)
+        hi = parse_num(T, s, RoundUp)
     end
+    is_valid_interval(lo, hi) && return unsafe_interval(T, lo, hi), isnotcom
+    throw(ArgumentError("input $s can not be parsed as an interval."))
+end
 
-    # match string of form [a, b]_dec:
-    m = match(r"\[(.*),(.*)\]", s)
-
-    if m != nothing  # matched
-
-        m.captures[1] = strip(m.captures[1], [' '])
-        m.captures[2] = strip(m.captures[2], [' '])
-        lo, hi = m.captures
-
-        if m.captures[2] == "+infinity" || m.captures[2] == ""
-            hi = "Inf"
-        end
-
-        if m.captures[1] == "-infinity" || m.captures[1] == ""
-            lo = "-Inf"
-        end
-
+"""
+Same as `parse(T, s, rounding_mode)`, but also accept string representing rational numbers.
+"""
+function parse_num(::Type{T}, str::AbstractString, ::RoundingMode{:Down}) where {S<:Integer,T<:Rational{S}}
+    '/' ∈ str && return parse(T, str)
+    x = parse(BigFloat, str)
+    y = prevfloat(x)
+    z = rationalize(S, y)
+    z < x && return z
+    return rationalize(S, prevfloat(y))
+end
+function parse_num(::Type{T}, str::AbstractString, ::RoundingMode{:Up}) where {S<:Integer,T<:Rational{S}}
+    '/' ∈ str && return parse(T, str)
+    x = parse(BigFloat, str)
+    y = nextfloat(x)
+    z = rationalize(S, y)
+    z > x && return z
+    return rationalize(S, nextfloat(y))
+end
+function parse_num(::Type{T}, str::AbstractString, rounding_mode::RoundingMode) where {T<:AbstractFloat}
+    if '/' ∈ str
+        num, denum = parse.(BigInt, split(str, '/'; keepempty = false))
+        return T(num//denum, rounding_mode)
     end
-
-    if m == nothing
-
-        m = match(r"\[(.*)\]", s)  # string like "[1]"
-
-        if m == nothing
-            throw(ArgumentError("Unable to process string $s as interval"))
-        end
-
-        m.captures[1] = strip(m.captures[1], [' '])
-
-        if m.captures[1] == "Empty" || m.captures[1] == "" || m.captures[1] == "empty"
-            return emptyinterval(T)
-        end
-        if m.captures[1] == "entire"
-            return entireinterval(T)
-        end
-
-        lo = m.captures[1]
-        hi = lo
-
-    end
-
-    expr1 = Meta.parse(lo)
-    expr2 = Meta.parse(hi)
-    if lo == "-Inf"
-        expr1 = parse(Float64, lo)
-    end
-    if hi == "Inf"
-        expr2 = parse(Float64, hi)
-    end
-
-    interval = eval(make_interval(T, expr1, [expr2]))
-
-    return interval
-
+    return T(parse(BigFloat, str), rounding_mode)
 end

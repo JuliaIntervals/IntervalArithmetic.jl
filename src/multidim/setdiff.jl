@@ -5,17 +5,19 @@ Computes the set difference x\\y and always returns a tuple of two intervals.
 If the set difference is only one interval or is empty, then the returned tuple contains 1
 or 2 empty intervals.
 """
-function _setdiff(x::Interval{T}, y::Interval{T}) where T
+function _setdiff(x::Interval{T}, y::Interval{T}) where {T<:NumTypes}
     intersection = x ∩ y
 
     isempty(intersection) && return (x, emptyinterval(T))
-    intersection == x && return (emptyinterval(T), emptyinterval(T))  # x is subset of y; setdiff is empty
+    intersection ≛ x && return (emptyinterval(T), emptyinterval(T))  # x is subset of y; setdiff is empty
 
-    x.lo == intersection.lo && return (Interval(intersection.hi, x.hi), emptyinterval(T))
-    x.hi == intersection.hi && return (Interval(x.lo, intersection.lo), emptyinterval(T))
+    xlo, xhi = bounds(x)
+    ylo, yhi = bounds(y)
+    intersectionlo, intersectionhi = bounds(intersection)
+    xlo == intersectionlo && return (unsafe_interval(T, intersectionhi, xhi), emptyinterval(T))
+    xhi == intersectionhi && return (unsafe_interval(T, xlo, intersectionlo), emptyinterval(T))
 
-    return (Interval(x.lo, y.lo), Interval(y.hi, x.hi))
-
+    return (unsafe_interval(T, xlo, ylo), unsafe_interval(T, yhi, xhi))
 end
 
 
@@ -28,7 +30,7 @@ i.e. the set of `x` that are in `A` but not in `B`.
 Algorithm: Start from the total overlap (in all directions);
 expand each direction in turn.
 """
-function setdiff(A::IntervalBox{N,T}, B::IntervalBox{N,T}) where {N,T}
+function setdiff(A::IntervalBox{N,T}, B::IntervalBox{N,T}) where {N,T<:NumTypes}
 
     intersection = A ∩ B
     isempty(intersection) && return [A]

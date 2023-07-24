@@ -148,7 +148,7 @@ end
 
     @test mid(interval(-Inf,1.2)) === -0x1.FFFFFFFFFFFFFp1023
 
-    @test_broken mid(interval(-0x0.0000000000002P-1022,0x0.0000000000001P-1022)) === 0.0
+    @test mid(interval(-0x0.0000000000002P-1022,0x0.0000000000001P-1022)) === 0.0
 
     @test mid(interval(-0x0.0000000000001P-1022,0x0.0000000000002P-1022)) === 0.0
 
@@ -178,7 +178,7 @@ end
 
     @test mid(DecoratedInterval(interval(-Inf,1.2), trv)) === -0x1.FFFFFFFFFFFFFp1023
 
-    @test_broken mid(DecoratedInterval(interval(-0x0.0000000000002P-1022,0x0.0000000000001P-1022), trv)) === 0.0
+    @test mid(DecoratedInterval(interval(-0x0.0000000000002P-1022,0x0.0000000000001P-1022), trv)) === 0.0
 
     @test mid(DecoratedInterval(interval(-0x0.0000000000001P-1022,0x0.0000000000002P-1022), trv)) === 0.0
 
@@ -252,7 +252,7 @@ end
 
     @test midpoint_radius(interval(-Inf, 1.2))[1] === -0x1.FFFFFFFFFFFFFP+1023 && midpoint_radius(interval(-Inf, 1.2))[2] === Inf
 
-    @test_broken midpoint_radius(interval(-0x0.0000000000002P-1022,0x0.0000000000001P-1022))[1] === 0.0 && midpoint_radius(interval(-0x0.0000000000002P-1022,0x0.0000000000001P-1022))[2] === 0x0.0000000000002P-1022
+    @test midpoint_radius(interval(-0x0.0000000000002P-1022,0x0.0000000000001P-1022))[1] === 0.0 && midpoint_radius(interval(-0x0.0000000000002P-1022,0x0.0000000000001P-1022))[2] === 0x0.0000000000002P-1022
 
     @test midpoint_radius(interval(-0x0.0000000000001P-1022,0x0.0000000000002P-1022))[1] === 0.0 && midpoint_radius(interval(-0x0.0000000000001P-1022,0x0.0000000000002P-1022))[2] === 0x0.0000000000002P-1022
 
@@ -282,7 +282,7 @@ end
 
     @test midpoint_radius(DecoratedInterval(interval(-Inf, 1.2), trv))[1] === -0x1.FFFFFFFFFFFFFP+1023 && midpoint_radius(DecoratedInterval(interval(-Inf, 1.2), trv))[2] === Inf
 
-    @test_broken midpoint_radius(DecoratedInterval(interval(-0x0.0000000000002P-1022,0x0.0000000000001P-1022), trv))[1] === 0.0 && midpoint_radius(DecoratedInterval(interval(-0x0.0000000000002P-1022,0x0.0000000000001P-1022), trv))[2] === 0x0.0000000000002P-1022
+    @test midpoint_radius(DecoratedInterval(interval(-0x0.0000000000002P-1022,0x0.0000000000001P-1022), trv))[1] === 0.0 && midpoint_radius(DecoratedInterval(interval(-0x0.0000000000002P-1022,0x0.0000000000001P-1022), trv))[2] === 0x0.0000000000002P-1022
 
     @test midpoint_radius(DecoratedInterval(interval(-0x0.0000000000001P-1022,0x0.0000000000002P-1022), trv))[1] === 0.0 && midpoint_radius(DecoratedInterval(interval(-0x0.0000000000001P-1022,0x0.0000000000002P-1022), trv))[2] === 0x0.0000000000002P-1022
 

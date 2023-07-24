@@ -3,31 +3,30 @@
 module IntervalArithmetic
 
 import CRlibm
-
-using StaticArrays
-using FastRounding
-using SetRounding
-using RoundingEmulator
-
-using Markdown
+import FastRounding
+import RoundingEmulator
 
 using LinearAlgebra
+using Markdown
+using StaticArrays
+using SetRounding
+using EnumX
+
 import LinearAlgebra: ×, dot, norm
 export ×, dot
 
 
 import Base:
     +, -, *, /, //, fma,
-    <, >, ==, !=, ⊆, ^, <=,
-    in, zero, one, eps, typemin, typemax, abs, abs2, real, min, max,
-    sqrt, exp, log, sin, cos, tan, cot, inv, cbrt, csc, hypot, sec,
-    exp2, exp10, log2, log10,
-    mod,
-    asin, acos, atan,
-    sinh, cosh, tanh, coth, csch, sech, asinh, acosh, atanh, sinpi, cospi,
+    <, >, ==, !=, ⊆, ^, <=, >=,
+    in, zero, one, eps, typemin, typemax, abs, abs2, min, max,
+    sqrt, exp, log, exp2, exp10, log2, log10, inv, cbrt, hypot,
+    rad2deg, deg2rad,
+    sin, cos, tan, cot, csc, sec, asin, acos, atan, acot, sinpi, cospi, sincospi,
+    sinh, cosh, tanh, coth, csch, sech, asinh, acosh, atanh, acoth,
     union, intersect, isempty,
-    convert, promote_rule, eltype, size,
-    BigFloat, float, widen, big,
+    convert, eltype, size,
+    BigFloat, float, big,
     ∩, ∪, ⊆, ⊇, ∈, eps,
     floor, ceil, trunc, sign, round, copysign, flipsign, signbit,
     expm1, log1p,
@@ -49,32 +48,28 @@ import Base.MPFR: MPFRRoundUp, MPFRRoundDown, MPFRRoundNearest, MPFRRoundToZero,
 import .Broadcast: broadcasted
 
 export
-    AbstractInterval, Interval,
-    interval,
-    @interval, @biginterval, @floatinterval,
-    diam, radius, mid, mag, mig, hull,
-    emptyinterval, ∅, ∞, isempty, isinterior, ⪽, nthroot,
-    precedes, strictprecedes, ≼, ≺, ⊂, ⊃, ⊇, contains_zero,
+    Interval, BooleanInterval,
+    interval, ±, .., @I_str,
+    diam, radius, mid, scaled_mid, mag, mig, hull,
+    emptyinterval, ∅, ∞, isempty, isinterior, isdisjoint, ⪽,
+    precedes, strictprecedes, ≺, ⊂, ⊃, ⊇, contains_zero, isthinzero,
+    isweaklyless, isstrictless, overlap, Overlap,
+    ≛,
     entireinterval, isentire, nai, isnai, isthin, iscommon, isatomic,
-    widen, inf, sup, bisect, mince,
-    parameters, eps, dist, #numtype,
-    midpoint_radius, interval_from_midpoint_radius,
+    inf, sup, bounds, bisect, mince,
+    eps, dist,
+    midpoint_radius,
     RoundTiesToEven, RoundTiesToAway,
-    cancelminus, cancelplus, isunbounded,
-    .., @I_str, ±,
-    pow, extended_div,
-    setformat, @format
+    IntervalRounding,
+    PointwisePolicy,
+    cancelminus, cancelplus, isbounded, isunbounded,
+    pow, extended_div, nthroot,
+    setformat
 
 import Base: isdisjoint
 
 export
     setindex   # re-export from StaticArrays for IntervalBox
-
-
-
-export showfull
-
-import Base: rounding, setrounding, setprecision
 
 
 
@@ -84,7 +79,6 @@ export
 
 ## Decorations
 export
-    @decorated,
     interval, decoration, DecoratedInterval,
     com, dac, def, trv, ill
 
@@ -96,16 +90,17 @@ export
 
 function __init__()
     setrounding(BigFloat, RoundNearest)
-
-
-    setprecision(Interval, 256)  # set up pi
-    setprecision(Interval, Float64)
 end
 
+function Base.setrounding(f::Function, ::Type{Rational{T}},
+    rounding_mode::RoundingMode) where T
+    return setrounding(f, float(Rational{T}), rounding_mode)
+end
 
 ## Includes
 
 include("intervals/intervals.jl")
+
 include("multidim/multidim.jl")
 include("bisect.jl")
 include("decorations/decorations.jl")
@@ -113,10 +108,9 @@ include("decorations/decorations.jl")
 include("rand.jl")
 include("parsing.jl")
 include("display.jl")
+include("symbols.jl")
 
 include("plot_recipes/plot_recipes.jl")
-
-include("deprecated.jl")
 
 """
     Region{T} = Union{Interval{T}, IntervalBox{T}}

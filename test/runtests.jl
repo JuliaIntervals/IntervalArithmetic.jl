@@ -1,23 +1,27 @@
-using IntervalArithmetic
 using Test
+using IntervalArithmetic
 
+IntervalArithmetic.:(≛)(a::Tuple, b::Tuple) = all(a .≛ b)
 
-const Interval = IntervalArithmetic.Interval
-
-# Interval tests:
+function include_test(filename)
+    @testset "$filename" begin
+        include(filename)
+    end
+end
 
 setformat(:full)
 
-include("interval_tests/intervals.jl")
-include("decoration_tests/decoration_tests.jl")
+# Interval tests:
+include_test("interval_tests/intervals.jl")
+include_test("decoration_tests/decoration_tests.jl")
 
-include("rand.jl")
+include_test("rand.jl")
 
 # Display tests:
-include("display_tests/display.jl")
+include_test("display_tests/display.jl")
 
-include("multidim_tests/multidim.jl")
+# Multidim tests
+include_test("multidim_tests/multidim.jl")
 
 # ITF1788 tests
-
-include("test_ITF1788/run_ITF1788.jl")
+include_test("test_ITF1788/run_ITF1788.jl")  # TODO fix these tests
