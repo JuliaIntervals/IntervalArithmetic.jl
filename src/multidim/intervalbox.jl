@@ -61,7 +61,7 @@ length(::IntervalBox{N}) where {N} = N
 
 Return a vector of the `mid` of each interval composing the `IntervalBox`.
 
-See `mid(X::Interval, α=0.5)` for more informations.
+See `mid(X::Interval, α=0.5)` for more information.
 """
 mid(X::IntervalBox) = mid.(X)
 scaled_mid(X::IntervalBox, α) = scaled_mid.(X, α)
