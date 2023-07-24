@@ -343,7 +343,7 @@ for (f, domain) in restricted_functions1
         x = interval(xx)
         r = $(f)(x)
         d = min(decoration(xx), decoration(r))
-        x ⪽ $(domain) && return DecoratedInterval(r, d)
+        isinterior(x, $(domain)) && return DecoratedInterval(r, d)
         DecoratedInterval(r, trv)
     end
 end

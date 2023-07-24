@@ -5,9 +5,9 @@ let x, b
 
 @testset "setformat tests" begin
     @testset "Interval" begin
-        a = 1..2
-        b = -1.1..1.3
-        c = interval(pi)
+        a = interval(1, 2)
+        b = interval(-1.1, 1.3)
+        c = interval(π)
         # large_expo = IntervalArithmetic.atomic(Interval{BigFloat}, -Inf)
         # Use smaller exponent, cf. JuliaLang/julia#48678
         large_expo = interval(0, big"1e123456789")
@@ -180,11 +180,11 @@ let x, b
         @test sprint(show, MIME("text/plain"), X) == "IntervalBox(Interval{Float64}(-Inf, Inf), 2)"
 
         setformat(:standard)
-        a = IntervalBox(1..2, 2..3)
+        a = IntervalBox(interval(1, 2), interval(2, 3))
         @test sprint(show, MIME("text/plain"), a) == "[1.0, 2.0] × [2.0, 3.0]"
         b = IntervalBox(emptyinterval(), 2)
         @test sprint(show, MIME("text/plain"), b) == "∅²"
-        c = IntervalBox(1..2, 1)
+        c = IntervalBox(interval(1, 2), 1)
         @test sprint(show, MIME("text/plain"), c) == "[1.0, 2.0]¹"
 
         setformat(:full)
@@ -203,7 +203,7 @@ end
     setformat(:standard; decorations = false, sigdigits = 6)
     setprecision(BigFloat, 128)
 
-    x = 0..1
+    x = interval(0, 1)
     @test sprint(show, MIME("text/plain"), x) == "[0.0, 1.0]"
     @test sprint(show, x) == "Interval{Float64}(0.0, 1.0)"
 

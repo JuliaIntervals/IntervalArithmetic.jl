@@ -1,4 +1,4 @@
-for op in (:⊆, :⊂, :⪽)
+for op in (:⊆, :⊂, :isinterior)
     @eval function $(op)(x::Complex{<:Interval}, y::Complex{<:Interval})
         return $(op)(real(x), real(y)) && $(op)(imag(x), imag(y))
     end

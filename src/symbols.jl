@@ -1,3 +1,8 @@
+module Symbols
+
+    using IntervalArithmetic
+    export .., ≺, ⪽, ∅, ℝ, ∞
+
 """
     a..b
     ..(a, b)
@@ -60,3 +65,5 @@ const ℝ = entireinterval()
 Unicode alias of `Inf`.
 """
 const ∞ = Inf
+
+end

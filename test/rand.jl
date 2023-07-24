@@ -5,7 +5,7 @@ using Random
 
 @testset "rand tests" begin
 
-    X = 3..4
+    X = interval(3, 4)
     for i in 1:100
         @test rand(X) ∈ X
     end
@@ -15,7 +15,7 @@ using Random
         @test rand(Y) ∈ Y
     end
 
-    X = 3..4
+    X = interval(3, 4)
     for i in 1:100
         @test rand(X,4)[(i%4)+1] ∈ X
     end
