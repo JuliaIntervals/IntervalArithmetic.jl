@@ -159,7 +159,7 @@ import IntervalArithmetic: unsafe_interval
         @test isinterior(interval(-Inf, Inf), interval(-Inf, Inf))
 
         @test !(nai(a) ≛ nai(a))
-        @test nai(Float64) ≛ DecoratedInterval(NaN)
+        @test isnai(DecoratedInterval(NaN))
         @test isnan(interval(nai(BigFloat)).lo)
         @test isnai(nai())
         @test !(isnai(a))
