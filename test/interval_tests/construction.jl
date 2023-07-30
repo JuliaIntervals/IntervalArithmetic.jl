@@ -19,18 +19,15 @@ import IntervalArithmetic: unsafe_interval
 
     # Irrational
     for irr in (π, ℯ)
-        @test interval(-irr, irr).hi == IntervalArithmetic.Symbols.:(..)(-irr, irr).hi
-        @test IntervalArithmetic.Symbols.:(..)(0, irr) ≛ hull(interval(0), interval(Float64, irr))
-        @test IntervalArithmetic.Symbols.:(..)(1.2, irr).hi == interval(1.2, irr).hi
-        @test IntervalArithmetic.Symbols.:(..)(irr, irr) ≛ interval(Float64, irr)
-        @test interval(irr) ≛ interval(irr, irr)
+        @test interval(0, irr) ≛ hull(interval(0), interval(irr))
+        @test interval(irr) ≛ interval(irr, irr) ≛ interval(Float64, irr)
         @test interval(Float32, irr, irr) ≛ interval(Float32, irr)
     end
 
-    @test IntervalArithmetic.Symbols.:(..)(ℯ, big(4)) ≛ hull(interval(BigFloat, ℯ), interval(4))
-    @test IntervalArithmetic.Symbols.:(..)(π, big(4)) ≛ hull(interval(BigFloat, π), interval(4))
+    @test interval(ℯ, big(4)) ≛ hull(interval(BigFloat, ℯ), interval(4))
+    @test interval(π, big(4)) ≛ hull(interval(BigFloat, π), interval(4))
 
-    @test IntervalArithmetic.Symbols.:(..)(ℯ, π) ≛ hull(interval(ℯ), interval(Float64, π))
+    @test interval(ℯ, π) ≛ hull(interval(ℯ), interval(Float64, π))
     @test big(ℯ) in interval(ℯ, π)
     @test big(π) in interval(ℯ, π)
     @test big(ℯ) in interval(0, ℯ)
@@ -152,19 +149,19 @@ end
 
 @testset "± tests" begin
     @test 3 ± 1 ≛ interval(Float64, 2.0, 4.0)
-    @test 3 ± 0.5 ≛ IntervalArithmetic.Symbols.:(..)(2.5, 3.5)
-    @test 3 ± 0.1 ≛ IntervalArithmetic.Symbols.:(..)(2.9, 3.1)
-    @test 0.5 ± 1 ≛ IntervalArithmetic.Symbols.:(..)(-0.5, 1.5)
+    @test 3 ± 0.5 ≛ interval(2.5, 3.5)
+    @test 3 ± 0.1 ≛ interval(2.9, 3.1)
+    @test 0.5 ± 1 ≛ interval(-0.5, 1.5)
 
     # issue 172:
-    @test IntervalArithmetic.Symbols.:(..)(1, 1) ± 1 ≛ IntervalArithmetic.Symbols.:(..)(0, 2)
+    @test interval(1, 1) ± 1 ≛ interval(0, 2)
 end
 
 @testset "Conversion to interval of same type" begin
-    x = IntervalArithmetic.Symbols.:(..)(3, 4)
+    x = interval(3, 4)
     @test convert(Interval{Float64}, x) === x
 
-    x = IntervalArithmetic.Symbols.:(..)(big(3), big(4))
+    x = interval(big(3), big(4))
     @test convert(Interval{BigFloat}, x) === x
 end
 
