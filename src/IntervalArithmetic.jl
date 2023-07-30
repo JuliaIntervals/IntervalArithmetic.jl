@@ -1,5 +1,3 @@
-# This file is part of the IntervalArithmetic.jl package; MIT licensed
-
 module IntervalArithmetic
 
 import CRlibm
@@ -15,29 +13,25 @@ using EnumX
 import LinearAlgebra: ×, dot, norm
 export ×, dot
 
-
 import Base:
     +, -, *, /, //, fma,
-    <, >, ==, !=, ⊆, ^, <=, >=,
-    in, zero, one, eps, typemin, typemax, abs, abs2, min, max,
-    sqrt, exp, log, exp2, exp10, log2, log10, inv, cbrt, hypot,
+    ^, sqrt, exp, log, exp2, exp10, log2, log10, inv, cbrt, hypot,
+    zero, one, eps, typemin, typemax, abs, abs2, min, max,
     rad2deg, deg2rad,
     sin, cos, tan, cot, csc, sec, asin, acos, atan, acot, sinpi, cospi, sincospi,
     sinh, cosh, tanh, coth, csch, sech, asinh, acosh, atanh, acoth,
-    union, intersect, isempty,
+    in, union, intersect, issubset, isempty, isdisjoint,
     convert, eltype, size,
     BigFloat, float, big,
-    ∩, ∪, ⊆, ⊇, ∈, eps,
     floor, ceil, trunc, sign, round, copysign, flipsign, signbit,
     expm1, log1p,
     precision,
-    isfinite, isnan, isinf, iszero,
+    isfinite, isinteger, isnan, isinf, iszero,
     abs, abs2,
     show,
-    isinteger, setdiff,
-    parse, hash
-
-import Base:  # for IntervalBox
+    setdiff,
+    parse, hash,
+    # for IntervalBox
     broadcast, length,
     getindex, setindex,
     iterate, eltype
@@ -51,22 +45,21 @@ export
     Interval, BooleanInterval,
     interval, ±, @I_str,
     diam, radius, mid, scaled_mid, mag, mig, hull,
-    emptyinterval, isempty, isinterior, isdisjoint,
-    precedes, strictprecedes, ⊂, ⊃, ⊇, contains_zero, isthinzero,
+    emptyinterval, isempty, isinterior,
+    precedes, strictprecedes, ≺, ⊂, ⊃, contains_zero, isthinzero,
     isweaklyless, isstrictless, overlap, Overlap,
     ≛,
     entireinterval, isentire, nai, isnai, isthin, iscommon, isatomic,
     inf, sup, bounds, bisect, mince,
-    eps, dist,
+    dist,
     midpoint_radius,
     RoundTiesToEven, RoundTiesToAway,
     IntervalRounding,
-    PointwisePolicy,
     cancelminus, cancelplus, isbounded, isunbounded,
     pow, extended_div, nthroot,
     setformat
 
-import Base: isdisjoint
+
 
 export
     setindex   # re-export from StaticArrays for IntervalBox
@@ -79,7 +72,7 @@ export
 
 ## Decorations
 export
-    interval, decoration, DecoratedInterval,
+    decoration, DecoratedInterval,
     com, dac, def, trv, ill
 
 ## Union type

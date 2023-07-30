@@ -21,7 +21,7 @@
 wrap(v::SVector{N,T} where {N,T<:Interval}) = IntervalBox(v)
 wrap(v) = v
 
-Base.size(X::IntervalBox{2,Float64}) = (2,)
+size(::IntervalBox{2,Float64}) = (2,)
 #
 @inline broadcasted(f, X::IntervalBox) = wrap(f.(X.v))
 @inline broadcasted(f, X::IntervalBox, Y::IntervalBox) = wrap(f.(X.v, Y.v))
@@ -31,10 +31,14 @@ Base.size(X::IntervalBox{2,Float64}) = (2,)
 @inline broadcasted(f, x, y, Z::IntervalBox) = wrap(f.(x, y, Z.v))
 @inline broadcasted(f, x, Y::IntervalBox, z) = wrap(f.(x, Y.v, z))
 
-for op in (:+, :-, :∩, :∪, :⊆, :⊂, :⊃, :isinterior, :dot, :setdiff, :×)
+for op in (:+, :-, :intersect, :hull, :union, :issubset, :⊂, :⊃, :isinterior, :dot, :setdiff, :×)
     @eval $(op)(a::SVector, b::IntervalBox) = $(op)(IntervalBox(a), b)
     @eval $(op)(a::IntervalBox, b::SVector) = $(op)(a, IntervalBox(b))
 end
+hull(a::IntervalBox, b::IntervalBox...) = reduce(hull, b; init = a)
+hull(a::AbstractVector{<:IntervalBox}) = reduce(hull, a)
+union(a::IntervalBox, b::IntervalBox...) = hull(a, b...)
+union(a::AbstractVector{<:IntervalBox}) = hull(a)
 
 
 # multiplication by a matrix
