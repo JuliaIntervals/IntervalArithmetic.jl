@@ -58,7 +58,7 @@ end
 
 @testset "sincospi" begin
     x = sincospi(emptyinterval())
-    @test (x[1] == emptyinterval()) & (x[2] == emptyinterval())
+    @test (x[1] ≛ emptyinterval()) & (x[2] ≛ emptyinterval())
     x = sincospi(interval(1, 2))
     @test (x[1] ⊇ interval(-1 , 0)) & (x[2] ≛ interval(-1 , 1))
     x = sincospi(interval(0.5, 1.5))

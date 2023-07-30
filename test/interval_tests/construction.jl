@@ -66,7 +66,7 @@ import IntervalArithmetic: unsafe_interval
     @test_throws MethodError convert(Interval, ℯ)
     @test_throws MethodError convert(Interval, BigInt(1))
     @test_throws MethodError convert(Interval, 1//10)
-    @test convert(Interval, interval(Float64, 0.1, 0.2)) === interval(Float64, 0.1, 0.2)
+    @test convert(Interval, interval(Float64, 0.1, 0.2)) ≛ interval(Float64, 0.1, 0.2)
 
     a = I"0.1"
     b = interval(π)
@@ -159,10 +159,10 @@ end
 
 @testset "Conversion to interval of same type" begin
     x = interval(3, 4)
-    @test convert(Interval{Float64}, x) === x
+    @test convert(Interval{Float64}, x) ≛ x
 
     x = interval(big(3), big(4))
-    @test convert(Interval{BigFloat}, x) === x
+    @test convert(Interval{BigFloat}, x) ≛ x
 end
 
 @testset "Promotion between intervals" begin

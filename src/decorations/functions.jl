@@ -10,6 +10,10 @@ one(::DecoratedInterval{T}) where {T<:NumTypes} = DecoratedInterval(one(T))
 one(::Type{DecoratedInterval{T}}) where {T<:NumTypes} = DecoratedInterval(one(T))
 
 ## Bool functions
+
+Base.:(==)(::DecoratedInterval, ::DecoratedInterval) =
+    throw(ArgumentError("== is purposely not supported, use ≛ instead"))
+
 const bool_functions = (
     :isempty, :isentire, :isunbounded,
     :isfinite, :isnan,
@@ -17,8 +21,8 @@ const bool_functions = (
 )
 
 const bool_binary_functions = (
-    :<, :>, :!=, :⊆, :<=, :(==),
-    :isinterior, :isdisjoint, :precedes, :strictprecedes,
+    :issubset,
+    :isinterior, :isdisjoint, :precedes, :strictprecedes, :isstrictless, :isweaklyless,
     :≛, :overlap
 )
 
@@ -131,7 +135,7 @@ function ^(xx::DecoratedInterval{T}, qq::DecoratedInterval{S}) where {T,S}
     r = x^q
     d = min(decoration(xx), decoration(qq), decoration(r))
     if inf(x) > zero(T) || (inf(x) ≥ zero(T) && inf(q) > zero(T)) ||
-            (isthin(q) && isinteger(inf(q)) && inf(q) > zero(q)) ||
+            (isthin(q) && isinteger(inf(q)) && inf(q) > zero(T)) ||
             (isthin(q) && isinteger(inf(q)) && zero(T) ∉ x)
         return DecoratedInterval(r, d)
     end

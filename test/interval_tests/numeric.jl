@@ -176,11 +176,9 @@ end
 @testset "Comparison tests" begin
     d = interval(0.1, 2)
 
-    @test d < 3
-    @test d <= 2
-    @test_skip ismissing(d < 2)  # Test depends on pointwise_policy mode
-    @test -1 < d
-    @test_skip ismissing(d < 0.15)  # Test depends on pointwise_policy mode
+    @test isstrictless(d, interval(3))
+    @test isweaklyless(d, interval(2))
+    @test isstrictless(interval(-1), d)
 
     # abs
     @test abs(interval(0.1, 0.2)) ≛ interval(0.1, 0.2)

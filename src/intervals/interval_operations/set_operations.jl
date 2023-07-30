@@ -38,7 +38,7 @@ This function is applicable to any number of input intervals, as in
 If your use case needs to splat the input, as in `intersect(a...)`, consider
 `reduce(intersect, a)` instead, because you save the cost of splatting.
 """
-intersect(a::Interval...) = interval(maximum(inf.(a)), minimum(sup.(a)))
+intersect(a::Union{Interval,Complex{<:Interval}}, b::Union{Interval,Complex{<:Interval}}...) = reduce(intersect, b; init = a)
 
 """
     hull(a, b)
@@ -53,8 +53,10 @@ hull(a::Interval{T}, b::Interval{S}) where {T<:NumTypes,S<:NumTypes} =
     unsafe_interval(promote_numtype(T, S), min(inf(a), inf(b)), max(sup(a), sup(b)))
 hull(a::Complex{<:Interval}, b::Complex{<:Interval}) =
     complex(hull(real(a), real(b)), hull(imag(a), imag(b)))
-hull(a...) = reduce(hull, a)
-hull(a::AbstractVector{<:Interval}) = reduce(hull, a)
+hull(a::Interval, b::Complex{<:Interval}) = complex(hull(a, real(b)), imag(b))
+hull(a::Complex{<:Interval}, b::Interval) = complex(hull(real(a), b), imag(a))
+hull(a::Union{Interval,Complex{<:Interval}}, b::Union{Interval,Complex{<:Interval}}...) = reduce(hull, b; init = a)
+hull(a::AbstractVector{<:Union{<:Interval,Complex{<:Interval}}}) = reduce(hull, a)
 
 """
     union(a, b)
@@ -65,8 +67,9 @@ to `hull(a,b)`.
 
 Implement the `converxHull` function of the IEEE Standard 1788-2015 (Section 9.3).
 """
-union(a::Interval, b::Interval) = hull(a, b)
-union(a::Complex{<:Interval}, b::Complex{<:Interval}) = hull(a, b)
+union(a::Union{Interval,Complex{<:Interval}}, b::Union{Interval,Complex{<:Interval}}) = hull(a, b)
+union(a::Union{Interval,Complex{<:Interval}}, b::Union{Interval,Complex{<:Interval}}...) = hull(a, b...)
+union(a::AbstractVector{<:Union{<:Interval,Complex{<:Interval}}}) = hull(a)
 
 """
     setdiff(x::Interval, y::Interval)

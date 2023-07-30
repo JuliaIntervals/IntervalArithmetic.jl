@@ -28,6 +28,8 @@ function ≛(a::Interval, b::Interval)
     isempty(a) && isempty(b) && return true
     return inf(a) == inf(b) && sup(a) == sup(b)
 end
+Base.:(==)(::Interval, ::Interval) =
+    throw(ArgumentError("== is purposely not supported, use ≛ instead"))
 
 """
     ≛(a::Interval, x::Real)
@@ -45,7 +47,7 @@ Typed with \\subseteq<TAB>.
 
 Implement the `subset` function of the IEEE Standard 1788-2015 (Table 9.3).
 """
-function ⊆(a::Interval, b::Interval)
+function issubset(a::Interval, b::Interval)
     isempty(a) && return true
     return inf(b) ≤ inf(a) && sup(a) ≤ sup(b)
 end
@@ -62,7 +64,6 @@ function ⊂(a::Interval, b::Interval)
     return a ⊆ b
 end
 
-⊇(a::Interval, b::Interval) = b ⊆ a
 ⊃(a::Interval, b::Interval) = b ⊂ a
 
 """

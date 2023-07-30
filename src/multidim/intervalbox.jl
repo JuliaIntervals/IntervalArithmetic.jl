@@ -70,18 +70,19 @@ big(X::IntervalBox) = big.(X)
 
 
 ## set operations
-for (op, dotop) in ((:⊆, :.⊆), (:⊂, :.⊂), (:⊃, :.⊃))
+for (op, dotop) in ((:issubset, :.⊆), (:⊂, :.⊂), (:⊃, :.⊃))
     @eval $(op)(X::IntervalBox{N}, Y::IntervalBox{N}) where {N} = all($(dotop)(X, Y))
 end
 
-∩(X::IntervalBox{N}, Y::IntervalBox{N}) where {N} = IntervalBox(X.v .∩ Y.v)
-∪(X::IntervalBox{N}, Y::IntervalBox{N}) where {N} = IntervalBox(X.v .∪ Y.v)
+intersect(X::IntervalBox{N}, Y::IntervalBox{N}) where {N} = IntervalBox(intersect.(X.v, Y.v))
+hull(X::IntervalBox{N}, Y::IntervalBox{N}) where {N} = IntervalBox(hull.(X.v, Y.v))
+union(X::IntervalBox{N}, Y::IntervalBox{N}) where {N} = hull(X, Y)
 
-∈(X::AbstractVector, Y::IntervalBox) = all(X .∈ Y)
-∈(X, Y::IntervalBox) = throw(ArgumentError("$X ∈ $Y is not defined"))
+in(X::AbstractVector, Y::IntervalBox) = all(X .∈ Y)
+in(X, Y::IntervalBox) = throw(ArgumentError("$X ∈ $Y is not defined"))
 
 # mixing intervals with one-dimensional interval boxes
-for op in (:⊆, :⊂, :⊃, :∩, :∪)
+for op in (:issubset, :⊂, :⊃, :intersect, :hull, :union)
     @eval $(op)(a::Interval, X::IntervalBox{1}) = $(op)(a, first(X))
     @eval $(op)(X::IntervalBox{1}, a::Interval) = $(op)(first(X), a)
 end
@@ -116,7 +117,6 @@ IntervalBox(x::Interval, n::Int) = IntervalBox(x, Val(n))
 
 dot(x::IntervalBox, y::IntervalBox) = dot(x.v, y.v)
 
-==(x::IntervalBox, y::IntervalBox) = all(x.v .== y.v)
 ≛(x::IntervalBox, y::IntervalBox) = all(x.v .≛ y.v)
 
 """
