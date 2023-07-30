@@ -19,7 +19,7 @@ import IntervalArithmetic: unsafe_interval
         @test one(a) ≛ one(typeof(a))
         @test one(a) ≛ big(1.0)
         @test !(a ≛ b)
-        @test eps(typeof(a)) == eps(one(typeof(a)))
+        @test eps(typeof(a)) ≛ eps(one(typeof(a)))
         @test typemin(typeof(a)) ≛ interval(-Inf, nextfloat(-Inf))
         @test typemax(typeof(a)) ≛ interval(prevfloat(Inf), Inf)
         @test typemin(a) ≛ typemin(typeof(a))
@@ -159,7 +159,6 @@ import IntervalArithmetic: unsafe_interval
         @test isinterior(interval(-Inf, Inf), interval(-Inf, Inf))
 
         @test !(nai(a) ≛ nai(a))
-        @test nai(a) ≛ nai(a)
         @test nai(Float64) ≛ DecoratedInterval(NaN)
         @test isnan(interval(nai(BigFloat)).lo)
         @test isnai(nai())
