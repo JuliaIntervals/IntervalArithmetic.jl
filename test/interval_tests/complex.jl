@@ -8,7 +8,7 @@ using IntervalArithmetic
 
     @test a ⊂ c
     @test a ⊆ c
-    @test isinterior(a, c)
+    @test interior(a, c)
     @test (b ⊂ c) == false
     @test (b ⊆ c) == false
 

@@ -13,15 +13,15 @@
 Implement the `add` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function +(a::Interval{T}, b::Interval{T}) where {T<:NumTypes}
-    isempty(a) && return a
-    isempty(b) && return b
+    isemptyinterval(a) && return a
+    isemptyinterval(b) && return b
     return @round(T, inf(a) + inf(b), sup(a) + sup(b))
 end
 
 +(a::Interval, b::Interval) = +(promote(a, b)...)
 
 function +(a::Interval{T}, b::T) where {T<:NumTypes}
-    isempty(a) && return a
+    isemptyinterval(a) && return a
     return @round(T, inf(a) + b, sup(a) + b)
 end
 
@@ -44,20 +44,20 @@ Implement the `neg` function of the IEEE Standard 1788-2015 (Table 9.1).
 Implement the `sub` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function -(a::Interval{T}, b::Interval{T}) where {T<:NumTypes}
-    isempty(a) && return a
-    isempty(b) && return b
+    isemptyinterval(a) && return a
+    isemptyinterval(b) && return b
     return @round(T, inf(a) - sup(b), sup(a) - inf(b))
 end
 
 -(a::Interval, b::Interval) = -(promote(a, b)...)
 
 function -(a::Interval{T}, b::T) where {T<:NumTypes}
-    isempty(a) && return a
+    isemptyinterval(a) && return a
     return @round(T, inf(a) - b, sup(a) - b)
 end
 
 function -(b::T, a::Interval{T}) where {T<:NumTypes}
-    isempty(a) && return a
+    isemptyinterval(a) && return a
     return @round(T, b - sup(a), b - inf(a))
 end
 
@@ -84,10 +84,10 @@ Implement the `mul` function of the IEEE Standard 1788-2015 (Table 9.1).
     The behavior of the multiplication is flavor dependent for some edge cases.
 """
 function *(a::Interval{T}, b::Interval{T}) where {T<:NumTypes}
-    isempty(a) && return a
-    isempty(b) && return b
-    isthinzero(a) && return a
-    isthinzero(b) && return b
+    isemptyinterval(a) && return a
+    isemptyinterval(b) && return b
+    issingletonzero(a) && return a
+    issingletonzero(b) && return b
     isbounded(a) && isbounded(b) && return mult(*, a, b)
     return mult((x, y, r) -> unbounded_mult(T, x, y, r), a, b)
 end
@@ -95,7 +95,7 @@ end
 *(a::Interval, b::Interval) = *(promote(a, b)...)
 
 function *(a::Interval{T}, b::T) where {T<:NumTypes}
-    (isempty(a) || isthinzero(a) || isone(b)) && return a
+    (isemptyinterval(a) || issingletonzero(a) || isone(b)) && return a
     if b ≥ 0
         return @round(T, inf(a) * b, sup(a) * b)
     else
@@ -142,9 +142,9 @@ Implement the `div` function of the IEEE Standard 1788-2015 (Table 9.1).
     The behavior of the division is flavor dependent for some edge cases.
 """
 function /(a::Interval{T}, b::Interval{T}) where {T<:NumTypes}
-    isempty(a) && return a
-    isempty(b) && return b
-    isthinzero(b) && return div_by_thin_zero(a)
+    isemptyinterval(a) && return a
+    isemptyinterval(b) && return b
+    issingletonzero(b) && return div_by_thin_zero(a)
     if inf(b) > 0 # b strictly positive
         inf(a) ≥ 0 && return @round(T, inf(a)/sup(b), sup(a)/inf(b))
         sup(a) ≤ 0 && return @round(T, inf(a)/inf(b), sup(a)/sup(b))
@@ -154,7 +154,7 @@ function /(a::Interval{T}, b::Interval{T}) where {T<:NumTypes}
         sup(a) ≤ 0 && return @round(T, sup(a)/inf(b), inf(a)/sup(b))
         return @round(T, sup(a)/sup(b), inf(a)/sup(b)) # 0 ∈ a
     else # 0 ∈ b
-        isthinzero(a) && return a
+        issingletonzero(a) && return a
         if iszero(inf(b))
             inf(a) ≥ 0 && return @round(T, inf(a)/sup(b), typemax(T))
             sup(a) ≤ 0 && return @round(T, typemin(T), sup(a)/sup(b))
@@ -172,7 +172,7 @@ end
 /(a::Interval, b::Interval) = /(promote(a, b)...)
 
 function /(a::Interval{T}, b::T) where {T<:NumTypes}
-    isempty(a) && return a
+    isemptyinterval(a) && return a
     iszero(b) && return div_by_thin_zero(a)
     if b ≥ 0
         return @round(T, inf(a)/b, sup(a)/b)
@@ -194,12 +194,12 @@ Implement the `recip` function of the IEEE Standard 1788-2015 (Table 9.1).
     The behavior of the division is flavor dependent for some edge cases.
 """
 function inv(a::Interval{T}) where {T<:NumTypes}
-    isempty(a) && return a
-    if 0 ∈ a
+    isemptyinterval(a) && return a
+    if ismember(0, a)
         inf(a) < 0 == sup(a) && return @round(T, typemin(T), inv(inf(a)))
         inf(a) == 0 < sup(a) && return @round(T, inv(sup(a)), typemax(T))
         inf(a) < 0 < sup(a) && return entireinterval(T)
-        isthinzero(a) && return div_by_thin_zero(one(Interval{T}))
+        issingletonzero(a) && return div_by_thin_zero(one(Interval{T}))
     end
     return @round(T, inv(sup(a)), inv(inf(a)))
 end
@@ -233,15 +233,15 @@ Fused multiply-add.
 Implement the `fma` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function fma(a::Interval{T}, b::Interval{T}, c::Interval{T}) where {T<:NumTypes}
-    isempty(a) && return a
-    isempty(b) && return b
-    isempty(c) && return c
+    isemptyinterval(a) && return a
+    isemptyinterval(b) && return b
+    isemptyinterval(c) && return c
 
-    if isentire(a)
-        isthinzero(b) && return c
+    if isentireinterval(a)
+        issingletonzero(b) && return c
         return entireinterval(T)
-    elseif isentire(b)
-        isthinzero(a) && return c
+    elseif isentireinterval(b)
+        issingletonzero(a) && return c
         return entireinterval(T)
     end
 
@@ -275,8 +275,8 @@ Implement the `sqrt` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function sqrt(a::Interval{T}) where {T<:NumTypes}
     domain = unsafe_interval(T, zero(T), typemax(T))
-    x = a ∩ domain
-    isempty(x) && return x
+    x = intersection(a, domain)
+    isemptyinterval(x) && return x
     lo, hi = bounds(x)
     return @round(T, sqrt(lo), sqrt(hi)) # `sqrt` is correctly-rounded
 end

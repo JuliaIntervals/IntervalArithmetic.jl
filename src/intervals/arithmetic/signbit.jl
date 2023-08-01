@@ -20,7 +20,7 @@ Interval{Float64}(0.0, 1.0)
 ```
 """
 function signbit(a::Interval{T}) where {T<:NumTypes}
-    isempty(a) && return a
+    isemptyinterval(a) && return a
     lo, hi = bounds(a)
     return interval(T, signbit(hi), signbit(lo))
 end

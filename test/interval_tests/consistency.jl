@@ -13,101 +13,99 @@ import IntervalArithmetic: unsafe_interval
         @test isa( interval(0.1), Interval )
         @test isa( zero(b), Interval )
 
-        @test zero(b) ≛ 0.0
-        @test zero(b) ≛ zero(typeof(b))
-        @test one(a) ≛ 1.0
-        @test one(a) ≛ one(typeof(a))
-        @test one(a) ≛ big(1.0)
-        @test !(a ≛ b)
-        @test eps(typeof(a)) ≛ eps(one(typeof(a)))
-        @test typemin(typeof(a)) ≛ interval(-Inf, nextfloat(-Inf))
-        @test typemax(typeof(a)) ≛ interval(prevfloat(Inf), Inf)
-        @test typemin(a) ≛ typemin(typeof(a))
-        @test typemax(a) ≛ typemax(typeof(a))
+        @test equal(zero(b), 0.0)
+        @test equal(zero(b), zero(typeof(b)))
+        @test equal(one(a), 1.0)
+        @test equal(one(a), one(typeof(a)))
+        @test equal(one(a), big(1.0))
+        @test !equal(a, b)
+        @test equal(eps(typeof(a)), eps(one(typeof(a))))
+        @test equal(typemin(typeof(a)), interval(-Inf, nextfloat(-Inf)))
+        @test equal(typemax(typeof(a)), interval(prevfloat(Inf), Inf))
+        @test equal(typemin(a), typemin(typeof(a)))
+        @test equal(typemax(a), typemax(typeof(a)))
 
-        @test a ≛ interval(a.lo, a.hi)
-        @test emptyinterval(Rational{Int}) ≛ emptyinterval()
+        @test equal(a, interval(a.lo, a.hi))
+        @test equal(emptyinterval(Rational{Int}), emptyinterval())
 
         @test (zero(a) + one(b)).lo == 1
         @test (zero(a) + one(b)).hi == 1
-        @test interval(0,1) + emptyinterval(a) ≛ emptyinterval(a)
-        @test interval(0.25) - one(c)/4 ≛ zero(c)
-        @test emptyinterval(a) - interval(0, 1) ≛ emptyinterval(a)
-        @test interval(0, 1) - emptyinterval(a) ≛ emptyinterval(a)
-        @test a*b ≛ interval(*(a.lo, b.lo, RoundDown), *(a.hi, b.hi, RoundUp))
-        @test interval(0, 1) * emptyinterval(a) ≛ emptyinterval(a)
-        @test a * interval(0) ≛ zero(a)
+        @test equal(interval(0,1) + emptyinterval(a), emptyinterval(a))
+        @test equal(interval(0.25) - one(c)/4, zero(c))
+        @test equal(emptyinterval(a) - interval(0, 1), emptyinterval(a))
+        @test equal(interval(0, 1) - emptyinterval(a), emptyinterval(a))
+        @test equal(a*b, interval(*(a.lo, b.lo, RoundDown), *(a.hi, b.hi, RoundUp)))
+        @test equal(interval(0, 1) * emptyinterval(a), emptyinterval(a))
+        @test equal(a * interval(0), zero(a))
     end
 
     @testset "inv" begin
-        @test inv( zero(a) ) ≛ emptyinterval()  # Only for set based flavor
-        @test inv( interval(0, 1) ) ≛ interval(1, Inf)
-        @test inv( interval(1, Inf) ) ≛ interval(0, 1)
-        @test inv(c) ≛ c
-        @test one(b)/b ≛ inv(b)
-        @test a/emptyinterval(a) ≛ emptyinterval(a)
-        @test emptyinterval(a)/a ≛ emptyinterval(a)
-        @test inv(interval(-4.0, 0.0)) ≛ interval(-Inf, -0.25)
-        @test inv(interval(0.0, 4.0)) ≛ interval(0.25, Inf)
-        @test inv(interval(-4.0, 4.0)) ≛ entireinterval(Float64)
-        @test interval(0)/interval(0) ≛ emptyinterval()  # According to the standard for :set_based flavor
+        @test equal(inv( zero(a) ), emptyinterval())  # Only for set based flavor
+        @test equal(inv( interval(0, 1) ), interval(1, Inf))
+        @test equal(inv( interval(1, Inf) ), interval(0, 1))
+        @test equal(inv(c), c)
+        @test equal(one(b)/b, inv(b))
+        @test equal(a/emptyinterval(a), emptyinterval(a))
+        @test equal(emptyinterval(a)/a, emptyinterval(a))
+        @test equal(inv(interval(-4.0, 0.0)), interval(-Inf, -0.25))
+        @test equal(inv(interval(0.0, 4.0)), interval(0.25, Inf))
+        @test equal(inv(interval(-4.0, 4.0)), entireinterval(Float64))
+        @test equal(interval(0)/interval(0), emptyinterval())  # According to the standard for :set_based flavor
         @test typeof(emptyinterval()) == Interval{Float64}
     end
 
     @testset "fma consistency" begin
-        @test fma(emptyinterval(), a, b) ≛ emptyinterval()
-        @test fma(entireinterval(), zero(a), b) ≛ b
-        @test fma(entireinterval(), one(a), b) ≛ entireinterval()
-        @test fma(zero(a), entireinterval(), b) ≛ b
-        @test fma(one(a), entireinterval(), b) ≛ entireinterval()
-        @test fma(a, zero(a), c) ≛ c
-        @test fma(interval(Rational{Int}, 1//2, 1//2),
+        @test equal(fma(emptyinterval(), a, b), emptyinterval())
+        @test equal(fma(entireinterval(), zero(a), b), b)
+        @test equal(fma(entireinterval(), one(a), b), entireinterval())
+        @test equal(fma(zero(a), entireinterval(), b), b)
+        @test equal(fma(one(a), entireinterval(), b), entireinterval())
+        @test equal(fma(a, zero(a), c), c)
+        @test equal(fma(interval(Rational{Int}, 1//2, 1//2),
             interval(Rational{Int}, 1//3, 1//3),
-            interval(Rational{Int}, 1//12, 1//12)) ≛ interval(Rational{Int}, 3//12, 3//12)
+            interval(Rational{Int}, 1//12, 1//12)), interval(Rational{Int}, 3//12, 3//12))
     end
 
-    @testset "∈ tests" begin
-        @test !(Inf ∈ entireinterval())
-        @test 0.1 ∈ I"0.1"
-        @test 0.1 ∈ I"0.1"
-        @test !(-Inf ∈ entireinterval())
-        @test !(Inf ∈ entireinterval())
+    @testset "ismember tests" begin
+        @test !ismember(Inf, entireinterval())
+        @test ismember(0.1, I"0.1")
+        @test ismember(0.1, I"0.1")
+        @test !ismember(-Inf, entireinterval())
+        @test !ismember(Inf, entireinterval())
 
-        @test_throws ArgumentError interval(3, 4) ∈ interval(3, 4)
+        @test_throws ArgumentError ismember(interval(3, 4), interval(3, 4))
     end
 
     @testset "Inclusion tests" begin
-        @test b ⊆ c
-        @test emptyinterval(c) ⊆ c
-        @test !(c ⊆ emptyinterval(c))
-        @test isinterior(b,c)
-        @test !isinterior(b, emptyinterval(b))
-        @test isinterior(emptyinterval(c), c)
-        @test isinterior(emptyinterval(c), emptyinterval(c))
-        @test b ⊂ c
-        @test !(b ⊂ b)
-        @test emptyinterval(c) ⊂ c
-        @test !(c ⊂ emptyinterval(c))
-        @test c ⊃ b
-        @test !(b ⊃ b)
-        @test !(emptyinterval(c) ⊃ c)
-        @test c ⊃ emptyinterval(c)
-        @test c ⊇ b
-        @test b ⊇ b
-        @test !(emptyinterval(c) ⊇ c)
-        @test c ⊇ emptyinterval(c)
-        @test isdisjoint(a, I"2.1")
-        @test !(isdisjoint(a, b))
-        @test isdisjoint(emptyinterval(a), a)
-        @test isdisjoint(emptyinterval(), emptyinterval())
+        @test subset(b, c)
+        @test subset(emptyinterval(c), c)
+        @test !subset(c, emptyinterval(c))
+        @test interior(b,c)
+        @test !interior(b, emptyinterval(b))
+        @test interior(emptyinterval(c), c)
+        @test interior(emptyinterval(c), emptyinterval(c))
+        @test strictsubset(b, c)
+        @test !strictsubset(b, b)
+        @test strictsubset(emptyinterval(c), c)
+        @test !strictsubset(c, emptyinterval(c))
+        @test strictsupset(c, b)
+        @test !strictsupset(b, b)
+        @test !strictsupset(emptyinterval(c), c)
+        @test strictsupset(c, emptyinterval(c))
+        @test supset(c, b)
+        @test supset(b, b)
+        @test !supset(emptyinterval(c), c)
+        @test supset(c, emptyinterval(c))
+        @test disjoint(a, I"2.1")
+        @test !(disjoint(a, b))
+        @test disjoint(emptyinterval(a), a)
+        @test disjoint(emptyinterval(), emptyinterval())
     end
 
     @testset "Comparison tests" begin
-        @test IntervalArithmetic.isweaklylessprime(a.lo, b.lo) == (a.lo < b.lo)
-        @test IntervalArithmetic.isweaklylessprime(Inf, Inf)
-        @test isweaklyless(emptyinterval(), emptyinterval())
-        @test !isweaklyless(interval(1, 2), emptyinterval())
-        @test isweaklyless(interval(-Inf,Inf), interval(-Inf,Inf))
+        @test less(emptyinterval(), emptyinterval())
+        @test !less(interval(1, 2), emptyinterval())
+        @test less(interval(-Inf,Inf), interval(-Inf,Inf))
         @test precedes(emptyinterval(), emptyinterval())
         @test precedes(interval(3, 4), emptyinterval())
         @test !(precedes(interval(0, 2),interval(-Inf,Inf)))
@@ -125,44 +123,44 @@ import IntervalArithmetic: unsafe_interval
     end
 
     @testset "Intersection tests" begin
-        @test emptyinterval() ≛ interval(Inf, -Inf)
-        @test (a ∩ interval(-1)) ≛ emptyinterval(a)
-        @test isempty(a ∩ interval(-1))
-        @test !(isempty(a))
-        @test !(emptyinterval(a) ≛ a)
-        @test emptyinterval() ≛ emptyinterval()
+        @test equal(emptyinterval(), interval(Inf, -Inf))
+        @test equal(intersection(a, interval(-1)), emptyinterval(a))
+        @test isemptyinterval(intersection(a, interval(-1)))
+        @test !isemptyinterval(a)
+        @test !equal(emptyinterval(a), a)
+        @test equal(emptyinterval(), emptyinterval())
 
-        @test intersect(a, hull(a,b)) ≛ a
-        @test union(a,b) ≛ interval(a.lo, b.hi)
+        @test equal(intersection(a, convexhull(a,b)), a)
+        @test equal(convexhull(a,b), interval(a.lo, b.hi))
 
         # n-ary intersection
-        @test intersect(interval(1.0, 2.0),
+        @test equal(intersection(interval(1.0, 2.0),
                         interval(-1.0, 5.0),
-                        interval(1.8, 3.0)) ≛ interval(1.8, 2.0)
-        @test intersect(a, emptyinterval(), b) ≛ emptyinterval()
-        @test intersect(interval(0, 1), interval(3, 4), interval(0, 1), interval(0, 1)) ≛ emptyinterval()
+                        interval(1.8, 3.0)), interval(1.8, 2.0))
+        @test equal(intersection(a, emptyinterval(), b), emptyinterval())
+        @test equal(intersection(interval(0, 1), interval(3, 4), interval(0, 1), interval(0, 1)), emptyinterval())
     end
 
-    @testset "Hull and union tests" begin
-        @test hull(interval(1, 2), interval(3, 4)) ≛ interval(1, 4)
-        @test hull(interval(1//3, 3//4), interval(3, 4)) ≛ interval(1/3, 4)
+    @testset "convexhull and convexhull tests" begin
+        @test equal(convexhull(interval(1, 2), interval(3, 4)), interval(1, 4))
+        @test equal(convexhull(interval(1//3, 3//4), interval(3, 4)), interval(1/3, 4))
 
-        @test union(interval(1, 2), interval(3, 4)) ≛ interval(1, 4)
-        @test union(interval(1//3, 3//4), interval(3, 4)) ≛ interval(1/3, 4)
+        @test equal(convexhull(interval(1, 2), interval(3, 4)), interval(1, 4))
+        @test equal(convexhull(interval(1//3, 3//4), interval(3, 4)), interval(1/3, 4))
     end
 
     @testset "Special interval tests" begin
-        @test entireinterval(Float64) ≛ interval(-Inf, Inf)
-        @test isentire(entireinterval(a))
-        @test isentire(interval(-Inf, Inf))
-        @test !(isentire(a))
-        @test isinterior(interval(-Inf, Inf), interval(-Inf, Inf))
+        @test equal(entireinterval(Float64), interval(-Inf, Inf))
+        @test isentireinterval(entireinterval(a))
+        @test isentireinterval(interval(-Inf, Inf))
+        @test !isentireinterval(a)
+        @test interior(interval(-Inf, Inf), interval(-Inf, Inf))
 
-        @test !(nai(a) ≛ nai(a))
+        @test !equal(nai(a), nai(a))
         @test isnai(DecoratedInterval(NaN))
         @test isnan(interval(nai(BigFloat)).lo)
         @test isnai(nai())
-        @test !(isnai(a))
+        @test !isnai(a)
 
         @test inf(a) == a.lo
         @test sup(a) == a.hi
@@ -222,38 +220,38 @@ import IntervalArithmetic: unsafe_interval
     @testset "cancelplus tests" begin
         x = interval(-2.0, 4.440892098500622e-16)
         y = interval(-4.440892098500624e-16, 2.0)
-        @test cancelminus(x, y) ≛ entireinterval(Float64)
-        @test cancelplus(x, y) ≛ entireinterval(Float64)
+        @test equal(cancelminus(x, y), entireinterval(Float64))
+        @test equal(cancelplus(x, y), entireinterval(Float64))
         x = interval(-big(1.0), eps(big(1.0))/4)
         y = interval(-eps(big(1.0))/2, big(1.0))
-        @test cancelminus(x, y) ≛ entireinterval(BigFloat)
-        @test cancelplus(x, y) ≛ entireinterval(BigFloat)
+        @test equal(cancelminus(x, y), entireinterval(BigFloat))
+        @test equal(cancelplus(x, y), entireinterval(BigFloat))
         x = interval(-big(1.0), eps(big(1.0))/2)
         y = interval(-eps(big(1.0))/2, big(1.0))
-        @test cancelminus(x, y) ⊆ interval(-one(BigFloat), one(BigFloat))
-        @test cancelplus(x, y) ≛ interval(zero(BigFloat), zero(BigFloat))
-        @test cancelminus(emptyinterval(), emptyinterval()) ≛ emptyinterval()
-        @test cancelplus(emptyinterval(), emptyinterval()) ≛ emptyinterval()
-        @test cancelminus(emptyinterval(), interval(0.0, 5.0)) ≛ emptyinterval()
-        @test cancelplus(emptyinterval(), interval(0.0, 5.0)) ≛ emptyinterval()
-        @test cancelminus(entireinterval(), interval(0.0, 5.0)) ≛ entireinterval()
-        @test cancelplus(entireinterval(), interval(0.0, 5.0)) ≛ entireinterval()
-        @test cancelminus(interval(5.0), interval(-Inf, 0.0)) ≛ entireinterval()
-        @test cancelplus(interval(5.0), interval(-Inf, 0.0)) ≛ entireinterval()
-        @test cancelminus(interval(0.0, 5.0), emptyinterval()) ≛ entireinterval()
-        @test cancelplus(interval(0.0, 5.0), emptyinterval()) ≛ entireinterval()
-        @test cancelminus(interval(0.0), interval(0.0, 1.0)) ≛ entireinterval()
-        @test cancelplus(interval(0.0), interval(0.0, 1.0)) ≛ entireinterval()
-        @test cancelminus(interval(0.0), interval(1.0)) ≛ interval(-1.0)
-        @test cancelplus(interval(0.0), interval(1.0)) ≛ interval(1.0)
-        @test cancelminus(interval(-5.0, 0.0), interval(0.0, 5.0)) ≛ interval(-5.0)
-        @test cancelplus(interval(-5.0, 0.0), interval(0.0, 5.0)) ≛ interval(0.0)
-        @test cancelminus(interval(1e308), -interval(1e308)) ≛ IntervalArithmetic.atomic(Float64, Inf)
-        @test cancelplus(interval(1e308), interval(1e308)) ≛ IntervalArithmetic.atomic(Float64, Inf)
-        @test cancelminus(interval(nextfloat(1e308)), -interval(nextfloat(1e308))) ≛ IntervalArithmetic.atomic(Float64, Inf)
-        @test cancelplus(interval(nextfloat(1e308)), interval(nextfloat(1e308))) ≛ IntervalArithmetic.atomic(Float64, Inf)
-        @test cancelminus(interval(prevfloat(big(Inf))), -interval(prevfloat(big(Inf)))) ≛ IntervalArithmetic.atomic(BigFloat, Inf)
-        @test cancelplus(interval(prevfloat(big(Inf))), interval(prevfloat(big(Inf)))) ≛ IntervalArithmetic.atomic(BigFloat, Inf)
+        @test subset(cancelminus(x, y), interval(-one(BigFloat), one(BigFloat)))
+        @test equal(cancelplus(x, y), interval(zero(BigFloat), zero(BigFloat)))
+        @test equal(cancelminus(emptyinterval(), emptyinterval()), emptyinterval())
+        @test equal(cancelplus(emptyinterval(), emptyinterval()), emptyinterval())
+        @test equal(cancelminus(emptyinterval(), interval(0.0, 5.0)), emptyinterval())
+        @test equal(cancelplus(emptyinterval(), interval(0.0, 5.0)), emptyinterval())
+        @test equal(cancelminus(entireinterval(), interval(0.0, 5.0)), entireinterval())
+        @test equal(cancelplus(entireinterval(), interval(0.0, 5.0)), entireinterval())
+        @test equal(cancelminus(interval(5.0), interval(-Inf, 0.0)), entireinterval())
+        @test equal(cancelplus(interval(5.0), interval(-Inf, 0.0)), entireinterval())
+        @test equal(cancelminus(interval(0.0, 5.0), emptyinterval()), entireinterval())
+        @test equal(cancelplus(interval(0.0, 5.0), emptyinterval()), entireinterval())
+        @test equal(cancelminus(interval(0.0), interval(0.0, 1.0)), entireinterval())
+        @test equal(cancelplus(interval(0.0), interval(0.0, 1.0)), entireinterval())
+        @test equal(cancelminus(interval(0.0), interval(1.0)), interval(-1.0))
+        @test equal(cancelplus(interval(0.0), interval(1.0)), interval(1.0))
+        @test equal(cancelminus(interval(-5.0, 0.0), interval(0.0, 5.0)), interval(-5.0))
+        @test equal(cancelplus(interval(-5.0, 0.0), interval(0.0, 5.0)), interval(0.0))
+        @test equal(cancelminus(interval(1e308), -interval(1e308)), IntervalArithmetic.atomic(Float64, Inf))
+        @test equal(cancelplus(interval(1e308), interval(1e308)), IntervalArithmetic.atomic(Float64, Inf))
+        @test equal(cancelminus(interval(nextfloat(1e308)), -interval(nextfloat(1e308))), IntervalArithmetic.atomic(Float64, Inf))
+        @test equal(cancelplus(interval(nextfloat(1e308)), interval(nextfloat(1e308))), IntervalArithmetic.atomic(Float64, Inf))
+        @test equal(cancelminus(interval(prevfloat(big(Inf))), -interval(prevfloat(big(Inf)))), IntervalArithmetic.atomic(BigFloat, Inf))
+        @test equal(cancelplus(interval(prevfloat(big(Inf))), interval(prevfloat(big(Inf)))), IntervalArithmetic.atomic(BigFloat, Inf))
     end
 
     @testset "mid and radius" begin
@@ -270,27 +268,27 @@ import IntervalArithmetic: unsafe_interval
     end
 
     @testset "abs, min, max, sign" begin
-        @test abs(entireinterval()) ≛ interval(0.0, Inf)
-        @test abs(emptyinterval()) ≛ emptyinterval()
-        @test abs(interval(-3.0,1.0)) ≛ interval(0.0, 3.0)
-        @test abs(interval(-3.0,-1.0)) ≛ interval(1.0, 3.0)
-        @test abs2(interval(-3.0,1.0)) ≛ interval(0.0, 9.0)
-        @test abs2(interval(-3.0,-1.0)) ≛ interval(1.0, 9.0)
-        @test min(entireinterval(), interval(3.0,4.0)) ≛ interval(-Inf, 4.0)
-        @test min(emptyinterval(), interval(3.0,4.0)) ≛ emptyinterval()
-        @test min(interval(-3.0,1.0), interval(3.0,4.0)) ≛ interval(-3.0, 1.0)
-        @test min(interval(-3.0,-1.0), interval(3.0,4.0)) ≛ interval(-3.0, -1.0)
-        @test max(entireinterval(), interval(3.0,4.0)) ≛ interval(3.0, Inf)
-        @test max(emptyinterval(), interval(3.0,4.0)) ≛ emptyinterval()
-        @test max(interval(-3.0,1.0), interval(3.0,4.0)) ≛ interval(3.0, 4.0)
-        @test max(interval(-3.0,-1.0), interval(3.0,4.0)) ≛ interval(3.0, 4.0)
-        @test sign(entireinterval()) ≛ interval(-1.0, 1.0)
-        @test sign(emptyinterval()) ≛ emptyinterval()
-        @test sign(interval(-3.0,1.0)) ≛ interval(-1.0, 1.0)
-        @test sign(interval(-3.0,-1.0)) ≛ interval(-1.0, -1.0)
+        @test equal(abs(entireinterval()), interval(0.0, Inf))
+        @test equal(abs(emptyinterval()), emptyinterval())
+        @test equal(abs(interval(-3.0,1.0)), interval(0.0, 3.0))
+        @test equal(abs(interval(-3.0,-1.0)), interval(1.0, 3.0))
+        @test equal(abs2(interval(-3.0,1.0)), interval(0.0, 9.0))
+        @test equal(abs2(interval(-3.0,-1.0)), interval(1.0, 9.0))
+        @test equal(min(entireinterval(), interval(3.0,4.0)), interval(-Inf, 4.0))
+        @test equal(min(emptyinterval(), interval(3.0,4.0)), emptyinterval())
+        @test equal(min(interval(-3.0,1.0), interval(3.0,4.0)), interval(-3.0, 1.0))
+        @test equal(min(interval(-3.0,-1.0), interval(3.0,4.0)), interval(-3.0, -1.0))
+        @test equal(max(entireinterval(), interval(3.0,4.0)), interval(3.0, Inf))
+        @test equal(max(emptyinterval(), interval(3.0,4.0)), emptyinterval())
+        @test equal(max(interval(-3.0,1.0), interval(3.0,4.0)), interval(3.0, 4.0))
+        @test equal(max(interval(-3.0,-1.0), interval(3.0,4.0)), interval(3.0, 4.0))
+        @test equal(sign(entireinterval()), interval(-1.0, 1.0))
+        @test equal(sign(emptyinterval()), emptyinterval())
+        @test equal(sign(interval(-3.0,1.0)), interval(-1.0, 1.0))
+        @test equal(sign(interval(-3.0,-1.0)), interval(-1.0, -1.0))
 
         # Test putting functions in interval:
-        @test log(interval(-2, 5)) ⊆ interval(-Inf, log(interval(5)))
+        @test subset(log(interval(-2, 5)), interval(-Inf, log(interval(5))))
     end
 
     # @testset "Interval rounding tests" begin
@@ -307,9 +305,9 @@ import IntervalArithmetic: unsafe_interval
         a = interval(1, 2)
         b = interval(3, 4)
 
-        @test a^b ≛ interval(1, 16)
-        @test a^interval(0.5, 1) ≛ a
-        @test a^interval(0.3, 0.5) ≛ interval(1, sqrt(2))
+        @test equal(a^b, interval(1, 16))
+        @test equal(a^interval(0.5, 1), a)
+        @test equal(a^interval(0.3, 0.5), interval(1, sqrt(2)))
     end
 
     @testset "isatomic" begin
@@ -323,25 +321,25 @@ import IntervalArithmetic: unsafe_interval
 
     end
 
-    @testset "isthinzero" begin
-        @test isthinzero(interval(0))
-        @test isthinzero(interval(Rational{Int}, 0//1))
-        @test isthinzero(interval(big(0)))
-        @test isthinzero(interval(-0.0))
-        @test isthinzero(interval(-0.0, 0.0))
+    @testset "issingletonzero" begin
+        @test issingletonzero(interval(0))
+        @test issingletonzero(interval(Rational{Int}, 0//1))
+        @test issingletonzero(interval(big(0)))
+        @test issingletonzero(interval(-0.0))
+        @test issingletonzero(interval(-0.0, 0.0))
 
-        @test !isthinzero(interval(1, 2))
-        @test !isthinzero(interval(0.0, nextfloat(0.0)))
+        @test !issingletonzero(interval(1, 2))
+        @test !issingletonzero(interval(0.0, nextfloat(0.0)))
     end
 
     @testset "Difference between checked and unchecked Intervals" begin
-        @test unsafe_interval(Float64, 1, 2) ≛ interval(Float64, 1, 2)
+        @test equal(unsafe_interval(Float64, 1, 2), interval(Float64, 1, 2))
 
         @test inf(unsafe_interval(Float64, 3, 2)) == 3
-        @test_logs (:warn,) @test isempty(interval(3, 2))
+        @test_logs (:warn,) @test isemptyinterval(interval(3, 2))
 
         @test sup(unsafe_interval(Float64, Inf, Inf)) == Inf
-        @test_logs (:warn,) @test isempty(interval(Inf, Inf))
+        @test_logs (:warn,) @test isemptyinterval(interval(Inf, Inf))
     end
 
     @testset "Type stability" begin

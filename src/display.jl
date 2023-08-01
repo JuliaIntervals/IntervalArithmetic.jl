@@ -76,10 +76,10 @@ end
 
 # Printing mechanism for various types of intervals
 
-show(io::IO, ::MIME"text/plain", a::Union{Interval,Complex{<:Interval},DecoratedInterval,IntervalBox}) =
+show(io::IO, ::MIME"text/plain", a::Union{Interval,Complex{<:Interval},DecoratedInterval}) =
     print(io, representation(a, display_params.format))
 
-function show(io::IO, a::Union{Interval,Complex{<:Interval},DecoratedInterval,IntervalBox})
+function show(io::IO, a::Union{Interval,Complex{<:Interval},DecoratedInterval})
     get(io, :compact, false) && return print(io, representation(a, display_params.format))
     return print(io, representation(a, :full))
 end
@@ -127,33 +127,10 @@ function representation(a::DecoratedInterval{BigFloat}, format::Symbol)
     return var_interval
 end
 
-function representation(X::IntervalBox{N}, format::Symbol) where {N}
-    # `format` is either :standard, :midpoint or :full
-    if format === :full
-        isempty(X) && return string("IntervalBox(∅, ", N, ")")
-        x = first(X)
-        all(y -> x ≛ y, X) && return string("IntervalBox(", representation(x, format), ", ", N, ")")
-        str = representation.(X.v, format)
-        return string("IntervalBox(", join(str, ", "), ")")
-    elseif format === :midpoint
-        isempty(X) && return string("∅", supscriptify(N))
-        x = first(X)
-        all(y -> x ≛ y, X) && return string("(", representation(x, format), ")", supscriptify(N))
-        str = representation.(X.v, format)
-        return string("(", join(str, ") × ("), ")")
-    else  # format === :standard
-        isempty(X) && return string("∅", supscriptify(N))
-        x = first(X)
-        all(y -> x ≛ y, X) && return string(representation(x, format), supscriptify(N))
-        str = representation.(X.v, format)
-        return join(str, " × ")
-    end
-end
-
 # `String` representation of an `Interval`
 
 function basic_representation(a::Interval{T}, format::Symbol) where {T<:AbstractFloat}
-    isempty(a) && return "∅"
+    isemptyinterval(a) && return "∅"
     sigdigits = display_params.sigdigits
     if format === :full
         # Do not use `inf(a)` to avoid -0.0
@@ -173,7 +150,7 @@ function basic_representation(a::Interval{T}, format::Symbol) where {T<:Abstract
 end
 
 function basic_representation(a::Interval{Float32}, format::Symbol)
-    isempty(a) && return "∅"
+    isemptyinterval(a) && return "∅"
     sigdigits = display_params.sigdigits
     if format === :full
         # Do not use `inf(a)` to avoid -0.0
@@ -194,7 +171,7 @@ function basic_representation(a::Interval{Float32}, format::Symbol)
 end
 
 function basic_representation(a::Interval{T}, format::Symbol) where {T<:Rational}
-    isempty(a) && return "∅"
+    isemptyinterval(a) && return "∅"
     if format === :full
         # Do not use `inf(a)` to avoid -0.0
         return string("Interval{", T, "}(", a.lo, ", ", sup(a), ")")

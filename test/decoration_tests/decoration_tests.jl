@@ -8,12 +8,12 @@ let b
     @test decoration(a) == com
 
     b = sqrt(a)
-    @test interval(b) ≛ sqrt(interval(a))
+    @test equal(interval(b), sqrt(interval(a)))
     @test decoration(b) == com
 
     a = DecoratedInterval(interval(-1, 1), com)
     b = sqrt(a)
-    @test interval(b) ≛ sqrt(interval(0, 1))
+    @test equal(interval(b), sqrt(interval(0, 1)))
     @test decoration(b) == trv
 
     d = DecoratedInterval(a, dac)
@@ -32,20 +32,20 @@ let b
     # @test_throws ArgumentError DecoratedInterval(BigInt(1), 1//10)
 
     # Tests related to powers of decorated Intervals
-    @test DecoratedInterval(2, 3) ^ 2 ≛ DecoratedInterval(4, 9)
-    @test DecoratedInterval(2, 3) ^ -2 ≛ DecoratedInterval(1/9,1/4)
-    @test DecoratedInterval(-3, 2) ^ 3 ≛ DecoratedInterval(-27, 8)
-    @test DecoratedInterval(-3, -2) ^ -3 ≛ DecoratedInterval(-1/8, -1/27)
-    @test DecoratedInterval(0, 3) ^ 2 ≛ DecoratedInterval(0, 9)
-    @test DecoratedInterval(0, 3) ^ -2 ≛ DecoratedInterval(1/9, Inf, trv)
-    @test DecoratedInterval(2, 3)^interval(0, 1) ≛ DecoratedInterval(1, 3)
-    @test DecoratedInterval(2, 3)^DecoratedInterval(0, 1) ≛ DecoratedInterval(1, 3)
-    @test DecoratedInterval(0, 2)^interval(0, 1) ≛ DecoratedInterval(0, 2, trv)
-    @test DecoratedInterval(0, 2)^DecoratedInterval(0, 1) ≛ DecoratedInterval(0, 2, trv)
-    @test DecoratedInterval(-3, 2)^interval(0, 1) ≛ DecoratedInterval(0, 2, trv)
-    @test DecoratedInterval(-3, 2)^DecoratedInterval(0, 1) ≛ DecoratedInterval(0, 2, trv)
-    @test DecoratedInterval(-3, 2)^interval(-1, 1) ≛ DecoratedInterval(0, Inf, trv)
-    @test DecoratedInterval(-3, 2)^DecoratedInterval(-1, 1) ≛ DecoratedInterval(0, Inf, trv)
+    @test equal(DecoratedInterval(2, 3) ^ 2, DecoratedInterval(4, 9))
+    @test equal(DecoratedInterval(2, 3) ^ -2, DecoratedInterval(1/9,1/4))
+    @test equal(DecoratedInterval(-3, 2) ^ 3, DecoratedInterval(-27, 8))
+    @test equal(DecoratedInterval(-3, -2) ^ -3, DecoratedInterval(-1/8, -1/27))
+    @test equal(DecoratedInterval(0, 3) ^ 2, DecoratedInterval(0, 9))
+    @test equal(DecoratedInterval(0, 3) ^ -2, DecoratedInterval(1/9, Inf, trv))
+    @test equal(DecoratedInterval(2, 3)^interval(0, 1), DecoratedInterval(1, 3))
+    @test equal(DecoratedInterval(2, 3)^DecoratedInterval(0, 1), DecoratedInterval(1, 3))
+    @test equal(DecoratedInterval(0, 2)^interval(0, 1), DecoratedInterval(0, 2, trv))
+    @test equal(DecoratedInterval(0, 2)^DecoratedInterval(0, 1), DecoratedInterval(0, 2, trv))
+    @test equal(DecoratedInterval(-3, 2)^interval(0, 1), DecoratedInterval(0, 2, trv))
+    @test equal(DecoratedInterval(-3, 2)^DecoratedInterval(0, 1), DecoratedInterval(0, 2, trv))
+    @test equal(DecoratedInterval(-3, 2)^interval(-1, 1), DecoratedInterval(0, Inf, trv))
+    @test equal(DecoratedInterval(-3, 2)^DecoratedInterval(-1, 1), DecoratedInterval(0, Inf, trv))
 
     a = DecoratedInterval(1, 2)
     b = DecoratedInterval(3, 4)

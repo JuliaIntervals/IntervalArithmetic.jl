@@ -1,15 +1,14 @@
 using Test
 using IntervalArithmetic
+using LinearAlgebra
 
-IntervalArithmetic.:(≛)(a::Tuple, b::Tuple) = all(a .≛ b)
+# IntervalArithmetic.:(equal)(a::Tuple, b::Tuple) = all(a .equal b)
 
 function include_test(filename)
     @testset "$filename" begin
         include(filename)
     end
 end
-
-setformat(:full)
 
 # Interval tests:
 include_test("interval_tests/intervals.jl")

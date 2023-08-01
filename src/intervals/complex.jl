@@ -1,4 +1,4 @@
-for op in (:⊆, :⊂, :isinterior)
+for op in (:⊆, :⊂, :interior)
     @eval function $(op)(x::Complex{<:Interval}, y::Complex{<:Interval})
         return $(op)(real(x), real(y)) && $(op)(imag(x), imag(y))
     end
@@ -121,6 +121,6 @@ abs(z::Complex{<:Interval}) = sqrt(abs2(z))
 mid(z::Complex) = complex(mid(real(z)), mid(imag(z)))
 diam(z::Complex) = max(diam(real(z)), diam(imag(z)))
 radius(z::Complex) = max(radius(real(z)), radius(imag(z)))
-midpoint_radius(z::Complex) = (mid(z), radius(z))
+midradius(z::Complex) = (mid(z), radius(z))
 mag(z::Complex) = sup(abs(z))
 mig(z::Complex) = inf(abs(z))

@@ -14,7 +14,7 @@ follows Section 11.2 of the IEEE Standard 1788-2015:
 - `ill -> 0`: not an interval (ill-formed)
 """
 @enum DECORATION ill=0 trv=1 def=2 dac=3 com=4
-# Note that `isweaklyless`, and hence `<` and `min`, are automatically defined for enums
+# Note that `less`, and hence `<` and `min`, are automatically defined for enums
 
 """
     DecoratedInterval{T<:NumTypes}
@@ -68,7 +68,7 @@ decoration(x::DecoratedInterval) = x.decoration
 
 function decoration(x::Interval)
     isnai(x) && return ill        # nai()
-    isempty(x) && return trv      # emptyinterval
+    isemptyinterval(x) && return trv      # emptyinterval
     isunbounded(x) && return dac  # unbounded
     return com                    # common
 end

@@ -35,9 +35,9 @@ Implement the `overlap` function according to the IEEE Standard 1788-2015
 """
 function overlap(a::Interval, b::Interval)
     # At least one interval is empty
-    isempty(a) && isempty(b) && return Overlap.both_empty
-    isempty(a) && return Overlap.first_empty
-    isempty(b) && return Overlap.second_empty
+    isemptyinterval(a) && isemptyinterval(b) && return Overlap.both_empty
+    isemptyinterval(a) && return Overlap.first_empty
+    isemptyinterval(b) && return Overlap.second_empty
 
     # States with both intervals nonempty
     sup(a) < inf(b) && return Overlap.before
@@ -46,7 +46,7 @@ function overlap(a::Interval, b::Interval)
     inf(a) == inf(b) && sup(a) < sup(b) && return Overlap.starts
     inf(b) < inf(a) && sup(a) < sup(b) && return Overlap.contained_by
     inf(b) < inf(a) && sup(a) == sup(b) && return Overlap.finishes
-    a ≛ b && return Overlap.equals
+    equal(a, b) && return Overlap.equals
     inf(a) < inf(b) && sup(a) == sup(b) && return Overlap.finished_by
     inf(b) > inf(a) && sup(a) > sup(b) && return Overlap.contains
     inf(a) == inf(b) && sup(a) > sup(b) && return Overlap.started_by

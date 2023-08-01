@@ -12,7 +12,7 @@ function extended_div(a::Interval{T}, b::Interval{T}) where {T<:NumTypes}
     alo, ahi = bounds(a)
     blo, bhi = bounds(b)
     z = zero(T)
-    if 0 < bhi && 0 > blo && 0 ∉ a
+    if 0 < bhi && 0 > blo && !ismember(0, a)
         if ahi < 0
             return (a / unsafe_interval(T, z, bhi), a / unsafe_interval(T, blo, z))
             # return (unsafe_interval(T, T(-Inf), ahi / bhi), unsafe_interval(T, ahi / blo, T(Inf)))
@@ -21,7 +21,7 @@ function extended_div(a::Interval{T}, b::Interval{T}) where {T<:NumTypes}
             # return (unsafe_interval(T, T(-Inf), alo / blo), unsafe_interval(T, alo / bhi, T(Inf)))
         end
 
-    elseif 0 ∈ a && 0 ∈ b
+    elseif ismember(0, a) && ismember(0, b)
         return (entireinterval(T), emptyinterval(T))
 
     else

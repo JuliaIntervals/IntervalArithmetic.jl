@@ -58,7 +58,7 @@ end
 Implement the `sin` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function sin(a::Interval{T}) where {T<:NumTypes}
-    isempty(a) && return a
+    isemptyinterval(a) && return a
 
     whole_range = unsafe_interval(T, -one(T), one(T))
 
@@ -82,7 +82,7 @@ function sin(a::Interval{T}) where {T<:NumTypes}
         ahi - alo > inf(interval(T, π)) && return whole_range  # in same quadrant but separated by almost 2pi
         lo = @round(T, sin(alo), sin(alo))
         hi = @round(T, sin(ahi), sin(ahi))
-        return hull(lo, hi)
+        return convexhull(lo, hi)
 
     elseif lo_quadrant == 3 && hi_quadrant == 0
         return @round(T, sin(alo), sin(ahi))
@@ -102,7 +102,7 @@ function sin(a::Interval{T}) where {T<:NumTypes}
 end
 
 function sin(a::Interval{Float64})
-    isempty(a) && return a
+    isemptyinterval(a) && return a
 
     whole_range = unsafe_interval(Float64, -1.0, 1.0)
 
@@ -150,7 +150,7 @@ sinpi(a::Interval) = sin(a * π)
 Implement the `cos` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function cos(a::Interval{T}) where {T<:NumTypes}
-    isempty(a) && return a
+    isemptyinterval(a) && return a
 
     whole_range = unsafe_interval(T, -one(T), one(T))
 
@@ -172,7 +172,7 @@ function cos(a::Interval{T}) where {T<:NumTypes}
         ahi - alo > inf(interval(T, π)) && return whole_range
         lo = @round(T, cos(alo), cos(alo))
         hi = @round(T, cos(ahi), cos(ahi))
-        return hull(lo, hi)
+        return convexhull(lo, hi)
 
     elseif lo_quadrant == 2 && hi_quadrant == 3
         return @round(T, cos(alo), cos(ahi))
@@ -192,7 +192,7 @@ function cos(a::Interval{T}) where {T<:NumTypes}
 end
 
 function cos(a::Interval{Float64})
-    isempty(a) && return a
+    isemptyinterval(a) && return a
 
     whole_range = unsafe_interval(Float64, -1.0, 1.0)
 
@@ -240,7 +240,7 @@ cospi(a::Interval) = cos(a * π)
 Implement the `tan` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function tan(a::Interval{T}) where {T<:NumTypes}
-    isempty(a) && return a
+    isemptyinterval(a) && return a
 
     diam(a) > inf(interval(T, π)) && return entireinterval(T)
 
@@ -253,7 +253,7 @@ function tan(a::Interval{T}) where {T<:NumTypes}
 
     if iszero(lo_quadrant_mod) && hi_quadrant_mod == 1
         # check if really contains singularity:
-        if hi_quadrant * half_pi(T) ⊆ a
+        if subset(hi_quadrant * half_pi(T), a)
             return entireinterval(T)  # crosses singularity
         end
 
@@ -266,7 +266,7 @@ function tan(a::Interval{T}) where {T<:NumTypes}
 end
 
 function tan(a::Interval{Float64})
-    isempty(a) && return a
+    isemptyinterval(a) && return a
 
     diam(a) > inf(interval(Float64, π)) && return entireinterval(Float64)
 
@@ -295,11 +295,11 @@ end
 Implement the `cot` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function cot(a::Interval{T}) where {T<:NumTypes}
-    isempty(a) && return a
+    isemptyinterval(a) && return a
 
     diam(a) > inf(interval(T, π)) && return entireinterval(T)
 
-    isthinzero(a) && return emptyinterval(T)
+    issingletonzero(a) && return emptyinterval(T)
 
     alo, ahi = bounds(a)
     lo_quadrant = minimum(find_quadrants(T, alo))
@@ -340,7 +340,7 @@ cot(a::Interval{Float64}) = atomic(Float64, cot(big(a)))
 Implement the `sec` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function sec(a::Interval{T}) where {T<:NumTypes}
-    isempty(a) && return a
+    isemptyinterval(a) && return a
 
     diam(a) > inf(interval(T, π)) && return entireinterval(T)
 
@@ -355,7 +355,7 @@ function sec(a::Interval{T}) where {T<:NumTypes}
     if lo_quadrant == hi_quadrant  # Interval limits in the same quadrant
         lo = @round(T, sec(alo), sec(alo))
         hi = @round(T, sec(ahi), sec(ahi))
-        return hull(lo, hi)
+        return convexhull(lo, hi)
 
     elseif (iszero(lo_quadrant) && hi_quadrant == 1) || (lo_quadrant == 2 && hi_quadrant ==3)
         return entireinterval(T)
@@ -379,11 +379,11 @@ sec(a::Interval{Float64}) = atomic(Float64, sec(big(a)))
 Implement the `csc` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function csc(a::Interval{T}) where {T<:NumTypes}
-    isempty(a) && return a
+    isemptyinterval(a) && return a
 
     diam(a) > inf(interval(T, π)) && return entireinterval(T)
 
-    isthinzero(a) && return emptyinterval(T)
+    issingletonzero(a) && return emptyinterval(T)
 
     alo, ahi = bounds(a)
     lo_quadrant = minimum(find_quadrants(T, alo))
@@ -398,7 +398,7 @@ function csc(a::Interval{T}) where {T<:NumTypes}
 
         lo = @round(T, csc(alo), csc(alo))
         hi = @round(T, csc(ahi), csc(ahi))
-        return hull(lo, hi)
+        return convexhull(lo, hi)
 
     elseif (lo_quadrant == 3 && iszero(hi_quadrant)) || (lo_quadrant == 1 && hi_quadrant == 2)
         iszero(ahi) && return @round(T, typemin(T), csc(alo))
@@ -430,8 +430,8 @@ Implement the `asin` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function asin(a::Interval{T}) where {T<:NumTypes}
     domain = unsafe_interval(T, -one(T), one(T))
-    a = a ∩ domain
-    isempty(a) && return a
+    a = intersection(a, domain)
+    isemptyinterval(a) && return a
     alo, ahi = bounds(a)
     return @round(T, asin(alo), asin(ahi))
 end
@@ -443,8 +443,8 @@ Implement the `acos` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function acos(a::Interval{T}) where {T<:NumTypes}
     domain = unsafe_interval(T, -one(T), one(T))
-    a = a ∩ domain
-    isempty(a) && return a
+    a = intersection(a, domain)
+    isemptyinterval(a) && return a
     alo, ahi = bounds(a)
     return @round(T, acos(ahi), acos(alo))
 end
@@ -455,20 +455,20 @@ end
 Implement the `atan` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function atan(a::Interval{T}) where {T<:NumTypes}
-    isempty(a) && return a
+    isemptyinterval(a) && return a
     alo, ahi = bounds(a)
     return @round(T, atan(alo), atan(ahi))
 end
 
 function atan(y::Interval{T}, x::Interval{S}) where {T<:NumTypes,S<:NumTypes}
     F = Interval{promote_type(T, S)}
-    (isempty(y) || isempty(x)) && return emptyinterval(F)
+    (isemptyinterval(y) || isemptyinterval(x)) && return emptyinterval(F)
     return F(atan(big(y), big(x)))
 end
 
 function atan(y::Interval{BigFloat}, x::Interval{BigFloat})
-    isempty(y) && return y
-    isempty(x) && return x
+    isemptyinterval(y) && return y
+    isemptyinterval(x) && return x
 
     ylo, yhi = bounds(y)
     xlo, xhi = bounds(x)
@@ -484,14 +484,14 @@ function atan(y::Interval{BigFloat}, x::Interval{BigFloat})
     end
 
     # Check cases based on x
-    if isthinzero(x)
-        isthinzero(y) && return emptyinterval(BigFloat)
+    if issingletonzero(x)
+        issingletonzero(y) && return emptyinterval(BigFloat)
         ylo ≥ z && return half_pi(BigFloat)
         yhi ≤ z && return -half_pi(BigFloat)
         return half_range_atan(BigFloat)
 
     elseif xlo > z
-        isthinzero(y) && return y
+        issingletonzero(y) && return y
         ylo ≥ z &&
             return @round(BigFloat, atan(ylo, xhi), atan(yhi, xlo)) # refinement lo bound
         yhi ≤ z &&
@@ -499,7 +499,7 @@ function atan(y::Interval{BigFloat}, x::Interval{BigFloat})
         return @round(BigFloat, atan(ylo, xlo), atan(yhi, xlo))
 
     elseif xhi < z
-        isthinzero(y) && return interval(BigFloat, π)
+        issingletonzero(y) && return interval(BigFloat, π)
         ylo ≥ z &&
             return @round(BigFloat, atan(yhi, xhi), atan(ylo, xlo))
         yhi < z &&
@@ -508,7 +508,7 @@ function atan(y::Interval{BigFloat}, x::Interval{BigFloat})
 
     else # z ∈ x
         if iszero(xlo)
-            isthinzero(y) && return y
+            issingletonzero(y) && return y
             ylo ≥ z &&
                 return unsafe_interval(BigFloat, atan(ylo, xhi, RoundDown), sup(half_range_atan(BigFloat)))
             yhi ≤ z &&
@@ -516,7 +516,7 @@ function atan(y::Interval{BigFloat}, x::Interval{BigFloat})
             return half_range_atan(BigFloat)
 
         elseif iszero(xhi)
-            isthinzero(y) && return interval(BigFloat, π)
+            issingletonzero(y) && return interval(BigFloat, π)
             ylo ≥ z &&
                 return unsafe_interval(BigFloat, inf(half_pi(BigFloat)), atan(ylo, xlo, RoundUp))
             yhi < z &&
@@ -538,7 +538,7 @@ end
 Implement the `acot` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function acot(a::Interval{T}) where {T<:NumTypes}
-    isempty(a) && return a
+    isemptyinterval(a) && return a
     return atomic(T, interval(acot(bigequiv(sup(a))), acot(bigequiv(inf(a)))))
     # return atomic(T, @round(Interval{BigFloat}, acot(bigequiv(sup(a))), acot(bigequiv(inf(a)))))
 end
