@@ -79,8 +79,9 @@ end
     @test 0.1 + x ≛ interval(1.0999999999999999, 2.1)
     @test 3.0 - x ≛ 1..2
     @test 3.1 - x ≛ interval(1.1, 2.1)
-    @test 0.1 * (1..1) ≛ interval(0.1, 0.1)
-    @test (1..1) / 10.0 ≛ interval(0.09999999999999999, 0.1)
+    @test 0.1 * interval(1) ≛ interval(0.1, 0.1)
+    @test 0.0 * interval(1) ≛ interval(0.0, 0.0)
+    @test interval(1) / 10.0 ≛ interval(0.09999999999999999, 0.1)
 end
 
 @testset "Arithmetic with irrational" begin
