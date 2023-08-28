@@ -211,6 +211,20 @@ min_ignore_nans(args...) = minimum(filter(x -> !isnan(x), args))
 
 max_ignore_nans(args...) = maximum(filter(x -> !isnan(x), args))
 
+
+
+muladd(a::F, b::F, c::F) where {F<:Interval} = a * b + c
+
+muladd(a::Interval, b::Interval, c::Interval) = muladd(promote(a, b, c)...)
+
+muladd(a::Interval{T}, b::Interval{S}, c::Number) where {T<:NumTypes,S<:NumTypes} = muladd(promote(a, b, interval(promote_numtype(T, S), c))...)
+muladd(a::Interval{T}, b::Number, c::Interval{S}) where {T<:NumTypes,S<:NumTypes} = muladd(promote(a, interval(promote_numtype(T, S), b), c)...)
+muladd(a::Number, b::Interval{T}, c::Interval{S}) where {T<:NumTypes,S<:NumTypes} = muladd(promote(interval(promote_numtype(T, S), a), b, c)...)
+
+muladd(a::Interval{T}, b::Number, c::Number) where {T<:NumTypes} = muladd(a, interval(T, b), interval(T, c))
+muladd(a::Number, b::Interval{T}, c::Number) where {T<:NumTypes} = muladd(interval(T, a), b, interval(T, c))
+muladd(a::Number, b::Number, c::Interval{T}) where {T<:NumTypes} = muladd(interval(T, a), interval(T, b), c)
+
 """
     fma(a::Interval, b::Interval, c::Interval)
 
