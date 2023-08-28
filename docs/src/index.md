@@ -1,55 +1,39 @@
-# IntervalArithmetic.jl #
+# IntervalArithmetic.jl
 
-`IntervalArithmetic.jl` is a Julia package for performing *Validated Numerics* in Julia, i.e. *rigorous* computations with finite-precision floating-point arithmetic.
-
-All calculations are carried out using **interval arithmetic**: all quantities are treated as intervals, which are propagated throughout a calculation. The final result is an interval that is *guaranteed* to contain the correct result, starting from the given initial data.
-
-The aim of the package is correctness over speed, although performance considerations are also taken into account.
-
-
-### Authors
-- [Luis Benet](http://www.cicc.unam.mx/~benet/), Instituto de Ciencias Físicas, Universidad Nacional Autónoma de México (UNAM)
-- [David P. Sanders](http://sistemas.fciencias.unam.mx/~dsanders), Departamento de Física, Facultad de Ciencias, Universidad Nacional Autónoma de México (UNAM)
-
-### Contributors
-- Oliver Heimlich
-- Nikolay Kryukov
-- John Verzani
-
+`IntervalArithmetic.jl` is a Julia package for validated numerics in Julia. All calculations are carried out using [interval arithmetic](https://en.wikipedia.org/wiki/Interval_arithmetic) where quantities are treated as intervals. The final result is a rigorous enclosure of the true value.
 
 ## Installation
-To install the package, from within Julia do
 
-```julia
-julia> Pkg.add("IntervalArithmetic")
+```@repl
+using Pkg # Julia v1.8 or above
+redirect_stderr(devnull) do # hide
+Pkg.add("IntervalArithmetic")
+end # hide
 ```
 
-## Contents
+## Citation
 
-```@contents
-Pages = ["usage.md",
-    "intro.md",
-    "decorations.md",
-    "multidim.md",
-    "rounding.md",
-    "api.md",
-    "input_output.md"
-    ]
-```
+If you use the IntervalArithmetic library in your publication, research, teaching, or other activities, please use the BibTeX template [CITATION.bib](https://github.com/JuliaIntervals/IntervalArithmetic.jl/blob/main/CITATION.bib).
+
 
 ## Bibliography
 
-- *Validated Numerics: A Short Introduction to Rigorous Computations*, W. Tucker, Princeton University Press (2010)
-- *Introduction to Interval Analysis*, R.E. Moore, R.B. Kearfott & M.J. Cloud, SIAM (2009)
+- W. Tucker, [*Validated Numerics: A Short Introduction to Rigorous Computations*](https://press.princeton.edu/books/hardcover/9780691147819/validated-numerics), Princeton University Press (2010)
+- R. E. Moore, R. B. Kearfott and M. J. Cloud, [*Introduction to Interval Analysis*](https://doi.org/10.1137/1.9780898717716), Society for Industrial and Applied Mathematics (2009)
 
-### Related packages
+## Related packages
+
 - [MPFI.jl](https://github.com/andrioni/MPFI.jl), a Julia wrapper around the [MPFI C library](http://perso.ens-lyon.fr/nathalie.revol/software.html), a multiple-precision interval arithmetic library based on MPFR
-- [Intervals.jl](https://github.com/andrioni/Intervals.jl), an alternative implementation of basic interval functions.
-- [Unums.jl](https://github.com/JuliaComputing/Unums.jl), an implementation of interval arithmetic with variable precision ("ubounds")
+- [Intervals.jl](https://github.com/invenia/Intervals.jl), an alternative implementation of basic interval functions by Invenia Technical Computing
 
+## History
 
-## Acknowledgements ##
-This project was developed in a masters' course in the postgraduate programs in Physics and in Mathematics at UNAM during the second semester of 2013 and the first semester of 2015. We thank the participants of the courses for putting up with the half-baked material and contributing energy and ideas.
+This project began in 2014 during a masters' course in the postgraduate programs of Mathematics and Physics at the Universidad Nacional Autónoma de México. It was initially written in Python, then reinitiated in 2015 and rewritten in Julia. We thank the participants of the courses for their contribution, energy and ideas.
 
-Financial support is acknowledged from DGAPA-UNAM PAPIME grants PE-105911 and PE-107114, and DGAPA-UNAM PAPIIT grant IN-117214. LB acknowledges support through a *Cátedra Marcos Moshinsky* (2013).
-DPS acknowledges a sabbatical fellowship from CONACYT and thanks Alan Edelman and the Julia group at MIT for hosting his sabbatical visit.
+### Support
+
+Financial support is acknowledged from DGAPA-UNAM PAPIME grants PE-105911 and PE-107114, and DGAPA-UNAM PAPIIT grant IN-117214.
+
+Luis Benet acknowledges support from *Cátedra Marcos Moshinsky* (2013).
+
+David P. Sanders acknowledges a sabbatical fellowship from CONACYT and thanks Alan Edelman and the Julia group at MIT for hosting his sabbatical visit.
