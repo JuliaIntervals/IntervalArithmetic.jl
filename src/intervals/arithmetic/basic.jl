@@ -95,7 +95,7 @@ end
 *(a::Interval, b::Interval) = *(promote(a, b)...)
 
 function *(a::Interval{T}, b::T) where {T<:NumTypes}
-    (isempty(a) || isthinzero(a) || iszero(b)) && return a
+    (isempty(a) || isthinzero(a) || isone(b)) && return a
     if b ≥ 0
         return @round(T, inf(a) * b, sup(a) * b)
     else
