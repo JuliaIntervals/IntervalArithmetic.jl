@@ -2,25 +2,31 @@ using Documenter, IntervalArithmetic
 
 makedocs(
     modules = [IntervalArithmetic],
-    format = Documenter.HTML(prettyurls = get(ENV, "CI", nothing) == "true"),
-    sitename = "IntervalArithmetic",
     authors = "David P. Sanders and Luis Benet",
+    sitename = "IntervalArithmetic.jl",
+    format = Documenter.HTML(;
+        assets = ["assets/intervalarithmetic.css"],
+        prettyurls = get(ENV, "CI", "false") == "true",
+        canonical = "https://juliaintervals.github.io/IntervalArithmetic.jl",
+        mathengine = KaTeX(Dict(
+            :macros => Dict(
+                "\\bydef" => "\\stackrel{\\tiny\\text{def}}{=}"
+            )
+        ))
+    ),
     pages = [
-        "Package" => "index.md",
-        "Interval Arithmetic" => "intro.md",
-        "Constructing intervals" => "construction.md",
-        "Basic usage" => "usage.md",
-        "Decorations" => "decorations.md",
-        "Multi-dimensional boxes" => "multidim.md",
-        "Rounding" => "rounding.md",
-        "API" => "api.md",
-        "Input&Output" => "input_output.md"
+        "Home" => "index.md",
+        "Overview" => "intro.md",
+        "Manual" => [
+            "Constructing intervals" => "manual/construction.md",
+            "Usage" => "manual/usage.md",
+            "Decorations" => "manual/decorations.md",
+            "API" => "manual/api.md"
+        ]
     ]
 )
 
-deploydocs(
-    repo   = "github.com/JuliaIntervals/IntervalArithmetic.jl.git",
-    target = "build",
-    deps   = nothing,
-    make   = nothing
+deploydocs(;
+    repo = "github.com/JuliaIntervals/IntervalArithmetic.jl",
+    devbranch = "master"
 )

@@ -1,54 +1,67 @@
-# Introduction to Interval Arithmetic
+# Overview
 
-The basic idea in Interval Arithmetic is to calculate with entire *sets* of real numbers, of which the simplest type are closed intervals
-$[a,b] := \{x \in \mathbb{R}: a \le x \le b \}$.
+The basic idea in [interval arithmetic](https://en.wikipedia.org/wiki/Interval_arithmetic) is to perform computations with a whole interval of real numbers
 
-We define arithmetic operations and functions to act on intervals in such a way that the result of the calculation is a new interval that is guaranteed to contain the true range of the function.
-
-For example, for monotone functions like `exp`, we define
+```math
+[a, b] \bydef \{x \in \mathbb{R}: a \le x \le b \},
 ```
-exp([a, b]) := [exp(a), exp(b)]
+
+where ``a, b \in \mathbb{R} \cup \{ \pm \infty \}``; note that despite the above notation, ``[a, b]`` does not contain infinity when ``a`` or ``b`` are infinite.
+
+We define functions on intervals in such a way that the result of the computation is a new interval that is guaranteed to contain the true range of the function.
+
+For instance, by monotonicity, the exponential function is given by
+
+```math
+e^{[a, b]} \bydef [e^a, e^b].
 ```
-For non-monotone functions, like the squaring function, it is more complicated:
+
+On the other hand, the squaring function is non-monotone, thus it is given by the following cases
+
+```math
+[a, b]^2 \bydef
+\begin{cases}
+[a^2, b^2], &  0 < a < b,
+[0, \max(a^2, b^2)], & a < 0 < b,
+[b^2, a^2], & a < b < 0.
+\end{cases}
 ```
-[a, b]^2 := [a^2, b^2]  if 0 < a < b
-          = [0, max(a^2, b^2)]  if a < 0 < b
-          = [b^2, a^2] if a < b < 0
+
+Of course, we must round the lower endpoint down and the upper endpoint up to get a guaranteed enclosure of the true result.
+
+IntervalArithmetic defines such behaviour for a wide set of basic functions, thereby allowing the evaluation of more complex functions such as
+
+```math
+f(x) = \sin(3x^2 - 2 \cos(1/x))
 ```
-We also have to round the lower endpoint down and the upper endpoint up to get guaranteed containment of the true result, since we are using floating-point arithmetic.
 
-For more information on how different functions behave in Interval Arithmetic, refer to [Interval Arithmetic](https://en.wikipedia.org/wiki/Interval_arithmetic).
 
-Once we have done this for basic functions, we can define a complicated Julia function like
+
+## Applications
+
+To illustrate the use of interval arithmetic, consider the following:
+
+```@repl intro
+using IntervalArithmetic
+f(x) = x^2 - 2
+x = interval(3, 4)
+f(x)
 ```
-f(x) = sin(3x^2 - 2 cos(1/x))
+
+Since `f(x)` does not contain `0`, the true range of the function ``f`` over the interval ``[3, 4]`` is guaranteed not to contain ``0``, and hence we obtain the following property.
+
+**Theorem:** ``f`` has no root in the interval ``[3, 4]``.
+
+This theorem has been obtained using floating-point computations! In fact, we can even extend this to semi-infinite intervals:
+
+```@repl intro
+f(interval(3, Inf))
 ```
-and feed an interval in. Since at each step of the process, the result is an interval that is guaranteed to contain the range, the whole function has the same property.
 
-For example,
-```
-julia> using IntervalArithmetic
+Therefore, we have excluded the whole unbounded set ``[3, \infty)`` from possibly containing roots of ``f``.
 
-julia> f(x) = x^2 - 2
-f (generic function with 1 method)
+Interval arithmetic is the foundation of more powerful and elaborate methods in the field of computer-assisted proofs (see e.g. [IntervalRootFinding.jl](https://juliaintervals.github.io/IntervalRootFinding.jl)).
 
-julia> X = 3..4
-[3, 4]
-
-julia> f(X)
-[7, 14]
-```
-Since `f(X)` does not contain 0, the true range of the function $f$ over the set $X$ is guaranteed not to contain 0, and hence we have
-
-**Theorem:** The function $f$ has no root in the interval $[3,4]$.
-
-This theorem has been obtained using *just floating-point calculations*!
-
-Further, we can even extend this to semi-infinite intervals:
-```
-julia> f(3..∞)
-[7, ∞]
-```
-Thus we have *excluded the entire domain [3, ∞) from possibly containing roots of $f$.*
-
-To move beyond just excluding regions and to actually guaranteeing existence and uniqueness for smooth functions, we use an interval version of the Newton method, which is described a bit [here](https://juliaintervals.github.io/IntervalRootFinding.jl/latest/).
+The interested reader may refer to the following books:
+- R. E. Moore, R. B. Kearfott and M. J. Cloud, [*Introduction to Interval Analysis*](https://doi.org/10.1137/1.9780898717716), Society for Industrial and Applied Mathematics (2009)
+- W. Tucker, [*Validated Numerics: A Short Introduction to Rigorous Computations*](https://press.princeton.edu/books/hardcover/9780691147819/validated-numerics), Princeton University Press (2010)
