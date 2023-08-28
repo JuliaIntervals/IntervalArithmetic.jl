@@ -1,65 +1,32 @@
-# IntervalArithmetic.jl #
+# IntervalArithmetic.jl
 
 [![Build Status](https://github.com/JuliaIntervals/IntervalArithmetic.jl/workflows/CI/badge.svg)](https://github.com/JuliaIntervals/IntervalArithmetic.jl/actions/workflows/CI.yml)
 [![coverage](https://codecov.io/gh/JuliaIntervals/IntervalArithmetic.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaIntervals/IntervalArithmetic.jl)
 
-[![docs](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliaintervals.github.io/pages/packages/intervalarithmetic/)
-
 [![DOI](https://zenodo.org/badge/87007945.svg)](https://zenodo.org/badge/latestdoi/87007945)
 
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliaintervals.github.io/IntervalArithmetic.jl/stable)
 
-`IntervalArithmetic.jl` is a Julia package for performing *Validated Numerics* in Julia, i.e. *rigorous* computations with finite-precision floating-point arithmetic.
+`IntervalArithmetic.jl` is a Julia package for validated numerics in Julia. All calculations are carried out using [interval arithmetic](https://en.wikipedia.org/wiki/Interval_arithmetic) where quantities are treated as intervals. The final result is a rigorous enclosure of the true value.
 
-All calculations are carried out using **interval arithmetic**: all quantities are treated as intervals, which are propagated throughout a calculation. The final result is an interval that is *guaranteed* to contain the correct result, starting from the given initial data.
+We are working towards having the IntervalArithmetic library be conformant with the [IEEE 1788-2015 Standard for Interval Arithmetic](https://standards.ieee.org/findstds/standard/1788-2015.html). To do so, we have incorporated tests from the [ITF1788 test suite](https://github.com/JuliaIntervals/ITF1788.jl).
 
-The aim of the package is correctness over speed, although performance considerations are also taken into account.
-
-
-### Authors
-- [Luis Benet](http://www.cicc.unam.mx/~benet/), Instituto de Ciencias Físicas, Universidad Nacional Autónoma de México (UNAM)
-- [David P. Sanders](http://sistemas.fciencias.unam.mx/~dsanders), Departamento de Física, Facultad de Ciencias, Universidad Nacional Autónoma de México (UNAM)
-
-### Contributors
-- Oliver Heimlich
-- Nikolay Kryukov
-- John Verzani
+The IntervalArithmetic library is part of the [JuliaInterval organisation](https://juliaintervals.github.io).
 
 ## Documentation
-Documentation for the package is available [here](https://juliaintervals.github.io/pages/packages/intervalarithmetic/).
 
-The best way to learn how to use the package is to look at the tutorial, available in the organisation webpage [here](https://juliaintervals.github.io/pages/tutorials/tutorialArithmetic/).
+The official documentation is available online: https://juliaintervals.github.io/IntervalArithmetic.jl/stable.
 
 ## Installation
-To install the package, from within Julia do
+
+The IntervalArithmetic.jl package requires to [install Julia](https://julialang.org/downloads/) (v1.8 or above).
+
+Then, start Julia and execute the following command in the REPL:
 
 ```julia
-julia> Pkg.add("IntervalArithmetic")
+using Pkg; Pkg.add("IntervalArithmetic")
 ```
 
-## Standard for Interval Arithmetic:  IEEE 1788-2015
+## Citation
 
-The IEEE Std 1788-2015 - IEEE Standard for Interval Arithmetic was [published](https://standards.ieee.org/findstds/standard/1788-2015.html) in June 2015. We are working towards having `IntervalArithmetic.jl` be conformant with this standard.
-
-To do so, we have incorporated tests from the excellent [ITF1788 test suite](https://github.com/oheim/ITF1788), originally written by Marco Nehmeier and Maximilian Kiesner, and converted to a common format and to output tests for Julia by Oliver Heimlich.
-
-## Bibliography
-
-- *Validated Numerics: A Short Introduction to Rigorous Computations*, W. Tucker, Princeton University Press (2010)
-- *Introduction to Interval Analysis*, R.E. Moore, R.B. Kearfott & M.J. Cloud, SIAM (2009)
-
-### Related packages
-- [MPFI.jl](https://github.com/andrioni/MPFI.jl), a Julia wrapper around the [MPFI C library](http://perso.ens-lyon.fr/nathalie.revol/software.html), a multiple-precision interval arithmetic library based on MPFR
-- [Intervals.jl](https://github.com/andrioni/Intervals.jl), an alternative implementation of basic interval functions.
-- [Intervals.jl](https://github.com/invenia/Intervals.jl), an alternative implementation of basic interval functions by Invenia Technical Computing.
-- [Unums.jl](https://github.com/JuliaComputing/Unums.jl), an implementation of interval arithmetic with variable precision ("ubounds")
-
-
-## History ##
-This project was begun during a masters' course in the postgraduate programs in Physics and in Mathematics at UNAM during the second semester of 2013 (in Python), and was reinitiated -- now in Julia -- in the first semester of 2015. We thank the participants of the courses for putting up with the half-baked material and contributing energy and ideas.
-
-
-## Acknowledgements ##
-This project was developed in a masters' course in the postgraduate programs in Physics and in Mathematics at UNAM during the second semester of 2013 and the first semester of 2015. We thank the participants of the courses for putting up with the half-baked material and contributing energy and ideas.
-
-Financial support is acknowledged from DGAPA-UNAM PAPIME grants PE-105911 and PE-107114, and DGAPA-UNAM PAPIIT grant IN-117214. LB acknowledges support through a *Cátedra Marcos Moshinsky* (2013).
-DPS acknowledges a sabbatical fellowship from CONACYT and thanks Alan Edelman and the Julia group at MIT for hosting his sabbatical visit.
+If you use the IntervalArithmetic library in your publication, research, teaching, or other activities, please use the BibTeX template [CITATION.bib](https://github.com/JuliaIntervals/IntervalArithmetic.jl/blob/main/CITATION.bib).
