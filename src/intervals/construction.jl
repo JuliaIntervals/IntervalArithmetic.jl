@@ -65,19 +65,18 @@ function, however it should be set to a concrete subtype of `Rational` or
 
 # Examples
 ```jldoctest
-julia> IntervalArithmetic.default_numtype()
-Float64
-
-julia> typeof(interval(1, 2))
-Interval{Float64}
-
-julia> typeof(interval(1, big(2)))
-Interval{BigFloat}
-
 julia> IntervalArithmetic.default_numtype() = Float32
 
 julia> typeof(interval(1, 2))
 Interval{Float32}
+
+julia> typeof(interval(1, big(2)))
+Interval{BigFloat}
+
+julia> IntervalArithmetic.default_numtype() = Float64
+
+julia> typeof(interval(1, 2))
+Interval{Float64}
 
 julia> typeof(interval(1, big(2)))
 Interval{BigFloat}
@@ -209,10 +208,10 @@ See also: [`interval`](@ref), [`..`](@ref) and [`@I_str`](@ref).
 ```jldoctest
 julia> setformat(:full);
 
-julia> 0.0 ± π
+julia> 0 ± π
 Interval{Float64}(-3.1415926535897936, 3.1415926535897936)
 
-julia> Int64(0)//1 ± π
+julia> 0//1 ± π
 Interval{Rational{Int64}}(-85563208//27235615, 85563208//27235615)
 ```
 """
