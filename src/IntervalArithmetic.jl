@@ -14,7 +14,7 @@ import LinearAlgebra: ×, dot, norm
 export ×, dot
 
 import Base:
-    +, -, *, /, //, fma,
+    +, -, *, /, //, muladd, fma,
     ^, sqrt, exp, log, exp2, exp10, log2, log10, inv, cbrt, hypot,
     zero, one, eps, typemin, typemax, abs, abs2, min, max,
     rad2deg, deg2rad,

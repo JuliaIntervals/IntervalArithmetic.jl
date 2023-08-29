@@ -71,6 +71,17 @@ end
     @test extended_div(interval(0.0, 0.0), interval(-1.0, 1.0)) ≛ (entireinterval(c), emptyinterval(c))
 
     @test interval(0, Inf) * interval(-1, Inf) ≛ interval(-Inf, Inf)
+
+    result = interval(1.1) * interval(2) + interval(3)
+    @test muladd(interval(1.1), interval(2), interval(3)) ≛ result
+    @test muladd(interval(1.1), interval(Float32, 2), interval(3)) ≛ result
+    @test muladd(interval(1.1), interval(2), 3) ≛ result
+    @test muladd(interval(1.1), 2, interval(3)) ≛ result
+    @test muladd(1.1, interval(2), interval(3)) ≛ result
+    @test muladd(interval(1.1), 2, 3) ≛ result
+    @test muladd(1.1, interval(2), 3) ≛ result
+    @test muladd(1.1, 2, interval(3)) ≛ result
+
 end
 
 @testset "Arithmetic with constants" begin
