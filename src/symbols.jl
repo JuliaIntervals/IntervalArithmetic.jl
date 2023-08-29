@@ -14,6 +14,10 @@ See also: [`interval`](@ref), [`±`](@ref) and [`@I_str`](@ref).
 
 # Examples
 ```jldoctest
+julia> using IntervalArithmetic
+
+julia> using IntervalArithmetic.Symbols
+
 julia> setformat(:full);
 
 julia> (1//1)..π
