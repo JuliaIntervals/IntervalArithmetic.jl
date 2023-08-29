@@ -51,6 +51,8 @@ julia> X
 [3, 4]_com
 ```
 
+To parse string, for decorated interval add `_dec` at the end of the string otherwise decoration is determined using `decoration` function.
+
 If no decoration is explicitly specified when a `DecoratedInterval` is created, then it is initialised with a decoration according to its interval `X`:
 
 - `com`: if `X` is nonempty and bounded;
