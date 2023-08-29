@@ -9,13 +9,13 @@ empty.
 ```jldoctest
 julia> setformat(:full);
 
-julia> signbit(interval(-4))
+julia> signbit(interval(-4.0))
 Interval{Float64}(1.0, 1.0)
 
-julia> signbit(interval(5))
+julia> signbit(interval(5.0))
 Interval{Float64}(0.0, 0.0)
 
-julia> signbit(interval(-4,5))
+julia> signbit(interval(-4.0, 5.0))
 Interval{Float64}(0.0, 1.0)
 ```
 """

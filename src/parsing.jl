@@ -11,7 +11,7 @@ decoration; otherwise, it is semantically equivalent to
 ```jldoctest
 julia> setformat(:full);
 
-julia> I"[3, 4]"
+julia> I"[3.0, 4.0]"
 Interval{Float64}(3.0, 4.0)
 
 julia> I"0.1"
@@ -101,10 +101,10 @@ case unsensitive.
 julia> setformat(:full);
 
 julia> parse(DecoratedInterval{Float64}, "[1, 2]")
-[1, 2]_com
+DecoratedInterval(Interval{Float64}(1.0, 2.0), com)
 
 julia> parse(DecoratedInterval{Float64}, "[1, 2]_def")
-[1, 2]_def
+DecoratedInterval(Interval{Float64}(1.0, 2.0), def)
 ```
 """
 function parse(::Type{DecoratedInterval{T}}, s::AbstractString) where {T<:NumTypes}
