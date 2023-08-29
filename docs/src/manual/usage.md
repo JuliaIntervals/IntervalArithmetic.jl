@@ -15,63 +15,20 @@ the following options, specified by keyword arguments (type `?setformat` to get 
 
 - `decorations` (boolean): whether to show [decorations](decorations.md) or not
 
-```jldoctest usage
-julia> setprecision(Interval, Float64)
-Float64
-
-julia> a = interval(1.1, pi)
-[1.09999, 3.1416]
-
-julia> setformat(sigfigs=10)
-Display parameters:
-- format: standard
-- decorations: false
-- significant figures: 10
-
-julia> a
-[1.099999999, 3.141592654]
-
-julia> setformat(:full)
-Display parameters:
-- format: full
-- decorations: false
-- significant figures: 10
-
-julia> a
-Interval(1.0999999999999999, 3.1415926535897936)
-
-julia> setformat(:midpoint)
-Display parameters:
-- format: midpoint
-- decorations: false
-- significant figures: 10
-
-julia> a
-2.120796327 ± 1.020796327
-
-julia> setformat(:midpoint, sigfigs=4)
-Display parameters:
-- format: midpoint
-- decorations: false
-- significant figures: 4
-
-julia> a
-2.121 ± 1.021
-
-julia> setformat(:standard)
-Display parameters:
-- format: standard
-- decorations: false
-- significant figures: 4
-
-julia> a
-[1.099, 3.142]
-
-julia> setformat(:standard, sigfigs=6)  # default values
-Display parameters:
-- format: standard
-- decorations: false
-- significant figures: 6
+```@repl
+using IntervalArithmetic
+setformat() # default values
+a = interval(1.1, pi)
+setformat(; sigdigits = 10)
+a
+setformat(:full)
+a
+setformat(:midpoint)
+a
+setformat(; sigdigits = 4)
+a
+setformat(:standard)
+a
 ```
 
 
@@ -146,8 +103,8 @@ cuboids (in 3D), etc.
 `IntervalBox`es are constructed from an array of `Interval`s; it is
 often convenient to use the `..` notation:
 
-```jldoctest multidim
-julia> using IntervalArithmetic # hide
+```
+julia> using IntervalArithmetic
 
 julia> X = IntervalBox(1..3, 2..4)
 [1, 3] × [2, 4]
@@ -158,7 +115,7 @@ julia> Y = IntervalBox(2.1..2.9, 3.1..4.9)
 
 Several operations are defined on `IntervalBox`es, for example:
 
-```jldoctest multidim
+```
 julia> X ∩ Y
 [2.09999, 2.90001] × [3.09999, 4]
 
@@ -168,7 +125,7 @@ false
 
 Given a multi-dimensional function taking several inputs, and interval box can be constructed as follows:
 
-```jldoctest multidim
+```
 julia> f(x, y) = (x + y, x - y)
 f (generic function with 1 method)
 
