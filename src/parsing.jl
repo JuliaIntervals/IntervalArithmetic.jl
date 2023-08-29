@@ -11,7 +11,7 @@ decoration; otherwise, it is semantically equivalent to
 ```jldoctest
 julia> setformat(:full);
 
-julia> I"[3.0, 4.0]"
+julia> I"[3, 4]"
 Interval{Float64}(3.0, 4.0)
 
 julia> I"0.1"
