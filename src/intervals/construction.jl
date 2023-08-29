@@ -209,10 +209,10 @@ See also: [`interval`](@ref), [`..`](@ref) and [`@I_str`](@ref).
 ```jldoctest
 julia> setformat(:full);
 
-julia> 0 ± π
+julia> 0.0 ± π
 Interval{Float64}(-3.1415926535897936, 3.1415926535897936)
 
-julia> 0//1 ± π
+julia> Int64(0)//1 ± π
 Interval{Rational{Int64}}(-85563208//27235615, 85563208//27235615)
 ```
 """
@@ -243,7 +243,7 @@ julia> setformat(:full);
 julia> IntervalArithmetic.atomic(Float64, 0.1)
 Interval{Float64}(0.09999999999999999, 0.10000000000000002)
 
-julia> IntervalArithmetic.atomic(Float64, 0.1)
+julia> IntervalArithmetic.atomic(Float64, 0.3)
 Interval{Float64}(0.29999999999999993, 0.30000000000000004)
 ```
 """
