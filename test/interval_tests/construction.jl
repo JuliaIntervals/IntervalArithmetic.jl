@@ -185,9 +185,6 @@ end
     @test eltype(interval(1, 2)) == Interval{Float64}
     @test IntervalArithmetic.numtype(interval(1, 2)) == Float64
     @test all([1 2; 3 4] * interval(-1, 1) .≛ [interval(-1, 1) interval(-2, 2) ; interval(-3, 3) interval(-4, 4)])
-
-    @test eltype(IntervalBox(interval(1, 2), interval(2, 3))) == Interval{Float64}
-    @test IntervalArithmetic.numtype(IntervalBox(interval(1, 2), interval(2, 3))) == Float64
 end
 
 @testset "Conversions between different types of interval" begin
@@ -226,19 +223,19 @@ end
     @test a ≛ b
 end
 
-@testset "setdiff tests" begin
+@testset "setdiffinterval tests" begin
     x = interval(1, 3)
     y = interval(2, 4)
-    @test all(setdiff(x, y) .≛ [interval(1, 2)])
-    @test all(setdiff(y, x) .≛ [interval(3, 4)])
+    @test all(setdiffinterval(x, y) .≛ [interval(1, 2)])
+    @test all(setdiffinterval(y, x) .≛ [interval(3, 4)])
 
-    @test setdiff(x, x) == Interval{Float64}[]
+    @test setdiffinterval(x, x) == Interval{Float64}[]
 
-    @test all(setdiff(x, emptyinterval(x)) .≛ [x])
+    @test all(setdiffinterval(x, emptyinterval(x)) .≛ [x])
 
     z = interval(0, 5)
-    @test setdiff(x, z) == Interval{Float64}[]
-    @test all(setdiff(z, x) .≛ [interval(0, 1), interval(3, 5)])
+    @test setdiffinterval(x, z) == Interval{Float64}[]
+    @test all(setdiffinterval(z, x) .≛ [interval(0, 1), interval(3, 5)])
 end
 
 @testset "Interval{T}(x::Interval)" begin

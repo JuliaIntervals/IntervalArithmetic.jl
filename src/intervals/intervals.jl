@@ -26,3 +26,6 @@ include("interval_operations/boolean.jl")
 include("interval_operations/overlap.jl")
 include("interval_operations/numeric.jl")
 include("interval_operations/set_operations.jl")
+
+# Multidimensional functions
+include("multidim.jl")

@@ -164,39 +164,6 @@ let x, b
         setformat(:full)
         @test sprint(show, MIME("text/plain"), a) == "DecoratedInterval(Interval{BigFloat}(2.0, 3.0), com)"
     end
-
-    @testset "IntervalBox" begin
-        X = IntervalBox(interval(1, 2), interval(3, 4))
-        @test typeof(X) == IntervalBox{2,Float64}
-
-        setformat(:standard; sigdigits = 6)
-        @test sprint(show, MIME("text/plain"), X) == "[1.0, 2.0] × [3.0, 4.0]"
-        X = IntervalBox(interval(1.1, 1.2), interval(2.1, 2.2))
-        @test sprint(show, MIME("text/plain"), X) == "[1.09999, 1.20001] × [2.09999, 2.20001]"
-        X = IntervalBox(interval(-Inf, Inf), interval(-Inf, Inf))
-        @test sprint(show, MIME("text/plain"), X) == "[-∞, ∞]²"
-
-        setformat(:full)
-        @test sprint(show, MIME("text/plain"), X) == "IntervalBox(Interval{Float64}(-Inf, Inf), 2)"
-
-        setformat(:standard)
-        a = IntervalBox(interval(1, 2), interval(2, 3))
-        @test sprint(show, MIME("text/plain"), a) == "[1.0, 2.0] × [2.0, 3.0]"
-        b = IntervalBox(emptyinterval(), 2)
-        @test sprint(show, MIME("text/plain"), b) == "∅²"
-        c = IntervalBox(interval(1, 2), 1)
-        @test sprint(show, MIME("text/plain"), c) == "[1.0, 2.0]¹"
-
-        setformat(:full)
-        @test sprint(show, MIME("text/plain"), a) == "IntervalBox(Interval{Float64}(1.0, 2.0), Interval{Float64}(2.0, 3.0))"
-        @test sprint(show, MIME("text/plain"), b) == "IntervalBox(∅, 2)"
-        @test sprint(show, MIME("text/plain"), c) == "IntervalBox(Interval{Float64}(1.0, 2.0), 1)"
-
-        setformat(:midpoint)
-        @test sprint(show, MIME("text/plain"), a) == "(1.5 ± 0.5) × (2.5 ± 0.5)"
-        @test sprint(show, MIME("text/plain"), b) == "∅²"
-        @test sprint(show, MIME("text/plain"), c) == "(1.5 ± 0.5)¹"
-    end
 end
 
 @testset "show" begin
@@ -221,15 +188,6 @@ end
 
     setformat(; decorations = true)
     @test sprint(show, MIME("text/plain"), x) == "[0.0, 1.0]₁₂₈_def"
-
-    a = IntervalBox(interval(1, 2), interval(2, 3))
-    b = IntervalBox(emptyinterval(), 2)
-    c = IntervalBox(interval(1, 2), 1)
-
-    @test sprint(show, a) == "IntervalBox(Interval{Float64}(1.0, 2.0), Interval{Float64}(2.0, 3.0))"
-    @test sprint(show, b) == "IntervalBox(∅, 2)"
-    @test sprint(show, c) == "IntervalBox(Interval{Float64}(1.0, 2.0), 1)"
-
 end
 
 setprecision(BigFloat, 256)

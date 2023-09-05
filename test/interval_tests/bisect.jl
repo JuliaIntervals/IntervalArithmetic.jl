@@ -17,15 +17,23 @@ using IntervalArithmetic
     @test B[1].hi < 0
     @test B[1].hi == B[2].lo
 
-    X = interval(0, 1) × interval(0, 2)
-    @test bisect(X, 0.5) ≛ ( interval(0, 1) × interval(0, 1), interval(0, 1) × interval(1, 2) )
-    @test bisect(X, 0.25) ≛ ( interval(0, 1) × interval(0, 0.5), interval(0, 1) × interval(0.5, 2) )
-    @test bisect(X, 1, 0.5) ≛ ( interval(0, 0.5) × interval(0, 2), interval(0.5, 1) × interval(0, 2) )
-    @test bisect(X, 1, 0.25) ≛ ( interval(0, 0.25) × interval(0, 2), interval(0.25, 1) × interval(0, 2) )
+    X = [interval(0, 1), interval(0, 2)]
 
-    @test bisect(X) ≛ (IntervalBox(interval(0, 1), interval(0.0, 0.9921875)),
-                        IntervalBox(interval(0, 1), interval(0.9921875, 2.0)))
+    tuple_starequal(x, y) = all(x .≛ y)
 
-    X = interval(-Inf, Inf) × interval(-Inf, Inf)
-    @test bisect(X, 0.5) ≛ ( interval(-Inf, 0) × interval(-Inf, Inf), interval(0, Inf) × interval(-Inf, Inf))
+    @test all(tuple_starequal.(bisect(X, 2, 0.5),
+        ([interval(0, 1), interval(0, 1)], [interval(0, 1), interval(1, 2)])))
+    @test all(tuple_starequal.(bisect(X, 2, 0.25),
+        ([interval(0, 1), interval(0, 0.5)], [interval(0, 1), interval(0.5, 2)])))
+    @test all(tuple_starequal.(bisect(X, 1, 0.5),
+        ([interval(0, 0.5), interval(0, 2)], [interval(0.5, 1), interval(0, 2)])))
+    @test all(tuple_starequal.(bisect(X, 1, 0.25),
+        ([interval(0, 0.25), interval(0, 2)], [interval(0.25, 1), interval(0, 2)])))
+
+    @test all(tuple_starequal.(bisect(X, 2),
+        ([interval(0, 1), interval(0.0, 0.9921875)], [interval(0, 1), interval(0.9921875, 2.0)])))
+
+    X = [interval(-Inf, Inf), interval(-Inf, Inf)]
+    @test all(tuple_starequal.(bisect(X, 1, 0.5),
+        ([interval(-Inf, 0), interval(-Inf, Inf)], [interval(0, Inf), interval(-Inf, Inf)])))
 end
