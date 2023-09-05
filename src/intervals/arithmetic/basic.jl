@@ -66,12 +66,12 @@ end
 -(a::Real, b::Interval{T}) where {T<:NumTypes} = interval(T, a) - b
 
 """
-    unsafe_scale(α, a::Interval)
+    unsafe_scale(a::Interval, α)
 
 Multiply an interval by a positive scalar. For efficiency, does not check that
 the constant is positive.
 """
-unsafe_scale(α::T, a::Interval{T}) where {T<:NumTypes} = @round(T, α * inf(a), α * sup(a))
+unsafe_scale(a::Interval{T}, α::T) where {T<:NumTypes} = @round(T, inf(a) * α, sup(a) * α)
 
 """
     *(a::Interval, b::Interval)

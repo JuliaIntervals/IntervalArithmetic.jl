@@ -14,8 +14,8 @@ sincospi(x::Interval) = (sinpi(x), cospi(x))
 
 const halfpi = π / 2
 
-half_pi(::Type{T}) where {T<:NumTypes} = unsafe_scale(convert(T, 0.5), interval(T, π))
-two_pi(::Type{T}) where {T<:NumTypes} = unsafe_scale(convert(T, 2), interval(T, π))
+half_pi(::Type{T}) where {T<:NumTypes} = unsafe_scale(interval(T, π), convert(T, 0.5))
+two_pi(::Type{T}) where {T<:NumTypes} = unsafe_scale(interval(T, π), convert(T, 2))
 
 function range_atan(::Type{T}) where {T<:NumTypes}
     temp = sup(interval(T, π))
