@@ -233,6 +233,7 @@ end
     @test all(isequalinterval.(setdiffinterval(y, x), [interval(3, 4)]))
 
     @test setdiffinterval(x, x) == Interval{Float64}[]
+    @test setdiffinterval(x, x) == Interval{Float64}[]
 
     @test all(isequalinterval.(setdiffinterval(x, emptyinterval(x)), [x]))
 

@@ -164,7 +164,6 @@ let x, b
         setformat(:full)
         @test sprint(show, MIME("text/plain"), a) == "DecoratedInterval(Interval{BigFloat}(2.0, 3.0), com)"
     end
-
 end
 
 @testset "show" begin

@@ -22,5 +22,4 @@ using IntervalArithmetic
     x = interval(2, 5)
     y = interval(3, 4)
     @test setdiffinterval(x, y) == [interval(2, 3), interval(4, 5)]
-
 end

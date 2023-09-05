@@ -27,8 +27,6 @@ import Base:
 import Base.MPFR: MPFRRoundingMode
 import Base.MPFR: MPFRRoundUp, MPFRRoundDown, MPFRRoundNearest, MPFRRoundToZero, MPFRRoundFromZero
 
-import .Broadcast: broadcasted
-
 export
     Interval, interval, ±, @I_str,
     diam, radius, mid, midradius, scaled_mid, mag, mig, hull,
