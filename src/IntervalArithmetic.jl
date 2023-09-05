@@ -16,7 +16,7 @@ import Base:
     sin, cos, tan, cot, csc, sec, asin, acos, atan, acot, sinpi, cospi, sincospi,
     sinh, cosh, tanh, coth, csch, sech, asinh, acosh, atanh, acoth,
     in, union, intersect, issubset, isempty, isdisjoint,
-    convert, eltype, size,
+    convert,
     BigFloat, float, big,
     floor, ceil, trunc, sign, round, copysign, flipsign, signbit,
     expm1, log1p,
