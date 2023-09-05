@@ -22,6 +22,7 @@ end
 
 function +(a::Interval{T}, b::T) where {T<:NumTypes}
     isempty(a) && return a
+    isfinite(b) || return emptyinterval(T)
     return @round(T, inf(a) + b, sup(a) + b)
 end
 
@@ -96,6 +97,7 @@ end
 
 function *(a::Interval{T}, b::T) where {T<:NumTypes}
     (isempty(a) || isthinzero(a) || isone(b)) && return a
+    isfinite(b) || return emptyinterval(T)
     if b ≥ 0
         return @round(T, inf(a) * b, sup(a) * b)
     else
@@ -173,6 +175,7 @@ end
 
 function /(a::Interval{T}, b::T) where {T<:NumTypes}
     isempty(a) && return a
+    isfinite(b) || return emptyinterval(T)
     iszero(b) && return div_by_thin_zero(a)
     if b ≥ 0
         return @round(T, inf(a)/b, sup(a)/b)
