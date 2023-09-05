@@ -178,33 +178,33 @@ end
 
 @testset "cxsc.intervalsetcompops" begin
 
-    @test interior(interval(-1.0, 2.0), interval(-1.0, 2.0)) == false
+    @test isinterior(interval(-1.0, 2.0), interval(-1.0, 2.0)) == false
 
-    @test interior(interval(-2.0, 1.0), interval(-3.0, 2.0)) == true
+    @test isinterior(interval(-2.0, 1.0), interval(-3.0, 2.0)) == true
 
-    @test interior(interval(-2.0, 2.0), interval(-1.0, 1.0)) == false
+    @test isinterior(interval(-2.0, 2.0), interval(-1.0, 1.0)) == false
 
-    @test interior(interval(-2.0, 2.0), interval(-1.0, 2.0)) == false
+    @test isinterior(interval(-2.0, 2.0), interval(-1.0, 2.0)) == false
 
-    @test interior(interval(-2.0, 2.0), interval(-2.0, 1.0)) == false
+    @test isinterior(interval(-2.0, 2.0), interval(-2.0, 1.0)) == false
 
-    @test interior(interval(-2.0, 2.0), interval(-2.0, 3.0)) == false
+    @test isinterior(interval(-2.0, 2.0), interval(-2.0, 3.0)) == false
 
-    @test interior(interval(-2.0, 2.0), interval(-3.0, 2.0)) == false
+    @test isinterior(interval(-2.0, 2.0), interval(-3.0, 2.0)) == false
 
-    @test interior(interval(-1.0, 2.0), interval(-1.0, 2.0)) == false
+    @test isinterior(interval(-1.0, 2.0), interval(-1.0, 2.0)) == false
 
-    @test interior(interval(-3.0, 2.0), interval(-2.0, 1.0)) == false
+    @test isinterior(interval(-3.0, 2.0), interval(-2.0, 1.0)) == false
 
-    @test interior(interval(-1.0, 1.0), interval(-2.0, 2.0)) == true
+    @test isinterior(interval(-1.0, 1.0), interval(-2.0, 2.0)) == true
 
-    @test interior(interval(-1.0, 2.0), interval(-2.0, 2.0)) == false
+    @test isinterior(interval(-1.0, 2.0), interval(-2.0, 2.0)) == false
 
-    @test interior(interval(-2.0, 1.0), interval(-2.0, 2.0)) == false
+    @test isinterior(interval(-2.0, 1.0), interval(-2.0, 2.0)) == false
 
-    @test interior(interval(-2.0, 3.0), interval(-2.0, 2.0)) == false
+    @test isinterior(interval(-2.0, 3.0), interval(-2.0, 2.0)) == false
 
-    @test interior(interval(-3.0, 2.0), interval(-2.0, 2.0)) == false
+    @test isinterior(interval(-3.0, 2.0), interval(-2.0, 2.0)) == false
 
     @test isweaklysubset(interval(-1.0, 2.0), interval(-1.0, 2.0)) == true
 
@@ -250,33 +250,33 @@ end
 
 @testset "cxsc.intervalscalarsetcompops" begin
 
-    @test interior(interval(-1.0, 2.0), interval(-2.0, -2.0)) == false
+    @test isinterior(interval(-1.0, 2.0), interval(-2.0, -2.0)) == false
 
-    @test interior(interval(-2.0, 2.0), interval(-2.0, -2.0)) == false
+    @test isinterior(interval(-2.0, 2.0), interval(-2.0, -2.0)) == false
 
-    @test interior(interval(-2.0, 2.0), interval(0.0, 0.0)) == false
+    @test isinterior(interval(-2.0, 2.0), interval(0.0, 0.0)) == false
 
-    @test interior(interval(-2.0, 2.0), interval(2.0, 2.0)) == false
+    @test isinterior(interval(-2.0, 2.0), interval(2.0, 2.0)) == false
 
-    @test interior(interval(-2.0, 2.0), interval(3.0, 3.0)) == false
+    @test isinterior(interval(-2.0, 2.0), interval(3.0, 3.0)) == false
 
-    @test interior(interval(-1.0, -1.0), interval(1.0, 1.0)) == false
+    @test isinterior(interval(-1.0, -1.0), interval(1.0, 1.0)) == false
 
-    @test interior(interval(-1.0, -1.0), interval(-1.0, -1.0)) == false
+    @test isinterior(interval(-1.0, -1.0), interval(-1.0, -1.0)) == false
 
-    @test interior(interval(-2.0, -2.0), interval(-1.0, 2.0)) == false
+    @test isinterior(interval(-2.0, -2.0), interval(-1.0, 2.0)) == false
 
-    @test interior(interval(-2.0, -2.0), interval(-2.0, 2.0)) == false
+    @test isinterior(interval(-2.0, -2.0), interval(-2.0, 2.0)) == false
 
-    @test interior(interval(0.0, 0.0), interval(-2.0, 2.0)) == true
+    @test isinterior(interval(0.0, 0.0), interval(-2.0, 2.0)) == true
 
-    @test interior(interval(2.0, 2.0), interval(-2.0, 2.0)) == false
+    @test isinterior(interval(2.0, 2.0), interval(-2.0, 2.0)) == false
 
-    @test interior(interval(3.0, 3.0), interval(-2.0, 2.0)) == false
+    @test isinterior(interval(3.0, 3.0), interval(-2.0, 2.0)) == false
 
-    @test interior(interval(1.0, 1.0), interval(-1.0, -1.0)) == false
+    @test isinterior(interval(1.0, 1.0), interval(-1.0, -1.0)) == false
 
-    @test interior(interval(-1.0, -1.0), interval(-1.0, -1.0)) == false
+    @test isinterior(interval(-1.0, -1.0), interval(-1.0, -1.0)) == false
 
     @test isweaklysubset(interval(-1.0, 2.0), interval(-2.0, -2.0)) == false
 

@@ -32,7 +32,7 @@ import .Broadcast: broadcasted
 export
     Interval, interval, ±, @I_str,
     diam, radius, mid, midradius, scaled_mid, mag, mig, hull,
-    emptyinterval, isemptyinterval, interior,
+    emptyinterval, isemptyinterval, isinterior,
     ismember, intersectinterval, isweaklysubset, isweaklysupset, isdisjointinterval,
     setdiffinterval,
     precedes, strictprecedes, isstrictsubset, isstrictsupset, contains_zero, isthinzero,

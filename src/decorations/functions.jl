@@ -21,7 +21,7 @@ const bool_functions = (
 
 const bool_binary_functions = (
     :isweaklysubset, :isweaklysupset, :isstrictsubset, :isstrictsupset,
-    :interior, :isdisjointinterval, :precedes, :strictprecedes, :strictless, :isweaklyless,
+    :isinterior, :isdisjointinterval, :precedes, :strictprecedes, :strictless, :isweaklyless,
     :isequalinterval, :overlap
 )
 
@@ -340,7 +340,7 @@ for (f, domain) in restricted_functions1
         x = interval(xx)
         r = $(f)(x)
         d = min(decoration(xx), decoration(r))
-        interior(x, $domain) && return DecoratedInterval(r, d)
+        isinterior(x, $domain) && return DecoratedInterval(r, d)
         DecoratedInterval(r, trv)
     end
 end

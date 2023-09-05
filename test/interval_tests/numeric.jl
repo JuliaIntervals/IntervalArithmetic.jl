@@ -294,7 +294,7 @@ end
         x = interval(pi)
         @test isweaklysubset(x^100, pow(x, 100))
         @test isweaklysubset(x^50, pow(x, 50))
-        @test interior(x^50, pow(x, 50))
+        @test isinterior(x^50, pow(x, 50))
 
         x = interval(2)
         @test isequalinterval(pow(x, 2000), interval(floatmax(), Inf))

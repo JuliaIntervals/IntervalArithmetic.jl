@@ -46,9 +46,9 @@ const ≺ = strictprecedes
 """
     ⪽(a, b)
 
-Unicode alias of [`interior`](@ref).
+Unicode alias of [`isinterior`](@ref).
 """
-const ⪽ = interior
+const ⪽ = isinterior
 
 """
     ∅

@@ -95,14 +95,14 @@ function precedes(a::Interval, b::Interval)
 end
 
 """
-    interior(a,b)
+    isinterior(a,b)
 
 Checks if all the points of the interval `a` are within the interior of
 interval `b`.
 
 Implement the `interior` function of the IEEE Standard 1788-2015 (Table 9.3).
 """
-function interior(a::Interval, b::Interval)
+function isinterior(a::Interval, b::Interval)
     isemptyinterval(a) && return true
     return _strictlessprime(inf(b), inf(a)) && _strictlessprime(sup(a), sup(b))
 end

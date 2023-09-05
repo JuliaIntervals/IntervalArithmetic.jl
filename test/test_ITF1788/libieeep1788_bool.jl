@@ -588,81 +588,81 @@ end
 
 @testset "minimal_interior_test" begin
 
-    @test interior(emptyinterval(), emptyinterval()) == true
+    @test isinterior(emptyinterval(), emptyinterval()) == true
 
-    @test interior(emptyinterval(), interval(0.0,4.0)) == true
+    @test isinterior(emptyinterval(), interval(0.0,4.0)) == true
 
-    @test interior(interval(0.0,4.0), emptyinterval()) == false
+    @test isinterior(interval(0.0,4.0), emptyinterval()) == false
 
-    @test interior(interval(-Inf,+Inf), interval(-Inf,+Inf)) == true
+    @test isinterior(interval(-Inf,+Inf), interval(-Inf,+Inf)) == true
 
-    @test interior(interval(0.0,4.0), interval(-Inf,+Inf)) == true
+    @test isinterior(interval(0.0,4.0), interval(-Inf,+Inf)) == true
 
-    @test interior(emptyinterval(), interval(-Inf,+Inf)) == true
+    @test isinterior(emptyinterval(), interval(-Inf,+Inf)) == true
 
-    @test interior(interval(-Inf,+Inf), interval(0.0,4.0)) == false
+    @test isinterior(interval(-Inf,+Inf), interval(0.0,4.0)) == false
 
-    @test interior(interval(0.0,4.0), interval(0.0,4.0)) == false
+    @test isinterior(interval(0.0,4.0), interval(0.0,4.0)) == false
 
-    @test interior(interval(1.0,2.0), interval(0.0,4.0)) == true
+    @test isinterior(interval(1.0,2.0), interval(0.0,4.0)) == true
 
-    @test interior(interval(-2.0,2.0), interval(-2.0,4.0)) == false
+    @test isinterior(interval(-2.0,2.0), interval(-2.0,4.0)) == false
 
-    @test interior(interval(-0.0,-0.0), interval(-2.0,4.0)) == true
+    @test isinterior(interval(-0.0,-0.0), interval(-2.0,4.0)) == true
 
-    @test interior(interval(0.0,0.0), interval(-2.0,4.0)) == true
+    @test isinterior(interval(0.0,0.0), interval(-2.0,4.0)) == true
 
-    @test interior(interval(0.0,0.0), interval(-0.0,-0.0)) == false
+    @test isinterior(interval(0.0,0.0), interval(-0.0,-0.0)) == false
 
-    @test interior(interval(0.0,4.4), interval(0.0,4.0)) == false
+    @test isinterior(interval(0.0,4.4), interval(0.0,4.0)) == false
 
-    @test interior(interval(-1.0,-1.0), interval(0.0,4.0)) == false
+    @test isinterior(interval(-1.0,-1.0), interval(0.0,4.0)) == false
 
-    @test interior(interval(2.0,2.0), interval(-2.0,-1.0)) == false
+    @test isinterior(interval(2.0,2.0), interval(-2.0,-1.0)) == false
 
 end
 
 @testset "minimal_interior_dec_test" begin
 
-    @test interior(nai(), nai()) == false
+    @test isinterior(nai(), nai()) == false
 
-    @test interior(nai(), DecoratedInterval(emptyinterval(), trv)) == false
+    @test isinterior(nai(), DecoratedInterval(emptyinterval(), trv)) == false
 
-    @test interior(nai(), DecoratedInterval(interval(0.0,4.0), trv)) == false
+    @test isinterior(nai(), DecoratedInterval(interval(0.0,4.0), trv)) == false
 
-    @test interior(DecoratedInterval(interval(0.0,4.0), def), nai()) == false
+    @test isinterior(DecoratedInterval(interval(0.0,4.0), def), nai()) == false
 
-    @test interior(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(emptyinterval(), trv)) == true
+    @test isinterior(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(emptyinterval(), trv)) == true
 
-    @test interior(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(0.0,4.0), trv)) == true
+    @test isinterior(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(0.0,4.0), trv)) == true
 
-    @test interior(DecoratedInterval(interval(0.0,4.0), def), DecoratedInterval(emptyinterval(), trv)) == false
+    @test isinterior(DecoratedInterval(interval(0.0,4.0), def), DecoratedInterval(emptyinterval(), trv)) == false
 
-    @test interior(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
+    @test isinterior(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
 
-    @test interior(DecoratedInterval(interval(0.0,4.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
+    @test isinterior(DecoratedInterval(interval(0.0,4.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
 
-    @test interior(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
+    @test isinterior(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
 
-    @test interior(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(0.0,4.0), trv)) == false
+    @test isinterior(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(0.0,4.0), trv)) == false
 
-    @test interior(DecoratedInterval(interval(0.0,4.0), trv), DecoratedInterval(interval(0.0,4.0), trv)) == false
+    @test isinterior(DecoratedInterval(interval(0.0,4.0), trv), DecoratedInterval(interval(0.0,4.0), trv)) == false
 
-    @test interior(DecoratedInterval(interval(1.0,2.0), def), DecoratedInterval(interval(0.0,4.0), trv)) == true
+    @test isinterior(DecoratedInterval(interval(1.0,2.0), def), DecoratedInterval(interval(0.0,4.0), trv)) == true
 
-    @test interior(DecoratedInterval(interval(-2.0,2.0), trv), DecoratedInterval(interval(-2.0,4.0), def)) == false
+    @test isinterior(DecoratedInterval(interval(-2.0,2.0), trv), DecoratedInterval(interval(-2.0,4.0), def)) == false
 
-    @test interior(DecoratedInterval(interval(-0.0,-0.0), trv), DecoratedInterval(interval(-2.0,4.0), trv)) == true
+    @test isinterior(DecoratedInterval(interval(-0.0,-0.0), trv), DecoratedInterval(interval(-2.0,4.0), trv)) == true
 
-    @test interior(DecoratedInterval(interval(0.0,0.0), def), DecoratedInterval(interval(-2.0,4.0), trv)) == true
+    @test isinterior(DecoratedInterval(interval(0.0,0.0), def), DecoratedInterval(interval(-2.0,4.0), trv)) == true
 
-    @test interior(DecoratedInterval(interval(0.0,0.0), trv), DecoratedInterval(interval(-0.0,-0.0), trv)) == false
+    @test isinterior(DecoratedInterval(interval(0.0,0.0), trv), DecoratedInterval(interval(-0.0,-0.0), trv)) == false
 
-    @test interior(DecoratedInterval(interval(0.0,4.4), trv), DecoratedInterval(interval(0.0,4.0), trv)) == false
+    @test isinterior(DecoratedInterval(interval(0.0,4.4), trv), DecoratedInterval(interval(0.0,4.0), trv)) == false
 
-    @test interior(DecoratedInterval(interval(-1.0,-1.0), trv), DecoratedInterval(interval(0.0,4.0), def)) == false
+    @test isinterior(DecoratedInterval(interval(-1.0,-1.0), trv), DecoratedInterval(interval(0.0,4.0), def)) == false
 
-    @test interior(DecoratedInterval(interval(2.0,2.0), def), DecoratedInterval(interval(-2.0,-1.0), trv)) == false
+    @test isinterior(DecoratedInterval(interval(2.0,2.0), def), DecoratedInterval(interval(-2.0,-1.0), trv)) == false
 
 end
 
