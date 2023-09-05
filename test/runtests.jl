@@ -1,5 +1,6 @@
 using Test
 using IntervalArithmetic
+using LinearAlgebra
 
 IntervalArithmetic.:(≛)(a::Tuple, b::Tuple) = all(a .≛ b)
 

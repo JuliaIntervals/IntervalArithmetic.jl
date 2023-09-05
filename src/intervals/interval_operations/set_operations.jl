@@ -72,7 +72,7 @@ union(a::Union{Interval,Complex{<:Interval}}, b::Union{Interval,Complex{<:Interv
 union(a::AbstractVector{<:Union{<:Interval,Complex{<:Interval}}}) = hull(a)
 
 """
-    setdiff(x::Interval, y::Interval)
+    setdiffinterval(x::Interval, y::Interval)
 
 Calculate the set difference `x ∖ y`, i.e. the set of values
 that are inside the interval `x` but not inside `y`.
@@ -84,14 +84,14 @@ The array may:
 - contain a single interval, if `y` overlaps `x`
 - contain two intervals, if `y` is strictly contained within `x`.
 """
-function setdiff(x::Interval{T}, y::Interval{T}) where {T<:NumTypes}
-    intersection = x ∩ y
+function setdiffinterval(x::Interval{T}, y::Interval{T}) where {T<:NumTypes}
+    inter = intersect(x, y)
 
-    isempty(intersection) && return [x]
-    intersection ≛ x && return Interval{T}[]  # x is subset of y; setdiff is empty
+    isempty(inter) && return [x]
+    (inter ≛ x) && return Interval{T}[]  # x is subset of y; setdiffinterval is empty
 
-    inf(x) == inf(intersection) && return [unsafe_interval(T, sup(intersection), sup(x))]
-    sup(x) == sup(intersection) && return [unsafe_interval(T, inf(x), inf(intersection))]
+    inf(x) == inf(inter) && return [unsafe_interval(T, sup(inter), sup(x))]
+    sup(x) == sup(inter) && return [unsafe_interval(T, inf(x), inf(inter))]
 
     return [unsafe_interval(T, inf(x), inf(y)), unsafe_interval(T, sup(y), sup(x))]
 

@@ -4,14 +4,9 @@ import CRlibm
 import FastRounding
 import RoundingEmulator
 
-using LinearAlgebra
 using Markdown
-using StaticArrays
 using SetRounding
 using EnumX
-
-import LinearAlgebra: ×, dot, norm
-export ×, dot
 
 import Base:
     +, -, *, /, //, muladd, fma,
@@ -29,26 +24,18 @@ import Base:
     isfinite, isinteger, isnan, isinf, iszero,
     abs, abs2,
     show,
-    setdiff,
-    parse, hash,
-    # for IntervalBox
-    broadcast, length,
-    getindex, setindex,
-    iterate, eltype
+    parse, hash
 
 import Base.MPFR: MPFRRoundingMode
 import Base.MPFR: MPFRRoundUp, MPFRRoundDown, MPFRRoundNearest, MPFRRoundToZero, MPFRRoundFromZero
 
-import .Broadcast: broadcasted
-
 export
-    Interval, BooleanInterval,
-    interval, ±, @I_str,
+    Interval, interval, ±, @I_str,
     diam, radius, mid, scaled_mid, mag, mig, hull,
     emptyinterval, isempty, isinterior,
     precedes, strictprecedes, ≺, ⊂, ⊃, contains_zero, isthinzero,
     isweaklyless, isstrictless, overlap, Overlap,
-    ≛,
+    ≛, setdiffinterval,
     entireinterval, isentire, nai, isnai, isthin, iscommon, isatomic,
     inf, sup, bounds, bisect, mince,
     dist,
@@ -59,27 +46,10 @@ export
     pow, extended_div, nthroot,
     setformat
 
-
-
-export
-    setindex   # re-export from StaticArrays for IntervalBox
-
-
-
-## Multidimensional
-export
-    IntervalBox, symmetric_box
-
 ## Decorations
 export
     decoration, DecoratedInterval,
     com, dac, def, trv, ill
-
-## Union type
-export
-    Region
-
-
 
 function __init__()
     setrounding(BigFloat, RoundNearest)
@@ -94,7 +64,6 @@ end
 
 include("intervals/intervals.jl")
 
-include("multidim/multidim.jl")
 include("bisect.jl")
 include("decorations/decorations.jl")
 
@@ -103,11 +72,4 @@ include("parsing.jl")
 include("display.jl")
 include("symbols.jl")
 
-include("plot_recipes/plot_recipes.jl")
-
-"""
-    Region{T} = Union{Interval{T}, IntervalBox{T}}
-"""
-const Region{T} = Union{Interval{T}, IntervalBox{T}}
-
-end # module IntervalArithmetic
+end
