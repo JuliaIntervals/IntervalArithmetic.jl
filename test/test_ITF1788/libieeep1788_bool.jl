@@ -668,73 +668,73 @@ end
 
 @testset "minimal_strictly_less_test" begin
 
-    @test strictless(emptyinterval(), emptyinterval()) == true
+    @test isstrictless(emptyinterval(), emptyinterval()) == true
 
-    @test strictless(interval(1.0,2.0), emptyinterval()) == false
+    @test isstrictless(interval(1.0,2.0), emptyinterval()) == false
 
-    @test strictless(emptyinterval(), interval(1.0,2.0)) == false
+    @test isstrictless(emptyinterval(), interval(1.0,2.0)) == false
 
-    @test strictless(interval(-Inf,+Inf), interval(-Inf,+Inf)) == true
+    @test isstrictless(interval(-Inf,+Inf), interval(-Inf,+Inf)) == true
 
-    @test strictless(interval(1.0,2.0), interval(-Inf,+Inf)) == false
+    @test isstrictless(interval(1.0,2.0), interval(-Inf,+Inf)) == false
 
-    @test strictless(interval(-Inf,+Inf), interval(1.0,2.0)) == false
+    @test isstrictless(interval(-Inf,+Inf), interval(1.0,2.0)) == false
 
-    @test strictless(interval(1.0,2.0), interval(1.0,2.0)) == false
+    @test isstrictless(interval(1.0,2.0), interval(1.0,2.0)) == false
 
-    @test strictless(interval(1.0,2.0), interval(3.0,4.0)) == true
+    @test isstrictless(interval(1.0,2.0), interval(3.0,4.0)) == true
 
-    @test strictless(interval(1.0,3.5), interval(3.0,4.0)) == true
+    @test isstrictless(interval(1.0,3.5), interval(3.0,4.0)) == true
 
-    @test strictless(interval(1.0,4.0), interval(3.0,4.0)) == false
+    @test isstrictless(interval(1.0,4.0), interval(3.0,4.0)) == false
 
-    @test strictless(interval(0.0,4.0), interval(0.0,4.0)) == false
+    @test isstrictless(interval(0.0,4.0), interval(0.0,4.0)) == false
 
-    @test strictless(interval(-0.0,4.0), interval(0.0,4.0)) == false
+    @test isstrictless(interval(-0.0,4.0), interval(0.0,4.0)) == false
 
-    @test strictless(interval(-2.0,-1.0), interval(-2.0,-1.0)) == false
+    @test isstrictless(interval(-2.0,-1.0), interval(-2.0,-1.0)) == false
 
-    @test strictless(interval(-3.0,-1.5), interval(-2.0,-1.0)) == true
+    @test isstrictless(interval(-3.0,-1.5), interval(-2.0,-1.0)) == true
 
 end
 
 @testset "minimal_strictly_less_dec_test" begin
 
-    @test strictless(nai(), nai()) == false
+    @test isstrictless(nai(), nai()) == false
 
-    @test strictless(DecoratedInterval(emptyinterval(), trv), nai()) == false
+    @test isstrictless(DecoratedInterval(emptyinterval(), trv), nai()) == false
 
-    @test strictless(DecoratedInterval(interval(1.0,2.0), trv), nai()) == false
+    @test isstrictless(DecoratedInterval(interval(1.0,2.0), trv), nai()) == false
 
-    @test strictless(nai(), DecoratedInterval(interval(1.0,2.0), def)) == false
+    @test isstrictless(nai(), DecoratedInterval(interval(1.0,2.0), def)) == false
 
-    @test strictless(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(emptyinterval(), trv)) == true
+    @test isstrictless(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(emptyinterval(), trv)) == true
 
-    @test strictless(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(emptyinterval(), trv)) == false
+    @test isstrictless(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(emptyinterval(), trv)) == false
 
-    @test strictless(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(1.0,2.0), def)) == false
+    @test isstrictless(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(1.0,2.0), def)) == false
 
-    @test strictless(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
+    @test isstrictless(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
 
-    @test strictless(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
+    @test isstrictless(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
 
-    @test strictless(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(1.0,2.0), trv)) == false
+    @test isstrictless(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(1.0,2.0), trv)) == false
 
-    @test strictless(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(1.0,2.0), trv)) == false
+    @test isstrictless(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(1.0,2.0), trv)) == false
 
-    @test strictless(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(3.0,4.0), trv)) == true
+    @test isstrictless(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(3.0,4.0), trv)) == true
 
-    @test strictless(DecoratedInterval(interval(1.0,3.5), def), DecoratedInterval(interval(3.0,4.0), trv)) == true
+    @test isstrictless(DecoratedInterval(interval(1.0,3.5), def), DecoratedInterval(interval(3.0,4.0), trv)) == true
 
-    @test strictless(DecoratedInterval(interval(1.0,4.0), trv), DecoratedInterval(interval(3.0,4.0), def)) == false
+    @test isstrictless(DecoratedInterval(interval(1.0,4.0), trv), DecoratedInterval(interval(3.0,4.0), def)) == false
 
-    @test strictless(DecoratedInterval(interval(0.0,4.0), trv), DecoratedInterval(interval(0.0,4.0), def)) == false
+    @test isstrictless(DecoratedInterval(interval(0.0,4.0), trv), DecoratedInterval(interval(0.0,4.0), def)) == false
 
-    @test strictless(DecoratedInterval(interval(-0.0,4.0), def), DecoratedInterval(interval(0.0,4.0), trv)) == false
+    @test isstrictless(DecoratedInterval(interval(-0.0,4.0), def), DecoratedInterval(interval(0.0,4.0), trv)) == false
 
-    @test strictless(DecoratedInterval(interval(-2.0,-1.0), def), DecoratedInterval(interval(-2.0,-1.0), def)) == false
+    @test isstrictless(DecoratedInterval(interval(-2.0,-1.0), def), DecoratedInterval(interval(-2.0,-1.0), def)) == false
 
-    @test strictless(DecoratedInterval(interval(-3.0,-1.5), trv), DecoratedInterval(interval(-2.0,-1.0), trv)) == true
+    @test isstrictless(DecoratedInterval(interval(-3.0,-1.5), trv), DecoratedInterval(interval(-2.0,-1.0), trv)) == true
 
 end
 

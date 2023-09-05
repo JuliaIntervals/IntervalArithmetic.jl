@@ -108,7 +108,7 @@ function isinterior(a::Interval, b::Interval)
 end
 
 """
-    strictless(a, b)
+    isstrictless(a, b)
 
 Checks if the interval `a` is strictly less than interval `b`, which is true
 if `inf(a) < inf(b)` and `sup(a) < sup(b)`.
@@ -118,7 +118,7 @@ For variants in the definition of "strictly less than" for intervals see
 
 Implement the `strictLess` function of the IEEE Standard 1788-2015 (Table 10.3).
 """
-function strictless(a::Interval, b::Interval)
+function isstrictless(a::Interval, b::Interval)
     isemptyinterval(a) && isemptyinterval(b) && return true
     (isemptyinterval(a) || isemptyinterval(b)) && return false
     return _strictlessprime(inf(a), inf(b)) && _strictlessprime(sup(a), sup(b))

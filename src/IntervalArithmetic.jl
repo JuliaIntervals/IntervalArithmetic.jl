@@ -34,7 +34,7 @@ export
     ismember, intersectinterval, isweaklysubset, isweaklysupset, isdisjointinterval,
     setdiffinterval,
     precedes, strictprecedes, isstrictsubset, isstrictsupset, contains_zero, isthinzero,
-    isweaklyless, strictless, overlap, Overlap,
+    isweaklyless, isstrictless, overlap, Overlap,
     isequalinterval,
     entireinterval, isentireinterval, nai, isnai, isthin, iscommon, isatomic,
     inf, sup, bounds, bisect, mince,

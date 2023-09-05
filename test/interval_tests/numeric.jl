@@ -188,9 +188,9 @@ end
 @testset "Comparison tests" begin
     d = interval(0.1, 2)
 
-    @test strictless(d, interval(3))
+    @test isstrictless(d, interval(3))
     @test isweaklyless(d, interval(2))
-    @test strictless(interval(-1), d)
+    @test isstrictless(interval(-1), d)
 
     # abs
     @test isequalinterval(abs(interval(0.1, 0.2)), interval(0.1, 0.2))

@@ -21,7 +21,7 @@ const bool_functions = (
 
 const bool_binary_functions = (
     :isweaklysubset, :isweaklysupset, :isstrictsubset, :isstrictsupset,
-    :isinterior, :isdisjointinterval, :precedes, :strictprecedes, :strictless, :isweaklyless,
+    :isinterior, :isdisjointinterval, :precedes, :strictprecedes, :isstrictless, :isweaklyless,
     :isequalinterval, :overlap
 )
 
