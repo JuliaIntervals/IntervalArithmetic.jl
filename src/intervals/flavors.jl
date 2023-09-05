@@ -31,7 +31,7 @@ Currently only Flavor{:set_based} is supported.
 """
 struct Flavor{F} end
 
-current_flavor() = Flavor{:set_based}()
+default_flavor() = Flavor{:set_based}()
 
 # :set_based
 
@@ -43,7 +43,7 @@ and number type `T`.
 """
 zero_times_infinity(::Flavor{:set_based}, ::Type{T}) where {T<:NumTypes} = zero(T)
 
-zero_times_infinity(::Type{T}) where {T<:NumTypes} = zero_times_infinity(current_flavor(), T)
+zero_times_infinity(::Type{T}) where {T<:NumTypes} = zero_times_infinity(default_flavor(), T)
 
 """
     div_by_thin_zero(::Flavor, x::Interval)
@@ -53,11 +53,11 @@ Divide `x` by the interval containing only `0`.
 div_by_thin_zero(::Flavor{:set_based}, ::Interval{T}) where {T<:NumTypes} =
     emptyinterval(T)
 
-div_by_thin_zero(x::Interval) = div_by_thin_zero(current_flavor(), x)
+div_by_thin_zero(x::Interval) = div_by_thin_zero(default_flavor(), x)
 
 contains_infinity(::Flavor{:set_based}, ::Interval) = false
 
-contains_infinity(x::Interval) = contains_infinity(current_flavor(), x)
+contains_infinity(x::Interval) = contains_infinity(default_flavor(), x)
 
 """
     is_valid_interval(a, b)
@@ -67,7 +67,7 @@ Check if `(a, b)` constitute a valid interval.
 is_valid_interval(::Flavor{:set_based}, ::Type{T}, a, b) where {T<:NumTypes} =
     !(isnan(a) | isnan(b) | (a > b) | (a == typemax(T)) | (b == typemin(T)))
 
-is_valid_interval(::Type{T}, a, b) where {T<:NumTypes} = is_valid_interval(current_flavor(), T, a, b)
+is_valid_interval(::Type{T}, a, b) where {T<:NumTypes} = is_valid_interval(default_flavor(), T, a, b)
 
 is_valid_interval(a, b) = is_valid_interval(default_numtype(), a, b)
 
