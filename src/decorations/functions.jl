@@ -12,17 +12,17 @@ one(::Type{DecoratedInterval{T}}) where {T<:NumTypes} = DecoratedInterval(one(T)
 ## Bool functions
 
 Base.:(==)(::DecoratedInterval, ::DecoratedInterval) =
-    throw(ArgumentError("`==` is purposely not supported, use `equal` instead"))
+    throw(ArgumentError("`==` is purposely not supported, use `isequalinterval` instead"))
 
 const bool_functions = (
     :isemptyinterval, :isentireinterval, :isunbounded, :isbounded,
-    :issingleton, :iscommon
+    :isthin, :iscommon
 )
 
 const bool_binary_functions = (
-    :subset, :supset, :strictsubset, :strictsupset,
-    :interior, :disjoint, :precedes, :strictprecedes, :strictless, :less,
-    :equal, :overlap
+    :isweaklysubset, :isweaklysupset, :isstrictsubset, :isstrictsupset,
+    :interior, :isdisjointinterval, :precedes, :strictprecedes, :strictless, :isweaklyless,
+    :isequalinterval, :overlap
 )
 
 for f in bool_functions
@@ -134,8 +134,8 @@ function ^(xx::DecoratedInterval{T}, qq::DecoratedInterval{S}) where {T,S}
     r = x^q
     d = min(decoration(xx), decoration(qq), decoration(r))
     if inf(x) > zero(T) || (inf(x) ≥ zero(T) && inf(q) > zero(T)) ||
-            (issingleton(q) && isinteger(inf(q)) && inf(q) > zero(T)) ||
-            (issingleton(q) && isinteger(inf(q)) && !ismember(zero(T), x))
+            (isthin(q) && isinteger(inf(q)) && inf(q) > zero(T)) ||
+            (isthin(q) && isinteger(inf(q)) && !ismember(zero(T), x))
         return DecoratedInterval(r, d)
     end
     DecoratedInterval(r, trv)
@@ -148,7 +148,7 @@ end
 function sign(xx::DecoratedInterval{T}) where T
     r = sign(interval(xx))
     d = decoration(xx)
-    issingleton(r) && return DecoratedInterval(r, d)
+    isthin(r) && return DecoratedInterval(r, d)
     DecoratedInterval(r, min(d,def))
 end
 function ceil(xx::DecoratedInterval{T}) where T
@@ -158,7 +158,7 @@ function ceil(xx::DecoratedInterval{T}) where T
     if isinteger(sup(x))
         d = min(d, dac)
     end
-    issingleton(r) && return DecoratedInterval(r, d)
+    isthin(r) && return DecoratedInterval(r, d)
     DecoratedInterval(r, min(d,def))
 end
 function floor(xx::DecoratedInterval{T}) where T
@@ -168,7 +168,7 @@ function floor(xx::DecoratedInterval{T}) where T
     if isinteger(inf(x))
         d = min(d, dac)
     end
-    issingleton(r) && return DecoratedInterval(r, d)
+    isthin(r) && return DecoratedInterval(r, d)
     DecoratedInterval(r, min(d,def))
 end
 function trunc(xx::DecoratedInterval{T}) where T
@@ -178,7 +178,7 @@ function trunc(xx::DecoratedInterval{T}) where T
     if (isinteger(inf(x)) && inf(x) < zero(T)) || (isinteger(sup(x)) && sup(x) > zero(T))
         d = min(d, dac)
     end
-    issingleton(r) && return DecoratedInterval(r, d)
+    isthin(r) && return DecoratedInterval(r, d)
     DecoratedInterval(r, min(d,def))
 end
 
@@ -189,7 +189,7 @@ function round(xx::DecoratedInterval, ::RoundingMode{:Nearest})
     if isinteger(2*inf(x)) || isinteger(2*sup(x))
         d = min(d, dac)
     end
-    issingleton(r) && return DecoratedInterval(r, d)
+    isthin(r) && return DecoratedInterval(r, d)
     DecoratedInterval(r, min(d,def))
 end
 function round(xx::DecoratedInterval, ::RoundingMode{:NearestTiesAway})
@@ -199,7 +199,7 @@ function round(xx::DecoratedInterval, ::RoundingMode{:NearestTiesAway})
     if isinteger(2*inf(x)) || isinteger(2*sup(x))
         d = min(d, dac)
     end
-    issingleton(r) && return DecoratedInterval(r, d)
+    isthin(r) && return DecoratedInterval(r, d)
     DecoratedInterval(r, min(d,def))
 end
 round(xx::DecoratedInterval) = round(xx, RoundNearest)
@@ -225,7 +225,7 @@ abs(xx::DecoratedInterval{T}) where T =
 
 
 ## Other (cancel and set) functions
-other_functions = ( :cancelplus, :cancelminus, :intersection, :convexhull )
+other_functions = ( :cancelplus, :cancelminus, :intersectinterval, :hull )
 
 for f in other_functions
     @eval $(f)(xx::DecoratedInterval{T}, yy::DecoratedInterval{T}) where T =
@@ -247,18 +247,18 @@ following the IEEE-1788 Standard (see Sect. 11.7.1, pp 47).
 """ cancelminus
 
 @doc """
-    intersection(xx, yy)
+    intersectinterval(xx, yy)
 
 Decorated interval extension; the result is decorated as `trv`,
 following the IEEE-1788 Standard (see Sect. 11.7.1, pp 47).
-""" intersection
+""" intersectinterval
 
 @doc """
-    convexhull(xx, yy)
+    hull(xx, yy)
 
 Decorated interval extension; the result is decorated as `trv`,
 following the IEEE-1788 Standard (see Sect. 11.7.1, pp 47).
-""" convexhull
+""" hull
 
 
 
@@ -350,7 +350,7 @@ for (f, domain) in restricted_functions2
         x = interval(xx)
         r = $(f)(x)
         d = min(decoration(xx), decoration(r))
-        subset(x, $domain) && return DecoratedInterval(r, d)
+        isweaklysubset(x, $domain) && return DecoratedInterval(r, d)
         DecoratedInterval(r, trv)
     end
 end

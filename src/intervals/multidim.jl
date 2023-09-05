@@ -54,7 +54,7 @@ expand each direction in turn.
 function setdiffinterval(A::T, B::T) where {T<:AbstractVector}
     N = length(A)
     (length(B) == N) || return throw(DimensionMismatch("A and B must have the same length"))
-    inter = intersection.(A, B)
+    inter = intersectinterval.(A, B)
     any(isemptyinterval, inter) && return [A]
     result_list = Vector{T}(undef, 2*N)
     offset = 0
@@ -79,9 +79,9 @@ end
 # If the set difference is only one interval or is empty, then the returned tuple contains 1
 # or 2 empty intervals.
 function _setdiffinterval(x::Interval{T}, y::Interval{T}) where {T<:NumTypes}
-    inter = intersection(x, y)
+    inter = intersectinterval(x, y)
     isemptyinterval(inter) && return (x, emptyinterval(T))
-    equal(inter, x) && return (emptyinterval(T), emptyinterval(T))  # x is subset of y; setdiff is empty
+    isequalinterval(inter, x) && return (emptyinterval(T), emptyinterval(T))  # x is subset of y; setdiff is empty
     xlo, xhi = bounds(x)
     ylo, yhi = bounds(y)
     interlo, interhi = bounds(inter)

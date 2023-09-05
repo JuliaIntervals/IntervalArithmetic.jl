@@ -2,7 +2,7 @@ using Test
 using IntervalArithmetic
 using LinearAlgebra
 
-# IntervalArithmetic.:(equal)(a::Tuple, b::Tuple) = all(a .equal b)
+# IntervalArithmetic.:(isequalinterval)(a::Tuple, b::Tuple) = all(a .isequalinterval b)
 
 function include_test(filename)
     @testset "$filename" begin

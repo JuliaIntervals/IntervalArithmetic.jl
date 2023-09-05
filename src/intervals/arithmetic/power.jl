@@ -31,7 +31,7 @@ function ^(a::Interval{BigFloat}, n::Integer)
     isemptyinterval(a) && return a
     iszero(n) && return one(Interval{BigFloat})
     n == 1 && return a
-    (n < 0 && issingletonzero(a)) && return emptyinterval(BigFloat)
+    (n < 0 && isthinzero(a)) && return emptyinterval(BigFloat)
 
     if isodd(n) # odd power
         isentireinterval(a) && return a
@@ -77,7 +77,7 @@ end
 function ^(a::Interval{BigFloat}, x::BigFloat)
     domain = unsafe_interval(BigFloat, zero(BigFloat), typemax(BigFloat))
 
-    if issingletonzero(a)
+    if isthinzero(a)
         x > 0 && return zero(Interval{BigFloat})
         return emptyinterval(BigFloat)
     end
@@ -85,7 +85,7 @@ function ^(a::Interval{BigFloat}, x::BigFloat)
     isinteger(x) && return a^(round(Int, x))
     x == 0.5 && return sqrt(a)
 
-    a = intersection(a, domain)
+    a = intersectinterval(a, domain)
     isemptyinterval(a) && return a
 
     M = typemax(BigFloat)
@@ -103,10 +103,10 @@ function ^(a::Interval{BigFloat}, x::BigFloat)
     hi1 = @round(BigFloat, sup(a)^x, sup(a)^x)
     hi1 = (inf(hi1) == M) ? MM : hi1
 
-    lo = convexhull(lo, lo1)
-    hi = convexhull(hi, hi1)
+    lo = hull(lo, lo1)
+    hi = hull(hi, hi1)
 
-    return convexhull(lo, hi)
+    return hull(lo, hi)
 end
 
 function ^(a::Interval{T}, x::AbstractFloat) where {T<:Rational}
@@ -124,7 +124,7 @@ function ^(a::F, x::Rational{R}) where {T<:NumTypes,F<:Interval{T},R<:Integer}
     # x < 0 && return inv(a^(-x))
     x < 0 && return F( inv( (bigequiv(a))^(-x) ) )
 
-    if issingletonzero(a)
+    if isthinzero(a)
         x > zero(x) && return zero(a)
         return emptyinterval(a)
     end
@@ -140,7 +140,7 @@ function ^(a::F, x::Rational{R}) where {T<:NumTypes,F<:Interval{T},R<:Integer}
     end
 
     if alo < 0 && ahi ≥ 0
-        a = intersection(a, unsafe_interval(T, zero(T), typemax(T)))
+        a = intersectinterval(a, unsafe_interval(T, zero(T), typemax(T)))
     end
 
     b = nthroot( bigequiv(a), q)
@@ -154,9 +154,9 @@ end
 function ^(a::Interval{BigFloat}, x::Interval)
     isemptyinterval(x) && return x
     domain = unsafe_interval(BigFloat, zero(BigFloat), typemax(BigFloat))
-    a = intersection(a, domain)
+    a = intersectinterval(a, domain)
     isemptyinterval(a) && return a
-    return convexhull(a^inf(x), a^sup(x))
+    return hull(a^inf(x), a^sup(x))
 end
 
 sqr(a::Interval) = a^2
@@ -184,20 +184,20 @@ function pow(x::Interval{T}, n::Integer) where {T<:NumTypes}
     if iseven(n) && ismember(0, x)
         xmig = mig(x)
         xmag = mag(x)
-        return convexhull(zero(x),
+        return hull(zero(x),
                     Base.power_by_squaring(unsafe_interval(T, xmig, xmig), n),
                     Base.power_by_squaring(unsafe_interval(T, xmag, xmag), n))
     else
         xinf = inf(x)
         xsup = sup(x)
-        return convexhull(Base.power_by_squaring(unsafe_interval(T, xinf, xinf), n),
+        return hull(Base.power_by_squaring(unsafe_interval(T, xinf, xinf), n),
                     Base.power_by_squaring(unsafe_interval(T, xsup, xsup), n))
     end
 end
 
 function pow(x::Interval, y::Interval)  # fast real power, including for y an Interval
     isemptyinterval(x) && return x
-    issingletoninteger(y) && return pow(x, Int(inf(y)))
+    isthininteger(y) && return pow(x, Int(inf(y)))
     return exp(y * log(x))
 end
 
@@ -235,7 +235,7 @@ end
 for f in (:log, :log2, :log10)
     @eval function ($f)(a::Interval{T}) where {T<:NumTypes}
             domain = unsafe_interval(T, zero(T), typemax(T))
-            a = intersection(a, domain)
+            a = intersectinterval(a, domain)
 
             (isemptyinterval(a) || sup(a) ≤ zero(T)) && return emptyinterval(T)
 
@@ -245,7 +245,7 @@ end
 
 function log1p(a::Interval{T}) where {T<:NumTypes}
     domain = unsafe_interval(T, -one(T), typemax(T))
-    a = intersection(a, domain)
+    a = intersectinterval(a, domain)
 
     (isemptyinterval(a) || sup(a) ≤ -1) && return emptyinterval(T)
 
@@ -262,13 +262,13 @@ function nthroot(a::Interval{BigFloat}, n::Integer)
     n == 1 && return a
     n == 2 && return sqrt(a)
     n == 0 && return emptyinterval(a)
-    # n < 0 && issingletonzero(a) && return emptyinterval(a)
+    # n < 0 && isthinzero(a) && return emptyinterval(a)
     n < 0 && return inv(nthroot(a, -n))
 
     alo, ahi = bounds(a)
     ahi < 0 && iseven(n) && return emptyinterval(BigFloat)
     if alo < 0 && ahi ≥ 0 && iseven(n)
-        a = intersection(a, unsafe_interval(BigFloat, zero(BigFloat), typemax(BigFloat)))
+        a = intersectinterval(a, unsafe_interval(BigFloat, zero(BigFloat), typemax(BigFloat)))
         alo, ahi = bounds(a)
     end
     ui = convert(Culong, n)

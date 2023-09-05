@@ -50,7 +50,7 @@ Compute the integer hash code for an interval using the method for composite
 types used in `AutoHashEquals.jl`.
 
 Note that in `IntervalArithmetic.jl`, equality of intervals is given by
-`equal` rather than the `==` operator.
+`isequalinterval` rather than the `==` operator.
 The latter is reserved for the pointwise extension of equality to intervals
 and uses three-way logic by default.
 """

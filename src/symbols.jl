@@ -1,7 +1,7 @@
 module Symbols
 
     using IntervalArithmetic
-    export .., ≐, ≺, ⪽, ∅, ℝ, ∞
+    export .., ≛, ≺, ⪽, ∅, ℝ, ∞
 
 """
     ..(a, b)
@@ -30,11 +30,11 @@ Interval{Float64}(0.1, 0.3)
 const .. = interval
 
 """
-    ≐(a, b)
+    ≛(a, b)
 
-Unicode alias of [`equal`](@ref).
+Unicode alias of [`isequalinterval`](@ref).
 """
-const ≐ = equal
+const ≛ = isequalinterval
 
 """
     ≺(a, b)

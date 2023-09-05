@@ -11,7 +11,7 @@ function _strictlessprime(a::Real, b::Real)
 end
 
 """
-    equal(a::Interval, b::Interval)
+    isequalinterval(a::Interval, b::Interval)
 
 Checks if the intervals `a` and `b` are identical.
 
@@ -24,52 +24,50 @@ equality.
 
 In most case this is equivalent to the built-in `===`.
 """
-function equal(a::Interval, b::Interval)
+function isequalinterval(a::Interval, b::Interval)
     isemptyinterval(a) && isemptyinterval(b) && return true
     return inf(a) == inf(b) && sup(a) == sup(b)
 end
 Base.:(==)(::Interval, ::Interval) =
-    throw(ArgumentError("`==` is purposely not supported, use `equal` instead"))
+    throw(ArgumentError("`==` is purposely not supported, use `isequalinterval` instead"))
 
 """
-    equal(a::Interval, x::Real)
+    isequalinterval(a::Interval, x::Real)
 
 Check if the interval `a` contains exactly (and only) the number `x`.
 """
-equal(a::Interval, x::Real) = inf(a) == sup(a) == x
+isequalinterval(a::Interval, x::Real) = inf(a) == sup(a) == x
 
 """
-    subset(a, b)
+    isweaklysubset(a, b)
 
 Checks if all the points of the interval `a` are within the interval `b`.
 
 Typed with \\subseteq<TAB>.
 
-Implement the `subset` function of the IEEE Standard 1788-2015 (Table 9.3).
+Implement the `isweaklysubset` function of the IEEE Standard 1788-2015 (Table 9.3).
 """
-function subset(a::Interval, b::Interval)
+function isweaklysubset(a::Interval, b::Interval)
     isemptyinterval(a) && return true
     return inf(b) ≤ inf(a) && sup(a) ≤ sup(b)
 end
 
-supset(a::Interval, b::Interval) = subset(b, a)
+isweaklysupset(a::Interval, b::Interval) = isweaklysubset(b, a)
 
 """
-    strictsubset(a, b)
+    isstrictsubset(a, b)
 
 Checks if `a` is a strict subset of interval `b`.
-
-Typed with \\subset<TAB>.
 """
-function strictsubset(a::Interval, b::Interval)
-    equal(a, b) && return false
-    return subset(a, b)
+function isstrictsubset(a::Interval, b::Interval)
+    isequalinterval(a, b) && return false
+    return isweaklysubset(a, b)
 end
 
-strictsupset(a::Interval, b::Interval) = strictsubset(b, a)
+isstrictsupset(a::Interval, b::Interval) = isstrictsubset(b, a)
 
 """
-    less(a, b)
+    isweaklyless(a, b)
 
 Checks if the interval `a` is weakly less than interval `b`.
 
@@ -78,7 +76,7 @@ any element of `b`.
 
 Implement the `less` function of the IEEE Standard 1788-2015 (Table 10.3).
 """
-function less(a::Interval, b::Interval)
+function isweaklyless(a::Interval, b::Interval)
     isemptyinterval(a) && isemptyinterval(b) && return true
     (isemptyinterval(a) || isemptyinterval(b)) && return false
     return (inf(a) ≤ inf(b)) && (sup(a) ≤ sup(b))
@@ -139,20 +137,20 @@ function strictprecedes(a::Interval, b::Interval)
 end
 
 """
-    disjoint(a,b)
+    isdisjointinterval(a,b)
 
 Checks if all the points of the interval `a` are within the interior of
 interval `b`.
 
 Implement the `disjoint` function of the IEEE Standard 1788-2015 (Table 9.3).
 """
-function disjoint(a::Interval, b::Interval)
+function isdisjointinterval(a::Interval, b::Interval)
     (isemptyinterval(a) || isemptyinterval(b)) && return true
     return _strictlessprime(sup(b), inf(a)) || _strictlessprime(sup(a), inf(b))
 end
 
-function disjoint(a::Complex{F}, b::Complex{F}) where {F<:Interval}
-    return disjoint(real(a), real(b)) || disjoint(imag(a), imag(b))
+function isdisjointinterval(a::Complex{F}, b::Complex{F}) where {F<:Interval}
+    return isdisjointinterval(real(a), real(b)) || isdisjointinterval(imag(a), imag(b))
 end
 
 """
@@ -167,7 +165,7 @@ function ismember(x::Real, a::Interval)
     return inf(a) ≤ x ≤ sup(a)
 end
 
-ismember(::Interval, ::Interval) = throw(ArgumentError("ismember(::Interval, ::Interval) is not defined, maybe you meant subset"))
+ismember(::Interval, ::Interval) = throw(ArgumentError("ismember(::Interval, ::Interval) is not defined, maybe you meant isweaklysubset"))
 ismember(x::Real, a::Complex{<:Interval}) = ismember(x, real(a)) && ismember(0, imag(a))
 ismember(x::Complex, a::Complex{<:Interval}) = ismember(real(x), real(a)) && ismember(imag(x), imag(a))
 
@@ -179,14 +177,14 @@ isbounded(x::Interval) = (isfinite(inf(x)) && isfinite(sup(x))) || isemptyinterv
 isunbounded(x::Interval) = !isbounded(x)
 
 """
-    issingleton(x)
+    isthin(x)
 
 Checks if `x` is the set consisting of a single exactly
 representable float. Any float which is not exactly representable
 does *not* yield a thin interval. Corresponds to `isSingleton` of
 the standard.
 """
-issingleton(x::Interval) = inf(x) == sup(x)
+isthin(x::Interval) = inf(x) == sup(x)
 
 """
     iscommon(x)
@@ -206,15 +204,15 @@ bound or the bounds are consecutive floating point numbers.
 isatomic(x::Interval) = isemptyinterval(x) || (inf(x) == sup(x)) || (sup(x) == nextfloat(inf(x)))
 
 """
-    issingletonzero(x)
+    isthinzero(x)
 
 Return whether the interval only contains zero.
 """
-issingletonzero(x::Interval) = iszero(inf(x)) && iszero(sup(x))
+isthinzero(x::Interval) = iszero(inf(x)) && iszero(sup(x))
 
 """
-    issingletoninteger(x)
+    isthininteger(x)
 
 Return whether the inverval only contains a single integer.
 """
-issingletoninteger(x::Interval) = (inf(x) == sup(x)) && isinteger(inf(x))
+isthininteger(x::Interval) = (inf(x) == sup(x)) && isinteger(inf(x))

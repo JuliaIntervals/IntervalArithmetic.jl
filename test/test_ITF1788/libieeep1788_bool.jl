@@ -172,317 +172,317 @@ end
 
 @testset "minimal_equal_test" begin
 
-    @test equal(interval(1.0,2.0), interval(1.0,2.0)) == true
+    @test isequalinterval(interval(1.0,2.0), interval(1.0,2.0)) == true
 
-    @test equal(interval(1.0,2.1), interval(1.0,2.0)) == false
+    @test isequalinterval(interval(1.0,2.1), interval(1.0,2.0)) == false
 
-    @test equal(emptyinterval(), emptyinterval()) == true
+    @test isequalinterval(emptyinterval(), emptyinterval()) == true
 
-    @test equal(emptyinterval(), interval(1.0,2.0)) == false
+    @test isequalinterval(emptyinterval(), interval(1.0,2.0)) == false
 
-    @test equal(interval(-Inf,+Inf), interval(-Inf,+Inf)) == true
+    @test isequalinterval(interval(-Inf,+Inf), interval(-Inf,+Inf)) == true
 
-    @test equal(interval(1.0,2.4), interval(-Inf,+Inf)) == false
+    @test isequalinterval(interval(1.0,2.4), interval(-Inf,+Inf)) == false
 
-    @test equal(interval(1.0,Inf), interval(1.0,Inf)) == true
+    @test isequalinterval(interval(1.0,Inf), interval(1.0,Inf)) == true
 
-    @test equal(interval(1.0,2.4), interval(1.0,Inf)) == false
+    @test isequalinterval(interval(1.0,2.4), interval(1.0,Inf)) == false
 
-    @test equal(interval(-Inf,2.0), interval(-Inf,2.0)) == true
+    @test isequalinterval(interval(-Inf,2.0), interval(-Inf,2.0)) == true
 
-    @test equal(interval(-Inf,2.4), interval(-Inf,2.0)) == false
+    @test isequalinterval(interval(-Inf,2.4), interval(-Inf,2.0)) == false
 
-    @test equal(interval(-2.0,0.0), interval(-2.0,0.0)) == true
+    @test isequalinterval(interval(-2.0,0.0), interval(-2.0,0.0)) == true
 
-    @test equal(interval(-0.0,2.0), interval(0.0,2.0)) == true
+    @test isequalinterval(interval(-0.0,2.0), interval(0.0,2.0)) == true
 
-    @test equal(interval(-0.0,-0.0), interval(0.0,0.0)) == true
+    @test isequalinterval(interval(-0.0,-0.0), interval(0.0,0.0)) == true
 
-    @test equal(interval(-0.0,0.0), interval(0.0,0.0)) == true
+    @test isequalinterval(interval(-0.0,0.0), interval(0.0,0.0)) == true
 
-    @test equal(interval(0.0,-0.0), interval(0.0,0.0)) == true
+    @test isequalinterval(interval(0.0,-0.0), interval(0.0,0.0)) == true
 
 end
 
 @testset "minimal_equal_dec_test" begin
 
-    @test equal(DecoratedInterval(interval(1.0,2.0), def), DecoratedInterval(interval(1.0,2.0), trv)) == true
+    @test isequalinterval(DecoratedInterval(interval(1.0,2.0), def), DecoratedInterval(interval(1.0,2.0), trv)) == true
 
-    @test equal(DecoratedInterval(interval(1.0,2.1), trv), DecoratedInterval(interval(1.0,2.0), trv)) == false
+    @test isequalinterval(DecoratedInterval(interval(1.0,2.1), trv), DecoratedInterval(interval(1.0,2.0), trv)) == false
 
-    @test equal(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(emptyinterval(), trv)) == true
+    @test isequalinterval(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(emptyinterval(), trv)) == true
 
-    @test equal(DecoratedInterval(emptyinterval(), trv), nai()) == false
+    @test isequalinterval(DecoratedInterval(emptyinterval(), trv), nai()) == false
 
-    @test equal(nai(), DecoratedInterval(emptyinterval(), trv)) == false
+    @test isequalinterval(nai(), DecoratedInterval(emptyinterval(), trv)) == false
 
-    @test equal(nai(), nai()) == false
+    @test isequalinterval(nai(), nai()) == false
 
-    @test equal(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(1.0,2.0), trv)) == false
+    @test isequalinterval(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(1.0,2.0), trv)) == false
 
-    @test equal(nai(), DecoratedInterval(interval(1.0,2.0), trv)) == false
+    @test isequalinterval(nai(), DecoratedInterval(interval(1.0,2.0), trv)) == false
 
-    @test equal(DecoratedInterval(interval(-Inf,+Inf), def), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
+    @test isequalinterval(DecoratedInterval(interval(-Inf,+Inf), def), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
 
-    @test equal(DecoratedInterval(interval(1.0,2.4), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
+    @test isequalinterval(DecoratedInterval(interval(1.0,2.4), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
 
-    @test equal(DecoratedInterval(interval(1.0,Inf), trv), DecoratedInterval(interval(1.0,Inf), trv)) == true
+    @test isequalinterval(DecoratedInterval(interval(1.0,Inf), trv), DecoratedInterval(interval(1.0,Inf), trv)) == true
 
-    @test equal(DecoratedInterval(interval(1.0,2.4), def), DecoratedInterval(interval(1.0,Inf), trv)) == false
+    @test isequalinterval(DecoratedInterval(interval(1.0,2.4), def), DecoratedInterval(interval(1.0,Inf), trv)) == false
 
-    @test equal(DecoratedInterval(interval(-Inf,2.0), trv), DecoratedInterval(interval(-Inf,2.0), trv)) == true
+    @test isequalinterval(DecoratedInterval(interval(-Inf,2.0), trv), DecoratedInterval(interval(-Inf,2.0), trv)) == true
 
-    @test equal(DecoratedInterval(interval(-Inf,2.4), def), DecoratedInterval(interval(-Inf,2.0), trv)) == false
+    @test isequalinterval(DecoratedInterval(interval(-Inf,2.4), def), DecoratedInterval(interval(-Inf,2.0), trv)) == false
 
-    @test equal(DecoratedInterval(interval(-2.0,0.0), trv), DecoratedInterval(interval(-2.0,0.0), trv)) == true
+    @test isequalinterval(DecoratedInterval(interval(-2.0,0.0), trv), DecoratedInterval(interval(-2.0,0.0), trv)) == true
 
-    @test equal(DecoratedInterval(interval(-0.0,2.0), def), DecoratedInterval(interval(0.0,2.0), trv)) == true
+    @test isequalinterval(DecoratedInterval(interval(-0.0,2.0), def), DecoratedInterval(interval(0.0,2.0), trv)) == true
 
-    @test equal(DecoratedInterval(interval(-0.0,-0.0), trv), DecoratedInterval(interval(0.0,0.0), trv)) == true
+    @test isequalinterval(DecoratedInterval(interval(-0.0,-0.0), trv), DecoratedInterval(interval(0.0,0.0), trv)) == true
 
-    @test equal(DecoratedInterval(interval(-0.0,0.0), def), DecoratedInterval(interval(0.0,0.0), trv)) == true
+    @test isequalinterval(DecoratedInterval(interval(-0.0,0.0), def), DecoratedInterval(interval(0.0,0.0), trv)) == true
 
-    @test equal(DecoratedInterval(interval(0.0,-0.0), trv), DecoratedInterval(interval(0.0,0.0), trv)) == true
+    @test isequalinterval(DecoratedInterval(interval(0.0,-0.0), trv), DecoratedInterval(interval(0.0,0.0), trv)) == true
 
 end
 
 @testset "minimal_subset_test" begin
 
-    @test subset(emptyinterval(), emptyinterval()) == true
+    @test isweaklysubset(emptyinterval(), emptyinterval()) == true
 
-    @test subset(emptyinterval(), interval(0.0,4.0)) == true
+    @test isweaklysubset(emptyinterval(), interval(0.0,4.0)) == true
 
-    @test subset(emptyinterval(), interval(-0.0,4.0)) == true
+    @test isweaklysubset(emptyinterval(), interval(-0.0,4.0)) == true
 
-    @test subset(emptyinterval(), interval(-0.1,1.0)) == true
+    @test isweaklysubset(emptyinterval(), interval(-0.1,1.0)) == true
 
-    @test subset(emptyinterval(), interval(-0.1,0.0)) == true
+    @test isweaklysubset(emptyinterval(), interval(-0.1,0.0)) == true
 
-    @test subset(emptyinterval(), interval(-0.1,-0.0)) == true
+    @test isweaklysubset(emptyinterval(), interval(-0.1,-0.0)) == true
 
-    @test subset(emptyinterval(), interval(-Inf,+Inf)) == true
+    @test isweaklysubset(emptyinterval(), interval(-Inf,+Inf)) == true
 
-    @test subset(interval(0.0,4.0), emptyinterval()) == false
+    @test isweaklysubset(interval(0.0,4.0), emptyinterval()) == false
 
-    @test subset(interval(-0.0,4.0), emptyinterval()) == false
+    @test isweaklysubset(interval(-0.0,4.0), emptyinterval()) == false
 
-    @test subset(interval(-0.1,1.0), emptyinterval()) == false
+    @test isweaklysubset(interval(-0.1,1.0), emptyinterval()) == false
 
-    @test subset(interval(-Inf,+Inf), emptyinterval()) == false
+    @test isweaklysubset(interval(-Inf,+Inf), emptyinterval()) == false
 
-    @test subset(interval(0.0,4.0), interval(-Inf,+Inf)) == true
+    @test isweaklysubset(interval(0.0,4.0), interval(-Inf,+Inf)) == true
 
-    @test subset(interval(-0.0,4.0), interval(-Inf,+Inf)) == true
+    @test isweaklysubset(interval(-0.0,4.0), interval(-Inf,+Inf)) == true
 
-    @test subset(interval(-0.1,1.0), interval(-Inf,+Inf)) == true
+    @test isweaklysubset(interval(-0.1,1.0), interval(-Inf,+Inf)) == true
 
-    @test subset(interval(-Inf,+Inf), interval(-Inf,+Inf)) == true
+    @test isweaklysubset(interval(-Inf,+Inf), interval(-Inf,+Inf)) == true
 
-    @test subset(interval(1.0,2.0), interval(1.0,2.0)) == true
+    @test isweaklysubset(interval(1.0,2.0), interval(1.0,2.0)) == true
 
-    @test subset(interval(1.0,2.0), interval(0.0,4.0)) == true
+    @test isweaklysubset(interval(1.0,2.0), interval(0.0,4.0)) == true
 
-    @test subset(interval(1.0,2.0), interval(-0.0,4.0)) == true
+    @test isweaklysubset(interval(1.0,2.0), interval(-0.0,4.0)) == true
 
-    @test subset(interval(0.1,0.2), interval(0.0,4.0)) == true
+    @test isweaklysubset(interval(0.1,0.2), interval(0.0,4.0)) == true
 
-    @test subset(interval(0.1,0.2), interval(-0.0,4.0)) == true
+    @test isweaklysubset(interval(0.1,0.2), interval(-0.0,4.0)) == true
 
-    @test subset(interval(-0.1,-0.1), interval(-4.0, 3.4)) == true
+    @test isweaklysubset(interval(-0.1,-0.1), interval(-4.0, 3.4)) == true
 
-    @test subset(interval(0.0,0.0), interval(-0.0,-0.0)) == true
+    @test isweaklysubset(interval(0.0,0.0), interval(-0.0,-0.0)) == true
 
-    @test subset(interval(-0.0,-0.0), interval(0.0,0.0)) == true
+    @test isweaklysubset(interval(-0.0,-0.0), interval(0.0,0.0)) == true
 
-    @test subset(interval(-0.0,0.0), interval(0.0,0.0)) == true
+    @test isweaklysubset(interval(-0.0,0.0), interval(0.0,0.0)) == true
 
-    @test subset(interval(-0.0,0.0), interval(0.0,-0.0)) == true
+    @test isweaklysubset(interval(-0.0,0.0), interval(0.0,-0.0)) == true
 
-    @test subset(interval(0.0,-0.0), interval(0.0,0.0)) == true
+    @test isweaklysubset(interval(0.0,-0.0), interval(0.0,0.0)) == true
 
-    @test subset(interval(0.0,-0.0), interval(-0.0,0.0)) == true
+    @test isweaklysubset(interval(0.0,-0.0), interval(-0.0,0.0)) == true
 
 end
 
 @testset "minimal_subset_dec_test" begin
 
-    @test subset(nai(), nai()) == false
+    @test isweaklysubset(nai(), nai()) == false
 
-    @test subset(nai(), DecoratedInterval(emptyinterval(), trv)) == false
+    @test isweaklysubset(nai(), DecoratedInterval(emptyinterval(), trv)) == false
 
-    @test subset(nai(), DecoratedInterval(interval(0.0,4.0), trv)) == false
+    @test isweaklysubset(nai(), DecoratedInterval(interval(0.0,4.0), trv)) == false
 
-    @test subset(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(0.0,4.0), trv)) == true
+    @test isweaklysubset(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(0.0,4.0), trv)) == true
 
-    @test subset(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(-0.0,4.0), def)) == true
+    @test isweaklysubset(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(-0.0,4.0), def)) == true
 
-    @test subset(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(-0.1,1.0), trv)) == true
+    @test isweaklysubset(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(-0.1,1.0), trv)) == true
 
-    @test subset(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(-0.1,0.0), trv)) == true
+    @test isweaklysubset(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(-0.1,0.0), trv)) == true
 
-    @test subset(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(-0.1,-0.0), trv)) == true
+    @test isweaklysubset(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(-0.1,-0.0), trv)) == true
 
-    @test subset(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
+    @test isweaklysubset(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
 
-    @test subset(DecoratedInterval(interval(0.0,4.0), trv), DecoratedInterval(emptyinterval(), trv)) == false
+    @test isweaklysubset(DecoratedInterval(interval(0.0,4.0), trv), DecoratedInterval(emptyinterval(), trv)) == false
 
-    @test subset(DecoratedInterval(interval(-0.0,4.0), def), DecoratedInterval(emptyinterval(), trv)) == false
+    @test isweaklysubset(DecoratedInterval(interval(-0.0,4.0), def), DecoratedInterval(emptyinterval(), trv)) == false
 
-    @test subset(DecoratedInterval(interval(-0.1,1.0), trv), DecoratedInterval(emptyinterval(), trv)) == false
+    @test isweaklysubset(DecoratedInterval(interval(-0.1,1.0), trv), DecoratedInterval(emptyinterval(), trv)) == false
 
-    @test subset(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(emptyinterval(), trv)) == false
+    @test isweaklysubset(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(emptyinterval(), trv)) == false
 
-    @test subset(DecoratedInterval(interval(0.0,4.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
+    @test isweaklysubset(DecoratedInterval(interval(0.0,4.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
 
-    @test subset(DecoratedInterval(interval(-0.0,4.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
+    @test isweaklysubset(DecoratedInterval(interval(-0.0,4.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
 
-    @test subset(DecoratedInterval(interval(-0.1,1.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
+    @test isweaklysubset(DecoratedInterval(interval(-0.1,1.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
 
-    @test subset(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
+    @test isweaklysubset(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
 
-    @test subset(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(1.0,2.0), trv)) == true
+    @test isweaklysubset(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(1.0,2.0), trv)) == true
 
-    @test subset(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(0.0,4.0), trv)) == true
+    @test isweaklysubset(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(0.0,4.0), trv)) == true
 
-    @test subset(DecoratedInterval(interval(1.0,2.0), def), DecoratedInterval(interval(-0.0,4.0), def)) == true
+    @test isweaklysubset(DecoratedInterval(interval(1.0,2.0), def), DecoratedInterval(interval(-0.0,4.0), def)) == true
 
-    @test subset(DecoratedInterval(interval(0.1,0.2), trv), DecoratedInterval(interval(0.0,4.0), trv)) == true
+    @test isweaklysubset(DecoratedInterval(interval(0.1,0.2), trv), DecoratedInterval(interval(0.0,4.0), trv)) == true
 
-    @test subset(DecoratedInterval(interval(0.1,0.2), trv), DecoratedInterval(interval(-0.0,4.0), def)) == true
+    @test isweaklysubset(DecoratedInterval(interval(0.1,0.2), trv), DecoratedInterval(interval(-0.0,4.0), def)) == true
 
-    @test subset(DecoratedInterval(interval(-0.1,-0.1), trv), DecoratedInterval(interval(-4.0, 3.4), trv)) == true
+    @test isweaklysubset(DecoratedInterval(interval(-0.1,-0.1), trv), DecoratedInterval(interval(-4.0, 3.4), trv)) == true
 
-    @test subset(DecoratedInterval(interval(0.0,0.0), trv), DecoratedInterval(interval(-0.0,-0.0), trv)) == true
+    @test isweaklysubset(DecoratedInterval(interval(0.0,0.0), trv), DecoratedInterval(interval(-0.0,-0.0), trv)) == true
 
-    @test subset(DecoratedInterval(interval(-0.0,-0.0), trv), DecoratedInterval(interval(0.0,0.0), def)) == true
+    @test isweaklysubset(DecoratedInterval(interval(-0.0,-0.0), trv), DecoratedInterval(interval(0.0,0.0), def)) == true
 
-    @test subset(DecoratedInterval(interval(-0.0,0.0), trv), DecoratedInterval(interval(0.0,0.0), trv)) == true
+    @test isweaklysubset(DecoratedInterval(interval(-0.0,0.0), trv), DecoratedInterval(interval(0.0,0.0), trv)) == true
 
-    @test subset(DecoratedInterval(interval(-0.0,0.0), trv), DecoratedInterval(interval(0.0,-0.0), trv)) == true
+    @test isweaklysubset(DecoratedInterval(interval(-0.0,0.0), trv), DecoratedInterval(interval(0.0,-0.0), trv)) == true
 
-    @test subset(DecoratedInterval(interval(0.0,-0.0), def), DecoratedInterval(interval(0.0,0.0), trv)) == true
+    @test isweaklysubset(DecoratedInterval(interval(0.0,-0.0), def), DecoratedInterval(interval(0.0,0.0), trv)) == true
 
-    @test subset(DecoratedInterval(interval(0.0,-0.0), trv), DecoratedInterval(interval(-0.0,0.0), trv)) == true
+    @test isweaklysubset(DecoratedInterval(interval(0.0,-0.0), trv), DecoratedInterval(interval(-0.0,0.0), trv)) == true
 
 end
 
 @testset "minimal_less_test" begin
 
-    @test less(emptyinterval(), emptyinterval()) == true
+    @test isweaklyless(emptyinterval(), emptyinterval()) == true
 
-    @test less(interval(1.0,2.0), emptyinterval()) == false
+    @test isweaklyless(interval(1.0,2.0), emptyinterval()) == false
 
-    @test less(emptyinterval(), interval(1.0,2.0)) == false
+    @test isweaklyless(emptyinterval(), interval(1.0,2.0)) == false
 
-    @test less(interval(-Inf,+Inf), interval(-Inf,+Inf)) == true
+    @test isweaklyless(interval(-Inf,+Inf), interval(-Inf,+Inf)) == true
 
-    @test less(interval(1.0,2.0), interval(-Inf,+Inf)) == false
+    @test isweaklyless(interval(1.0,2.0), interval(-Inf,+Inf)) == false
 
-    @test less(interval(0.0,2.0), interval(-Inf,+Inf)) == false
+    @test isweaklyless(interval(0.0,2.0), interval(-Inf,+Inf)) == false
 
-    @test less(interval(-0.0,2.0), interval(-Inf,+Inf)) == false
+    @test isweaklyless(interval(-0.0,2.0), interval(-Inf,+Inf)) == false
 
-    @test less(interval(-Inf,+Inf), interval(1.0,2.0)) == false
+    @test isweaklyless(interval(-Inf,+Inf), interval(1.0,2.0)) == false
 
-    @test less(interval(-Inf,+Inf), interval(0.0,2.0)) == false
+    @test isweaklyless(interval(-Inf,+Inf), interval(0.0,2.0)) == false
 
-    @test less(interval(-Inf,+Inf), interval(-0.0,2.0)) == false
+    @test isweaklyless(interval(-Inf,+Inf), interval(-0.0,2.0)) == false
 
-    @test less(interval(0.0,2.0), interval(0.0,2.0)) == true
+    @test isweaklyless(interval(0.0,2.0), interval(0.0,2.0)) == true
 
-    @test less(interval(0.0,2.0), interval(-0.0,2.0)) == true
+    @test isweaklyless(interval(0.0,2.0), interval(-0.0,2.0)) == true
 
-    @test less(interval(0.0,2.0), interval(1.0,2.0)) == true
+    @test isweaklyless(interval(0.0,2.0), interval(1.0,2.0)) == true
 
-    @test less(interval(-0.0,2.0), interval(1.0,2.0)) == true
+    @test isweaklyless(interval(-0.0,2.0), interval(1.0,2.0)) == true
 
-    @test less(interval(1.0,2.0), interval(1.0,2.0)) == true
+    @test isweaklyless(interval(1.0,2.0), interval(1.0,2.0)) == true
 
-    @test less(interval(1.0,2.0), interval(3.0,4.0)) == true
+    @test isweaklyless(interval(1.0,2.0), interval(3.0,4.0)) == true
 
-    @test less(interval(1.0,3.5), interval(3.0,4.0)) == true
+    @test isweaklyless(interval(1.0,3.5), interval(3.0,4.0)) == true
 
-    @test less(interval(1.0,4.0), interval(3.0,4.0)) == true
+    @test isweaklyless(interval(1.0,4.0), interval(3.0,4.0)) == true
 
-    @test less(interval(-2.0,-1.0), interval(-2.0,-1.0)) == true
+    @test isweaklyless(interval(-2.0,-1.0), interval(-2.0,-1.0)) == true
 
-    @test less(interval(-3.0,-1.5), interval(-2.0,-1.0)) == true
+    @test isweaklyless(interval(-3.0,-1.5), interval(-2.0,-1.0)) == true
 
-    @test less(interval(0.0,0.0), interval(-0.0,-0.0)) == true
+    @test isweaklyless(interval(0.0,0.0), interval(-0.0,-0.0)) == true
 
-    @test less(interval(-0.0,-0.0), interval(0.0,0.0)) == true
+    @test isweaklyless(interval(-0.0,-0.0), interval(0.0,0.0)) == true
 
-    @test less(interval(-0.0,0.0), interval(0.0,0.0)) == true
+    @test isweaklyless(interval(-0.0,0.0), interval(0.0,0.0)) == true
 
-    @test less(interval(-0.0,0.0), interval(0.0,-0.0)) == true
+    @test isweaklyless(interval(-0.0,0.0), interval(0.0,-0.0)) == true
 
-    @test less(interval(0.0,-0.0), interval(0.0,0.0)) == true
+    @test isweaklyless(interval(0.0,-0.0), interval(0.0,0.0)) == true
 
-    @test less(interval(0.0,-0.0), interval(-0.0,0.0)) == true
+    @test isweaklyless(interval(0.0,-0.0), interval(-0.0,0.0)) == true
 
 end
 
 @testset "minimal_less_dec_test" begin
 
-    @test less(nai(), nai()) == false
+    @test isweaklyless(nai(), nai()) == false
 
-    @test less(DecoratedInterval(emptyinterval(), trv), nai()) == false
+    @test isweaklyless(DecoratedInterval(emptyinterval(), trv), nai()) == false
 
-    @test less(DecoratedInterval(interval(1.0,2.0), trv), nai()) == false
+    @test isweaklyless(DecoratedInterval(interval(1.0,2.0), trv), nai()) == false
 
-    @test less(nai(), DecoratedInterval(interval(1.0,2.0), def)) == false
+    @test isweaklyless(nai(), DecoratedInterval(interval(1.0,2.0), def)) == false
 
-    @test less(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(emptyinterval(), trv)) == true
+    @test isweaklyless(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(emptyinterval(), trv)) == true
 
-    @test less(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(emptyinterval(), trv)) == false
+    @test isweaklyless(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(emptyinterval(), trv)) == false
 
-    @test less(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(1.0,2.0), trv)) == false
+    @test isweaklyless(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(1.0,2.0), trv)) == false
 
-    @test less(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
+    @test isweaklyless(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
 
-    @test less(DecoratedInterval(interval(1.0,2.0), def), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
+    @test isweaklyless(DecoratedInterval(interval(1.0,2.0), def), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
 
-    @test less(DecoratedInterval(interval(0.0,2.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
+    @test isweaklyless(DecoratedInterval(interval(0.0,2.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
 
-    @test less(DecoratedInterval(interval(-0.0,2.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
+    @test isweaklyless(DecoratedInterval(interval(-0.0,2.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
 
-    @test less(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(1.0,2.0), trv)) == false
+    @test isweaklyless(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(1.0,2.0), trv)) == false
 
-    @test less(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(0.0,2.0), def)) == false
+    @test isweaklyless(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(0.0,2.0), def)) == false
 
-    @test less(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(-0.0,2.0), trv)) == false
+    @test isweaklyless(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(-0.0,2.0), trv)) == false
 
-    @test less(DecoratedInterval(interval(0.0,2.0), trv), DecoratedInterval(interval(0.0,2.0), trv)) == true
+    @test isweaklyless(DecoratedInterval(interval(0.0,2.0), trv), DecoratedInterval(interval(0.0,2.0), trv)) == true
 
-    @test less(DecoratedInterval(interval(0.0,2.0), trv), DecoratedInterval(interval(-0.0,2.0), trv)) == true
+    @test isweaklyless(DecoratedInterval(interval(0.0,2.0), trv), DecoratedInterval(interval(-0.0,2.0), trv)) == true
 
-    @test less(DecoratedInterval(interval(0.0,2.0), def), DecoratedInterval(interval(1.0,2.0), def)) == true
+    @test isweaklyless(DecoratedInterval(interval(0.0,2.0), def), DecoratedInterval(interval(1.0,2.0), def)) == true
 
-    @test less(DecoratedInterval(interval(-0.0,2.0), trv), DecoratedInterval(interval(1.0,2.0), trv)) == true
+    @test isweaklyless(DecoratedInterval(interval(-0.0,2.0), trv), DecoratedInterval(interval(1.0,2.0), trv)) == true
 
-    @test less(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(1.0,2.0), trv)) == true
+    @test isweaklyless(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(1.0,2.0), trv)) == true
 
-    @test less(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(3.0,4.0), def)) == true
+    @test isweaklyless(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(3.0,4.0), def)) == true
 
-    @test less(DecoratedInterval(interval(1.0,3.5), trv), DecoratedInterval(interval(3.0,4.0), trv)) == true
+    @test isweaklyless(DecoratedInterval(interval(1.0,3.5), trv), DecoratedInterval(interval(3.0,4.0), trv)) == true
 
-    @test less(DecoratedInterval(interval(1.0,4.0), trv), DecoratedInterval(interval(3.0,4.0), trv)) == true
+    @test isweaklyless(DecoratedInterval(interval(1.0,4.0), trv), DecoratedInterval(interval(3.0,4.0), trv)) == true
 
-    @test less(DecoratedInterval(interval(-2.0,-1.0), trv), DecoratedInterval(interval(-2.0,-1.0), trv)) == true
+    @test isweaklyless(DecoratedInterval(interval(-2.0,-1.0), trv), DecoratedInterval(interval(-2.0,-1.0), trv)) == true
 
-    @test less(DecoratedInterval(interval(-3.0,-1.5), trv), DecoratedInterval(interval(-2.0,-1.0), trv)) == true
+    @test isweaklyless(DecoratedInterval(interval(-3.0,-1.5), trv), DecoratedInterval(interval(-2.0,-1.0), trv)) == true
 
-    @test less(DecoratedInterval(interval(0.0,0.0), trv), DecoratedInterval(interval(-0.0,-0.0), trv)) == true
+    @test isweaklyless(DecoratedInterval(interval(0.0,0.0), trv), DecoratedInterval(interval(-0.0,-0.0), trv)) == true
 
-    @test less(DecoratedInterval(interval(-0.0,-0.0), trv), DecoratedInterval(interval(0.0,0.0), def)) == true
+    @test isweaklyless(DecoratedInterval(interval(-0.0,-0.0), trv), DecoratedInterval(interval(0.0,0.0), def)) == true
 
-    @test less(DecoratedInterval(interval(-0.0,0.0), trv), DecoratedInterval(interval(0.0,0.0), trv)) == true
+    @test isweaklyless(DecoratedInterval(interval(-0.0,0.0), trv), DecoratedInterval(interval(0.0,0.0), trv)) == true
 
-    @test less(DecoratedInterval(interval(-0.0,0.0), trv), DecoratedInterval(interval(0.0,-0.0), trv)) == true
+    @test isweaklyless(DecoratedInterval(interval(-0.0,0.0), trv), DecoratedInterval(interval(0.0,-0.0), trv)) == true
 
-    @test less(DecoratedInterval(interval(0.0,-0.0), def), DecoratedInterval(interval(0.0,0.0), trv)) == true
+    @test isweaklyless(DecoratedInterval(interval(0.0,-0.0), def), DecoratedInterval(interval(0.0,0.0), trv)) == true
 
-    @test less(DecoratedInterval(interval(0.0,-0.0), trv), DecoratedInterval(interval(-0.0,0.0), trv)) == true
+    @test isweaklyless(DecoratedInterval(interval(0.0,-0.0), trv), DecoratedInterval(interval(-0.0,0.0), trv)) == true
 
 end
 
@@ -812,56 +812,56 @@ end
 
 @testset "minimal_disjoint_test" begin
 
-    @test disjoint(emptyinterval(), interval(3.0,4.0)) == true
+    @test isdisjointinterval(emptyinterval(), interval(3.0,4.0)) == true
 
-    @test disjoint(interval(3.0,4.0), emptyinterval()) == true
+    @test isdisjointinterval(interval(3.0,4.0), emptyinterval()) == true
 
-    @test disjoint(emptyinterval(), emptyinterval()) == true
+    @test isdisjointinterval(emptyinterval(), emptyinterval()) == true
 
-    @test disjoint(interval(3.0,4.0), interval(1.0,2.0)) == true
+    @test isdisjointinterval(interval(3.0,4.0), interval(1.0,2.0)) == true
 
-    @test disjoint(interval(0.0,0.0), interval(-0.0,-0.0)) == false
+    @test isdisjointinterval(interval(0.0,0.0), interval(-0.0,-0.0)) == false
 
-    @test disjoint(interval(0.0,-0.0), interval(-0.0,0.0)) == false
+    @test isdisjointinterval(interval(0.0,-0.0), interval(-0.0,0.0)) == false
 
-    @test disjoint(interval(3.0,4.0), interval(1.0,7.0)) == false
+    @test isdisjointinterval(interval(3.0,4.0), interval(1.0,7.0)) == false
 
-    @test disjoint(interval(3.0,4.0), interval(-Inf,+Inf)) == false
+    @test isdisjointinterval(interval(3.0,4.0), interval(-Inf,+Inf)) == false
 
-    @test disjoint(interval(-Inf,+Inf), interval(1.0,7.0)) == false
+    @test isdisjointinterval(interval(-Inf,+Inf), interval(1.0,7.0)) == false
 
-    @test disjoint(interval(-Inf,+Inf), interval(-Inf,+Inf)) == false
+    @test isdisjointinterval(interval(-Inf,+Inf), interval(-Inf,+Inf)) == false
 
 end
 
 @testset "minimal_disjoint_dec_test" begin
 
-    @test disjoint(nai(), DecoratedInterval(interval(3.0,4.0), def)) == false
+    @test isdisjointinterval(nai(), DecoratedInterval(interval(3.0,4.0), def)) == false
 
-    @test disjoint(DecoratedInterval(interval(3.0,4.0), trv), nai()) == false
+    @test isdisjointinterval(DecoratedInterval(interval(3.0,4.0), trv), nai()) == false
 
-    @test disjoint(DecoratedInterval(emptyinterval(), trv), nai()) == false
+    @test isdisjointinterval(DecoratedInterval(emptyinterval(), trv), nai()) == false
 
-    @test disjoint(nai(), nai()) == false
+    @test isdisjointinterval(nai(), nai()) == false
 
-    @test disjoint(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(3.0,4.0), def)) == true
+    @test isdisjointinterval(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(3.0,4.0), def)) == true
 
-    @test disjoint(DecoratedInterval(interval(3.0,4.0), trv), DecoratedInterval(emptyinterval(), trv)) == true
+    @test isdisjointinterval(DecoratedInterval(interval(3.0,4.0), trv), DecoratedInterval(emptyinterval(), trv)) == true
 
-    @test disjoint(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(emptyinterval(), trv)) == true
+    @test isdisjointinterval(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(emptyinterval(), trv)) == true
 
-    @test disjoint(DecoratedInterval(interval(3.0,4.0), trv), DecoratedInterval(interval(1.0,2.0), def)) == true
+    @test isdisjointinterval(DecoratedInterval(interval(3.0,4.0), trv), DecoratedInterval(interval(1.0,2.0), def)) == true
 
-    @test disjoint(DecoratedInterval(interval(0.0,0.0), trv), DecoratedInterval(interval(-0.0,-0.0), trv)) == false
+    @test isdisjointinterval(DecoratedInterval(interval(0.0,0.0), trv), DecoratedInterval(interval(-0.0,-0.0), trv)) == false
 
-    @test disjoint(DecoratedInterval(interval(0.0,-0.0), trv), DecoratedInterval(interval(-0.0,0.0), trv)) == false
+    @test isdisjointinterval(DecoratedInterval(interval(0.0,-0.0), trv), DecoratedInterval(interval(-0.0,0.0), trv)) == false
 
-    @test disjoint(DecoratedInterval(interval(3.0,4.0), def), DecoratedInterval(interval(1.0,7.0), def)) == false
+    @test isdisjointinterval(DecoratedInterval(interval(3.0,4.0), def), DecoratedInterval(interval(1.0,7.0), def)) == false
 
-    @test disjoint(DecoratedInterval(interval(3.0,4.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
+    @test isdisjointinterval(DecoratedInterval(interval(3.0,4.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
 
-    @test disjoint(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(1.0,7.0), trv)) == false
+    @test isdisjointinterval(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(1.0,7.0), trv)) == false
 
-    @test disjoint(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
+    @test isdisjointinterval(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
 
 end

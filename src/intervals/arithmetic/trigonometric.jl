@@ -82,7 +82,7 @@ function sin(a::Interval{T}) where {T<:NumTypes}
         ahi - alo > inf(interval(T, π)) && return whole_range  # in same quadrant but separated by almost 2pi
         lo = @round(T, sin(alo), sin(alo))
         hi = @round(T, sin(ahi), sin(ahi))
-        return convexhull(lo, hi)
+        return hull(lo, hi)
 
     elseif lo_quadrant == 3 && hi_quadrant == 0
         return @round(T, sin(alo), sin(ahi))
@@ -172,7 +172,7 @@ function cos(a::Interval{T}) where {T<:NumTypes}
         ahi - alo > inf(interval(T, π)) && return whole_range
         lo = @round(T, cos(alo), cos(alo))
         hi = @round(T, cos(ahi), cos(ahi))
-        return convexhull(lo, hi)
+        return hull(lo, hi)
 
     elseif lo_quadrant == 2 && hi_quadrant == 3
         return @round(T, cos(alo), cos(ahi))
@@ -253,7 +253,7 @@ function tan(a::Interval{T}) where {T<:NumTypes}
 
     if iszero(lo_quadrant_mod) && hi_quadrant_mod == 1
         # check if really contains singularity:
-        if subset(hi_quadrant * half_pi(T), a)
+        if isweaklysubset(hi_quadrant * half_pi(T), a)
             return entireinterval(T)  # crosses singularity
         end
 
@@ -299,7 +299,7 @@ function cot(a::Interval{T}) where {T<:NumTypes}
 
     diam(a) > inf(interval(T, π)) && return entireinterval(T)
 
-    issingletonzero(a) && return emptyinterval(T)
+    isthinzero(a) && return emptyinterval(T)
 
     alo, ahi = bounds(a)
     lo_quadrant = minimum(find_quadrants(T, alo))
@@ -355,7 +355,7 @@ function sec(a::Interval{T}) where {T<:NumTypes}
     if lo_quadrant == hi_quadrant  # Interval limits in the same quadrant
         lo = @round(T, sec(alo), sec(alo))
         hi = @round(T, sec(ahi), sec(ahi))
-        return convexhull(lo, hi)
+        return hull(lo, hi)
 
     elseif (iszero(lo_quadrant) && hi_quadrant == 1) || (lo_quadrant == 2 && hi_quadrant ==3)
         return entireinterval(T)
@@ -383,7 +383,7 @@ function csc(a::Interval{T}) where {T<:NumTypes}
 
     diam(a) > inf(interval(T, π)) && return entireinterval(T)
 
-    issingletonzero(a) && return emptyinterval(T)
+    isthinzero(a) && return emptyinterval(T)
 
     alo, ahi = bounds(a)
     lo_quadrant = minimum(find_quadrants(T, alo))
@@ -398,7 +398,7 @@ function csc(a::Interval{T}) where {T<:NumTypes}
 
         lo = @round(T, csc(alo), csc(alo))
         hi = @round(T, csc(ahi), csc(ahi))
-        return convexhull(lo, hi)
+        return hull(lo, hi)
 
     elseif (lo_quadrant == 3 && iszero(hi_quadrant)) || (lo_quadrant == 1 && hi_quadrant == 2)
         iszero(ahi) && return @round(T, typemin(T), csc(alo))
@@ -430,7 +430,7 @@ Implement the `asin` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function asin(a::Interval{T}) where {T<:NumTypes}
     domain = unsafe_interval(T, -one(T), one(T))
-    a = intersection(a, domain)
+    a = intersectinterval(a, domain)
     isemptyinterval(a) && return a
     alo, ahi = bounds(a)
     return @round(T, asin(alo), asin(ahi))
@@ -443,7 +443,7 @@ Implement the `acos` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function acos(a::Interval{T}) where {T<:NumTypes}
     domain = unsafe_interval(T, -one(T), one(T))
-    a = intersection(a, domain)
+    a = intersectinterval(a, domain)
     isemptyinterval(a) && return a
     alo, ahi = bounds(a)
     return @round(T, acos(ahi), acos(alo))
@@ -484,14 +484,14 @@ function atan(y::Interval{BigFloat}, x::Interval{BigFloat})
     end
 
     # Check cases based on x
-    if issingletonzero(x)
-        issingletonzero(y) && return emptyinterval(BigFloat)
+    if isthinzero(x)
+        isthinzero(y) && return emptyinterval(BigFloat)
         ylo ≥ z && return half_pi(BigFloat)
         yhi ≤ z && return -half_pi(BigFloat)
         return half_range_atan(BigFloat)
 
     elseif xlo > z
-        issingletonzero(y) && return y
+        isthinzero(y) && return y
         ylo ≥ z &&
             return @round(BigFloat, atan(ylo, xhi), atan(yhi, xlo)) # refinement lo bound
         yhi ≤ z &&
@@ -499,7 +499,7 @@ function atan(y::Interval{BigFloat}, x::Interval{BigFloat})
         return @round(BigFloat, atan(ylo, xlo), atan(yhi, xlo))
 
     elseif xhi < z
-        issingletonzero(y) && return interval(BigFloat, π)
+        isthinzero(y) && return interval(BigFloat, π)
         ylo ≥ z &&
             return @round(BigFloat, atan(yhi, xhi), atan(ylo, xlo))
         yhi < z &&
@@ -508,7 +508,7 @@ function atan(y::Interval{BigFloat}, x::Interval{BigFloat})
 
     else # z ∈ x
         if iszero(xlo)
-            issingletonzero(y) && return y
+            isthinzero(y) && return y
             ylo ≥ z &&
                 return unsafe_interval(BigFloat, atan(ylo, xhi, RoundDown), sup(half_range_atan(BigFloat)))
             yhi ≤ z &&
@@ -516,7 +516,7 @@ function atan(y::Interval{BigFloat}, x::Interval{BigFloat})
             return half_range_atan(BigFloat)
 
         elseif iszero(xhi)
-            issingletonzero(y) && return interval(BigFloat, π)
+            isthinzero(y) && return interval(BigFloat, π)
             ylo ≥ z &&
                 return unsafe_interval(BigFloat, inf(half_pi(BigFloat)), atan(ylo, xlo, RoundUp))
             yhi < z &&

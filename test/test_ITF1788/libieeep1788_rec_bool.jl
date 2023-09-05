@@ -74,71 +74,71 @@ end
 
 @testset "minimal_is_singleton_test" begin
 
-    @test issingleton(interval(-27.0,-27.0)) == true
+    @test isthin(interval(-27.0,-27.0)) == true
 
-    @test issingleton(interval(-2.0, -2.0)) == true
+    @test isthin(interval(-2.0, -2.0)) == true
 
-    @test issingleton(interval(12.0,12.0)) == true
+    @test isthin(interval(12.0,12.0)) == true
 
-    @test issingleton(interval(17.1, 17.1)) == true
+    @test isthin(interval(17.1, 17.1)) == true
 
-    @test issingleton(interval(-0.0,-0.0)) == true
+    @test isthin(interval(-0.0,-0.0)) == true
 
-    @test issingleton(interval(0.0,0.0)) == true
+    @test isthin(interval(0.0,0.0)) == true
 
-    @test issingleton(interval(-0.0, 0.0)) == true
+    @test isthin(interval(-0.0, 0.0)) == true
 
-    @test issingleton(interval(0.0, -0.0)) == true
+    @test isthin(interval(0.0, -0.0)) == true
 
-    @test issingleton(emptyinterval()) == false
+    @test isthin(emptyinterval()) == false
 
-    @test issingleton(entireinterval()) == false
+    @test isthin(entireinterval()) == false
 
-    @test issingleton(interval(-1.0, 0.0)) == false
+    @test isthin(interval(-1.0, 0.0)) == false
 
-    @test issingleton(interval(-1.0, -0.5)) == false
+    @test isthin(interval(-1.0, -0.5)) == false
 
-    @test issingleton(interval(1.0, 2.0)) == false
+    @test isthin(interval(1.0, 2.0)) == false
 
-    @test issingleton(interval(-Inf,-0x1.FFFFFFFFFFFFFp1023)) == false
+    @test isthin(interval(-Inf,-0x1.FFFFFFFFFFFFFp1023)) == false
 
-    @test issingleton(interval(-1.0,Inf)) == false
+    @test isthin(interval(-1.0,Inf)) == false
 
 end
 
 @testset "minimal_is_singleton_dec_test" begin
 
-    @test issingleton(DecoratedInterval(interval(-27.0,-27.0), def)) == true
+    @test isthin(DecoratedInterval(interval(-27.0,-27.0), def)) == true
 
-    @test issingleton(DecoratedInterval(interval(-2.0, -2.0), trv)) == true
+    @test isthin(DecoratedInterval(interval(-2.0, -2.0), trv)) == true
 
-    @test issingleton(DecoratedInterval(interval(12.0,12.0), dac)) == true
+    @test isthin(DecoratedInterval(interval(12.0,12.0), dac)) == true
 
-    @test issingleton(DecoratedInterval(interval(17.1, 17.1), com)) == true
+    @test isthin(DecoratedInterval(interval(17.1, 17.1), com)) == true
 
-    @test issingleton(DecoratedInterval(interval(-0.0,-0.0), def)) == true
+    @test isthin(DecoratedInterval(interval(-0.0,-0.0), def)) == true
 
-    @test issingleton(DecoratedInterval(interval(0.0,0.0), com)) == true
+    @test isthin(DecoratedInterval(interval(0.0,0.0), com)) == true
 
-    @test issingleton(DecoratedInterval(interval(-0.0, 0.0), def)) == true
+    @test isthin(DecoratedInterval(interval(-0.0, 0.0), def)) == true
 
-    @test issingleton(DecoratedInterval(interval(0.0, -0.0), dac)) == true
+    @test isthin(DecoratedInterval(interval(0.0, -0.0), dac)) == true
 
-    @test issingleton(DecoratedInterval(emptyinterval(), trv)) == false
+    @test isthin(DecoratedInterval(emptyinterval(), trv)) == false
 
-    @test issingleton(nai()) == false
+    @test isthin(nai()) == false
 
-    @test issingleton(DecoratedInterval(entireinterval(), def)) == false
+    @test isthin(DecoratedInterval(entireinterval(), def)) == false
 
-    @test issingleton(DecoratedInterval(interval(-1.0, 0.0), dac)) == false
+    @test isthin(DecoratedInterval(interval(-1.0, 0.0), dac)) == false
 
-    @test issingleton(DecoratedInterval(interval(-1.0, -0.5), com)) == false
+    @test isthin(DecoratedInterval(interval(-1.0, -0.5), com)) == false
 
-    @test issingleton(DecoratedInterval(interval(1.0, 2.0), def)) == false
+    @test isthin(DecoratedInterval(interval(1.0, 2.0), def)) == false
 
-    @test issingleton(DecoratedInterval(interval(-Inf,-0x1.FFFFFFFFFFFFFp1023), dac)) == false
+    @test isthin(DecoratedInterval(interval(-Inf,-0x1.FFFFFFFFFFFFFp1023), dac)) == false
 
-    @test issingleton(DecoratedInterval(interval(-1.0,Inf), trv)) == false
+    @test isthin(DecoratedInterval(interval(-1.0,Inf), trv)) == false
 
 end
 

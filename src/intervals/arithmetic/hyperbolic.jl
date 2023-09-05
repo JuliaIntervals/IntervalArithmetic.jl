@@ -34,7 +34,7 @@ Implement the `coth` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function coth(a::Interval{T}) where {T<:NumTypes}
     isemptyinterval(a) && return a
-    issingletonzero(a) && return emptyinterval(T)
+    isthinzero(a) && return emptyinterval(T)
     lo, hi = bounds(a)
     if hi > 0 > lo
         return entireinterval(T)
@@ -72,7 +72,7 @@ Implement the `csch` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function csch(a::Interval{T}) where {T<:NumTypes}
     isemptyinterval(a) && return a
-    issingletonzero(a) && return emptyinterval(T)
+    isthinzero(a) && return emptyinterval(T)
     lo, hi = bounds(a)
     if ismember(0, a)
         if hi > 0 > lo
@@ -94,7 +94,7 @@ Implement the `acosh` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function acosh(a::Interval{T}) where {T<:NumTypes}
     domain = unsafe_interval(T, one(T), typemax(T))
-    x = intersection(a, domain)
+    x = intersectinterval(a, domain)
     isemptyinterval(x) && return x
     lo, hi = bounds(x)
     return @round(T, acosh(lo), acosh(hi))
@@ -107,7 +107,7 @@ Implement the `atanh` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function atanh(a::Interval{T}) where {T<:NumTypes}
     domain = unsafe_interval(T, -one(T), one(T))
-    x = intersection(a, domain)
+    x = intersectinterval(a, domain)
     isemptyinterval(x) && return x
     lo, hi = bounds(x)
     res_lo, res_hi = bounds(@round(T, atanh(lo), atanh(hi)))
@@ -123,7 +123,7 @@ function acoth(a::Interval{T}) where {T<:NumTypes}
     isemptyinterval(a) && return a
     domain_excluded = unsafe_interval(T, -one(T), one(T))
     interior(a, domain_excluded) && return emptyinterval(T)
-    !isemptyinterval(intersection(a, domain_excluded)) && return entireinterval(T)
+    !isemptyinterval(intersectinterval(a, domain_excluded)) && return entireinterval(T)
     lo, hi = bounds(a)
     res_lo, res_hi = bounds(@round(T, acoth(hi), acoth(lo)))
     return interval(T, res_lo, res_hi)

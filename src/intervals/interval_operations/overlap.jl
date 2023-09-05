@@ -46,7 +46,7 @@ function overlap(a::Interval, b::Interval)
     inf(a) == inf(b) && sup(a) < sup(b) && return Overlap.starts
     inf(b) < inf(a) && sup(a) < sup(b) && return Overlap.contained_by
     inf(b) < inf(a) && sup(a) == sup(b) && return Overlap.finishes
-    equal(a, b) && return Overlap.equals
+    isequalinterval(a, b) && return Overlap.equals
     inf(a) < inf(b) && sup(a) == sup(b) && return Overlap.finished_by
     inf(b) > inf(a) && sup(a) > sup(b) && return Overlap.contains
     inf(a) == inf(b) && sup(a) > sup(b) && return Overlap.started_by

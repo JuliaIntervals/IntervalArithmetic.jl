@@ -3,13 +3,13 @@ using IntervalArithmetic
 
 @testset "`bisect` function" begin
     X = interval(0, 1)
-    @test all(equal.(bisect(X, 0.5), (interval(0, 0.5), interval(0.5, 1))))
-    @test all(equal.(bisect(X, 0.25), (interval(0, 0.25), interval(0.25, 1))))
+    @test all(isequalinterval.(bisect(X, 0.5), (interval(0, 0.5), interval(0.5, 1))))
+    @test all(isequalinterval.(bisect(X, 0.25), (interval(0, 0.25), interval(0.25, 1))))
 
-    @test all(equal.(bisect(X), (interval(0.0, 0.49609375), interval(0.49609375, 1.0))))
+    @test all(isequalinterval.(bisect(X), (interval(0.0, 0.49609375), interval(0.49609375, 1.0))))
 
     X = interval(-Inf, Inf)
-    @test all(equal.(bisect(X, 0.5), (interval(-Inf, 0), interval(0, Inf))))
+    @test all(isequalinterval.(bisect(X, 0.5), (interval(-Inf, 0), interval(0, Inf))))
     B = bisect(X, 0.75)
     @test B[1].hi > 0
     @test B[1].hi == B[2].lo
@@ -19,7 +19,7 @@ using IntervalArithmetic
 
     X = [interval(0, 1), interval(0, 2)]
 
-    tuple_starequal(x, y) = all(equal.(x, y))
+    tuple_starequal(x, y) = all(isequalinterval.(x, y))
 
     @test all(tuple_starequal.(bisect(X, 2, 0.5),
         ([interval(0, 1), interval(0, 1)], [interval(0, 1), interval(1, 2)])))

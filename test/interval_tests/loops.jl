@@ -93,6 +93,6 @@ end
     @test ismember(big_pi, pi4)
     @test ismember(big_pi, pi5)
 
-    @test equal(pi1, pi2)
-    @test equal(pi2, pi3)
+    @test isequalinterval(pi1, pi2)
+    @test isequalinterval(pi2, pi3)
 end
