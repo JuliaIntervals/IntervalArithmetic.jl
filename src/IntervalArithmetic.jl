@@ -15,7 +15,7 @@ import Base:
     rad2deg, deg2rad,
     sin, cos, tan, cot, csc, sec, asin, acos, atan, acot, sinpi, cospi, sincospi,
     sinh, cosh, tanh, coth, csch, sech, asinh, acosh, atanh, acoth,
-    convert, eltype, size,
+    convert,
     float, big,
     floor, ceil, trunc, sign, round, copysign, flipsign, signbit,
     expm1, log1p,
