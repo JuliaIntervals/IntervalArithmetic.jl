@@ -73,14 +73,14 @@ end
     @test isequalinterval(interval(0, Inf) * interval(-1, Inf), interval(-Inf, Inf))
 
     result = interval(1.1) * interval(2) + interval(3)
-    @test muladd(interval(1.1), interval(2), interval(3)) ≛ result
-    @test muladd(interval(1.1), interval(Float32, 2), interval(3)) ≛ result
-    @test muladd(interval(1.1), interval(2), 3) ≛ result
-    @test muladd(interval(1.1), 2, interval(3)) ≛ result
-    @test muladd(1.1, interval(2), interval(3)) ≛ result
-    @test muladd(interval(1.1), 2, 3) ≛ result
-    @test muladd(1.1, interval(2), 3) ≛ result
-    @test muladd(1.1, 2, interval(3)) ≛ result
+    @test isequalinterval(muladd(interval(1.1), interval(2), interval(3)), result)
+    @test isequalinterval(muladd(interval(1.1), interval(Float32, 2), interval(3)), result)
+    @test isequalinterval(muladd(interval(1.1), interval(2), 3), result)
+    @test isequalinterval(muladd(interval(1.1), 2, interval(3)), result)
+    @test isequalinterval(muladd(1.1, interval(2), interval(3)), result)
+    @test isequalinterval(muladd(interval(1.1), 2, 3), result)
+    @test isequalinterval(muladd(1.1, interval(2), 3), result)
+    @test isequalinterval(muladd(1.1, 2, interval(3)), result)
 
 end
 
