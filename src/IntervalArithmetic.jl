@@ -18,8 +18,9 @@ export ×, dot
 
 import Base:
     +, -, *, /, //, muladd, fma,
-    ^, sqrt, exp, log, exp2, exp10, log2, log10, inv, cbrt, hypot,
-    zero, one, eps, typemin, typemax, abs, abs2, min, max,
+    <, >, ==, !=, ⊆, ^, <=, >=,
+    in, zero, one, eps, typemin, typemax, abs, abs2, min, max,
+    sqrt, exp, log, exp2, exp10, log2, log10, inv, cbrt, hypot,
     rad2deg, deg2rad,
     sin, cos, tan, cot, csc, sec, asin, acos, atan, acot, sinpi, cospi, sincospi,
     sinh, cosh, tanh, coth, csch, sech, asinh, acosh, atanh, acoth,
