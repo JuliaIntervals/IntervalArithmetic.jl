@@ -17,7 +17,7 @@ export ×, dot
 
 
 import Base:
-    +, -, *, /, //, fma,
+    +, -, *, /, //, muladd, fma,
     <, >, ==, !=, ⊆, ^, <=, >=,
     in, zero, one, eps, typemin, typemax, abs, abs2, min, max,
     sqrt, exp, log, exp2, exp10, log2, log10, inv, cbrt, hypot,

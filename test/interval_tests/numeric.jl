@@ -70,7 +70,18 @@ end
     @test extended_div(interval(-2.0, -1.0), interval(-2.0, 4.0)) ≛ ((-∞.. -0.25), (0.5..∞))
     @test extended_div(interval(0.0, 0.0), interval(-1.0, 1.0)) ≛ (entireinterval(c), emptyinterval(c))
 
-    @test (0..∞) * (-1..∞) ≛ -∞..∞
+    @test interval(0, Inf) * interval(-1, Inf) ≛ interval(-Inf, Inf)
+
+    result = interval(1.1) * interval(2) + interval(3)
+    @test muladd(interval(1.1), interval(2), interval(3)) ≛ result
+    @test muladd(interval(1.1), interval(Float32, 2), interval(3)) ≛ result
+    @test muladd(interval(1.1), interval(2), 3) ≛ result
+    @test muladd(interval(1.1), 2, interval(3)) ≛ result
+    @test muladd(1.1, interval(2), interval(3)) ≛ result
+    @test muladd(interval(1.1), 2, 3) ≛ result
+    @test muladd(1.1, interval(2), 3) ≛ result
+    @test muladd(1.1, 2, interval(3)) ≛ result
+
 end
 
 @testset "Arithmetic with constants" begin
@@ -79,8 +90,9 @@ end
     @test 0.1 + x ≛ interval(1.0999999999999999, 2.1)
     @test 3.0 - x ≛ 1..2
     @test 3.1 - x ≛ interval(1.1, 2.1)
-    @test 0.1 * (1..1) ≛ interval(0.1, 0.1)
-    @test (1..1) / 10.0 ≛ interval(0.09999999999999999, 0.1)
+    @test 0.1 * interval(1) ≛ interval(0.1, 0.1)
+    @test 0.0 * interval(1) ≛ interval(0.0, 0.0)
+    @test interval(1) / 10.0 ≛ interval(0.09999999999999999, 0.1)
 end
 
 @testset "Arithmetic with irrational" begin
