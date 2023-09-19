@@ -84,20 +84,20 @@ import IntervalArithmetic: unsafe_interval
     a = I"[0.1, 0.2]"
     b = interval(0.1, 0.2)
 
-    @test isweaklysubset(b, a)
+    @test isweaksubset(b, a)
 
     # TODO Actually use the rounding mode here
     for rounding in (:wide, :narrow)
         a = interval(0.1, 0.2)
-        @test isweaklysubset(a, interval(0.09999999999999999, 0.20000000000000004))
+        @test isweaksubset(a, interval(0.09999999999999999, 0.20000000000000004))
 
         b = interval(0.1)
-        @test isweaklysubset(b, interval(0.09999999999999999, 0.10000000000000002))
-        @test isweaklysubset(b, interval(0.09999999999999999, 0.20000000000000004))
-        @test isweaklysubset(float(b), a)
+        @test isweaksubset(b, interval(0.09999999999999999, 0.10000000000000002))
+        @test isweaksubset(b, interval(0.09999999999999999, 0.20000000000000004))
+        @test isweaksubset(float(b), a)
 
         c = I"[0.1, 0.2]"
-        @test isweaklysubset(a, c)   # a is narrower than c
+        @test isweaksubset(a, c)   # a is narrower than c
         @test isequalinterval(interval(1//2), interval(0.5))
         @test interval(1//10).lo == rationalize(0.1)
     end

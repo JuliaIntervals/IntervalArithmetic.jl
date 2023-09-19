@@ -37,20 +37,20 @@ Check if the interval `a` contains exactly (and only) the number `x`.
 isequalinterval(a::Interval, x::Real) = inf(a) == sup(a) == x
 
 """
-    isweaklysubset(a, b)
+    isweaksubset(a, b)
 
 Checks if all the points of the interval `a` are within the interval `b`.
 
 Typed with \\subseteq<TAB>.
 
-Implement the `isweaklysubset` function of the IEEE Standard 1788-2015 (Table 9.3).
+Implement the `isweaksubset` function of the IEEE Standard 1788-2015 (Table 9.3).
 """
-function isweaklysubset(a::Interval, b::Interval)
+function isweaksubset(a::Interval, b::Interval)
     isemptyinterval(a) && return true
     return inf(b) ≤ inf(a) && sup(a) ≤ sup(b)
 end
 
-isweaklysupset(a::Interval, b::Interval) = isweaklysubset(b, a)
+isweaksupset(a::Interval, b::Interval) = isweaksubset(b, a)
 
 """
     isstrictsubset(a, b)
@@ -59,13 +59,13 @@ Checks if `a` is a strict subset of interval `b`.
 """
 function isstrictsubset(a::Interval, b::Interval)
     isequalinterval(a, b) && return false
-    return isweaklysubset(a, b)
+    return isweaksubset(a, b)
 end
 
 isstrictsupset(a::Interval, b::Interval) = isstrictsubset(b, a)
 
 """
-    isweaklyless(a, b)
+    isweakless(a, b)
 
 Checks if the interval `a` is weakly less than interval `b`.
 
@@ -74,7 +74,7 @@ any element of `b`.
 
 Implement the `less` function of the IEEE Standard 1788-2015 (Table 10.3).
 """
-function isweaklyless(a::Interval, b::Interval)
+function isweakless(a::Interval, b::Interval)
     isemptyinterval(a) && isemptyinterval(b) && return true
     (isemptyinterval(a) || isemptyinterval(b)) && return false
     return (inf(a) ≤ inf(b)) && (sup(a) ≤ sup(b))
@@ -164,7 +164,7 @@ function ismember(x::Real, a::Interval)
 end
 
 ismember(::Interval, ::Interval) =
-    throw(ArgumentError("`ismember` is purposely not supported for two interval arguments. See instead `isweaklysubset`."))
+    throw(ArgumentError("`ismember` is purposely not supported for two interval arguments. See instead `isweaksubset`."))
 ismember(x::Real, a::Complex{<:Interval}) = ismember(x, real(a)) && ismember(0, imag(a))
 ismember(x::Complex, a::Complex{<:Interval}) = ismember(real(x), real(a)) && ismember(imag(x), imag(a))
 

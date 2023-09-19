@@ -206,31 +206,31 @@ end
 
     @test isinterior(interval(-3.0, 2.0), interval(-2.0, 2.0)) == false
 
-    @test isweaklysubset(interval(-1.0, 2.0), interval(-1.0, 2.0)) == true
+    @test isweaksubset(interval(-1.0, 2.0), interval(-1.0, 2.0)) == true
 
-    @test isweaklysubset(interval(-2.0, 1.0), interval(-3.0, 2.0)) == true
+    @test isweaksubset(interval(-2.0, 1.0), interval(-3.0, 2.0)) == true
 
-    @test isweaklysubset(interval(-2.0, 2.0), interval(-1.0, 1.0)) == false
+    @test isweaksubset(interval(-2.0, 2.0), interval(-1.0, 1.0)) == false
 
-    @test isweaklysubset(interval(-2.0, 2.0), interval(-1.0, 2.0)) == false
+    @test isweaksubset(interval(-2.0, 2.0), interval(-1.0, 2.0)) == false
 
-    @test isweaklysubset(interval(-2.0, 2.0), interval(-2.0, 1.0)) == false
+    @test isweaksubset(interval(-2.0, 2.0), interval(-2.0, 1.0)) == false
 
-    @test isweaklysubset(interval(-2.0, 2.0), interval(-2.0, 3.0)) == true
+    @test isweaksubset(interval(-2.0, 2.0), interval(-2.0, 3.0)) == true
 
-    @test isweaklysubset(interval(-2.0, 2.0), interval(-3.0, 2.0)) == true
+    @test isweaksubset(interval(-2.0, 2.0), interval(-3.0, 2.0)) == true
 
-    @test isweaklysubset(interval(-3.0, 2.0), interval(-2.0, 1.0)) == false
+    @test isweaksubset(interval(-3.0, 2.0), interval(-2.0, 1.0)) == false
 
-    @test isweaklysubset(interval(-1.0, 1.0), interval(-2.0, 2.0)) == true
+    @test isweaksubset(interval(-1.0, 1.0), interval(-2.0, 2.0)) == true
 
-    @test isweaklysubset(interval(-1.0, 2.0), interval(-2.0, 2.0)) == true
+    @test isweaksubset(interval(-1.0, 2.0), interval(-2.0, 2.0)) == true
 
-    @test isweaklysubset(interval(-2.0, 1.0), interval(-2.0, 2.0)) == true
+    @test isweaksubset(interval(-2.0, 1.0), interval(-2.0, 2.0)) == true
 
-    @test isweaklysubset(interval(-2.0, 3.0), interval(-2.0, 2.0)) == false
+    @test isweaksubset(interval(-2.0, 3.0), interval(-2.0, 2.0)) == false
 
-    @test isweaklysubset(interval(-3.0, 2.0), interval(-2.0, 2.0)) == false
+    @test isweaksubset(interval(-3.0, 2.0), interval(-2.0, 2.0)) == false
 
     @test isequalinterval(interval(-1.0, 2.0), interval(-1.0, 2.0)) == true
 
@@ -278,33 +278,33 @@ end
 
     @test isinterior(interval(-1.0, -1.0), interval(-1.0, -1.0)) == false
 
-    @test isweaklysubset(interval(-1.0, 2.0), interval(-2.0, -2.0)) == false
+    @test isweaksubset(interval(-1.0, 2.0), interval(-2.0, -2.0)) == false
 
-    @test isweaklysubset(interval(-2.0, 2.0), interval(-2.0, -2.0)) == false
+    @test isweaksubset(interval(-2.0, 2.0), interval(-2.0, -2.0)) == false
 
-    @test isweaklysubset(interval(-2.0, 2.0), interval(0.0, 0.0)) == false
+    @test isweaksubset(interval(-2.0, 2.0), interval(0.0, 0.0)) == false
 
-    @test isweaklysubset(interval(-2.0, 2.0), interval(2.0, 2.0)) == false
+    @test isweaksubset(interval(-2.0, 2.0), interval(2.0, 2.0)) == false
 
-    @test isweaklysubset(interval(-2.0, 2.0), interval(3.0, 3.0)) == false
+    @test isweaksubset(interval(-2.0, 2.0), interval(3.0, 3.0)) == false
 
-    @test isweaklysubset(interval(-1.0, -1.0), interval(1.0, 1.0)) == false
+    @test isweaksubset(interval(-1.0, -1.0), interval(1.0, 1.0)) == false
 
-    @test isweaklysubset(interval(-1.0, -1.0), interval(-1.0, -1.0)) == true
+    @test isweaksubset(interval(-1.0, -1.0), interval(-1.0, -1.0)) == true
 
-    @test isweaklysubset(interval(-2.0, -2.0), interval(-1.0, 2.0)) == false
+    @test isweaksubset(interval(-2.0, -2.0), interval(-1.0, 2.0)) == false
 
-    @test isweaklysubset(interval(-2.0, -2.0), interval(-2.0, 2.0)) == true
+    @test isweaksubset(interval(-2.0, -2.0), interval(-2.0, 2.0)) == true
 
-    @test isweaklysubset(interval(0.0, 0.0), interval(-2.0, 2.0)) == true
+    @test isweaksubset(interval(0.0, 0.0), interval(-2.0, 2.0)) == true
 
-    @test isweaklysubset(interval(2.0, 2.0), interval(-2.0, 2.0)) == true
+    @test isweaksubset(interval(2.0, 2.0), interval(-2.0, 2.0)) == true
 
-    @test isweaklysubset(interval(3.0, 3.0), interval(-2.0, 2.0)) == false
+    @test isweaksubset(interval(3.0, 3.0), interval(-2.0, 2.0)) == false
 
-    @test isweaklysubset(interval(1.0, 1.0), interval(-1.0, -1.0)) == false
+    @test isweaksubset(interval(1.0, 1.0), interval(-1.0, -1.0)) == false
 
-    @test isweaklysubset(interval(-1.0, -1.0), interval(-1.0, -1.0)) == true
+    @test isweaksubset(interval(-1.0, -1.0), interval(-1.0, -1.0)) == true
 
     @test isequalinterval(interval(-1.0, 2.0), interval(-2.0, -2.0)) == false
 

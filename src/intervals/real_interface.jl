@@ -64,14 +64,14 @@ dist(a::Interval, b::Interval) = max(abs(inf(a)-inf(b)), abs(sup(a)-sup(b)))
 Base.:(==)(::Interval, ::Interval) = # also returned when calling `≤`, `≥`, `isequal`
     throw(ArgumentError("`==` is purposely not supported for intervals. See instead `isequalinterval`."))
 
-Base.:<(::Interval, ::Interval) = # also returned when calling `>`
-    throw(ArgumentError("`<` is purposely not supported for intervals. See instead `isweaklyless`, `precedes`."))
+Base.:<(::Interval, ::Interval) = # also returned when calling `isless`, `>`
+    throw(ArgumentError("`<` is purposely not supported for intervals. See instead `isstrictless`, `strictprecedes`."))
 
 Base.isdisjoint(::Interval, ::Interval) =
     throw(ArgumentError("`isdisjoint` is purposely not supported for intervals. See instead `isdisjointinterval`."))
 
 Base.issubset(::Interval, ::Interval) =
-    throw(ArgumentError("`issubset` is purposely not supported for intervals. See instead `isweaklysubset`."))
+    throw(ArgumentError("`issubset` is purposely not supported for intervals. See instead `isweaksubset`."))
 
 Base.in(::Interval, ::Interval) =
     throw(ArgumentError("`in` is purposely not supported for intervals. See instead `ismember`."))

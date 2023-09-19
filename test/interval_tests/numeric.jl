@@ -142,7 +142,7 @@ end
 
     @test dist(interval(1,27)^interval(1/3), interval(1., 3.)) < 2*eps(interval(1,3)).lo
     @test dist(interval(1,27)^(1/3), interval(1., 3.)) < 2*eps(interval(1,3)).lo
-    @test isweaklysubset(interval(1., 3.), interval(1,27)^(1//3))
+    @test isweaksubset(interval(1., 3.), interval(1,27)^(1//3))
     @test isequalinterval(interval(0.1,0.7)^(1//3), interval(0.46415888336127786, 0.8879040017426008))
     @test dist(interval(0.1,0.7)^(1/3),
         interval(0.46415888336127786, 0.8879040017426008)) < 2*eps(interval(0.1,0.7)^(1/3)).lo
@@ -159,24 +159,24 @@ end
 end
 
 @testset "Exp and log tests" begin
-    @test isweaklysubset(exp(interval(BigFloat, 1//2)), exp(interval(1//2)))
+    @test isweaksubset(exp(interval(BigFloat, 1//2)), exp(interval(1//2)))
     @test ismember(exp(big(1//2)), exp(interval(1//2)))
-    @test isweaklysubset(exp(interval(BigFloat, 0.1)), exp(interval(0.1)))
+    @test isweaksubset(exp(interval(BigFloat, 0.1)), exp(interval(0.1)))
     @test isequalinterval(exp(interval(0.1)), interval(1.1051709180756475e+00, 1.1051709180756477e+00))
     @test diam(exp(interval(0.1))) == eps(exp(0.1))
 
-    @test isweaklysubset(log(interval(BigFloat, 1//2)), log(interval(1//2)))
+    @test isweaksubset(log(interval(BigFloat, 1//2)), log(interval(1//2)))
     @test ismember(log(big(1//2)), log(interval(1//2)))
-    @test isweaklysubset(log(interval(BigFloat, 0.1)), log(interval(0.1)))
+    @test isweaksubset(log(interval(BigFloat, 0.1)), log(interval(0.1)))
     @test isequalinterval(log(interval(0.1)), interval(-2.3025850929940459e+00, -2.3025850929940455e+00))
     @test diam(log(interval(0.1))) == eps(log(0.1))
 
-    @test isweaklysubset(exp2(interval(BigFloat, 1//2)), exp2(interval(1//2)))
+    @test isweaksubset(exp2(interval(BigFloat, 1//2)), exp2(interval(1//2)))
     @test isequalinterval(exp2(interval(1024.0)), interval(1.7976931348623157e308, Inf))
-    @test isweaklysubset(exp10(interval(BigFloat, 1//2)), exp10(interval(1//2)))
+    @test isweaksubset(exp10(interval(BigFloat, 1//2)), exp10(interval(1//2)))
     @test isequalinterval(exp10(interval(308.5)), interval(1.7976931348623157e308, Inf))
 
-    @test isweaklysubset(log2(interval(BigFloat, 1//2)), log2(interval(1//2)))
+    @test isweaksubset(log2(interval(BigFloat, 1//2)), log2(interval(1//2)))
     @test isequalinterval(log2(interval(0.25, 0.5)), interval(-2.0, -1.0))
     @test ismember(log10(big(1//10)), log10(interval(1//10)))
     @test isequalinterval(log10(interval(0.01, 0.1)), interval(log10(0.01, RoundDown), log10(0.1, RoundUp)))
@@ -189,7 +189,7 @@ end
     d = interval(0.1, 2)
 
     @test isstrictless(d, interval(3))
-    @test isweaklyless(d, interval(2))
+    @test isweakless(d, interval(2))
     @test isstrictless(interval(-1), d)
 
     # abs
@@ -206,7 +206,7 @@ end
     @test isequalinterval(interval(f*g), interval(1//9))
     @test isequalinterval(interval(1//9), interval(1//9, 1//9))
     @test isequalinterval(interval(f, g) - 1, interval(-2 // 3, -2 // 3))
-    @test isweaklysubset(interval(f*g), interval(1)/9)
+    @test isweaksubset(interval(f*g), interval(1)/9)
 end
 
 @testset "Floor etc. tests" begin
@@ -292,8 +292,8 @@ end
         @test isequalinterval(pow(interval(BigFloat, 1, 2), 2), interval(1, 4))
 
         x = interval(pi)
-        @test isweaklysubset(x^100, pow(x, 100))
-        @test isweaklysubset(x^50, pow(x, 50))
+        @test isweaksubset(x^100, pow(x, 100))
+        @test isweaksubset(x^50, pow(x, 50))
         @test isinterior(x^50, pow(x, 50))
 
         x = interval(2)
@@ -310,7 +310,7 @@ end
 
         y = interval(-2, 3)
         @test isequalinterval(pow(y, 2.1), interval(0.0, 10.045108566305146))
-        @test isweaklysubset(y^2.1, pow(y, 2.1))
+        @test isweaksubset(y^2.1, pow(y, 2.1))
     end
 
     @testset "Fast interval powers" begin
@@ -333,10 +333,10 @@ end
     @testset "cbrt" begin
         @test isequalinterval(cbrt(interval(2, 3)), interval(1.259921049894873, 1.4422495703074085))
         @test isequalinterval(cbrt(big(interval(2, 3))), interval(big"1.259921049894873164767210607278228350570251464701507980081975112155299676513956", big"1.442249570307408382321638310780109588391869253499350577546416194541687596830003"))
-        @test isweaklysubset(cbrt(big(interval(2, 3))), cbrt(interval(2, 3)))
+        @test isweaksubset(cbrt(big(interval(2, 3))), cbrt(interval(2, 3)))
         @test_skip ismissing(cbrt(big(interval(3, 4))) == cbrt(interval(3, 4)))
         @test isequalinterval(cbrt(interval(2f0, 3f0)), interval(1.259921f0, 1.4422497f0))
-        @test isweaklysubset(cbrt(interval(2, 3)), cbrt(interval(2f0, 3f0)))
+        @test isweaksubset(cbrt(interval(2, 3)), cbrt(interval(2f0, 3f0)))
     end
 
     @testset "inv" begin

@@ -24,7 +24,7 @@ end
     c = I"[0.1, 0.2]"
 
     @test isa(I"0.1", Interval)
-    @test isweaklysubset(c, interval(prevfloat(0.1), nextfloat(0.2)))
+    @test isweaksubset(c, interval(prevfloat(0.1), nextfloat(0.2)))
 
     @test isequalinterval(interval(Float64, pi), interval(3.141592653589793, 3.1415926535897936))
 end
