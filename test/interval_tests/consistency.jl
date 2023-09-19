@@ -370,6 +370,7 @@ import IntervalArithmetic: unsafe_interval
         @test_throws ArgumentError x < y
         @test_throws ArgumentError isdisjoint(x, y)
         @test_throws ArgumentError issubset(x, y)
+        @test_throws ArgumentError issetequal(x, y)
         @test_throws ArgumentError x in y
         @test_throws ArgumentError isempty(x)
         @test_throws ArgumentError isfinite(x)
