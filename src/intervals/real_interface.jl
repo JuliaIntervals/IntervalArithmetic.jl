@@ -58,3 +58,32 @@ hash(x::Interval, h::UInt) = hash(sup(x), hash(inf(x), hash(Interval, h)))
 
 # TODO No idea where this comes from and if it is the correct place to put it.
 dist(a::Interval, b::Interval) = max(abs(inf(a)-inf(b)), abs(sup(a)-sup(b)))
+
+#
+
+Base.:(==)(::Interval, ::Interval) = # also returned when calling `≤`, `≥`, `isequal`
+    throw(ArgumentError("`==` is purposely not supported for intervals. See instead `isequalinterval`."))
+
+Base.:<(::Interval, ::Interval) = # also returned when calling `>`
+    throw(ArgumentError("`<` is purposely not supported for intervals. See instead `isweaklyless`, `precedes`."))
+
+Base.isdisjoint(::Interval, ::Interval) =
+    throw(ArgumentError("`isdisjoint` is purposely not supported for intervals. See instead `isdisjointinterval`."))
+
+Base.issubset(::Interval, ::Interval) =
+    throw(ArgumentError("`issubset` is purposely not supported for intervals. See instead `isweaklysubset`."))
+
+Base.in(::Interval, ::Interval) =
+    throw(ArgumentError("`in` is purposely not supported for intervals. See instead `ismember`."))
+
+Base.isempty(::Interval) =
+    throw(ArgumentError("`isempty` is purposely not supported for intervals. See instead `isemptyinterval`."))
+
+Base.isfinite(::Interval) = # also returned when calling `isinf`
+    throw(ArgumentError("`isfinite` is purposely not supported for intervals. See instead `isbounded`."))
+
+Base.isnan(::Interval) =
+    throw(ArgumentError("`isnan` is purposely not supported for intervals. See instead `isnai`."))
+
+Base.isinteger(::Interval) =
+    throw(ArgumentError("`isinteger` is purposely not supported for intervals. See instead `isthininteger`."))

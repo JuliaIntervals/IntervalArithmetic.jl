@@ -28,8 +28,6 @@ function isequalinterval(a::Interval, b::Interval)
     isemptyinterval(a) && isemptyinterval(b) && return true
     return inf(a) == inf(b) && sup(a) == sup(b)
 end
-Base.:(==)(::Interval, ::Interval) =
-    throw(ArgumentError("`==` is purposely not supported, use `isequalinterval` instead"))
 
 """
     isequalinterval(a::Interval, x::Real)
@@ -165,7 +163,8 @@ function ismember(x::Real, a::Interval)
     return inf(a) ≤ x ≤ sup(a)
 end
 
-ismember(::Interval, ::Interval) = throw(ArgumentError("ismember(::Interval, ::Interval) is not defined, maybe you meant isweaklysubset"))
+ismember(::Interval, ::Interval) =
+    throw(ArgumentError("`ismember` is purposely not supported for two interval arguments. See instead `isweaklysubset`."))
 ismember(x::Real, a::Complex{<:Interval}) = ismember(x, real(a)) && ismember(0, imag(a))
 ismember(x::Complex, a::Complex{<:Interval}) = ismember(real(x), real(a)) && ismember(imag(x), imag(a))
 

@@ -364,4 +364,17 @@ import IntervalArithmetic: unsafe_interval
         end
     end
 
+    @testset "Disallowed `Real` functionalities" begin
+        x, y = interval(1), interval(2)
+        @test_throws ArgumentError x == y
+        @test_throws ArgumentError x < y
+        @test_throws ArgumentError isdisjoint(x, y)
+        @test_throws ArgumentError issubset(x, y)
+        @test_throws ArgumentError x in y
+        @test_throws ArgumentError isempty(x)
+        @test_throws ArgumentError isfinite(x)
+        @test_throws ArgumentError isnan(x)
+        @test_throws ArgumentError isinteger(x)
+    end
+
 end
