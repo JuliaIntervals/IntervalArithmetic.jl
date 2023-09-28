@@ -26,3 +26,6 @@ include_test("multidim_tests/multidim.jl")
 
 # ITF1788 tests
 include_test("test_ITF1788/run_ITF1788.jl")  # TODO fix these tests
+
+# Extensions
+include_test("autodiff_tests/runall.jl")

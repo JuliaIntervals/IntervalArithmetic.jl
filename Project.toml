@@ -12,10 +12,17 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 RoundingEmulator = "5eaf0fd0-dfba-4ccb-bf02-d820a40db705"
 SetRounding = "3cc68bcd-71a2-5612-b932-767ffbe40ab0"
 
+[weakdeps]
+ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+
+[extensions]
+IntervalArithmeticForwardDiffExt = "ForwardDiff"
+
 [compat]
 CRlibm = "0.7, 0.8, 1"
 EnumX = "1"
 FastRounding = "0.2, 0.3"
+ForwardDiff = "0.11"
 RoundingEmulator = "0.2"
 SetRounding = "0.2"
-julia = "1.8"
+julia = "1.9"
