@@ -29,3 +29,17 @@ using IntervalArithmetic
     X = (-∞..∞) × (-∞..∞)
     @test bisect(X, 0.5) ≛ ( (-∞..0) × (-∞..∞), (0..∞) × (-∞..∞))
 end
+
+# mince interval test#
+@testset "Interval containment and index retrieving" begin
+    for k in 1:100
+        u = rand(1:100)
+        x = mince(interval(0, 1), u)  
+        for i in 1:u
+            step = (1-0)/u
+            y = interval(0 + (i-1)*step, 0 + i*step)
+            @test y ∈ x
+            @test y ⊆ x[i]
+        end
+    end
+end
