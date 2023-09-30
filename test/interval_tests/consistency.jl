@@ -77,25 +77,17 @@ import IntervalArithmetic: unsafe_interval
     end
 
     @testset "Inclusion tests" begin
-        @test isweaksubset(b, c)
-        @test isweaksubset(emptyinterval(c), c)
-        @test !isweaksubset(c, emptyinterval(c))
-        @test isinterior(b,c)
-        @test !isinterior(b, emptyinterval(b))
-        @test isinterior(emptyinterval(c), c)
-        @test isinterior(emptyinterval(c), emptyinterval(c))
-        @test isstrictsubset(b, c)
-        @test !isstrictsubset(b, b)
-        @test isstrictsubset(emptyinterval(c), c)
-        @test !isstrictsubset(c, emptyinterval(c))
-        @test isstrictsupset(c, b)
-        @test !isstrictsupset(b, b)
-        @test !isstrictsupset(emptyinterval(c), c)
-        @test isstrictsupset(c, emptyinterval(c))
-        @test isweaksupset(c, b)
-        @test isweaksupset(b, b)
-        @test !isweaksupset(emptyinterval(c), c)
-        @test isweaksupset(c, emptyinterval(c))
+        @test isweakinterior(b, c)
+        @test isweakinterior(b, b)
+        @test isweakinterior(emptyinterval(c), c)
+        @test !isweakinterior(c, emptyinterval(c))
+
+        @test isstrictinterior(b, c)
+        @test !isstrictinterior(b, b)
+        @test isstrictinterior(emptyinterval(c), c)
+        @test !isstrictinterior(c, emptyinterval(c))
+        @test isstrictinterior(emptyinterval(c), emptyinterval(c))
+
         @test isdisjointinterval(a, I"2.1")
         @test !(isdisjointinterval(a, b))
         @test isdisjointinterval(emptyinterval(a), a)
@@ -106,10 +98,10 @@ import IntervalArithmetic: unsafe_interval
         @test isweakless(emptyinterval(), emptyinterval())
         @test !isweakless(interval(1, 2), emptyinterval())
         @test isweakless(interval(-Inf,Inf), interval(-Inf,Inf))
-        @test precedes(emptyinterval(), emptyinterval())
-        @test precedes(interval(3, 4), emptyinterval())
-        @test !(precedes(interval(0, 2),interval(-Inf,Inf)))
-        @test precedes(interval(1, 3),interval(3, 4))
+        @test weakprecedes(emptyinterval(), emptyinterval())
+        @test weakprecedes(interval(3, 4), emptyinterval())
+        @test !(weakprecedes(interval(0, 2),interval(-Inf,Inf)))
+        @test weakprecedes(interval(1, 3),interval(3, 4))
         @test strictprecedes(interval(3, 4), emptyinterval())
         @test !(strictprecedes(interval(-3, -1),interval(-1, 0)))
         @test !(iscommon(emptyinterval()))
@@ -154,7 +146,7 @@ import IntervalArithmetic: unsafe_interval
         @test isentireinterval(entireinterval(a))
         @test isentireinterval(interval(-Inf, Inf))
         @test !isentireinterval(a)
-        @test isinterior(interval(-Inf, Inf), interval(-Inf, Inf))
+        @test isstrictinterior(interval(-Inf, Inf), interval(-Inf, Inf))
 
         @test !isequalinterval(nai(a), nai(a))
         @test isnai(DecoratedInterval(NaN))
@@ -228,7 +220,7 @@ import IntervalArithmetic: unsafe_interval
         @test isequalinterval(cancelplus(x, y), entireinterval(BigFloat))
         x = interval(-big(1.0), eps(big(1.0))/2)
         y = interval(-eps(big(1.0))/2, big(1.0))
-        @test isweaksubset(cancelminus(x, y), interval(-one(BigFloat), one(BigFloat)))
+        @test isweakinterior(cancelminus(x, y), interval(-one(BigFloat), one(BigFloat)))
         @test isequalinterval(cancelplus(x, y), interval(zero(BigFloat), zero(BigFloat)))
         @test isequalinterval(cancelminus(emptyinterval(), emptyinterval()), emptyinterval())
         @test isequalinterval(cancelplus(emptyinterval(), emptyinterval()), emptyinterval())
@@ -288,7 +280,7 @@ import IntervalArithmetic: unsafe_interval
         @test isequalinterval(sign(interval(-3.0,-1.0)), interval(-1.0, -1.0))
 
         # Test putting functions in interval:
-        @test isweaksubset(log(interval(-2, 5)), interval(-Inf, log(interval(5))))
+        @test isweakinterior(log(interval(-2, 5)), interval(-Inf, log(interval(5))))
     end
 
     # @testset "Interval rounding tests" begin

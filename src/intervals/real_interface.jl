@@ -71,7 +71,7 @@ Base.isdisjoint(::Interval, ::Interval) =
     throw(ArgumentError("`isdisjoint` is purposely not supported for intervals. See instead `isdisjointinterval`."))
 
 Base.issubset(::Interval, ::Interval) =
-    throw(ArgumentError("`issubset` is purposely not supported for intervals. See instead `isweaksubset`."))
+    throw(ArgumentError("`issubset` is purposely not supported for intervals. See instead `isweakinterior`."))
 
 Base.issetequal(::Interval, ::Interval) =
     throw(ArgumentError("`issetequal` is purposely not supported for intervals. See instead `isequalinterval`."))

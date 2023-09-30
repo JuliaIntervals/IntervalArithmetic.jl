@@ -37,32 +37,31 @@ Check if the interval `a` contains exactly (and only) the number `x`.
 isequalinterval(a::Interval, x::Real) = inf(a) == sup(a) == x
 
 """
-    isweaksubset(a, b)
+    isweakinterior(a, b)
 
 Checks if all the points of the interval `a` are within the interval `b`.
 
 Typed with \\subseteq<TAB>.
 
-Implement the `isweaksubset` function of the IEEE Standard 1788-2015 (Table 9.3).
+Implement the `subset` function of the IEEE Standard 1788-2015 (Table 9.3).
 """
-function isweaksubset(a::Interval, b::Interval)
+function isweakinterior(a::Interval, b::Interval)
     isemptyinterval(a) && return true
     return inf(b) ≤ inf(a) && sup(a) ≤ sup(b)
 end
 
-isweaksupset(a::Interval, b::Interval) = isweaksubset(b, a)
-
 """
-    isstrictsubset(a, b)
+    isstrictinterior(a, b)
 
-Checks if `a` is a strict subset of interval `b`.
+Checks if all the points of the interval `a` are within the interior of
+interval `b`.
+
+Implement the `interior` function of the IEEE Standard 1788-2015 (Table 9.3).
 """
-function isstrictsubset(a::Interval, b::Interval)
-    isequalinterval(a, b) && return false
-    return isweaksubset(a, b)
+function isstrictinterior(a::Interval, b::Interval)
+    isemptyinterval(a) && return true
+    return _strictlessprime(inf(b), inf(a)) && _strictlessprime(sup(a), sup(b))
 end
-
-isstrictsupset(a::Interval, b::Interval) = isstrictsubset(b, a)
 
 """
     isweakless(a, b)
@@ -81,31 +80,6 @@ function isweakless(a::Interval, b::Interval)
 end
 
 """
-    precedes(a, b)
-
-Checks if the interval `a` is to the left of interval `b`.
-
-Implement the `precedes` function of the IEEE Standard 1788-2015 (Table 10.3).
-"""
-function precedes(a::Interval, b::Interval)
-    (isemptyinterval(a) || isemptyinterval(b)) && return true
-    return sup(a) ≤ inf(b)
-end
-
-"""
-    isinterior(a,b)
-
-Checks if all the points of the interval `a` are within the interior of
-interval `b`.
-
-Implement the `interior` function of the IEEE Standard 1788-2015 (Table 9.3).
-"""
-function isinterior(a::Interval, b::Interval)
-    isemptyinterval(a) && return true
-    return _strictlessprime(inf(b), inf(a)) && _strictlessprime(sup(a), sup(b))
-end
-
-"""
     isstrictless(a, b)
 
 Checks if the interval `a` is strictly less than interval `b`, which is true
@@ -120,6 +94,18 @@ function isstrictless(a::Interval, b::Interval)
     isemptyinterval(a) && isemptyinterval(b) && return true
     (isemptyinterval(a) || isemptyinterval(b)) && return false
     return _strictlessprime(inf(a), inf(b)) && _strictlessprime(sup(a), sup(b))
+end
+
+"""
+    weakprecedes(a, b)
+
+Checks if the interval `a` is to the left of interval `b`.
+
+Implement the `precedes` function of the IEEE Standard 1788-2015 (Table 10.3).
+"""
+function weakprecedes(a::Interval, b::Interval)
+    (isemptyinterval(a) || isemptyinterval(b)) && return true
+    return sup(a) ≤ inf(b)
 end
 
 """
@@ -164,7 +150,7 @@ function ismember(x::Real, a::Interval)
 end
 
 ismember(::Interval, ::Interval) =
-    throw(ArgumentError("`ismember` is purposely not supported for two interval arguments. See instead `isweaksubset`."))
+    throw(ArgumentError("`ismember` is purposely not supported for two interval arguments. See instead `isweakinterior`."))
 ismember(x::Real, a::Complex{<:Interval}) = ismember(x, real(a)) && ismember(0, imag(a))
 ismember(x::Complex, a::Complex{<:Interval}) = ismember(real(x), real(a)) && ismember(imag(x), imag(a))
 

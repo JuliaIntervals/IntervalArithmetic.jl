@@ -253,7 +253,7 @@ function tan(a::Interval{T}) where {T<:NumTypes}
 
     if iszero(lo_quadrant_mod) && hi_quadrant_mod == 1
         # check if really contains singularity:
-        if isweaksubset(hi_quadrant * half_pi(T), a)
+        if isweakinterior(hi_quadrant * half_pi(T), a)
             return entireinterval(T)  # crosses singularity
         end
 

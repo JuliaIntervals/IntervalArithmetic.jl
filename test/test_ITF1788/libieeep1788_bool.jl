@@ -248,121 +248,121 @@ end
 
 @testset "minimal_subset_test" begin
 
-    @test isweaksubset(emptyinterval(), emptyinterval()) == true
+    @test isweakinterior(emptyinterval(), emptyinterval()) == true
 
-    @test isweaksubset(emptyinterval(), interval(0.0,4.0)) == true
+    @test isweakinterior(emptyinterval(), interval(0.0,4.0)) == true
 
-    @test isweaksubset(emptyinterval(), interval(-0.0,4.0)) == true
+    @test isweakinterior(emptyinterval(), interval(-0.0,4.0)) == true
 
-    @test isweaksubset(emptyinterval(), interval(-0.1,1.0)) == true
+    @test isweakinterior(emptyinterval(), interval(-0.1,1.0)) == true
 
-    @test isweaksubset(emptyinterval(), interval(-0.1,0.0)) == true
+    @test isweakinterior(emptyinterval(), interval(-0.1,0.0)) == true
 
-    @test isweaksubset(emptyinterval(), interval(-0.1,-0.0)) == true
+    @test isweakinterior(emptyinterval(), interval(-0.1,-0.0)) == true
 
-    @test isweaksubset(emptyinterval(), interval(-Inf,+Inf)) == true
+    @test isweakinterior(emptyinterval(), interval(-Inf,+Inf)) == true
 
-    @test isweaksubset(interval(0.0,4.0), emptyinterval()) == false
+    @test isweakinterior(interval(0.0,4.0), emptyinterval()) == false
 
-    @test isweaksubset(interval(-0.0,4.0), emptyinterval()) == false
+    @test isweakinterior(interval(-0.0,4.0), emptyinterval()) == false
 
-    @test isweaksubset(interval(-0.1,1.0), emptyinterval()) == false
+    @test isweakinterior(interval(-0.1,1.0), emptyinterval()) == false
 
-    @test isweaksubset(interval(-Inf,+Inf), emptyinterval()) == false
+    @test isweakinterior(interval(-Inf,+Inf), emptyinterval()) == false
 
-    @test isweaksubset(interval(0.0,4.0), interval(-Inf,+Inf)) == true
+    @test isweakinterior(interval(0.0,4.0), interval(-Inf,+Inf)) == true
 
-    @test isweaksubset(interval(-0.0,4.0), interval(-Inf,+Inf)) == true
+    @test isweakinterior(interval(-0.0,4.0), interval(-Inf,+Inf)) == true
 
-    @test isweaksubset(interval(-0.1,1.0), interval(-Inf,+Inf)) == true
+    @test isweakinterior(interval(-0.1,1.0), interval(-Inf,+Inf)) == true
 
-    @test isweaksubset(interval(-Inf,+Inf), interval(-Inf,+Inf)) == true
+    @test isweakinterior(interval(-Inf,+Inf), interval(-Inf,+Inf)) == true
 
-    @test isweaksubset(interval(1.0,2.0), interval(1.0,2.0)) == true
+    @test isweakinterior(interval(1.0,2.0), interval(1.0,2.0)) == true
 
-    @test isweaksubset(interval(1.0,2.0), interval(0.0,4.0)) == true
+    @test isweakinterior(interval(1.0,2.0), interval(0.0,4.0)) == true
 
-    @test isweaksubset(interval(1.0,2.0), interval(-0.0,4.0)) == true
+    @test isweakinterior(interval(1.0,2.0), interval(-0.0,4.0)) == true
 
-    @test isweaksubset(interval(0.1,0.2), interval(0.0,4.0)) == true
+    @test isweakinterior(interval(0.1,0.2), interval(0.0,4.0)) == true
 
-    @test isweaksubset(interval(0.1,0.2), interval(-0.0,4.0)) == true
+    @test isweakinterior(interval(0.1,0.2), interval(-0.0,4.0)) == true
 
-    @test isweaksubset(interval(-0.1,-0.1), interval(-4.0, 3.4)) == true
+    @test isweakinterior(interval(-0.1,-0.1), interval(-4.0, 3.4)) == true
 
-    @test isweaksubset(interval(0.0,0.0), interval(-0.0,-0.0)) == true
+    @test isweakinterior(interval(0.0,0.0), interval(-0.0,-0.0)) == true
 
-    @test isweaksubset(interval(-0.0,-0.0), interval(0.0,0.0)) == true
+    @test isweakinterior(interval(-0.0,-0.0), interval(0.0,0.0)) == true
 
-    @test isweaksubset(interval(-0.0,0.0), interval(0.0,0.0)) == true
+    @test isweakinterior(interval(-0.0,0.0), interval(0.0,0.0)) == true
 
-    @test isweaksubset(interval(-0.0,0.0), interval(0.0,-0.0)) == true
+    @test isweakinterior(interval(-0.0,0.0), interval(0.0,-0.0)) == true
 
-    @test isweaksubset(interval(0.0,-0.0), interval(0.0,0.0)) == true
+    @test isweakinterior(interval(0.0,-0.0), interval(0.0,0.0)) == true
 
-    @test isweaksubset(interval(0.0,-0.0), interval(-0.0,0.0)) == true
+    @test isweakinterior(interval(0.0,-0.0), interval(-0.0,0.0)) == true
 
 end
 
 @testset "minimal_subset_dec_test" begin
 
-    @test isweaksubset(nai(), nai()) == false
+    @test isweakinterior(nai(), nai()) == false
 
-    @test isweaksubset(nai(), DecoratedInterval(emptyinterval(), trv)) == false
+    @test isweakinterior(nai(), DecoratedInterval(emptyinterval(), trv)) == false
 
-    @test isweaksubset(nai(), DecoratedInterval(interval(0.0,4.0), trv)) == false
+    @test isweakinterior(nai(), DecoratedInterval(interval(0.0,4.0), trv)) == false
 
-    @test isweaksubset(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(0.0,4.0), trv)) == true
+    @test isweakinterior(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(0.0,4.0), trv)) == true
 
-    @test isweaksubset(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(-0.0,4.0), def)) == true
+    @test isweakinterior(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(-0.0,4.0), def)) == true
 
-    @test isweaksubset(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(-0.1,1.0), trv)) == true
+    @test isweakinterior(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(-0.1,1.0), trv)) == true
 
-    @test isweaksubset(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(-0.1,0.0), trv)) == true
+    @test isweakinterior(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(-0.1,0.0), trv)) == true
 
-    @test isweaksubset(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(-0.1,-0.0), trv)) == true
+    @test isweakinterior(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(-0.1,-0.0), trv)) == true
 
-    @test isweaksubset(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
+    @test isweakinterior(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
 
-    @test isweaksubset(DecoratedInterval(interval(0.0,4.0), trv), DecoratedInterval(emptyinterval(), trv)) == false
+    @test isweakinterior(DecoratedInterval(interval(0.0,4.0), trv), DecoratedInterval(emptyinterval(), trv)) == false
 
-    @test isweaksubset(DecoratedInterval(interval(-0.0,4.0), def), DecoratedInterval(emptyinterval(), trv)) == false
+    @test isweakinterior(DecoratedInterval(interval(-0.0,4.0), def), DecoratedInterval(emptyinterval(), trv)) == false
 
-    @test isweaksubset(DecoratedInterval(interval(-0.1,1.0), trv), DecoratedInterval(emptyinterval(), trv)) == false
+    @test isweakinterior(DecoratedInterval(interval(-0.1,1.0), trv), DecoratedInterval(emptyinterval(), trv)) == false
 
-    @test isweaksubset(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(emptyinterval(), trv)) == false
+    @test isweakinterior(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(emptyinterval(), trv)) == false
 
-    @test isweaksubset(DecoratedInterval(interval(0.0,4.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
+    @test isweakinterior(DecoratedInterval(interval(0.0,4.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
 
-    @test isweaksubset(DecoratedInterval(interval(-0.0,4.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
+    @test isweakinterior(DecoratedInterval(interval(-0.0,4.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
 
-    @test isweaksubset(DecoratedInterval(interval(-0.1,1.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
+    @test isweakinterior(DecoratedInterval(interval(-0.1,1.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
 
-    @test isweaksubset(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
+    @test isweakinterior(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
 
-    @test isweaksubset(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(1.0,2.0), trv)) == true
+    @test isweakinterior(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(1.0,2.0), trv)) == true
 
-    @test isweaksubset(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(0.0,4.0), trv)) == true
+    @test isweakinterior(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(0.0,4.0), trv)) == true
 
-    @test isweaksubset(DecoratedInterval(interval(1.0,2.0), def), DecoratedInterval(interval(-0.0,4.0), def)) == true
+    @test isweakinterior(DecoratedInterval(interval(1.0,2.0), def), DecoratedInterval(interval(-0.0,4.0), def)) == true
 
-    @test isweaksubset(DecoratedInterval(interval(0.1,0.2), trv), DecoratedInterval(interval(0.0,4.0), trv)) == true
+    @test isweakinterior(DecoratedInterval(interval(0.1,0.2), trv), DecoratedInterval(interval(0.0,4.0), trv)) == true
 
-    @test isweaksubset(DecoratedInterval(interval(0.1,0.2), trv), DecoratedInterval(interval(-0.0,4.0), def)) == true
+    @test isweakinterior(DecoratedInterval(interval(0.1,0.2), trv), DecoratedInterval(interval(-0.0,4.0), def)) == true
 
-    @test isweaksubset(DecoratedInterval(interval(-0.1,-0.1), trv), DecoratedInterval(interval(-4.0, 3.4), trv)) == true
+    @test isweakinterior(DecoratedInterval(interval(-0.1,-0.1), trv), DecoratedInterval(interval(-4.0, 3.4), trv)) == true
 
-    @test isweaksubset(DecoratedInterval(interval(0.0,0.0), trv), DecoratedInterval(interval(-0.0,-0.0), trv)) == true
+    @test isweakinterior(DecoratedInterval(interval(0.0,0.0), trv), DecoratedInterval(interval(-0.0,-0.0), trv)) == true
 
-    @test isweaksubset(DecoratedInterval(interval(-0.0,-0.0), trv), DecoratedInterval(interval(0.0,0.0), def)) == true
+    @test isweakinterior(DecoratedInterval(interval(-0.0,-0.0), trv), DecoratedInterval(interval(0.0,0.0), def)) == true
 
-    @test isweaksubset(DecoratedInterval(interval(-0.0,0.0), trv), DecoratedInterval(interval(0.0,0.0), trv)) == true
+    @test isweakinterior(DecoratedInterval(interval(-0.0,0.0), trv), DecoratedInterval(interval(0.0,0.0), trv)) == true
 
-    @test isweaksubset(DecoratedInterval(interval(-0.0,0.0), trv), DecoratedInterval(interval(0.0,-0.0), trv)) == true
+    @test isweakinterior(DecoratedInterval(interval(-0.0,0.0), trv), DecoratedInterval(interval(0.0,-0.0), trv)) == true
 
-    @test isweaksubset(DecoratedInterval(interval(0.0,-0.0), def), DecoratedInterval(interval(0.0,0.0), trv)) == true
+    @test isweakinterior(DecoratedInterval(interval(0.0,-0.0), def), DecoratedInterval(interval(0.0,0.0), trv)) == true
 
-    @test isweaksubset(DecoratedInterval(interval(0.0,-0.0), trv), DecoratedInterval(interval(-0.0,0.0), trv)) == true
+    @test isweakinterior(DecoratedInterval(interval(0.0,-0.0), trv), DecoratedInterval(interval(-0.0,0.0), trv)) == true
 
 end
 
@@ -488,181 +488,181 @@ end
 
 @testset "minimal_precedes_test" begin
 
-    @test precedes(emptyinterval(), interval(3.0,4.0)) == true
+    @test weakprecedes(emptyinterval(), interval(3.0,4.0)) == true
 
-    @test precedes(interval(3.0,4.0), emptyinterval()) == true
+    @test weakprecedes(interval(3.0,4.0), emptyinterval()) == true
 
-    @test precedes(emptyinterval(), emptyinterval()) == true
+    @test weakprecedes(emptyinterval(), emptyinterval()) == true
 
-    @test precedes(interval(1.0,2.0), interval(-Inf,+Inf)) == false
+    @test weakprecedes(interval(1.0,2.0), interval(-Inf,+Inf)) == false
 
-    @test precedes(interval(0.0,2.0), interval(-Inf,+Inf)) == false
+    @test weakprecedes(interval(0.0,2.0), interval(-Inf,+Inf)) == false
 
-    @test precedes(interval(-0.0,2.0), interval(-Inf,+Inf)) == false
+    @test weakprecedes(interval(-0.0,2.0), interval(-Inf,+Inf)) == false
 
-    @test precedes(interval(-Inf,+Inf), interval(1.0,2.0)) == false
+    @test weakprecedes(interval(-Inf,+Inf), interval(1.0,2.0)) == false
 
-    @test precedes(interval(-Inf,+Inf), interval(-Inf,+Inf)) == false
+    @test weakprecedes(interval(-Inf,+Inf), interval(-Inf,+Inf)) == false
 
-    @test precedes(interval(1.0,2.0), interval(3.0,4.0)) == true
+    @test weakprecedes(interval(1.0,2.0), interval(3.0,4.0)) == true
 
-    @test precedes(interval(1.0,3.0), interval(3.0,4.0)) == true
+    @test weakprecedes(interval(1.0,3.0), interval(3.0,4.0)) == true
 
-    @test precedes(interval(-3.0, -1.0), interval(-1.0,0.0)) == true
+    @test weakprecedes(interval(-3.0, -1.0), interval(-1.0,0.0)) == true
 
-    @test precedes(interval(-3.0, -1.0), interval(-1.0,-0.0)) == true
+    @test weakprecedes(interval(-3.0, -1.0), interval(-1.0,-0.0)) == true
 
-    @test precedes(interval(1.0,3.5), interval(3.0,4.0)) == false
+    @test weakprecedes(interval(1.0,3.5), interval(3.0,4.0)) == false
 
-    @test precedes(interval(1.0,4.0), interval(3.0,4.0)) == false
+    @test weakprecedes(interval(1.0,4.0), interval(3.0,4.0)) == false
 
-    @test precedes(interval(-3.0, -0.1), interval(-1.0,0.0)) == false
+    @test weakprecedes(interval(-3.0, -0.1), interval(-1.0,0.0)) == false
 
-    @test precedes(interval(0.0,0.0), interval(-0.0,-0.0)) == true
+    @test weakprecedes(interval(0.0,0.0), interval(-0.0,-0.0)) == true
 
-    @test precedes(interval(-0.0,-0.0), interval(0.0,0.0)) == true
+    @test weakprecedes(interval(-0.0,-0.0), interval(0.0,0.0)) == true
 
-    @test precedes(interval(-0.0,0.0), interval(0.0,0.0)) == true
+    @test weakprecedes(interval(-0.0,0.0), interval(0.0,0.0)) == true
 
-    @test precedes(interval(-0.0,0.0), interval(0.0,-0.0)) == true
+    @test weakprecedes(interval(-0.0,0.0), interval(0.0,-0.0)) == true
 
-    @test precedes(interval(0.0,-0.0), interval(0.0,0.0)) == true
+    @test weakprecedes(interval(0.0,-0.0), interval(0.0,0.0)) == true
 
-    @test precedes(interval(0.0,-0.0), interval(-0.0,0.0)) == true
+    @test weakprecedes(interval(0.0,-0.0), interval(-0.0,0.0)) == true
 
 end
 
 @testset "minimal_precedes_dec_test" begin
 
-    @test precedes(nai(), DecoratedInterval(interval(3.0,4.0), def)) == false
+    @test weakprecedes(nai(), DecoratedInterval(interval(3.0,4.0), def)) == false
 
-    @test precedes(DecoratedInterval(interval(3.0,4.0), trv), nai()) == false
+    @test weakprecedes(DecoratedInterval(interval(3.0,4.0), trv), nai()) == false
 
-    @test precedes(nai(), DecoratedInterval(emptyinterval(), trv)) == false
+    @test weakprecedes(nai(), DecoratedInterval(emptyinterval(), trv)) == false
 
-    @test precedes(nai(), nai()) == false
+    @test weakprecedes(nai(), nai()) == false
 
-    @test precedes(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(3.0,4.0), def)) == true
+    @test weakprecedes(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(3.0,4.0), def)) == true
 
-    @test precedes(DecoratedInterval(interval(3.0,4.0), trv), DecoratedInterval(emptyinterval(), trv)) == true
+    @test weakprecedes(DecoratedInterval(interval(3.0,4.0), trv), DecoratedInterval(emptyinterval(), trv)) == true
 
-    @test precedes(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(emptyinterval(), trv)) == true
+    @test weakprecedes(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(emptyinterval(), trv)) == true
 
-    @test precedes(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
+    @test weakprecedes(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
 
-    @test precedes(DecoratedInterval(interval(0.0,2.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
+    @test weakprecedes(DecoratedInterval(interval(0.0,2.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
 
-    @test precedes(DecoratedInterval(interval(-0.0,2.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
+    @test weakprecedes(DecoratedInterval(interval(-0.0,2.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
 
-    @test precedes(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(1.0,2.0), trv)) == false
+    @test weakprecedes(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(1.0,2.0), trv)) == false
 
-    @test precedes(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
+    @test weakprecedes(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
 
-    @test precedes(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(3.0,4.0), trv)) == true
+    @test weakprecedes(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(3.0,4.0), trv)) == true
 
-    @test precedes(DecoratedInterval(interval(1.0,3.0), trv), DecoratedInterval(interval(3.0,4.0), def)) == true
+    @test weakprecedes(DecoratedInterval(interval(1.0,3.0), trv), DecoratedInterval(interval(3.0,4.0), def)) == true
 
-    @test precedes(DecoratedInterval(interval(-3.0, -1.0), def), DecoratedInterval(interval(-1.0,0.0), trv)) == true
+    @test weakprecedes(DecoratedInterval(interval(-3.0, -1.0), def), DecoratedInterval(interval(-1.0,0.0), trv)) == true
 
-    @test precedes(DecoratedInterval(interval(-3.0, -1.0), trv), DecoratedInterval(interval(-1.0,-0.0), trv)) == true
+    @test weakprecedes(DecoratedInterval(interval(-3.0, -1.0), trv), DecoratedInterval(interval(-1.0,-0.0), trv)) == true
 
-    @test precedes(DecoratedInterval(interval(1.0,3.5), trv), DecoratedInterval(interval(3.0,4.0), trv)) == false
+    @test weakprecedes(DecoratedInterval(interval(1.0,3.5), trv), DecoratedInterval(interval(3.0,4.0), trv)) == false
 
-    @test precedes(DecoratedInterval(interval(1.0,4.0), trv), DecoratedInterval(interval(3.0,4.0), trv)) == false
+    @test weakprecedes(DecoratedInterval(interval(1.0,4.0), trv), DecoratedInterval(interval(3.0,4.0), trv)) == false
 
-    @test precedes(DecoratedInterval(interval(-3.0, -0.1), trv), DecoratedInterval(interval(-1.0,0.0), trv)) == false
+    @test weakprecedes(DecoratedInterval(interval(-3.0, -0.1), trv), DecoratedInterval(interval(-1.0,0.0), trv)) == false
 
-    @test precedes(DecoratedInterval(interval(0.0,0.0), trv), DecoratedInterval(interval(-0.0,-0.0), trv)) == true
+    @test weakprecedes(DecoratedInterval(interval(0.0,0.0), trv), DecoratedInterval(interval(-0.0,-0.0), trv)) == true
 
-    @test precedes(DecoratedInterval(interval(-0.0,-0.0), trv), DecoratedInterval(interval(0.0,0.0), def)) == true
+    @test weakprecedes(DecoratedInterval(interval(-0.0,-0.0), trv), DecoratedInterval(interval(0.0,0.0), def)) == true
 
-    @test precedes(DecoratedInterval(interval(-0.0,0.0), trv), DecoratedInterval(interval(0.0,0.0), trv)) == true
+    @test weakprecedes(DecoratedInterval(interval(-0.0,0.0), trv), DecoratedInterval(interval(0.0,0.0), trv)) == true
 
-    @test precedes(DecoratedInterval(interval(-0.0,0.0), def), DecoratedInterval(interval(0.0,-0.0), trv)) == true
+    @test weakprecedes(DecoratedInterval(interval(-0.0,0.0), def), DecoratedInterval(interval(0.0,-0.0), trv)) == true
 
-    @test precedes(DecoratedInterval(interval(0.0,-0.0), trv), DecoratedInterval(interval(0.0,0.0), trv)) == true
+    @test weakprecedes(DecoratedInterval(interval(0.0,-0.0), trv), DecoratedInterval(interval(0.0,0.0), trv)) == true
 
-    @test precedes(DecoratedInterval(interval(0.0,-0.0), trv), DecoratedInterval(interval(-0.0,0.0), trv)) == true
+    @test weakprecedes(DecoratedInterval(interval(0.0,-0.0), trv), DecoratedInterval(interval(-0.0,0.0), trv)) == true
 
 end
 
 @testset "minimal_interior_test" begin
 
-    @test isinterior(emptyinterval(), emptyinterval()) == true
+    @test isstrictinterior(emptyinterval(), emptyinterval()) == true
 
-    @test isinterior(emptyinterval(), interval(0.0,4.0)) == true
+    @test isstrictinterior(emptyinterval(), interval(0.0,4.0)) == true
 
-    @test isinterior(interval(0.0,4.0), emptyinterval()) == false
+    @test isstrictinterior(interval(0.0,4.0), emptyinterval()) == false
 
-    @test isinterior(interval(-Inf,+Inf), interval(-Inf,+Inf)) == true
+    @test isstrictinterior(interval(-Inf,+Inf), interval(-Inf,+Inf)) == true
 
-    @test isinterior(interval(0.0,4.0), interval(-Inf,+Inf)) == true
+    @test isstrictinterior(interval(0.0,4.0), interval(-Inf,+Inf)) == true
 
-    @test isinterior(emptyinterval(), interval(-Inf,+Inf)) == true
+    @test isstrictinterior(emptyinterval(), interval(-Inf,+Inf)) == true
 
-    @test isinterior(interval(-Inf,+Inf), interval(0.0,4.0)) == false
+    @test isstrictinterior(interval(-Inf,+Inf), interval(0.0,4.0)) == false
 
-    @test isinterior(interval(0.0,4.0), interval(0.0,4.0)) == false
+    @test isstrictinterior(interval(0.0,4.0), interval(0.0,4.0)) == false
 
-    @test isinterior(interval(1.0,2.0), interval(0.0,4.0)) == true
+    @test isstrictinterior(interval(1.0,2.0), interval(0.0,4.0)) == true
 
-    @test isinterior(interval(-2.0,2.0), interval(-2.0,4.0)) == false
+    @test isstrictinterior(interval(-2.0,2.0), interval(-2.0,4.0)) == false
 
-    @test isinterior(interval(-0.0,-0.0), interval(-2.0,4.0)) == true
+    @test isstrictinterior(interval(-0.0,-0.0), interval(-2.0,4.0)) == true
 
-    @test isinterior(interval(0.0,0.0), interval(-2.0,4.0)) == true
+    @test isstrictinterior(interval(0.0,0.0), interval(-2.0,4.0)) == true
 
-    @test isinterior(interval(0.0,0.0), interval(-0.0,-0.0)) == false
+    @test isstrictinterior(interval(0.0,0.0), interval(-0.0,-0.0)) == false
 
-    @test isinterior(interval(0.0,4.4), interval(0.0,4.0)) == false
+    @test isstrictinterior(interval(0.0,4.4), interval(0.0,4.0)) == false
 
-    @test isinterior(interval(-1.0,-1.0), interval(0.0,4.0)) == false
+    @test isstrictinterior(interval(-1.0,-1.0), interval(0.0,4.0)) == false
 
-    @test isinterior(interval(2.0,2.0), interval(-2.0,-1.0)) == false
+    @test isstrictinterior(interval(2.0,2.0), interval(-2.0,-1.0)) == false
 
 end
 
 @testset "minimal_interior_dec_test" begin
 
-    @test isinterior(nai(), nai()) == false
+    @test isstrictinterior(nai(), nai()) == false
 
-    @test isinterior(nai(), DecoratedInterval(emptyinterval(), trv)) == false
+    @test isstrictinterior(nai(), DecoratedInterval(emptyinterval(), trv)) == false
 
-    @test isinterior(nai(), DecoratedInterval(interval(0.0,4.0), trv)) == false
+    @test isstrictinterior(nai(), DecoratedInterval(interval(0.0,4.0), trv)) == false
 
-    @test isinterior(DecoratedInterval(interval(0.0,4.0), def), nai()) == false
+    @test isstrictinterior(DecoratedInterval(interval(0.0,4.0), def), nai()) == false
 
-    @test isinterior(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(emptyinterval(), trv)) == true
+    @test isstrictinterior(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(emptyinterval(), trv)) == true
 
-    @test isinterior(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(0.0,4.0), trv)) == true
+    @test isstrictinterior(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(0.0,4.0), trv)) == true
 
-    @test isinterior(DecoratedInterval(interval(0.0,4.0), def), DecoratedInterval(emptyinterval(), trv)) == false
+    @test isstrictinterior(DecoratedInterval(interval(0.0,4.0), def), DecoratedInterval(emptyinterval(), trv)) == false
 
-    @test isinterior(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
+    @test isstrictinterior(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
 
-    @test isinterior(DecoratedInterval(interval(0.0,4.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
+    @test isstrictinterior(DecoratedInterval(interval(0.0,4.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
 
-    @test isinterior(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
+    @test isstrictinterior(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == true
 
-    @test isinterior(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(0.0,4.0), trv)) == false
+    @test isstrictinterior(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(0.0,4.0), trv)) == false
 
-    @test isinterior(DecoratedInterval(interval(0.0,4.0), trv), DecoratedInterval(interval(0.0,4.0), trv)) == false
+    @test isstrictinterior(DecoratedInterval(interval(0.0,4.0), trv), DecoratedInterval(interval(0.0,4.0), trv)) == false
 
-    @test isinterior(DecoratedInterval(interval(1.0,2.0), def), DecoratedInterval(interval(0.0,4.0), trv)) == true
+    @test isstrictinterior(DecoratedInterval(interval(1.0,2.0), def), DecoratedInterval(interval(0.0,4.0), trv)) == true
 
-    @test isinterior(DecoratedInterval(interval(-2.0,2.0), trv), DecoratedInterval(interval(-2.0,4.0), def)) == false
+    @test isstrictinterior(DecoratedInterval(interval(-2.0,2.0), trv), DecoratedInterval(interval(-2.0,4.0), def)) == false
 
-    @test isinterior(DecoratedInterval(interval(-0.0,-0.0), trv), DecoratedInterval(interval(-2.0,4.0), trv)) == true
+    @test isstrictinterior(DecoratedInterval(interval(-0.0,-0.0), trv), DecoratedInterval(interval(-2.0,4.0), trv)) == true
 
-    @test isinterior(DecoratedInterval(interval(0.0,0.0), def), DecoratedInterval(interval(-2.0,4.0), trv)) == true
+    @test isstrictinterior(DecoratedInterval(interval(0.0,0.0), def), DecoratedInterval(interval(-2.0,4.0), trv)) == true
 
-    @test isinterior(DecoratedInterval(interval(0.0,0.0), trv), DecoratedInterval(interval(-0.0,-0.0), trv)) == false
+    @test isstrictinterior(DecoratedInterval(interval(0.0,0.0), trv), DecoratedInterval(interval(-0.0,-0.0), trv)) == false
 
-    @test isinterior(DecoratedInterval(interval(0.0,4.4), trv), DecoratedInterval(interval(0.0,4.0), trv)) == false
+    @test isstrictinterior(DecoratedInterval(interval(0.0,4.4), trv), DecoratedInterval(interval(0.0,4.0), trv)) == false
 
-    @test isinterior(DecoratedInterval(interval(-1.0,-1.0), trv), DecoratedInterval(interval(0.0,4.0), def)) == false
+    @test isstrictinterior(DecoratedInterval(interval(-1.0,-1.0), trv), DecoratedInterval(interval(0.0,4.0), def)) == false
 
-    @test isinterior(DecoratedInterval(interval(2.0,2.0), def), DecoratedInterval(interval(-2.0,-1.0), trv)) == false
+    @test isstrictinterior(DecoratedInterval(interval(2.0,2.0), def), DecoratedInterval(interval(-2.0,-1.0), trv)) == false
 
 end
 
