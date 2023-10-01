@@ -30,13 +30,6 @@ function isequalinterval(a::Interval, b::Interval)
 end
 
 """
-    isequalinterval(a::Interval, x::Real)
-
-Check if the interval `a` contains exactly (and only) the number `x`.
-"""
-isequalinterval(a::Interval, x::Real) = inf(a) == sup(a) == x
-
-"""
     isweakinterior(a, b)
 
 Checks if all the points of the interval `a` are within the interval `b`.
@@ -194,6 +187,13 @@ isatomic(x::Interval) = isemptyinterval(x) || (inf(x) == sup(x)) || (sup(x) == n
 Return whether the interval only contains zero.
 """
 isthinzero(x::Interval) = iszero(inf(x)) && iszero(sup(x))
+
+"""
+    isthin(a::Interval, x::Number)
+
+Check if the interval `a` contains exactly (and only) the number `x`.
+"""
+isthin(a::Interval, x::Real) = inf(a) == sup(a) == x
 
 """
     isthininteger(x)
