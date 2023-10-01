@@ -51,10 +51,10 @@ const rounding_types = (:fast, :tight, :accurate, :slow, :none)
 interval_rounding() = IntervalRounding{:tight}()
 
 # BigFloat conversion
-convert(::Type{BigFloat}, x, rounding_mode::RoundingMode) =
-    setrounding(BigFloat, rounding_mode) do
-        convert(BigFloat, x)
-    end
+# convert(::Type{BigFloat}, x, rounding_mode::RoundingMode) =
+#     setrounding(BigFloat, rounding_mode) do
+#         convert(BigFloat, x)
+#     end
 
 # Parsing from string
 parse(::Type{T}, x::AbstractString, rounding_mode::RoundingMode) where T = setrounding(Float64, rounding_mode) do
