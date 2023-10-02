@@ -16,18 +16,18 @@ Currently only Flavor{:set_based} is supported.
     In particular, this means that `(Inf..Inf)` is an empty interval, and division
     by a thin zero returns the empty interval.
     The edge cases are
-        - `isequalinterval(x/(0..0), ∅)`
-        - `isequalinterval((0..0)/(0..0), ∅)`
-        - `isequalinterval((0..0)*(-Inf..Inf), 0)`
-        - `ismember(Inf, (0..Inf)) == false`
+        - `isequal_interval(x/(0..0), ∅)`
+        - `isequal_interval((0..0)/(0..0), ∅)`
+        - `isequal_interval((0..0)*(-Inf..Inf), 0)`
+        - `in_interval(Inf, (0..Inf)) == false`
     This flavor is described and required in part 2 of the IEEE Std 1799-2015.
 - `:cset` (not implemented) : Elements of an interval are either real numbers
     or `±Inf`, applying standard rule for arithmetic with infinity.
     The edge cases are
-        - `isequalinterval(x/(0..0), (-Inf..Inf))`
-        - `isequalinterval((0..0)/(0..0), (-Inf..Inf))`
-        - `isequalinterval((0..0)*(-Inf..Inf), (-Inf..Inf))`
-        - `ismember(Inf, (0..Inf)) == true`
+        - `isequal_interval(x/(0..0), (-Inf..Inf))`
+        - `isequal_interval((0..0)/(0..0), (-Inf..Inf))`
+        - `isequal_interval((0..0)*(-Inf..Inf), (-Inf..Inf))`
+        - `in_interval(Inf, (0..Inf)) == true`
 """
 struct Flavor{F} end
 

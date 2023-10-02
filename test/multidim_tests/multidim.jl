@@ -6,7 +6,7 @@ using IntervalArithmetic.Symbols
         for a ∈ A
             found = false
             for b ∈ B
-                if all(isequalinterval.(a, b))
+                if all(isequal_interval.(a, b))
                     found = true
                     break
                 end
@@ -87,26 +87,26 @@ end
           [(0 .. 0.5), (0 .. 0.5)], [(0.5 .. 1), (0 .. 0.5)],
           [(-1 .. -0.5), (0.5 .. 1)], [(-0.5 .. 0), (0.5 .. 1)],
           [(0 .. 0.5), (0.5 .. 1)], [(0.5 .. 1), (0.5 .. 1)]]
-    @test mapreduce((x, y) -> all(isequalinterval.(x, y)), &, vb2, vv)
-    @test all(isequalinterval.(hull.(vb2...), ib2))
-    @test mapreduce((x, y) -> all(isequalinterval.(x, y)), &, mince(ib2, (4, 4)), vb2)
-    @test mapreduce((x, y) -> all(isequalinterval.(x, y)), &, mince(ib2, (1,4)),
+    @test mapreduce((x, y) -> all(isequal_interval.(x, y)), &, vb2, vv)
+    @test all(isequal_interval.(hull.(vb2...), ib2))
+    @test mapreduce((x, y) -> all(isequal_interval.(x, y)), &, mince(ib2, (4, 4)), vb2)
+    @test mapreduce((x, y) -> all(isequal_interval.(x, y)), &, mince(ib2, (1,4)),
         [[(-1 .. 1), (-1 .. -0.5)], [(-1 .. 1), (-0.5 .. 0)], [(-1 .. 1), (0 .. 0.5)], [(-1 .. 1), (0.5 .. 1)]])
-    @test all(isequalinterval.(hull.(mince(ib2, (1,4))...), ib2))
+    @test all(isequal_interval.(hull.(mince(ib2, (1,4))...), ib2))
 
     ib3 = fill(-1..1, 3)
     vb3 = mince(ib3, 4)
     @test length(vb3) == 4^3
-    @test all(isequalinterval.(hull.(vb3...), ib3))
-    @test mapreduce((x, y) -> all(isequalinterval.(x, y)), &, mince(ib3, (4,4,4)), vb3)
-    @test mapreduce((x, y) -> all(isequalinterval.(x, y)), &, mince(ib3, (2,1,1)),
+    @test all(isequal_interval.(hull.(vb3...), ib3))
+    @test mapreduce((x, y) -> all(isequal_interval.(x, y)), &, mince(ib3, (4,4,4)), vb3)
+    @test mapreduce((x, y) -> all(isequal_interval.(x, y)), &, mince(ib3, (2,1,1)),
         [[(-1 .. 0), (-1 .. 1), (-1 .. 1)], [(0 .. 1), (-1 .. 1), (-1 .. 1)]])
-    @test all(isequalinterval.(hull.(mince(ib3, (2,1,1))...), ib3))
+    @test all(isequal_interval.(hull.(mince(ib3, (2,1,1))...), ib3))
 
     ib4 = fill(-1..1, 4)
     vb4 = mince(ib4, 4)
     @test length(vb4) == 4^4
-    @test all(isequalinterval.(hull.(vb4...), ib4))
-    @test mapreduce((x, y) -> all(isequalinterval.(x, y)), &, mince(ib4, (4,4,4,4)), vb4)
-    @test mapreduce((x, y) -> all(isequalinterval.(x, y)), &, mince(ib4, (1,1,1,1)), (ib4,))
+    @test all(isequal_interval.(hull.(vb4...), ib4))
+    @test mapreduce((x, y) -> all(isequal_interval.(x, y)), &, mince(ib4, (4,4,4,4)), vb4)
+    @test mapreduce((x, y) -> all(isequal_interval.(x, y)), &, mince(ib4, (1,1,1,1)), (ib4,))
 end

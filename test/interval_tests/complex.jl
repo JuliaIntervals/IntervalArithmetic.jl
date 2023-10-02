@@ -8,7 +8,7 @@ using IntervalArithmetic
 
     @test a ⊂ c
     @test a ⊆ c
-    @test isstrictinterior(a, c)
+    @test isstrictsubset_interval(a, c)
     @test (b ⊂ c) == false
     @test (b ⊆ c) == false
 

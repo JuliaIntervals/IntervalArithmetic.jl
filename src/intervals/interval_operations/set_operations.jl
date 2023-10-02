@@ -3,23 +3,23 @@
 # Some other related functions are also present
 
 """
-    intersectinterval(a, b)
+    intersect_interval(a, b)
 
-Returns the intersectinterval of the intervals `a` and `b`, considered as
+Returns the intersect_interval of the intervals `a` and `b`, considered as
 (extended) sets of real numbers. That is, the set that contains
 the points common in `a` and `b`.
 
 Implement the `intersection` function of the IEEE Standard 1788-2015 (Section 9.3).
 """
-function intersectinterval(a::Interval{T}, b::Interval{S}) where {T<:NumTypes,S<:NumTypes}
+function intersect_interval(a::Interval{T}, b::Interval{S}) where {T<:NumTypes,S<:NumTypes}
     R = promote_numtype(T, S)
-    isdisjointinterval(a, b) && return emptyinterval(R)
+    isdisjoint_interval(a, b) && return emptyinterval(R)
     return unsafe_interval(R, max(inf(a), inf(b)), min(sup(a), sup(b)))
 end
 
-function intersectinterval(a::Complex{Interval{T}}, b::Complex{Interval{S}}) where {T<:NumTypes,S<:NumTypes}
+function intersect_interval(a::Complex{Interval{T}}, b::Complex{Interval{S}}) where {T<:NumTypes,S<:NumTypes}
     R = promote_numtype(T, S)
-    isdisjointinterval(a, b) && return emptyinterval(Complex{R})
+    isdisjoint_interval(a, b) && return emptyinterval(Complex{R})
     a_re, a_im = reim(a)
     b_re, b_im = reim(b)
     x_re = unsafe_interval(R, max(inf(a_re), inf(b_re)), min(sup(a_re), sup(b_re)))
@@ -28,16 +28,16 @@ function intersectinterval(a::Complex{Interval{T}}, b::Complex{Interval{S}}) whe
 end
 
 """
-    intersectinterval(a::Interval{T}...) where T
+    intersect_interval(a::Interval{T}...) where T
 
-Return the n-ary intersectinterval of its arguments.
+Return the n-ary intersect_interval of its arguments.
 
 This function is applicable to any number of input intervals, as in
-`intersectinterval(a1, a2, a3, a4)` where `ai` is an interval.
-If your use case needs to splat the input, as in `intersectinterval(a...)`, consider
-`reduce(intersectinterval, a)` instead, because you save the cost of splatting.
+`intersect_interval(a1, a2, a3, a4)` where `ai` is an interval.
+If your use case needs to splat the input, as in `intersect_interval(a...)`, consider
+`reduce(intersect_interval, a)` instead, because you save the cost of splatting.
 """
-intersectinterval(a::Union{Interval,Complex{<:Interval}}, b::Union{Interval,Complex{<:Interval}}...) = reduce(intersectinterval, b; init = a)
+intersect_interval(a::Union{Interval,Complex{<:Interval}}, b::Union{Interval,Complex{<:Interval}}...) = reduce(intersect_interval, b; init = a)
 
 """
     hull(a, b)
@@ -70,10 +70,10 @@ The array may:
 - contain two intervals, if `y` is strictly contained within `x`.
 """
 function setdiffinterval(x::Interval{T}, y::Interval{T}) where {T<:NumTypes}
-    inter = intersectinterval(x, y)
+    inter = intersect_interval(x, y)
 
-    isemptyinterval(inter) && return [x]
-    isequalinterval(inter, x) && return Interval{T}[]  # x is subset of y; setdiff is empty
+    isempty_interval(inter) && return [x]
+    isequal_interval(inter, x) && return Interval{T}[]  # x is subset of y; setdiff is empty
 
     inf(x) == inf(inter) && return [unsafe_interval(T, sup(inter), sup(x))]
     sup(x) == sup(inter) && return [unsafe_interval(T, inf(x), inf(inter))]

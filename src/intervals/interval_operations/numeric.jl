@@ -46,8 +46,8 @@ Find the midpoint of the interval `a`.
 Implement the `mid` function of the IEEE Standard 1788-2015 (Table 9.2).
 """
 function mid(a::Interval{T}) where {T<:NumTypes}
-    isemptyinterval(a) && return convert(T, NaN)
-    isentireinterval(a) && return zero(T)
+    isempty_interval(a) && return convert(T, NaN)
+    isentire_interval(a) && return zero(T)
 
     inf(a) == typemin(T) && return nextfloat(inf(a))  # IEEE-1788 section 12.12.8
     sup(a) == typemax(T) && return prevfloat(sup(a))  # IEEE-1788 section 12.12.8
@@ -75,7 +75,7 @@ intervals.
 """
 function scaled_mid(a::Interval{T}, α) where {T<:NumTypes}
     0 ≤ α ≤ 1 || return throw(DomainError(α, "scaled_mid requires 0 ≤ α ≤ 1"))
-    isemptyinterval(a) && return convert(T, NaN)
+    isempty_interval(a) && return convert(T, NaN)
 
     lo = (inf(a) == typemin(T) ? nextfloat(inf(a)) : inf(a))
     hi = (sup(a) == typemax(T) ? prevfloat(sup(a)) : sup(a))
@@ -98,7 +98,7 @@ Return the diameter (length) of the interval `a`.
 Implement the `wid` function of the IEEE Standard 1788-2015 (Table 9.2).
 """
 function diam(a::Interval{T}) where {T<:NumTypes}
-    isemptyinterval(a) && return convert(T, NaN)
+    isempty_interval(a) && return convert(T, NaN)
     return -(sup(a), inf(a), RoundUp)  # IEEE1788 section 12.12.8
 end
 
@@ -128,7 +128,7 @@ Function required by the IEEE Standard 1788-2015 in Section 10.5.9 for the
 set-based flavor.
 """
 function midradius(a::Interval{T}) where {T<:NumTypes}
-    isemptyinterval(a) && return convert(T, NaN), convert(T, NaN)
+    isempty_interval(a) && return convert(T, NaN), convert(T, NaN)
     m = mid(a)
     return m, max(m - inf(a), sup(a) - m)
 end
@@ -143,7 +143,7 @@ Magnitude of an interval. Return `NaN` for empty intervals.
 Implement the `mag` function of the IEEE Standard 1788-2015 (Table 9.2).
 """
 function mag(a::Interval{T}) where {T<:NumTypes}
-    isemptyinterval(a) && return convert(T, NaN)
+    isempty_interval(a) && return convert(T, NaN)
     return max(abs(inf(a)), abs(sup(a)))
 end
 
@@ -157,8 +157,8 @@ Mignitude of an interval. Return `NaN` for empty intervals.
 Implement the `mig` function of the IEEE Standard 1788-2015 (Table 9.2).
 """
 function mig(a::Interval{T}) where {T<:NumTypes}
-    isemptyinterval(a) && return convert(T, NaN)
-    ismember(0, a) && return zero(T)
+    isempty_interval(a) && return convert(T, NaN)
+    in_interval(0, a) && return zero(T)
     return min(abs(inf(a)), abs(sup(a)))
 end
 

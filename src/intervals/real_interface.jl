@@ -50,7 +50,7 @@ Compute the integer hash code for an interval using the method for composite
 types used in `AutoHashEquals.jl`.
 
 Note that in `IntervalArithmetic.jl`, equality of intervals is given by
-`isequalinterval` rather than the `==` operator.
+`isequal_interval` rather than the `==` operator.
 The latter is reserved for the pointwise extension of equality to intervals
 and uses three-way logic by default.
 """
@@ -62,25 +62,25 @@ dist(a::Interval, b::Interval) = max(abs(inf(a)-inf(b)), abs(sup(a)-sup(b)))
 #
 
 Base.:(==)(::Interval, ::Interval) = # also returned when calling `≤`, `≥`, `isequal`
-    throw(ArgumentError("`==` is purposely not supported for intervals. See instead `isequalinterval`."))
+    throw(ArgumentError("`==` is purposely not supported for intervals. See instead `isequal_interval`."))
 
 Base.:<(::Interval, ::Interval) = # also returned when calling `isless`, `>`
-    throw(ArgumentError("`<` is purposely not supported for intervals. See instead `isstrictless`, `strictprecedes`."))
+    throw(ArgumentError("`<` is purposely not supported for intervals. See instead `isstrictless`, `strictprecedes_interval`."))
 
 Base.isdisjoint(::Interval, ::Interval) =
-    throw(ArgumentError("`isdisjoint` is purposely not supported for intervals. See instead `isdisjointinterval`."))
+    throw(ArgumentError("`isdisjoint` is purposely not supported for intervals. See instead `isdisjoint_interval`."))
 
 Base.issubset(::Interval, ::Interval) =
-    throw(ArgumentError("`issubset` is purposely not supported for intervals. See instead `isweakinterior`."))
+    throw(ArgumentError("`issubset` is purposely not supported for intervals. See instead `issubset_interval`."))
 
 Base.issetequal(::Interval, ::Interval) =
-    throw(ArgumentError("`issetequal` is purposely not supported for intervals. See instead `isequalinterval`."))
+    throw(ArgumentError("`issetequal` is purposely not supported for intervals. See instead `isequal_interval`."))
 
 Base.in(::Interval, ::Interval) =
-    throw(ArgumentError("`in` is purposely not supported for intervals. See instead `ismember`."))
+    throw(ArgumentError("`in` is purposely not supported for intervals. See instead `in_interval`."))
 
 Base.isempty(::Interval) =
-    throw(ArgumentError("`isempty` is purposely not supported for intervals. See instead `isemptyinterval`."))
+    throw(ArgumentError("`isempty` is purposely not supported for intervals. See instead `isempty_interval`."))
 
 Base.isfinite(::Interval) = # also returned when calling `isinf`
     throw(ArgumentError("`isfinite` is purposely not supported for intervals. See instead `isbounded`."))

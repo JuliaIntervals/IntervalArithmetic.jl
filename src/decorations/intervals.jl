@@ -68,7 +68,7 @@ decoration(x::DecoratedInterval) = x.decoration
 
 function decoration(x::Interval)
     isnai(x) && return ill        # nai()
-    isemptyinterval(x) && return trv      # emptyinterval
+    isempty_interval(x) && return trv      # emptyinterval
     isunbounded(x) && return dac  # unbounded
     return com                    # common
 end

@@ -32,23 +32,23 @@ const .. = interval
 """
     ≛(a, b)
 
-Unicode alias of [`isequalinterval`](@ref).
+Unicode alias of [`isequal_interval`](@ref).
 """
-const ≛ = isequalinterval
+const ≛ = isequal_interval
 
 """
     ≺(a, b)
 
-Unicode alias of [`strictprecedes`](@ref).
+Unicode alias of [`strictprecedes_interval`](@ref).
 """
-const ≺ = strictprecedes
+const ≺ = strictprecedes_interval
 
 """
     ⪽(a, b)
 
-Unicode alias of [`isstrictinterior`](@ref).
+Unicode alias of [`isstrictsubset_interval`](@ref).
 """
-const ⪽ = isstrictinterior
+const ⪽ = isstrictsubset_interval
 
 """
     ∅
