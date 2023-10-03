@@ -1,6 +1,6 @@
 using IntervalArithmetic.Symbols
 
-@testset "setdiffinterval" begin
+@testset "setdiff_interval" begin
     function sameset(A, B)
         length(A) != length(B) && return false
         for a ∈ A
@@ -19,21 +19,21 @@ using IntervalArithmetic.Symbols
     X = [2..4, 3..5]
     Y = [3..5, 4..6]
     @test sameset(
-        setdiffinterval(X, Y),
+        setdiff_interval(X, Y),
         [ [3..4, 3..4],
           [2..3, 3..5] ])
 
     X = [2..5, 3..6]
     Y = [-10..10, 4..5]
     @test sameset(
-        setdiffinterval(X, Y),
+        setdiff_interval(X, Y),
         [ [2..5, 3..4],
           [2..5, 5..6] ])
 
     X = [2..5, 3..6]
     Y = [4..6, 4..5]
     @test sameset(
-        setdiffinterval(X, Y),
+        setdiff_interval(X, Y),
         [ [4..5, 3..4],
           [4..5, 5..6],
           [2..4, 3..6] ])
@@ -41,7 +41,7 @@ using IntervalArithmetic.Symbols
     X = [2..5, 3..6]
     Y = [3..4, 4..5]
     @test sameset(
-        setdiffinterval(X, Y),
+        setdiff_interval(X, Y),
         [ [3..4, 3..4],
           [3..4, 5..6],
           [2..3, 3..6],
@@ -49,16 +49,16 @@ using IntervalArithmetic.Symbols
 
     X = [2..5, 3..6]
     Y = [2..4, 10..20]
-    @test sameset(setdiffinterval(X, Y), typeof(X)[X])
+    @test sameset(setdiff_interval(X, Y), typeof(X)[X])
 
     X = [2..5, 3..6]
     Y = [-10..10, -10..10]
-    @test sameset(setdiffinterval(X, Y), typeof(X)[])
+    @test sameset(setdiff_interval(X, Y), typeof(X)[])
 
     X = [1..4, 3..6, 7..10]
     Y = [2..3, 4..5, 8..9]
     @test sameset(
-        setdiffinterval(X, Y),
+        setdiff_interval(X, Y),
         [ [2..3, 4..5, 7..8],
           [2..3, 4..5, 9..10],
           [2..3, 3..4, 7..10],
@@ -69,7 +69,7 @@ using IntervalArithmetic.Symbols
     X = [-Inf..Inf, 1..2]
     Y = [1..2, -1..1.5]
     @test sameset(
-        setdiffinterval(X, Y),
+        setdiff_interval(X, Y),
         [ [-Inf..1, 1..2],
           [2..Inf, 1..2],
           [1..2, 1.5..2] ])

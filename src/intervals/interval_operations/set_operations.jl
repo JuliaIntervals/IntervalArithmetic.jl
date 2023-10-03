@@ -57,7 +57,7 @@ hull(a::Complex{<:Interval}, b::Interval) = complex(hull(real(a), b), imag(a))
 hull(a::Union{Interval,Complex{<:Interval}}, b::Union{Interval,Complex{<:Interval}}...) = reduce(hull, b; init = a)
 
 """
-    setdiffinterval(x::Interval, y::Interval)
+    setdiff_interval(x::Interval, y::Interval)
 
 Calculate the set difference `x ∖ y`, i.e. the set of values
 that are inside the interval `x` but not inside `y`.
@@ -69,7 +69,7 @@ The array may:
 - contain a single interval, if `y` overlaps `x`
 - contain two intervals, if `y` is strictly contained within `x`.
 """
-function setdiffinterval(x::Interval{T}, y::Interval{T}) where {T<:NumTypes}
+function setdiff_interval(x::Interval{T}, y::Interval{T}) where {T<:NumTypes}
     inter = intersect_interval(x, y)
 
     isempty_interval(inter) && return [x]

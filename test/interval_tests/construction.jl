@@ -226,20 +226,20 @@ end
     @test isequal_interval(a, b)
 end
 
-@testset "setdiffinterval tests" begin
+@testset "setdiff_interval tests" begin
     x = interval(1, 3)
     y = interval(2, 4)
-    @test all(isequal_interval.(setdiffinterval(x, y), [interval(1, 2)]))
-    @test all(isequal_interval.(setdiffinterval(y, x), [interval(3, 4)]))
+    @test all(isequal_interval.(setdiff_interval(x, y), [interval(1, 2)]))
+    @test all(isequal_interval.(setdiff_interval(y, x), [interval(3, 4)]))
 
-    @test setdiffinterval(x, x) == Interval{Float64}[]
-    @test setdiffinterval(x, x) == Interval{Float64}[]
+    @test setdiff_interval(x, x) == Interval{Float64}[]
+    @test setdiff_interval(x, x) == Interval{Float64}[]
 
-    @test all(isequal_interval.(setdiffinterval(x, emptyinterval(x)), [x]))
+    @test all(isequal_interval.(setdiff_interval(x, emptyinterval(x)), [x]))
 
     z = interval(0, 5)
-    @test setdiffinterval(x, z) == Interval{Float64}[]
-    @test all(isequal_interval.(setdiffinterval(z, x), [interval(0, 1), interval(3, 5)]))
+    @test setdiff_interval(x, z) == Interval{Float64}[]
+    @test all(isequal_interval.(setdiff_interval(z, x), [interval(0, 1), interval(3, 5)]))
 end
 
 @testset "Interval{T}(x::Interval)" begin

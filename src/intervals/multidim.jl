@@ -43,7 +43,7 @@ function mince(x::AbstractVector, n::NTuple{N,Integer}) where {N}
 end
 
 """
-    setdiffinterval(A::AbstractVector, B::AbstractVector)
+    setdiff_interval(A::AbstractVector, B::AbstractVector)
 
 Returns a vector of `IntervalBox`es that are in the set difference `A ∖ B`,
 i.e. the set of `x` that are in `A` but not in `B`.
@@ -51,7 +51,7 @@ i.e. the set of `x` that are in `A` but not in `B`.
 Algorithm: Start from the total overlap (in all directions);
 expand each direction in turn.
 """
-function setdiffinterval(A::T, B::T) where {T<:AbstractVector}
+function setdiff_interval(A::T, B::T) where {T<:AbstractVector}
     N = length(A)
     (length(B) == N) || return throw(DimensionMismatch("A and B must have the same length"))
     inter = intersect_interval.(A, B)
@@ -60,7 +60,7 @@ function setdiffinterval(A::T, B::T) where {T<:AbstractVector}
     offset = 0
     x = copy(A)
     @inbounds for i ∈ 1:N
-        h1, h2 = _setdiffinterval(A[i], B[i])
+        h1, h2 = _setdiff_interval(A[i], B[i])
         y = similar(T, N)
         z = similar(T, N)
         for (j, k) ∈ enumerate(eachindex(y))
@@ -78,7 +78,7 @@ end
 # Computes the set difference x\\y and always returns a tuple of two intervals.
 # If the set difference is only one interval or is empty, then the returned tuple contains 1
 # or 2 empty intervals.
-function _setdiffinterval(x::Interval{T}, y::Interval{T}) where {T<:NumTypes}
+function _setdiff_interval(x::Interval{T}, y::Interval{T}) where {T<:NumTypes}
     inter = intersect_interval(x, y)
     isempty_interval(inter) && return (x, emptyinterval(T))
     isequal_interval(inter, x) && return (emptyinterval(T), emptyinterval(T))  # x is subset of y; setdiff is empty
