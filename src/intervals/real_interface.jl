@@ -46,13 +46,9 @@ end
 """
     hash(x::Interval, h)
 
-Compute the integer hash code for an interval using the method for composite
-types used in `AutoHashEquals.jl`.
-
-Note that in `IntervalArithmetic.jl`, equality of intervals is given by
-`isequal_interval` rather than the `==` operator.
-The latter is reserved for the pointwise extension of equality to intervals
-and uses three-way logic by default.
+Compute the integer hash code for an interval. Note that in
+`IntervalArithmetic.jl`, equality of intervals is given by `isequal_interval`
+rather than the `==` operator.
 """
 hash(x::Interval, h::UInt) = hash(sup(x), hash(inf(x), hash(Interval, h)))
 
@@ -90,3 +86,22 @@ Base.isnan(::Interval) =
 
 Base.isinteger(::Interval) =
     throw(ArgumentError("`isinteger` is purposely not supported for intervals. See instead `isthininteger`."))
+
+Base.intersect(::Interval) =
+    throw(ArgumentError("`intersect` is purposely not supported for intervals. See instead `intersect_interval`."))
+
+Base.union!(::AbstractSet, ::Interval) = # also returned when calling `intersect`, `symdiff` with intervals
+    throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`."))
+Base.union!(::AbstractVector{T}, ::Interval) where {T} =
+    throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`."))
+Base.union!(::AbstractVector{T}, ::Interval, ::Any, ::Any...) where {T} =
+    throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`."))
+Base.union!(::AbstractVector{T}, ::Interval, ::Interval, ::Any...) where {T} =
+    throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`."))
+Base.union!(::AbstractVector{T}, ::Any, ::Interval, ::Any...) where {T} =
+    throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`."))
+
+Base.setdiff(::Interval) =
+    throw(ArgumentError("`setdiff` is purposely not supported for intervals. See instead `setdiff_interval`."))
+Base.setdiff!(::AbstractSet, ::Interval) =
+    throw(ArgumentError("`setdiff!` is purposely not supported for intervals. See instead `setdiff_interval`."))
