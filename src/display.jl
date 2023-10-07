@@ -8,7 +8,11 @@ function Base.show(io::IO, ::MIME"text/plain", params::DisplayParameters)
     println(io, "Display options:")
     println(io, "  - format: ", params.format)
     println(io, "  - decorations: ", params.decorations)
-    print(io, "  - significant digits: ", params.sigdigits)
+    if params.format === :full
+        print(io, "  - significant digits: ", params.sigdigits, " (ignored)")
+    else
+        print(io, "  - significant digits: ", params.sigdigits)
+    end
 end
 
 const display_params = DisplayParameters(:standard, true, 6)  # Default
@@ -45,7 +49,7 @@ julia> setformat(:full)
 Display parameters:
   - format: full
   - decorations: true
-  - significant digits: 6
+  - significant digits: 6 (ignored)
 
 julia> x
 Interval(0.09999999999999999, 0.30000000000000004)
