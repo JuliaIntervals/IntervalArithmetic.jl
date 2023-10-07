@@ -39,9 +39,9 @@ const ≛ = isequal_interval
 """
     ≺(a, b)
 
-Unicode alias of [`strictprecedes_interval`](@ref).
+Unicode alias of [`strictprecedes`](@ref).
 """
-const ≺ = strictprecedes_interval
+const ≺ = strictprecedes
 
 """
     ⪽(a, b)

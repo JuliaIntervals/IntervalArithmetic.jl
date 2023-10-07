@@ -79,7 +79,7 @@ Checks if the interval `a` is strictly less than interval `b`, which is true
 if `inf(a) < inf(b)` and `sup(a) < sup(b)`.
 
 For variants in the definition of "strictly less than" for intervals see
-`strictprecedes_interval` and `<`.
+`strictprecedes` and `<`.
 
 Implement the `strictLess` function of the IEEE Standard 1788-2015 (Table 10.3).
 """
@@ -90,25 +90,25 @@ function isstrictless(a::Interval, b::Interval)
 end
 
 """
-    precedes_interval(a, b)
+    precedes(a, b)
 
 Checks if the interval `a` is to the left of interval `b`.
 
 Implement the `precedes` function of the IEEE Standard 1788-2015 (Table 10.3).
 """
-function precedes_interval(a::Interval, b::Interval)
+function precedes(a::Interval, b::Interval)
     (isempty_interval(a) || isempty_interval(b)) && return true
     return sup(a) ≤ inf(b)
 end
 
 """
-    strictprecedes_interval(a, b)
+    strictprecedes(a, b)
 
 Checks if the interval `a` is strictly to the left of interval `b`.
 
 Implement the `strictPrecedes` function of the IEEE Standard 1788-2015 (Table 10.3).
 """
-function strictprecedes_interval(a::Interval, b::Interval)
+function strictprecedes(a::Interval, b::Interval)
     (isempty_interval(a) || isempty_interval(b)) && return true
     return sup(a) < inf(b)
 end

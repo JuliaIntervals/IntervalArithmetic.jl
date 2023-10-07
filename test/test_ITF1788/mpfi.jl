@@ -1382,217 +1382,217 @@ end
 
 @testset "mpfi_is_neg" begin
 
-    @test precedes_interval(interval(-Inf, -8.0), interval(0.0, 0.0)) == true
+    @test precedes(interval(-Inf, -8.0), interval(0.0, 0.0)) == true
 
-    @test precedes_interval(interval(-Inf, 0.0), interval(0.0, 0.0)) == true
+    @test precedes(interval(-Inf, 0.0), interval(0.0, 0.0)) == true
 
-    @test precedes_interval(interval(-Inf, 5.0), interval(0.0, 0.0)) == false
+    @test precedes(interval(-Inf, 5.0), interval(0.0, 0.0)) == false
 
-    @test precedes_interval(entireinterval(), interval(0.0, 0.0)) == false
+    @test precedes(entireinterval(), interval(0.0, 0.0)) == false
 
-    @test precedes_interval(interval(-8.0, 0.0), interval(0.0, 0.0)) == true
+    @test precedes(interval(-8.0, 0.0), interval(0.0, 0.0)) == true
 
-    @test precedes_interval(interval(0.0, 0.0), interval(0.0, 0.0)) == true
+    @test precedes(interval(0.0, 0.0), interval(0.0, 0.0)) == true
 
-    @test precedes_interval(interval(0.0, 5.0), interval(0.0, 0.0)) == false
+    @test precedes(interval(0.0, 5.0), interval(0.0, 0.0)) == false
 
-    @test precedes_interval(interval(0.0, +Inf), interval(0.0, 0.0)) == false
+    @test precedes(interval(0.0, +Inf), interval(0.0, 0.0)) == false
 
-    @test precedes_interval(interval(5.0, +Inf), interval(0.0, 0.0)) == false
+    @test precedes(interval(5.0, +Inf), interval(0.0, 0.0)) == false
 
-    @test precedes_interval(interval(-34.0, -17.0), interval(0.0, 0.0)) == true
+    @test precedes(interval(-34.0, -17.0), interval(0.0, 0.0)) == true
 
-    @test precedes_interval(interval(-8.0, -1.0), interval(0.0, 0.0)) == true
+    @test precedes(interval(-8.0, -1.0), interval(0.0, 0.0)) == true
 
-    @test precedes_interval(interval(-34.0, 17.0), interval(0.0, 0.0)) == false
+    @test precedes(interval(-34.0, 17.0), interval(0.0, 0.0)) == false
 
-    @test precedes_interval(interval(-0x1921fb54442d18p-51, 0x1921fb54442d19p-51), interval(0.0, 0.0)) == false
+    @test precedes(interval(-0x1921fb54442d18p-51, 0x1921fb54442d19p-51), interval(0.0, 0.0)) == false
 
-    @test precedes_interval(interval(0x1921fb54442d18p-51, 0x1921fb54442d19p-51), interval(0.0, 0.0)) == false
+    @test precedes(interval(0x1921fb54442d18p-51, 0x1921fb54442d19p-51), interval(0.0, 0.0)) == false
 
-    @test precedes_interval(interval(+8.0, +0x7fffffffffffbp+51), interval(0.0, 0.0)) == false
+    @test precedes(interval(+8.0, +0x7fffffffffffbp+51), interval(0.0, 0.0)) == false
 
-    @test precedes_interval(interval(+0x1fffffffffffffp-53, 2.0), interval(0.0, 0.0)) == false
+    @test precedes(interval(+0x1fffffffffffffp-53, 2.0), interval(0.0, 0.0)) == false
 
 end
 
 @testset "mpfi_is_nonneg" begin
 
-    @test precedes_interval(interval(0.0, 0.0), interval(-Inf, -8.0)) == false
+    @test precedes(interval(0.0, 0.0), interval(-Inf, -8.0)) == false
 
-    @test precedes_interval(interval(0.0, 0.0), interval(-Inf, 0.0)) == false
+    @test precedes(interval(0.0, 0.0), interval(-Inf, 0.0)) == false
 
-    @test precedes_interval(interval(0.0, 0.0), interval(-Inf, 5.0)) == false
+    @test precedes(interval(0.0, 0.0), interval(-Inf, 5.0)) == false
 
-    @test precedes_interval(interval(0.0, 0.0), entireinterval()) == false
+    @test precedes(interval(0.0, 0.0), entireinterval()) == false
 
-    @test precedes_interval(interval(0.0, 0.0), interval(-8.0, 0.0)) == false
+    @test precedes(interval(0.0, 0.0), interval(-8.0, 0.0)) == false
 
-    @test precedes_interval(interval(0.0, 0.0), interval(0.0, 0.0)) == true
+    @test precedes(interval(0.0, 0.0), interval(0.0, 0.0)) == true
 
-    @test precedes_interval(interval(0.0, 0.0), interval(0.0, 5.0)) == true
+    @test precedes(interval(0.0, 0.0), interval(0.0, 5.0)) == true
 
-    @test precedes_interval(interval(0.0, 0.0), interval(0.0, +Inf)) == true
+    @test precedes(interval(0.0, 0.0), interval(0.0, +Inf)) == true
 
-    @test precedes_interval(interval(0.0, 0.0), interval(5.0, +Inf)) == true
+    @test precedes(interval(0.0, 0.0), interval(5.0, +Inf)) == true
 
-    @test precedes_interval(interval(0.0, 0.0), interval(-34.0, -17.0)) == false
+    @test precedes(interval(0.0, 0.0), interval(-34.0, -17.0)) == false
 
-    @test precedes_interval(interval(0.0, 0.0), interval(-8.0, -1.0)) == false
+    @test precedes(interval(0.0, 0.0), interval(-8.0, -1.0)) == false
 
-    @test precedes_interval(interval(0.0, 0.0), interval(-34.0, 17.0)) == false
+    @test precedes(interval(0.0, 0.0), interval(-34.0, 17.0)) == false
 
-    @test precedes_interval(interval(0.0, 0.0), interval(-0x1921fb54442d18p-51, 0x1921fb54442d19p-51)) == false
+    @test precedes(interval(0.0, 0.0), interval(-0x1921fb54442d18p-51, 0x1921fb54442d19p-51)) == false
 
-    @test precedes_interval(interval(0.0, 0.0), interval(0x1921fb54442d18p-51, 0x1921fb54442d19p-51)) == true
+    @test precedes(interval(0.0, 0.0), interval(0x1921fb54442d18p-51, 0x1921fb54442d19p-51)) == true
 
-    @test precedes_interval(interval(0.0, 0.0), interval(+8.0, +0x7fffffffffffbp+51)) == true
+    @test precedes(interval(0.0, 0.0), interval(+8.0, +0x7fffffffffffbp+51)) == true
 
-    @test precedes_interval(interval(0.0, 0.0), interval(+0x1fffffffffffffp-53, 2.0)) == true
+    @test precedes(interval(0.0, 0.0), interval(+0x1fffffffffffffp-53, 2.0)) == true
 
 end
 
 @testset "mpfi_is_nonpos" begin
 
-    @test precedes_interval(interval(-Inf, -8.0), interval(0.0, 0.0)) == true
+    @test precedes(interval(-Inf, -8.0), interval(0.0, 0.0)) == true
 
-    @test precedes_interval(interval(-Inf, 0.0), interval(0.0, 0.0)) == true
+    @test precedes(interval(-Inf, 0.0), interval(0.0, 0.0)) == true
 
-    @test precedes_interval(interval(-Inf, 5.0), interval(0.0, 0.0)) == false
+    @test precedes(interval(-Inf, 5.0), interval(0.0, 0.0)) == false
 
-    @test precedes_interval(entireinterval(), interval(0.0, 0.0)) == false
+    @test precedes(entireinterval(), interval(0.0, 0.0)) == false
 
-    @test precedes_interval(interval(-8.0, 0.0), interval(0.0, 0.0)) == true
+    @test precedes(interval(-8.0, 0.0), interval(0.0, 0.0)) == true
 
-    @test precedes_interval(interval(0.0, 0.0), interval(0.0, 0.0)) == true
+    @test precedes(interval(0.0, 0.0), interval(0.0, 0.0)) == true
 
-    @test precedes_interval(interval(0.0, 5.0), interval(0.0, 0.0)) == false
+    @test precedes(interval(0.0, 5.0), interval(0.0, 0.0)) == false
 
-    @test precedes_interval(interval(0.0, +Inf), interval(0.0, 0.0)) == false
+    @test precedes(interval(0.0, +Inf), interval(0.0, 0.0)) == false
 
-    @test precedes_interval(interval(5.0, +Inf), interval(0.0, 0.0)) == false
+    @test precedes(interval(5.0, +Inf), interval(0.0, 0.0)) == false
 
-    @test precedes_interval(interval(-34.0, -17.0), interval(0.0, 0.0)) == true
+    @test precedes(interval(-34.0, -17.0), interval(0.0, 0.0)) == true
 
-    @test precedes_interval(interval(-8.0, -1.0), interval(0.0, 0.0)) == true
+    @test precedes(interval(-8.0, -1.0), interval(0.0, 0.0)) == true
 
-    @test precedes_interval(interval(-34.0, 17.0), interval(0.0, 0.0)) == false
+    @test precedes(interval(-34.0, 17.0), interval(0.0, 0.0)) == false
 
-    @test precedes_interval(interval(-0x1921fb54442d18p-51, 0x1921fb54442d19p-51), interval(0.0, 0.0)) == false
+    @test precedes(interval(-0x1921fb54442d18p-51, 0x1921fb54442d19p-51), interval(0.0, 0.0)) == false
 
-    @test precedes_interval(interval(0x1921fb54442d18p-51, 0x1921fb54442d19p-51), interval(0.0, 0.0)) == false
+    @test precedes(interval(0x1921fb54442d18p-51, 0x1921fb54442d19p-51), interval(0.0, 0.0)) == false
 
-    @test precedes_interval(interval(8.0, 0x7fffffffffffbp+51), interval(0.0, 0.0)) == false
+    @test precedes(interval(8.0, 0x7fffffffffffbp+51), interval(0.0, 0.0)) == false
 
-    @test precedes_interval(interval(0x1fffffffffffffp-53, 2.0), interval(0.0, 0.0)) == false
+    @test precedes(interval(0x1fffffffffffffp-53, 2.0), interval(0.0, 0.0)) == false
 
 end
 
 @testset "mpfi_is_pos" begin
 
-    @test precedes_interval(interval(0.0, 0.0), interval(-Inf, -8.0)) == false
+    @test precedes(interval(0.0, 0.0), interval(-Inf, -8.0)) == false
 
-    @test precedes_interval(interval(0.0, 0.0), interval(-Inf, 0.0)) == false
+    @test precedes(interval(0.0, 0.0), interval(-Inf, 0.0)) == false
 
-    @test precedes_interval(interval(0.0, 0.0), interval(-Inf, 5.0)) == false
+    @test precedes(interval(0.0, 0.0), interval(-Inf, 5.0)) == false
 
-    @test precedes_interval(interval(0.0, 0.0), entireinterval()) == false
+    @test precedes(interval(0.0, 0.0), entireinterval()) == false
 
-    @test precedes_interval(interval(0.0, 0.0), interval(-8.0, 0.0)) == false
+    @test precedes(interval(0.0, 0.0), interval(-8.0, 0.0)) == false
 
-    @test precedes_interval(interval(0.0, 0.0), interval(0.0, 0.0)) == true
+    @test precedes(interval(0.0, 0.0), interval(0.0, 0.0)) == true
 
-    @test precedes_interval(interval(0.0, 0.0), interval(0.0, 5.0)) == true
+    @test precedes(interval(0.0, 0.0), interval(0.0, 5.0)) == true
 
-    @test precedes_interval(interval(0.0, 0.0), interval(0.0, +Inf)) == true
+    @test precedes(interval(0.0, 0.0), interval(0.0, +Inf)) == true
 
-    @test precedes_interval(interval(0.0, 0.0), interval(5.0, +Inf)) == true
+    @test precedes(interval(0.0, 0.0), interval(5.0, +Inf)) == true
 
-    @test precedes_interval(interval(0.0, 0.0), interval(-34.0, -17.0)) == false
+    @test precedes(interval(0.0, 0.0), interval(-34.0, -17.0)) == false
 
-    @test precedes_interval(interval(0.0, 0.0), interval(-8.0, -1.0)) == false
+    @test precedes(interval(0.0, 0.0), interval(-8.0, -1.0)) == false
 
-    @test precedes_interval(interval(0.0, 0.0), interval(-34.0, 17.0)) == false
+    @test precedes(interval(0.0, 0.0), interval(-34.0, 17.0)) == false
 
-    @test precedes_interval(interval(0.0, 0.0), interval(-0x1921fb54442d18p-51, 0x1921fb54442d19p-51)) == false
+    @test precedes(interval(0.0, 0.0), interval(-0x1921fb54442d18p-51, 0x1921fb54442d19p-51)) == false
 
-    @test precedes_interval(interval(0.0, 0.0), interval(0x1921fb54442d18p-51, 0x1921fb54442d19p-51)) == true
+    @test precedes(interval(0.0, 0.0), interval(0x1921fb54442d18p-51, 0x1921fb54442d19p-51)) == true
 
-    @test precedes_interval(interval(0.0, 0.0), interval(+8.0, +0x7fffffffffffbp+51)) == true
+    @test precedes(interval(0.0, 0.0), interval(+8.0, +0x7fffffffffffbp+51)) == true
 
-    @test precedes_interval(interval(0.0, 0.0), interval(+0x1fffffffffffffp-53, 2.0)) == true
+    @test precedes(interval(0.0, 0.0), interval(+0x1fffffffffffffp-53, 2.0)) == true
 
 end
 
 @testset "mpfi_is_strictly_neg" begin
 
-    @test strictprecedes_interval(interval(-Inf, -8.0), interval(0.0, 0.0)) == true
+    @test strictprecedes(interval(-Inf, -8.0), interval(0.0, 0.0)) == true
 
-    @test strictprecedes_interval(interval(-Inf, 0.0), interval(0.0, 0.0)) == false
+    @test strictprecedes(interval(-Inf, 0.0), interval(0.0, 0.0)) == false
 
-    @test strictprecedes_interval(interval(-Inf, 5.0), interval(0.0, 0.0)) == false
+    @test strictprecedes(interval(-Inf, 5.0), interval(0.0, 0.0)) == false
 
-    @test strictprecedes_interval(entireinterval(), interval(0.0, 0.0)) == false
+    @test strictprecedes(entireinterval(), interval(0.0, 0.0)) == false
 
-    @test strictprecedes_interval(interval(-8.0, 0.0), interval(0.0, 0.0)) == false
+    @test strictprecedes(interval(-8.0, 0.0), interval(0.0, 0.0)) == false
 
-    @test strictprecedes_interval(interval(0.0, 0.0), interval(0.0, 0.0)) == false
+    @test strictprecedes(interval(0.0, 0.0), interval(0.0, 0.0)) == false
 
-    @test strictprecedes_interval(interval(0.0, 5.0), interval(0.0, 0.0)) == false
+    @test strictprecedes(interval(0.0, 5.0), interval(0.0, 0.0)) == false
 
-    @test strictprecedes_interval(interval(0.0, +Inf), interval(0.0, 0.0)) == false
+    @test strictprecedes(interval(0.0, +Inf), interval(0.0, 0.0)) == false
 
-    @test strictprecedes_interval(interval(5.0, +Inf), interval(0.0, 0.0)) == false
+    @test strictprecedes(interval(5.0, +Inf), interval(0.0, 0.0)) == false
 
-    @test strictprecedes_interval(interval(-34.0, -17.0), interval(0.0, 0.0)) == true
+    @test strictprecedes(interval(-34.0, -17.0), interval(0.0, 0.0)) == true
 
-    @test strictprecedes_interval(interval(-8.0, -1.0), interval(0.0, 0.0)) == true
+    @test strictprecedes(interval(-8.0, -1.0), interval(0.0, 0.0)) == true
 
-    @test strictprecedes_interval(interval(-34.0, 17.0), interval(0.0, 0.0)) == false
+    @test strictprecedes(interval(-34.0, 17.0), interval(0.0, 0.0)) == false
 
-    @test strictprecedes_interval(interval(-0x1921fb54442d18p-51, 0x1921fb54442d19p-51), interval(0.0, 0.0)) == false
+    @test strictprecedes(interval(-0x1921fb54442d18p-51, 0x1921fb54442d19p-51), interval(0.0, 0.0)) == false
 
-    @test strictprecedes_interval(interval(0x1921fb54442d18p-51, 0x1921fb54442d19p-51), interval(0.0, 0.0)) == false
+    @test strictprecedes(interval(0x1921fb54442d18p-51, 0x1921fb54442d19p-51), interval(0.0, 0.0)) == false
 
-    @test strictprecedes_interval(interval(+8.0, +0x7fffffffffffbp+51), interval(0.0, 0.0)) == false
+    @test strictprecedes(interval(+8.0, +0x7fffffffffffbp+51), interval(0.0, 0.0)) == false
 
-    @test strictprecedes_interval(interval(+0x1fffffffffffffp-53, 2.0), interval(0.0, 0.0)) == false
+    @test strictprecedes(interval(+0x1fffffffffffffp-53, 2.0), interval(0.0, 0.0)) == false
 
 end
 
 @testset "mpfi_is_strictly_pos" begin
 
-    @test strictprecedes_interval(interval(0.0, 0.0), interval(-Inf, -8.0)) == false
+    @test strictprecedes(interval(0.0, 0.0), interval(-Inf, -8.0)) == false
 
-    @test strictprecedes_interval(interval(0.0, 0.0), interval(-Inf, 0.0)) == false
+    @test strictprecedes(interval(0.0, 0.0), interval(-Inf, 0.0)) == false
 
-    @test strictprecedes_interval(interval(0.0, 0.0), interval(-Inf, 5.0)) == false
+    @test strictprecedes(interval(0.0, 0.0), interval(-Inf, 5.0)) == false
 
-    @test strictprecedes_interval(interval(0.0, 0.0), entireinterval()) == false
+    @test strictprecedes(interval(0.0, 0.0), entireinterval()) == false
 
-    @test strictprecedes_interval(interval(0.0, 0.0), interval(-8.0, 0.0)) == false
+    @test strictprecedes(interval(0.0, 0.0), interval(-8.0, 0.0)) == false
 
-    @test strictprecedes_interval(interval(0.0, 0.0), interval(0.0, 0.0)) == false
+    @test strictprecedes(interval(0.0, 0.0), interval(0.0, 0.0)) == false
 
-    @test strictprecedes_interval(interval(0.0, 0.0), interval(0.0, 5.0)) == false
+    @test strictprecedes(interval(0.0, 0.0), interval(0.0, 5.0)) == false
 
-    @test strictprecedes_interval(interval(0.0, 0.0), interval(0.0, +Inf)) == false
+    @test strictprecedes(interval(0.0, 0.0), interval(0.0, +Inf)) == false
 
-    @test strictprecedes_interval(interval(0.0, 0.0), interval(5.0, +Inf)) == true
+    @test strictprecedes(interval(0.0, 0.0), interval(5.0, +Inf)) == true
 
-    @test strictprecedes_interval(interval(0.0, 0.0), interval(-34.0, -17.0)) == false
+    @test strictprecedes(interval(0.0, 0.0), interval(-34.0, -17.0)) == false
 
-    @test strictprecedes_interval(interval(0.0, 0.0), interval(-8.0, -1.0)) == false
+    @test strictprecedes(interval(0.0, 0.0), interval(-8.0, -1.0)) == false
 
-    @test strictprecedes_interval(interval(0.0, 0.0), interval(-34.0, 17.0)) == false
+    @test strictprecedes(interval(0.0, 0.0), interval(-34.0, 17.0)) == false
 
-    @test strictprecedes_interval(interval(0.0, 0.0), interval(-0x1921fb54442d18p-51, 0x1921fb54442d19p-51)) == false
+    @test strictprecedes(interval(0.0, 0.0), interval(-0x1921fb54442d18p-51, 0x1921fb54442d19p-51)) == false
 
-    @test strictprecedes_interval(interval(0.0, 0.0), interval(0x1921fb54442d18p-51, 0x1921fb54442d19p-51)) == true
+    @test strictprecedes(interval(0.0, 0.0), interval(0x1921fb54442d18p-51, 0x1921fb54442d19p-51)) == true
 
-    @test strictprecedes_interval(interval(0.0, 0.0), interval(+8.0, +0x7fffffffffffbp+51)) == true
+    @test strictprecedes(interval(0.0, 0.0), interval(+8.0, +0x7fffffffffffbp+51)) == true
 
-    @test strictprecedes_interval(interval(0.0, 0.0), interval(+0x1fffffffffffffp-53, 2.0)) == true
+    @test strictprecedes(interval(0.0, 0.0), interval(+0x1fffffffffffffp-53, 2.0)) == true
 
 end
 

@@ -488,101 +488,101 @@ end
 
 @testset "minimal_precedes_test" begin
 
-    @test precedes_interval(emptyinterval(), interval(3.0,4.0)) == true
+    @test precedes(emptyinterval(), interval(3.0,4.0)) == true
 
-    @test precedes_interval(interval(3.0,4.0), emptyinterval()) == true
+    @test precedes(interval(3.0,4.0), emptyinterval()) == true
 
-    @test precedes_interval(emptyinterval(), emptyinterval()) == true
+    @test precedes(emptyinterval(), emptyinterval()) == true
 
-    @test precedes_interval(interval(1.0,2.0), interval(-Inf,+Inf)) == false
+    @test precedes(interval(1.0,2.0), interval(-Inf,+Inf)) == false
 
-    @test precedes_interval(interval(0.0,2.0), interval(-Inf,+Inf)) == false
+    @test precedes(interval(0.0,2.0), interval(-Inf,+Inf)) == false
 
-    @test precedes_interval(interval(-0.0,2.0), interval(-Inf,+Inf)) == false
+    @test precedes(interval(-0.0,2.0), interval(-Inf,+Inf)) == false
 
-    @test precedes_interval(interval(-Inf,+Inf), interval(1.0,2.0)) == false
+    @test precedes(interval(-Inf,+Inf), interval(1.0,2.0)) == false
 
-    @test precedes_interval(interval(-Inf,+Inf), interval(-Inf,+Inf)) == false
+    @test precedes(interval(-Inf,+Inf), interval(-Inf,+Inf)) == false
 
-    @test precedes_interval(interval(1.0,2.0), interval(3.0,4.0)) == true
+    @test precedes(interval(1.0,2.0), interval(3.0,4.0)) == true
 
-    @test precedes_interval(interval(1.0,3.0), interval(3.0,4.0)) == true
+    @test precedes(interval(1.0,3.0), interval(3.0,4.0)) == true
 
-    @test precedes_interval(interval(-3.0, -1.0), interval(-1.0,0.0)) == true
+    @test precedes(interval(-3.0, -1.0), interval(-1.0,0.0)) == true
 
-    @test precedes_interval(interval(-3.0, -1.0), interval(-1.0,-0.0)) == true
+    @test precedes(interval(-3.0, -1.0), interval(-1.0,-0.0)) == true
 
-    @test precedes_interval(interval(1.0,3.5), interval(3.0,4.0)) == false
+    @test precedes(interval(1.0,3.5), interval(3.0,4.0)) == false
 
-    @test precedes_interval(interval(1.0,4.0), interval(3.0,4.0)) == false
+    @test precedes(interval(1.0,4.0), interval(3.0,4.0)) == false
 
-    @test precedes_interval(interval(-3.0, -0.1), interval(-1.0,0.0)) == false
+    @test precedes(interval(-3.0, -0.1), interval(-1.0,0.0)) == false
 
-    @test precedes_interval(interval(0.0,0.0), interval(-0.0,-0.0)) == true
+    @test precedes(interval(0.0,0.0), interval(-0.0,-0.0)) == true
 
-    @test precedes_interval(interval(-0.0,-0.0), interval(0.0,0.0)) == true
+    @test precedes(interval(-0.0,-0.0), interval(0.0,0.0)) == true
 
-    @test precedes_interval(interval(-0.0,0.0), interval(0.0,0.0)) == true
+    @test precedes(interval(-0.0,0.0), interval(0.0,0.0)) == true
 
-    @test precedes_interval(interval(-0.0,0.0), interval(0.0,-0.0)) == true
+    @test precedes(interval(-0.0,0.0), interval(0.0,-0.0)) == true
 
-    @test precedes_interval(interval(0.0,-0.0), interval(0.0,0.0)) == true
+    @test precedes(interval(0.0,-0.0), interval(0.0,0.0)) == true
 
-    @test precedes_interval(interval(0.0,-0.0), interval(-0.0,0.0)) == true
+    @test precedes(interval(0.0,-0.0), interval(-0.0,0.0)) == true
 
 end
 
 @testset "minimal_precedes_dec_test" begin
 
-    @test precedes_interval(nai(), DecoratedInterval(interval(3.0,4.0), def)) == false
+    @test precedes(nai(), DecoratedInterval(interval(3.0,4.0), def)) == false
 
-    @test precedes_interval(DecoratedInterval(interval(3.0,4.0), trv), nai()) == false
+    @test precedes(DecoratedInterval(interval(3.0,4.0), trv), nai()) == false
 
-    @test precedes_interval(nai(), DecoratedInterval(emptyinterval(), trv)) == false
+    @test precedes(nai(), DecoratedInterval(emptyinterval(), trv)) == false
 
-    @test precedes_interval(nai(), nai()) == false
+    @test precedes(nai(), nai()) == false
 
-    @test precedes_interval(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(3.0,4.0), def)) == true
+    @test precedes(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(3.0,4.0), def)) == true
 
-    @test precedes_interval(DecoratedInterval(interval(3.0,4.0), trv), DecoratedInterval(emptyinterval(), trv)) == true
+    @test precedes(DecoratedInterval(interval(3.0,4.0), trv), DecoratedInterval(emptyinterval(), trv)) == true
 
-    @test precedes_interval(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(emptyinterval(), trv)) == true
+    @test precedes(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(emptyinterval(), trv)) == true
 
-    @test precedes_interval(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
+    @test precedes(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
 
-    @test precedes_interval(DecoratedInterval(interval(0.0,2.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
+    @test precedes(DecoratedInterval(interval(0.0,2.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
 
-    @test precedes_interval(DecoratedInterval(interval(-0.0,2.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
+    @test precedes(DecoratedInterval(interval(-0.0,2.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
 
-    @test precedes_interval(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(1.0,2.0), trv)) == false
+    @test precedes(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(1.0,2.0), trv)) == false
 
-    @test precedes_interval(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
+    @test precedes(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
 
-    @test precedes_interval(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(3.0,4.0), trv)) == true
+    @test precedes(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(3.0,4.0), trv)) == true
 
-    @test precedes_interval(DecoratedInterval(interval(1.0,3.0), trv), DecoratedInterval(interval(3.0,4.0), def)) == true
+    @test precedes(DecoratedInterval(interval(1.0,3.0), trv), DecoratedInterval(interval(3.0,4.0), def)) == true
 
-    @test precedes_interval(DecoratedInterval(interval(-3.0, -1.0), def), DecoratedInterval(interval(-1.0,0.0), trv)) == true
+    @test precedes(DecoratedInterval(interval(-3.0, -1.0), def), DecoratedInterval(interval(-1.0,0.0), trv)) == true
 
-    @test precedes_interval(DecoratedInterval(interval(-3.0, -1.0), trv), DecoratedInterval(interval(-1.0,-0.0), trv)) == true
+    @test precedes(DecoratedInterval(interval(-3.0, -1.0), trv), DecoratedInterval(interval(-1.0,-0.0), trv)) == true
 
-    @test precedes_interval(DecoratedInterval(interval(1.0,3.5), trv), DecoratedInterval(interval(3.0,4.0), trv)) == false
+    @test precedes(DecoratedInterval(interval(1.0,3.5), trv), DecoratedInterval(interval(3.0,4.0), trv)) == false
 
-    @test precedes_interval(DecoratedInterval(interval(1.0,4.0), trv), DecoratedInterval(interval(3.0,4.0), trv)) == false
+    @test precedes(DecoratedInterval(interval(1.0,4.0), trv), DecoratedInterval(interval(3.0,4.0), trv)) == false
 
-    @test precedes_interval(DecoratedInterval(interval(-3.0, -0.1), trv), DecoratedInterval(interval(-1.0,0.0), trv)) == false
+    @test precedes(DecoratedInterval(interval(-3.0, -0.1), trv), DecoratedInterval(interval(-1.0,0.0), trv)) == false
 
-    @test precedes_interval(DecoratedInterval(interval(0.0,0.0), trv), DecoratedInterval(interval(-0.0,-0.0), trv)) == true
+    @test precedes(DecoratedInterval(interval(0.0,0.0), trv), DecoratedInterval(interval(-0.0,-0.0), trv)) == true
 
-    @test precedes_interval(DecoratedInterval(interval(-0.0,-0.0), trv), DecoratedInterval(interval(0.0,0.0), def)) == true
+    @test precedes(DecoratedInterval(interval(-0.0,-0.0), trv), DecoratedInterval(interval(0.0,0.0), def)) == true
 
-    @test precedes_interval(DecoratedInterval(interval(-0.0,0.0), trv), DecoratedInterval(interval(0.0,0.0), trv)) == true
+    @test precedes(DecoratedInterval(interval(-0.0,0.0), trv), DecoratedInterval(interval(0.0,0.0), trv)) == true
 
-    @test precedes_interval(DecoratedInterval(interval(-0.0,0.0), def), DecoratedInterval(interval(0.0,-0.0), trv)) == true
+    @test precedes(DecoratedInterval(interval(-0.0,0.0), def), DecoratedInterval(interval(0.0,-0.0), trv)) == true
 
-    @test precedes_interval(DecoratedInterval(interval(0.0,-0.0), trv), DecoratedInterval(interval(0.0,0.0), trv)) == true
+    @test precedes(DecoratedInterval(interval(0.0,-0.0), trv), DecoratedInterval(interval(0.0,0.0), trv)) == true
 
-    @test precedes_interval(DecoratedInterval(interval(0.0,-0.0), trv), DecoratedInterval(interval(-0.0,0.0), trv)) == true
+    @test precedes(DecoratedInterval(interval(0.0,-0.0), trv), DecoratedInterval(interval(-0.0,0.0), trv)) == true
 
 end
 
@@ -740,73 +740,73 @@ end
 
 @testset "minimal_strictly_precedes_test" begin
 
-    @test strictprecedes_interval(emptyinterval(), interval(3.0,4.0)) == true
+    @test strictprecedes(emptyinterval(), interval(3.0,4.0)) == true
 
-    @test strictprecedes_interval(interval(3.0,4.0), emptyinterval()) == true
+    @test strictprecedes(interval(3.0,4.0), emptyinterval()) == true
 
-    @test strictprecedes_interval(emptyinterval(), emptyinterval()) == true
+    @test strictprecedes(emptyinterval(), emptyinterval()) == true
 
-    @test strictprecedes_interval(interval(1.0,2.0), interval(-Inf,+Inf)) == false
+    @test strictprecedes(interval(1.0,2.0), interval(-Inf,+Inf)) == false
 
-    @test strictprecedes_interval(interval(-Inf,+Inf), interval(1.0,2.0)) == false
+    @test strictprecedes(interval(-Inf,+Inf), interval(1.0,2.0)) == false
 
-    @test strictprecedes_interval(interval(-Inf,+Inf), interval(-Inf,+Inf)) == false
+    @test strictprecedes(interval(-Inf,+Inf), interval(-Inf,+Inf)) == false
 
-    @test strictprecedes_interval(interval(1.0,2.0), interval(3.0,4.0)) == true
+    @test strictprecedes(interval(1.0,2.0), interval(3.0,4.0)) == true
 
-    @test strictprecedes_interval(interval(1.0,3.0), interval(3.0,4.0)) == false
+    @test strictprecedes(interval(1.0,3.0), interval(3.0,4.0)) == false
 
-    @test strictprecedes_interval(interval(-3.0,-1.0), interval(-1.0,0.0)) == false
+    @test strictprecedes(interval(-3.0,-1.0), interval(-1.0,0.0)) == false
 
-    @test strictprecedes_interval(interval(-3.0,-0.0), interval(0.0,1.0)) == false
+    @test strictprecedes(interval(-3.0,-0.0), interval(0.0,1.0)) == false
 
-    @test strictprecedes_interval(interval(-3.0,0.0), interval(-0.0,1.0)) == false
+    @test strictprecedes(interval(-3.0,0.0), interval(-0.0,1.0)) == false
 
-    @test strictprecedes_interval(interval(1.0,3.5), interval(3.0,4.0)) == false
+    @test strictprecedes(interval(1.0,3.5), interval(3.0,4.0)) == false
 
-    @test strictprecedes_interval(interval(1.0,4.0), interval(3.0,4.0)) == false
+    @test strictprecedes(interval(1.0,4.0), interval(3.0,4.0)) == false
 
-    @test strictprecedes_interval(interval(-3.0,-0.1), interval(-1.0,0.0)) == false
+    @test strictprecedes(interval(-3.0,-0.1), interval(-1.0,0.0)) == false
 
 end
 
 @testset "minimal_strictly_precedes_dec_test" begin
 
-    @test strictprecedes_interval(nai(), DecoratedInterval(interval(3.0,4.0), trv)) == false
+    @test strictprecedes(nai(), DecoratedInterval(interval(3.0,4.0), trv)) == false
 
-    @test strictprecedes_interval(DecoratedInterval(interval(3.0,4.0), def), nai()) == false
+    @test strictprecedes(DecoratedInterval(interval(3.0,4.0), def), nai()) == false
 
-    @test strictprecedes_interval(nai(), DecoratedInterval(emptyinterval(), trv)) == false
+    @test strictprecedes(nai(), DecoratedInterval(emptyinterval(), trv)) == false
 
-    @test strictprecedes_interval(nai(), nai()) == false
+    @test strictprecedes(nai(), nai()) == false
 
-    @test strictprecedes_interval(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(3.0,4.0), trv)) == true
+    @test strictprecedes(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(interval(3.0,4.0), trv)) == true
 
-    @test strictprecedes_interval(DecoratedInterval(interval(3.0,4.0), def), DecoratedInterval(emptyinterval(), trv)) == true
+    @test strictprecedes(DecoratedInterval(interval(3.0,4.0), def), DecoratedInterval(emptyinterval(), trv)) == true
 
-    @test strictprecedes_interval(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(emptyinterval(), trv)) == true
+    @test strictprecedes(DecoratedInterval(emptyinterval(), trv), DecoratedInterval(emptyinterval(), trv)) == true
 
-    @test strictprecedes_interval(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
+    @test strictprecedes(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
 
-    @test strictprecedes_interval(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(1.0,2.0), trv)) == false
+    @test strictprecedes(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(1.0,2.0), trv)) == false
 
-    @test strictprecedes_interval(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
+    @test strictprecedes(DecoratedInterval(interval(-Inf,+Inf), trv), DecoratedInterval(interval(-Inf,+Inf), trv)) == false
 
-    @test strictprecedes_interval(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(3.0,4.0), trv)) == true
+    @test strictprecedes(DecoratedInterval(interval(1.0,2.0), trv), DecoratedInterval(interval(3.0,4.0), trv)) == true
 
-    @test strictprecedes_interval(DecoratedInterval(interval(1.0,3.0), def), DecoratedInterval(interval(3.0,4.0), trv)) == false
+    @test strictprecedes(DecoratedInterval(interval(1.0,3.0), def), DecoratedInterval(interval(3.0,4.0), trv)) == false
 
-    @test strictprecedes_interval(DecoratedInterval(interval(-3.0,-1.0), trv), DecoratedInterval(interval(-1.0,0.0), def)) == false
+    @test strictprecedes(DecoratedInterval(interval(-3.0,-1.0), trv), DecoratedInterval(interval(-1.0,0.0), def)) == false
 
-    @test strictprecedes_interval(DecoratedInterval(interval(-3.0,-0.0), def), DecoratedInterval(interval(0.0,1.0), trv)) == false
+    @test strictprecedes(DecoratedInterval(interval(-3.0,-0.0), def), DecoratedInterval(interval(0.0,1.0), trv)) == false
 
-    @test strictprecedes_interval(DecoratedInterval(interval(-3.0,0.0), trv), DecoratedInterval(interval(-0.0,1.0), trv)) == false
+    @test strictprecedes(DecoratedInterval(interval(-3.0,0.0), trv), DecoratedInterval(interval(-0.0,1.0), trv)) == false
 
-    @test strictprecedes_interval(DecoratedInterval(interval(1.0,3.5), trv), DecoratedInterval(interval(3.0,4.0), trv)) == false
+    @test strictprecedes(DecoratedInterval(interval(1.0,3.5), trv), DecoratedInterval(interval(3.0,4.0), trv)) == false
 
-    @test strictprecedes_interval(DecoratedInterval(interval(1.0,4.0), trv), DecoratedInterval(interval(3.0,4.0), def)) == false
+    @test strictprecedes(DecoratedInterval(interval(1.0,4.0), trv), DecoratedInterval(interval(3.0,4.0), def)) == false
 
-    @test strictprecedes_interval(DecoratedInterval(interval(-3.0,-0.1), trv), DecoratedInterval(interval(-1.0,0.0), trv)) == false
+    @test strictprecedes(DecoratedInterval(interval(-3.0,-0.1), trv), DecoratedInterval(interval(-1.0,0.0), trv)) == false
 
 end
 

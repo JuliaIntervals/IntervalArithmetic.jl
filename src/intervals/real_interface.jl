@@ -65,7 +65,7 @@ Base.:(==)(::Interval, ::Interval) = # also returned when calling `≤`, `≥`, 
     throw(ArgumentError("`==` is purposely not supported for intervals. See instead `isequal_interval`."))
 
 Base.:<(::Interval, ::Interval) = # also returned when calling `isless`, `>`
-    throw(ArgumentError("`<` is purposely not supported for intervals. See instead `isstrictless`, `strictprecedes_interval`."))
+    throw(ArgumentError("`<` is purposely not supported for intervals. See instead `isstrictless`, `strictprecedes`."))
 
 Base.isdisjoint(::Interval, ::Interval) =
     throw(ArgumentError("`isdisjoint` is purposely not supported for intervals. See instead `isdisjoint_interval`."))
