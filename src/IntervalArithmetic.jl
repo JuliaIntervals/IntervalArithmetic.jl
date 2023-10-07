@@ -4,7 +4,6 @@ import CRlibm
 import FastRounding
 import RoundingEmulator
 
-using Markdown
 using SetRounding
 using EnumX
 
