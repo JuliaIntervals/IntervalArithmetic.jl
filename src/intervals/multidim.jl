@@ -43,7 +43,7 @@ function mince(x::AbstractVector, n::NTuple{N,Integer}) where {N}
 end
 
 """
-    setdiffinterval(A::AbstractVector, B::AbstractVector)
+    setdiff_interval(A::AbstractVector, B::AbstractVector)
 
 Returns a vector of `IntervalBox`es that are in the set difference `A ∖ B`,
 i.e. the set of `x` that are in `A` but not in `B`.
@@ -51,16 +51,16 @@ i.e. the set of `x` that are in `A` but not in `B`.
 Algorithm: Start from the total overlap (in all directions);
 expand each direction in turn.
 """
-function setdiffinterval(A::T, B::T) where {T<:AbstractVector}
+function setdiff_interval(A::T, B::T) where {T<:AbstractVector}
     N = length(A)
     (length(B) == N) || return throw(DimensionMismatch("A and B must have the same length"))
-    inter = intersect.(A, B)
-    any(isempty, inter) && return [A]
+    inter = intersect_interval.(A, B)
+    any(isempty_interval, inter) && return [A]
     result_list = Vector{T}(undef, 2*N)
     offset = 0
     x = copy(A)
     @inbounds for i ∈ 1:N
-        h1, h2 = _setdiffinterval(A[i], B[i])
+        h1, h2 = _setdiff_interval(A[i], B[i])
         y = similar(T, N)
         z = similar(T, N)
         for (j, k) ∈ enumerate(eachindex(y))
@@ -72,16 +72,16 @@ function setdiffinterval(A::T, B::T) where {T<:AbstractVector}
         offset += 2
         x[i] = inter[i]
     end
-    return filter!(x -> !any(isempty, x), result_list)
+    return filter!(x -> !any(isempty_interval, x), result_list)
 end
 
 # Computes the set difference x\\y and always returns a tuple of two intervals.
 # If the set difference is only one interval or is empty, then the returned tuple contains 1
 # or 2 empty intervals.
-function _setdiffinterval(x::Interval{T}, y::Interval{T}) where {T<:NumTypes}
-    inter = intersect(x, y)
-    isempty(inter) && return (x, emptyinterval(T))
-    (inter ≛ x) && return (emptyinterval(T), emptyinterval(T))  # x is subset of y; setdiffinterval is empty
+function _setdiff_interval(x::Interval{T}, y::Interval{T}) where {T<:NumTypes}
+    inter = intersect_interval(x, y)
+    isempty_interval(inter) && return (x, emptyinterval(T))
+    isequal_interval(inter, x) && return (emptyinterval(T), emptyinterval(T))  # x is subset of y; setdiff is empty
     xlo, xhi = bounds(x)
     ylo, yhi = bounds(y)
     interlo, interhi = bounds(inter)

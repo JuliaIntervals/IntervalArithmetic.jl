@@ -1,7 +1,6 @@
 include("intervals.jl")
 include("functions.jl")
 
-isnan(::Interval) = false  # NaI is always decorated
 
 """`NaI` not-an-interval: [NaN, NaN]."""
 nai(::Type{Interval{T}}) where {T<:NumTypes} = nai(T)

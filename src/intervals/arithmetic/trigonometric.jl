@@ -58,7 +58,7 @@ end
 Implement the `sin` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function sin(a::Interval{T}) where {T<:NumTypes}
-    isempty(a) && return a
+    isempty_interval(a) && return a
 
     whole_range = unsafe_interval(T, -one(T), one(T))
 
@@ -102,7 +102,7 @@ function sin(a::Interval{T}) where {T<:NumTypes}
 end
 
 function sin(a::Interval{Float64})
-    isempty(a) && return a
+    isempty_interval(a) && return a
 
     whole_range = unsafe_interval(Float64, -1.0, 1.0)
 
@@ -150,7 +150,7 @@ sinpi(a::Interval) = sin(a * π)
 Implement the `cos` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function cos(a::Interval{T}) where {T<:NumTypes}
-    isempty(a) && return a
+    isempty_interval(a) && return a
 
     whole_range = unsafe_interval(T, -one(T), one(T))
 
@@ -192,7 +192,7 @@ function cos(a::Interval{T}) where {T<:NumTypes}
 end
 
 function cos(a::Interval{Float64})
-    isempty(a) && return a
+    isempty_interval(a) && return a
 
     whole_range = unsafe_interval(Float64, -1.0, 1.0)
 
@@ -240,7 +240,7 @@ cospi(a::Interval) = cos(a * π)
 Implement the `tan` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function tan(a::Interval{T}) where {T<:NumTypes}
-    isempty(a) && return a
+    isempty_interval(a) && return a
 
     diam(a) > inf(interval(T, π)) && return entireinterval(T)
 
@@ -253,7 +253,7 @@ function tan(a::Interval{T}) where {T<:NumTypes}
 
     if iszero(lo_quadrant_mod) && hi_quadrant_mod == 1
         # check if really contains singularity:
-        if hi_quadrant * half_pi(T) ⊆ a
+        if issubset_interval(hi_quadrant * half_pi(T), a)
             return entireinterval(T)  # crosses singularity
         end
 
@@ -266,7 +266,7 @@ function tan(a::Interval{T}) where {T<:NumTypes}
 end
 
 function tan(a::Interval{Float64})
-    isempty(a) && return a
+    isempty_interval(a) && return a
 
     diam(a) > inf(interval(Float64, π)) && return entireinterval(Float64)
 
@@ -295,7 +295,7 @@ end
 Implement the `cot` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function cot(a::Interval{T}) where {T<:NumTypes}
-    isempty(a) && return a
+    isempty_interval(a) && return a
 
     diam(a) > inf(interval(T, π)) && return entireinterval(T)
 
@@ -340,7 +340,7 @@ cot(a::Interval{Float64}) = atomic(Float64, cot(big(a)))
 Implement the `sec` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function sec(a::Interval{T}) where {T<:NumTypes}
-    isempty(a) && return a
+    isempty_interval(a) && return a
 
     diam(a) > inf(interval(T, π)) && return entireinterval(T)
 
@@ -379,7 +379,7 @@ sec(a::Interval{Float64}) = atomic(Float64, sec(big(a)))
 Implement the `csc` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function csc(a::Interval{T}) where {T<:NumTypes}
-    isempty(a) && return a
+    isempty_interval(a) && return a
 
     diam(a) > inf(interval(T, π)) && return entireinterval(T)
 
@@ -430,8 +430,8 @@ Implement the `asin` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function asin(a::Interval{T}) where {T<:NumTypes}
     domain = unsafe_interval(T, -one(T), one(T))
-    a = a ∩ domain
-    isempty(a) && return a
+    a = intersect_interval(a, domain)
+    isempty_interval(a) && return a
     alo, ahi = bounds(a)
     return @round(T, asin(alo), asin(ahi))
 end
@@ -443,8 +443,8 @@ Implement the `acos` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function acos(a::Interval{T}) where {T<:NumTypes}
     domain = unsafe_interval(T, -one(T), one(T))
-    a = a ∩ domain
-    isempty(a) && return a
+    a = intersect_interval(a, domain)
+    isempty_interval(a) && return a
     alo, ahi = bounds(a)
     return @round(T, acos(ahi), acos(alo))
 end
@@ -455,20 +455,20 @@ end
 Implement the `atan` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function atan(a::Interval{T}) where {T<:NumTypes}
-    isempty(a) && return a
+    isempty_interval(a) && return a
     alo, ahi = bounds(a)
     return @round(T, atan(alo), atan(ahi))
 end
 
 function atan(y::Interval{T}, x::Interval{S}) where {T<:NumTypes,S<:NumTypes}
     F = Interval{promote_type(T, S)}
-    (isempty(y) || isempty(x)) && return emptyinterval(F)
+    (isempty_interval(y) || isempty_interval(x)) && return emptyinterval(F)
     return F(atan(big(y), big(x)))
 end
 
 function atan(y::Interval{BigFloat}, x::Interval{BigFloat})
-    isempty(y) && return y
-    isempty(x) && return x
+    isempty_interval(y) && return y
+    isempty_interval(x) && return x
 
     ylo, yhi = bounds(y)
     xlo, xhi = bounds(x)
@@ -538,7 +538,7 @@ end
 Implement the `acot` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function acot(a::Interval{T}) where {T<:NumTypes}
-    isempty(a) && return a
+    isempty_interval(a) && return a
     return atomic(T, interval(acot(bigequiv(sup(a))), acot(bigequiv(inf(a)))))
     # return atomic(T, @round(Interval{BigFloat}, acot(bigequiv(sup(a))), acot(bigequiv(inf(a)))))
 end

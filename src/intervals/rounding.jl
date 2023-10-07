@@ -51,7 +51,7 @@ const rounding_types = (:fast, :tight, :accurate, :slow, :none)
 interval_rounding() = IntervalRounding{:tight}()
 
 # BigFloat conversion
-convert(::Type{BigFloat}, x, rounding_mode::RoundingMode) =
+Base.convert(::Type{BigFloat}, x, rounding_mode::RoundingMode) =
     setrounding(BigFloat, rounding_mode) do
         convert(BigFloat, x)
     end

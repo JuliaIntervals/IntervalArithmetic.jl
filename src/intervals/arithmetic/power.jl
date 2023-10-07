@@ -28,13 +28,13 @@ end
 ^(a::F, b::AbstractFloat) where {F<:Interval{BigFloat}} = a^big(b)
 
 function ^(a::Interval{BigFloat}, n::Integer)
-    isempty(a) && return a
+    isempty_interval(a) && return a
     iszero(n) && return one(Interval{BigFloat})
     n == 1 && return a
     (n < 0 && isthinzero(a)) && return emptyinterval(BigFloat)
 
     if isodd(n) # odd power
-        isentire(a) && return a
+        isentire_interval(a) && return a
         if n > 0
             inf(a) == 0 && return @round(BigFloat, zero(BigFloat), sup(a)^n)
             sup(a) == 0 && return @round(BigFloat, inf(a)^n, zero(BigFloat))
@@ -85,8 +85,8 @@ function ^(a::Interval{BigFloat}, x::BigFloat)
     isinteger(x) && return a^(round(Int, x))
     x == 0.5 && return sqrt(a)
 
-    a = a ∩ domain
-    isempty(a) && return a
+    a = intersect_interval(a, domain)
+    isempty_interval(a) && return a
 
     M = typemax(BigFloat)
     MM = typemax(Interval{BigFloat})
@@ -119,7 +119,7 @@ function ^(a::F, x::Rational{R}) where {T<:NumTypes,F<:Interval{T},R<:Integer}
     p = x.num
     q = x.den
 
-    isempty(a) && return a
+    isempty_interval(a) && return a
     iszero(x) && return one(a)
     # x < 0 && return inv(a^(-x))
     x < 0 && return F( inv( (bigequiv(a))^(-x) ) )
@@ -140,7 +140,7 @@ function ^(a::F, x::Rational{R}) where {T<:NumTypes,F<:Interval{T},R<:Integer}
     end
 
     if alo < 0 && ahi ≥ 0
-        a = a ∩ unsafe_interval(T, zero(T), typemax(T))
+        a = intersect_interval(a, unsafe_interval(T, zero(T), typemax(T)))
     end
 
     b = nthroot( bigequiv(a), q)
@@ -152,10 +152,10 @@ end
 
 # Interval power of an interval:
 function ^(a::Interval{BigFloat}, x::Interval)
-    isempty(x) && return x
+    isempty_interval(x) && return x
     domain = unsafe_interval(BigFloat, zero(BigFloat), typemax(BigFloat))
-    a = a ∩ domain
-    isempty(a) && return a
+    a = intersect_interval(a, domain)
+    isempty_interval(a) && return a
     return hull(a^inf(x), a^sup(x))
 end
 
@@ -179,9 +179,9 @@ enclosure when using multiplication with correct rounding.
 """
 function pow(x::Interval{T}, n::Integer) where {T<:NumTypes}
     n < 0 && return 1/pow(x, -n)
-    isempty(x) && return x
+    isempty_interval(x) && return x
 
-    if iseven(n) && 0 ∈ x
+    if iseven(n) && in_interval(0, x)
         xmig = mig(x)
         xmag = mag(x)
         return hull(zero(x),
@@ -196,13 +196,13 @@ function pow(x::Interval{T}, n::Integer) where {T<:NumTypes}
 end
 
 function pow(x::Interval, y::Interval)  # fast real power, including for y an Interval
-    isempty(x) && return x
+    isempty_interval(x) && return x
     isthininteger(y) && return pow(x, Int(inf(y)))
     return exp(y * log(x))
 end
 
 function pow(x::Interval, y)  # fast real power, including for y an Interval
-    isempty(x) && return x
+    isempty_interval(x) && return x
     isinteger(y) && return pow(x, Int(inf(y)))
     return exp(y * log(x))
 end
@@ -210,7 +210,7 @@ end
 for f in (:exp, :expm1)
     @eval begin
         function ($f)(a::Interval{T}) where {T<:NumTypes}
-            isempty(a) && return a
+            isempty_interval(a) && return a
             return @round( T, ($f)(inf(a)), ($f)(sup(a)) )
         end
     end
@@ -227,7 +227,7 @@ for f in (:exp2, :exp10, :cbrt)
     @eval ($f)(a::F) where {F<:Interval} = F($f(bigequiv(a)))  # no CRlibm version
 
     @eval function ($f)(a::Interval{BigFloat})
-            isempty(a) && return a
+            isempty_interval(a) && return a
             return @round( BigFloat, ($f)(inf(a)), ($f)(sup(a)) )
         end
 end
@@ -235,9 +235,9 @@ end
 for f in (:log, :log2, :log10)
     @eval function ($f)(a::Interval{T}) where {T<:NumTypes}
             domain = unsafe_interval(T, zero(T), typemax(T))
-            a = a ∩ domain
+            a = intersect_interval(a, domain)
 
-            (isempty(a) || sup(a) ≤ zero(T)) && return emptyinterval(T)
+            (isempty_interval(a) || sup(a) ≤ zero(T)) && return emptyinterval(T)
 
             return @round( T, ($f)(inf(a)), ($f)(sup(a)) )
         end
@@ -245,9 +245,9 @@ end
 
 function log1p(a::Interval{T}) where {T<:NumTypes}
     domain = unsafe_interval(T, -one(T), typemax(T))
-    a = a ∩ domain
+    a = intersect_interval(a, domain)
 
-    (isempty(a) || sup(a) ≤ -1) && return emptyinterval(T)
+    (isempty_interval(a) || sup(a) ≤ -1) && return emptyinterval(T)
 
     @round( T, log1p(inf(a)), log1p(sup(a)) )
 end
@@ -258,7 +258,7 @@ end
 Compute the real n-th root of Interval.
 """
 function nthroot(a::Interval{BigFloat}, n::Integer)
-    isempty(a) && return a
+    isempty_interval(a) && return a
     n == 1 && return a
     n == 2 && return sqrt(a)
     n == 0 && return emptyinterval(a)
@@ -267,8 +267,8 @@ function nthroot(a::Interval{BigFloat}, n::Integer)
 
     alo, ahi = bounds(a)
     ahi < 0 && iseven(n) && return emptyinterval(BigFloat)
-    if alo < 0 && ahi >= 0 && iseven(n)
-        a = a ∩ unsafe_interval(BigFloat, zero(BigFloat), typemax(BigFloat))
+    if alo < 0 && ahi ≥ 0 && iseven(n)
+        a = intersect_interval(a, unsafe_interval(BigFloat, zero(BigFloat), typemax(BigFloat)))
         alo, ahi = bounds(a)
     end
     ui = convert(Culong, n)

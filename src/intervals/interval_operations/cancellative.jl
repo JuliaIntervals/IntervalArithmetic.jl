@@ -10,9 +10,9 @@ Return the unique interval `c` such that `b + c = a`.
 Implement the `cancelMinus` function of the IEEE Standard 1788-2015 (Section 9.2).
 """
 function cancelminus(a::Interval{T}, b::Interval{T}) where {T<:NumTypes}
-    (isempty(a) && (isempty(b) || !isunbounded(b))) && return emptyinterval(T)
+    (isempty_interval(a) && (isempty_interval(b) || !isunbounded(b))) && return emptyinterval(T)
 
-    (isunbounded(a) || isunbounded(b) || isempty(b)) && return entireinterval(T)
+    (isunbounded(a) || isunbounded(b) || isempty_interval(b)) && return entireinterval(T)
 
     diam(a) < diam(b) && return entireinterval(T)
 

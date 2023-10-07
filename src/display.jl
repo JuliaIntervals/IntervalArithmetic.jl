@@ -130,7 +130,7 @@ end
 # `String` representation of an `Interval`
 
 function basic_representation(a::Interval{T}, format::Symbol) where {T<:AbstractFloat}
-    isempty(a) && return "∅"
+    isempty_interval(a) && return "∅"
     sigdigits = display_params.sigdigits
     if format === :full
         # Do not use `inf(a)` to avoid -0.0
@@ -150,7 +150,7 @@ function basic_representation(a::Interval{T}, format::Symbol) where {T<:Abstract
 end
 
 function basic_representation(a::Interval{Float32}, format::Symbol)
-    isempty(a) && return "∅"
+    isempty_interval(a) && return "∅"
     sigdigits = display_params.sigdigits
     if format === :full
         # Do not use `inf(a)` to avoid -0.0
@@ -171,7 +171,7 @@ function basic_representation(a::Interval{Float32}, format::Symbol)
 end
 
 function basic_representation(a::Interval{T}, format::Symbol) where {T<:Rational}
-    isempty(a) && return "∅"
+    isempty_interval(a) && return "∅"
     if format === :full
         # Do not use `inf(a)` to avoid -0.0
         return string("Interval{", T, "}(", a.lo, ", ", sup(a), ")")

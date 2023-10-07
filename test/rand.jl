@@ -1,18 +1,17 @@
 using Test
 using IntervalArithmetic
-using StaticArrays
 using Random
 
 @testset "rand tests" begin
 
     X = interval(3, 4)
     for i in 1:100
-        @test rand(X) ∈ X
+        @test in_interval(rand(X), X)
     end
 
     X = interval(3, 4)
     for i in 1:100
-        @test rand(X,4)[(i%4)+1] ∈ X
+        @test in_interval(rand(X, 4)[(i%4)+1], X)
     end
 
     for T in (Float32, Float64, BigFloat)

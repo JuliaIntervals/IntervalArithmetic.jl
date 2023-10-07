@@ -1,6 +1,8 @@
 using Documenter, IntervalArithmetic
 
-makedocs(
+DocMeta.setdocmeta!(IntervalArithmetic, :DocTestSetup, :(using IntervalArithmetic))
+
+makedocs(;
     modules = [IntervalArithmetic],
     authors = "David P. Sanders and Luis Benet",
     sitename = "IntervalArithmetic.jl",

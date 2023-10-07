@@ -87,12 +87,12 @@ end
     pi5 = calc_pi5(N)
 
 
-    @test big_pi ∈ pi1
-    @test big_pi ∈ pi2
-    @test big_pi ∈ pi3
-    @test big_pi ∈ pi4
-    @test big_pi ∈ pi5
+    @test in_interval(big_pi, pi1)
+    @test in_interval(big_pi, pi2)
+    @test in_interval(big_pi, pi3)
+    @test in_interval(big_pi, pi4)
+    @test in_interval(big_pi, pi5)
 
-    @test pi1 ≛ pi2
-    @test pi2 ≛ pi3
+    @test isequal_interval(pi1, pi2)
+    @test isequal_interval(pi2, pi3)
 end

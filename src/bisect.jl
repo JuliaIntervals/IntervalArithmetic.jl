@@ -1,12 +1,10 @@
-const where_bisect = 0.49609375
-
 """
     bisect(X::Interval, α=0.49609375)
 
 Split the interval `X` at position α; α=0.5 corresponds to the midpoint.
 Returns a tuple of the new intervals.
 """
-function bisect(X::Interval{T}, α=where_bisect) where {T<:NumTypes}
+function bisect(X::Interval{T}, α=0.49609375) where {T<:NumTypes}
     @assert 0 ≤ α ≤ 1
 
     m = scaled_mid(X, α)

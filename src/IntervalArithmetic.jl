@@ -15,13 +15,10 @@ import Base:
     rad2deg, deg2rad,
     sin, cos, tan, cot, csc, sec, asin, acos, atan, acot, sinpi, cospi, sincospi,
     sinh, cosh, tanh, coth, csch, sech, asinh, acosh, atanh, acoth,
-    in, union, intersect, issubset, isempty, isdisjoint,
-    convert,
-    BigFloat, float, big,
+    float, big,
     floor, ceil, trunc, sign, round, copysign, flipsign, signbit,
     expm1, log1p,
     precision,
-    isfinite, isinteger, isnan, isinf, iszero,
     abs, abs2,
     show,
     parse, hash
@@ -29,47 +26,51 @@ import Base:
 import Base.MPFR: MPFRRoundingMode
 import Base.MPFR: MPFRRoundUp, MPFRRoundDown, MPFRRoundNearest, MPFRRoundToZero, MPFRRoundFromZero
 
-export
-    Interval, interval, ±, @I_str,
-    diam, radius, mid, scaled_mid, mag, mig, hull,
-    emptyinterval, isempty, isinterior,
-    precedes, strictprecedes, ≺, ⊂, ⊃, contains_zero, isthinzero,
-    isweaklyless, isstrictless, overlap, Overlap,
-    ≛, setdiffinterval,
-    entireinterval, isentire, nai, isnai, isthin, iscommon, isatomic,
-    inf, sup, bounds, bisect, mince,
-    dist,
-    midpoint_radius,
-    RoundTiesToEven, RoundTiesToAway,
-    IntervalRounding,
-    cancelminus, cancelplus, isbounded, isunbounded,
-    pow, extended_div, nthroot,
-    setformat
-
-## Decorations
-export
-    decoration, DecoratedInterval,
-    com, dac, def, trv, ill
-
 function __init__()
     setrounding(BigFloat, RoundNearest)
 end
 
-function Base.setrounding(f::Function, ::Type{Rational{T}},
-    rounding_mode::RoundingMode) where T
+function Base.setrounding(f::Function, ::Type{Rational{T}}, rounding_mode::RoundingMode) where {T<:Integer}
     return setrounding(f, float(Rational{T}), rounding_mode)
 end
 
-## Includes
+#
 
 include("intervals/intervals.jl")
+export Interval, interval, ±, @I_str,
+    diam, radius, mid, midradius, scaled_mid, mag, mig, hull,
+    emptyinterval, isempty_interval,
+    isequal_interval,
+    in_interval,
+    issubset_interval, isstrictsubset_interval,
+    precedes, strictprecedes,
+    isweakless, isstrictless,
+    contains_zero,
+    isthinzero, isthin,
+    isbounded, isunbounded,
+    isdisjoint_interval, intersect_interval, setdiff_interval,
+    entireinterval, isentire_interval, nai, isnai, iscommon, isatomic,
+    inf, sup, bounds, mince,
+    dist,
+    RoundTiesToEven, RoundTiesToAway,
+    IntervalRounding,
+    cancelminus, cancelplus,
+    pow, extended_div, nthroot,
+    overlap, Overlap
 
 include("bisect.jl")
+export bisect
+
 include("decorations/decorations.jl")
+export decoration, DecoratedInterval, com, dac, def, trv, ill
 
 include("rand.jl")
+
 include("parsing.jl")
+
 include("display.jl")
+export setformat
+
 include("symbols.jl")
 
 end
