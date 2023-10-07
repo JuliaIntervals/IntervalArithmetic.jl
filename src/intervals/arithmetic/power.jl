@@ -1,6 +1,6 @@
 # This file contains the functions described as "Power functions" in Section 9.1
 # of the IEEE Standard 1788-2015 and required for set-based flavor in Section
-# 10.5.3, with addition of the `sqr` function.
+# 10.5.3
 
 # CRlibm does not contain a correctly-rounded `^` function for Float64
 # use the BigFloat version from MPFR instead, which is correctly-rounded
@@ -159,14 +159,12 @@ function ^(a::Interval{BigFloat}, x::Interval)
     return hull(a^inf(x), a^sup(x))
 end
 
-sqr(a::Interval) = a^2
-
 """
     hypot(x::Interval, n::Integer)
 
 Direct implemntation of `hypot` using intervals.
 """
-hypot(x::Interval, y::Interval) = sqrt(sqr(x) + sqr(y))
+hypot(x::Interval, y::Interval) = sqrt(x^2 + y^2)
 
 
 """

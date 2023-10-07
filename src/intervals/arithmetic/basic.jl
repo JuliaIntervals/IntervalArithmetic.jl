@@ -1,7 +1,6 @@
 # This file contains the functions described as "Basic arithmetic functions" in
 # Section 9.1 of the IEEE Standard 1788-2015 and required for set-based flavor
-# in Section 10.5.3, at the exception of the `sqr` function present in the
-# power.jl file
+# in Section 10.5.3
 
 +(a::Interval) = a # not in the IEEE Standard 1788-2015
 

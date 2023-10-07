@@ -12,7 +12,7 @@ function abs(a::Interval{T}) where {T<:NumTypes}
     return unsafe_interval(T, mig(a), mag(a))
 end
 
-abs2(a::Interval) = sqr(a)
+abs2(a::Interval) = a^2
 
 """
     min(a::Interval, b::Interval)
