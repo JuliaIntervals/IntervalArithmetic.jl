@@ -1,7 +1,7 @@
 module Symbols
 
     using IntervalArithmetic
-    export .., ≛, ≺, ⪽, ∅, ℝ, ∞
+    export .., ≛, ≺, ⪽, ∅, ℝ
 
 """
     ..(a, b)
@@ -69,12 +69,5 @@ flavor and default bound type.
 See also: [`entireinterval`](@ref).
 """
 const ℝ = entireinterval()
-
-"""
-    ∞
-
-Unicode alias of `Inf`.
-"""
-const ∞ = Inf
 
 end
