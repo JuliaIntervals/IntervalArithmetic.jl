@@ -2,7 +2,8 @@ using IntervalArithmetic, ForwardDiff
 using Test
 
 @testset "AD" begin
-    @test ForwardDiff.derivative(abs, -2.0 .. 2.0) == -1.0 .. 1.0
+    for F in (Interval, DecoratedInterval)
+        @test ForwardDiff.derivative(abs, F(-2.0 .. 2.0)) == F(-1.0 .. 1.0)
     @test ForwardDiff.derivative(abs, 1.0 .. 2.0) == 1.0 .. 1.0
     @test ForwardDiff.derivative(abs, -2.0 .. -1.0) == -1.0 .. -1.0
     @test ForwardDiff.derivative(abs, Interval(0.0)) == Interval(1.0)
