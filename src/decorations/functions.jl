@@ -4,31 +4,25 @@ Base.literal_pow(::typeof(^), x::DecoratedInterval{T}, ::Val{p}) where {T,p} = x
 
 
 # zero, one
-zero(a::DecoratedInterval{T}) where T<:Real = DecoratedInterval(zero(T))
-zero(::Type{DecoratedInterval{T}}) where T<:Real = DecoratedInterval(zero(T))
-one(a::DecoratedInterval{T}) where T<:Real = DecoratedInterval(one(T))
-one(::Type{DecoratedInterval{T}}) where T<:Real = DecoratedInterval(one(T))
-
-# NaI: not-an-interval
-"""`NaI` not-an-interval: [NaN, NaN]."""
-nai(::Type{T}) where T<:Real = DecoratedInterval(Interval{T}(convert(T, NaN), convert(T, NaN)), ill)
-nai(x::Interval{T}) where T<:Real = nai(T)
-nai(x::DecoratedInterval{T}) where T<:Real = nai(T)
-nai() = nai(precision(Interval)[1])
-isnai(x::Interval) = isnan(x.lo) || isnan(x.hi)
-isnai(x::DecoratedInterval) = isnai(interval(x)) && x.decoration == ill
-isnan(x::Interval) = isnai(x)
+zero(::DecoratedInterval{T}) where {T<:NumTypes} = DecoratedInterval(zero(T))
+zero(::Type{DecoratedInterval{T}}) where {T<:NumTypes} = DecoratedInterval(zero(T))
+one(::DecoratedInterval{T}) where {T<:NumTypes} = DecoratedInterval(one(T))
+one(::Type{DecoratedInterval{T}}) where {T<:NumTypes} = DecoratedInterval(one(T))
 
 ## Bool functions
-bool_functions = (
-    :isempty, :isentire, :isunbounded,
-    :isfinite, :isnan,
+
+Base.:(==)(::DecoratedInterval, ::DecoratedInterval) =
+    throw(ArgumentError("`==` is purposely not supported, use `isequal_interval` instead"))
+
+const bool_functions = (
+    :isempty_interval, :isentire_interval, :isunbounded, :isbounded,
     :isthin, :iscommon
 )
 
-bool_binary_functions = (
-    :<, :>, :!=, :⊆, :<=, :(==),
-    :isinterior, :isdisjoint, :precedes, :strictprecedes
+const bool_binary_functions = (
+    :issubset_interval, :isstrictsubset_interval, :isdisjoint_interval,
+    :precedes, :strictprecedes, :isweakless, :isstrictless,
+    :isequal_interval, :overlap
 )
 
 for f in bool_functions
@@ -42,16 +36,16 @@ for f in bool_binary_functions
     end
 end
 
-in(x::T, a::DecoratedInterval) where T<:Real = in(x, interval(a))
+in_interval(x::Real, a::DecoratedInterval) = in_interval(x, interval(a))
 
 
 ## scalar functions: mig, mag and friends
 scalar_functions = (
-    :mig, :mag, :inf, :sup, :mid, :diam, :radius, :eps, :midpoint_radius
+    :mig, :mag, :inf, :sup, :mid, :diam, :radius, :eps, :midradius
 )
 
 for f in scalar_functions
-    @eval $(f)(xx::DecoratedInterval{T}) where T = $f(interval(xx))
+    @eval $(f)(xx::DecoratedInterval)= $f(interval(xx))
 end
 
 dist(xx::DecoratedInterval, yy::DecoratedInterval) = dist(interval(xx), interval(yy))
@@ -69,23 +63,27 @@ for f in arithm_functions
         dec = min(decoration(xx), decoration(yy), decoration(r))
         DecoratedInterval(r, dec)
     end
+    @eval $(f)(xx::Real, yy::DecoratedInterval) = $(f)(DecoratedInterval(xx), yy)
+    @eval $(f)(xx::DecoratedInterval, yy::Real) = $(f)(xx, DecoratedInterval(yy))
 end
 
 # Division
 function inv(xx::DecoratedInterval{T}) where T
     x = interval(xx)
     dx = decoration(xx)
-    dx = zero(T) ∈ x ? min(dx,trv) : dx
+    dx = in_interval(zero(T), x) ? min(dx, trv) : dx
     r = inv(x)
     dx = min(decoration(r), dx)
     DecoratedInterval( r, dx )
 end
+/(xx::Real, yy::DecoratedInterval) = DecoratedInterval(xx) / yy
+/(xx::DecoratedInterval, yy::Real) = xx / DecoratedInterval(yy)
 function /(xx::DecoratedInterval{T}, yy::DecoratedInterval{T}) where T
     x = interval(xx)
     y = interval(yy)
     r = x / y
     dy = decoration(yy)
-    dy = zero(T) ∈ y ? min(dy, trv) : dy
+    dy = in_interval(zero(T), y) ? min(dy, trv) : dy
     dy = min(decoration(xx), dy, decoration(r))
     DecoratedInterval(r, dy)
 end
@@ -104,7 +102,7 @@ function ^(xx::DecoratedInterval{T}, n::Integer) where T
     x = interval(xx)
     r = x^n
     d = min(decoration(xx), decoration(r))
-    n < 0 && zero(T) ∈ x && return DecoratedInterval(r, trv)
+    n < 0 && in_interval(zero(T), x) && return DecoratedInterval(r, trv)
     DecoratedInterval(r, d)
 end
 
@@ -112,8 +110,8 @@ function ^(xx::DecoratedInterval{T}, q::AbstractFloat) where T
     x = interval(xx)
     r = x^q
     d = min(decoration(xx), decoration(r))
-    if x > zero(T) || (x.lo ≥ zero(T) && q > zero(T)) ||
-            (isinteger(q) && q > zero(q)) || (isinteger(q) && zero(T) ∉ x)
+    if inf(x) > zero(T) || (inf(x) ≥ zero(T) && q > zero(T)) ||
+            (isinteger(q) && q > zero(q)) || (isinteger(q) && !in_interval(zero(T), x))
         return DecoratedInterval(r, d)
     end
     DecoratedInterval(r, trv)
@@ -123,8 +121,8 @@ function ^(xx::DecoratedInterval{T}, q::Rational{S}) where {T, S<:Integer}
     x = interval(xx)
     r = x^q
     d = min(decoration(xx), decoration(r))
-    if x > zero(T) || (x.lo ≥ zero(T) && q > zero(T)) ||
-            (isinteger(q) && q > zero(q)) || (isinteger(q) && zero(T) ∉ x)
+    if inf(x) > zero(T) || (inf(x) ≥ zero(T) && q > zero(T)) ||
+            (isinteger(q) && q > zero(q)) || (isinteger(q) && !in_interval(zero(T), x))
         return DecoratedInterval(r, d)
     end
     DecoratedInterval(r, trv)
@@ -135,9 +133,9 @@ function ^(xx::DecoratedInterval{T}, qq::DecoratedInterval{S}) where {T,S}
     q = interval(qq)
     r = x^q
     d = min(decoration(xx), decoration(qq), decoration(r))
-    if x > zero(T) || (x.lo ≥ zero(T) && q.lo > zero(T)) ||
-            (isthin(q) && isinteger(q.lo) && q.lo > zero(q)) ||
-            (isthin(q) && isinteger(q.lo) && zero(T) ∉ x)
+    if inf(x) > zero(T) || (inf(x) ≥ zero(T) && inf(q) > zero(T)) ||
+            (isthin(q) && isinteger(inf(q)) && inf(q) > zero(T)) ||
+            (isthin(q) && isinteger(inf(q)) && !in_interval(zero(T), x))
         return DecoratedInterval(r, d)
     end
     DecoratedInterval(r, trv)
@@ -157,7 +155,7 @@ function ceil(xx::DecoratedInterval{T}) where T
     x = interval(xx)
     r = ceil(x)
     d = decoration(xx)
-    if isinteger(x.hi)
+    if isinteger(sup(x))
         d = min(d, dac)
     end
     isthin(r) && return DecoratedInterval(r, d)
@@ -167,7 +165,7 @@ function floor(xx::DecoratedInterval{T}) where T
     x = interval(xx)
     r = floor(x)
     d = decoration(xx)
-    if isinteger(x.lo)
+    if isinteger(inf(x))
         d = min(d, dac)
     end
     isthin(r) && return DecoratedInterval(r, d)
@@ -177,7 +175,7 @@ function trunc(xx::DecoratedInterval{T}) where T
     x = interval(xx)
     r = trunc(x)
     d = decoration(xx)
-    if (isinteger(x.lo) && x.lo < zero(T)) || (isinteger(x.hi) && x.hi > zero(T))
+    if (isinteger(inf(x)) && inf(x) < zero(T)) || (isinteger(sup(x)) && sup(x) > zero(T))
         d = min(d, dac)
     end
     isthin(r) && return DecoratedInterval(r, d)
@@ -188,7 +186,7 @@ function round(xx::DecoratedInterval, ::RoundingMode{:Nearest})
     x = interval(xx)
     r = round(x)
     d = decoration(xx)
-    if isinteger(2*x.lo) || isinteger(2*x.hi)
+    if isinteger(2*inf(x)) || isinteger(2*sup(x))
         d = min(d, dac)
     end
     isthin(r) && return DecoratedInterval(r, d)
@@ -198,7 +196,7 @@ function round(xx::DecoratedInterval, ::RoundingMode{:NearestTiesAway})
     x = interval(xx)
     r = round(x,RoundNearestTiesAway)
     d = decoration(xx)
-    if isinteger(2*x.lo) || isinteger(2*x.hi)
+    if isinteger(2*inf(x)) || isinteger(2*sup(x))
         d = min(d, dac)
     end
     isthin(r) && return DecoratedInterval(r, d)
@@ -227,7 +225,7 @@ abs(xx::DecoratedInterval{T}) where T =
 
 
 ## Other (cancel and set) functions
-other_functions = ( :cancelplus, :cancelminus, :intersect, :hull, :union )
+other_functions = ( :cancelplus, :cancelminus, :intersect_interval, :hull )
 
 for f in other_functions
     @eval $(f)(xx::DecoratedInterval{T}, yy::DecoratedInterval{T}) where T =
@@ -249,11 +247,11 @@ following the IEEE-1788 Standard (see Sect. 11.7.1, pp 47).
 """ cancelminus
 
 @doc """
-    intersect(xx, yy)
+    intersect_interval(xx, yy)
 
 Decorated interval extension; the result is decorated as `trv`,
 following the IEEE-1788 Standard (see Sect. 11.7.1, pp 47).
-""" intersect
+""" intersect_interval
 
 @doc """
     hull(xx, yy)
@@ -262,12 +260,6 @@ Decorated interval extension; the result is decorated as `trv`,
 following the IEEE-1788 Standard (see Sect. 11.7.1, pp 47).
 """ hull
 
-@doc """
-    union(xx, yy)
-
-Decorated interval extension; the result is decorated as `trv`,
-following the IEEE-1788 Standard (see Sect. 11.7.1, pp 47).
-""" union
 
 
 ## Functions on unrestricted domains; tan and atan are treated separately
@@ -312,10 +304,10 @@ function atan(yy::DecoratedInterval{T}, xx::DecoratedInterval{T}) where T
     d = decoration(r)
     d = min(d, decoration(xx), decoration(yy))
     # Check cases when decoration is trv and decays (from com or dac)
-    if zero(T) ∈ y
-        zero(T) ∈ x && return DecoratedInterval(r, trv)
-        if x.hi < zero(T)
-            y.lo < zero(T) && return DecoratedInterval(r, min(d, def))
+    if in_interval(zero(T), y)
+        in_interval(zero(T), x) && return DecoratedInterval(r, trv)
+        if sup(x) < zero(T)
+            inf(y) < zero(T) && return DecoratedInterval(r, min(d, def))
             return DecoratedInterval(r, min(d, dac))
         end
     end
@@ -328,39 +320,37 @@ end
 
 # The function is unbounded at the bounded edges of the domain
 restricted_functions1 = Dict(
-    :log   => [0, ∞],
-    :log2  => [0, ∞],
-    :log10 => [0, ∞],
-    :atanh => [-1, 1]
+    :log   => unsafe_interval(Float64, 0.0, Inf),
+    :log2  => unsafe_interval(Float64, 0.0, Inf),
+    :log10 => unsafe_interval(Float64, 0.0, Inf),
+    :atanh => unsafe_interval(Float64, -1.0, 1.0)
 )
 
 # The function is bounded at the bounded edge(s) of the domain
 restricted_functions2 = Dict(
-    :sqrt  => [0, ∞],
-    :asin  => [-1, 1],
-    :acos  => [-1, 1],
-    :acosh => [1, ∞]
+    :sqrt  => unsafe_interval(Float64, 0.0, Inf),
+    :asin  => unsafe_interval(Float64, -1.0, 1.0),
+    :acos  => unsafe_interval(Float64, -1.0, 1.0),
+    :acosh => unsafe_interval(Float64, 1.0, Inf)
 )
 
 # Define functions with restricted domains on DecoratedInterval's:
 for (f, domain) in restricted_functions1
-    domain = Interval(domain...)
     @eval function Base.$(f)(xx::DecoratedInterval{T}) where T
         x = interval(xx)
         r = $(f)(x)
         d = min(decoration(xx), decoration(r))
-        x ⪽ $(domain) && return DecoratedInterval(r, d)
+        isstrictsubset_interval(x, $domain) && return DecoratedInterval(r, d)
         DecoratedInterval(r, trv)
     end
 end
 
 for (f, domain) in restricted_functions2
-    domain = Interval(domain...)
     @eval function Base.$(f)(xx::DecoratedInterval{T}) where T
         x = interval(xx)
         r = $(f)(x)
         d = min(decoration(xx), decoration(r))
-        x ⊆ $(domain) && return DecoratedInterval(r, d)
+        issubset_interval(x, $domain) && return DecoratedInterval(r, d)
         DecoratedInterval(r, trv)
     end
 end

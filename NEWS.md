@@ -6,7 +6,7 @@
 - The package now supports only Julia v1.3 and later.
 
 ### Breaking changes
-- Changed from using `FastRounding.jl` to `RoundingEmulator.jl` for the defalt rounding mode. [#370](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/370)
+- Changed from using `FastRounding.jl` to `RoundingEmulator.jl` for the default rounding mode. [#370](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/370)
 
 
 ## v0.15
@@ -270,7 +270,7 @@ the interval, e.g. `convert(Interval{Float64}, 0.1)`
 
 - Improvements towards conformance with the [IEEE-1788](https://standards.ieee.org/findstds/standard/1788-2015.html) standard for Interval Arithmetic:
 
- - New `special_intervals.jl` file, with definitions of `emptyinterval`, `entireinterval`, `nai` and related functions. Add new interval functions (`<=`, `radius`, `precedes`, `strictprecedes`, `≺`, etc).
+ - New `special_intervals.jl` file, with definitions of `emptyinterval`, `RR`, `nai` and related functions. Add new interval functions (`<=`, `radius`, `precedes`, `strictprecedes`, `≺`, etc).
 
  - Control rounding tighter for arithmetic operations; `*`, `inv` and `/` have been rewritten; this includes changes in `make_interval` and `convert` to get consistent behavior. These functions pass the corresponding tests in the [ITF1788](https://github.com/oheim/ITF1788) test suite.
 - Deprecate the use of `⊊` in favor of `isinterior` (`⪽`).
@@ -293,7 +293,7 @@ v0.1 is the first public release of the package.
 
 ### Interval arithmetic
 - Two methods for interval rounding are available:
- (i) narrow/slow (which uses hardward rounding mode changes for `Float64` intervals, and (ii) wide/fast (which does not change the rounding mode)
+ (i) narrow/slow (which uses hardware rounding mode changes for `Float64` intervals, and (ii) wide/fast (which does not change the rounding mode)
 - The current interval precision and rounding mode are stored in the `parameters` object
 - The macro `@interval` generates intervals based on the current interval precision
 - Trigonometric functions are "nearly" rigorous (for `Float64` intervals, correct rounding is not currently guaranteed)

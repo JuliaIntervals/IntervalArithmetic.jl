@@ -1,34 +1,38 @@
-# This file is part of the IntervalArithmetic.jl package; MIT licensed
-
-using IntervalArithmetic
 using Test
+using IntervalArithmetic
 
-setprecision(Interval, Float64)
+@testset "removed interval" begin
+    @test_throws ArgumentError intersect(interval(1))
+    @test_throws ArgumentError intersect(interval(1), 2, [1], 4., 5)
+    @test_throws ArgumentError intersect(interval(1), interval(2.), interval(3.))
+    @test_throws ArgumentError union(interval(1))
+    @test_throws ArgumentError union(interval(1), 2, [1], 4., 5)
+    @test_throws ArgumentError union(interval(1), interval(2.), interval(3.))
+    @test_throws ArgumentError setdiff(interval(1))
+    @test_throws ArgumentError setdiff(interval(1), 2, [1], 4., 5)
+    @test_throws ArgumentError setdiff(interval(1), interval(2.), interval(3.))
+    @test_throws ArgumentError symdiff(interval(1), interval(2.), interval(3.))
+end
 
-@testset "setdiff" begin
-    x = 2..4
-    y = 3..5
+@testset "setdiff_interval" begin
+    x = interval(2, 4)
+    y = interval(3, 5)
 
-    d = setdiff(x, y)
+    d = setdiff_interval(x, y)
 
-    @test typeof(d) ==Vector{Interval{Float64}}
-    @test length(d) ==1
-    @test d ==[2..3]
-    @test setdiff(y, x) ==[4..5]
+    @test typeof(d) == Vector{Interval{Float64}}
+    @test length(d) == 1
+    @test d == [interval(2, 3)]
+    @test setdiff_interval(y, x) == [interval(4, 5)]
 
-    x = 2..4
-    y = 2..5
+    x = interval(2, 4)
+    y = interval(2, 5)
 
-    @test typeof(d) ==Vector{Interval{Float64}}
-    @test length(setdiff(x, y)) ==0
-    @test setdiff(y, x) ==[4..5]
+    @test typeof(d) == Vector{Interval{Float64}}
+    @test length(setdiff_interval(x, y)) == 0
+    @test setdiff_interval(y, x) == [interval(4, 5)]
 
-    x = 2..5
-    y = 3..4
-    @test setdiff(x, y) ==[2..3, 4..5]
-
-#    X = IntervalBox(2..4, 3..5)
-#    Y = IntervalBox(3..5, 4..6)
-
-    #@test setdiff(X, Y) ==IntervalBox(2..3, 3..4)
+    x = interval(2, 5)
+    y = interval(3, 4)
+    @test setdiff_interval(x, y) == [interval(2, 3), interval(4, 5)]
 end
