@@ -7,3 +7,5 @@ function _abs_deriv(x::Interval{T}) where T
         return sign(x)
     end
 end
+
+_abs_deriv(x::DecoratedInterval) = DecoratedInterval(_abs_deriv(interval(x)), decoration(x))
