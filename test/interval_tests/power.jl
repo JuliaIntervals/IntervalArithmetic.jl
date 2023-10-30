@@ -49,8 +49,8 @@
 end
 
 @testset "Interval{<:Rational}" begin
-    a = interval(1//2, 3//4)
-    b = interval(3//7, 9//12)
+    a = interval(Int64(1)//2, 3//4)
+    b = interval(Int64(3)//7, 9//12)
 
     @test isequal_interval(sqrt(a + b), interval(Rational{Int64}, 137482504//142672337, 46099201//37639840))
 
