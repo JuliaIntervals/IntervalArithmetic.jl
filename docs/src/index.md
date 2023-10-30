@@ -33,6 +33,7 @@ If you use the IntervalArithmetic library in your publication, research, teachin
 This project began in 2014 during a masters' course in the postgraduate programs of Mathematics and Physics at the Universidad Nacional Autónoma de México. It was initially written in Python, then reinitiated in 2015 and rewritten in Julia. We thank the participants of the courses for their contribution, energy and ideas.
 
 
+
 ## Support
 
 Financial support is acknowledged from DGAPA-UNAM PAPIME grants PE-105911 and PE-107114, and DGAPA-UNAM PAPIIT grant IN-117214.

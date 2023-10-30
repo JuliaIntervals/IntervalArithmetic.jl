@@ -1,17 +1,13 @@
-using Test
-using IntervalArithmetic
-
-
 @testset "Interval loop tests" begin
     i = 1
 
-    @test interval(i, i).lo == 1
-    @test interval(i).lo == 1
+    @test inf(interval(i, i)) == 1
+    @test inf(interval(i)) == 1
 
 
     for i in 1:10
         a = interval(i)
-        @test a.lo == i
+        @test inf(a) == i
     end
 end
 

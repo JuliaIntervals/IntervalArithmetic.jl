@@ -5,6 +5,10 @@
 # defined in the standard (sections 10.5.9 and 12.12.8 for the functions in
 # this file)
 
+
+
+# bare intervals
+
 """
     inf(a::Interval)
 
@@ -14,9 +18,7 @@ is returned.
 Implement the `inf` function of the IEEE Standard 1788-2015 (Table 9.2 and
 Section 12.12.8).
 """
-inf(a::Interval) = ifelse(iszero(a.lo), copysign(a.lo, -1), a.lo)
-
-inf(a::Real) = a
+inf(a::BareInterval) = ifelse(iszero(a.lo), copysign(a.lo, -1), a.lo)
 
 """
     sup(a::Interval)
@@ -25,9 +27,7 @@ Supremum of an interval.
 
 Implement the `sup` function of the IEEE Standard 1788-2015 (Table 9.2).
 """
-sup(a::Interval) = a.hi
-
-sup(a::Real) = a
+sup(a::BareInterval) = a.hi
 
 """
     bounds(a::Interval)
@@ -36,7 +36,7 @@ Bounds of an interval as a tuple. This is semantically equivalent to
 `(a.lo, sup(a))`. In particular, this function does not normalize the lower
 bound.
 """
-bounds(a::Interval) = (a.lo, sup(a))
+bounds(a::BareInterval) = (a.lo, sup(a))
 
 """
     mid(a::Interval)
@@ -45,7 +45,7 @@ Find the midpoint of the interval `a`.
 
 Implement the `mid` function of the IEEE Standard 1788-2015 (Table 9.2).
 """
-function mid(a::Interval{T}) where {T<:NumTypes}
+function mid(a::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(a) && return convert(T, NaN)
     isentire_interval(a) && return zero(T)
 
@@ -60,12 +60,10 @@ function mid(a::Interval{T}) where {T<:NumTypes}
     return _normalisezero(inf(a) / 2 + sup(a) / 2)
 end
 
-mid(a::Real) = a
-
 """
     scaled_mid(a::Interval, α)
 
-Find an intermediate  point at a relative position `α` in the interval `a`
+Find an intermediate point at a relative position `α` in the interval `a`
 instead.
 
 Assume 0 ≤ α ≤ 1.
@@ -73,7 +71,7 @@ Assume 0 ≤ α ≤ 1.
 Note that `scaled_mid(a, 0.5)` does not equal `mid(a)` for unbounded set-based
 intervals.
 """
-function scaled_mid(a::Interval{T}, α) where {T<:NumTypes}
+function scaled_mid(a::BareInterval{T}, α) where {T<:NumTypes}
     0 ≤ α ≤ 1 || return throw(DomainError(α, "scaled_mid requires 0 ≤ α ≤ 1"))
     isempty_interval(a) && return convert(T, NaN)
 
@@ -97,12 +95,10 @@ Return the diameter (length) of the interval `a`.
 
 Implement the `wid` function of the IEEE Standard 1788-2015 (Table 9.2).
 """
-function diam(a::Interval{T}) where {T<:NumTypes}
+function diam(a::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(a) && return convert(T, NaN)
     return -(sup(a), inf(a), RoundUp)  # IEEE1788 section 12.12.8
 end
-
-diam(a::Real) = zero(a)
 
 """
     radius(a::Interval)
@@ -112,12 +108,10 @@ Return the radius of the interval `a`, such that `a ⊆ m ± radius`, where
 
 Implement the `rad` function of the IEEE Standard 1788-2015 (Table 9.2).
 """
-function radius(a::Interval)
+function radius(a::BareInterval)
     _, r = midradius(a)
     return r
 end
-
-radius(a::Real) = zero(a)
 
 """
 midradius(a::Interval)
@@ -127,13 +121,11 @@ Return the midpoint of an interval `a` together with its radius.
 Function required by the IEEE Standard 1788-2015 in Section 10.5.9 for the
 set-based flavor.
 """
-function midradius(a::Interval{T}) where {T<:NumTypes}
+function midradius(a::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(a) && return convert(T, NaN), convert(T, NaN)
     m = mid(a)
     return m, max(m - inf(a), sup(a) - m)
 end
-
-midradius(a::Real) = (mid(a), radius(a))
 
 """
     mag(a::Interval)
@@ -142,12 +134,10 @@ Magnitude of an interval. Return `NaN` for empty intervals.
 
 Implement the `mag` function of the IEEE Standard 1788-2015 (Table 9.2).
 """
-function mag(a::Interval{T}) where {T<:NumTypes}
+function mag(a::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(a) && return convert(T, NaN)
     return max(abs(inf(a)), abs(sup(a)))
 end
-
-mag(a::Real) = abs(a)
 
 """
     mig(a::Interval)
@@ -156,10 +146,52 @@ Mignitude of an interval. Return `NaN` for empty intervals.
 
 Implement the `mig` function of the IEEE Standard 1788-2015 (Table 9.2).
 """
-function mig(a::Interval{T}) where {T<:NumTypes}
+function mig(a::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(a) && return convert(T, NaN)
     in_interval(0, a) && return zero(T)
     return min(abs(inf(a)), abs(sup(a)))
 end
 
-mig(a::Real) = abs(a)
+dist(a::BareInterval, b::BareInterval) = max(abs(inf(a)-inf(b)), abs(sup(a)-sup(b)))
+
+
+
+# decorated intervals
+# TODO: handle NaI differently
+# -> could return NaN for AbstractFloat bound type and throw and error for Rational bound type
+
+for f ∈ (:inf, :sup, :bounds, :mid, :diam, :radius, :midradius, :mag, :mig)
+    @eval $f(x::Interval)= $f(bareinterval(x))
+end
+
+scaled_mid(x::Interval, α) = scaled_mid(bareinterval(x), α)
+
+dist(x::Interval, y::Interval) = dist(bareinterval(x), bareinterval(y))
+
+
+
+# extension
+
+inf(x::Real) = x
+
+sup(x::Real) = x
+
+bounds(x::Real) = (x, x)
+
+mid(x::Real) = x
+mid(z::Complex) = complex(mid(real(z)), mid(imag(z)))
+
+diam(x::Real) = zero(x)
+diam(z::Complex) = max(diam(real(z)), diam(imag(z)))
+
+radius(x::Real) = zero(x)
+radius(z::Complex) = max(radius(real(z)), radius(imag(z)))
+
+midradius(x::Real) = (mid(x), radius(x))
+midradius(z::Complex) = (mid(z), radius(z))
+
+mag(x::Real) = abs(x)
+mag(z::Complex) = sup(abs(z))
+
+mig(x::Real) = abs(x)
+mig(z::Complex) = inf(abs(z))

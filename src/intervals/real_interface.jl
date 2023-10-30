@@ -10,50 +10,60 @@ julia> IntervalArithmetic.numtype(interval(1, 2))
 Float64
 ```
 """
-numtype(::F) where {F} = numtype(F)
+numtype(::Type{BareInterval{T}}) where {T<:NumTypes} = T
 numtype(::Type{Interval{T}}) where {T<:NumTypes} = T
+numtype(::Type{Complex{T}}) where {T<:Real} = numtype(T)
 numtype(::Type{T}) where {T} = T
+numtype(::T) where {T} = numtype(T)
 
 # standard `Real` functions
 
-float(x::Interval{T}) where {T<:NumTypes} = Interval{float(T)}(x)
-big(x::Interval{T}) where {T<:NumTypes} = Interval{big(T)}(x)
-
-zero(::F) where {F<:Interval} = zero(F)
-function zero(::Type{Interval{T}}) where {T<:NumTypes}
-    x = zero(T)
-    return unsafe_interval(T, x, x)
+for f ∈ (:float, :big)
+    @eval begin
+        $f(x::BareInterval{T}) where {T<:NumTypes} = BareInterval{$f(T)}(x)
+        $f(x::Interval{T}) where {T<:NumTypes} = _unsafe_interval($f(bareinterval(x)), decoration(x))
+    end
 end
 
-one(::F) where {F<:Interval} = one(F)
-function one(::Type{Interval{T}}) where {T<:NumTypes}
-    x = one(T)
-    return unsafe_interval(T, x, x)
+for f ∈ (:zero, :one)
+    @eval begin
+        $f(::T) where {T<:BareInterval} = $f(T)
+        $f(::Type{BareInterval{T}}) where {T<:NumTypes} = _unsafe_bareinterval(T, $f(T), $f(T))
+        $f(::T) where {T<:Interval} = $f(T)
+        $f(::Type{Interval{T}}) where {T<:NumTypes} = _unsafe_interval($f(BareInterval{T}), com)
+    end
 end
 
-typemin(::Type{Interval{T}}) where {T<:NumTypes} = unsafe_interval(T, typemin(T), nextfloat(typemin(T)))
-typemax(::Type{Interval{T}}) where {T<:NumTypes} = unsafe_interval(T, prevfloat(typemax(T)), typemax(T))
+typemin(::Type{BareInterval{T}}) where {T<:NumTypes} =
+    _unsafe_bareinterval(T, typemin(T), nextfloat(typemin(T)))
+typemin(::Type{Interval{T}}) where {T<:NumTypes} =
+    _unsafe_interval(typemin(BareInterval{T}), dac)
 
-function eps(a::Interval{T}) where {T<:NumTypes}
+typemax(::Type{BareInterval{T}}) where {T<:NumTypes} =
+    _unsafe_bareinterval(T, prevfloat(typemax(T)), typemax(T))
+typemax(::Type{Interval{T}}) where {T<:NumTypes} =
+    _unsafe_interval(typemax(BareInterval{T}), dac)
+
+function eps(a::BareInterval{T}) where {T<:NumTypes}
     x = max(eps(inf(a)), eps(sup(a)))
-    return unsafe_interval(T, x, x)
+    return _unsafe_bareinterval(T, x, x)
 end
-function eps(::Type{Interval{T}}) where {T<:NumTypes}
+eps(x::Interval) = _unsafe_interval(eps(bareinterval(x)), com)
+function eps(::Type{BareInterval{T}}) where {T<:NumTypes}
     x = eps(T)
-    return unsafe_interval(T, x, x)
+    return _unsafe_bareinterval(T, x, x)
 end
+eps(::Type{Interval{T}}) where {T<:NumTypes} =
+    _unsafe_interval(eps(BareInterval{T}), com)
 
 """
-    hash(x::Interval, h)
+    hash(x, h)
 
-Compute the integer hash code for an interval. Note that in
-`IntervalArithmetic.jl`, equality of intervals is given by `isequal_interval`
-rather than the `==` operator.
+Compute the integer hash code for an interval. Note that equality of intervals
+is given by `isequal_interval` rather than the `==` operator.
 """
+hash(x::BareInterval, h::UInt) = hash(sup(x), hash(inf(x), hash(BareInterval, h)))
 hash(x::Interval, h::UInt) = hash(sup(x), hash(inf(x), hash(Interval, h)))
-
-# TODO No idea where this comes from and if it is the correct place to put it.
-dist(a::Interval, b::Interval) = max(abs(inf(a)-inf(b)), abs(sup(a)-sup(b)))
 
 #
 

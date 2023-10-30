@@ -1,7 +1,7 @@
 ## Display modes
 
-There are several useful output representations for intervals, some of which we have already touched on. The display is controlled globally by the `setformat` function, which has
-the following options, specified by keyword arguments (type `?setformat` to get help at the REPL):
+There are several useful output representations for intervals, some of which we have already touched on. The display is controlled globally by the `setdisplay` function, which has
+the following options, specified by keyword arguments (type `?setdisplay` to get help at the REPL):
 
 - `format`: interval output format
 
@@ -17,17 +17,17 @@ the following options, specified by keyword arguments (type `?setformat` to get 
 
 ```@repl
 using IntervalArithmetic
-setformat() # default values
+setdisplay() # default values
 a = interval(1.1, pi)
-setformat(; sigdigits = 10)
+setdisplay(; sigdigits = 10)
 a
-setformat(:full)
+setdisplay(:full)
 a
-setformat(:midpoint)
+setdisplay(:midpoint)
 a
-setformat(; sigdigits = 4)
+setdisplay(; sigdigits = 4)
 a
-setformat(:standard)
+setdisplay(:standard)
 a
 ```
 
@@ -45,7 +45,7 @@ For example,
 
 ```@repl usage
 using IntervalArithmetic
-setformat(:full)
+setdisplay(:full)
 X = interval(0, 1)
 Y = interval(1, 2)
 X + Y

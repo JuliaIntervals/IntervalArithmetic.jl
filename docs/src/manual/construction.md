@@ -4,7 +4,7 @@ Constructing an interval is the most basic operation in the library. The [`inter
 
 ```@repl construction
 using IntervalArithmetic
-setformat(:full) # print the interval in full
+setdisplay(:full) # print the interval in full
 interval(0.1) # interval(Float64, 0.1)
 interval(0.1, 0.2) # interval(Float64, 0.1, 0.2)
 interval(3.1f0) # interval(Float32, 3.1f0)

@@ -16,9 +16,9 @@
 
     @test iscommon(interval(-0x1.FFFFFFFFFFFFFp1023, 0x1.FFFFFFFFFFFFFp1023)) == true
 
-    @test iscommon(entireinterval()) == false
+    @test iscommon(entireinterval(BareInterval{Float64})) == false
 
-    @test iscommon(emptyinterval()) == false
+    @test iscommon(emptyinterval(BareInterval{Float64})) == false
 
     @test iscommon(interval(-Inf, 0.0)) == false
 
@@ -28,47 +28,47 @@ end
 
 @testset "minimal_is_common_interval_dec_test" begin
 
-    @test iscommon(DecoratedInterval(interval(-27.0,-27.0), com)) == true
+    @test iscommon(Interval(interval(-27.0,-27.0), IntervalArithmetic.com)) == true
 
-    @test iscommon(DecoratedInterval(interval(-27.0, 0.0), com)) == true
+    @test iscommon(Interval(interval(-27.0, 0.0), IntervalArithmetic.com)) == true
 
-    @test iscommon(DecoratedInterval(interval(0.0,0.0), com)) == true
+    @test iscommon(Interval(interval(0.0,0.0), IntervalArithmetic.com)) == true
 
-    @test iscommon(DecoratedInterval(interval(-0.0,-0.0), com)) == true
+    @test iscommon(Interval(interval(-0.0,-0.0), IntervalArithmetic.com)) == true
 
-    @test iscommon(DecoratedInterval(interval(-0.0,0.0), com)) == true
+    @test iscommon(Interval(interval(-0.0,0.0), IntervalArithmetic.com)) == true
 
-    @test iscommon(DecoratedInterval(interval(0.0,-0.0), com)) == true
+    @test iscommon(Interval(interval(0.0,-0.0), IntervalArithmetic.com)) == true
 
-    @test iscommon(DecoratedInterval(interval(5.0, 12.4), com)) == true
+    @test iscommon(Interval(interval(5.0, 12.4), IntervalArithmetic.com)) == true
 
-    @test iscommon(DecoratedInterval(interval(-0x1.FFFFFFFFFFFFFp1023, 0x1.FFFFFFFFFFFFFp1023), com)) == true
+    @test iscommon(Interval(interval(-0x1.FFFFFFFFFFFFFp1023, 0x1.FFFFFFFFFFFFFp1023), IntervalArithmetic.com)) == true
 
-    @test iscommon(DecoratedInterval(interval(-27.0,-27.0), trv)) == true
+    @test iscommon(Interval(interval(-27.0,-27.0), IntervalArithmetic.trv)) == true
 
-    @test iscommon(DecoratedInterval(interval(-27.0, 0.0), def)) == true
+    @test iscommon(Interval(interval(-27.0, 0.0), IntervalArithmetic.def)) == true
 
-    @test iscommon(DecoratedInterval(interval(0.0,0.0), dac)) == true
+    @test iscommon(Interval(interval(0.0,0.0), IntervalArithmetic.dac)) == true
 
-    @test iscommon(DecoratedInterval(interval(-0.0,-0.0), trv)) == true
+    @test iscommon(Interval(interval(-0.0,-0.0), IntervalArithmetic.trv)) == true
 
-    @test iscommon(DecoratedInterval(interval(-0.0,0.0), def)) == true
+    @test iscommon(Interval(interval(-0.0,0.0), IntervalArithmetic.def)) == true
 
-    @test iscommon(DecoratedInterval(interval(0.0,-0.0), dac)) == true
+    @test iscommon(Interval(interval(0.0,-0.0), IntervalArithmetic.dac)) == true
 
-    @test iscommon(DecoratedInterval(interval(5.0, 12.4), def)) == true
+    @test iscommon(Interval(interval(5.0, 12.4), IntervalArithmetic.def)) == true
 
-    @test iscommon(DecoratedInterval(interval(-0x1.FFFFFFFFFFFFFp1023, 0x1.FFFFFFFFFFFFFp1023), trv)) == true
+    @test iscommon(Interval(interval(-0x1.FFFFFFFFFFFFFp1023, 0x1.FFFFFFFFFFFFFp1023), IntervalArithmetic.trv)) == true
 
-    @test iscommon(DecoratedInterval(entireinterval(), dac)) == false
+    @test iscommon(Interval(entireinterval(BareInterval{Float64}), IntervalArithmetic.dac)) == false
 
     @test iscommon(nai()) == false
 
-    @test iscommon(DecoratedInterval(emptyinterval(), trv)) == false
+    @test iscommon(Interval(emptyinterval(BareInterval{Float64}), IntervalArithmetic.trv)) == false
 
-    @test iscommon(DecoratedInterval(interval(-Inf, 0.0), trv)) == false
+    @test iscommon(Interval(interval(-Inf, 0.0), IntervalArithmetic.trv)) == false
 
-    @test iscommon(DecoratedInterval(interval(0.0, Inf), def)) == false
+    @test iscommon(Interval(interval(0.0, Inf), IntervalArithmetic.def)) == false
 
 end
 
@@ -90,9 +90,9 @@ end
 
     @test isthin(interval(0.0, -0.0)) == true
 
-    @test isthin(emptyinterval()) == false
+    @test isthin(emptyinterval(BareInterval{Float64})) == false
 
-    @test isthin(entireinterval()) == false
+    @test isthin(entireinterval(BareInterval{Float64})) == false
 
     @test isthin(interval(-1.0, 0.0)) == false
 
@@ -108,37 +108,37 @@ end
 
 @testset "minimal_is_singleton_dec_test" begin
 
-    @test isthin(DecoratedInterval(interval(-27.0,-27.0), def)) == true
+    @test isthin(Interval(interval(-27.0,-27.0), IntervalArithmetic.def)) == true
 
-    @test isthin(DecoratedInterval(interval(-2.0, -2.0), trv)) == true
+    @test isthin(Interval(interval(-2.0, -2.0), IntervalArithmetic.trv)) == true
 
-    @test isthin(DecoratedInterval(interval(12.0,12.0), dac)) == true
+    @test isthin(Interval(interval(12.0,12.0), IntervalArithmetic.dac)) == true
 
-    @test isthin(DecoratedInterval(interval(17.1, 17.1), com)) == true
+    @test isthin(Interval(interval(17.1, 17.1), IntervalArithmetic.com)) == true
 
-    @test isthin(DecoratedInterval(interval(-0.0,-0.0), def)) == true
+    @test isthin(Interval(interval(-0.0,-0.0), IntervalArithmetic.def)) == true
 
-    @test isthin(DecoratedInterval(interval(0.0,0.0), com)) == true
+    @test isthin(Interval(interval(0.0,0.0), IntervalArithmetic.com)) == true
 
-    @test isthin(DecoratedInterval(interval(-0.0, 0.0), def)) == true
+    @test isthin(Interval(interval(-0.0, 0.0), IntervalArithmetic.def)) == true
 
-    @test isthin(DecoratedInterval(interval(0.0, -0.0), dac)) == true
+    @test isthin(Interval(interval(0.0, -0.0), IntervalArithmetic.dac)) == true
 
-    @test isthin(DecoratedInterval(emptyinterval(), trv)) == false
+    @test isthin(Interval(emptyinterval(BareInterval{Float64}), IntervalArithmetic.trv)) == false
 
     @test isthin(nai()) == false
 
-    @test isthin(DecoratedInterval(entireinterval(), def)) == false
+    @test isthin(Interval(entireinterval(BareInterval{Float64}), IntervalArithmetic.def)) == false
 
-    @test isthin(DecoratedInterval(interval(-1.0, 0.0), dac)) == false
+    @test isthin(Interval(interval(-1.0, 0.0), IntervalArithmetic.dac)) == false
 
-    @test isthin(DecoratedInterval(interval(-1.0, -0.5), com)) == false
+    @test isthin(Interval(interval(-1.0, -0.5), IntervalArithmetic.com)) == false
 
-    @test isthin(DecoratedInterval(interval(1.0, 2.0), def)) == false
+    @test isthin(Interval(interval(1.0, 2.0), IntervalArithmetic.def)) == false
 
-    @test isthin(DecoratedInterval(interval(-Inf,-0x1.FFFFFFFFFFFFFp1023), dac)) == false
+    @test isthin(Interval(interval(-Inf,-0x1.FFFFFFFFFFFFFp1023), IntervalArithmetic.dac)) == false
 
-    @test isthin(DecoratedInterval(interval(-1.0,Inf), trv)) == false
+    @test isthin(Interval(interval(-1.0,Inf), IntervalArithmetic.trv)) == false
 
 end
 
@@ -168,21 +168,21 @@ end
 
     @test in_interval(12.4, interval(5.0, 12.4)) == true
 
-    @test in_interval(0.0, entireinterval()) == true
+    @test in_interval(0.0, entireinterval(BareInterval{Float64})) == true
 
-    @test in_interval(5.0, entireinterval()) == true
+    @test in_interval(5.0, entireinterval(BareInterval{Float64})) == true
 
-    @test in_interval(6.3, entireinterval()) == true
+    @test in_interval(6.3, entireinterval(BareInterval{Float64})) == true
 
-    @test in_interval(12.4, entireinterval()) == true
+    @test in_interval(12.4, entireinterval(BareInterval{Float64})) == true
 
-    @test in_interval(0x1.FFFFFFFFFFFFFp1023, entireinterval()) == true
+    @test in_interval(0x1.FFFFFFFFFFFFFp1023, entireinterval(BareInterval{Float64})) == true
 
-    @test in_interval(-0x1.FFFFFFFFFFFFFp1023, entireinterval()) == true
+    @test in_interval(-0x1.FFFFFFFFFFFFFp1023, entireinterval(BareInterval{Float64})) == true
 
-    @test in_interval(0x1.0p-1022, entireinterval()) == true
+    @test in_interval(0x1.0p-1022, entireinterval(BareInterval{Float64})) == true
 
-    @test in_interval(-0x1.0p-1022, entireinterval()) == true
+    @test in_interval(-0x1.0p-1022, entireinterval(BareInterval{Float64})) == true
 
     @test in_interval(-71.0, interval(-27.0, 0.0)) == false
 
@@ -198,104 +198,104 @@ end
 
     @test in_interval(-6.3, interval(5.0, 12.4)) == false
 
-    @test in_interval(0.0, emptyinterval()) == false
+    @test in_interval(0.0, emptyinterval(BareInterval{Float64})) == false
 
-    @test in_interval(-4535.3, emptyinterval()) == false
+    @test in_interval(-4535.3, emptyinterval(BareInterval{Float64})) == false
 
-    @test in_interval(-Inf, emptyinterval()) == false
+    @test in_interval(-Inf, emptyinterval(BareInterval{Float64})) == false
 
-    @test in_interval(Inf, emptyinterval()) == false
+    @test in_interval(Inf, emptyinterval(BareInterval{Float64})) == false
 
-    @test in_interval(NaN, emptyinterval()) == false
+    @test in_interval(NaN, emptyinterval(BareInterval{Float64})) == false
 
-    @test in_interval(-Inf, entireinterval()) == false
+    @test in_interval(-Inf, entireinterval(BareInterval{Float64})) == false
 
-    @test in_interval(Inf, entireinterval()) == false
+    @test in_interval(Inf, entireinterval(BareInterval{Float64})) == false
 
-    @test in_interval(NaN, entireinterval()) == false
+    @test in_interval(NaN, entireinterval(BareInterval{Float64})) == false
 
 end
 
 @testset "minimal_is_member_dec_test" begin
 
-    @test in_interval(-27.0, DecoratedInterval(interval(-27.0,-27.0), trv)) == true
+    @test in_interval(-27.0, Interval(interval(-27.0,-27.0), IntervalArithmetic.trv)) == true
 
-    @test in_interval(-27.0, DecoratedInterval(interval(-27.0, 0.0), def)) == true
+    @test in_interval(-27.0, Interval(interval(-27.0, 0.0), IntervalArithmetic.def)) == true
 
-    @test in_interval(-7.0, DecoratedInterval(interval(-27.0, 0.0), dac)) == true
+    @test in_interval(-7.0, Interval(interval(-27.0, 0.0), IntervalArithmetic.dac)) == true
 
-    @test in_interval(0.0, DecoratedInterval(interval(-27.0, 0.0), com)) == true
+    @test in_interval(0.0, Interval(interval(-27.0, 0.0), IntervalArithmetic.com)) == true
 
-    @test in_interval(-0.0, DecoratedInterval(interval(0.0,0.0), trv)) == true
+    @test in_interval(-0.0, Interval(interval(0.0,0.0), IntervalArithmetic.trv)) == true
 
-    @test in_interval(0.0, DecoratedInterval(interval(0.0,0.0), def)) == true
+    @test in_interval(0.0, Interval(interval(0.0,0.0), IntervalArithmetic.def)) == true
 
-    @test in_interval(0.0, DecoratedInterval(interval(-0.0,-0.0), dac)) == true
+    @test in_interval(0.0, Interval(interval(-0.0,-0.0), IntervalArithmetic.dac)) == true
 
-    @test in_interval(0.0, DecoratedInterval(interval(-0.0,0.0), com)) == true
+    @test in_interval(0.0, Interval(interval(-0.0,0.0), IntervalArithmetic.com)) == true
 
-    @test in_interval(0.0, DecoratedInterval(interval(0.0,-0.0), trv)) == true
+    @test in_interval(0.0, Interval(interval(0.0,-0.0), IntervalArithmetic.trv)) == true
 
-    @test in_interval(5.0, DecoratedInterval(interval(5.0, 12.4), def)) == true
+    @test in_interval(5.0, Interval(interval(5.0, 12.4), IntervalArithmetic.def)) == true
 
-    @test in_interval(6.3, DecoratedInterval(interval(5.0, 12.4), dac)) == true
+    @test in_interval(6.3, Interval(interval(5.0, 12.4), IntervalArithmetic.dac)) == true
 
-    @test in_interval(12.4, DecoratedInterval(interval(5.0, 12.4), com)) == true
+    @test in_interval(12.4, Interval(interval(5.0, 12.4), IntervalArithmetic.com)) == true
 
-    @test in_interval(0.0, DecoratedInterval(entireinterval(), trv)) == true
+    @test in_interval(0.0, Interval(entireinterval(BareInterval{Float64}), IntervalArithmetic.trv)) == true
 
-    @test in_interval(5.0, DecoratedInterval(entireinterval(), def)) == true
+    @test in_interval(5.0, Interval(entireinterval(BareInterval{Float64}), IntervalArithmetic.def)) == true
 
-    @test in_interval(6.3, DecoratedInterval(entireinterval(), dac)) == true
+    @test in_interval(6.3, Interval(entireinterval(BareInterval{Float64}), IntervalArithmetic.dac)) == true
 
-    @test in_interval(12.4, DecoratedInterval(entireinterval(), trv)) == true
+    @test in_interval(12.4, Interval(entireinterval(BareInterval{Float64}), IntervalArithmetic.trv)) == true
 
-    @test in_interval(0x1.FFFFFFFFFFFFFp1023, DecoratedInterval(entireinterval(), def)) == true
+    @test in_interval(0x1.FFFFFFFFFFFFFp1023, Interval(entireinterval(BareInterval{Float64}), IntervalArithmetic.def)) == true
 
-    @test in_interval(-0x1.FFFFFFFFFFFFFp1023, DecoratedInterval(entireinterval(), dac)) == true
+    @test in_interval(-0x1.FFFFFFFFFFFFFp1023, Interval(entireinterval(BareInterval{Float64}), IntervalArithmetic.dac)) == true
 
-    @test in_interval(0x1.0p-1022, DecoratedInterval(entireinterval(), trv)) == true
+    @test in_interval(0x1.0p-1022, Interval(entireinterval(BareInterval{Float64}), IntervalArithmetic.trv)) == true
 
-    @test in_interval(-0x1.0p-1022, DecoratedInterval(entireinterval(), def)) == true
+    @test in_interval(-0x1.0p-1022, Interval(entireinterval(BareInterval{Float64}), IntervalArithmetic.def)) == true
 
-    @test in_interval(-71.0, DecoratedInterval(interval(-27.0, 0.0), trv)) == false
+    @test in_interval(-71.0, Interval(interval(-27.0, 0.0), IntervalArithmetic.trv)) == false
 
-    @test in_interval(0.1, DecoratedInterval(interval(-27.0, 0.0), def)) == false
+    @test in_interval(0.1, Interval(interval(-27.0, 0.0), IntervalArithmetic.def)) == false
 
-    @test in_interval(-0.01, DecoratedInterval(interval(0.0,0.0), dac)) == false
+    @test in_interval(-0.01, Interval(interval(0.0,0.0), IntervalArithmetic.dac)) == false
 
-    @test in_interval(0.000001, DecoratedInterval(interval(0.0,0.0), com)) == false
+    @test in_interval(0.000001, Interval(interval(0.0,0.0), IntervalArithmetic.com)) == false
 
-    @test in_interval(111110.0, DecoratedInterval(interval(-0.0,-0.0), trv)) == false
+    @test in_interval(111110.0, Interval(interval(-0.0,-0.0), IntervalArithmetic.trv)) == false
 
-    @test in_interval(4.9, DecoratedInterval(interval(5.0, 12.4), def)) == false
+    @test in_interval(4.9, Interval(interval(5.0, 12.4), IntervalArithmetic.def)) == false
 
-    @test in_interval(-6.3, DecoratedInterval(interval(5.0, 12.4), dac)) == false
+    @test in_interval(-6.3, Interval(interval(5.0, 12.4), IntervalArithmetic.dac)) == false
 
-    @test in_interval(0.0, DecoratedInterval(emptyinterval(), trv)) == false
+    @test in_interval(0.0, Interval(emptyinterval(BareInterval{Float64}), IntervalArithmetic.trv)) == false
 
-    @test in_interval(0.0, DecoratedInterval(emptyinterval(), trv)) == false
+    @test in_interval(0.0, Interval(emptyinterval(BareInterval{Float64}), IntervalArithmetic.trv)) == false
 
-    @test in_interval(-4535.3, DecoratedInterval(emptyinterval(), trv)) == false
+    @test in_interval(-4535.3, Interval(emptyinterval(BareInterval{Float64}), IntervalArithmetic.trv)) == false
 
-    @test in_interval(-4535.3, DecoratedInterval(emptyinterval(), trv)) == false
+    @test in_interval(-4535.3, Interval(emptyinterval(BareInterval{Float64}), IntervalArithmetic.trv)) == false
 
-    @test in_interval(-Inf, DecoratedInterval(emptyinterval(), trv)) == false
+    @test in_interval(-Inf, Interval(emptyinterval(BareInterval{Float64}), IntervalArithmetic.trv)) == false
 
     @test in_interval(-Inf, nai()) == false
 
-    @test in_interval(Inf, DecoratedInterval(emptyinterval(), trv)) == false
+    @test in_interval(Inf, Interval(emptyinterval(BareInterval{Float64}), IntervalArithmetic.trv)) == false
 
     @test in_interval(Inf, nai()) == false
 
-    @test in_interval(NaN, DecoratedInterval(emptyinterval(), trv)) == false
+    @test in_interval(NaN, Interval(emptyinterval(BareInterval{Float64}), IntervalArithmetic.trv)) == false
 
     @test in_interval(NaN, nai()) == false
 
-    @test in_interval(-Inf, DecoratedInterval(entireinterval(), trv)) == false
+    @test in_interval(-Inf, Interval(entireinterval(BareInterval{Float64}), IntervalArithmetic.trv)) == false
 
-    @test in_interval(Inf, DecoratedInterval(entireinterval(), def)) == false
+    @test in_interval(Inf, Interval(entireinterval(BareInterval{Float64}), IntervalArithmetic.def)) == false
 
-    @test in_interval(NaN, DecoratedInterval(entireinterval(), dac)) == false
+    @test in_interval(NaN, Interval(entireinterval(BareInterval{Float64}), IntervalArithmetic.dac)) == false
 
 end

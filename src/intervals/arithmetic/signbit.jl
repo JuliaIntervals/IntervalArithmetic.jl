@@ -7,7 +7,7 @@ empty.
 
 # Examples
 ```jldoctest
-julia> setformat(:full);
+julia> setdisplay(:full);
 
 julia> signbit(interval(-4.0))
 Interval{Float64}(1.0, 1.0)
@@ -22,7 +22,7 @@ Interval{Float64}(0.0, 1.0)
 function signbit(a::Interval{T}) where {T<:NumTypes}
     isempty_interval(a) && return a
     lo, hi = bounds(a)
-    return interval(T, signbit(hi), signbit(lo))
+    return _unsafe_interval(_unsafe_bareinterval(T, signbit(hi), signbit(lo)), decoration(a))
 end
 
 for T ∈ (:Interval, :Real, :Float64, :Float32, :Signed, :Unsigned)

@@ -1,5 +1,19 @@
 using IntervalArithmetic.Symbols
 
+@testset "Linear algebra" begin
+    A = [interval(2, 4)  interval(-2, 1)
+         interval(-1, 2) interval(2, 4)]
+
+    b = [interval(-2, 2)
+         interval(-2, 2)]
+
+    @test all(isequal_interval.(A * b, [interval(-12, 12), interval(-12, 12)]))
+    @test_throws ArgumentError A \ b
+
+    @test all(isequal_interval.([1 2; 3 4] * interval(-1, 1), [interval(-1, 1) interval(-2, 2) ; interval(-3, 3) interval(-4, 4)]))
+end
+
+
 @testset "setdiff_interval" begin
     function sameset(A, B)
         length(A) != length(B) && return false
@@ -109,4 +123,31 @@ end
     @test all(isequal_interval.(hull.(vb4...), ib4))
     @test mapreduce((x, y) -> all(isequal_interval.(x, y)), &, mince(ib4, (4,4,4,4)), vb4)
     @test mapreduce((x, y) -> all(isequal_interval.(x, y)), &, mince(ib4, (1,1,1,1)), (ib4,))
+end
+
+@testset "Bisect" begin
+    v = [interval(0, 1), interval(0, 2)]
+    w = bisect(v, 1, 0.5)
+    @test all(isequal_interval.( w[1], [interval(0, 0.5), interval(0, 2)] )) &
+          all(isequal_interval.( w[2], [interval(0.5, 1), interval(0, 2)] ))
+    w = bisect(v, 2, 0.5)
+    @test all(isequal_interval.( w[1], [interval(0, 1), interval(0, 1)] )) &
+          all(isequal_interval.( w[2], [interval(0, 1), interval(1, 2)] ))
+    w = bisect(v, 1, 0.25)
+    @test all(isequal_interval.( w[1], [interval(0, 0.25), interval(0, 2)] )) &
+          all(isequal_interval.( w[2], [interval(0.25, 1), interval(0, 2)] ))
+    w = bisect(v, 2, 0.25)
+    @test all(isequal_interval.( w[1], [interval(0, 1), interval(0, 0.5)] )) &
+          all(isequal_interval.( w[2], [interval(0, 1), interval(0.5, 2)] ))
+    w = bisect(v, 1)
+    @test all(isequal_interval.( w[1], [interval(0, 0.49609375), interval(0, 2)] )) &
+          all(isequal_interval.( w[2], [interval(0.49609375, 1), interval(0, 2)] ))
+    w = bisect(v, 2)
+    @test all(isequal_interval.( w[1], [interval(0, 1), interval(0.0, 0.9921875)] )) &
+          all(isequal_interval.( w[2], [interval(0, 1), interval(0.9921875, 2.0)] ))
+
+    v = [interval(-Inf, Inf), interval(-Inf, Inf)]
+    w = bisect(v, 1, 0.5)
+    @test all(isequal_interval.( w[1], [interval(-Inf, 0), interval(-Inf, Inf)] )) &
+          all(isequal_interval.( w[2], [interval(0, Inf),  interval(-Inf, Inf)] ))
 end

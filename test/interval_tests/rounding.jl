@@ -1,6 +1,3 @@
-using Test
-using IntervalArithmetic
-
 x = interval(0.5)
 
 @testset "IntervalRounding{:slow}" begin
@@ -36,5 +33,4 @@ end
     @test isequal_interval(tiny / huge, interval(0, nextfloat(0.0)))
 end
 
-setformat(:standard)
 IntervalArithmetic.interval_rounding() = IntervalRounding{:tight}()

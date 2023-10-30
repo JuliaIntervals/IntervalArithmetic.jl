@@ -2,36 +2,43 @@
 # of the IEEE Standard 1788-2015 and required for set-based flavor in Section
 # 10.5.3
 
-# CRlibm does not contain a correctly-rounded `^` function for Float64
-# use the BigFloat version from MPFR instead, which is correctly-rounded
 
-for T in (:Integer, :Float64, :BigFloat, :Interval) # need explicit signatures to avoid method ambiguities
-    @eval ^(a::Interval{Float64}, x::$T) = Interval{Float64}((bigequiv(a))^x)
+
+# bare intervals
+
+# code inspired by `power_by_squaring(::Any, ::Integer)` in base/intfuncs.jl
+Base.@assume_effects :terminates_locally function _positive_power_by_squaring(x::BareInterval, p::Integer)
+    if p == 1
+        return x
+    elseif p == 0
+        return one(x)
+    elseif p == 2
+        return x*x
+    end
+    t = trailing_zeros(p) + 1
+    p >>= t
+    while (t -= 1) > 0
+        x *= x
+    end
+    y = x
+    while p > 0
+        t = trailing_zeros(p) + 1
+        p >>= t
+        while (t -= 1) >= 0
+            x *= x
+        end
+        y *= x
+    end
+    return y
 end
 
-# overwrite behaviour for small integer powers from
-# https://github.com/JuliaLang/julia/pull/24240
-Base.literal_pow(::typeof(^), x::Interval{T}, ::Val{p}) where {T<:NumTypes,p} = x^p
+nthpow(x::BareInterval{T}, n::Integer) where {T<:NumTypes} = BareInterval{T}(nthpow(_bigequiv(x), n))
 
-"""
-    ^(a::Interval, b::Interval)
-    ^(a::Interval, b)
-
-Implement the `pow` function of the IEEE Standard 1788-2015 (Table 9.1).
-"""
-^(a::F, b::F) where {F<:Interval} = F(bigequiv(a)^b)
-
-for T ∈ (:AbstractFloat, :Integer)
-    @eval ^(a::F, b::$T) where {F<:Interval} = F(bigequiv(a)^b)
-end
-
-^(a::F, b::AbstractFloat) where {F<:Interval{BigFloat}} = a^big(b)
-
-function ^(a::Interval{BigFloat}, n::Integer)
+function nthpow(a::BareInterval{BigFloat}, n::Integer)
     isempty_interval(a) && return a
-    iszero(n) && return one(Interval{BigFloat})
+    iszero(n) && return one(BareInterval{BigFloat})
     n == 1 && return a
-    (n < 0 && isthinzero(a)) && return emptyinterval(BigFloat)
+    (n < 0 && isthinzero(a)) && return emptyinterval(BareInterval{BigFloat})
 
     if isodd(n) # odd power
         isentire_interval(a) && return a
@@ -74,22 +81,46 @@ function ^(a::Interval{BigFloat}, n::Integer)
     end
 end
 
-function ^(a::Interval{BigFloat}, x::BigFloat)
-    domain = unsafe_interval(BigFloat, zero(BigFloat), typemax(BigFloat))
+"""
+    ^(x::BareInterval, y::BareInterval)
+
+Implement the `pow` function of the IEEE Standard 1788-2015 (Table 9.1).
+"""
+^(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes} = BareInterval{T}(_bigequiv(x)^y)
+
+^(x::BareInterval, y::BareInterval) = ^(promote(x, y)...)
+
+function ^(x::BareInterval{BigFloat}, y::BareInterval)
+    isempty_interval(y) && return y
+    domain = _unsafe_bareinterval(BigFloat, zero(BigFloat), typemax(BigFloat))
+    x = intersect_interval(x, domain)
+    isempty_interval(x) && return x
+    return hull(_pow(x, inf(y)), _pow(x, sup(y)))
+end
+
+# function _pow(a::BareInterval{T}, x::AbstractFloat) where {T<:Rational}
+#     a = unsafe_interval(float(T), inf(a).num/inf(a).den, sup(a).num/sup(a).den)
+#     return BareInterval{T}(a^x)
+# end
+
+_pow(a::BareInterval{BigFloat}, b::AbstractFloat) = _pow(a, big(b))
+
+function _pow(a::BareInterval{BigFloat}, x::BigFloat)
+    domain = _unsafe_bareinterval(BigFloat, zero(BigFloat), typemax(BigFloat))
 
     if isthinzero(a)
-        x > 0 && return zero(Interval{BigFloat})
-        return emptyinterval(BigFloat)
+        x > 0 && return zero(BareInterval{BigFloat})
+        return emptyinterval(BareInterval{BigFloat})
     end
 
-    isinteger(x) && return a^(round(Int, x))
+    isinteger(x) && return nthpow(a, round(Int, x))
     x == 0.5 && return sqrt(a)
 
     a = intersect_interval(a, domain)
     isempty_interval(a) && return a
 
     M = typemax(BigFloat)
-    MM = typemax(Interval{BigFloat})
+    MM = typemax(BareInterval{BigFloat})
 
     lo = @round(BigFloat, inf(a)^x, inf(a)^x)
     lo = (inf(lo) == M) ? MM : lo
@@ -109,153 +140,86 @@ function ^(a::Interval{BigFloat}, x::BigFloat)
     return hull(lo, hi)
 end
 
-function ^(a::Interval{T}, x::AbstractFloat) where {T<:Rational}
-    a = unsafe_interval(float(T), inf(a).num/inf(a).den, sup(a).num/sup(a).den)
-    return Interval{T}(a^x)
-end
-
-# Rational power
-function ^(a::F, x::Rational{R}) where {T<:NumTypes,F<:Interval{T},R<:Integer}
+function _pow(a::BareInterval{BigFloat}, x::Rational{T}) where {T<:Integer}
     p = x.num
     q = x.den
 
     isempty_interval(a) && return a
     iszero(x) && return one(a)
-    # x < 0 && return inv(a^(-x))
-    x < 0 && return F( inv( (bigequiv(a))^(-x) ) )
+    x < 0 && return inv(_pow(a, -x))
 
     if isthinzero(a)
         x > zero(x) && return zero(a)
         return emptyinterval(a)
     end
 
-    isinteger(x) && return a^R(x)
+    isinteger(x) && return nthpow(a, T(x))
 
     x == (1//2) && return sqrt(a)
 
     alo, ahi = bounds(a)
 
     if ahi < 0
-        return emptyinterval(T)
+        return emptyinterval(BareInterval{BigFloat})
     end
 
     if alo < 0 && ahi ≥ 0
-        a = intersect_interval(a, unsafe_interval(T, zero(T), typemax(T)))
+        a = intersect_interval(a, _unsafe_bareinterval(BigFloat, zero(BigFloat), typemax(BigFloat)))
     end
 
-    b = nthroot( bigequiv(a), q)
+    b = nthroot(a, q)
 
-    p == 1 && return F(b)
+    p == 1 && return b
 
-    return F(b^p)
+    return nthpow(b, p)
 end
 
-# Interval power of an interval:
-function ^(a::Interval{BigFloat}, x::Interval)
-    isempty_interval(x) && return x
-    domain = unsafe_interval(BigFloat, zero(BigFloat), typemax(BigFloat))
-    a = intersect_interval(a, domain)
-    isempty_interval(a) && return a
-    return hull(a^inf(x), a^sup(x))
-end
-
-"""
-    hypot(x::Interval, n::Integer)
-
-Direct implemntation of `hypot` using intervals.
-"""
-hypot(x::Interval, y::Interval) = sqrt(x^2 + y^2)
-
-
-"""
-    pow(x::Interval, n::Integer)
-
-A faster implementation of `x^n`, currently using `power_by_squaring`.
-`pow(x, n)` will usually return an interval that is slightly larger than that
-calculated by `x^n`, but is guaranteed to be a correct
-enclosure when using multiplication with correct rounding.
-"""
-function pow(x::Interval{T}, n::Integer) where {T<:NumTypes}
-    n < 0 && return 1/pow(x, -n)
-    isempty_interval(x) && return x
-
-    if iseven(n) && in_interval(0, x)
-        xmig = mig(x)
-        xmag = mag(x)
-        return hull(zero(x),
-                    Base.power_by_squaring(unsafe_interval(T, xmig, xmig), n),
-                    Base.power_by_squaring(unsafe_interval(T, xmag, xmag), n))
-    else
-        xinf = inf(x)
-        xsup = sup(x)
-        return hull(Base.power_by_squaring(unsafe_interval(T, xinf, xinf), n),
-                    Base.power_by_squaring(unsafe_interval(T, xsup, xsup), n))
-    end
-end
-
-function pow(x::Interval, y::Interval)  # fast real power, including for y an Interval
-    isempty_interval(x) && return x
-    isthininteger(y) && return pow(x, Int(inf(y)))
-    return exp(y * log(x))
-end
-
-function pow(x::Interval, y)  # fast real power, including for y an Interval
-    isempty_interval(x) && return x
-    isinteger(y) && return pow(x, Int(inf(y)))
-    return exp(y * log(x))
-end
-
-for f in (:exp, :expm1)
+for f ∈ (:exp, :expm1)
     @eval begin
-        function ($f)(a::Interval{T}) where {T<:NumTypes}
+        function $f(a::BareInterval{T}) where {T<:NumTypes}
             isempty_interval(a) && return a
-            return @round( T, ($f)(inf(a)), ($f)(sup(a)) )
+            return @round( T, $f(inf(a)), $f(sup(a)) )
         end
     end
 end
 
+for f ∈ (:exp2, :exp10, :cbrt)
+    @eval begin
+        $f(a::BareInterval{T}) where {T<:NumTypes} = BareInterval{T}($f(_bigequiv(a)))  # no CRlibm version
 
-for f in (:exp2, :exp10, :cbrt)
-    @eval function ($f)(x::BigFloat, r::RoundingMode)  # add BigFloat functions with rounding:
-            setrounding(BigFloat, r) do
-                ($f)(x)
-            end
-        end
-
-    @eval ($f)(a::F) where {F<:Interval} = F($f(bigequiv(a)))  # no CRlibm version
-
-    @eval function ($f)(a::Interval{BigFloat})
+        function $f(a::BareInterval{BigFloat})
             isempty_interval(a) && return a
-            return @round( BigFloat, ($f)(inf(a)), ($f)(sup(a)) )
+            return @round( BigFloat, $f(inf(a)), $f(sup(a)) )
         end
+    end
 end
 
-for f in (:log, :log2, :log10)
-    @eval function ($f)(a::Interval{T}) where {T<:NumTypes}
-            domain = unsafe_interval(T, zero(T), typemax(T))
-            a = intersect_interval(a, domain)
+for f ∈ (:log, :log2, :log10)
+    @eval function $f(a::BareInterval{T}) where {T<:NumTypes}
+        domain = _unsafe_bareinterval(T, zero(T), typemax(T))
+        a = intersect_interval(a, domain)
 
-            (isempty_interval(a) || sup(a) ≤ zero(T)) && return emptyinterval(T)
+        (isempty_interval(a) || sup(a) ≤ 0) && return emptyinterval(BareInterval{T})
 
-            return @round( T, ($f)(inf(a)), ($f)(sup(a)) )
-        end
+        return @round( T, $f(inf(a)), $f(sup(a)) )
+    end
 end
 
-function log1p(a::Interval{T}) where {T<:NumTypes}
-    domain = unsafe_interval(T, -one(T), typemax(T))
+function log1p(a::BareInterval{T}) where {T<:NumTypes}
+    domain = _unsafe_bareinterval(T, -one(T), typemax(T))
     a = intersect_interval(a, domain)
 
-    (isempty_interval(a) || sup(a) ≤ -1) && return emptyinterval(T)
+    (isempty_interval(a) || sup(a) ≤ -1) && return emptyinterval(BareInterval{T})
 
     @round( T, log1p(inf(a)), log1p(sup(a)) )
 end
 
 """
-    nthroot(a::Interval, n::Integer)
+    nthroot(a::BareInterval, n::Integer)
 
-Compute the real n-th root of Interval.
+Compute the real `n`-th root of `a`.
 """
-function nthroot(a::Interval{BigFloat}, n::Integer)
+function nthroot(a::BareInterval{BigFloat}, n::Integer)
     isempty_interval(a) && return a
     n == 1 && return a
     n == 2 && return sqrt(a)
@@ -264,9 +228,9 @@ function nthroot(a::Interval{BigFloat}, n::Integer)
     n < 0 && return inv(nthroot(a, -n))
 
     alo, ahi = bounds(a)
-    ahi < 0 && iseven(n) && return emptyinterval(BigFloat)
+    ahi < 0 && iseven(n) && return emptyinterval(BareInterval{BigFloat})
     if alo < 0 && ahi ≥ 0 && iseven(n)
-        a = intersect_interval(a, unsafe_interval(BigFloat, zero(BigFloat), typemax(BigFloat)))
+        a = intersect_interval(a, _unsafe_bareinterval(BigFloat, zero(BigFloat), typemax(BigFloat)))
         alo, ahi = bounds(a)
     end
     ui = convert(Culong, n)
@@ -274,19 +238,170 @@ function nthroot(a::Interval{BigFloat}, n::Integer)
     high = BigFloat()
     ccall((:mpfr_rootn_ui, :libmpfr), Int32 , (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode) , low , alo , ui, MPFRRoundDown)
     ccall((:mpfr_rootn_ui, :libmpfr), Int32 , (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode) , high , ahi , ui, MPFRRoundUp)
-    return interval(BigFloat, low , high)
+    return bareinterval(BigFloat, low , high)
 end
 
-function nthroot(a::F, n::Integer) where {F<:Interval}
+function nthroot(a::BareInterval{T}, n::Integer) where {T<:NumTypes}
     n == 1 && return a
     n == 2 && return sqrt(a)
 
-    abig = bigequiv(a)
+    abig = _bigequiv(a)
     if n < 0
         issubnormal(mag(a)) && return inv(nthroot(a, -n))
-        return F( inv(nthroot(abig, -n)) )
+        return BareInterval{T}(inv(nthroot(abig, -n)))
     end
 
     b = nthroot(abig, n)
-    return F(b)
+    return BareInterval{T}(b)
+end
+
+"""
+    hypot(x::BareInterval, n::BareInterval)
+
+Compute the hypotenuse.
+"""
+hypot(x::BareInterval, y::BareInterval) = sqrt(nthpow(x, 2) + nthpow(y, 2))
+
+"""
+    fastpow(x::BareInterval, n::Integer)
+
+A faster implementation of `x^n`, currently using `power_by_squaring`.
+`fastpow(x, n)` will usually return an interval that is slightly larger than that
+calculated by `x^n`, but is guaranteed to be a correct
+enclosure when using multiplication with correct rounding.
+"""
+function fastpow(x::BareInterval{T}, n::Integer) where {T<:NumTypes}
+    n < 0 && return inv(fastpow(x, -n))
+    isempty_interval(x) && return x
+
+    if iseven(n) && in_interval(0, x)
+        xmig = mig(x)
+        xmag = mag(x)
+        return hull(zero(x),
+                _positive_power_by_squaring(_unsafe_bareinterval(T, xmig, xmig), n),
+                _positive_power_by_squaring(_unsafe_bareinterval(T, xmag, xmag), n))
+    else
+        xinf = inf(x)
+        xsup = sup(x)
+        return hull(_positive_power_by_squaring(_unsafe_bareinterval(T, xinf, xinf), n),
+                    _positive_power_by_squaring(_unsafe_bareinterval(T, xsup, xsup), n))
+    end
+end
+
+function fastpow(x::BareInterval, y::BareInterval)
+    isempty_interval(x) && return x
+    isthininteger(y) && return fastpow(x, Int(inf(y)))
+    return exp(y * log(x))
+end
+
+fastpow(x::BareInterval{T}, y::S) where {T<:NumTypes,S<:Real} =
+    fastpow(x, bareinterval(promote_numtype(T, S), y))
+
+
+
+# decorated intervals
+
+# overwrite behaviour for small integer powers from https://github.com/JuliaLang/julia/pull/24240
+Base.literal_pow(::typeof(^), x::Interval, ::Val{p}) where {p} = x^p
+
+function nthpow(a::Interval, n::Integer)
+    x = bareinterval(a)
+    r = nthpow(x, n)
+    d = min(decoration(a), decoration(r))
+    d = min(d, ifelse(n < 0 && in_interval(0, x), trv, d))
+    return _unsafe_interval(r, d)
+end
+
+^(x::Interval, n::Integer) = nthpow(x, n)
+
+for S ∈ (:Rational, :AbstractFloat)
+    @eval function ^(xx::Interval{T}, q::$S) where {T<:NumTypes}
+        x = bareinterval(xx)
+        r = BareInterval{T}(_pow(_bigequiv(x), q))
+        d = min(decoration(xx), decoration(r))
+        if inf(x) > 0 || (inf(x) ≥ 0 && q > 0) ||
+                (isinteger(q) && q > 0) ||
+                (isinteger(q) && !in_interval(0, x))
+            return _unsafe_interval(r, d)
+        end
+        return _unsafe_interval(r, trv)
+    end
+end
+
+function ^(xx::Interval, qq::Interval)
+    x = bareinterval(xx)
+    q = bareinterval(qq)
+    r = x^q
+    d = min(decoration(xx), decoration(qq), decoration(r))
+    if inf(x) > 0 || (inf(x) ≥ 0 && inf(q) > 0) ||
+            (isthininteger(q) && inf(q) > 0) ||
+            (isthininteger(q) && !in_interval(0, x))
+        return _unsafe_interval(r, d)
+    end
+    return _unsafe_interval(r, trv)
+end
+
+for f ∈ (:exp, :exp2, :exp10, :expm1, :cbrt)
+    @eval function $f(xx::Interval)
+        x = bareinterval(xx)
+        r = $f(x)
+        d = min(decoration(r), decoration(xx))
+        return _unsafe_interval(r, d)
+    end
+end
+
+for f ∈ (:log, :log2, :log10)
+    @eval function $f(a::Interval{T}) where {T<:NumTypes}
+        domain = _unsafe_bareinterval(T, zero(T), typemax(T))
+        x = bareinterval(a)
+        r = $f(x)
+        d = min(decoration(a), decoration(r))
+        d = min(d, ifelse(isstrictsubset_interval(x, domain), d, trv))
+        return _unsafe_interval(r, d)
+    end
+end
+
+function log1p(a::Interval{T}) where {T<:NumTypes}
+    domain = _unsafe_bareinterval(T, -one(T), typemax(T))
+    x = bareinterval(a)
+    r = log1p(x)
+    d = min(decoration(a), decoration(r))
+    d = min(d, ifelse(isstrictsubset_interval(x, domain), d, trv))
+    return _unsafe_interval(r, d)
+end
+
+function nthroot(a::Interval{T}, n::Integer) where {T<:NumTypes}
+    domain = _unsafe_bareinterval(T, ifelse(iseven(n), zero(T), typemin(T)), typemax(T))
+    x = bareinterval(a)
+    r = nthroot(x, n)
+    d = min(decoration(a), decoration(r))
+    d = min(d, ifelse(issubset_interval(x, domain), d, trv))
+    return _unsafe_interval(r, d)
+end
+
+hypot(x::Interval, y::Interval) = sqrt(x^2 + y^2)
+
+function fastpow(xx::Interval, qq::Interval)
+    x = bareinterval(xx)
+    q = bareinterval(qq)
+    r = fastpow(x, q)
+    d = min(decoration(xx), decoration(qq), decoration(r))
+    if inf(x) > 0 || (inf(x) ≥ 0 && inf(q) > 0) ||
+            (isthininteger(q) && inf(q) > 0) ||
+            (isthininteger(q) && !in_interval(0, x))
+        return _unsafe_interval(r, d)
+    end
+    return _unsafe_interval(r, trv)
+end
+
+function fastpow(xx::Interval, q::Real)
+    x = bareinterval(xx)
+    r = fastpow(x, q)
+    d = min(decoration(xx), decoration(r))
+    if inf(x) > 0 || (inf(x) ≥ 0 && q > 0) ||
+            (isinteger(q) && q > 0) ||
+            (isinteger(q) && !in_interval(0, x))
+        return _unsafe_interval(r, d)
+    end
+    return _unsafe_interval(r, trv)
 end

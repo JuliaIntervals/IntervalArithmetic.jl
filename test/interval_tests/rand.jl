@@ -1,5 +1,3 @@
-using Test
-using IntervalArithmetic
 using Random
 
 @testset "rand tests" begin

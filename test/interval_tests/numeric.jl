@@ -1,29 +1,10 @@
-using Test
-using IntervalArithmetic
+@testset "Brodcasting" begin
+    x = interval(1, 2)
 
-@testset "brodcasting tests" begin
-    a = 3
-    b = 12
-    x = interval(a, b)
-
-    for i in 1:20
-        @test isequal_interval(x.-i, interval(a-i, b-i))
-    end
-
-
-    for i in 1:20
-        @test isequal_interval(x.*i, interval(a*i, b*i))
-    end
-
-    a = 4
-    b = 5
-    y = interval(a, b)
-    for i in 1:20
-        @test isequal_interval(y.+i, interval(a+i, b+i))
-    end
-
-    for i in 1:20
-        @test isequal_interval(y./i, interval(/(a, i, RoundDown), /(b, i, RoundUp)))
+    for f ∈ (+, -, *, /)
+        @test isequal_interval(f.(x, x), f(x, x))
+        @test isequal_interval(f.(x, 0.1), f(x, 0.1))
+        @test isequal_interval(f.(0.1, x), f(0.1, x))
     end
 end
 
@@ -35,9 +16,9 @@ end
 
     ## Basic arithmetic
     @test isequal_interval(+a, a)
-    @test isequal_interval(a + b, interval(+(a.lo, b.lo, RoundDown), +(a.hi, b.hi, RoundUp)))
-    @test isequal_interval(-a, interval(-a.hi, -a.lo))
-    @test isequal_interval(a - b, interval(-(a.lo, b.hi, RoundDown), -(a.hi, b.lo, RoundUp)))
+    @test isequal_interval(a + b, interval(+(inf(a), inf(b), RoundDown), +(sup(a), sup(b), RoundUp)))
+    @test isequal_interval(-a, interval(-sup(a), -inf(a)))
+    @test isequal_interval(a - b, interval(-(inf(a), sup(b), RoundDown), -(sup(a), inf(b), RoundUp)))
     for f in (:+, :-, :*, :/)
         @eval begin
             @test isequal_interval($f(interval(Float64, pi), interval(Float32, pi)),
@@ -49,7 +30,7 @@ end
 
     @test isequal_interval(interval(-30.0,-15.0) / interval(-5.0,-3.0), interval(3.0, 10.0))
     @test isequal_interval(interval(-30,-15) / interval(-5,-3), interval(3.0, 10.0))
-    @test isequal_interval(b/a, interval(/(b.lo, a.hi, RoundDown), /(b.hi, a.lo, RoundUp)))
+    @test isequal_interval(b/a, interval(/(inf(b), sup(a), RoundDown), /(sup(b), inf(a), RoundUp)))
     @test isequal_interval(a/c, interval(0.025, 4.4))
     @test isequal_interval(c/4.0, interval(6.25e-02, 1e+00))
     @test isequal_interval(c/zero(c), emptyinterval(c))
@@ -140,12 +121,12 @@ end
     @test isequal_interval(interval(-3, 4) ^ interval(0.5), interval(0, 2))
     @test isequal_interval(interval(BigFloat, -3, 4) ^ 0.5, interval(BigFloat, 0, 2))
 
-    @test dist(interval(1,27)^interval(1/3), interval(1., 3.)) < 2*eps(interval(1,3)).lo
-    @test dist(interval(1,27)^(1/3), interval(1., 3.)) < 2*eps(interval(1,3)).lo
-    @test issubset_interval(interval(1., 3.), interval(1,27)^(1//3))
-    @test isequal_interval(interval(0.1,0.7)^(1//3), interval(0.46415888336127786, 0.8879040017426008))
-    @test dist(interval(0.1,0.7)^(1/3),
-        interval(0.46415888336127786, 0.8879040017426008)) < 2*eps(interval(0.1,0.7)^(1/3)).lo
+    @test dist(interval(1, 27)^interval(1/3), interval(1, 3)) < 2*inf(eps(interval(1, 3)))
+    @test dist(interval(1, 27)^(1/3), interval(1, 3)) < 2*inf(eps(interval(1, 3)))
+    @test issubset_interval(interval(1, 3), interval(1, 27)^(1//3))
+    @test isequal_interval(interval(0.1, 0.7)^(1//3), interval(0.46415888336127786, 0.8879040017426008))
+    @test dist(interval(0.1, 0.7)^(1/3),
+        interval(0.46415888336127786, 0.8879040017426008)) < 2*inf(eps(interval(0.1, 0.7)^(1/3)))
 
     x = interval(BigFloat, 27)
     y = x^(1//3)
@@ -212,7 +193,7 @@ end
 @testset "Floor etc. tests" begin
     a = interval(0.1)
     b = interval(0.1, 0.1)
-    @test dist(a, b) <= eps(a).lo
+    @test dist(a, b) <= inf(eps(a))
 
     @test isequal_interval(floor(interval(0.1, 1.1)), interval(0, 1))
     @test isequal_interval(round(interval(0.1, 1.1), RoundDown), interval(0, 1))
@@ -276,41 +257,41 @@ end
 
     @testset "Fast integer powers" begin
         x = interval(1, 2)
-        @test isequal_interval(pow(x, 2), pow(-x, 2))
-        @test isequal_interval(pow(-x, 2), interval(1, 4))
-        @test isequal_interval(pow(-x, 3), interval(-8.0, -1.0))
+        @test isequal_interval(fastpow(x, 2), fastpow(-x, 2))
+        @test isequal_interval(fastpow(-x, 2), interval(1, 4))
+        @test isequal_interval(fastpow(-x, 3), interval(-8.0, -1.0))
 
-        @test isequal_interval(pow(interval(-1, 2), 2), interval(0, 4))
-        @test isequal_interval(pow(interval(-1, 2), 3), interval(-1, 8))
-        @test isequal_interval(pow(interval(-1, 2), 4), interval(0, 16))
+        @test isequal_interval(fastpow(interval(-1, 2), 2), interval(0, 4))
+        @test isequal_interval(fastpow(interval(-1, 2), 3), interval(-1, 8))
+        @test isequal_interval(fastpow(interval(-1, 2), 4), interval(0, 16))
 
-        @test isequal_interval(pow(interval(-2, -1), interval(4)), interval(1, 16))
-        @test isequal_interval(pow(interval(-2, -1), interval(-1, -1)), interval(-1, -0.5))
+        @test isequal_interval(fastpow(interval(-2, -1), interval(4)), interval(1, 16))
+        @test isequal_interval(fastpow(interval(-2, -1), interval(-1, -1)), interval(-1, -0.5))
 
-        @test isequal_interval(pow(interval(BigFloat, -1, 2), 2), interval(0, 4))
-        @test isequal_interval(pow(interval(BigFloat, -1, 2), 3), interval(-1, 8))
-        @test isequal_interval(pow(interval(BigFloat, 1, 2), 2), interval(1, 4))
+        @test isequal_interval(fastpow(interval(BigFloat, -1, 2), 2), interval(0, 4))
+        @test isequal_interval(fastpow(interval(BigFloat, -1, 2), 3), interval(-1, 8))
+        @test isequal_interval(fastpow(interval(BigFloat, 1, 2), 2), interval(1, 4))
 
         x = interval(pi)
-        @test issubset_interval(x^100, pow(x, 100))
-        @test issubset_interval(x^50, pow(x, 50))
-        @test isstrictsubset_interval(x^50, pow(x, 50))
+        @test issubset_interval(x^100, fastpow(x, 100))
+        @test issubset_interval(x^50, fastpow(x, 50))
+        @test isstrictsubset_interval(x^50, fastpow(x, 50))
 
         x = interval(2)
-        @test isequal_interval(pow(x, 2000), interval(floatmax(), Inf))
+        @test isequal_interval(fastpow(x, 2000), interval(floatmax(), Inf))
     end
 
     @testset "Fast real powers" begin
         x = interval(1, 2)
-        @test isequal_interval(pow(x, 0.5), interval(1.0, 1.4142135623730951))
-        @test isequal_interval(pow(x, 0.5), x^0.5)
+        @test isequal_interval(fastpow(x, 0.5), interval(1.0, 1.4142135623730951))
+        @test isequal_interval(fastpow(x, 0.5), x^0.5)
 
         y = interval(2, 3)
-        @test isequal_interval(pow(y, -0.5), interval(0.5773502691896257, 0.7071067811865476))
+        @test isequal_interval(fastpow(y, -0.5), interval(0.5773502691896257, 0.7071067811865476))
 
         y = interval(-2, 3)
-        @test isequal_interval(pow(y, 2.1), interval(0.0, 10.045108566305146))
-        @test issubset_interval(y^2.1, pow(y, 2.1))
+        @test isequal_interval(fastpow(y, 2.1), interval(0.0, 10.045108566305146))
+        @test issubset_interval(y^2.1, fastpow(y, 2.1))
     end
 
     @testset "Fast interval powers" begin
@@ -318,10 +299,10 @@ end
         @test isequal_interval(x^interval(-1.5, 2.5), interval(0.35355339059327373, 5.656854249492381))
 
         y = interval(-2, 3)
-        @test isequal_interval(pow(y, 2.1), interval(0.0, 10.045108566305146))
-        @test isequal_interval(pow(y, interval(-2, 3)), interval(0, Inf))
+        @test isequal_interval(fastpow(y, 2.1), interval(0.0, 10.045108566305146))
+        @test isequal_interval(fastpow(y, interval(-2, 3)), interval(0, Inf))
 
-        @test isequal_interval(pow(y, interval(2.1)), interval(0.0, 10.045108566305146))
+        @test isequal_interval(fastpow(y, interval(2.1)), interval(0.0, 10.045108566305146))
     end
 
     @testset "sqrt" begin

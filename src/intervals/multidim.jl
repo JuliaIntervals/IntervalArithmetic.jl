@@ -55,7 +55,7 @@ function setdiff_interval(A::T, B::T) where {T<:AbstractVector}
     N = length(A)
     (length(B) == N) || return throw(DimensionMismatch("A and B must have the same length"))
     inter = intersect_interval.(A, B)
-    any(isempty_interval, inter) && return [A]
+    any(x -> isempty_interval(x) | isnai(x), inter) && return [A]
     result_list = Vector{T}(undef, 2*N)
     offset = 0
     x = copy(A)
@@ -72,20 +72,25 @@ function setdiff_interval(A::T, B::T) where {T<:AbstractVector}
         offset += 2
         x[i] = inter[i]
     end
-    return filter!(x -> !any(isempty_interval, x), result_list)
+    return filter!(x -> !any(x -> isempty_interval(x) | isnai(x), x), result_list)
 end
 
 # Computes the set difference x\\y and always returns a tuple of two intervals.
 # If the set difference is only one interval or is empty, then the returned tuple contains 1
 # or 2 empty intervals.
-function _setdiff_interval(x::Interval{T}, y::Interval{T}) where {T<:NumTypes}
+function _setdiff_interval(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
     inter = intersect_interval(x, y)
-    isempty_interval(inter) && return (x, emptyinterval(T))
-    isequal_interval(inter, x) && return (emptyinterval(T), emptyinterval(T))  # x is subset of y; setdiff is empty
+    isempty_interval(inter) && return (x, emptyinterval(BareInterval{T}))
+    isequal_interval(inter, x) && return (emptyinterval(BareInterval{T}), emptyinterval(BareInterval{T})) # x is subset of y; setdiff is empty
     xlo, xhi = bounds(x)
     ylo, yhi = bounds(y)
     interlo, interhi = bounds(inter)
-    xlo == interlo && return (unsafe_interval(T, interhi, xhi), emptyinterval(T))
-    xhi == interhi && return (unsafe_interval(T, xlo, interlo), emptyinterval(T))
-    return (unsafe_interval(T, xlo, ylo), unsafe_interval(T, yhi, xhi))
+    xlo == interlo && return (_unsafe_bareinterval(T, interhi, xhi), emptyinterval(BareInterval{T}))
+    xhi == interhi && return (_unsafe_bareinterval(T, xlo, interlo), emptyinterval(BareInterval{T}))
+    return (_unsafe_bareinterval(T, xlo, ylo), _unsafe_bareinterval(T, yhi, xhi))
+end
+
+function _setdiff_interval(x::Interval{T}, y::Interval{T}) where {T<:NumTypes}
+    h1, h2 = _setdiff_interval(bareinterval(x), bareinterval(y))
+    return (_unsafe_interval(h1, trv), _unsafe_interval(h2, trv))
 end

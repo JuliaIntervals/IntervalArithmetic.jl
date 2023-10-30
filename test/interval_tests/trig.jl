@@ -1,6 +1,3 @@
-using Test
-using IntervalArithmetic
-
 @testset "rad2deg/deg2rad" begin
     @test issubset_interval(interval(180, 360), rad2deg(interval(π, 2π)))
     @test issubset_interval(interval(π, 2interval(π)), deg2rad(interval(180, 360)))
@@ -41,7 +38,7 @@ end
 end
 
 @testset "sinpi" begin
-    @test isequal_interval(sinpi(emptyinterval()), emptyinterval())
+    @test isempty_interval(sinpi(emptyinterval()))
     @test issubset_interval(interval(-1 , 0), sinpi(interval(1, 2)))
     @test isequal_interval(sinpi(interval(0.5, 1.5)), interval(-1 , 1))
     @test issubset_interval(interval(1/sqrt(2) , 1), sinpi(interval(0.25, 0.75)))
@@ -49,7 +46,7 @@ end
 end
 
 @testset "cospi" begin
-    @test isequal_interval(cospi(emptyinterval()), emptyinterval())
+    @test isempty_interval(cospi(emptyinterval()))
     @test isequal_interval(cospi(interval(1, 2)), interval(-1 , 1))
     @test issubset_interval(interval(-1 , 0), cospi(interval(0.5, 1.5)))
     @test issubset_interval(interval(-1/sqrt(2) , 1/sqrt(2)), cospi(interval(0.25, 0.75)))
@@ -58,7 +55,7 @@ end
 
 @testset "sincospi" begin
     x = sincospi(emptyinterval())
-    @test isequal_interval(x[1], emptyinterval()) & isequal_interval(x[2], emptyinterval())
+    @test isempty_interval(x[1]) & isempty_interval(x[2])
     x = sincospi(interval(1, 2))
     @test issubset_interval(interval(-1, 0), x[1]) & isequal_interval(x[2], interval(-1, 1))
     x = sincospi(interval(0.5, 1.5))
@@ -104,7 +101,7 @@ end
     @test issubset_interval(acos(interval(BigFloat, 3, 4)), acos(interval(3, 4)))
 
     @test isequal_interval(atan(interval(-1,1)),
-        interval(-interval(Float64, π).hi/4, interval(Float64, π).hi/4))
+        interval(-sup(interval(Float64, π))/4, sup(interval(Float64, π))/4))
     @test isequal_interval(atan(interval(0)), interval(0.0, 0.0))
     @test issubset_interval(atan(interval(BigFloat, -1, 1)), atan(interval(-1, 1)))
 end

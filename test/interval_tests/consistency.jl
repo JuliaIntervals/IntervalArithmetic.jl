@@ -1,6 +1,4 @@
-using Test
-using IntervalArithmetic
-import IntervalArithmetic: unsafe_interval
+@test size(interval(1)) == () # match the `size` behaviour of `Real`
 
 @testset "Consistency tests" begin
 
@@ -25,16 +23,16 @@ import IntervalArithmetic: unsafe_interval
         @test isequal_interval(typemin(a), typemin(typeof(a)))
         @test isequal_interval(typemax(a), typemax(typeof(a)))
 
-        @test isequal_interval(a, interval(a.lo, a.hi))
+        @test isequal_interval(a, interval(inf(a), sup(a)))
         @test isequal_interval(emptyinterval(Rational{Int}), emptyinterval())
 
-        @test (zero(a) + one(b)).lo == 1
-        @test (zero(a) + one(b)).hi == 1
+        @test inf(zero(a) + one(b)) == 1
+        @test sup(zero(a) + one(b)) == 1
         @test isequal_interval(interval(0,1) + emptyinterval(a), emptyinterval(a))
         @test isequal_interval(interval(0.25) - one(c)/4, zero(c))
         @test isequal_interval(emptyinterval(a) - interval(0, 1), emptyinterval(a))
         @test isequal_interval(interval(0, 1) - emptyinterval(a), emptyinterval(a))
-        @test isequal_interval(a*b, interval(*(a.lo, b.lo, RoundDown), *(a.hi, b.hi, RoundUp)))
+        @test isequal_interval(a*b, interval(*(inf(a), inf(b), RoundDown), *(sup(a), sup(b), RoundUp)))
         @test isequal_interval(interval(0, 1) * emptyinterval(a), emptyinterval(a))
         @test isequal_interval(a * interval(0), zero(a))
     end
@@ -115,15 +113,15 @@ import IntervalArithmetic: unsafe_interval
     end
 
     @testset "Intersection tests" begin
-        @test isequal_interval(emptyinterval(), interval(Inf, -Inf))
+        @test isequal_interval(emptyinterval(BareInterval{Float64}), bareinterval(Inf, -Inf))
         @test isequal_interval(intersect_interval(a, interval(-1)), emptyinterval(a))
         @test isempty_interval(intersect_interval(a, interval(-1)))
         @test !isempty_interval(a)
         @test !isequal_interval(emptyinterval(a), a)
         @test isequal_interval(emptyinterval(), emptyinterval())
 
-        @test isequal_interval(intersect_interval(a, hull(a,b)), a)
-        @test isequal_interval(hull(a,b), interval(a.lo, b.hi))
+        @test isequal_interval(intersect_interval(a, hull(a, b)), a)
+        @test isequal_interval(hull(a, b), interval(inf(a), sup(b)))
 
         # n-ary intersect_interval
         @test isequal_interval(intersect_interval(interval(1.0, 2.0),
@@ -149,13 +147,13 @@ import IntervalArithmetic: unsafe_interval
         @test isstrictsubset_interval(interval(-Inf, Inf), interval(-Inf, Inf))
 
         @test !isequal_interval(nai(a), nai(a))
-        @test isnai(DecoratedInterval(NaN))
-        @test isnan(interval(nai(BigFloat)).lo)
+        @test isnai(interval(NaN))
+        @test isnan(inf(nai(BigFloat)))
         @test isnai(nai())
         @test !isnai(a)
 
-        @test inf(a) == a.lo
-        @test sup(a) == a.hi
+        @test inf(a) == bareinterval(a).lo
+        @test sup(a) == bareinterval(a).hi
         @test inf(emptyinterval(a)) == Inf
         @test sup(emptyinterval(a)) == -Inf
         @test inf(entireinterval(a)) == -Inf
@@ -204,7 +202,7 @@ import IntervalArithmetic: unsafe_interval
         @test mig(interval(-2, 2)) == BigFloat(0.0)
         @test mig( interval(Rational{Int}, 1//2) ) == 1//2
         @test isnan(mig(emptyinterval()))
-        @test mag(-b) == b.hi
+        @test mag(-b) == sup(b)
         @test mag( interval(Rational{Int}, 1//2) ) == 1//2
         @test isnan(mag(emptyinterval()))
     end
@@ -238,12 +236,12 @@ import IntervalArithmetic: unsafe_interval
         @test isequal_interval(cancelplus(interval(0.0), interval(1.0)), interval(1.0))
         @test isequal_interval(cancelminus(interval(-5.0, 0.0), interval(0.0, 5.0)), interval(-5.0))
         @test isequal_interval(cancelplus(interval(-5.0, 0.0), interval(0.0, 5.0)), interval(0.0))
-        @test isequal_interval(cancelminus(interval(1e308), -interval(1e308)), IntervalArithmetic.atomic(Float64, Inf))
-        @test isequal_interval(cancelplus(interval(1e308), interval(1e308)), IntervalArithmetic.atomic(Float64, Inf))
-        @test isequal_interval(cancelminus(interval(nextfloat(1e308)), -interval(nextfloat(1e308))), IntervalArithmetic.atomic(Float64, Inf))
-        @test isequal_interval(cancelplus(interval(nextfloat(1e308)), interval(nextfloat(1e308))), IntervalArithmetic.atomic(Float64, Inf))
-        @test isequal_interval(cancelminus(interval(prevfloat(big(Inf))), -interval(prevfloat(big(Inf)))), IntervalArithmetic.atomic(BigFloat, Inf))
-        @test isequal_interval(cancelplus(interval(prevfloat(big(Inf))), interval(prevfloat(big(Inf)))), IntervalArithmetic.atomic(BigFloat, Inf))
+        @test isequal_interval(cancelminus(bareinterval(1e308), -bareinterval(1e308)), IntervalArithmetic.atomic(Float64, Inf))
+        @test isequal_interval(cancelplus(bareinterval(1e308), bareinterval(1e308)), IntervalArithmetic.atomic(Float64, Inf))
+        @test isequal_interval(cancelminus(bareinterval(nextfloat(1e308)), -bareinterval(nextfloat(1e308))), IntervalArithmetic.atomic(Float64, Inf))
+        @test isequal_interval(cancelplus(bareinterval(nextfloat(1e308)), bareinterval(nextfloat(1e308))), IntervalArithmetic.atomic(Float64, Inf))
+        @test isequal_interval(cancelminus(bareinterval(prevfloat(big(Inf))), -bareinterval(prevfloat(big(Inf)))), IntervalArithmetic.atomic(BigFloat, Inf))
+        @test isequal_interval(cancelplus(bareinterval(prevfloat(big(Inf))), bareinterval(prevfloat(big(Inf)))), IntervalArithmetic.atomic(BigFloat, Inf))
     end
 
     @testset "mid and radius" begin
@@ -306,7 +304,7 @@ import IntervalArithmetic: unsafe_interval
         @test isatomic(interval(1))
         @test isatomic(interval(2.3, 2.3))
         @test isatomic(emptyinterval())
-        @test isatomic(interval(Inf))  # interval(floatmax(), Inf)
+        @test isnai(interval(Inf))
 
         @test !isatomic(interval(1, 2))
         @test !isatomic(interval(1, nextfloat(1.0, 2)))
@@ -322,16 +320,6 @@ import IntervalArithmetic: unsafe_interval
 
         @test !isthinzero(interval(1, 2))
         @test !isthinzero(interval(0.0, nextfloat(0.0)))
-    end
-
-    @testset "Difference between checked and unchecked Intervals" begin
-        @test isequal_interval(unsafe_interval(Float64, 1, 2), interval(Float64, 1, 2))
-
-        @test inf(unsafe_interval(Float64, 3, 2)) == 3
-        @test_logs (:warn,) @test isempty_interval(interval(3, 2))
-
-        @test sup(unsafe_interval(Float64, Inf, Inf)) == Inf
-        @test_logs (:warn,) @test isempty_interval(interval(Inf, Inf))
     end
 
     @testset "Type stability" begin
@@ -363,11 +351,47 @@ import IntervalArithmetic: unsafe_interval
         @test_throws ArgumentError isdisjoint(x, y)
         @test_throws ArgumentError issubset(x, y)
         @test_throws ArgumentError issetequal(x, y)
-        @test_throws ArgumentError x in y
+        @test_throws ArgumentError x ∈ y
         @test_throws ArgumentError isempty(x)
         @test_throws ArgumentError isfinite(x)
         @test_throws ArgumentError isnan(x)
         @test_throws ArgumentError isinteger(x)
     end
 
+end
+
+@testset "Zero interval" begin
+    @test isequal_interval(zero(Interval{Float64}), interval(0))
+    @test isequal_interval(zero(interval(0, 1)), interval(0))
+end
+
+@testset "Decorations" begin
+    a = interval(1, 2)
+    b = interval(3, 4)
+
+    @test dist(a, b) == 2.0
+
+    @test isnai(interval(3, 1))
+    @test isnai(interval(Inf, Inf))
+    @test isnai(interval(-Inf, -Inf))
+    @test isnai(interval(NaN, NaN))
+    @test isnai(interval(NaN, 3))
+    @test isnai(interval(3, NaN))
+end
+
+@testset "Hashing of Intervals" begin
+    x = interval(Float64, 1, 2)
+    y = interval(BigFloat, 1, 2)
+    @test isequal_interval(x, y)
+    @test hash(x) == hash(y)
+
+    x = I"0.1"
+    y = interval(BigFloat, x)
+    @test isequal_interval(x, y)
+    @test hash(x) == hash(y)
+
+    x = interval(1, 2)
+    y = interval(1, 3)
+    @test !isequal_interval(x, y)
+    @test hash(x) != hash(y)
 end

@@ -27,15 +27,15 @@ An example will be given at the end of this section.
 
 ## Initialisation
 
-The simplest way to create a `DecoratedInterval` is as follows:
+The simplest way to create a `Interval` is as follows:
 ```
-julia> X = DecoratedInterval(3, 4)
+julia> X = Interval(3, 4)
 [3, 4]
 ```
 
 By default, decorations are not displayed. The following turns on display of decorations:
 ```
-julia> setformat(decorations=true)
+julia> setdisplay(decorations=true)
 Display parameters:
 - format: standard
 - decorations: true
@@ -47,7 +47,7 @@ julia> X
 
 To parse string, for decorated interval add `_dec` at the end of the string otherwise decoration is determined using `decoration` function.
 
-If no decoration is explicitly specified when a `DecoratedInterval` is created, then it is initialised with a decoration according to its interval `X`:
+If no decoration is explicitly specified when a `Interval` is created, then it is initialised with a decoration according to its interval `X`:
 
 - `com`: if `X` is nonempty and bounded;
 - `dac` if `X` is unbounded;
@@ -56,20 +56,20 @@ If no decoration is explicitly specified when a `DecoratedInterval` is created, 
 
 An explicit decoration may be provided for advanced use:
 ```
-julia> DecoratedInterval(3, 4, dac)
+julia> Interval(3, 4, dac)
 [3, 4]_dac
 
-julia> DecoratedInterval(X, def)
+julia> Interval(X, def)
 [3, 4]_def
 ```
-Here, a new `DecoratedInterval` was created by extracting the interval from another one and appending a different decoration.
+Here, a new `Interval` was created by extracting the interval from another one and appending a different decoration.
 
 ## Action of functions
 
 A decoration is the combination of an interval together with the sequence of functions that it has passed through. Here are some examples:
 
 ```
-julia> X1 = DecoratedInterval(0.5, 3)
+julia> X1 = Interval(0.5, 3)
 [0.5, 3]_com
 
 julia> sqrt(X1)
@@ -78,7 +78,7 @@ julia> sqrt(X1)
 In this case, both input and output are "common" intervals, meaning that they are closed and bounded, and that the resulting function is continuous over the input interval, so that fixed-point theorems may be applied. Since `sqrt(X1) ⊆ X1`, we know that there must be a fixed point of the function inside the interval `X1` (in this case, `sqrt(1) == 1`).
 
 ```
-julia> X2 = DecoratedInterval(3, ∞)
+julia> X2 = Interval(3, ∞)
 [3, ∞]_dac
 
 julia> sqrt(X2)
@@ -87,7 +87,7 @@ julia> sqrt(X2)
 Since the intervals are unbounded here, the maximum decoration possible is `dac`.
 
 ```
-julia> X3 = DecoratedInterval(-3, 4)
+julia> X3 = Interval(-3, 4)
 [-3, 4]_com
 
 julia> sign(X3)
@@ -96,7 +96,7 @@ julia> sign(X3)
 The `sign` function is discontinuous at 0, but is defined everywhere on the input interval, so the decoration is `def`.
 
 ```
-julia> X4 = DecoratedInterval(-3.5, 4.1)
+julia> X4 = Interval(-3.5, 4.1)
 [-3.5, 4.1]_com
 
 julia> sqrt(X4)
@@ -108,13 +108,13 @@ The negative part of `X` is discarded by the `sqrt` function, since its domain i
 In this case, we know why the decoration was reduced to `trv`. But if this were just a single step in a longer calculation, a resulting `trv` decoration shows only that something like this happened *at some step*. For example:
 
 ```
-julia> X5 = DecoratedInterval(-3, 3)
+julia> X5 = Interval(-3, 3)
 [-3, 3]_com
 
 julia> asin(sqrt(X5))
 [0, 1.5708]_trv
 
-julia> X6 = DecoratedInterval(0, 3)
+julia> X6 = Interval(0, 3)
 [0, 3]_com
 
 julia> asin(sqrt(X6))

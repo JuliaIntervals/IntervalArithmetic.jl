@@ -1,6 +1,3 @@
-using Test
-using IntervalArithmetic
-
 @testset "Complex interval operations" begin
     a = interval(1im)
     b = interval(4im + 3)
