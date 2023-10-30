@@ -55,11 +55,11 @@ end
         Interval{Rational{Int}}(interval(3, 4)), Interval{Rational{BigInt}}(interval(3, 4)),
         interval(3, 4))
 
-    @test_logs (:warn,) @test isempty_interval(bareinterval(2, 1))
-    @test_logs (:warn,) @test isempty_interval(bareinterval(Inf))
-    @test_logs (:warn,) @test isempty_interval(bareinterval(-Inf))
-    @test_logs (:warn,) @test isempty_interval(bareinterval(1, NaN))
-    @test_logs (:warn,) @test isempty_interval(bareinterval(NaN))
+    @test isempty_interval(bareinterval(2, 1))
+    @test isempty_interval(bareinterval(Inf))
+    @test isempty_interval(bareinterval(-Inf))
+    @test isempty_interval(bareinterval(1, NaN))
+    @test isempty_interval(bareinterval(NaN))
 
     @test isnai(interval(2, 1))
     @test isnai(interval(Inf))

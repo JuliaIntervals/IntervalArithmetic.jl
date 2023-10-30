@@ -182,7 +182,6 @@ function bareinterval(::Type{T}, a, b) where {T<:NumTypes}
     lo = inf(a)
     hi = sup(b)
     is_valid_interval(lo, hi) && return _unsafe_bareinterval(T, lo, hi)
-    @warn "invalid input, empty bare interval is returned"
     return emptyinterval(BareInterval{T})
 end
 bareinterval(a, b) = bareinterval(promote_numtype(numtype(a), numtype(b)), a, b)
@@ -302,7 +301,7 @@ Fields:
 - `decoration   :: Decoration`
 
 Constructors compliant with the IEEE Standard 1788-2015:
-- [`Interval`](@ref)
+- [`interval`](@ref)
 - [`..`](@ref)
 - [`±`](@ref)
 - [`@I_str`](@ref)
