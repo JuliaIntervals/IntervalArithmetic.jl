@@ -312,19 +312,24 @@ function nthpow(a::Interval, n::Integer)
     return _unsafe_interval(r, d)
 end
 
-^(x::Interval, n::Integer) = nthpow(x, n)
+function ^(x::Interval, n::Integer)
+    r = nthpow(bareinterval(x), n)
+    d = min(decoration(x), decoration(r), bad)
+    d = min(d, ifelse(n < 0 && in_interval(0, x), trv, d))
+    return _unsafe_interval(r, d)
+end
 
 for S ∈ (:Rational, :AbstractFloat)
     @eval function ^(xx::Interval{T}, q::$S) where {T<:NumTypes}
         x = bareinterval(xx)
         r = BareInterval{T}(_pow(_bigequiv(x), q))
-        d = min(decoration(xx), decoration(r))
+        d = min(decoration(xx), decoration(r), bad)
         if inf(x) > 0 || (inf(x) ≥ 0 && q > 0) ||
                 (isinteger(q) && q > 0) ||
                 (isinteger(q) && !in_interval(0, x))
             return _unsafe_interval(r, d)
         end
-        return _unsafe_interval(r, trv)
+        return _unsafe_interval(r, min(d, trv))
     end
 end
 
@@ -397,7 +402,7 @@ end
 function fastpow(xx::Interval, q::Real)
     x = bareinterval(xx)
     r = fastpow(x, q)
-    d = min(decoration(xx), decoration(r))
+    d = min(decoration(xx), decoration(r), bad)
     if inf(x) > 0 || (inf(x) ≥ 0 && q > 0) ||
             (isinteger(q) && q > 0) ||
             (isinteger(q) && !in_interval(0, x))
