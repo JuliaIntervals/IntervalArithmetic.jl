@@ -17,7 +17,11 @@ argument given, the default interval bound type is used.
 
 Implement the `empty` function of the IEEE Standard 1788-2015 (Section 10.5.2).
 """
-emptyinterval(::Type{BareInterval{T}}) where {T<:NumTypes} = _unsafe_bareinterval(T, typemax(T), typemin(T))
+emptyinterval(::Type{BareInterval{T}}) where {T<:AbstractFloat} = _unsafe_bareinterval(T, convert(T, NaN), convert(T, NaN))
+emptyinterval(::Type{BareInterval{T}}) where {T<:Rational} = _unsafe_bareinterval(T, typemax(T), typemin(T))
+# note: `using Base.unsafe_rational(Int, 0, 0)` as an equivalent to `NaN` for `Rational`
+# does not work well since most codes for `Rational` assume that the denominator cannot be zero
+# e.g. `iszero(Base.unsafe_rational(Int, 0, 0)) == true`
 
 """
     entireinterval
@@ -51,11 +55,7 @@ entireinterval() = entireinterval(default_numtype())
 entireinterval(::Type{Complex{T}}) where {T<:Real} = complex(entireinterval(T), entireinterval(T))
 entireinterval(::T) where {T} = entireinterval(T)
 
-nai(::Type{Interval{T}}) where {T<:AbstractFloat} = _unsafe_interval(_unsafe_bareinterval(T, convert(T, NaN), convert(T, NaN)), ill)
-# nai(::Type{Interval{T}}) where {S<:Integer,T<:Rational{S}} = _unsafe_interval(_unsafe_bareinterval(T, Base.unsafe_rational(S, 0, 0), Base.unsafe_rational(S, 0, 0)), ill)
-# this does not work well since most codes for `Rational` assume the denominator cannot be zero
-# e.g. `iszero(Base.unsafe_rational(Int, 0, 0)) == true`
-nai(::Type{Interval{T}}) where {T<:Rational} = _unsafe_interval(emptyinterval(BareInterval{T}), ill)
+nai(::Type{Interval{T}}) where {T<:NumTypes} = _unsafe_interval(emptyinterval(BareInterval{T}), ill)
 nai(::Type{T}) where {T<:NumTypes} = nai(Interval{T})
 nai() = nai(default_numtype())
 nai(::Type{Complex{T}}) where {T<:Real} = complex(nai(T), nai(T))

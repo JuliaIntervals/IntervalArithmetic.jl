@@ -352,7 +352,7 @@ end
 
     @test isequal_interval(bareinterval(Interval(bareinterval(-0x1.99999C0000000p+4,0x1.9999999999999P-4), IntervalArithmetic.com)), bareinterval(-0x1.99999C0000000p+4,0x1.9999999999999P-4))
 
-    @test_broken isequal_interval(bareinterval(nai()), emptyinterval(BareInterval{Float64}))
+    @test isequal_interval(bareinterval(nai()), emptyinterval(BareInterval{Float64}))
 
 end
 

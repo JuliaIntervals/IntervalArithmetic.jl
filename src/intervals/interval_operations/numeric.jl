@@ -18,7 +18,8 @@ is returned.
 Implement the `inf` function of the IEEE Standard 1788-2015 (Table 9.2 and
 Section 12.12.8).
 """
-inf(a::BareInterval) = ifelse(iszero(a.lo), copysign(a.lo, -1), a.lo)
+inf(a::BareInterval{T}) where {T<:AbstractFloat} = ifelse(isnan(a.lo), typemax(T), ifelse(iszero(a.lo), copysign(a.lo, -1), a.lo))
+inf(a::BareInterval{<:Rational}) = a.lo
 
 """
     sup(a::Interval)
@@ -27,7 +28,8 @@ Supremum of an interval.
 
 Implement the `sup` function of the IEEE Standard 1788-2015 (Table 9.2).
 """
-sup(a::BareInterval) = a.hi
+sup(a::BareInterval{T}) where {T<:AbstractFloat} = ifelse(isnan(a.hi), typemin(T), a.hi)
+sup(a::BareInterval{<:Rational}) = a.hi
 
 """
     bounds(a::Interval)
@@ -36,7 +38,8 @@ Bounds of an interval as a tuple. This is semantically equivalent to
 `(a.lo, sup(a))`. In particular, this function does not normalize the lower
 bound.
 """
-bounds(a::BareInterval) = (a.lo, sup(a))
+bounds(a::BareInterval{T}) where {T<:AbstractFloat} = (ifelse(isnan(a.lo), typemax(T), a.lo), a.hi)
+bounds(a::BareInterval{<:Rational}) = (inf(a), sup(a))
 
 """
     mid(a::Interval)
@@ -47,6 +50,21 @@ Implement the `mid` function of the IEEE Standard 1788-2015 (Table 9.2).
 """
 function mid(a::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(a) && return convert(T, NaN)
+    isentire_interval(a) && return zero(T)
+
+    inf(a) == typemin(T) && return nextfloat(inf(a))  # IEEE-1788 section 12.12.8
+    sup(a) == typemax(T) && return prevfloat(sup(a))  # IEEE-1788 section 12.12.8
+
+    midpoint = (inf(a) + sup(a)) / 2
+    isfinite(midpoint) && return _normalisezero(midpoint)
+    # Fallback in case of overflow: sup(a) + inf(a) == +∞ or sup(a) + inf(a) == -∞.
+    # This case can not be the default one as it does not pass several
+    # IEEE1788-2015 tests for small floats.
+    return _normalisezero(inf(a) / 2 + sup(a) / 2)
+end
+
+function mid(a::BareInterval{T}) where {T<:Rational}
+    isempty_interval(a) && return throw(ArgumentError("cannot compute the mid of empty intervals; cannot return a `Rational` NaN."))
     isentire_interval(a) && return zero(T)
 
     inf(a) == typemin(T) && return nextfloat(inf(a))  # IEEE-1788 section 12.12.8
@@ -122,7 +140,6 @@ Function required by the IEEE Standard 1788-2015 in Section 10.5.9 for the
 set-based flavor.
 """
 function midradius(a::BareInterval{T}) where {T<:NumTypes}
-    isempty_interval(a) && return convert(T, NaN), convert(T, NaN)
     m = mid(a)
     return m, max(m - inf(a), sup(a) - m)
 end
@@ -157,10 +174,28 @@ dist(a::BareInterval, b::BareInterval) = max(abs(inf(a)-inf(b)), abs(sup(a)-sup(
 
 
 # decorated intervals
-# TODO: handle NaI differently
-# -> could return NaN for AbstractFloat bound type and throw and error for Rational bound type
 
-for f ∈ (:inf, :sup, :bounds, :mid, :diam, :radius, :midradius, :mag, :mig)
+# `inf`, `sup` and `bounds` must return `NaN` for NaI, cf. Section 12.12.8
+
+function inf(a::Interval{T}) where {T<:AbstractFloat}
+    isnai(a) && return convert(T, NaN)
+    return inf(bareinterval(a))
+end
+inf(a::Interval{<:Rational}) = inf(bareinterval(a))
+
+function sup(a::Interval{T}) where {T<:AbstractFloat}
+    isnai(a) && return convert(T, NaN)
+    return sup(bareinterval(a))
+end
+sup(a::Interval{<:Rational}) = sup(bareinterval(a))
+
+function bounds(a::Interval{T}) where {T<:AbstractFloat}
+    isnai(a) && return (convert(T, NaN), convert(T, NaN))
+    return bounds(bareinterval(a))
+end
+bounds(x::Interval{<:Rational}) = bounds(bareinterval(x))
+
+for f ∈ (:mid, :diam, :radius, :midradius, :mag, :mig)
     @eval $f(x::Interval)= $f(bareinterval(x))
 end
 
