@@ -65,17 +65,14 @@ promote_numtype(::Type{<:AbstractIrrational}, ::Type{Rational{T}}) where {T<:Int
 
 Interval type for guaranteed computation with interval arithmetic according to
 the IEEE Standard 1788-2015. Unlike [`Interval`](@ref), this bare interval does
-not have decorations.
+not have decorations, is not a subtype of `Real` and errors on operations mixing
+`BareInterval` and `Number`.
 
 Fields:
 - `lo :: T`
 - `hi :: T`
 
 Constructor compliant with the IEEE Standard 1788-2015: [`bareinterval`](@ref).
-
-!!! warning
-    The internal constructor `_unsafe_bareinterval` is *not* compliant with the
-    IEEE Standard 1788-2015.
 
 See also: [`Interval`](@ref).
 """
@@ -85,6 +82,16 @@ struct BareInterval{T<:NumTypes}
 
     # need explicit signatures to avoid method ambiguities
 
+    """
+        _unsafe_bareinterval(::Type{<:NumTypes}, lo, hi)
+
+    Internal constructor which assumes that `is_valid_interval(lo, hi) == true`.
+
+    !!! warning
+        This constructor is *not* compliant with the IEEE Standard 1788-2015.
+        Since misuse of this function can deeply corrupt code, its usage is
+        *strongly discouraged* in favour of [`bareinterval`](@ref).
+    """
     global _unsafe_bareinterval(::Type{T}, a::T, b::T) where {S<:Integer,T<:Rational{S}} =
         new{T}(_normalisezero(a), _normalisezero(b))
     _unsafe_bareinterval(::Type{T}, a::T, b::T) where {S<:Union{Int8,UInt8},T<:Rational{S}} =
