@@ -30,17 +30,19 @@ function bisect(x::Interval, α=0.49609375)
     bx = bareinterval(x)
     r1, r2 = bisect(bx, α)
     d1, d2 = min(decoration(x), decoration(r1), dac), min(decoration(x), decoration(r2), trv)
-    return (_unsafe_interval(r1, d1), _unsafe_interval(r2, d2))
+    t = guarantee(x)
+    return (_unsafe_interval(r1, d1, t), _unsafe_interval(r2, d2, t))
 end
 
 function mince(x::Interval{T}, n) where {T<:NumTypes}
     v = Vector{Interval{T}}(undef, n)
     nodes = LinRange(inf(x), sup(x), n+1)
     d = decoration(x)
+    t = guarantee(x)
     @inbounds for i ∈ 1:n
         rᵢ = _unsafe_bareinterval(T, nodes[i], nodes[i+1])
         dᵢ = min(d, decoration(rᵢ), trv)
-        v[i] = _unsafe_interval(rᵢ, dᵢ)
+        v[i] = _unsafe_interval(rᵢ, dᵢ, t)
     end
     return v
 end

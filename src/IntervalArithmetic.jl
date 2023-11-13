@@ -35,7 +35,7 @@ end
 
 include("intervals/intervals.jl")
 export BareInterval, bareinterval, Interval, interval, decoration, @I_str,
-    diam, radius, mid, midradius, scaled_mid, mag, mig, hull,
+    guarantee, diam, radius, mid, midradius, scaled_mid, mag, mig, hull,
     emptyinterval, isempty_interval,
     isequal_interval,
     in_interval,

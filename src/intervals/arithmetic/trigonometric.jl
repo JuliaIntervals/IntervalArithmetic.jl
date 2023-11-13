@@ -565,7 +565,7 @@ for f ∈ (:sin, :cos, :atan)
     @eval function $f(a::Interval)
         r = $f(bareinterval(a))
         d = min(decoration(a), decoration(r))
-        return _unsafe_interval(r, d)
+        return _unsafe_interval(r, d, guarantee(a))
     end
 end
 
@@ -573,7 +573,7 @@ function tan(a::Interval)
     r = tan(bareinterval(a))
     d = min(decoration(a), decoration(r))
     d = min(d, ifelse(isunbounded(r), trv, d))
-    return _unsafe_interval(r, d)
+    return _unsafe_interval(r, d, guarantee(a))
 end
 
 function atan(b::Interval, a::Interval)
@@ -585,7 +585,7 @@ function atan(b::Interval, a::Interval)
             ifelse(in_interval(0, x), trv,
                 ifelse(sup(x) < 0, ifelse(inf(y) < 0, def, dac), d)),
         d))
-    return _unsafe_interval(r, d)
+    return _unsafe_interval(r, d, guarantee(a))
 end
 
 for f ∈ (:asin, :acos)
@@ -595,6 +595,6 @@ for f ∈ (:asin, :acos)
         r = $f(x)
         d = min(decoration(a), decoration(r))
         d = min(d, ifelse(issubset_interval(x, domain), d, trv))
-        return _unsafe_interval(r, d)
+        return _unsafe_interval(r, d, guarantee(a))
     end
 end

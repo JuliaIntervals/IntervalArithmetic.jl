@@ -21,7 +21,7 @@ numtype(::T) where {T} = numtype(T)
 for f ∈ (:float, :big)
     @eval begin
         $f(x::BareInterval{T}) where {T<:NumTypes} = BareInterval{$f(T)}(x)
-        $f(x::Interval{T}) where {T<:NumTypes} = _unsafe_interval($f(bareinterval(x)), decoration(x))
+        $f(x::Interval{<:NumTypes}) = _unsafe_interval($f(bareinterval(x)), decoration(x), guarantee(x))
     end
 end
 
@@ -30,31 +30,31 @@ for f ∈ (:zero, :one)
         $f(::T) where {T<:BareInterval} = $f(T)
         $f(::Type{BareInterval{T}}) where {T<:NumTypes} = _unsafe_bareinterval(T, $f(T), $f(T))
         $f(::T) where {T<:Interval} = $f(T)
-        $f(::Type{Interval{T}}) where {T<:NumTypes} = _unsafe_interval($f(BareInterval{T}), com)
+        $f(::Type{Interval{T}}) where {T<:NumTypes} = _unsafe_interval($f(BareInterval{T}), com, true)
     end
 end
 
 typemin(::Type{BareInterval{T}}) where {T<:NumTypes} =
     _unsafe_bareinterval(T, typemin(T), nextfloat(typemin(T)))
 typemin(::Type{Interval{T}}) where {T<:NumTypes} =
-    _unsafe_interval(typemin(BareInterval{T}), dac)
+    _unsafe_interval(typemin(BareInterval{T}), dac, true)
 
 typemax(::Type{BareInterval{T}}) where {T<:NumTypes} =
     _unsafe_bareinterval(T, prevfloat(typemax(T)), typemax(T))
 typemax(::Type{Interval{T}}) where {T<:NumTypes} =
-    _unsafe_interval(typemax(BareInterval{T}), dac)
+    _unsafe_interval(typemax(BareInterval{T}), dac, true)
 
 function eps(a::BareInterval{T}) where {T<:NumTypes}
     x = max(eps(inf(a)), eps(sup(a)))
     return _unsafe_bareinterval(T, x, x)
 end
-eps(x::Interval) = _unsafe_interval(eps(bareinterval(x)), com)
+eps(x::Interval) = _unsafe_interval(eps(bareinterval(x)), com, true)
 function eps(::Type{BareInterval{T}}) where {T<:NumTypes}
     x = eps(T)
     return _unsafe_bareinterval(T, x, x)
 end
 eps(::Type{Interval{T}}) where {T<:NumTypes} =
-    _unsafe_interval(eps(BareInterval{T}), com)
+    _unsafe_interval(eps(BareInterval{T}), com, true)
 
 """
     hash(x, h)

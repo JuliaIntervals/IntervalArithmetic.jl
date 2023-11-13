@@ -43,19 +43,19 @@ entireinterval(::Type{BareInterval{T}}) where {T<:NumTypes} = _unsafe_bareinterv
 
 # decorated intervals
 
-emptyinterval(::Type{Interval{T}}) where {T<:NumTypes} = _unsafe_interval(emptyinterval(BareInterval{T}), trv)
+emptyinterval(::Type{Interval{T}}) where {T<:NumTypes} = _unsafe_interval(emptyinterval(BareInterval{T}), trv, true)
 emptyinterval(::Type{T}) where {T<:NumTypes} = emptyinterval(Interval{T})
 emptyinterval() = emptyinterval(default_numtype())
 emptyinterval(::Type{Complex{T}}) where {T<:Real} = complex(emptyinterval(T), emptyinterval(T))
 emptyinterval(::T) where {T} = emptyinterval(T)
 
-entireinterval(::Type{Interval{T}}) where {T<:NumTypes} = _unsafe_interval(entireinterval(BareInterval{T}), dac)
+entireinterval(::Type{Interval{T}}) where {T<:NumTypes} = _unsafe_interval(entireinterval(BareInterval{T}), dac, true)
 entireinterval(::Type{T}) where {T<:NumTypes} = entireinterval(Interval{T})
 entireinterval() = entireinterval(default_numtype())
 entireinterval(::Type{Complex{T}}) where {T<:Real} = complex(entireinterval(T), entireinterval(T))
 entireinterval(::T) where {T} = entireinterval(T)
 
-nai(::Type{Interval{T}}) where {T<:NumTypes} = _unsafe_interval(emptyinterval(BareInterval{T}), ill)
+nai(::Type{Interval{T}}) where {T<:NumTypes} = _unsafe_interval(emptyinterval(BareInterval{T}), ill, true)
 nai(::Type{T}) where {T<:NumTypes} = nai(Interval{T})
 nai() = nai(default_numtype())
 nai(::Type{Complex{T}}) where {T<:Real} = complex(nai(T), nai(T))

@@ -49,13 +49,14 @@ max(a::BareInterval, b::BareInterval) = max(promote(a, b)...)
 # decorated intervals
 
 for f ∈ (:abs, :abs2)
-    @eval $f(a::Interval) = _unsafe_interval($f(bareinterval(a)), decoration(a))
+    @eval $f(a::Interval) = _unsafe_interval($f(bareinterval(a)), decoration(a), guarantee(a))
 end
 
 for f ∈ (:min, :max)
     @eval function $f(a::Interval, b::Interval)
         r = $f(bareinterval(a), bareinterval(b))
-        d = $f(decoration(a), decoration(b)) # $f(decoration(a), decoration(b), decoration(r))
-        return _unsafe_interval(r, d)
+        d = min(decoration(a), decoration(b))
+        t = guarantee(a) & guarantee(b)
+        return _unsafe_interval(r, d, t)
     end
 end

@@ -149,7 +149,7 @@ for f ∈ (:sinh, :cosh, :tanh, :asinh)
     @eval function $f(a::Interval)
         r = $f(bareinterval(a))
         d = min(decoration(a), decoration(r))
-        return _unsafe_interval(r, d)
+        return _unsafe_interval(r, d, guarantee(a))
     end
 end
 
@@ -159,7 +159,7 @@ function atanh(a::Interval{T}) where {T<:NumTypes}
     r = atanh(x)
     d = min(decoration(a), decoration(r))
     d = min(d, ifelse(isstrictsubset_interval(x, domain), d, trv))
-    return _unsafe_interval(r, d)
+    return _unsafe_interval(r, d, guarantee(a))
 end
 
 function acosh(a::Interval{T}) where {T<:NumTypes}
@@ -168,5 +168,5 @@ function acosh(a::Interval{T}) where {T<:NumTypes}
     r = acosh(x)
     d = min(decoration(a), decoration(r))
     d = min(d, ifelse(issubset_interval(x, domain), d, trv))
-    return _unsafe_interval(r, d)
+    return _unsafe_interval(r, d, guarantee(a))
 end

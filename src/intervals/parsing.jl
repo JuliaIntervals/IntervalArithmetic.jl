@@ -111,7 +111,6 @@ function parse(::Type{Interval{T}}, s::AbstractString) where {T<:NumTypes}
 
         decorations = Dict{String,Decoration}(
             "ill" => ill,
-            "bad" => bad,
             "trv" => trv,
             "def" => def,
             "dac" => dac,

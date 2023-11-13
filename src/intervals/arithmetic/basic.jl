@@ -222,14 +222,15 @@ end
 
 +(a::Interval) = a
 
--(a::Interval) = _unsafe_interval(-bareinterval(a), decoration(a))
+-(a::Interval) = _unsafe_interval(-bareinterval(a), decoration(a), guarantee(a))
 
 for f ∈ (:+, :-, :*)
     @eval begin
         function $f(a::Interval, b::Interval)
             r = $f(bareinterval(a), bareinterval(b))
             d = min(decoration(a), decoration(b), decoration(r))
-            return _unsafe_interval(r, d)
+            t = guarantee(a) & guarantee(b)
+            return _unsafe_interval(r, d, t)
         end
         $f(a::Real, b::Interval) = $f(promote(a, b)...)
         $f(a::Interval, b::Real) = $f(promote(a, b)...)
@@ -241,7 +242,8 @@ function /(a::Interval, b::Interval)
     r = bareinterval(a) / x
     d = min(decoration(a), decoration(b), decoration(r))
     d = min(d, ifelse(in_interval(0, x), trv, d))
-    return _unsafe_interval(r, d)
+    t = guarantee(a) & guarantee(b)
+    return _unsafe_interval(r, d, t)
 end
 /(a::Real, b::Interval) = /(promote(a, b)...)
 /(a::Interval, b::Real) = /(promote(a, b)...)
@@ -255,7 +257,7 @@ function inv(a::Interval)
     r = inv(x)
     d = min(decoration(a), decoration(r))
     d = min(d, ifelse(in_interval(0, x), trv, d))
-    return _unsafe_interval(r, d)
+    return _unsafe_interval(r, d, guarantee(a))
 end
 
 for f ∈ (:muladd, :fma)
@@ -263,7 +265,8 @@ for f ∈ (:muladd, :fma)
         function $f(a::Interval, b::Interval, c::Interval)
             r = $f(bareinterval(a), bareinterval(b), bareinterval(c))
             d = min(decoration(a), decoration(b), decoration(c), decoration(r))
-            return _unsafe_interval(r, d)
+            t = guarantee(a) & guarantee(b) & guarantee(c)
+            return _unsafe_interval(r, d, t)
         end
         $f(a::Interval, b::Interval, c::Real) = $f(promote(a, b, c)...)
         $f(a::Interval, b::Real, c::Interval) = $f(promote(a, b, c)...)
@@ -280,5 +283,5 @@ function sqrt(a::Interval{T}) where {T<:NumTypes}
     r = sqrt(x)
     d = min(decoration(a), decoration(r))
     d = min(d, ifelse(issubset_interval(x, domain), d, trv))
-    return _unsafe_interval(r, d)
+    return _unsafe_interval(r, d, guarantee(a))
 end

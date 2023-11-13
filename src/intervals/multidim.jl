@@ -92,5 +92,6 @@ end
 
 function _setdiff_interval(x::Interval{T}, y::Interval{T}) where {T<:NumTypes}
     h1, h2 = _setdiff_interval(bareinterval(x), bareinterval(y))
-    return (_unsafe_interval(h1, trv), _unsafe_interval(h2, trv))
+    t = guarantee(x) & guarantee(y)
+    return (_unsafe_interval(h1, trv, t), _unsafe_interval(h2, trv, t))
 end
