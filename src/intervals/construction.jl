@@ -513,8 +513,7 @@ end
 
 function Base.convert(::Type{Interval{T}}, x::Complex{<:Interval}) where {T<:NumTypes}
     isthinzero(imag(x)) || return throw(DomainError(x, "imaginary part must be zero."))
-    bx = bareinterval(T, real(x))
-    return _unsafe_interval(bx, decoration(bx), guarantee(x))
+    return convert(Interval{T}, real(x))
 end
 
 function Base.convert(::Type{Interval{T}}, x::Real) where {T<:NumTypes}
@@ -524,6 +523,5 @@ end
 
 function Base.convert(::Type{Interval{T}}, x::Complex) where {T<:NumTypes}
     iszero(imag(x)) || return throw(DomainError(x, "imaginary part must be zero."))
-    bx = bareinterval(T, real(x))
-    return _unsafe_interval(bx, decoration(bx), false)
+    return convert(Interval{T}, real(x))
 end
