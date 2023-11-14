@@ -14,7 +14,7 @@ import Base:
     exp, log, exp2, exp10, log2, log10, cbrt, hypot, ^,
     zero, one, eps, typemin, typemax, abs, abs2, min, max,
     float, big,
-    floor, ceil, trunc, sign, round, copysign, flipsign, signbit,
+    floor, ceil, trunc, sign, round, copysign, flipsign,
     expm1, log1p,
     precision,
     show,

@@ -16,7 +16,6 @@ include("arithmetic/basic.jl")
 include("arithmetic/hyperbolic.jl")
 include("arithmetic/integer.jl")
 include("arithmetic/power.jl")
-include("arithmetic/signbit.jl")
 include("arithmetic/trigonometric.jl")
 
 # Other functions
