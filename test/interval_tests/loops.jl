@@ -18,33 +18,33 @@ function calc_pi1(N)
     S1 = interval(0)
 
     for i in 1:N
-        S1 += 1/interval(i)^2
+        S1 += inv(interval(i)^2)
     end
-    S1 += interval(1/interval(N+1), 1/interval(N))
+    S1 += interval(inv(interval(N+1)), inv(interval(N)))
 
-    sqrt(6*S1)
+    return sqrt(interval(6)*S1)
 end
 
 function calc_pi2(N)
     S2 = interval(0)
 
     for i in 1:N
-        S2 += 1 / i^2
+        S2 += interval(1 / i^2)
     end
-    S2 += interval(1/interval(N+1), 1/interval(N))
+    S2 += interval(inv(interval(N+1)), inv(interval(N)))
 
-    sqrt(6*S2)
+    return sqrt(interval(6)*S2)
 end
 
 function calc_pi3(N)
     S3 = interval(0)
 
     for i in 1:N
-        S3 += 1 / i^2
+        S3 += interval(1 / i^2)
     end
     S3 += parse(Interval{Float64}, "[1/$(N+1), 1/$N]")
 
-    sqrt(6*S3)
+    return sqrt(interval(6)*S3)
 end
 
 function calc_pi4(N)
@@ -52,27 +52,27 @@ function calc_pi4(N)
     II = interval(1)
 
     for i in N:-1:1
-        S4 += II / i^2
+        S4 += II / interval(i^2)
     end
     S4 += II / interval(N, N+1)
 
-    sqrt(6*S4)
+    return sqrt(interval(6)*S4)
 end
 
 function calc_pi5(N)
     S5 = interval(0)
 
     for i in N:-1:1
-        S5 += 1 // i^2
+        S5 += interval(1 // i^2)
     end
-    S5 += 1 / interval(N, N+1)
+    S5 += inv(interval(N, N+1))
 
-    sqrt(6*S5)
+    return sqrt(interval(6)*S5)
 end
 
 @testset "Pi tests" begin
     big_pi = setprecision(256) do
-        big(pi)
+        big(π)
     end
 
     N = 10000

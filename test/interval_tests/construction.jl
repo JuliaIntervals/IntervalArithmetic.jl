@@ -146,10 +146,10 @@ end
     @test isequal_interval(big_x, Interval{BigFloat}(x))
     @test isequal_interval(big_y, y)
     # can convert a `Real` to an `Interval`
-    @test isequal_interval(convert(Interval{Float64}, 1), interval(1)) & (guarantee(convert(Interval{Float64}, 1)) == !guarantee(interval(1)))
-    @test isequal_interval(convert(Complex{Interval{Float64}}, 1), interval(1+0im)) & (guarantee(convert(Complex{Interval{Float64}}, 1)) == !guarantee(interval(1+0im)))
-    @test isequal_interval(convert(Complex{Interval{Float64}}, im), interval(im)) & (guarantee(convert(Complex{Interval{Float64}}, im)) == !guarantee(interval(im)))
-    @test isequal_interval(convert(Interval{Float64}, 1+0im), convert(Interval{Float64}, interval(1+0im)), interval(1))
+    @test_logs (:warn,) (:warn,) @test isequal_interval(convert(Interval{Float64}, 1), interval(1)) & (guarantee(convert(Interval{Float64}, 1)) == !guarantee(interval(1)))
+    @test_logs (:warn,) (:warn,) (:warn,) (:warn,) @test isequal_interval(convert(Complex{Interval{Float64}}, 1), interval(1+0im)) & (guarantee(convert(Complex{Interval{Float64}}, 1)) == !guarantee(interval(1+0im)))
+    @test_logs (:warn,) (:warn,) (:warn,) (:warn,) @test isequal_interval(convert(Complex{Interval{Float64}}, im), interval(im)) & (guarantee(convert(Complex{Interval{Float64}}, im)) == !guarantee(interval(im)))
+    @test_logs (:warn,) @test isequal_interval(convert(Interval{Float64}, 1+0im), convert(Interval{Float64}, interval(1+0im)), interval(1))
     @test_throws DomainError convert(Interval{Float64}, 1+im)
     @test_throws DomainError convert(Interval{Float64}, interval(1+im))
 end

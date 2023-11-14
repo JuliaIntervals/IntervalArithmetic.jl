@@ -113,7 +113,7 @@ function _pow(a::BareInterval{BigFloat}, x::BigFloat)
         return emptyinterval(BareInterval{BigFloat})
     end
 
-    isinteger(x) && return nthpow(a, round(Int, x))
+    isinteger(x) && return nthpow(a, Integer(x))
     x == 0.5 && return sqrt(a)
 
     a = intersect_interval(a, domain)
@@ -290,7 +290,7 @@ end
 
 function fastpow(x::BareInterval, y::BareInterval)
     isempty_interval(x) && return x
-    isthininteger(y) && return fastpow(x, Int(inf(y)))
+    isthininteger(y) && return fastpow(x, Integer(sup(y)))
     return exp(y * log(x))
 end
 
@@ -304,33 +304,11 @@ fastpow(x::BareInterval{T}, y::S) where {T<:NumTypes,S<:Real} =
 # overwrite behaviour for small integer powers from https://github.com/JuliaLang/julia/pull/24240
 Base.literal_pow(::typeof(^), x::Interval, ::Val{p}) where {p} = x^p
 
-function nthpow(a::Interval, n::Integer)
-    x = bareinterval(a)
-    r = nthpow(x, n)
-    d = min(decoration(a), decoration(r))
-    d = min(d, ifelse(n < 0 && in_interval(0, x), trv, d))
-    return _unsafe_interval(r, d, guarantee(a))
-end
-
-function ^(x::Interval, n::Integer)
+function nthpow(x::Interval, n::Integer)
     r = nthpow(bareinterval(x), n)
     d = min(decoration(x), decoration(r))
     d = min(d, ifelse(n < 0 && in_interval(0, x), trv, d))
-    return _unsafe_interval(r, d, false)
-end
-
-for S ∈ (:Rational, :AbstractFloat)
-    @eval function ^(xx::Interval{T}, q::$S) where {T<:NumTypes}
-        x = bareinterval(xx)
-        r = BareInterval{T}(_pow(_bigequiv(x), q))
-        d = min(decoration(xx), decoration(r))
-        if inf(x) > 0 || (inf(x) ≥ 0 && q > 0) ||
-                (isinteger(q) && q > 0) ||
-                (isinteger(q) && !in_interval(0, x))
-            return _unsafe_interval(r, d, false)
-        end
-        return _unsafe_interval(r, min(d, trv), false)
-    end
+    return _unsafe_interval(r, d, guarantee(x))
 end
 
 function ^(xx::Interval, qq::Interval)
@@ -345,6 +323,26 @@ function ^(xx::Interval, qq::Interval)
         return _unsafe_interval(r, d, t)
     end
     return _unsafe_interval(r, trv, t)
+end
+^(x::Interval, y::Real) = ^(promote(x, y)...)
+^(x::Real, y::Interval) = ^(promote(x, y)...)
+# needed to resolve ambiguities
+^(x::Interval, n::Integer) = x ^ (n//1)
+for S ∈ (:Rational, :AbstractFloat)
+    @eval function ^(x::Interval{T}, y::$S) where {T<:NumTypes}
+        domain = _unsafe_bareinterval(T, zero(T), typemax(T))
+        bx = bareinterval(x)
+        bx = intersect_interval(bx, domain)
+        isempty_interval(x) && return x
+        r = BareInterval{T}(_pow(_bigequiv(bx), y))
+        d = min(decoration(x), decoration(r))
+        if inf(x) > 0 || (inf(x) ≥ 0 && y > 0) ||
+                (isinteger(y) && y > 0) ||
+                (isinteger(y) && !in_interval(0, x))
+            return _unsafe_interval(r, d, false)
+        end
+        return _unsafe_interval(r, min(d, trv), false)
+    end
 end
 
 for f ∈ (:exp, :exp2, :exp10, :expm1, :cbrt)

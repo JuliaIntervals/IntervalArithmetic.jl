@@ -1282,13 +1282,13 @@ end
 
 @testset "minimal_sqr_dec_test" begin
 
-    @test isequal_interval(Interval(bareinterval(-0x1.FFFFFFFFFFFFFp1023,-0x0.0000000000001p-1022), IntervalArithmetic.com)^2, Interval(bareinterval(0.0,Inf), IntervalArithmetic.dac))
+    @test isequal_interval(nthpow(Interval(bareinterval(-0x1.FFFFFFFFFFFFFp1023,-0x0.0000000000001p-1022), IntervalArithmetic.com), 2), Interval(bareinterval(0.0,Inf), IntervalArithmetic.dac))
 
-    @test isequal_interval(Interval(bareinterval(-1.0,1.0), IntervalArithmetic.def)^2, Interval(bareinterval(0.0,1.0), IntervalArithmetic.def))
+    @test isequal_interval(nthpow(Interval(bareinterval(-1.0,1.0), IntervalArithmetic.def), 2), Interval(bareinterval(0.0,1.0), IntervalArithmetic.def))
 
-    @test isequal_interval(Interval(bareinterval(-5.0,3.0), IntervalArithmetic.com)^2, Interval(bareinterval(0.0,25.0), IntervalArithmetic.com))
+    @test isequal_interval(nthpow(Interval(bareinterval(-5.0,3.0), IntervalArithmetic.com), 2), Interval(bareinterval(0.0,25.0), IntervalArithmetic.com))
 
-    @test isequal_interval(Interval(bareinterval(0x1.999999999999AP-4,0x1.999999999999AP-4), IntervalArithmetic.com)^2, Interval(bareinterval(0x1.47AE147AE147BP-7,0x1.47AE147AE147CP-7), IntervalArithmetic.com))
+    @test isequal_interval(nthpow(Interval(bareinterval(0x1.999999999999AP-4,0x1.999999999999AP-4), IntervalArithmetic.com), 2), Interval(bareinterval(0x1.47AE147AE147BP-7,0x1.47AE147AE147CP-7), IntervalArithmetic.com))
 
 end
 
@@ -2808,27 +2808,27 @@ end
 
 @testset "minimal_pown_dec_test" begin
 
-    @test isequal_interval(^(Interval(bareinterval(-5.0,10.0), IntervalArithmetic.com), 0), Interval(bareinterval(1.0,1.0), IntervalArithmetic.com))
+    @test isequal_interval(nthpow(Interval(bareinterval(-5.0,10.0), IntervalArithmetic.com), 0), Interval(bareinterval(1.0,1.0), IntervalArithmetic.com))
 
-    @test isequal_interval(^(Interval(bareinterval(-Inf,15.0), IntervalArithmetic.dac), 0), Interval(bareinterval(1.0,1.0), IntervalArithmetic.dac))
+    @test isequal_interval(nthpow(Interval(bareinterval(-Inf,15.0), IntervalArithmetic.dac), 0), Interval(bareinterval(1.0,1.0), IntervalArithmetic.dac))
 
-    @test isequal_interval(^(Interval(bareinterval(-3.0,5.0), IntervalArithmetic.def), 2), Interval(bareinterval(0.0,25.0), IntervalArithmetic.def))
+    @test isequal_interval(nthpow(Interval(bareinterval(-3.0,5.0), IntervalArithmetic.def), 2), Interval(bareinterval(0.0,25.0), IntervalArithmetic.def))
 
-    @test isequal_interval(^(Interval(bareinterval(-0x1.FFFFFFFFFFFFFp1023,2.0), IntervalArithmetic.com), 2), Interval(bareinterval(0.0,Inf), IntervalArithmetic.dac))
+    @test isequal_interval(nthpow(Interval(bareinterval(-0x1.FFFFFFFFFFFFFp1023,2.0), IntervalArithmetic.com), 2), Interval(bareinterval(0.0,Inf), IntervalArithmetic.dac))
 
-    @test isequal_interval(^(Interval(bareinterval(-3.0,5.0), IntervalArithmetic.dac), 3), Interval(bareinterval(-27.0,125.0), IntervalArithmetic.dac))
+    @test isequal_interval(nthpow(Interval(bareinterval(-3.0,5.0), IntervalArithmetic.dac), 3), Interval(bareinterval(-27.0,125.0), IntervalArithmetic.dac))
 
-    @test isequal_interval(^(Interval(bareinterval(-0x1.FFFFFFFFFFFFFp1023,2.0), IntervalArithmetic.com), 3), Interval(bareinterval(-Inf, 8.0), IntervalArithmetic.dac))
+    @test isequal_interval(nthpow(Interval(bareinterval(-0x1.FFFFFFFFFFFFFp1023,2.0), IntervalArithmetic.com), 3), Interval(bareinterval(-Inf, 8.0), IntervalArithmetic.dac))
 
-    @test isequal_interval(^(Interval(bareinterval(3.0,5.0), IntervalArithmetic.com), -2), Interval(bareinterval(0x1.47AE147AE147AP-5,0x1.C71C71C71C71DP-4), IntervalArithmetic.com))
+    @test isequal_interval(nthpow(Interval(bareinterval(3.0,5.0), IntervalArithmetic.com), -2), Interval(bareinterval(0x1.47AE147AE147AP-5,0x1.C71C71C71C71DP-4), IntervalArithmetic.com))
 
-    @test isequal_interval(^(Interval(bareinterval(-5.0,-3.0), IntervalArithmetic.def), -2), Interval(bareinterval(0x1.47AE147AE147AP-5,0x1.C71C71C71C71DP-4), IntervalArithmetic.def))
+    @test isequal_interval(nthpow(Interval(bareinterval(-5.0,-3.0), IntervalArithmetic.def), -2), Interval(bareinterval(0x1.47AE147AE147AP-5,0x1.C71C71C71C71DP-4), IntervalArithmetic.def))
 
-    @test isequal_interval(^(Interval(bareinterval(-5.0,3.0), IntervalArithmetic.com), -2), Interval(bareinterval(0x1.47AE147AE147AP-5,Inf), IntervalArithmetic.trv))
+    @test isequal_interval(nthpow(Interval(bareinterval(-5.0,3.0), IntervalArithmetic.com), -2), Interval(bareinterval(0x1.47AE147AE147AP-5,Inf), IntervalArithmetic.trv))
 
-    @test isequal_interval(^(Interval(bareinterval(3.0,5.0), IntervalArithmetic.dac), -3), Interval(bareinterval(0x1.0624DD2F1A9FBP-7 ,0x1.2F684BDA12F69P-5), IntervalArithmetic.dac))
+    @test isequal_interval(nthpow(Interval(bareinterval(3.0,5.0), IntervalArithmetic.dac), -3), Interval(bareinterval(0x1.0624DD2F1A9FBP-7 ,0x1.2F684BDA12F69P-5), IntervalArithmetic.dac))
 
-    @test isequal_interval(^(Interval(bareinterval(-3.0,5.0), IntervalArithmetic.com), -3), Interval(entireinterval(BareInterval{Float64}), IntervalArithmetic.trv))
+    @test isequal_interval(nthpow(Interval(bareinterval(-3.0,5.0), IntervalArithmetic.com), -3), Interval(entireinterval(BareInterval{Float64}), IntervalArithmetic.trv))
 
 end
 

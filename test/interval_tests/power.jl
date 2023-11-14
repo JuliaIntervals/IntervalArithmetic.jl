@@ -68,12 +68,12 @@ end
     @test isequal_interval(interval(b), sqrt(interval(0, 1)))
     @test decoration(b) == IntervalArithmetic.trv
 
-    @test isequal_interval(interval(2, 3)   ^  2, interval(4, 9))
-    @test isequal_interval(interval(2, 3)   ^ -2, interval(1/9, 1/4))
-    @test isequal_interval(interval(-3, 2)  ^  3, interval(-27, 8))
-    @test isequal_interval(interval(-3, -2) ^ -3, interval(-1/8, -1/27))
-    @test isequal_interval(interval(0, 3)   ^  2, interval(0, 9))
-    @test isequal_interval(interval(0, 3)   ^ -2, interval(1/9, Inf, IntervalArithmetic.trv))
+    @test isequal_interval(nthpow(interval(2, 3)  ,  2), interval(4, 9))
+    @test isequal_interval(nthpow(interval(2, 3)  , -2), interval(1/9, 1/4))
+    @test isequal_interval(nthpow(interval(-3, 2) ,  3), interval(-27, 8))
+    @test isequal_interval(nthpow(interval(-3, -2), -3), interval(-1/8, -1/27))
+    @test isequal_interval(nthpow(interval(0, 3)  ,  2), interval(0, 9))
+    @test isequal_interval(nthpow(interval(0, 3)  , -2), interval(1/9, Inf, IntervalArithmetic.trv))
     @test isequal_interval(interval(2, 3)   ^ interval(0, 1), interval(1, 3))
     @test isequal_interval(interval(2, 3)   ^ interval(0, 1), interval(1, 3))
     @test isequal_interval(interval(0, 2)   ^ interval(0, 1), interval(0, 2, IntervalArithmetic.trv))

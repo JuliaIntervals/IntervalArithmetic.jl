@@ -29,7 +29,7 @@
         @test inf(zero(a) + one(b)) == 1
         @test sup(zero(a) + one(b)) == 1
         @test isequal_interval(interval(0,1) + emptyinterval(a), emptyinterval(a))
-        @test isequal_interval(interval(0.25) - one(c)/4, zero(c))
+        @test isequal_interval(interval(0.25) - one(c)/interval(4), zero(c))
         @test isequal_interval(emptyinterval(a) - interval(0, 1), emptyinterval(a))
         @test isequal_interval(interval(0, 1) - emptyinterval(a), emptyinterval(a))
         @test isequal_interval(a*b, interval(*(inf(a), inf(b), RoundDown), *(sup(a), sup(b), RoundUp)))

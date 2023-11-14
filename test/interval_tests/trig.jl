@@ -1,6 +1,6 @@
 @testset "rad2deg/deg2rad" begin
     @test issubset_interval(interval(180, 360), rad2deg(interval(π, 2π)))
-    @test issubset_interval(interval(π, 2interval(π)), deg2rad(interval(180, 360)))
+    @test issubset_interval(interval(π, interval(2)*interval(π)), deg2rad(interval(180, 360)))
 end
 
 @testset "sin" begin
@@ -84,7 +84,7 @@ end
 end
 
 @testset "Inverse trig" begin
-    @test isequal_interval(asin(interval(1)), interval(pi)/2)
+    @test isequal_interval(asin(interval(1)), interval(π)/interval(2))
     @test isequal_interval(asin(interval(0.9, 2)), asin(interval(0.9, 1)))
     @test isequal_interval(asin(interval(3, 4)), emptyinterval())
 
@@ -101,7 +101,7 @@ end
     @test issubset_interval(acos(interval(BigFloat, 3, 4)), acos(interval(3, 4)))
 
     @test isequal_interval(atan(interval(-1,1)),
-        interval(-sup(interval(Float64, π))/4, sup(interval(Float64, π))/4))
+        interval(-interval(sup(interval(Float64, π)))/interval(4), interval(sup(interval(Float64, π)))/interval(4)))
     @test isequal_interval(atan(interval(0)), interval(0.0, 0.0))
     @test issubset_interval(atan(interval(BigFloat, -1, 1)), atan(interval(-1, 1)))
 end
@@ -109,9 +109,9 @@ end
 @testset "atan" begin
     @test isequal_interval(atan(emptyinterval(), entireinterval()), emptyinterval())
     @test isequal_interval(atan(entireinterval(), emptyinterval()), emptyinterval())
-    @test isequal_interval(atan(interval(0.0, 1.0), interval(BigFloat, 0.0, 0.0)), interval(BigFloat, π)/2)
-    @test isequal_interval(atan(interval(0.0, 1.0), interval(0.0)), interval(π)/2)
-    @test isequal_interval(atan(interval(-1.0, -0.1), interval(0.0)), -interval(π)/2)
+    @test isequal_interval(atan(interval(0.0, 1.0), interval(BigFloat, 0.0, 0.0)), interval(BigFloat, π)/interval(2))
+    @test isequal_interval(atan(interval(0.0, 1.0), interval(0.0)), interval(π)/interval(2))
+    @test isequal_interval(atan(interval(-1.0, -0.1), interval(0.0)), -interval(π)/interval(2))
     @test isequal_interval(atan(interval(-1.0, 1.0), interval(0.0)), interval(-0.5, 0.5) * interval(π))
     @test isequal_interval(atan(interval(0.0), interval(0.1, 1.0)), interval(0.0))
     @test issubset_interval(atan(interval(BigFloat, 0.0, 0.1), interval(BigFloat, 0.1, 1.0)),
@@ -224,7 +224,7 @@ end
 end
 
 @testset "Trig with large arguments" begin
-    x = interval(2.)^1000   # this is a thin interval
+    x = nthpow(interval(2.), 1000)
     @test diam(x) == 0.0
 
     @test isequal_interval(sin(x), interval(-0.15920170308624246, -0.15920170308624243))

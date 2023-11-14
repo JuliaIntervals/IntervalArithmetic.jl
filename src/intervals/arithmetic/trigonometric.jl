@@ -549,15 +549,15 @@ end
 
 # decorated intervals
 
-rad2deg(a::Interval) = (a / π) * 180
+rad2deg(a::Interval{T}) where {T<:NumTypes} = (a / interval(T, π)) * interval(T, 180)
 
-deg2rad(a::Interval) = (a * π) / 180
+deg2rad(a::Interval{T}) where {T<:NumTypes} = (a * interval(T, π)) / interval(T, 180)
 
 sincospi(a::Interval) = (sinpi(a), cospi(a))
 
-sinpi(a::Interval) = sin(a * π)
+sinpi(a::Interval{T}) where {T<:NumTypes} = sin(a * interval(T, π))
 
-cospi(a::Interval) = cos(a * π)
+cospi(a::Interval{T}) where {T<:NumTypes} = cos(a * interval(T, π))
 
 #
 
