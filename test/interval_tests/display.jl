@@ -54,6 +54,7 @@ setprecision(BigFloat, 256) do
 
     @testset "Interval" begin
         a = interval(1, 2)
+        a_NG = a/1
         b = interval(-floatmin(Float64), 1.3)
         b32 = interval(-floatmin(Float32), parse(Float32, "1.3"))
         b16 = interval(-floatmin(Float16), parse(Float16, "1.3"))
@@ -72,8 +73,10 @@ setprecision(BigFloat, 256) do
                     setdisplay(; decorations = true)
 
                     @test sprint(show, MIME("text/plain"), emptyinterval()) == "∅_trv"
+                    @test sprint(show, MIME("text/plain"), emptyinterval()/1) == "∅_trv_NG"
 
                     @test sprint(show, MIME("text/plain"), a)   == "[1.0, 2.0]_com"
+                    @test sprint(show, MIME("text/plain"), a_NG)   == "[1.0, 2.0]_com_NG"
                     @test sprint(show, MIME("text/plain"), b)   == "[-2.22508e-308, 1.30001]_com"
                     @test sprint(show, MIME("text/plain"), b32) == "[-1.1755f-38, 1.30001f0]_com"
                     @test sprint(show, MIME("text/plain"), b16) == "[Float16(-6.104e-5), Float16(1.29981)]_com"
@@ -87,8 +90,10 @@ setprecision(BigFloat, 256) do
                     setdisplay(; decorations = false)
 
                     @test sprint(show, MIME("text/plain"), emptyinterval()) == "∅"
+                    @test sprint(show, MIME("text/plain"), emptyinterval()/1) == "∅_NG"
 
                     @test sprint(show, MIME("text/plain"), a)   == "[1.0, 2.0]"
+                    @test sprint(show, MIME("text/plain"), a_NG)   == "[1.0, 2.0]_NG"
                     @test sprint(show, MIME("text/plain"), b)   == "[-2.22508e-308, 1.30001]"
                     @test sprint(show, MIME("text/plain"), b32) == "[-1.1755f-38, 1.30001f0]"
                     @test sprint(show, MIME("text/plain"), b16) == "[Float16(-6.104e-5), Float16(1.29981)]"
@@ -103,6 +108,7 @@ setprecision(BigFloat, 256) do
                 setdisplay(; sigdigits = 20, decorations = true)
 
                 @test sprint(show, MIME("text/plain"), a)   == "[1.0, 2.0]_com"
+                @test sprint(show, MIME("text/plain"), a_NG)   == "[1.0, 2.0]_com_NG"
                 @test sprint(show, MIME("text/plain"), b)   == "[-2.2250738585072014e-308, 1.3000000000000000445]_com"
                 @test sprint(show, MIME("text/plain"), b32) == "[-1.1754944f-38, 1.2999999523162841797f0]_com"
                 @test sprint(show, MIME("text/plain"), b16) == "[Float16(-6.104e-5), Float16(1.2998046875000000001)]_com"
@@ -118,8 +124,10 @@ setprecision(BigFloat, 256) do
             setdisplay(:full; sigdigits = 100, decorations = false)
 
             @test sprint(show, MIME("text/plain"), emptyinterval()) == "Interval{Float64}(∅, trv)"
+            @test sprint(show, MIME("text/plain"), emptyinterval()/1) == "Interval{Float64}(∅, trv, NG)"
 
             @test sprint(show, MIME("text/plain"), a)   == "Interval{Float64}(1.0, 2.0, com)"
+            @test sprint(show, MIME("text/plain"), a_NG)   == "Interval{Float64}(1.0, 2.0, com, NG)"
             @test sprint(show, MIME("text/plain"), b)   == "Interval{Float64}(-2.2250738585072014e-308, 1.3, com)"
             @test sprint(show, MIME("text/plain"), b32) == "Interval{Float32}(-1.1754944f-38, 1.3f0, com)"
             @test sprint(show, MIME("text/plain"), b16) == "Interval{Float16}(Float16(-6.104e-5), Float16(1.3), com)"
@@ -136,8 +144,10 @@ setprecision(BigFloat, 256) do
                 setdisplay(; decorations = true)
 
                 @test sprint(show, MIME("text/plain"), emptyinterval()) == "∅_trv"
+                @test sprint(show, MIME("text/plain"), emptyinterval()/1) == "∅_trv_NG"
 
                 @test sprint(show, MIME("text/plain"), a)   == "(1.5 ± 0.5)_com"
+                @test sprint(show, MIME("text/plain"), a_NG)   == "(1.5 ± 0.5)_com_NG"
                 @test sprint(show, MIME("text/plain"), b)   == "(0.65 ± 0.650001)_com"
                 @test sprint(show, MIME("text/plain"), b32) == "(0.65f0 ± 0.650001f0)_com"
                 @test sprint(show, MIME("text/plain"), b16) == "(Float16(0.649902) ± Float16(0.649903))_com"
@@ -151,8 +161,10 @@ setprecision(BigFloat, 256) do
                 setdisplay(; decorations = false)
 
                 @test sprint(show, MIME("text/plain"), emptyinterval()) == "∅"
+                @test sprint(show, MIME("text/plain"), emptyinterval()/1) == "∅_NG"
 
                 @test sprint(show, MIME("text/plain"), a)   == "1.5 ± 0.5"
+                @test sprint(show, MIME("text/plain"), a_NG)   == "(1.5 ± 0.5)_NG"
                 @test sprint(show, MIME("text/plain"), b)   == "0.65 ± 0.650001"
                 @test sprint(show, MIME("text/plain"), b32) == "0.65f0 ± 0.650001f0"
                 @test sprint(show, MIME("text/plain"), b16) == "Float16(0.649902) ± Float16(0.649903)"

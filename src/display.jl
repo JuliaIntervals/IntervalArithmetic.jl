@@ -110,23 +110,41 @@ end
 function _str_repr(a::Interval{T}, format::Symbol) where {T<:NumTypes}
     # `format` is either `:standard`, `:midpoint` or `:full`
     str_interval = _str_basic_repr(bareinterval(a), format)
-    format === :full && return string("Interval{", T, "}(", str_interval, ", ", decoration(a), ')')
-    display_params.decorations || return str_interval
-    if format === :midpoint && str_interval != "∅"
-        str_interval = string('(', str_interval, ')')
+    if guarantee(a)
+        format === :full && return string("Interval{", T, "}(", str_interval, ", ", decoration(a), ')')
+        display_params.decorations || return str_interval
+        if format === :midpoint && str_interval != "∅"
+            str_interval = string('(', str_interval, ')')
+        end
+        return string(str_interval, '_', decoration(a))
+    else
+        format === :full && return string("Interval{", T, "}(", str_interval, ", ", decoration(a), ", NG)")
+        if format === :midpoint && str_interval != "∅"
+            str_interval = string('(', str_interval, ')')
+        end
+        display_params.decorations || return string(str_interval, "_NG")
+        return string(str_interval, '_', decoration(a), "_NG")
     end
-    return string(str_interval, '_', decoration(a))
 end
 
 function _str_repr(a::Interval{BigFloat}, format::Symbol)
     # `format` is either `:standard`, `:midpoint` or `:full`
     str_interval = _str_basic_repr(bareinterval(a), format)
-    format === :full && return string("Interval{BigFloat}(", str_interval, ", ", decoration(a), ')')
-    if format === :midpoint && str_interval != "∅"
-        str_interval = string('(', str_interval, ')')
+    if guarantee(a)
+        format === :full && return string("Interval{BigFloat}(", str_interval, ", ", decoration(a), ')')
+        if format === :midpoint && str_interval != "∅"
+            str_interval = string('(', str_interval, ')')
+        end
+        display_params.decorations || return string(str_interval, _subscriptify(precision(BigFloat)))
+        return string(str_interval, _subscriptify(precision(BigFloat)), '_', decoration(a))
+    else
+        format === :full && return string("Interval{", T, "}(", str_interval, ", ", decoration(a), ", NG)")
+        if format === :midpoint && str_interval != "∅"
+            str_interval = string('(', str_interval, ')')
+        end
+        display_params.decorations || return string(str_interval, _subscriptify(precision(BigFloat)), "_NG")
+        return string(str_interval, _subscriptify(precision(BigFloat)), '_', decoration(a), "_NG")
     end
-    display_params.decorations || return string(str_interval, _subscriptify(precision(BigFloat)))
-    return string(str_interval, _subscriptify(precision(BigFloat)), '_', decoration(a))
 end
 
 function _str_repr(x::Complex{<:Interval}, format::Symbol)
