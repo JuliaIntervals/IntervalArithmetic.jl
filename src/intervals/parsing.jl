@@ -51,10 +51,10 @@ For more details, see sections 9.7 and 12.11 of the IEEE Standard 1788-2015.
 julia> setdisplay(:full);
 
 julia> parse(BareInterval{Float64}, "[1, 2]")
-Interval{Float64}(1.0, 2.0)
+BareInterval{Float64}(1.0, 2.0)
 
 julia> parse(BareInterval{Float64}, "[1, 2]")
-Interval{Float64}(1.0, 2.0)
+BareInterval{Float64}(1.0, 2.0)
 
 julia> parse(BareInterval{Float64}, "[1,]")
 BareInterval{Float64}(1.0, Inf)

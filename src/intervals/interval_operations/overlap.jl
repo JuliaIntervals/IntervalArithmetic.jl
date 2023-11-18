@@ -43,7 +43,7 @@ function overlap(a::BareInterval, b::BareInterval)
     isempty_interval(a) && return Overlap.first_empty
     isempty_interval(b) && return Overlap.second_empty
 
-    # States with both intervals nonempty
+    # States with both intervals non-empty
     sup(a) < inf(b) && return Overlap.before
     inf(a) != sup(a) && inf(b) != sup(b) && sup(a) == inf(b) && return Overlap.meets
     inf(a) < inf(b) && sup(a) < sup(b) && sup(a) > inf(b) && return Overlap.overlaps

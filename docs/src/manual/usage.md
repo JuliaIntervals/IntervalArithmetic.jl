@@ -17,8 +17,7 @@ the following options, specified by keyword arguments (type `?setdisplay` to get
 
 ```@repl
 using IntervalArithmetic
-setdisplay() # default values
-a = interval(1.1, pi)
+a = interval(1.1, pi) # default display
 setdisplay(; sigdigits = 10)
 a
 setdisplay(:full)
@@ -61,7 +60,7 @@ X - X
 
 ## Elementary functions
 
-The main elementary functions are implemented. The functions for `Interval{Float64}` internally use routines from the correctly-rounded [`CRlibm` library](https://github.com/dpsanders/CRlibm.jl) where possible, i.e. for the following functions defined in that library:
+The main elementary functions are implemented. The functions for `Interval{Float64}` internally use routines from the correctly-rounded [CRlibm library](https://github.com/dpsanders/CRlibm.jl) where possible, i.e. for the following functions defined in that library:
 - `exp`, `expm1`
 - `log`, `log1p`, `log2`, `log10`
 - `sin`, `cos`, `tan`
@@ -69,13 +68,13 @@ The main elementary functions are implemented. The functions for `Interval{Float
 - `sinh`, `cosh`
 
 Other functions that are implemented for `Interval{Float64}` internally convert
-to an `Interval{BigFloat}`, and then use routines from the `MPFR` library
+to an `Interval{BigFloat}`, and then use routines from the MPFR library
 (`BigFloat` in Julia):
 - `^`
 - `exp2`, `exp10`
 - `atan`, `atanh`
 
-Note, in particular, that in order to obtain correct rounding for the power function (`^`), intervals are converted to and from `BigFloat`; this implies a significant slow-down in this case.
+In particular, in order to obtain correct rounding for the power function (`^`), intervals are converted to and from `BigFloat`; this implies a significant slow-down in this case.
 
 For example,
 

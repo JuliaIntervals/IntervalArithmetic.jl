@@ -22,7 +22,6 @@ makedocs(;
         "Manual" => [
             "Constructing intervals" => "manual/construction.md",
             "Usage" => "manual/usage.md",
-            "Decorations" => "manual/decorations.md",
             "API" => "manual/api.md"
         ]
     ]
