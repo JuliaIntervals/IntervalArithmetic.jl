@@ -234,10 +234,10 @@ semantically equivalent to `bareinterval(T, a)`.
 julia> setdisplay(:full);
 
 julia> IntervalArithmetic.atomic(Float64, 0.1)
-Interval{Float64}(0.09999999999999999, 0.10000000000000002)
+BareInterval{Float64}(0.09999999999999999, 0.10000000000000002)
 
 julia> IntervalArithmetic.atomic(Float64, 0.3)
-Interval{Float64}(0.29999999999999993, 0.30000000000000004)
+BareInterval{Float64}(0.29999999999999993, 0.30000000000000004)
 ```
 """
 atomic(::Type{T}, a) where {T<:NumTypes} = bareinterval(T, a)
