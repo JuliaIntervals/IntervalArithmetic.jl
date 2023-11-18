@@ -24,7 +24,8 @@ makedocs(;
             "Usage" => "manual/usage.md",
             "API" => "manual/api.md"
         ]
-    ]
+    ],
+    warnonly = true
 )
 
 deploydocs(;
