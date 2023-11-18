@@ -8,7 +8,7 @@ using SetRounding
 using EnumX
 
 import Base:
-    +, -, *, /, inv, //, muladd, fma, sqrt,
+    +, -, *, /, \, inv, //, muladd, fma, sqrt,
     sinh, cosh, tanh, coth, csch, sech, asinh, acosh, atanh, acoth,
     rad2deg, deg2rad, sin, cos, tan, cot, csc, sec, asin, acos, atan, acot, sinpi, cospi, sincospi,
     exp, log, exp2, exp10, log2, log10, cbrt, hypot, ^,
@@ -48,7 +48,6 @@ export BareInterval, bareinterval, Interval, interval, decoration, @I_str,
     entireinterval, isentire_interval, nai, isnai, iscommon, isatomic,
     inf, sup, bounds, mince,
     dist,
-    RoundTiesToEven, RoundTiesToAway,
     IntervalRounding,
     cancelminus, cancelplus,
     fastpow, extended_div, nthroot, nthpow,

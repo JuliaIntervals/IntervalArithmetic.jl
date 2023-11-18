@@ -4,219 +4,318 @@
 # Some other (non required) related functions are also present, as well as some of
 # the "Recommended operations" (Section 10.6.3)
 
-# Equivalent to `<` but with Inf < Inf being true.
-function _strictlessprime(a::Real, b::Real)
-    (isinf(a) || isinf(b)) && a == b && return true
-    return a < b
+# equivalent to `<` but with `(Inf < Inf) == true`
+function _strictlessprime(x::Real, y::Real)
+    (isinf(x) || isinf(y)) && x == y && return true
+    return x < y
 end
 
 """
-    isequal_interval(a, b)
+    isequal_interval(x::BareInterval, y::BareInterval)
+    isequal_interval(x::Interval, y::Interval)
 
-Check if the intervals `a` and `b` are identical.
+Test whether `x` and `y` are identical.
 
 Implement the `equal` function of the IEEE Standard 1788-2015 (Table 9.3).
 """
-function isequal_interval(a::BareInterval, b::BareInterval)
-    isempty_interval(a) && isempty_interval(b) && return true
-    return inf(a) == inf(b) && sup(a) == sup(b)
+isequal_interval(x::BareInterval, y::BareInterval) = (inf(x) == inf(y)) & (sup(x) == sup(y))
+
+function isequal_interval(x::Interval, y::Interval)
+    (isnai(x) | isnai(y)) && return false
+    return isequal_interval(bareinterval(x), bareinterval(y))
 end
 
 """
-    issubset_interval(a, b)
+    issubset_interval(x::BareInterval, y::BareInterval)
+    issubset_interval(x::Interval, y::Interval)
 
-Check if all the points of the interval `a` are within the interval `b`.
+Test whether `x` is contained in `y`.
 
 Implement the `subset` function of the IEEE Standard 1788-2015 (Table 9.3).
 """
-function issubset_interval(a::BareInterval, b::BareInterval)
-    isempty_interval(a) && return true
-    return inf(b) ≤ inf(a) && sup(a) ≤ sup(b)
+issubset_interval(x::BareInterval, y::BareInterval) =
+    (inf(y) ≤ inf(x)) & (sup(x) ≤ sup(y))
+
+function issubset_interval(x::Interval, y::Interval)
+    (isnai(x) | isnai(y)) && return false
+    return issubset_interval(bareinterval(x), bareinterval(y))
 end
 
 """
-    isstrictsubset_interval(a, b)
+    isstrictsubset_interval(x::BareInterval, y::BareInterval)
+    isstrictsubset_interval(x::Interval, y::Interval)
 
-Check if all the points of the interval `a` are within the interior of
-interval `b`.
+
+Test whether `x` is in the interior of `y`.
 
 Implement the `interior` function of the IEEE Standard 1788-2015 (Table 9.3).
 """
-function isstrictsubset_interval(a::BareInterval, b::BareInterval)
-    isempty_interval(a) && return true
-    return _strictlessprime(inf(b), inf(a)) && _strictlessprime(sup(a), sup(b))
+isstrictsubset_interval(x::BareInterval, y::BareInterval) =
+    _strictlessprime(inf(y), inf(x)) & _strictlessprime(sup(x), sup(y))
+
+function isstrictsubset_interval(x::Interval, y::Interval)
+    (isnai(x) | isnai(y)) && return false
+    return isstrictsubset_interval(bareinterval(x), bareinterval(y))
 end
 
 """
-    isweakless(a, b)
+    isweakless(x::BareInterval, y::BareInterval)
+    isweakless(x::Interval, y::Interval)
 
-Check if the interval `a` is weakly less than interval `b`. This is not
-equivalent as saying every element of `a` is less than any element of `b`.
+Test whether `inf(x) ≤ inf(y)` and `sup(x) ≤ sup(y)`, where `<` is replaced by
+`≤` for infinite values.
 
 Implement the `less` function of the IEEE Standard 1788-2015 (Table 10.3).
 """
-function isweakless(a::BareInterval, b::BareInterval)
-    isempty_interval(a) && isempty_interval(b) && return true
-    (isempty_interval(a) || isempty_interval(b)) && return false
-    return (inf(a) ≤ inf(b)) && (sup(a) ≤ sup(b))
+isweakless(x::BareInterval, y::BareInterval) =
+    (inf(x) ≤ inf(y)) & (sup(x) ≤ sup(y))
+
+function isweakless(x::Interval, y::Interval)
+    (isnai(x) | isnai(y)) && return false
+    return isweakless(bareinterval(x), bareinterval(y))
 end
 
 """
-    isstrictless(a, b)
+    isstrictless(x::BareInterval, y::BareInterval)
+    isstrictless(x::Interval, y::Interval)
 
-Check if `inf(a) < inf(b)` and `sup(a) < sup(b)`, where `<` is replaced by `≤`
-for infinite values.
+Test whether `inf(x) < inf(y)` and `sup(x) < sup(y)`, where `<` is replaced by
+`≤` for infinite values.
 
 Implement the `strictLess` function of the IEEE Standard 1788-2015 (Table 10.3).
 """
-isstrictless(a::BareInterval, b::BareInterval) =
-    _strictlessprime(inf(a), inf(b)) && _strictlessprime(sup(a), sup(b))
+isstrictless(x::BareInterval, y::BareInterval) =
+    _strictlessprime(inf(x), inf(y)) & _strictlessprime(sup(x), sup(y))
+
+function isstrictless(x::Interval, y::Interval)
+    (isnai(x) | isnai(y)) && return false
+    return isstrictless(bareinterval(x), bareinterval(y))
+end
 
 """
-    precedes(a, b)
+    precedes(x::BareInterval, y::BareInterval)
+    precedes(x::Interval, y::Interval)
 
-Check if the interval `a` is to the left of interval `b`.
+Test whether any element of `x` is lesser or equal to every elements of `y`.
 
 Implement the `precedes` function of the IEEE Standard 1788-2015 (Table 10.3).
 """
-function precedes(a::BareInterval, b::BareInterval)
-    (isempty_interval(a) || isempty_interval(b)) && return true
-    return sup(a) ≤ inf(b)
+precedes(x::BareInterval, y::BareInterval) = sup(x) ≤ inf(y)
+
+function precedes(x::Interval, y::Interval)
+    (isnai(x) | isnai(y)) && return false
+    return precedes(bareinterval(x), bareinterval(y))
 end
 
 """
-    strictprecedes(a, b)
+    strictprecedes(x::BareInterval, y::BareInterval)
+    strictprecedes(x::Interval, y::Interval)
 
-Check if the interval `a` is strictly to the left of interval `b`.
+Test whether any element of `x` is strictly lesser than every elements of `y`.
 
 Implement the `strictPrecedes` function of the IEEE Standard 1788-2015 (Table 10.3).
 """
-function strictprecedes(a::BareInterval, b::BareInterval)
-    (isempty_interval(a) || isempty_interval(b)) && return true
-    return sup(a) < inf(b)
+function strictprecedes(x::BareInterval, y::BareInterval)
+    (isempty_interval(x) | isempty_interval(y)) && return true
+    return sup(x) < inf(y)
+end
+
+function strictprecedes(x::Interval, y::Interval)
+    (isnai(x) | isnai(y)) && return false
+    return strictprecedes(bareinterval(x), bareinterval(y))
 end
 
 """
-    isdisjoint_interval(a, b)
+    isdisjoint_interval(x::BareInterval, y::BareInterval)
+    isdisjoint_interval(x::Interval, y::Interval)
 
-Check if none of the points of the interval `a` are within the interval `b`.
+Test whether `x` and `y` have no common elements.
 
 Implement the `disjoint` function of the IEEE Standard 1788-2015 (Table 9.3).
 """
 function isdisjoint_interval(a::BareInterval, b::BareInterval)
-    (isempty_interval(a) || isempty_interval(b)) && return true
-    return _strictlessprime(sup(b), inf(a)) || _strictlessprime(sup(a), inf(b))
+    (isempty_interval(a) | isempty_interval(b)) && return true
+    return _strictlessprime(sup(b), inf(a)) | _strictlessprime(sup(a), inf(b))
+end
+
+function isdisjoint_interval(x::Interval, y::Interval)
+    (isnai(x) | isnai(y)) && return false
+    return isdisjoint_interval(bareinterval(x), bareinterval(y))
 end
 
 """
-    in_interval(x, a)
+    in_interval(x::Real, y::BareInterval)
+    in_interval(x::Real, y::Interval)
 
-Check if the number `x` is a member of the interval `a`.
+Test whether `x` is an element of `y`.
 
-Implement the `isMember` function of the IEEE Standard 1788-2015 (section 10.6.3).
+Implement the `isMember` function of the IEEE Standard 1788-2015 (Section 10.6.3).
 """
-function in_interval(x::Real, a::BareInterval)
-    isinf(x) && return contains_infinity(a)
-    return inf(a) ≤ x ≤ sup(a)
+function in_interval(x::Real, y::BareInterval)
+    isinf(x) && return contains_infinity(y)
+    return inf(y) ≤ x ≤ sup(y)
+end
+
+function in_interval(x::Real, y::Interval)
+    isnai(y) && return false
+    return in_interval(x, bareinterval(y))
 end
 
 in_interval(::BareInterval, ::BareInterval) =
     throw(ArgumentError("`in_interval` is purposely not supported for two interval arguments. See instead `issubset_interval`."))
 
-isempty_interval(x::BareInterval{T}) where {T<:NumTypes} = (inf(x) == typemax(T)) && (sup(x) == typemin(T))
-isentire_interval(x::BareInterval{T}) where {T<:NumTypes} = (inf(x) == typemin(T)) && (sup(x) == typemax(T))
-isbounded(x::BareInterval) = (isfinite(inf(x)) && isfinite(sup(x))) || isempty_interval(x)
-isunbounded(x::BareInterval) = !isbounded(x)
+in_interval(::Interval, ::Interval) =
+    throw(ArgumentError("`in_interval` is purposely not supported for two interval arguments. See instead `issubset_interval`."))
 
 """
-    isthin(x)
+    isempty_interval(x::BareInterval)
+    isempty_interval(x::Interval)
 
-Check if `x` is the set consisting of a single exactly
-representable float. Any float which is not exactly representable
-does *not* yield a thin interval. Corresponds to `isSingleton` of
-the standard.
+Test whether `x` contains no elements.
+
+Implement the `isEmpty` function of the IEEE Standard 1788-2015 (Section 10.6.3).
+"""
+isempty_interval(x::BareInterval{T}) where {T<:NumTypes} =
+    (inf(x) == typemax(T)) & (sup(x) == typemin(T))
+
+function isempty_interval(x::Interval)
+    isnai(x) && return false
+    return isempty_interval(bareinterval(x))
+end
+
+"""
+    isentire_interval(x::BareInterval)
+    isentire_interval(x::Interval)
+
+Test whether `x` is the entire real line.
+
+Implement the `isEntire` function of the IEEE Standard 1788-2015 (Section 10.6.3).
+"""
+isentire_interval(x::BareInterval{T}) where {T<:NumTypes} =
+    (inf(x) == typemin(T)) & (sup(x) == typemax(T))
+
+function isentire_interval(x::Interval)
+    isnai(x) && return false
+    return isentire_interval(bareinterval(x))
+end
+
+"""
+    isbounded(x::BareInterval)
+    isbounded(x::Interval)
+
+Test whether `x` is empty or has finite bounds.
+"""
+isbounded(x::BareInterval) = (isfinite(inf(x)) & isfinite(sup(x))) | isempty_interval(x)
+
+function isbounded(x::Interval)
+    isnai(x) && return false
+    return isbounded(bareinterval(x))
+end
+
+"""
+    isbounded(x::BareInterval)
+    isbounded(x::Interval)
+
+Test whether `x` is not empty and has infinite bounds.
+"""
+isunbounded(x::BareInterval) = !isbounded(x)
+
+function isunbounded(x::Interval)
+    isnai(x) && return false
+    return isunbounded(bareinterval(x))
+end
+
+"""
+    isnai(x::BareInterval)
+    isnai(x::Interval)
+
+Test whether `x` is an NaI.
+"""
+isnai(::BareInterval) = false
+
+isnai(x::Interval) = decoration(x) == ill
+
+"""
+    iscommon(x::BareInterval)
+    iscommon(x::Interval)
+
+Test whether `x` is non-empty and bounded.
+"""
+iscommon(x::BareInterval) = !(isentire_interval(x) | isempty_interval(x) | isunbounded(x))
+
+function iscommon(x::Interval)
+    isnai(x) && return false
+    return iscommon(bareinterval(x))
+end
+
+"""
+    isatomic(x::BareInterval)
+    isatomic(x::Interval)
+
+Test whether `x` is unable to be split. This occurs when the interval is empty,
+or when the upper bound equals the lower bound or the bounds are consecutive
+floating-point numbers.
+"""
+isatomic(x::BareInterval) = isempty_interval(x) | (inf(x) == sup(x)) | (sup(x) == nextfloat(inf(x)))
+
+function isatomic(x::Interval)
+    isnai(x) && return false
+    return isatomic(bareinterval(x))
+end
+
+"""
+    isthin(x::BareInterval)
+    isthin(x::Interval)
+
+Test whether `x` contains only a real.
+
+Implement the `isSingleton` function of the IEEE Standard 1788-2015 (Table 9.3).
 """
 isthin(x::BareInterval) = inf(x) == sup(x)
 
-"""
-    iscommon(x)
-
-Check if `x` is a **common interval**, i.e. a non-empty,
-bounded, real interval.
-"""
-iscommon(x::BareInterval) = !(isentire_interval(x) || isempty_interval(x) || isunbounded(x))
+function isthin(x::Interval)
+    isnai(x) && return false
+    return isthin(bareinterval(x))
+end
 
 """
-    isatomic(x)
+    isthin(x::BareInterval, y::Number)
+    isthin(x::Interval, y::Number)
 
-Check whether an interval `x` is *atomic*, i.e. is unable to be split.
-This occurs when the interval is empty, or when the upper bound equals the lower
-bound or the bounds are consecutive floating point numbers.
+Test whether `x` contains only `y`.
 """
-isatomic(x::BareInterval) = isempty_interval(x) || (inf(x) == sup(x)) || (sup(x) == nextfloat(inf(x)))
+isthin(x::BareInterval, y::Number) = inf(x) == sup(x) == y
+
+function isthin(x::Interval, y::Number)
+    isnai(x) && return false
+    return isthin(bareinterval(x), y)
+end
 
 """
-    isthinzero(x)
+    isthinzero(x::BareInterval)
+    isthinzero(x::Interval)
 
-Return whether the interval only contains zero.
+Test whether `x` contains only zero.
 """
 isthinzero(x::BareInterval) = iszero(inf(x)) & iszero(sup(x))
 
-"""
-    isthin(x, y)
-
-Check if the interval `x` contains exactly (and only) the number `y`.
-"""
-isthin(x::BareInterval, y::Real) = inf(x) == sup(x) == y
+function isthinzero(x::Interval)
+    isnai(x) && return false
+    return isthinzero(bareinterval(x))
+end
 
 """
-    isthininteger(x)
+    isthininteger(x::BareInterval)
+    isthininteger(x::Interval)
 
-Return whether the inverval only contains a single integer.
+Test whether `x` contains only an integer.
 """
 isthininteger(x::BareInterval) = (inf(x) == sup(x)) & isinteger(inf(x))
 
-
-isnai(::BareInterval) = false
-
-
-
-# decorated intervals
-
-for f ∈ (:isempty_interval, :isentire_interval, :isunbounded, :isbounded, :isthin, :isatomic, :iscommon)
-    @eval function $f(x::Interval)
-        isnai(x) && return false
-        return $f(bareinterval(x))
-    end
+function isthininteger(x::Interval)
+    isnai(x) && return false
+    return isthininteger(bareinterval(x))
 end
-
-function isthinzero(a::Interval)
-    isnai(a) && return false
-    return isthinzero(bareinterval(a))
-end
-
-function isthin(a::Interval, x::Real)
-    isnai(a) && return false
-    return isthin(bareinterval(a), x)
-end
-
-for f ∈ (:issubset_interval, :isstrictsubset_interval, :isdisjoint_interval,
-        :precedes, :strictprecedes, :isweakless, :isstrictless,
-        :isequal_interval)
-    @eval function $f(x::Interval, y::Interval)
-        (isnai(x) | isnai(y)) && return false
-        return $f(bareinterval(x), bareinterval(y))
-    end
-end
-
-function in_interval(x::Real, a::Interval)
-    isnai(a) && return false
-    return in_interval(x, bareinterval(a))
-end
-
-# iscommon(x::Interval) = decoration(x) == com
-
-isnai(x::Interval) = decoration(x) == ill
 
 
 

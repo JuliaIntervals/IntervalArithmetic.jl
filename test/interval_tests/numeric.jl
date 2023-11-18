@@ -198,14 +198,14 @@ end
     @test isequal_interval(round(interval(0.1, 1.5)), interval(0.0, 2.0))
     @test isequal_interval(round(interval(-1.5, 0.1)), interval(-2.0, 0.0))
     @test isequal_interval(round(interval(-2.5, 0.1)), interval(-2.0, 0.0))
-    @test isequal_interval(round(interval(0.1, 1.1), RoundTiesToEven), interval(0.0, 1.0))
-    @test isequal_interval(round(interval(0.1, 1.5), RoundTiesToEven), interval(0.0, 2.0))
-    @test isequal_interval(round(interval(-1.5, 0.1), RoundTiesToEven), interval(-2.0, 0.0))
-    @test isequal_interval(round(interval(-2.5, 0.1), RoundTiesToEven), interval(-2.0, 0.0))
-    @test isequal_interval(round(interval(0.1, 1.1), RoundTiesToAway), interval(0.0, 1.0))
-    @test isequal_interval(round(interval(0.1, 1.5), RoundTiesToAway), interval(0.0, 2.0))
-    @test isequal_interval(round(interval(-1.5, 0.1), RoundTiesToAway), interval(-2.0, 0.0))
-    @test isequal_interval(round(interval(-2.5, 0.1), RoundTiesToAway), interval(-3.0, 0.0))
+    @test isequal_interval(round(interval(0.1, 1.1), RoundNearest), interval(0.0, 1.0))
+    @test isequal_interval(round(interval(0.1, 1.5), RoundNearest), interval(0.0, 2.0))
+    @test isequal_interval(round(interval(-1.5, 0.1), RoundNearest), interval(-2.0, 0.0))
+    @test isequal_interval(round(interval(-2.5, 0.1), RoundNearest), interval(-2.0, 0.0))
+    @test isequal_interval(round(interval(0.1, 1.1), RoundNearestTiesAway), interval(0.0, 1.0))
+    @test isequal_interval(round(interval(0.1, 1.5), RoundNearestTiesAway), interval(0.0, 2.0))
+    @test isequal_interval(round(interval(-1.5, 0.1), RoundNearestTiesAway), interval(-2.0, 0.0))
+    @test isequal_interval(round(interval(-2.5, 0.1), RoundNearestTiesAway), interval(-3.0, 0.0))
 end
 
 @testset "Fast power" begin
