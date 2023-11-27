@@ -298,6 +298,7 @@ operations that produced this interval.
 Fields:
 - `bareinterval :: BareInterval{T}`
 - `decoration   :: Decoration`
+- `isguaranteed :: Bool`
 
 Constructors compliant with the IEEE Standard 1788-2015:
 - [`interval`](@ref)
@@ -310,7 +311,7 @@ See also: [`±`](@ref), [`..`](@ref) and [`@I_str`](@ref).
 struct Interval{T<:NumTypes} <: Real
     bareinterval :: BareInterval{T}
     decoration   :: Decoration
-    isguaranteed    :: Bool
+    isguaranteed :: Bool
 
     """
         _unsafe_interval(bareinterval::BareInterval, ::Decoration, ::Bool)
