@@ -337,14 +337,16 @@ decoration(x::Interval) = x.decoration
     isguaranteed(::BareInterval)
     isguaranteed(::Complex{<:Interval})
 
-Return `false` if the `Interval` was constructed using
-`convert(::Type{<:Interval}, ::Number)`, and `true` otherwise.
+Test whether the interval is not guaranteed to encompass all possible numerical
+errors. This happens whenever an `Interval` is constructed using
+`convert(::Type{<:Interval}, ::Number)`, for instance when operations mix
+intervals and other `Number` types.
 
 Since conversion between `BareInterval` and `Number` is prohibited, this implies
 that `isguaranteed(::BareInterval) == true`.
 
 In the case of a complex interval `x`, this is semantically equivalent to
-`isguaranteed(x) == real(x) & imag(x)`.
+`isguaranteed(x) == isguaranteed(real(x)) & isguaranteed(imag(x))`.
 """
 isguaranteed(x::Interval) = x.isguaranteed
 isguaranteed(::BareInterval) = true
