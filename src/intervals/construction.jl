@@ -310,7 +310,7 @@ See also: [`±`](@ref), [`..`](@ref) and [`@I_str`](@ref).
 struct Interval{T<:NumTypes} <: Real
     bareinterval :: BareInterval{T}
     decoration   :: Decoration
-    guarantee    :: Bool
+    isguaranteed    :: Bool
 
     """
         _unsafe_interval(bareinterval::BareInterval, ::Decoration, ::Bool)
@@ -323,8 +323,8 @@ struct Interval{T<:NumTypes} <: Real
         Since misuse of this function can deeply corrupt code, its usage is
         *strongly discouraged* in favour of [`interval`](@ref).
     """
-    global _unsafe_interval(bareinterval::BareInterval{T}, decoration::Decoration, guarantee::Bool) where {T<:NumTypes} =
-        new{T}(bareinterval, decoration, guarantee)
+    global _unsafe_interval(bareinterval::BareInterval{T}, decoration::Decoration, isguaranteed::Bool) where {T<:NumTypes} =
+        new{T}(bareinterval, decoration, isguaranteed)
 end
 
 bareinterval(x::Interval) = x.bareinterval
@@ -332,22 +332,22 @@ bareinterval(::Type{T}, x::Interval) where {T<:NumTypes} = bareinterval(T, barei
 decoration(x::Interval) = x.decoration
 
 """
-    guarantee(::Interval)
-    guarantee(::BareInterval)
-    guarantee(::Complex{<:Interval})
+    isguaranteed(::Interval)
+    isguaranteed(::BareInterval)
+    isguaranteed(::Complex{<:Interval})
 
 Return `false` if the `Interval` was constructed using
 `convert(::Type{<:Interval}, ::Number)`, and `true` otherwise.
 
 Since conversion between `BareInterval` and `Number` is prohibited, this implies
-that `guarantee(::BareInterval) == true`.
+that `isguaranteed(::BareInterval) == true`.
 
 In the case of a complex interval `x`, this is semantically equivalent to
-`guarantee(x) == real(x) & imag(x)`.
+`isguaranteed(x) == real(x) & imag(x)`.
 """
-guarantee(x::Interval) = x.guarantee
-guarantee(::BareInterval) = true
-guarantee(x::Complex{<:Interval}) = guarantee(real(x)) & guarantee(imag(x))
+isguaranteed(x::Interval) = x.isguaranteed
+isguaranteed(::BareInterval) = true
+isguaranteed(x::Complex{<:Interval}) = isguaranteed(real(x)) & isguaranteed(imag(x))
 
 Interval{T}(a::Union{BareInterval,Interval}, d::Decoration) where {T<:NumTypes} = interval(T, bareinterval(T, a), d)
 Interval{T}(a::Union{BareInterval,Interval}) where {T<:NumTypes} = interval(T, bareinterval(T, a))
@@ -375,7 +375,7 @@ function interval(::Type{T}, a, d::Decoration; format::Symbol = :standard) where
     return throw(ArgumentError("`format` must be `:standard` or `:midpoint`."))
 end
 function interval(::Type{T}, x::Union{BareInterval,Interval}, d::Decoration; format::Symbol = :standard) where {T<:NumTypes}
-    ((format === :standard) | (format === :midpoint)) && return _unsafe_interval(bareinterval(T, x), min(decoration(x), d), guarantee(x)) # assumes valid interval
+    ((format === :standard) | (format === :midpoint)) && return _unsafe_interval(bareinterval(T, x), min(decoration(x), d), isguaranteed(x)) # assumes valid interval
     return throw(ArgumentError("`format` must be `:standard` or `:midpoint`."))
 end
 interval(a, d::Decoration; format::Symbol = :standard) = interval(promote_numtype(numtype(a), numtype(a)), a, d; format = format)
@@ -385,7 +385,7 @@ function interval(::Type{T}, a; format::Symbol = :standard) where {T<:NumTypes}
     return throw(ArgumentError("`format` must be `:standard` or `:midpoint`."))
 end
 function interval(::Type{T}, x::Union{BareInterval,Interval}; format::Symbol = :standard) where {T<:NumTypes}
-    ((format === :standard) | (format === :midpoint)) && return _unsafe_interval(bareinterval(T, x), decoration(x), guarantee(x)) # assumes valid interval
+    ((format === :standard) | (format === :midpoint)) && return _unsafe_interval(bareinterval(T, x), decoration(x), isguaranteed(x)) # assumes valid interval
     return throw(ArgumentError("`format` must be `:standard` or `:midpoint`."))
 end
 interval(a; format::Symbol = :standard) = interval(promote_numtype(numtype(a), numtype(a)), a; format = format)
@@ -508,7 +508,7 @@ Base.promote_rule(::Type{T}, ::Type{Interval{S}}) where {T<:AbstractIrrational,S
 
 function Base.convert(::Type{Interval{T}}, x::Interval) where {T<:NumTypes}
     bx = bareinterval(T, x)
-    return _unsafe_interval(bx, decoration(bx), guarantee(x))
+    return _unsafe_interval(bx, decoration(bx), isguaranteed(x))
 end
 
 function Base.convert(::Type{Interval{T}}, x::Complex{<:Interval}) where {T<:NumTypes}

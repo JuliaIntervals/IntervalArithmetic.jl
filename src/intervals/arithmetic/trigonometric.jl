@@ -149,7 +149,7 @@ end
 function sin(a::Interval)
     r = sin(bareinterval(a))
     d = min(decoration(a), decoration(r))
-    return _unsafe_interval(r, d, guarantee(a))
+    return _unsafe_interval(r, d, isguaranteed(a))
 end
 
 sinpi(a::BareInterval{T}) where {T<:NumTypes} = sin(a * bareinterval(T, π)) # not in the IEEE Standard 1788-2015
@@ -247,7 +247,7 @@ end
 function cos(a::Interval)
     r = cos(bareinterval(a))
     d = min(decoration(a), decoration(r))
-    return _unsafe_interval(r, d, guarantee(a))
+    return _unsafe_interval(r, d, isguaranteed(a))
 end
 
 cospi(a::BareInterval{T}) where {T<:NumTypes} = cos(a * bareinterval(T, π)) # not in the IEEE Standard 1788-2015
@@ -313,7 +313,7 @@ function tan(a::Interval)
     r = tan(bareinterval(a))
     d = min(decoration(a), decoration(r))
     d = min(d, ifelse(isbounded(r), d, trv))
-    return _unsafe_interval(r, d, guarantee(a))
+    return _unsafe_interval(r, d, isguaranteed(a))
 end
 
 """
@@ -471,7 +471,7 @@ function asin(a::Interval{T}) where {T<:NumTypes}
     r = asin(x)
     d = min(decoration(a), decoration(r))
     d = min(d, ifelse(issubset_interval(x, domain), d, trv))
-    return _unsafe_interval(r, d, guarantee(a))
+    return _unsafe_interval(r, d, isguaranteed(a))
 end
 
 """
@@ -494,7 +494,7 @@ function acos(a::Interval{T}) where {T<:NumTypes}
     r = acos(x)
     d = min(decoration(a), decoration(r))
     d = min(d, ifelse(issubset_interval(x, domain), d, trv))
-    return _unsafe_interval(r, d, guarantee(a))
+    return _unsafe_interval(r, d, isguaranteed(a))
 end
 
 """
@@ -512,7 +512,7 @@ end
 function atan(a::Interval)
     r = atan(bareinterval(a))
     d = min(decoration(a), decoration(r))
-    return _unsafe_interval(r, d, guarantee(a))
+    return _unsafe_interval(r, d, isguaranteed(a))
 end
 
 function atan(y::BareInterval{T}, x::BareInterval{S}) where {T<:NumTypes,S<:NumTypes}
@@ -596,7 +596,7 @@ function atan(b::Interval, a::Interval)
             ifelse(in_interval(0, x), trv,
                 ifelse(sup(x) < 0, ifelse(inf(y) < 0, def, dac), d)),
         d))
-    return _unsafe_interval(r, d, guarantee(a))
+    return _unsafe_interval(r, d, isguaranteed(a))
 end
 
 """

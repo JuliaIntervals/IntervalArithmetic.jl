@@ -64,7 +64,7 @@ for f ∈ (:cancelplus, :cancelminus)
         function $f(x::Interval, y::Interval)
             r = $f(bareinterval(x), bareinterval(y))
             d = min(decoration(x), decoration(y), decoration(r), trv)
-            t = guarantee(x) & guarantee(y)
+            t = isguaranteed(x) & isguaranteed(y)
             return _unsafe_interval(r, d, t)
         end
     end

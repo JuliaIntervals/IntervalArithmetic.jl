@@ -20,7 +20,7 @@ for f ∈ (:sign, :ceil, :floor, :trunc)
             r = $f(bareinterval(a))
             d = decoration(a)
             d = min(d, ifelse(isthin(r), d, def))
-            return _unsafe_interval(r, d, guarantee(a))
+            return _unsafe_interval(r, d, isguaranteed(a))
         end
     end
 end
@@ -51,7 +51,7 @@ for (S, R) ∈ ((:(:Nearest), :RoundNearest), (:(:NearestTiesAway), :RoundNeares
             r = round(bareinterval(a), $R)
             d = decoration(a)
             d = min(d, ifelse(isthin(r), d, def))
-            return _unsafe_interval(r, d, guarantee(a))
+            return _unsafe_interval(r, d, isguaranteed(a))
         end
     end
 end

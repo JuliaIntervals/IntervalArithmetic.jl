@@ -31,7 +31,7 @@ for f ∈ (:sinh, :tanh, :asinh)
         function $f(a::Interval)
             r = $f(bareinterval(a))
             d = min(decoration(a), decoration(r))
-            return _unsafe_interval(r, d, guarantee(a))
+            return _unsafe_interval(r, d, isguaranteed(a))
         end
     end
 end
@@ -50,7 +50,7 @@ end
 function cosh(a::Interval)
     r = cosh(bareinterval(a))
     d = min(decoration(a), decoration(r))
-    return _unsafe_interval(r, d, guarantee(a))
+    return _unsafe_interval(r, d, isguaranteed(a))
 end
 
 """
@@ -79,7 +79,7 @@ function coth(a::Interval)
     r = coth(x)
     d = min(decoration(a), decoration(r))
     d = min(d, ifelse(in_interval(0, x), trv, d))
-    return _unsafe_interval(r, d, guarantee(a))
+    return _unsafe_interval(r, d, isguaranteed(a))
 end
 
 """
@@ -103,7 +103,7 @@ end
 function sech(a::Interval)
     r = sech(bareinterval(a))
     d = min(decoration(a), decoration(r))
-    return _unsafe_interval(r, d, guarantee(a))
+    return _unsafe_interval(r, d, isguaranteed(a))
 end
 
 """
@@ -132,7 +132,7 @@ function csch(a::Interval)
     r = csch(x)
     d = min(decoration(a), decoration(r))
     d = min(d, ifelse(in_interval(0, x), trv, d))
-    return _unsafe_interval(r, d, guarantee(a))
+    return _unsafe_interval(r, d, isguaranteed(a))
 end
 
 """
@@ -155,7 +155,7 @@ function acosh(a::Interval{T}) where {T<:NumTypes}
     r = acosh(x)
     d = min(decoration(a), decoration(r))
     d = min(d, ifelse(issubset_interval(x, domain), d, trv))
-    return _unsafe_interval(r, d, guarantee(a))
+    return _unsafe_interval(r, d, isguaranteed(a))
 end
 
 """
@@ -179,7 +179,7 @@ function atanh(a::Interval{T}) where {T<:NumTypes}
     r = atanh(x)
     d = min(decoration(a), decoration(r))
     d = min(d, ifelse(isstrictsubset_interval(x, domain), d, trv))
-    return _unsafe_interval(r, d, guarantee(a))
+    return _unsafe_interval(r, d, isguaranteed(a))
 end
 
 """
@@ -212,5 +212,5 @@ function acoth(a::Interval{T}) where {T<:NumTypes}
     r = acoth(x)
     d = min(decoration(a), decoration(r))
     d = min(d, ifelse(isempty_interval(intersect_interval(x, singular_domain)), d, trv))
-    return _unsafe_interval(r, d, guarantee(a))
+    return _unsafe_interval(r, d, isguaranteed(a))
 end

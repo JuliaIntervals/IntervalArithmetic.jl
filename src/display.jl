@@ -110,7 +110,7 @@ end
 function _str_repr(a::Interval{T}, format::Symbol) where {T<:NumTypes}
     # `format` is either `:standard`, `:midpoint` or `:full`
     str_interval = _str_basic_repr(bareinterval(a), format)
-    if guarantee(a)
+    if isguaranteed(a)
         format === :full && return string("Interval{", T, "}(", str_interval, ", ", decoration(a), ')')
         display_params.decorations || return str_interval
         if format === :midpoint && str_interval != "∅"
@@ -130,7 +130,7 @@ end
 function _str_repr(a::Interval{BigFloat}, format::Symbol)
     # `format` is either `:standard`, `:midpoint` or `:full`
     str_interval = _str_basic_repr(bareinterval(a), format)
-    if guarantee(a)
+    if isguaranteed(a)
         format === :full && return string("Interval{BigFloat}(", str_interval, ", ", decoration(a), ')')
         if format === :midpoint && str_interval != "∅"
             str_interval = string('(', str_interval, ')')

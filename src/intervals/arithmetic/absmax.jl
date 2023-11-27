@@ -13,7 +13,7 @@ function abs(a::BareInterval{T}) where {T<:NumTypes}
     return _unsafe_bareinterval(T, mig(a), mag(a))
 end
 
-abs(a::Interval) = _unsafe_interval(abs(bareinterval(a)), decoration(a), guarantee(a))
+abs(a::Interval) = _unsafe_interval(abs(bareinterval(a)), decoration(a), isguaranteed(a))
 
 """
     abs2(a::BareInterval)
@@ -23,7 +23,7 @@ Implement the square absolute value; this is semantically equivalent to `nthpow(
 """
 abs2(a::BareInterval) = nthpow(a, 2) # not in the IEEE Standard 1788-2015
 
-abs2(a::Interval) = _unsafe_interval(abs2(bareinterval(a)), decoration(a), guarantee(a))
+abs2(a::Interval) = _unsafe_interval(abs2(bareinterval(a)), decoration(a), isguaranteed(a))
 
 for f ∈ (:min, :max)
     @eval begin
@@ -43,7 +43,7 @@ for f ∈ (:min, :max)
         function $f(a::Interval, b::Interval)
             r = $f(bareinterval(a), bareinterval(b))
             d = min(decoration(a), decoration(b))
-            t = guarantee(a) & guarantee(b)
+            t = isguaranteed(a) & isguaranteed(b)
             return _unsafe_interval(r, d, t)
         end
     end

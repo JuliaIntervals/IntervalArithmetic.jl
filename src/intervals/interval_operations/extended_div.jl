@@ -44,6 +44,6 @@ function extended_div(x::Interval, y::Interval)
     d = min(decoration(x), decoration(y))
     d1 = min(d, decoration(r1), ifelse(!isempty_interval(bx) & !isempty_interval(by) & !in_interval(0, x), d, trv))
     d2 = min(d, decoration(r2), trv)
-    t = guarantee(x) & guarantee(y)
+    t = isguaranteed(x) & isguaranteed(y)
     return _unsafe_interval(r1, d1, t), _unsafe_interval(r2, d2, t)
 end

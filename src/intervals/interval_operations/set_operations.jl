@@ -73,7 +73,7 @@ for f ∈ (:intersect_interval, :hull)
         function $f(x::Interval, y::Interval)
             r = $f(bareinterval(x), bareinterval(y))
             d = min(decoration(x), decoration(y), decoration(r), trv)
-            t = guarantee(x) & guarantee(y)
+            t = isguaranteed(x) & isguaranteed(y)
             return _unsafe_interval(r, d, t)
         end
     end
@@ -81,7 +81,7 @@ end
 
 function setdiff_interval(x::Interval, y::Interval)
     r = setdiff_interval(bareinterval(x), bareinterval(y))
-    t = guarantee(x) & guarantee(y)
+    t = isguaranteed(x) & isguaranteed(y)
     return _unsafe_interval.(r, min.(decoration(x), decoration(y), decoration.(r), trv), t)
 end
 

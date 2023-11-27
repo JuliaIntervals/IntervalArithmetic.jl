@@ -22,7 +22,7 @@ end
 function +(a::Interval, b::Interval)
     r = bareinterval(a) + bareinterval(b)
     d = min(decoration(a), decoration(b), decoration(r))
-    t = guarantee(a) & guarantee(b)
+    t = isguaranteed(a) & isguaranteed(b)
     return _unsafe_interval(r, d, t)
 end
 
@@ -34,7 +34,7 @@ Implement the `neg` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 -(a::BareInterval{T}) where {T<:NumTypes} = _unsafe_bareinterval(T, -sup(a), -inf(a))
 
--(a::Interval) = _unsafe_interval(-bareinterval(a), decoration(a), guarantee(a))
+-(a::Interval) = _unsafe_interval(-bareinterval(a), decoration(a), isguaranteed(a))
 
 """
     -(a::BareInterval, b::BareInterval)
@@ -52,7 +52,7 @@ end
 function -(a::Interval, b::Interval)
     r = bareinterval(a) - bareinterval(b)
     d = min(decoration(a), decoration(b), decoration(r))
-    t = guarantee(a) & guarantee(b)
+    t = isguaranteed(a) & isguaranteed(b)
     return _unsafe_interval(r, d, t)
 end
 
@@ -78,7 +78,7 @@ end
 function *(a::Interval, b::Interval)
     r = bareinterval(a) * bareinterval(b)
     d = min(decoration(a), decoration(b), decoration(r))
-    t = guarantee(a) & guarantee(b)
+    t = isguaranteed(a) & isguaranteed(b)
     return _unsafe_interval(r, d, t)
 end
 
@@ -132,7 +132,7 @@ function inv(a::Interval)
     r = inv(x)
     d = min(decoration(a), decoration(r))
     d = min(d, ifelse(in_interval(0, x), trv, d))
-    return _unsafe_interval(r, d, guarantee(a))
+    return _unsafe_interval(r, d, isguaranteed(a))
 end
 
 """
@@ -179,7 +179,7 @@ function /(a::Interval, b::Interval)
     r = bareinterval(a) / x
     d = min(decoration(a), decoration(b), decoration(r))
     d = min(d, ifelse(in_interval(0, x), trv, d))
-    t = guarantee(a) & guarantee(b)
+    t = isguaranteed(a) & isguaranteed(b)
     return _unsafe_interval(r, d, t)
 end
 
@@ -205,7 +205,7 @@ muladd(a::BareInterval, b::BareInterval, c::BareInterval) = muladd(promote(a, b,
 function muladd(a::Interval, b::Interval, c::Interval)
     r = muladd(bareinterval(a), bareinterval(b), bareinterval(c))
     d = min(decoration(a), decoration(b), decoration(c), decoration(r))
-    t = guarantee(a) & guarantee(b) & guarantee(c)
+    t = isguaranteed(a) & isguaranteed(b) & isguaranteed(c)
     return _unsafe_interval(r, d, t)
 end
 
@@ -251,7 +251,7 @@ fma(a::BareInterval, b::BareInterval, c::BareInterval) = fma(promote(a, b, c)...
 function fma(a::Interval, b::Interval, c::Interval)
     r = fma(bareinterval(a), bareinterval(b), bareinterval(c))
     d = min(decoration(a), decoration(b), decoration(c), decoration(r))
-    t = guarantee(a) & guarantee(b) & guarantee(c)
+    t = isguaranteed(a) & isguaranteed(b) & isguaranteed(c)
     return _unsafe_interval(r, d, t)
 end
 
@@ -274,5 +274,5 @@ function sqrt(a::Interval{T}) where {T<:NumTypes}
     r = sqrt(x)
     d = min(decoration(a), decoration(r))
     d = min(d, ifelse(issubset_interval(x, domain), d, trv))
-    return _unsafe_interval(r, d, guarantee(a))
+    return _unsafe_interval(r, d, isguaranteed(a))
 end

@@ -308,7 +308,7 @@ function nthpow(x::Interval, n::Integer)
     r = nthpow(bareinterval(x), n)
     d = min(decoration(x), decoration(r))
     d = min(d, ifelse(n < 0 && in_interval(0, x), trv, d))
-    return _unsafe_interval(r, d, guarantee(x))
+    return _unsafe_interval(r, d, isguaranteed(x))
 end
 
 function ^(xx::Interval, qq::Interval)
@@ -316,7 +316,7 @@ function ^(xx::Interval, qq::Interval)
     q = bareinterval(qq)
     r = x^q
     d = min(decoration(xx), decoration(qq), decoration(r))
-    t = guarantee(xx) & guarantee(qq)
+    t = isguaranteed(xx) & isguaranteed(qq)
     if inf(x) > 0 || (inf(x) ≥ 0 && inf(q) > 0) ||
             (isthininteger(q) && inf(q) > 0) ||
             (isthininteger(q) && !in_interval(0, x))
@@ -350,7 +350,7 @@ for f ∈ (:exp, :exp2, :exp10, :expm1, :cbrt)
         x = bareinterval(xx)
         r = $f(x)
         d = min(decoration(r), decoration(xx))
-        return _unsafe_interval(r, d, guarantee(xx))
+        return _unsafe_interval(r, d, isguaranteed(xx))
     end
 end
 
@@ -361,7 +361,7 @@ for f ∈ (:log, :log2, :log10)
         r = $f(x)
         d = min(decoration(a), decoration(r))
         d = min(d, ifelse(isstrictsubset_interval(x, domain), d, trv))
-        return _unsafe_interval(r, d, guarantee(a))
+        return _unsafe_interval(r, d, isguaranteed(a))
     end
 end
 
@@ -371,7 +371,7 @@ function log1p(a::Interval{T}) where {T<:NumTypes}
     r = log1p(x)
     d = min(decoration(a), decoration(r))
     d = min(d, ifelse(isstrictsubset_interval(x, domain), d, trv))
-    return _unsafe_interval(r, d, guarantee(a))
+    return _unsafe_interval(r, d, isguaranteed(a))
 end
 
 function nthroot(a::Interval{T}, n::Integer) where {T<:NumTypes}
@@ -380,7 +380,7 @@ function nthroot(a::Interval{T}, n::Integer) where {T<:NumTypes}
     r = nthroot(x, n)
     d = min(decoration(a), decoration(r))
     d = min(d, ifelse(issubset_interval(x, domain), d, trv))
-    return _unsafe_interval(r, d, guarantee(a))
+    return _unsafe_interval(r, d, isguaranteed(a))
 end
 
 hypot(x::Interval, y::Interval) = sqrt(x^2 + y^2)
@@ -390,7 +390,7 @@ function fastpow(xx::Interval, qq::Interval)
     q = bareinterval(qq)
     r = fastpow(x, q)
     d = min(decoration(xx), decoration(qq), decoration(r))
-    t = guarantee(xx) & guarantee(qq)
+    t = isguaranteed(xx) & isguaranteed(qq)
     if inf(x) > 0 || (inf(x) ≥ 0 && inf(q) > 0) ||
             (isthininteger(q) && inf(q) > 0) ||
             (isthininteger(q) && !in_interval(0, x))

@@ -21,7 +21,7 @@ numtype(::T) where {T} = numtype(T)
 for f ∈ (:float, :big)
     @eval begin
         $f(x::BareInterval{T}) where {T<:NumTypes} = BareInterval{$f(T)}(x)
-        $f(x::Interval{<:NumTypes}) = _unsafe_interval($f(bareinterval(x)), decoration(x), guarantee(x))
+        $f(x::Interval{<:NumTypes}) = _unsafe_interval($f(bareinterval(x)), decoration(x), isguaranteed(x))
     end
 end
 
