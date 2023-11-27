@@ -14,6 +14,10 @@ interval(3, 2) # not valid since the lower bound is strictly greater than the up
 
 The above intervals came with a decoration. Decorations are flags, or labels, attached to intervals to indicate the status of a given interval. Decorated intervals provide valuable information on the result of evaluating a function on an initial interval.
 
+Moreover, an `Interval` comes with a boolean `isguaranteed` field which asserts the reliability of the interval. This field allows for `Interval` to interact, in generic code, with other number types by being set to `false` whenever a call to `convert(::{<:Interval}, ::Number)` occurs. A user interested in validated numerics should **always** have a resulting interval for which `isguaranteed` is true.
+
+In contrast, a `BareInterval` can be constructed via `bareinterval`. This interval type has no decorations and is always guaranteed (`isguaranteed` is always true). A `BareInterval` is not a subtype of `Real`, there are no allowed conversion with `Number`.
+
 Suppose that a decorated interval $(X, d)$ is the result of evaluating a function $f$, or the composition of a sequence of functions, on an initial decorated interval $(X_0, d_0)$. The meaning of the resulting decoration $d$ is as follows:
 - `com` (common): $X$ is a closed, bounded, non-empty subset of the domain of $f$; $f$ is continuous on the interval $X$; and the resulting interval $f(X)$ is bounded.
 - `dac` (defined and continuous): $X$ is a non-empty subset of $\mathrm{Dom}(f)$, and $f$ is continuous on $X$.
@@ -35,7 +39,9 @@ x = interval(1, 2, dac)
 interval(x, def)
 ```
 
-The submodule `IntervalArithmetic.Symbols` exports the infix operator `..` and `±` as an alias for `interval`.
+We strongly encourage the use of `interval` over `bareinterval` to better track, through decorations, the correctness of the computations. One using `BareInterval` should be well aware of the IEEE Standard 1788-2015 specifications. For instance, taking the square root of an interval discards the negative part of the interval which can be misleading if one expected an error to be thrown; on the other hand, the decoration registers this via the flag `trv` (trivial), see `sqrt(interval(-1, 1))` vs `sqrt(bareinterval(-1, 1))`.
+
+The submodule `IntervalArithmetic.Symbols` exports the infix operator `..` and `±` as an alias for `interval`; this submodule must be explicitly imported.
 
 ```@repl construction
 using IntervalArithmetic.Symbols
