@@ -20,17 +20,17 @@ sqrt(interval(-1, 1)) # interval decorated with `trv` (trivial)
 
 A *decoration* is a label that indicates the status of a given interval. Decorated intervals provide valuable information on the result of evaluating a function on an initial interval.
 
-Upon the application of a function $f$ on an interval $x$, the resulting interval $f(x)$ has either one of the following decorations:
+Upon the application of a function ``f`` on an interval ``x``, the resulting interval ``f(x)`` has either one of the following decorations:
 
-- `com` (common): $x$ is a closed, bounded, non-empty subset of the domain of $f$, $f$ is continuous on the interval $x$, and $f(x)$ is bounded.
+- `com` (common): ``x`` is a closed, bounded, non-empty subset of the domain of ``f``, ``f`` is continuous on the interval ``x``, and ``f(x)`` is bounded.
 
-- `dac` (defined and continuous): $x$ is a non-empty subset of the domain of $f$, and $f$ is continuous on $x$.
+- `dac` (defined and continuous): ``x`` is a non-empty subset of the domain of ``f``, and ``f`` is continuous on ``x``.
 
-- `def` (defined): $x$ is a non-empty subset of the domain of $f$; in other words, $f$ is defined at each point of $x$.
+- `def` (defined): ``x`` is a non-empty subset of the domain of ``f``; in other words, ``f`` is defined at each point of ``x``.
 
-- `trv` (trivial): $f(x)$ carries no meaningful information.
+- `trv` (trivial): ``f(x)`` carries no meaningful information.
 
-- `ill` (ill-formed): $f(x)$ is Not an Interval (NaI).
+- `ill` (ill-formed): ``f(x)`` is Not an Interval (NaI).
 
 Each decoration is paired with an integer as follows: `ill = 0`, `trv = 1`, `def = 2`, `dac = 3` and `com = 4`. Then, decorations degrade according to the propagation order `com > dac > def > trv > ill`.
 
@@ -54,9 +54,9 @@ x = interval(0.5, 3)
 sqrt(x)
 ```
 
-Both input `x` and output `sqrt(x)` are common intervals since they are closed, bounded, non-empty and that $\sqrt$ is continuous over $[1/2, 3]$.
+Both input `x` and output `sqrt(x)` are common intervals since they are closed, bounded, non-empty and that ``\sqrt`` is continuous over ``[1/2, 3]``.
 
-Observe that these decorations, together with the fact that any element of the interval `sqrt(x)` is also in the interval `x`, imply that the [Schauder Fixed-Point Theorem](https://en.wikipedia.org/wiki/Schauder_fixed-point_theorem) is satisfied. More precisely, this computation proves the existence of a fixed-point of $\sqrt$ in $[1/2, 3]$ (in this simple example, $\sqrt(1) = 1$).
+Observe that these decorations, together with the fact that any element of the interval `sqrt(x)` is also in the interval `x`, imply that the [Schauder Fixed-Point Theorem](https://en.wikipedia.org/wiki/Schauder_fixed-point_theorem) is satisfied. More precisely, this computation proves the existence of a fixed-point of ``\sqrt`` in ``[1/2, 3]`` (in this simple example, ``\sqrt(1) = 1``).
 
 ##### Defined and continuous
 
@@ -81,7 +81,7 @@ x = interval(-3, 4)
 sign(x)
 ```
 
-The $\sign$ function is discontinuous at $0$, but is defined everywhere on the input interval, so the decoration of the result is `def`.
+The ``\sign`` function is discontinuous at ``0``, but is defined everywhere on the input interval, so the decoration of the result is `def`.
 
 ##### Trivial
 
@@ -90,7 +90,7 @@ x = interval(-3.5, 4)
 sqrt(x)
 ```
 
-The negative part of `x` is discarded before evaluating the $\sqrt$ function since its domain is $[0, \infty)$. The process of discarding parts of an interval that are not in the domain of a function is called *loose evaluation*. This event has been recorded by degrading the decoration of the resulting interval to `trv`, indicating that nothing is known about the relationship between `x` and `sqrt(x)`.
+The negative part of `x` is discarded before evaluating the ``\sqrt`` function since its domain is ``[0, \infty)``. The process of discarding parts of an interval that are not in the domain of a function is called *loose evaluation*. This event has been recorded by degrading the decoration of the resulting interval to `trv`, indicating that nothing is known about the relationship between `x` and `sqrt(x)`.
 
 In this case, we know why the decoration was reduced to `trv`. Generally, if this were just a single step in a longer calculation, a resulting decoration `trv` shows only that something like this occured at some step.
 
@@ -191,15 +191,15 @@ To add a specific decoration, add `"_com"`, `"_dac"`, `"_dec"`, `"_trv"` and `"_
     x = 0.1
     ```
 
-    This appears to store the real number $1/10$  in a variable `x` of type `Float64`. Yet,
+    This appears to store the real number ``1/10``  in a variable `x` of type `Float64`. Yet,
 
     ```@repl construction
     x > 1//10
     ```
 
-    Hence, the floating-point `0.1` is (slightly) greater than the real number $1/10$ since $1/10$ **cannot be represented exactly in binary floating-point arithmetic, at any precision**. The true value must be approximated by a floating-point number with fixed precision -- this procedure is called rounding.
+    Hence, the floating-point `0.1` is (slightly) greater than the real number ``1/10`` since ``1/10`` **cannot be represented exactly in binary floating-point arithmetic, at any precision**. The true value must be approximated by a floating-point number with fixed precision -- this procedure is called rounding.
 
-    In particular, this implies that `interval(0.1)` **does not** contain the real number $1/10$. A valid interval containing the real number $1/10$ can be constructed by
+    In particular, this implies that `interval(0.1)` **does not** contain the real number ``1/10``. A valid interval containing the real number ``1/10`` can be constructed by
 
     ```@repl construction
     I"0.1"

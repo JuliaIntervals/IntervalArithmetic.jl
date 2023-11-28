@@ -33,10 +33,10 @@ a
 
 ## Arithmetic operations
 
-Basic arithmetic operations (`+`, `-`, `*`, `/`, `^`) are defined for pairs of intervals in a standard way: the result is the smallest interval containing the result of operating with each element of each interval. More precisely, for two intervals $X$ and $Y$ and an operation $\bigcirc$, we define the operation on the two intervals by
+Basic arithmetic operations (`+`, `-`, `*`, `/`, `^`) are defined for pairs of intervals in a standard way: the result is the smallest interval containing the result of operating with each element of each interval. More precisely, for two intervals ``X`` and ``Y`` and an operation ``\bigcirc``, we define the operation on the two intervals by
 
 ```math
-X \bigcirc Y := \{ x \bigcirc y \,:\, x \in X \text{ and } y \in Y \}.
+X \bigcirc Y \bydef \{ x \bigcirc y \,:\, x \in X \text{ and } y \in Y \}.
 ```
 
 For example,
