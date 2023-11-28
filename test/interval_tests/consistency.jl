@@ -147,7 +147,7 @@
         @test isstrictsubset_interval(interval(-Inf, Inf), interval(-Inf, Inf))
 
         @test !isequal_interval(nai(a), nai(a))
-        @test isnai(interval(NaN))
+        @test isnai(interval(NaN)) & isnai(convert(Interval{Float64}, NaN))
         @test isnan(inf(nai(BigFloat)))
         @test isnai(nai())
         @test !isnai(a)

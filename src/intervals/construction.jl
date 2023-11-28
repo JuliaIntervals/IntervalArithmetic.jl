@@ -509,10 +509,7 @@ Base.promote_rule(::Type{T}, ::Type{Interval{S}}) where {T<:AbstractIrrational,S
 
 # conversion
 
-function Base.convert(::Type{Interval{T}}, x::Interval) where {T<:NumTypes}
-    bx = bareinterval(T, x)
-    return _unsafe_interval(bx, decoration(bx), isguaranteed(x))
-end
+Base.convert(::Type{Interval{T}}, x::Interval) where {T<:NumTypes} = interval(T, x)
 
 function Base.convert(::Type{Interval{T}}, x::Complex{<:Interval}) where {T<:NumTypes}
     isthinzero(imag(x)) || return throw(DomainError(x, "imaginary part must be zero."))
@@ -520,8 +517,8 @@ function Base.convert(::Type{Interval{T}}, x::Complex{<:Interval}) where {T<:Num
 end
 
 function Base.convert(::Type{Interval{T}}, x::Real) where {T<:NumTypes}
-    bx = bareinterval(T, x)
-    return _unsafe_interval(bx, decoration(bx), false)
+    y = interval(T, x)
+    return _unsafe_interval(bareinterval(y), decoration(y), false)
 end
 
 function Base.convert(::Type{Interval{T}}, x::Complex) where {T<:NumTypes}
