@@ -1,45 +1,148 @@
-Constructing an interval is the most basic operation in the library. The [`interval`](@ref) constructor is the standard way to create an interval.
+The library provides two interval types. The first one is [`BareInterval`](@ref), corresponding to a basic implementation of intervals, stored by their infimum and supremum. The second type is [`Interval`](@ref) and builds on top of bare intervals, with the additional fields `decoration` and `isguaranteed`. See the sections below.
 
 ```@repl construction
 using IntervalArithmetic
 setdisplay(:full) # print the interval in full
-interval(0.1) # interval(Float64, 0.1)
-interval(0.1, 0.2) # interval(Float64, 0.1, 0.2)
-interval(3.1f0) # interval(Float32, 3.1f0)
-interval(π) # interval(Float64, π)
-interval(BigFloat, π)
-interval(Inf) # not valid since infinity is not part of an interval
-interval(3, 2) # not valid since the lower bound is strictly greater than the upper bound
+bareinterval(1, π) # `bareinterval(Float64, 1, π)`
+interval(1, π) # `interval(Float64, 1, π)`, interval decorated with `com` (common)
 ```
 
-The above intervals came with a decoration. Decorations are flags, or labels, attached to intervals to indicate the status of a given interval. Decorated intervals provide valuable information on the result of evaluating a function on an initial interval.
-
-Moreover, an `Interval` comes with a boolean `isguaranteed` field which asserts the reliability of the interval. This field allows for `Interval` to interact, in generic code, with other number types by being set to `false` whenever a call to `convert(::{<:Interval}, ::Number)` occurs. A user interested in validated numerics should **always** have a resulting interval for which `isguaranteed` is true.
-
-In contrast, a `BareInterval` can be constructed via `bareinterval`. This interval type has no decorations and is always guaranteed (`isguaranteed` is always true). A `BareInterval` is not a subtype of `Real`, there are no allowed conversion with `Number`.
-
-Suppose that a decorated interval $(X, d)$ is the result of evaluating a function $f$, or the composition of a sequence of functions, on an initial decorated interval $(X_0, d_0)$. The meaning of the resulting decoration $d$ is as follows:
-- `com` (common): $X$ is a closed, bounded, non-empty subset of the domain of $f$; $f$ is continuous on the interval $X$; and the resulting interval $f(X)$ is bounded.
-- `dac` (defined and continuous): $X$ is a non-empty subset of $\mathrm{Dom}(f)$, and $f$ is continuous on $X$.
-- `def` (defined): $X$ is a non-empty subset of $\mathrm{Dom}(f)$, i.e. $f$ is defined at each point of $X$.
-- `trv` (trivial): always true; gives no information
-- `ill` (ill-formed): NaI (Not an Interval) (an error occurred), e.g. $\mathrm{Dom}(f) = \emptyset$.
-Decorations follow the ordering `com > dac > def > trv > ill`.
-
-When constructing intervals, if no decoration is explicitly specified, then it is initialised with a decoration according to the underlying bare interval:
-- `com`: if the interval is non-empty and bounded
-- `dac`: if the interval is unbounded
-- `trv`: if the interval is empty
-- `ill`: if the interval is a NaI
-
-An explicit decoration may be provided for advanced use.
+Therefore, we **strongly recommend the use of [`Interval`](@ref) over [`BareInterval`](@ref)** to better track the effect of functions according to the IEEE Standard 1788-2015 specifications. For instance, taking the square root of an interval discards the negative part of the interval, without any notice for bare intervals:
 
 ```@repl construction
-x = interval(1, 2, dac)
-interval(x, def)
+sqrt(bareinterval(-1, 1)) # `sqrt(bareinterval(0, 1))`
+sqrt(interval(-1, 1)) # interval decorated with `trv` (trivial)
 ```
 
-We strongly encourage the use of `interval` over `bareinterval` to better track, through decorations, the correctness of the computations. One using `BareInterval` should be well aware of the IEEE Standard 1788-2015 specifications. For instance, taking the square root of an interval discards the negative part of the interval which can be misleading if one expected an error to be thrown; on the other hand, the decoration registers this via the flag `trv` (trivial), see `sqrt(interval(-1, 1))` vs `sqrt(bareinterval(-1, 1))`.
+
+
+### Decorations
+
+A *decoration* is a label that indicates the status of a given interval. Decorated intervals provide valuable information on the result of evaluating a function on an initial interval.
+
+Upon the application of a function $f$ on an interval $x$, the resulting interval $f(x)$ has either one of the following decorations:
+
+- `com` (common): $x$ is a closed, bounded, non-empty subset of the domain of $f$, $f$ is continuous on the interval $x$, and $f(x)$ is bounded.
+
+- `dac` (defined and continuous): $x$ is a non-empty subset of the domain of $f$, and $f$ is continuous on $x$.
+
+- `def` (defined): $x$ is a non-empty subset of the domain of $f$; in other words, $f$ is defined at each point of $x$.
+
+- `trv` (trivial): $f(x)$ carries no meaningful information.
+
+- `ill` (ill-formed): $f(x)$ is Not an Interval (NaI).
+
+Each decoration is paired with an integer as follows: `ill = 0`, `trv = 1`, `def = 2`, `dac = 3` and `com = 4`. Then, decorations degrade according to the propagation order `com > dac > def > trv > ill`.
+
+One can specify a decoration when constructing intervals. Otherwise, the interval is initialised with a decoration according to the underlying bare interval:
+
+- `com`: non-empty and bounded.
+
+- `dac`: unbounded.
+
+- `trv`: empty.
+
+- `ill`: NaI.
+
+
+#### Examples
+
+##### Common
+
+```@repl construction
+x = interval(0.5, 3)
+sqrt(x)
+```
+
+Both input `x` and output `sqrt(x)` are common intervals since they are closed, bounded, non-empty and that $\sqrt$ is continuous over $[1/2, 3]$.
+
+Observe that these decorations, together with the fact that any element of the interval `sqrt(x)` is also in the interval `x`, imply that the [Schauder Fixed-Point Theorem](https://en.wikipedia.org/wiki/Schauder_fixed-point_theorem) is satisfied. More precisely, this computation proves the existence of a fixed-point of $\sqrt$ in $[1/2, 3]$ (in this simple example, $\sqrt(1) = 1$).
+
+##### Defined and continuous
+
+```@repl construction
+x = interval(3, Inf)
+sqrt(x)
+```
+
+Both the intervals are unbounded, hence the maximum possible decoration is `dac`.
+
+Note that overflows can also produce the decoration `dac`:
+
+```@repl construction
+x = interval(floatmax(Float64))
+x + interval(1)
+```
+
+##### Defined and continuous
+
+```@repl construction
+x = interval(-3, 4)
+sign(x)
+```
+
+The $\sign$ function is discontinuous at $0$, but is defined everywhere on the input interval, so the decoration of the result is `def`.
+
+##### Trivial
+
+```@repl construction
+x = interval(-3.5, 4)
+sqrt(x)
+```
+
+The negative part of `x` is discarded before evaluating the $\sqrt$ function since its domain is $[0, \infty)$. The process of discarding parts of an interval that are not in the domain of a function is called *loose evaluation*. This event has been recorded by degrading the decoration of the resulting interval to `trv`, indicating that nothing is known about the relationship between `x` and `sqrt(x)`.
+
+In this case, we know why the decoration was reduced to `trv`. Generally, if this were just a single step in a longer calculation, a resulting decoration `trv` shows only that something like this occured at some step.
+
+For instance,
+
+```@repl construction
+f = asin ∘ sqrt
+x = interval(-3, 3)
+f(x)
+y = interval(0, 3)
+f(y)
+```
+
+In both cases, `asin(sqrt(X))` gives a result with the decoration `trv`; to find out where things went wrong, the function must be analyzed.
+
+```@repl construction
+sqrt(x) # `f(x)` has the decoration is `trv` since `x` contains negative values
+sqrt(y) # the decoration is `com`
+asin(sqrt(y)) # `f(x)` has the decoration is `trv` since `sqrt(y)` contains values stricly greater than `1`
+```
+
+This shows that loose evaluation occurred in different parts of `f` for `x` and `y`.
+
+!!! danger
+    The decoration `trv` is an indicator of information loss. Often this also reveals that something unexpected occured. Therefore, any interval marked by this decoration may not be trusted and the code may need to be revised.
+
+##### Ill-formed
+
+```@repl construction
+interval(2, 1)
+interval(NaN)
+```
+
+These are all examples of ill-formed intervals, resulting in the decoration `ill`.
+
+!!! danger
+    The decoration `ill` is an indicator that an error has occured. Therefore, any interval marked by this decoration cannot be trusted and the code needs to be debugged.
+
+
+
+### Guarantee
+
+A *guarantee* is yet an other label, independent of decorations, and not described by the IEEE Standard 1788-2015 specifications. Its purpose is to accomodate for Julia's extensive conversion and promotion system, while retaining reliability in computations. Specifically, an interval `x` constructed via [`interval`](@ref) satisfies `isguaranteed(x) == true`. However, if a call to `convert(::Type{<:Interval}, ::Real)` occurs, then the resulting interval `x` satisfies `isguaranteed(x) == false`.
+
+In contrast, a [`BareInterval`](@ref) can only be constructed via [`bareinterval`](@ref), it is not a subtype of `Real`, and there are no allowed conversion with `Number`. Thus, this interval type is always guaranteed.
+
+!!! danger
+    A user interested in validated numerics should **always** have a resulting interval for which [`isguaranteed`](@ref) is `true`.
+
+
+
+## More constructors
 
 The submodule `IntervalArithmetic.Symbols` exports the infix operator `..` and `±` as an alias for `interval`; this submodule must be explicitly imported.
 
@@ -49,23 +152,37 @@ using IntervalArithmetic.Symbols
 0.1 ± 0.2 # interval(0.1, 0.2; format = :midpoint)
 ```
 
-The various string formats are as follows:
-- no string parameter, `"Empty"` and `"[Empty]"` returns `emptyinterval()`
-- `"entire"`, `"[entire]"` and `"[,]"` returns `entireinterval()`
-- `"[nai]"` returns a `NaI`
-- `"[m]"` returns `interval(m, m)`
-- `"[l, r]"` returns `interval(l, r)`
-- `"m?r"` returns `interval(m-r, m+r)`
-- `"m?ren"` returns `interval((m-r)*1en, (m+r)*1en)`
-- `"m?rd"` returns `interval(m-r, m)`
-- `"m?ru"` returns `interval(m, m+r)`
-- `"m?"` returns `interval(m + 5 precision units, m - 5 precision units)`
-- `"m??"` returns `interval(-Inf, +Inf)`
-- `"m??d"` returns `interval(-Inf, m)`
-- `"m??u"` returns `Interval(m, +Inf)`
-To add a specific decoration, add `"_dec"` at the end of the string.
+Moreover, one can parse strings into intervals. The various string formats are the following:
 
-!!! warning
+- `"[m]"` is equivalent to `interval(m, m)`.
+
+- `"[l, r]"` is equivalent to `interval(l, r)`.
+
+- `"m?r"` is equivalent to `interval(m-r, m+r)`.
+
+- `"m?ren"` is equivalent to `interval((m-r)*1en, (m+r)*1en)`.
+
+- `"m?rd"` is equivalent to `interval(m-r, m)`.
+
+- `"m?ru"` is equivalent to `interval(m, m+r)`.
+
+- `"m?"` is equivalent to `interval(m + 5 precision units, m - 5 precision units)`.
+
+- `"m??"` is equivalent to `interval(-Inf, +Inf)`.
+
+- `"m??d"` is equivalent to `interval(-Inf, m)`.
+
+- `"m??u"` is equivalent to `interval(m, +Inf)`.
+
+- `"[Entire]"`, `"[entire]"` and `"[,]"` are equivalent to `entireinterval()`.
+
+- `"[Empty]"`, `"[empty]"` and `"[]"` are equivalent to `emptyinterval()`.
+
+- `"[nai]"` and any other unsupported string formats are equivalent to `nai()`.
+
+To add a specific decoration, add `"_com"`, `"_dac"`, `"_dec"`, `"_trv"` and `"_ill"` at the end of the string.
+
+!!! danger
     Most real numbers cannot be exactly represented by floating-points. In such cases, the literal expression is rounded at parse time. To construct an interval enclosing the true real number, one must rely on the string constructor mentioned above.
 
     For instance, consider
@@ -74,85 +191,16 @@ To add a specific decoration, add `"_dec"` at the end of the string.
     x = 0.1
     ```
 
-    This appears to store the real number ``1/10`` in a variable `x` of type `Float64`. Yet,
+    This appears to store the real number $1/10$  in a variable `x` of type `Float64`. Yet,
 
     ```@repl construction
     x > 1//10
     ```
 
-    Hence, the floating-point `0.1` is (slightly) greater than the real number ``1/10`` since ``1/10`` *cannot be represented exactly in binary floating-point arithmetic, at any precision*. The true value must be approximated by a floating-point number with fixed precision -- this procedure is called rounding.
+    Hence, the floating-point `0.1` is (slightly) greater than the real number $1/10$ since $1/10$ **cannot be represented exactly in binary floating-point arithmetic, at any precision**. The true value must be approximated by a floating-point number with fixed precision -- this procedure is called rounding.
 
-    In particular, this implies that `interval(0.1)` *does not* contain the real number ``1/10``. A valid interval containing the real number ``1/10`` can be constructed by
+    In particular, this implies that `interval(0.1)` **does not** contain the real number $1/10$. A valid interval containing the real number $1/10$ can be constructed by
 
     ```@repl construction
     I"0.1"
     ```
-
-
-
-## More on decorations
-
-```
-julia> X1 = Interval(0.5, 3)
-[0.5, 3]_com
-
-julia> sqrt(X1)
-[0.707106, 1.73206]_com
-```
-In this case, both input and output are "common" intervals, meaning that they are closed and bounded, and that the resulting function is continuous over the input interval, so that fixed-point theorems may be applied. Since `sqrt(X1) ⊆ X1`, we know that there must be a fixed point of the function inside the interval `X1` (in this case, `sqrt(1) == 1`).
-
-```
-julia> X2 = Interval(3, ∞)
-[3, ∞]_dac
-
-julia> sqrt(X2)
-[1.73205, ∞]_dac
-```
-Since the intervals are unbounded here, the maximum decoration possible is `dac`.
-
-```
-julia> X3 = Interval(-3, 4)
-[-3, 4]_com
-
-julia> sign(X3)
-[-1, 1]_def
-```
-The `sign` function is discontinuous at 0, but is defined everywhere on the input interval, so the decoration is `def`.
-
-```
-julia> X4 = Interval(-3.5, 4.1)
-[-3.5, 4.1]_com
-
-julia> sqrt(X4)
-[0, 2.02485]_trv
-```
-The negative part of `X` is discarded by the `sqrt` function, since its domain is `[0,∞]`. (This process of discarding parts of the input interval that are not in the domain is called "loose evaluation".) The fact that this occurred is, however, recorded by the resulting decoration, `trv`, indicating a loss of information: "nothing is known" about the relationship between the output interval and the input.
-
-
-In this case, we know why the decoration was reduced to `trv`. But if this were just a single step in a longer calculation, a resulting `trv` decoration shows only that something like this happened *at some step*. For example:
-
-```
-julia> X5 = Interval(-3, 3)
-[-3, 3]_com
-
-julia> asin(sqrt(X5))
-[0, 1.5708]_trv
-
-julia> X6 = Interval(0, 3)
-[0, 3]_com
-
-julia> asin(sqrt(X6))
-[0, 1.5708]_trv
-```
-In both cases, `asin(sqrt(X))` gives a result with a `trv` decoration, but
-we do not know at which step this happened, unless we break down the function into its constituent parts:
-```
-julia> sqrt(X5)
-[0, 1.73206]_trv
-
-julia> sqrt(X6)
-[0, 1.73206]_com
-```
-This shows that loose evaluation occurred in different parts of the expression in the two different cases.
-
-In general, the `trv` decoration is thus used only to signal that "something unexpected" happened during the calculation. Often this is later used to split up the original interval into pieces and reevaluate the function on each piece to refine the information that is obtained about the function.
