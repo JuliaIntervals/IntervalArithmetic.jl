@@ -21,8 +21,6 @@ end
 
 include("intervals/intervals.jl")
 
-include("rand.jl")
-
 include("display.jl")
     export setdisplay
 
