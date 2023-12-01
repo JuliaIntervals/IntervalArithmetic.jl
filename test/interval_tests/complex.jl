@@ -5,7 +5,7 @@
 
     @test a ⊂ c
     @test a ⊆ c
-    @test isstrictsubset_interval(a, c)
+    @test isinterior(a, c)
     @test (b ⊂ c) == false
     @test (b ⊆ c) == false
 

@@ -1,0 +1,186 @@
+/*
+
+Unit tests from libieeep1788 for recommended interval boolean operations
+(Original author: Marco Nehmeier)
+converted into portable ITL format by Oliver Heimlich.
+
+Copyright 2013-2015 Marco Nehmeier (nehmeier@informatik.uni-wuerzburg.de)
+Copyright 2015-2017 Oliver Heimlich (oheim@posteo.de)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+*/
+
+testcase minimal_is_common_interval_test {
+    isCommonInterval [-27.0,-27.0] = true;
+    isCommonInterval [-27.0, 0.0] = true;
+    isCommonInterval [0.0,0.0] = true;
+    isCommonInterval [-0.0,-0.0] = true;
+    isCommonInterval [-0.0,0.0] = true;
+    isCommonInterval [0.0,-0.0] = true;
+    isCommonInterval [5.0, 12.4] = true;
+    isCommonInterval [-0x1.FFFFFFFFFFFFFp1023, 0x1.FFFFFFFFFFFFFp1023] = true;
+
+    isCommonInterval [entire] = false;
+    isCommonInterval [empty] = false;
+    isCommonInterval [-infinity, 0.0] = false;
+    isCommonInterval [0.0, infinity] = false;
+}
+
+testcase minimal_is_common_interval_dec_test {
+    isCommonInterval [-27.0,-27.0]_com = true;
+    isCommonInterval [-27.0, 0.0]_com = true;
+    isCommonInterval [0.0,0.0]_com = true;
+    isCommonInterval [-0.0,-0.0]_com = true;
+    isCommonInterval [-0.0,0.0]_com = true;
+    isCommonInterval [0.0,-0.0]_com = true;
+    isCommonInterval [5.0, 12.4]_com = true;
+    isCommonInterval [-0x1.FFFFFFFFFFFFFp1023, 0x1.FFFFFFFFFFFFFp1023]_com = true;
+
+    isCommonInterval [-27.0,-27.0]_trv = true;
+    isCommonInterval [-27.0, 0.0]_def = true;
+    isCommonInterval [0.0,0.0]_dac = true;
+    isCommonInterval [-0.0,-0.0]_trv = true;
+    isCommonInterval [-0.0,0.0]_def = true;
+    isCommonInterval [0.0,-0.0]_dac = true;
+    isCommonInterval [5.0, 12.4]_def = true;
+    isCommonInterval [-0x1.FFFFFFFFFFFFFp1023, 0x1.FFFFFFFFFFFFFp1023]_trv = true;
+
+    isCommonInterval [entire]_dac = false;
+    isCommonInterval [nai] = false;
+    isCommonInterval [empty]_trv = false;
+    isCommonInterval [-infinity, 0.0]_trv = false;
+    isCommonInterval [0.0, infinity]_def = false;
+}
+
+testcase minimal_is_singleton_test {
+    isSingleton [-27.0,-27.0] = true;
+    isSingleton [-2.0, -2.0] = true;
+    isSingleton [12.0,12.0] = true;
+    isSingleton [17.1, 17.1] = true;
+    isSingleton [-0.0,-0.0] = true;
+    isSingleton [0.0,0.0] = true;
+    isSingleton [-0.0, 0.0] = true;
+    isSingleton [0.0, -0.0] = true;
+
+    isSingleton [empty] = false;
+    isSingleton [entire] = false;
+    isSingleton [-1.0, 0.0] = false;
+    isSingleton [-1.0, -0.5] = false;
+    isSingleton [1.0, 2.0] = false;
+    isSingleton [-infinity,-0x1.FFFFFFFFFFFFFp1023] = false;
+    isSingleton [-1.0,infinity] = false;
+}
+
+testcase minimal_is_singleton_dec_test {
+    isSingleton [-27.0,-27.0]_def = true;
+    isSingleton [-2.0, -2.0]_trv = true;
+    isSingleton [12.0,12.0]_dac = true;
+    isSingleton [17.1, 17.1]_com = true;
+    isSingleton [-0.0,-0.0]_def = true;
+    isSingleton [0.0,0.0]_com = true;
+    isSingleton [-0.0, 0.0]_def = true;
+    isSingleton [0.0, -0.0]_dac = true;
+
+    isSingleton [empty]_trv = false;
+    isSingleton [nai] = false;
+    isSingleton [entire]_def = false;
+    isSingleton [-1.0, 0.0]_dac = false;
+    isSingleton [-1.0, -0.5]_com = false;
+    isSingleton [1.0, 2.0]_def = false;
+    isSingleton [-infinity,-0x1.FFFFFFFFFFFFFp1023]_dac = false;
+    isSingleton [-1.0,infinity]_trv = false;
+}
+
+testcase minimal_is_member_test {
+    isMember -27.0 [-27.0,-27.0] = true;
+    isMember -27.0 [-27.0, 0.0] = true;
+    isMember -7.0 [-27.0, 0.0] = true;
+    isMember 0.0 [-27.0, 0.0] = true;
+    isMember -0.0 [0.0,0.0] = true;
+    isMember 0.0 [0.0,0.0] = true;
+    isMember 0.0 [-0.0,-0.0] = true;
+    isMember 0.0 [-0.0,0.0] = true;
+    isMember 0.0 [0.0,-0.0] = true;
+    isMember 5.0 [5.0, 12.4] = true;
+    isMember 6.3 [5.0, 12.4] = true;
+    isMember 12.4 [5.0, 12.4] = true;
+    isMember 0.0 [entire] = true;
+    isMember 5.0 [entire] = true;
+    isMember 6.3 [entire] = true;
+    isMember 12.4 [entire] = true;
+    isMember 0x1.FFFFFFFFFFFFFp1023 [entire] = true;
+    isMember -0x1.FFFFFFFFFFFFFp1023 [entire] = true;
+    isMember 0x1.0p-1022 [entire] = true;
+    isMember -0x1.0p-1022 [entire] = true;
+
+    isMember -71.0 [-27.0, 0.0] = false;
+    isMember 0.1 [-27.0, 0.0] = false;
+    isMember -0.01 [0.0,0.0] = false;
+    isMember 0.000001 [0.0,0.0] = false;
+    isMember 111110.0 [-0.0,-0.0] = false;
+    isMember 4.9 [5.0, 12.4] = false;
+    isMember -6.3 [5.0, 12.4] = false;
+    isMember 0.0 [empty] = false;
+    isMember -4535.3 [empty] = false;
+    isMember -infinity [empty] = false;
+    isMember infinity [empty] = false;
+    isMember NaN [empty] = false;
+    isMember -infinity [entire] = false;
+    isMember infinity [entire] = false;
+    isMember NaN [entire] = false;
+}
+
+testcase minimal_is_member_dec_test {
+    isMember -27.0 [-27.0,-27.0]_trv = true;
+    isMember -27.0 [-27.0, 0.0]_def = true;
+    isMember -7.0 [-27.0, 0.0]_dac = true;
+    isMember 0.0 [-27.0, 0.0]_com = true;
+    isMember -0.0 [0.0,0.0]_trv = true;
+    isMember 0.0 [0.0,0.0]_def = true;
+    isMember 0.0 [-0.0,-0.0]_dac = true;
+    isMember 0.0 [-0.0,0.0]_com = true;
+    isMember 0.0 [0.0,-0.0]_trv = true;
+    isMember 5.0 [5.0, 12.4]_def = true;
+    isMember 6.3 [5.0, 12.4]_dac = true;
+    isMember 12.4 [5.0, 12.4]_com = true;
+    isMember 0.0 [entire]_trv = true;
+    isMember 5.0 [entire]_def = true;
+    isMember 6.3 [entire]_dac = true;
+    isMember 12.4 [entire]_trv = true;
+    isMember 0x1.FFFFFFFFFFFFFp1023 [entire]_def = true;
+    isMember -0x1.FFFFFFFFFFFFFp1023 [entire]_dac = true;
+    isMember 0x1.0p-1022 [entire]_trv = true;
+    isMember -0x1.0p-1022 [entire]_def = true;
+
+    isMember -71.0 [-27.0, 0.0]_trv = false;
+    isMember 0.1 [-27.0, 0.0]_def = false;
+    isMember -0.01 [0.0,0.0]_dac = false;
+    isMember 0.000001 [0.0,0.0]_com = false;
+    isMember 111110.0 [-0.0,-0.0]_trv = false;
+    isMember 4.9 [5.0, 12.4]_def = false;
+    isMember -6.3 [5.0, 12.4]_dac = false;
+    isMember 0.0 [empty]_trv = false;
+    isMember 0.0 [empty]_trv = false;
+    isMember -4535.3 [empty]_trv = false;
+    isMember -4535.3 [empty]_trv = false;
+    isMember -infinity [empty]_trv = false;
+    isMember -infinity [nai] = false;
+    isMember infinity [empty]_trv = false;
+    isMember infinity [nai] = false;
+    isMember NaN [empty]_trv = false;
+    isMember NaN [nai] = false;
+    isMember -infinity [entire]_trv = false;
+    isMember infinity [entire]_def = false;
+    isMember NaN [entire]_dac = false;
+}

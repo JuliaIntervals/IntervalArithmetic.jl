@@ -4,7 +4,7 @@ There are several useful output representations for intervals. The display is co
 
 - interval output format:
 
-    - `:standard`: output of the form `[1.09999, 1.30001]`, rounded to the current number of significant figures.
+    - `:infsup`: output of the form `[1.09999, 1.30001]`, rounded to the current number of significant figures.
 
     - `:full`: output of the form `Interval(1.0999999999999999, 1.3)`, as in the `showfull` function.
 
@@ -25,7 +25,7 @@ setdisplay(:midpoint)
 a
 setdisplay(; sigdigits = 4)
 a
-setdisplay(:standard)
+setdisplay(:infsup)
 a
 ```
 
@@ -103,3 +103,9 @@ issubset_interval(interval(1, 2), interval(2))
 intersect(interval(1, 2), interval(2))
 intersect_interval(interval(1, 2), interval(2))
 ```
+
+
+
+## Custom interval bounds type
+
+A `BareInterval{T}` or `Interval{T}` has the restriction `T <: Union{Rational,AbstractFloat}` which is type for the bounds of the interval. Supposing one wishes to use their own numeric type `MyNumType <: Union{Rational,AbstractFloat}`, they must provide their own arithmetic operations (with correct rounding!).

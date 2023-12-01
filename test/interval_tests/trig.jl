@@ -224,7 +224,7 @@ end
 end
 
 @testset "Trig with large arguments" begin
-    x = nthpow(interval(2.), 1000)
+    x = pown(interval(2.), 1000)
     @test diam(x) == 0.0
 
     @test isequal_interval(sin(x), interval(-0.15920170308624246, -0.15920170308624243))

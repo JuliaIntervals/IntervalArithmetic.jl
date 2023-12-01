@@ -2,7 +2,7 @@
 # IEEE Standard 1788-2015
 
 """
-    emptyinterval
+    emptyinterval(T=default_numtype())
 
 Create an empty interval. This interval is an exception to the fact that the
 lower bound is larger than the upper one.
@@ -21,10 +21,14 @@ emptyinterval(::Type{Complex{T}}) where {T<:Real} = complex(emptyinterval(T), em
 emptyinterval(::T) where {T} = emptyinterval(T)
 
 """
-    entireinterval
+    entireinterval(T=default_numtype())
 
-Create an interval representing the entire real line. Depending on the flavor,
-`-Inf` and `Inf` may or may not be considerd inside this interval.
+Create an interval representing the entire real line, or the entire complex
+plane if `T` is complex.
+
+!!! note
+    Depending on the flavor, infinity may or may not be considered part of the
+    interval.
 
 Implement the `entire` function of the IEEE Standard 1788-2015 (Section 10.5.2).
 """
@@ -36,9 +40,9 @@ entireinterval(::Type{Complex{T}}) where {T<:Real} = complex(entireinterval(T), 
 entireinterval(::T) where {T} = entireinterval(T)
 
 """
-    nai
+    nai(T=default_numtype())
 
-Create an NaI.
+Create an NaI (Not an Interval).
 """
 nai(::Type{Interval{T}}) where {T<:NumTypes} = _unsafe_interval(emptyinterval(BareInterval{T}), ill, true)
 nai(::Type{T}=default_numtype()) where {T<:NumTypes} = nai(Interval{T})

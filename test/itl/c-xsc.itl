@@ -1,0 +1,228 @@
+/*
+
+Unit tests from C-XSC version 2.5.4
+converted into portable ITL format by Oliver Heimlich.
+
+Copyright 1990-2000 Institut fuer Angewandte Mathematik,
+                    Universitaet Karlsruhe, Germany
+Copyright 2000-2014 Wiss. Rechnen/Softwaretechnologie
+                    Universitaet Wuppertal, Germany   
+Copyright 2015-2016 Oliver Heimlich (oheim@posteo.de)
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+*/
+
+// Tests A+B, B+A, A-B, B-A, -A, +A
+testcase cxsc.intervaladdsub {
+    add [10.0, 20.0] [13.0, 17.0] = [23.0, 37.0];
+    add [13.0, 17.0] [10.0, 20.0] = [23.0, 37.0];
+    sub [10.0, 20.0] [13.0, 16.0] = [-6.0, 7.0];
+    sub [13.0, 16.0] [10.0, 20.0] = [-7.0, 6.0];
+    neg [10.0, 20.0] = [-20.0, -10.0];
+    pos [10.0, 20.0] = [10.0, 20.0];
+}
+
+// Tests A*B, B*A, A/B, B/A
+testcase cxsc.intervalmuldiv {
+    mul [1.0, 2.0] [3.0, 4.0] = [3.0, 8.0];
+    mul [-1.0, 2.0] [3.0, 4.0] = [-4.0, 8.0];
+    mul [-2.0, 1.0] [3.0, 4.0] = [-8.0, 4.0];
+    mul [-2.0, -1.0] [3.0, 4.0] = [-8.0, -3.0];
+    mul [1.0, 2.0] [-3.0, 4.0] = [-6.0, 8.0];
+    mul [-1.0, 2.0] [-3.0, 4.0] = [-6.0, 8.0];
+    mul [-2.0, 1.0] [-3.0, 4.0] = [-8.0, 6.0];
+    mul [-2.0, -1.0] [-3.0, 4.0] = [-8.0, 6.0];
+    mul [1.0, 2.0] [-4.0, 3.0] = [-8.0, 6.0];
+    mul [-1.0, 2.0] [-4.0, 3.0] = [-8.0, 6.0];
+    mul [-2.0, 1.0] [-4.0, 3.0] = [-6.0, 8.0];
+    mul [-2.0, -1.0] [-4.0, 3.0] = [-6.0, 8.0];
+    mul [1.0, 2.0] [-4.0, -3.0] = [-8.0, -3.0];
+    mul [-1.0, 2.0] [-4.0, -3.0] = [-8.0, 4.0];
+    mul [-2.0, -1.0] [-4.0, -3.0] = [3.0, 8.0];
+
+    div [1.0, 2.0] [4.0, 8.0] = [0.125, 0.5];
+    div [-1.0, 2.0] [4.0, 8.0] = [-0.25, 0.5];
+    div [-2.0, 1.0] [4.0, 8.0] = [-0.5, 0.25];
+    div [-2.0, -1.0] [4.0, 8.0] = [-0.5, -0.125];
+    div [1.0, 2.0] [-4.0, 8.0] = [entire];
+    div [-1.0, 2.0] [-4.0, 8.0] = [entire];
+    div [-2.0, 1.0] [-4.0, 8.0] = [entire];
+    div [-2.0, -1.0] [-4.0, 8.0] = [entire];
+    div [1.0, 2.0] [-8.0, 4.0] = [entire];
+    div [-1.0, 2.0] [-8.0, 4.0] = [entire];
+    div [-2.0, 1.0] [-8.0, 4.0] = [entire];
+    div [-2.0, -1.0] [-8.0, 4.0] = [entire];
+    div [1.0, 2.0] [-8.0, -4.0] = [-0.5, -0.125];
+    div [-1.0, 2.0] [-8.0, -4.0] = [-0.5, 0.25];
+    div [-2.0, 1.0] [-8.0, -4.0] = [-0.25, 0.5];
+    div [-2.0, -1.0] [-8.0, -4.0] = [0.125, 0.5];
+}
+
+// Tests A|B, B|A, A&B, B&A
+testcase cxsc.intervalsetops {
+    convexHull [-2.0, 2.0] [-4.0, -3.0] = [-4.0, 2.0];
+    convexHull [-2.0, 2.0] [-4.0, -1.0] = [-4.0, 2.0];
+    convexHull [-2.0, 2.0] [-4.0, 4.0] = [-4.0, 4.0];
+    convexHull [-2.0, 2.0] [-1.0, 1.0] = [-2.0, 2.0];
+    convexHull [-2.0, 2.0] [1.0, 4.0] = [-2.0, 4.0];
+    convexHull [-2.0, 2.0] [3.0, 4.0] = [-2.0, 4.0];
+    convexHull [-4.0, -3.0] [-2.0, 2.0] = [-4.0, 2.0];
+    convexHull [-4.0, -1.0] [-2.0, 2.0] = [-4.0, 2.0];
+    convexHull [-4.0, 4.0] [-2.0, 2.0] = [-4.0, 4.0];
+    convexHull [-1.0, 1.0] [-2.0, 2.0] = [-2.0, 2.0];
+    convexHull [1.0, 4.0] [-2.0, 2.0] = [-2.0, 4.0];
+    convexHull [3.0, 4.0] [-2.0, 2.0] = [-2.0, 4.0];
+
+    intersection [-2.0, 2.0] [-4.0, -3.0] = [empty];
+    intersection [-2.0, 2.0] [-4.0, -1.0] = [-2.0, -1.0];
+    intersection [-2.0, 2.0] [-4.0, 4.0] = [-2.0, 2.0];
+    intersection [-2.0, 2.0] [-1.0, 1.0] = [-1.0, 1.0];
+    intersection [-2.0, 2.0] [1.0, 4.0] = [1.0, 2.0];
+    intersection [-2.0, 2.0] [3.0, 4.0] = [empty];
+    intersection [-4.0, -3.0] [-2.0, 2.0] = [empty];
+    intersection [-4.0, -1.0] [-2.0, 2.0] = [-2.0, -1.0];
+    intersection [-4.0, 4.0] [-2.0, 2.0] = [-2.0, 2.0];
+    intersection [-1.0, 1.0] [-2.0, 2.0] = [-1.0, 1.0];
+    intersection [1.0, 4.0] [-2.0, 2.0] = [1.0, 2.0];
+    intersection [3.0, 4.0] [-2.0, 2.0] = [empty];
+}
+
+// Tests A|B, B|A, A&B, B&A, B is scalar-type
+testcase cxsc.intervalmixsetops {
+    convexHull [-2.0, 2.0] [-4.0, -4.0] = [-4.0, 2.0];
+    convexHull [-2.0, 2.0] [1.0, 1.0] = [-2.0, 2.0];
+    convexHull [-2.0, 2.0] [4.0, 4.0] = [-2.0, 4.0];
+    convexHull [-4.0, -4.0] [-2.0, 2.0] = [-4.0, 2.0];
+    convexHull [1.0, 1.0] [-2.0, 2.0] = [-2.0, 2.0];
+    convexHull [4.0, 4.0] [-2.0, 2.0] = [-2.0, 4.0];
+
+    intersection [-2.0, 2.0] [-4.0, -4.0] = [empty];
+    intersection [-2.0, 2.0] [1.0, 1.0] = [1.0, 1.0];
+    intersection [-2.0, 2.0] [4.0, 4.0] = [empty];
+    intersection [-4.0, -4.0] [-2.0, 2.0] = [empty];
+    intersection [1.0, 1.0] [-2.0, 2.0] = [1.0, 1.0];
+    intersection [4.0, 4.0] [-2.0, 2.0] = [empty];
+}
+
+// Tests A|B, B|A, A and B are scalar-type
+testcase cxsc.scalarmixsetops {
+    convexHull [-2.0, -2.0] [-4.0, -4.0] = [-4.0, -2.0];
+    convexHull [-2.0, -2.0] [-2.0, -2.0] = [-2.0, -2.0];
+    convexHull [-2.0, -2.0] [2.0, 2.0] = [-2.0, 2.0];
+    convexHull [-4.0, -4.0] [-2.0, -2.0] = [-4.0, -2.0];
+    convexHull [-2.0, -2.0] [-2.0, -2.0] = [-2.0, -2.0];
+    convexHull [2.0, 2.0] [-2.0, -2.0] = [-2.0, 2.0];
+}
+
+// Tests A<B, A>B, A<=B, A>=B, A==B
+testcase cxsc.intervalsetcompops {
+    interior [-1.0, 2.0] [-1.0, 2.0] = false;
+    interior [-2.0, 1.0] [-3.0, 2.0] = true;
+    interior [-2.0, 2.0] [-1.0, 1.0] = false;
+    interior [-2.0, 2.0] [-1.0, 2.0] = false;
+    interior [-2.0, 2.0] [-2.0, 1.0] = false;
+    interior [-2.0, 2.0] [-2.0, 3.0] = false;
+    interior [-2.0, 2.0] [-3.0, 2.0] = false;
+    interior [-1.0, 2.0] [-1.0, 2.0] = false;
+    interior [-3.0, 2.0] [-2.0, 1.0] = false;
+    interior [-1.0, 1.0] [-2.0, 2.0] = true;
+    interior [-1.0, 2.0] [-2.0, 2.0] = false;
+    interior [-2.0, 1.0] [-2.0, 2.0] = false;
+    interior [-2.0, 3.0] [-2.0, 2.0] = false;
+    interior [-3.0, 2.0] [-2.0, 2.0] = false;
+
+    subset [-1.0, 2.0] [-1.0, 2.0] = true;
+    subset [-2.0, 1.0] [-3.0, 2.0] = true;
+    subset [-2.0, 2.0] [-1.0, 1.0] = false;
+    subset [-2.0, 2.0] [-1.0, 2.0] = false;
+    subset [-2.0, 2.0] [-2.0, 1.0] = false;
+    subset [-2.0, 2.0] [-2.0, 3.0] = true;
+    subset [-2.0, 2.0] [-3.0, 2.0] = true;
+    subset [-3.0, 2.0] [-2.0, 1.0] = false;
+    subset [-1.0, 1.0] [-2.0, 2.0] = true;
+    subset [-1.0, 2.0] [-2.0, 2.0] = true;
+    subset [-2.0, 1.0] [-2.0, 2.0] = true;
+    subset [-2.0, 3.0] [-2.0, 2.0] = false;
+    subset [-3.0, 2.0] [-2.0, 2.0] = false;
+    
+    equal [-1.0, 2.0] [-1.0, 2.0] = true;
+    equal [-2.0, 1.0] [-3.0, 2.0] = false;
+    equal [-2.0, 2.0] [-1.0, 1.0] = false;
+    equal [-2.0, 2.0] [-1.0, 2.0] = false;
+    equal [-2.0, 2.0] [-2.0, 1.0] = false;
+    equal [-2.0, 2.0] [-2.0, 3.0] = false;
+    equal [-2.0, 2.0] [-3.0, 2.0] = false;
+}
+
+// Tests A<B, A>B, A<=B, A>=B, A==B, B<A, B>A, B<=A, B>=A, B==A, where B is scalar
+testcase cxsc.intervalscalarsetcompops {
+    interior [-1.0, 2.0] [-2.0, -2.0] = false;
+    interior [-2.0, 2.0] [-2.0, -2.0] = false;
+    interior [-2.0, 2.0] [0.0, 0.0] = false;
+    interior [-2.0, 2.0] [2.0, 2.0] = false;
+    interior [-2.0, 2.0] [3.0, 3.0] = false;
+    interior [-1.0, -1.0] [1.0, 1.0] = false;
+    interior [-1.0, -1.0] [-1.0, -1.0] = false;
+    interior [-2.0, -2.0] [-1.0, 2.0] = false;
+    interior [-2.0, -2.0] [-2.0, 2.0] = false;
+    interior [0.0, 0.0] [-2.0, 2.0] = true;
+    interior [2.0, 2.0] [-2.0, 2.0] = false;
+    interior [3.0, 3.0] [-2.0, 2.0] = false;
+    interior [1.0, 1.0] [-1.0, -1.0] = false;
+    interior [-1.0, -1.0] [-1.0, -1.0] = false;
+ 
+    subset [-1.0, 2.0] [-2.0, -2.0] = false;
+    subset [-2.0, 2.0] [-2.0, -2.0] = false;
+    subset [-2.0, 2.0] [0.0, 0.0] = false;
+    subset [-2.0, 2.0] [2.0, 2.0] = false;
+    subset [-2.0, 2.0] [3.0, 3.0] = false;
+    subset [-1.0, -1.0] [1.0, 1.0] = false;
+    subset [-1.0, -1.0] [-1.0, -1.0] = true;
+    subset [-2.0, -2.0] [-1.0, 2.0] = false;
+    subset [-2.0, -2.0] [-2.0, 2.0] = true;
+    subset [0.0, 0.0] [-2.0, 2.0] = true;
+    subset [2.0, 2.0] [-2.0, 2.0] = true;
+    subset [3.0, 3.0] [-2.0, 2.0] = false;
+    subset [1.0, 1.0] [-1.0, -1.0] = false;
+    subset [-1.0, -1.0] [-1.0, -1.0] = true;
+    
+    equal [-1.0, 2.0] [-2.0, -2.0] = false;
+    equal [-2.0, 2.0] [-2.0, -2.0] = false;
+    equal [-2.0, 2.0] [0.0, 0.0] = false;
+    equal [-2.0, 2.0] [2.0, 2.0] = false;
+    equal [-2.0, 2.0] [3.0, 3.0] = false;
+    equal [-1.0, -1.0] [1.0, 1.0] = false;
+    equal [-1.0, -1.0] [-1.0, -1.0] = true;
+}
+
+testcase cxsc.intervalstdfunc {
+    sqr [11.0, 11.0] = [121.0, 121.0];
+    sqr [0.0, 0.0] = [0.0, 0.0];
+    sqr [-9.0, -9.0] = [81.0, 81.0];
+
+    sqrt [121.0, 121.0] = [11.0, 11.0];
+    sqrt [0.0, 0.0] = [0.0, 0.0];
+    sqrt [81.0, 81.0] = [9.0, 9.0];
+    
+    rootn [27.0, 27.0] 3 = [3.0, 3.0];
+    rootn [0.0, 0.0] 4 = [0.0, 0.0];
+    rootn [1024.0, 1024.0] 10 = [2.0, 2.0];
+    
+    pow [2.0, 2.0] [2.0, 2.0] = [4.0, 4.0];
+    pow [4.0, 4.0] [5.0, 5.0] = [1024.0, 1024.0];
+    // Negativ geht noch nicht
+    pow [2.0, 2.0] [3.0, 3.0] = [8.0, 8.0];
+}

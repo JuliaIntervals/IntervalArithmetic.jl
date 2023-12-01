@@ -1,71 +1,95 @@
 """
     Flavor{F}
 
-Super type of all interval flavors.
+A flavor defining how an interval behaves in edge cases. For instance, infinity
+may or not be considered part of unbounded intervals.
 
-A flavor defines (following the IEEE Std 1788-2015) how an interval behaves
-in edge cases. This mostly makes a difference when dealing with
-infinity and division by zero.
+Some flavors `F` include:
+- `:set_based` (default): elements of an interval are real numbers. In
+    particular, infinity is never part of an interval. This flavor is described
+    and required in Part 2 of the IEEE Standard 1788-2015.
+    Edge cases:
+        - any unbounded interval does not contain infinity.
+        - ``[0, 0] / [0, 0] = \\emptyset``.
+        - ``x / [0, 0] = \\emptyset`` for any interval ``x``.
+        - ``x \\times [0, 0] = [0, 0]`` for any interval ``x``.
+- `:cset`: elements of an interval are either real numbers,
+    or ``\\pm \\infty``, applying standard rule for arithmetic with infinity.
+    Edge cases:
+        - any unbounded interval contains infinity.
+        - ``[0, 0] / [0, 0] = [-\\infty, \\infty]``.
+        - ``x / [0, 0] = [-\\infty, \\infty]`` for any interval ``x``.
+        - ``x \\times [0, 0] = [-\\infty, \\infty]`` for any unbounded interval
+          ``x``.
 
-Currently only Flavor{:set_based} is supported.
+!!! note
+    Currently only the flavor `:set_based` is supported and implemented.
 
-- `:set_based` (default) : Elements of an interval are real number.
-    In particular, infinity is never part of an interval and is only used as a
-    shorthand.
-    For example, the interval `(2..Inf)` contain all real number greater than 2.
-    In particular, this means that `(Inf..Inf)` is an empty interval, and division
-    by a thin zero returns the empty interval.
-    The edge cases are
-        - `isequal_interval(x/(0..0), ∅)`
-        - `isequal_interval((0..0)/(0..0), ∅)`
-        - `isequal_interval((0..0)*(-Inf..Inf), 0)`
-        - `in_interval(Inf, (0..Inf)) == false`
-    This flavor is described and required in part 2 of the IEEE Std 1799-2015.
-- `:cset` (not implemented) : Elements of an interval are either real numbers
-    or `±Inf`, applying standard rule for arithmetic with infinity.
-    The edge cases are
-        - `isequal_interval(x/(0..0), (-Inf..Inf))`
-        - `isequal_interval((0..0)/(0..0), (-Inf..Inf))`
-        - `isequal_interval((0..0)*(-Inf..Inf), (-Inf..Inf))`
-        - `in_interval(Inf, (0..Inf)) == true`
+# Examples
+
+```jldoctest
+julia> IntervalArithmetic.default_flavor()
+IntervalArithmetic.Flavor{:set_based}()
+
+julia> isempty_interval(bareinterval(Inf, Inf))
+true
+
+julia> isempty_interval(bareinterval(0)/bareinterval(0))
+true
+
+julia> isempty_interval(bareinterval(1)/bareinterval(0))
+true
+
+julia> isempty_interval(bareinterval(-Inf, Inf)/bareinterval(0))
+true
+
+julia> isthinzero(bareinterval(0)*bareinterval(-Inf, Inf))
+true
+```
 """
 struct Flavor{F} end
 
+"""
+    default_flavor()
+
+Return the default flavor used to handle edge cases.
+"""
 default_flavor() = Flavor{:set_based}()
 
-# :set_based
-
 """
-    zero_times_infinity(::Flavor, ::Type{T})
+    zero_times_infinity([F::Flavor=default_flavor()], T<:NumTypes)
 
-Return the result of zero times positive infinity for the given flavor
-and number type `T`.
+For the given flavor `F`, return ``0 \\times \\infty`` as an instance of type
+`T`.
 """
 zero_times_infinity(::Flavor{:set_based}, ::Type{T}) where {T<:NumTypes} = zero(T)
 
 zero_times_infinity(::Type{T}) where {T<:NumTypes} = zero_times_infinity(default_flavor(), T)
 
 """
-    div_by_thin_zero(::Flavor, x::BareInterval)
+    div_by_thin_zero([F::Flavor=default_flavor()], x::BareInterval)
 
-Divide `x` by the interval containing only `0`.
+For the given flavor `F`, divide `x` by the interval containing only ``0``.
 """
 div_by_thin_zero(::Flavor{:set_based}, ::BareInterval{T}) where {T<:NumTypes} =
     emptyinterval(BareInterval{T})
 
 div_by_thin_zero(x::BareInterval) = div_by_thin_zero(default_flavor(), x)
 
+"""
+    contains_infinity([F::Flavor=default_flavor()], x::BareInterval)
+
+For the given flavor `F`, test whether `x` contains infinity.
+"""
 contains_infinity(::Flavor{:set_based}, ::BareInterval) = false
 
 contains_infinity(x::BareInterval) = contains_infinity(default_flavor(), x)
 
 """
-    is_valid_interval(a, b)
+    is_valid_interval([F::Flavor=default_flavor()], a::Real, b::Real)
 
-Check if `(a, b)` constitute a valid interval.
+For the given flavor `F`, test whether ``[a, b]`` is a valid interval.
 """
-is_valid_interval(::Flavor{:set_based}, a, b) = b - a ≥ 0
+is_valid_interval(::Flavor{:set_based}, a::Real, b::Real) = b - a ≥ 0
 
-is_valid_interval(a, b) = is_valid_interval(default_flavor(), a, b)
-
-is_valid_interval(a) = is_valid_interval(a, a)
+is_valid_interval(a::Real, b::Real) = is_valid_interval(default_flavor(), a, b)

@@ -2,14 +2,26 @@ using Test
 using IntervalArithmetic
 using InteractiveUtils
 
-function include_test(filename)
-    @testset "$filename" begin
-        include(filename)
+include("generate_ITF1788.jl")
+
+open("tests_warning.log", "w") do io
+    redirect_stderr(io) do
+        # interval tests
+        for f ∈ readdir("interval_tests"; join = true)
+            if !occursin("complex", f)
+                @testset "$f" begin
+                    include(f)
+                end
+            end
+        end
+        # ITF1788 tests
+        for f ∈ readdir("itl")
+            generate(f)
+        end
+        for f ∈ readdir("ITF1788_tests"; join = true)
+            @testset "$f" begin
+                include(f)
+            end
+        end
     end
 end
-
-# interval tests
-include_test("interval_tests/run_intervals.jl")
-
-# ITF1788 tests
-include_test("test_ITF1788/run_ITF1788.jl") # TODO fix these tests

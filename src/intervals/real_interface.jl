@@ -118,8 +118,8 @@ for T ∈ (:BareInterval, :Interval)
             throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
 
         Base.setdiff(::$T) =
-            throw(ArgumentError("`setdiff` is purposely not supported for intervals. See instead `setdiff_interval`"))
+            throw(ArgumentError("`setdiff` is purposely not supported for intervals. See instead `interiordiff`"))
         Base.setdiff!(::AbstractSet, ::$T) =
-            throw(ArgumentError("`setdiff!` is purposely not supported for intervals. See instead `setdiff_interval`"))
+            throw(ArgumentError("`setdiff!` is purposely not supported for intervals. See instead `interiordiff`"))
     end
 end

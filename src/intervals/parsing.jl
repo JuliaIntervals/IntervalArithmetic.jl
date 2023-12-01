@@ -1,10 +1,11 @@
 """
     I"str"
 
-Create an interval according to the IEEE Standard 1788-2015. This is
-semantically equivalent to `parse(Interval{default_numtype()}, str)`.
+Create an interval by parsing the string `"str"`; this is semantically
+equivalent to `parse(Interval{default_numtype()}, "str")`.
 
 # Examples
+
 ```jldoctest
 julia> setdisplay(:full);
 
@@ -13,21 +14,28 @@ Interval{Float64}(3.0, 4.0, com)
 
 julia> I"0.1"
 Interval{Float64}(0.09999999999999999, 0.1, com)
+
+julia> in_interval(1//10, I"0.1")
+true
 ```
 """
 macro I_str(str)
     return parse(Interval{default_numtype()}, str)
 end
 
-#
-
 """
-    parse(BareInterval, s::AbstractString)
+    parse(T<:BareInterval, str)
+    parse(T<:Interval, str)
 
 Create an interval according to the IEEE Standard 1788-2015. In contrast with
 constructors that do not use strings, this constructor guarantees that the
 returned interval tightly encloses the values described by the string, including
 numbers that have no exact float representation (e.g. 0.1).
+
+Parse a string of the form `"[a, b]_dec"` as an `Interval` with decoration `dec`.
+If the decoration is not specified, it is computed based on the parsed interval.
+If the input is an invalid string, a warning is printed and NaI is returned. The
+parser is case unsensitive.
 
 Examples of allowed string formats:
 - `I"[1.33]"` or `I"1.33"`: the interval containing ``1.33``.
@@ -47,11 +55,9 @@ Examples of allowed string formats:
 For more details, see sections 9.7 and 12.11 of the IEEE Standard 1788-2015.
 
 # Examples
+
 ```jldoctest
 julia> setdisplay(:full);
-
-julia> parse(BareInterval{Float64}, "[1, 2]")
-BareInterval{Float64}(1.0, 2.0)
 
 julia> parse(BareInterval{Float64}, "[1, 2]")
 BareInterval{Float64}(1.0, 2.0)
@@ -64,151 +70,135 @@ BareInterval{Float64}(-Inf, Inf)
 
 julia> parse(BareInterval{Float64}, "6.42?2e2")
 BareInterval{Float64}(640.0, 644.0)
-```
-"""
-function parse(::Type{BareInterval{T}}, str::AbstractString) where {T<:NumTypes}
-    str = lowercase(strip(str))
-    try
-        ival, _ = _parse(BareInterval{T}, str)
-        return ival
-    catch e
-        if e isa ArgumentError
-            @warn "invalid input, empty bare interval is returned"
-            return emptyinterval(BareInterval{T})
-        else
-            rethrow(e)
-        end
-    end
-end
-
-"""
-    parse(Interval, s::AbstractString)
-
-Parse a string of the form `"[a, b]_dec"` as an `Interval` with decoration `dec`.
-If the decoration is not specified, it is computed based on the parsed interval.
-If the input is an invalid string, a warning is printed and NaI is returned. The parser is
-case unsensitive.
-
-# Examples
-```jldoctest
-julia> setdisplay(:full);
 
 julia> parse(Interval{Float64}, "[1, 2]")
 Interval{Float64}(1.0, 2.0, com)
 
 julia> parse(Interval{Float64}, "[1, 2]_def")
 Interval{Float64}(1.0, 2.0, def)
+
+julia> parse(Interval{Float64}, "[1, 1e400]_com")
+Interval{Float64}(1.0, Inf, dac)
 ```
 """
-function parse(::Type{Interval{T}}, s::AbstractString) where {T<:NumTypes}
-    s = lowercase(strip(s))
-    s == "[nai]" && return nai(T)
-    try
-        if '_' ∉ s
-            ival, _ = _parse(BareInterval{T}, s)
-            return interval(T, ival)
-        end
+function Base.parse(::Type{BareInterval{T}}, str::AbstractString) where {T<:NumTypes}
+    if '_' ∈ str
+        @warn "failed to parse a decorated interval as a `BareInterval`, empty interval is returned"
+        return emptyinterval(BareInterval{T})
+    else
+        str = lowercase(strip(str))
+        x, _, isexactnai, iserror = _parse(T, str) # `isexactnai == true` for string of the form [ nai ]
+        iserror && @warn "parsing error, empty interval is returned"
+        isexactnai && @warn "parsed NaI, empty interval is returned"
+        return x.bareinterval # use `x.bareinterval` to not print a warning if `x` is an NaI
+    end
+end
 
-        decorations = Dict{String,Decoration}(
-            "ill" => ill,
-            "trv" => trv,
-            "def" => def,
-            "dac" => dac,
-            "com" => com)
-
-        interval_string, dec = split(s, "_")
-
-        ival, isnotcom = _parse(BareInterval{T}, interval_string)
-        dec_calc = decoration(ival)
-
-        haskey(decorations, dec) || return throw(ArgumentError("invalid decoration $dec"))
-        dec_given = decorations[dec]
-
-        #=
-            If I try to give a decoration that is too high, e.g. [1, Inf]_com, then it
-            should error and return NaI. Exception to this is if the interval would be com
-            but becomes dac because of finite precision, e.g. "[1e403]_com" when parse to
-            Interval{Float64} is allowed to become [prevfloat(Inf), Inf]_dac without erroring.
-            The isnotcom flag returned by _parse is used to track if the interval was originally
-            smaller than com or became dac because of overflow.
-        =#
-        dec_given > dec_calc && isnotcom && return throw(ArgumentError("invalid decoration $dec for $ival"))
-
-        return interval(T, ival, min(dec_given, dec_calc))
-    catch e
-        if e isa ArgumentError
-            @warn "invalid input, NaI is returned"
-            return nai(T)
+function Base.parse(::Type{Interval{T}}, str::AbstractString) where {T<:NumTypes}
+    str = lowercase(strip(str))
+    if '_' ∉ str
+        x, _, _, iserror = _parse(T, str)
+        iserror && @warn "parsing error, NaI is returned"
+        return x
+    else
+        bx_str, d_str = split(str, '_'; keepempty = true, limit = 2)
+        decorations = Dict{String,Decoration}("ill" => ill, "trv" => trv, "def" => def, "dac" => dac, "com" => com)
+        if haskey(decorations, d_str)
+            d_given = decorations[d_str]
+            x, flag, _, iserror = _parse(T, bx_str) # `flag == true` if the parse interval is unbounded due to the precision
+            if iserror
+                @warn "parsing error, NaI is returned"
+                return x
+            else
+                d = decoration(x)
+                if d_given > d && flag
+                    @warn "parsed interval $x is incompatible with parsed decoration $d_given, NaI is returned"
+                    return nai(T)
+                else
+                    return interval(T, x, d_given) # warning is printed if `d_given == ill`
+                end
+            end
         else
-            rethrow(e)
+            @warn "failed to parse the decoration, NaI is returned"
+            return nai(T)
         end
     end
 end
 
-"""
-    _parse(::Type{Interval{T}}, s::AbstractString) where T
-
-Try to parse the string `s` to an interval of type `Interval{T}` and throws an argument
-error if an invalid string is given.
-
-### Output
-
-- the parsed interval
-- a flag `isnotcom`, which is set to true if the input interval is not `com` and to false
-  otherwise. This is used to distinguish the case when an interval is supposed to be
-  unbounded (e.g. input `"[3, infinity]"`) or becomes unbounded because of overflow
-  (e.g. the input `"[3, 1e400]", which is parse to `[3, ∞]` when using `Float64`).
-"""
-function _parse(::Type{BareInterval{T}}, s::AbstractString) where {T<:NumTypes}
-    isnotcom = occursin("inf", s)
-    if startswith(s, '[') && endswith(s, ']') # parse as interval
-        s = strip(s[2:end-1])
-        if ',' in s # inf-sup interval
-            lo, hi = strip.(split(s, ','))
-            isempty(lo) && (lo = "-inf"; isnotcom = true)
-            isempty(hi) && (hi = "inf"; isnotcom = true)
-            lo = _parse_num(T, lo, RoundDown)
-            hi = _parse_num(T, hi, RoundUp)
+function _parse(::Type{T}, str::AbstractString) where {T<:NumTypes}
+    if startswith(str, '[') && endswith(str, ']')
+        s = strip(view(str, 2:length(str)-1))
+        if ',' ∈ s # inf-sup interval
+            lo_str, hi_str = strip.(split(s, ','; keepempty = true, limit = 2))
+            if isempty(lo_str)
+                lo_str = "-inf"
+            end
+            if isempty(hi_str)
+                hi_str = "inf"
+            end
+            try
+                lo = _parse_num(T, lo_str, RoundDown)
+                hi = _parse_num(T, hi_str, RoundUp)
+                flag = !((isinf(lo) & !occursin("inf", lo_str)) | (isinf(hi) & !occursin("inf", hi_str)))
+                x = interval(T, lo, hi)
+                isatomic(x) & !isempty_interval(x) & !isthin(x) && @warn "$str is parsed as an atomic interval, something wrong may have happened"
+                return x, flag, false, false
+            catch
+                return nai(T), false, false, true
+            end
         else # point interval
-
-            (s == "empty" || isempty(s)) && return emptyinterval(BareInterval{T}), true
-            s == "entire" && return entireinterval(BareInterval{T}), true
-            lo = _parse_num(T, s, RoundDown)
-            hi = _parse_num(T, s, RoundUp)
+            s == "nai" && return nai(T), true, true, false # no warning is printed
+            (s == "empty") | isempty(s) && return emptyinterval(T), true, false, false # no warning is printed
+            s == "entire" && return entireinterval(T), true, false, false # no warning is printed
+            try
+                lo = _parse_num(T, s, RoundDown)
+                hi = _parse_num(T, s, RoundUp)
+                flag = !((isinf(lo) & !occursin("inf", s)) | (isinf(hi) & !occursin("inf", s)))
+                return interval(T, lo, hi), flag, false, false
+            catch
+                return nai(T), false, false, true
+            end
         end
-    elseif '?' in s # uncertainty interval
-        if occursin("??", s) # unbounded interval
-            isnotcom = true
-            m, _ = split(s, "??")
-            if 'u' in s # interval in the form [m, Inf]
-                lo = parse(T, m, RoundDown)
-                hi = typemax(T)
-            elseif 'd' in s # interval in the form [-Inf, m]
-                lo = typemin(T)
-                hi = parse(T, m, RoundUp)
-            else
-                return entireinterval(BareInterval{T}), true
+    elseif '?' ∈ str # uncertainty interval
+        if occursin("??", str) # unbounded interval
+            m, vde = split(str, "??"; keepempty = true, limit = 2)
+            if vde == "d" # [-inf, m]
+                lo_str = "-inf"
+                hi_str = m
+            elseif vde == "u" # [m, inf]
+                lo_str = m
+                hi_str = "inf"
+            elseif isempty(vde) # [-inf, inf]
+                return entireinterval(T), true, false, false # no warning is printed
+            end
+            try
+                lo = _parse_num(T, lo_str, RoundDown)
+                hi = _parse_num(T, hi_str, RoundUp)
+                flag = !((isinf(lo) & !occursin("inf", lo_str)) | (isinf(hi) & !occursin("inf", hi_str)))
+                return interval(T, lo, hi), flag, false, false
+            catch
+                return nai(T), false, false, true
             end
         else
-            m , vde = split(s, '?')
+            m, vde = split(str, '?'; keepempty = true, limit = 2)
 
             # ulp computation
-            if '.' in m # ulp is last decimal position
-                ulp = 1/(big(10.0)^length(split(m, '.')[2]))
+            if '.' ∈ m # ulp is last decimal position
+                ulp = inv(big(10.0) ^ length(split(m, '.')[2]))
             else # no decimal, hence ulp is unit
                 ulp = big(1.0)
             end
             m = parse(BigFloat, m)
 
-            if 'e' in vde
+            if 'e' ∈ vde
                 vd, e = split(vde, 'e')
-                e = big(10.0) ^ parse(Int, e)
+                e = big(10.0) ^ parse(BigInt, e)
             else
                 vd = vde
                 e = big(1.0)
             end
 
-            if 'u' in vd || 'd' in vd
+            if 'u' ∈ vd || 'd' ∈ vd
                 d = last(vd)
                 v = vd[1:end-1]
             else
@@ -227,18 +217,30 @@ function _parse(::Type{BareInterval{T}}, s::AbstractString) where {T<:NumTypes}
                 lo = T((m - v * ulp) * e, RoundDown)
                 hi = T((m + v * ulp) * e, RoundUp)
             end
+
+            flag = !(isinf(lo) | isinf(hi))
+            return interval(T, lo, hi), flag, false, false
         end
     else # number
-        lo = _parse_num(T, s, RoundDown)
-        hi = _parse_num(T, s, RoundUp)
+        try
+            lo = _parse_num(T, str, RoundDown)
+            hi = _parse_num(T, str, RoundUp)
+            flag = !((isinf(lo) & !occursin("inf", str)) | (isinf(hi) & !occursin("inf", str)))
+            return interval(T, lo, hi), flag, false, false
+        catch
+            return nai(T), false, false, true
+        end
     end
-    is_valid_interval(lo, hi) && return _unsafe_bareinterval(T, lo, hi), isnotcom
-    return throw(ArgumentError("input $s can not be parsed as an interval."))
 end
 
-"""
-Same as `parse(T, s, rounding_mode)`, but also accept string representing rational numbers.
-"""
+function _parse_num(::Type{T}, str::AbstractString, rounding_mode::RoundingMode) where {T<:AbstractFloat}
+    if '/' ∈ str
+        num, denum = parse.(BigInt, split(str, '/'; keepempty = false))
+        return T(num//denum, rounding_mode)
+    end
+    return T(parse(BigFloat, str), rounding_mode)
+end
+
 function _parse_num(::Type{T}, str::AbstractString, ::RoundingMode{:Down}) where {S<:Integer,T<:Rational{S}}
     '/' ∈ str && return parse(T, str)
     x = parse(BigFloat, str)
@@ -247,6 +249,7 @@ function _parse_num(::Type{T}, str::AbstractString, ::RoundingMode{:Down}) where
     z < x && return z
     return rationalize(S, prevfloat(y))
 end
+
 function _parse_num(::Type{T}, str::AbstractString, ::RoundingMode{:Up}) where {S<:Integer,T<:Rational{S}}
     '/' ∈ str && return parse(T, str)
     x = parse(BigFloat, str)
@@ -254,11 +257,4 @@ function _parse_num(::Type{T}, str::AbstractString, ::RoundingMode{:Up}) where {
     z = rationalize(S, y)
     z > x && return z
     return rationalize(S, nextfloat(y))
-end
-function _parse_num(::Type{T}, str::AbstractString, rounding_mode::RoundingMode) where {T<:AbstractFloat}
-    if '/' ∈ str
-        num, denum = parse.(BigInt, split(str, '/'; keepempty = false))
-        return T(num//denum, rounding_mode)
-    end
-    return T(parse(BigFloat, str), rounding_mode)
 end

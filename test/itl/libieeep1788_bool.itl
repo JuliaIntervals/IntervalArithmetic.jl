@@ -1,0 +1,531 @@
+/*
+
+Unit tests from libieeep1788 for interval boolean operations
+(Original author: Marco Nehmeier)
+converted into portable ITL format by Oliver Heimlich.
+
+Copyright 2013-2015 Marco Nehmeier (nehmeier@informatik.uni-wuerzburg.de)
+Copyright 2015-2017 Oliver Heimlich (oheim@posteo.de)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+*/
+
+testcase minimal_is_empty_test {
+    isEmpty [empty] = true;
+    isEmpty [-infinity,+infinity] = false;
+    isEmpty [1.0,2.0] = false;
+    isEmpty [-1.0,2.0] = false;
+    isEmpty [-3.0,-2.0] = false;
+    isEmpty [-infinity,2.0] = false;
+    isEmpty [-infinity,0.0] = false;
+    isEmpty [-infinity,-0.0] = false;
+    isEmpty [0.0,infinity] = false;
+    isEmpty [-0.0,infinity] = false;
+    isEmpty [-0.0,0.0] = false;
+    isEmpty [0.0,-0.0] = false;
+    isEmpty [0.0,0.0] = false;
+    isEmpty [-0.0,-0.0] = false;
+}
+
+testcase minimal_is_empty_dec_test {
+    isEmpty [nai] = false;
+    isEmpty [empty]_trv = true;
+    isEmpty [-infinity,+infinity]_def = false;
+    isEmpty [1.0,2.0]_com = false;
+    isEmpty [-1.0,2.0]_trv = false;
+    isEmpty [-3.0,-2.0]_dac = false;
+    isEmpty [-infinity,2.0]_trv = false;
+    isEmpty [-infinity,0.0]_trv = false;
+    isEmpty [-infinity,-0.0]_trv = false;
+    isEmpty [0.0,infinity]_def = false;
+    isEmpty [-0.0,infinity]_trv = false;
+    isEmpty [-0.0,0.0]_com = false;
+    isEmpty [0.0,-0.0]_trv = false;
+    isEmpty [0.0,0.0]_trv = false;
+    isEmpty [-0.0,-0.0]_trv = false;
+}
+
+testcase minimal_is_entire_test {
+    isEntire [empty] = false;
+    isEntire [-infinity,+infinity] = true;
+    isEntire [1.0,2.0] = false;
+    isEntire [-1.0,2.0] = false;
+    isEntire [-3.0,-2.0] = false;
+    isEntire [-infinity,2.0] = false;
+    isEntire [-infinity,0.0] = false;
+    isEntire [-infinity,-0.0] = false;
+    isEntire [0.0,infinity] = false;
+    isEntire [-0.0,infinity] = false;
+    isEntire [-0.0,0.0] = false;
+    isEntire [0.0,-0.0] = false;
+    isEntire [0.0,0.0] = false;
+    isEntire [-0.0,-0.0] = false;
+}
+
+testcase minimal_is_entire_dec_test {
+    isEntire [nai] = false;
+    isEntire [empty]_trv = false;
+    isEntire [-infinity,+infinity]_trv = true;
+    isEntire [-infinity,+infinity]_def = true;
+    isEntire [-infinity,+infinity]_dac = true;
+    isEntire [1.0,2.0]_com = false;
+    isEntire [-1.0,2.0]_trv = false;
+    isEntire [-3.0,-2.0]_dac = false;
+    isEntire [-infinity,2.0]_trv = false;
+    isEntire [-infinity,0.0]_trv = false;
+    isEntire [-infinity,-0.0]_trv = false;
+    isEntire [0.0,infinity]_def = false;
+    isEntire [-0.0,infinity]_trv = false;
+    isEntire [-0.0,0.0]_com = false;
+    isEntire [0.0,-0.0]_trv = false;
+    isEntire [0.0,0.0]_trv = false;
+    isEntire [-0.0,-0.0]_trv = false;
+}
+
+testcase minimal_is_nai_dec_test {
+    isNaI [nai] = true;
+    isNaI [-infinity,+infinity]_trv = false;
+    isNaI [-infinity,+infinity]_def = false;
+    isNaI [-infinity,+infinity]_dac = false;
+    isNaI [1.0,2.0]_com = false;
+    isNaI [-1.0,2.0]_trv = false;
+    isNaI [-3.0,-2.0]_dac = false;
+    isNaI [-infinity,2.0]_trv = false;
+    isNaI [-infinity,0.0]_trv = false;
+    isNaI [-infinity,-0.0]_trv = false;
+    isNaI [0.0,infinity]_def = false;
+    isNaI [-0.0,infinity]_trv = false;
+    isNaI [-0.0,0.0]_com = false;
+    isNaI [0.0,-0.0]_trv = false;
+    isNaI [0.0,0.0]_trv = false;
+    isNaI [-0.0,-0.0]_trv = false;
+}
+
+testcase minimal_equal_test {
+    equal [1.0,2.0] [1.0,2.0] = true;
+    equal [1.0,2.1] [1.0,2.0] = false;
+    equal [empty] [empty] = true;
+    equal [empty] [1.0,2.0] = false;
+    equal [-infinity,+infinity] [-infinity,+infinity] = true;
+    equal [1.0,2.4] [-infinity,+infinity] = false;
+    equal [1.0,infinity] [1.0,infinity] = true;
+    equal [1.0,2.4] [1.0,infinity] = false;
+    equal [-infinity,2.0] [-infinity,2.0] = true;
+    equal [-infinity,2.4] [-infinity,2.0] = false;
+    equal [-2.0,0.0] [-2.0,0.0] = true;
+    equal [-0.0,2.0] [0.0,2.0] = true;
+    equal [-0.0,-0.0] [0.0,0.0] = true;
+    equal [-0.0,0.0] [0.0,0.0] = true;
+    equal [0.0,-0.0] [0.0,0.0] = true;
+}
+
+testcase minimal_equal_dec_test {
+    equal [1.0,2.0]_def [1.0,2.0]_trv = true;
+    equal [1.0,2.1]_trv [1.0,2.0]_trv = false;
+    equal [empty]_trv [empty]_trv = true;
+    equal [empty]_trv [nai] = false;
+    equal [nai] [empty]_trv = false;
+    equal [nai] [nai] = false;
+    equal [empty]_trv [1.0,2.0]_trv = false;
+    equal [nai] [1.0,2.0]_trv = false;
+    equal [-infinity,+infinity]_def [-infinity,+infinity]_trv = true;
+    equal [1.0,2.4]_trv [-infinity,+infinity]_trv = false;
+    equal [1.0,infinity]_trv [1.0,infinity]_trv = true;
+    equal [1.0,2.4]_def [1.0,infinity]_trv = false;
+    equal [-infinity,2.0]_trv [-infinity,2.0]_trv = true;
+    equal [-infinity,2.4]_def [-infinity,2.0]_trv = false;
+    equal [-2.0,0.0]_trv [-2.0,0.0]_trv = true;
+    equal [-0.0,2.0]_def [0.0,2.0]_trv = true;
+    equal [-0.0,-0.0]_trv [0.0,0.0]_trv = true;
+    equal [-0.0,0.0]_def [0.0,0.0]_trv = true;
+    equal [0.0,-0.0]_trv [0.0,0.0]_trv = true;
+}
+
+testcase minimal_subset_test {
+    subset [empty] [empty] = true;
+    subset [empty] [0.0,4.0] = true;
+    subset [empty] [-0.0,4.0] = true;
+    subset [empty] [-0.1,1.0] = true;
+    subset [empty] [-0.1,0.0] = true;
+    subset [empty] [-0.1,-0.0] = true;
+    subset [empty] [-infinity,+infinity] = true;
+
+    subset [0.0,4.0] [empty] = false;
+    subset [-0.0,4.0] [empty] = false;
+    subset [-0.1,1.0] [empty] = false;
+    subset [-infinity,+infinity] [empty] = false;
+
+    subset [0.0,4.0] [-infinity,+infinity] = true;
+    subset [-0.0,4.0] [-infinity,+infinity] = true;
+    subset [-0.1,1.0] [-infinity,+infinity] = true;
+    subset [-infinity,+infinity] [-infinity,+infinity] = true;
+
+    subset [1.0,2.0] [1.0,2.0] = true;
+    subset [1.0,2.0] [0.0,4.0] = true;
+    subset [1.0,2.0] [-0.0,4.0] = true;
+    subset [0.1,0.2] [0.0,4.0] = true;
+    subset [0.1,0.2] [-0.0,4.0] = true;
+    subset [-0.1,-0.1] [-4.0, 3.4] = true;
+
+    subset [0.0,0.0] [-0.0,-0.0] = true;
+    subset [-0.0,-0.0] [0.0,0.0] = true;
+    subset [-0.0,0.0] [0.0,0.0] = true;
+    subset [-0.0,0.0] [0.0,-0.0] = true;
+    subset [0.0,-0.0] [0.0,0.0] = true;
+    subset [0.0,-0.0] [-0.0,0.0] = true;
+}
+
+testcase minimal_subset_dec_test {
+    subset [nai] [nai] = false;
+    subset [nai] [empty]_trv = false;
+    subset [nai] [0.0,4.0]_trv = false;
+
+    subset [empty]_trv [0.0,4.0]_trv = true;
+    subset [empty]_trv [-0.0,4.0]_def = true;
+    subset [empty]_trv [-0.1,1.0]_trv = true;
+    subset [empty]_trv [-0.1,0.0]_trv = true;
+    subset [empty]_trv [-0.1,-0.0]_trv = true;
+    subset [empty]_trv [-infinity,+infinity]_trv = true;
+
+    subset [0.0,4.0]_trv [empty]_trv = false;
+    subset [-0.0,4.0]_def [empty]_trv = false;
+    subset [-0.1,1.0]_trv [empty]_trv = false;
+    subset [-infinity,+infinity]_trv [empty]_trv = false;
+
+    subset [0.0,4.0]_trv [-infinity,+infinity]_trv = true;
+    subset [-0.0,4.0]_trv [-infinity,+infinity]_trv = true;
+    subset [-0.1,1.0]_trv [-infinity,+infinity]_trv = true;
+    subset [-infinity,+infinity]_trv [-infinity,+infinity]_trv = true;
+
+    subset [1.0,2.0]_trv [1.0,2.0]_trv = true;
+    subset [1.0,2.0]_trv [0.0,4.0]_trv = true;
+    subset [1.0,2.0]_def [-0.0,4.0]_def = true;
+    subset [0.1,0.2]_trv [0.0,4.0]_trv = true;
+    subset [0.1,0.2]_trv [-0.0,4.0]_def = true;
+    subset [-0.1,-0.1]_trv [-4.0, 3.4]_trv = true;
+
+    subset [0.0,0.0]_trv [-0.0,-0.0]_trv = true;
+    subset [-0.0,-0.0]_trv [0.0,0.0]_def = true;
+    subset [-0.0,0.0]_trv [0.0,0.0]_trv = true;
+    subset [-0.0,0.0]_trv [0.0,-0.0]_trv = true;
+    subset [0.0,-0.0]_def [0.0,0.0]_trv = true;
+    subset [0.0,-0.0]_trv [-0.0,0.0]_trv = true;
+}
+
+testcase minimal_less_test {
+    less [empty] [empty] = true;
+    less [1.0,2.0] [empty] = false;
+    less [empty] [1.0,2.0] = false;
+
+    less [-infinity,+infinity] [-infinity,+infinity] = true;
+    less [1.0,2.0] [-infinity,+infinity] = false;
+    less [0.0,2.0] [-infinity,+infinity] = false;
+    less [-0.0,2.0] [-infinity,+infinity] = false;
+    less [-infinity,+infinity] [1.0,2.0] = false;
+    less [-infinity,+infinity] [0.0,2.0] = false;
+    less [-infinity,+infinity] [-0.0,2.0] = false;
+
+    less [0.0,2.0] [0.0,2.0] = true;
+    less [0.0,2.0] [-0.0,2.0] = true;
+    less [0.0,2.0] [1.0,2.0] = true;
+    less [-0.0,2.0] [1.0,2.0] = true;
+    less [1.0,2.0] [1.0,2.0] = true;
+    less [1.0,2.0] [3.0,4.0] = true;
+    less [1.0,3.5] [3.0,4.0] = true;
+    less [1.0,4.0] [3.0,4.0] = true;
+
+    less [-2.0,-1.0] [-2.0,-1.0] = true;
+    less [-3.0,-1.5] [-2.0,-1.0] = true;
+
+    less [0.0,0.0] [-0.0,-0.0] = true;
+    less [-0.0,-0.0] [0.0,0.0] = true;
+    less [-0.0,0.0] [0.0,0.0] = true;
+    less [-0.0,0.0] [0.0,-0.0] = true;
+    less [0.0,-0.0] [0.0,0.0] = true;
+    less [0.0,-0.0] [-0.0,0.0] = true;
+}
+
+testcase minimal_less_dec_test {
+    less [nai] [nai] = false;
+    less [empty]_trv [nai] = false;
+    less [1.0,2.0]_trv [nai] = false;
+    less [nai] [1.0,2.0]_def = false;
+
+    less [empty]_trv [empty]_trv = true;
+    less [1.0,2.0]_trv [empty]_trv = false;
+    less [empty]_trv [1.0,2.0]_trv = false;
+
+    less [-infinity,+infinity]_trv [-infinity,+infinity]_trv = true;
+    less [1.0,2.0]_def [-infinity,+infinity]_trv = false;
+    less [0.0,2.0]_trv [-infinity,+infinity]_trv = false;
+    less [-0.0,2.0]_trv [-infinity,+infinity]_trv = false;
+    less [-infinity,+infinity]_trv [1.0,2.0]_trv = false;
+    less [-infinity,+infinity]_trv [0.0,2.0]_def = false;
+    less [-infinity,+infinity]_trv [-0.0,2.0]_trv = false;
+
+    less [0.0,2.0]_trv [0.0,2.0]_trv = true;
+    less [0.0,2.0]_trv [-0.0,2.0]_trv = true;
+    less [0.0,2.0]_def [1.0,2.0]_def = true;
+    less [-0.0,2.0]_trv [1.0,2.0]_trv = true;
+    less [1.0,2.0]_trv [1.0,2.0]_trv = true;
+    less [1.0,2.0]_trv [3.0,4.0]_def = true;
+    less [1.0,3.5]_trv [3.0,4.0]_trv = true;
+    less [1.0,4.0]_trv [3.0,4.0]_trv = true;
+
+    less [-2.0,-1.0]_trv [-2.0,-1.0]_trv = true;
+    less [-3.0,-1.5]_trv [-2.0,-1.0]_trv = true;
+
+    less [0.0,0.0]_trv [-0.0,-0.0]_trv = true;
+    less [-0.0,-0.0]_trv [0.0,0.0]_def = true;
+    less [-0.0,0.0]_trv [0.0,0.0]_trv = true;
+    less [-0.0,0.0]_trv [0.0,-0.0]_trv = true;
+    less [0.0,-0.0]_def [0.0,0.0]_trv = true;
+    less [0.0,-0.0]_trv [-0.0,0.0]_trv = true;
+}
+
+testcase minimal_precedes_test {
+    precedes [empty] [3.0,4.0] = true;
+    precedes [3.0,4.0] [empty] = true;
+    precedes [empty] [empty] = true;
+
+    precedes [1.0,2.0] [-infinity,+infinity] = false;
+    precedes [0.0,2.0] [-infinity,+infinity] = false;
+    precedes [-0.0,2.0] [-infinity,+infinity] = false;
+    precedes [-infinity,+infinity] [1.0,2.0] = false;
+    precedes [-infinity,+infinity] [-infinity,+infinity] = false;
+
+    precedes [1.0,2.0] [3.0,4.0] = true;
+    precedes [1.0,3.0] [3.0,4.0] = true;
+    precedes [-3.0, -1.0] [-1.0,0.0] = true;
+    precedes [-3.0, -1.0] [-1.0,-0.0] = true;
+
+    precedes [1.0,3.5] [3.0,4.0] = false;
+    precedes [1.0,4.0] [3.0,4.0] = false;
+    precedes [-3.0, -0.1] [-1.0,0.0] = false;
+
+    precedes [0.0,0.0] [-0.0,-0.0] = true;
+    precedes [-0.0,-0.0] [0.0,0.0] = true;
+    precedes [-0.0,0.0] [0.0,0.0] = true;
+    precedes [-0.0,0.0] [0.0,-0.0] = true;
+    precedes [0.0,-0.0] [0.0,0.0] = true;
+    precedes [0.0,-0.0] [-0.0,0.0] = true;
+}
+
+testcase minimal_precedes_dec_test {
+    precedes [nai] [3.0,4.0]_def = false;
+    precedes [3.0,4.0]_trv [nai] = false;
+    precedes [nai] [empty]_trv = false;
+    precedes [nai] [nai] = false;
+
+    precedes [empty]_trv [3.0,4.0]_def = true;
+    precedes [3.0,4.0]_trv [empty]_trv = true;
+    precedes [empty]_trv [empty]_trv = true;
+
+    precedes [1.0,2.0]_trv [-infinity,+infinity]_trv = false;
+    precedes [0.0,2.0]_trv [-infinity,+infinity]_trv = false;
+    precedes [-0.0,2.0]_trv [-infinity,+infinity]_trv = false;
+    precedes [-infinity,+infinity]_trv [1.0,2.0]_trv = false;
+    precedes [-infinity,+infinity]_trv [-infinity,+infinity]_trv = false;
+
+    precedes [1.0,2.0]_trv [3.0,4.0]_trv = true;
+    precedes [1.0,3.0]_trv [3.0,4.0]_def = true;
+    precedes [-3.0, -1.0]_def [-1.0,0.0]_trv = true;
+    precedes [-3.0, -1.0]_trv [-1.0,-0.0]_trv = true;
+
+    precedes [1.0,3.5]_trv [3.0,4.0]_trv = false;
+    precedes [1.0,4.0]_trv [3.0,4.0]_trv = false;
+    precedes [-3.0, -0.1]_trv [-1.0,0.0]_trv = false;
+
+    precedes [0.0,0.0]_trv [-0.0,-0.0]_trv = true;
+    precedes [-0.0,-0.0]_trv [0.0,0.0]_def = true;
+    precedes [-0.0,0.0]_trv [0.0,0.0]_trv = true;
+    precedes [-0.0,0.0]_def [0.0,-0.0]_trv = true;
+    precedes [0.0,-0.0]_trv [0.0,0.0]_trv = true;
+    precedes [0.0,-0.0]_trv [-0.0,0.0]_trv = true;
+}
+
+testcase minimal_interior_test {
+    interior [empty] [empty] = true;
+    interior [empty] [0.0,4.0] = true;
+    interior [0.0,4.0] [empty] = false;
+
+    interior [-infinity,+infinity] [-infinity,+infinity] = true;
+    interior [0.0,4.0] [-infinity,+infinity] = true;
+    interior [empty] [-infinity,+infinity] = true;
+    interior [-infinity,+infinity] [0.0,4.0] = false;
+
+    interior [0.0,4.0] [0.0,4.0] = false;
+    interior [1.0,2.0] [0.0,4.0] = true;
+    interior [-2.0,2.0] [-2.0,4.0] = false;
+    interior [-0.0,-0.0] [-2.0,4.0] = true;
+    interior [0.0,0.0] [-2.0,4.0] = true;
+    interior [0.0,0.0] [-0.0,-0.0] = false;
+
+    interior [0.0,4.4] [0.0,4.0] = false;
+    interior [-1.0,-1.0] [0.0,4.0] = false;
+    interior [2.0,2.0] [-2.0,-1.0] = false;
+}
+
+testcase minimal_interior_dec_test {
+    interior [nai] [nai] = false;
+    interior [nai] [empty]_trv = false;
+    interior [nai] [0.0,4.0]_trv = false;
+    interior [0.0,4.0]_def [nai] = false;
+
+    interior [empty]_trv [empty]_trv = true;
+    interior [empty]_trv [0.0,4.0]_trv = true;
+    interior [0.0,4.0]_def [empty]_trv = false;
+
+    interior [-infinity,+infinity]_trv [-infinity,+infinity]_trv = true;
+    interior [0.0,4.0]_trv [-infinity,+infinity]_trv = true;
+    interior [empty]_trv [-infinity,+infinity]_trv = true;
+    interior [-infinity,+infinity]_trv [0.0,4.0]_trv = false;
+
+    interior [0.0,4.0]_trv [0.0,4.0]_trv = false;
+    interior [1.0,2.0]_def [0.0,4.0]_trv = true;
+    interior [-2.0,2.0]_trv [-2.0,4.0]_def = false;
+    interior [-0.0,-0.0]_trv [-2.0,4.0]_trv = true;
+    interior [0.0,0.0]_def [-2.0,4.0]_trv = true;
+    interior [0.0,0.0]_trv [-0.0,-0.0]_trv = false;
+
+    interior [0.0,4.4]_trv [0.0,4.0]_trv = false;
+    interior [-1.0,-1.0]_trv [0.0,4.0]_def = false;
+    interior [2.0,2.0]_def [-2.0,-1.0]_trv = false;
+}
+
+testcase minimal_strictly_less_test {
+    strictLess [empty] [empty] = true;
+    strictLess [1.0,2.0] [empty] = false;
+    strictLess [empty] [1.0,2.0] = false;
+
+    strictLess [-infinity,+infinity] [-infinity,+infinity] = true;
+    strictLess [1.0,2.0] [-infinity,+infinity] = false;
+    strictLess [-infinity,+infinity] [1.0,2.0] = false;
+
+    strictLess [1.0,2.0] [1.0,2.0] = false;
+    strictLess [1.0,2.0] [3.0,4.0] = true;
+    strictLess [1.0,3.5] [3.0,4.0] = true;
+    strictLess [1.0,4.0] [3.0,4.0] = false;
+    strictLess [0.0,4.0] [0.0,4.0] = false;
+    strictLess [-0.0,4.0] [0.0,4.0] = false;
+
+    strictLess [-2.0,-1.0] [-2.0,-1.0] = false;
+    strictLess [-3.0,-1.5] [-2.0,-1.0] = true;
+}
+
+testcase minimal_strictly_less_dec_test {
+    strictLess [nai] [nai] = false;
+    strictLess [empty]_trv [nai] = false;
+    strictLess [1.0,2.0]_trv [nai] = false;
+    strictLess [nai] [1.0,2.0]_def = false;
+
+    strictLess [empty]_trv [empty]_trv = true;
+    strictLess [1.0,2.0]_trv [empty]_trv = false;
+    strictLess [empty]_trv [1.0,2.0]_def = false;
+
+    strictLess [-infinity,+infinity]_trv [-infinity,+infinity]_trv = true;
+    strictLess [1.0,2.0]_trv [-infinity,+infinity]_trv = false;
+    strictLess [-infinity,+infinity]_trv [1.0,2.0]_trv = false;
+
+    strictLess [1.0,2.0]_trv [1.0,2.0]_trv = false;
+    strictLess [1.0,2.0]_trv [3.0,4.0]_trv = true;
+    strictLess [1.0,3.5]_def [3.0,4.0]_trv = true;
+    strictLess [1.0,4.0]_trv [3.0,4.0]_def = false;
+    strictLess [0.0,4.0]_trv [0.0,4.0]_def = false;
+    strictLess [-0.0,4.0]_def [0.0,4.0]_trv = false;
+
+    strictLess [-2.0,-1.0]_def [-2.0,-1.0]_def = false;
+    strictLess [-3.0,-1.5]_trv [-2.0,-1.0]_trv = true;
+}
+
+testcase minimal_strictly_precedes_test {
+    strictPrecedes [empty] [3.0,4.0] = true;
+    strictPrecedes [3.0,4.0] [empty] = true;
+    strictPrecedes [empty] [empty] = true;
+
+
+    strictPrecedes [1.0,2.0] [-infinity,+infinity] = false;
+    strictPrecedes [-infinity,+infinity] [1.0,2.0] = false;
+    strictPrecedes [-infinity,+infinity] [-infinity,+infinity] = false;
+
+    strictPrecedes [1.0,2.0] [3.0,4.0] = true;
+    strictPrecedes [1.0,3.0] [3.0,4.0] = false;
+    strictPrecedes [-3.0,-1.0] [-1.0,0.0] = false;
+    strictPrecedes [-3.0,-0.0] [0.0,1.0] = false;
+    strictPrecedes [-3.0,0.0] [-0.0,1.0] = false;
+
+    strictPrecedes [1.0,3.5] [3.0,4.0] = false;
+    strictPrecedes [1.0,4.0] [3.0,4.0] = false;
+    strictPrecedes [-3.0,-0.1] [-1.0,0.0] = false;
+}
+
+testcase minimal_strictly_precedes_dec_test {
+    strictPrecedes [nai] [3.0,4.0]_trv = false;
+    strictPrecedes [3.0,4.0]_def [nai] = false;
+    strictPrecedes [nai] [empty]_trv = false;
+    strictPrecedes [nai] [nai] = false;
+
+    strictPrecedes [empty]_trv [3.0,4.0]_trv = true;
+    strictPrecedes [3.0,4.0]_def [empty]_trv = true;
+    strictPrecedes [empty]_trv [empty]_trv = true;
+
+    strictPrecedes [1.0,2.0]_trv [-infinity,+infinity]_trv = false;
+    strictPrecedes [-infinity,+infinity]_trv [1.0,2.0]_trv = false;
+    strictPrecedes [-infinity,+infinity]_trv [-infinity,+infinity]_trv = false;
+
+    strictPrecedes [1.0,2.0]_trv [3.0,4.0]_trv = true;
+    strictPrecedes [1.0,3.0]_def [3.0,4.0]_trv = false;
+    strictPrecedes [-3.0,-1.0]_trv [-1.0,0.0]_def = false;
+    strictPrecedes [-3.0,-0.0]_def [0.0,1.0]_trv = false;
+    strictPrecedes [-3.0,0.0]_trv [-0.0,1.0]_trv = false;
+
+    strictPrecedes [1.0,3.5]_trv [3.0,4.0]_trv = false;
+    strictPrecedes [1.0,4.0]_trv [3.0,4.0]_def = false;
+    strictPrecedes [-3.0,-0.1]_trv [-1.0,0.0]_trv = false;
+}
+
+testcase minimal_disjoint_test {
+    disjoint [empty] [3.0,4.0] = true;
+    disjoint [3.0,4.0] [empty] = true;
+    disjoint [empty] [empty] = true;
+
+    disjoint [3.0,4.0] [1.0,2.0] = true;
+
+    disjoint [0.0,0.0] [-0.0,-0.0] = false;
+    disjoint [0.0,-0.0] [-0.0,0.0] = false;
+    disjoint [3.0,4.0] [1.0,7.0] = false;
+    disjoint [3.0,4.0] [-infinity,+infinity] = false;
+    disjoint [-infinity,+infinity] [1.0,7.0] = false;
+    disjoint [-infinity,+infinity] [-infinity,+infinity] = false;
+}
+
+testcase minimal_disjoint_dec_test {
+    disjoint [nai] [3.0,4.0]_def = false;
+    disjoint [3.0,4.0]_trv [nai] = false;
+    disjoint [empty]_trv [nai] = false;
+    disjoint [nai] [nai] = false;
+
+    disjoint [empty]_trv [3.0,4.0]_def = true;
+    disjoint [3.0,4.0]_trv [empty]_trv = true;
+    disjoint [empty]_trv [empty]_trv = true;
+
+    disjoint [3.0,4.0]_trv [1.0,2.0]_def = true;
+
+    disjoint [0.0,0.0]_trv [-0.0,-0.0]_trv = false;
+    disjoint [0.0,-0.0]_trv [-0.0,0.0]_trv = false;
+    disjoint [3.0,4.0]_def [1.0,7.0]_def = false;
+    disjoint [3.0,4.0]_trv [-infinity,+infinity]_trv = false;
+    disjoint [-infinity,+infinity]_trv [1.0,7.0]_trv = false;
+    disjoint [-infinity,+infinity]_trv [-infinity,+infinity]_trv = false;
+}

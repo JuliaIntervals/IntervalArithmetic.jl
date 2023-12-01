@@ -1,7 +1,7 @@
 mutable struct DisplayParameters
-    format :: Symbol
+    format      :: Symbol
     decorations :: Bool
-    sigdigits :: Int
+    sigdigits   :: Int
 end
 
 function Base.show(io::IO, ::MIME"text/plain", params::DisplayParameters)
@@ -15,35 +15,31 @@ function Base.show(io::IO, ::MIME"text/plain", params::DisplayParameters)
     end
 end
 
-const display_params = DisplayParameters(:standard, true, 6) # default
+const display_params = DisplayParameters(:infsup, true, 6) # default
 
 """
     setdisplay(format::Symbol; decorations::Bool, sigdigits::Int)
-    setdisplay()
 
 Change the format used by `show` to display intervals.
 
-Initially, the display options are `format = :standard`, `decorations = false`
-and `sigdigits = 6`.
-
-If any of the three argument `format`, `decorations` and `sigdigits` is omitted,
-then their value is left unchanged.
-
-If the three arguments are omitted, i.e. calling `setdisplay()`, then the values
-are reset to the default display options.
-
 Possible options:
 - `format` can be:
-  - `:standard`: `[1, 2]`.
-  - `:midpoint`: display `x::Interval` in the form "mid(x) ± radius(x)".
-  - `:full`: display the entire bounds regardless of `sigdigits`.
-- `sigdigits`: number (greater or equal to 1) of significant digits to display.
+    - `:infsup`: display intervals as `[a, b]`.
+    - `:midpoint`: display intervals as `m ± r`.
+    - `:full`: display interval bounds entirely, ignoring `sigdigits`.
 - `decorations`: display the decorations or not.
+- `sigdigits`: number (greater or equal to 1) of significant digits to display.
 
-# Example
-```
-julia> x = interval(0.1, 0.3)  # Default display options
-[0.0999999, 0.300001]
+Initially, the display options are set to
+`setdisplay(:infsup; decorations = false, sigdigits = 6)`. If any of the three
+argument `format`, `decorations` and `sigdigits` is omitted, then their value is
+left unchanged.
+
+# Examples
+
+```jldoctest
+julia> x = interval(0.1, 0.3) # default display options
+[0.0999999, 0.300001]_com
 
 julia> setdisplay(:full)
 Display parameters:
@@ -52,12 +48,21 @@ Display parameters:
   - significant digits: 6 (ignored)
 
 julia> x
-Interval(0.09999999999999999, 0.30000000000000004)
+Interval(0.09999999999999999, 0.30000000000000004, com)
 
-julia> setdisplay(:standard; sigdigits = 3)
+julia> setdisplay(:infsup; sigdigits = 3)
 Display parameters:
   - format: standard
   - decorations: true
+  - significant digits: 3
+
+julia> x
+[0.0999, 0.301]_com
+
+julia> setdisplay(; decorations = false)
+Display parameters:
+  - format: standard
+  - decorations: false
   - significant digits: 3
 
 julia> x
@@ -68,8 +73,8 @@ function setdisplay(format::Symbol = display_params.format;
         decorations::Bool = display_params.decorations,
         sigdigits::Int = display_params.sigdigits)
 
-    format ∉ (:standard, :midpoint, :full) && return throw(ArgumentError("`format` must be `:standard`, `:midpoint` or `:full`."))
-    sigdigits < 1 && return throw(ArgumentError("`sigdigits` must be `≥ 1`."))
+    format ∉ (:infsup, :midpoint, :full) && return throw(ArgumentError("`format` must be `:infsup`, `:midpoint` or `:full`"))
+    sigdigits < 1 && return throw(ArgumentError("`sigdigits` must be `≥ 1`"))
 
     display_params.format = format
     display_params.decorations = decorations
@@ -80,10 +85,10 @@ end
 
 # printing mechanism
 
-show(io::IO, ::MIME"text/plain", a::Union{BareInterval,Interval,Complex{<:Interval}}) =
+Base.show(io::IO, ::MIME"text/plain", a::Union{BareInterval,Interval,Complex{<:Interval}}) =
     print(io, _str_repr(a, display_params.format))
 
-function show(io::IO, a::Union{BareInterval,Interval,Complex{<:Interval}})
+function Base.show(io::IO, a::Union{BareInterval,Interval,Complex{<:Interval}})
     get(io, :compact, false) && return print(io, _str_repr(a, display_params.format))
     return print(io, _str_repr(a, :full))
 end
@@ -91,14 +96,14 @@ end
 # `String` representation
 
 function _str_repr(a::BareInterval{T}, format::Symbol) where {T<:NumTypes}
-    # `format` is either `:standard`, `:midpoint` or `:full`
+    # `format` is either `:infsup`, `:midpoint` or `:full`
     str_interval = _str_basic_repr(a, format)
     format === :full && return string("BareInterval{", T, "}(", str_interval, ')')
     return str_interval
 end
 
 function _str_repr(a::BareInterval{BigFloat}, format::Symbol)
-    # `format` is either `:standard`, `:midpoint` or `:full`
+    # `format` is either `:infsup`, `:midpoint` or `:full`
     str_interval = _str_basic_repr(a, format)
     format === :full && return string("BareInterval{BigFloat}(", str_interval, ')')
     if format === :midpoint && str_interval != "∅"
@@ -108,8 +113,8 @@ function _str_repr(a::BareInterval{BigFloat}, format::Symbol)
 end
 
 function _str_repr(a::Interval{T}, format::Symbol) where {T<:NumTypes}
-    # `format` is either `:standard`, `:midpoint` or `:full`
-    str_interval = _str_basic_repr(bareinterval(a), format)
+    # `format` is either `:infsup`, `:midpoint` or `:full`
+    str_interval = _str_basic_repr(a.bareinterval, format) # use `a.bareinterval` to not print a warning if `a` is an NaI
     if isguaranteed(a)
         format === :full && return string("Interval{", T, "}(", str_interval, ", ", decoration(a), ')')
         display_params.decorations || return str_interval
@@ -128,8 +133,8 @@ function _str_repr(a::Interval{T}, format::Symbol) where {T<:NumTypes}
 end
 
 function _str_repr(a::Interval{BigFloat}, format::Symbol)
-    # `format` is either `:standard`, `:midpoint` or `:full`
-    str_interval = _str_basic_repr(bareinterval(a), format)
+    # `format` is either `:infsup`, `:midpoint` or `:full`
+    str_interval = _str_basic_repr(a.bareinterval, format) # use `a.bareinterval` to not print a warning if `a` is an NaI
     if isguaranteed(a)
         format === :full && return string("Interval{BigFloat}(", str_interval, ", ", decoration(a), ')')
         if format === :midpoint && str_interval != "∅"
@@ -148,10 +153,10 @@ function _str_repr(a::Interval{BigFloat}, format::Symbol)
 end
 
 function _str_repr(x::Complex{<:Interval}, format::Symbol)
-    # `format` is either `:standard`, `:midpoint` or `:full`
+    # `format` is either `:infsup`, `:midpoint` or `:full`
     if format === :full
         return string(_str_repr(real(x), format), " + ", _str_repr(imag(x), format), "im")
-    elseif format === :standard
+    elseif format === :infsup
         display_params.decorations && return string(_str_repr(real(x), format), " + (", _str_repr(imag(x), format), ")im")
         return string(_str_repr(real(x), format), " + ", _str_repr(imag(x), format), "im")
     else
@@ -161,7 +166,7 @@ function _str_repr(x::Complex{<:Interval}, format::Symbol)
 end
 
 function _str_repr(x::Complex{Interval{BigFloat}}, format::Symbol)
-    # `format` is either `:standard`, `:midpoint` or `:full`
+    # `format` is either `:infsup`, `:midpoint` or `:full`
     display_params.decorations && return string(_str_repr(real(x), format), " + (", _str_repr(imag(x), format), ")im")
     return string(_str_repr(real(x), format), " + ", _str_repr(imag(x), format), "im")
 end
@@ -169,7 +174,7 @@ end
 #
 
 function _str_basic_repr(a::BareInterval{<:AbstractFloat}, format::Symbol)
-    # `format` is either `:standard`, `:midpoint` or `:full`
+    # `format` is either `:infsup`, `:midpoint` or `:full`
     # do not use `inf(a)` to avoid `-0.0`
     isempty_interval(a) && return "∅"
     sigdigits = display_params.sigdigits
@@ -189,7 +194,7 @@ function _str_basic_repr(a::BareInterval{<:AbstractFloat}, format::Symbol)
 end
 
 function _str_basic_repr(a::BareInterval{Float32}, format::Symbol)
-    # `format` is either `:standard`, `:midpoint` or `:full`
+    # `format` is either `:infsup`, `:midpoint` or `:full`
     # do not use `inf(a)` to avoid `-0.0`
     isempty_interval(a) && return "∅"
     sigdigits = display_params.sigdigits
@@ -231,7 +236,7 @@ function _str_basic_repr(a::BareInterval{Float32}, format::Symbol)
 end
 
 function _str_basic_repr(a::BareInterval{Float16}, format::Symbol)
-    # `format` is either `:standard`, `:midpoint` or `:full`
+    # `format` is either `:infsup`, `:midpoint` or `:full`
     # do not use `inf(a)` to avoid `-0.0`
     isempty_interval(a) && return "∅"
     sigdigits = display_params.sigdigits
@@ -252,7 +257,7 @@ function _str_basic_repr(a::BareInterval{Float16}, format::Symbol)
 end
 
 function _str_basic_repr(a::BareInterval{<:Rational}, format::Symbol)
-    # `format` is either `:standard`, `:midpoint` or `:full`
+    # `format` is either `:infsup`, `:midpoint` or `:full`
     # do not use `inf(a)` to avoid `-0.0`
     isempty_interval(a) && return "∅"
     format === :full && return string(a.lo, ", ", sup(a))

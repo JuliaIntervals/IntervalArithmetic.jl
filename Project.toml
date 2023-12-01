@@ -5,16 +5,21 @@ version = "0.21.2"
 
 [deps]
 CRlibm = "96374032-68de-5a5b-8d9e-752f78720389"
-EnumX = "4e289a0a-7415-4d19-859d-a7e5c4648b56"
 FastRounding = "fa42c844-2597-5d31-933b-ebd51ab2693f"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 RoundingEmulator = "5eaf0fd0-dfba-4ccb-bf02-d820a40db705"
 SetRounding = "3cc68bcd-71a2-5612-b932-767ffbe40ab0"
 
+[weakdeps]
+DiffRules = "b552c78f-8df3-52c6-915a-8e097449b14b"
+
+[extensions]
+IADiffRulesExt = "DiffRules"
+
 [compat]
 CRlibm = "0.7, 0.8, 1"
-EnumX = "1"
+DiffRules = "1"
 FastRounding = "0.2, 0.3"
 RoundingEmulator = "0.2"
 SetRounding = "0.2"
-julia = "1.8"
+julia = "1.9"

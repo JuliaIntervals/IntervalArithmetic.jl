@@ -2,11 +2,10 @@
 # Section 9.1 of the IEEE Standard 1788-2015 and required for set-based flavor
 # in Section 10.5.3
 
-
 # Float64 versions of functions missing from CRlibm
 
 for f ∈ (:tanh, :coth, :sech, :csch, :asinh, :acosh, :atanh, :acoth)
-    @eval function $f(a::BareInterval{Float64})
+    @eval function Base.$f(a::BareInterval{Float64})
         isempty_interval(a) && return a
         return BareInterval{Float64}($f(_bigequiv(a)))
     end
@@ -17,18 +16,18 @@ end
 for f ∈ (:sinh, :tanh, :asinh)
     @eval begin
         """
-            $($f)(a::BareInterval)
-            $($f)(a::Interval)
+            $($f)(::BareInterval)
+            $($f)(::Interval)
 
         Implement the `$($f)` function of the IEEE Standard 1788-2015 (Table 9.1).
         """
-        function $f(a::BareInterval{T}) where {T<:NumTypes}
+        function Base.$f(a::BareInterval{T}) where {T<:NumTypes}
             isempty_interval(a) && return a
             lo, hi = bounds(a)
             return @round(T, $f(lo), $f(hi))
         end
 
-        function $f(a::Interval)
+        function Base.$f(a::Interval)
             r = $f(bareinterval(a))
             d = min(decoration(a), decoration(r))
             return _unsafe_interval(r, d, isguaranteed(a))
@@ -37,29 +36,29 @@ for f ∈ (:sinh, :tanh, :asinh)
 end
 
 """
-    cosh(a::BareInterval)
-    cosh(a::Interval)
+    cosh(::BareInterval)
+    cosh(::Interval)
 
 Implement the `cosh` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function cosh(a::BareInterval{T}) where {T<:NumTypes}
+function Base.cosh(a::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(a) && return a
     return @round(T, cosh(mig(a)), cosh(mag(a)))
 end
 
-function cosh(a::Interval)
+function Base.cosh(a::Interval)
     r = cosh(bareinterval(a))
     d = min(decoration(a), decoration(r))
     return _unsafe_interval(r, d, isguaranteed(a))
 end
 
 """
-    coth(a::BareInterval)
-    coth(a::Interval)
+    coth(::BareInterval)
+    coth(::Interval)
 
 Implement the `coth` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function coth(a::BareInterval{T}) where {T<:NumTypes}
+function Base.coth(a::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(a) && return a
     isthinzero(a) && return emptyinterval(BareInterval{T})
     lo, hi = bounds(a)
@@ -74,7 +73,7 @@ function coth(a::BareInterval{T}) where {T<:NumTypes}
     end
 end
 
-function coth(a::Interval)
+function Base.coth(a::Interval)
     x = bareinterval(a)
     r = coth(x)
     d = min(decoration(a), decoration(r))
@@ -83,12 +82,12 @@ function coth(a::Interval)
 end
 
 """
-    sech(a::BareInterval)
-    sech(a::Interval)
+    sech(::BareInterval)
+    sech(::Interval)
 
 Implement the `sech` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function sech(a::BareInterval{T}) where {T<:NumTypes}
+function Base.sech(a::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(a) && return a
     lo, hi = bounds(a)
     if lo ≥ 0 # decreasing function
@@ -100,19 +99,19 @@ function sech(a::BareInterval{T}) where {T<:NumTypes}
     end
 end
 
-function sech(a::Interval)
+function Base.sech(a::Interval)
     r = sech(bareinterval(a))
     d = min(decoration(a), decoration(r))
     return _unsafe_interval(r, d, isguaranteed(a))
 end
 
 """
-    csch(a::BareInterval)
-    csch(a::Interval)
+    csch(::BareInterval)
+    csch(::Interval)
 
 Implement the `csch` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function csch(a::BareInterval{T}) where {T<:NumTypes}
+function Base.csch(a::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(a) && return a
     isthinzero(a) && return emptyinterval(BareInterval{T})
     lo, hi = bounds(a)
@@ -127,7 +126,7 @@ function csch(a::BareInterval{T}) where {T<:NumTypes}
     end
 end
 
-function csch(a::Interval)
+function Base.csch(a::Interval)
     x = bareinterval(a)
     r = csch(x)
     d = min(decoration(a), decoration(r))
@@ -136,12 +135,12 @@ function csch(a::Interval)
 end
 
 """
-    acosh(a::BareInterval)
-    acosh(a::Interval)
+    acosh(::BareInterval)
+    acosh(::Interval)
 
 Implement the `acosh` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function acosh(a::BareInterval{T}) where {T<:NumTypes}
+function Base.acosh(a::BareInterval{T}) where {T<:NumTypes}
     domain = _unsafe_bareinterval(T, one(T), typemax(T))
     x = intersect_interval(a, domain)
     isempty_interval(x) && return x
@@ -149,7 +148,7 @@ function acosh(a::BareInterval{T}) where {T<:NumTypes}
     return @round(T, acosh(lo), acosh(hi))
 end
 
-function acosh(a::Interval{T}) where {T<:NumTypes}
+function Base.acosh(a::Interval{T}) where {T<:NumTypes}
     domain = _unsafe_bareinterval(T, one(T), typemax(T))
     x = bareinterval(a)
     r = acosh(x)
@@ -159,12 +158,12 @@ function acosh(a::Interval{T}) where {T<:NumTypes}
 end
 
 """
-    atanh(a::BareInterval)
-    atanh(a::Interval)
+    atanh(::BareInterval)
+    atanh(::Interval)
 
 Implement the `atanh` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function atanh(a::BareInterval{T}) where {T<:NumTypes}
+function Base.atanh(a::BareInterval{T}) where {T<:NumTypes}
     domain = _unsafe_bareinterval(T, -one(T), one(T))
     x = intersect_interval(a, domain)
     isempty_interval(x) && return x
@@ -173,22 +172,22 @@ function atanh(a::BareInterval{T}) where {T<:NumTypes}
     return bareinterval(T, res_lo, res_hi)
 end
 
-function atanh(a::Interval{T}) where {T<:NumTypes}
+function Base.atanh(a::Interval{T}) where {T<:NumTypes}
     domain = _unsafe_bareinterval(T, -one(T), one(T))
     x = bareinterval(a)
     r = atanh(x)
     d = min(decoration(a), decoration(r))
-    d = min(d, ifelse(isstrictsubset_interval(x, domain), d, trv))
+    d = min(d, ifelse(isinterior(x, domain), d, trv))
     return _unsafe_interval(r, d, isguaranteed(a))
 end
 
 """
-    acoth(a::BareInterval)
-    acoth(a::Interval)
+    acoth(::BareInterval)
+    acoth(::Interval)
 
 Implement the `acoth` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function acoth(a::BareInterval{T}) where {T<:NumTypes}
+function Base.acoth(a::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(a) && return a
     singular_domain = _unsafe_bareinterval(T, -one(T), one(T))
     issubset_interval(a, singular_domain) && return emptyinterval(BareInterval{T})
@@ -206,7 +205,7 @@ function acoth(a::BareInterval{T}) where {T<:NumTypes}
     end
 end
 
-function acoth(a::Interval{T}) where {T<:NumTypes}
+function Base.acoth(a::Interval{T}) where {T<:NumTypes}
     singular_domain = _unsafe_bareinterval(T, -one(T), one(T))
     x = bareinterval(a)
     r = acoth(x)

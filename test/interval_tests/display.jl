@@ -1,11 +1,10 @@
 setprecision(BigFloat, 256) do
     @testset "BareInterval" begin
         a = bareinterval(-floatmin(Float64), 1.3)
-        # large_expo = IntervalArithmetic.atomic(BigFloat, -Inf)
-        large_expo = bareinterval(0, big"1e123456789") # use smaller exponent, cf. JuliaLang/julia#48678
+        large_expo = bareinterval(0, big"1e123456789") # use "small" exponent, cf. JuliaLang/julia#48678
 
         @testset "Standard format" begin
-            setdisplay(:standard)
+            setdisplay(:infsup)
 
             @testset "6 significant digits" begin
                 # `decorations` keyword has no impact for `BareInterval`
@@ -60,11 +59,10 @@ setprecision(BigFloat, 256) do
         b16 = interval(-floatmin(Float16), parse(Float16, "1.3"))
         br = interval(Rational{Int64}, -11//10, 13//10)
         c = interval(-1, Inf)
-        # large_expo = IntervalArithmetic.atomic(BigFloat, -Inf)
-        large_expo = interval(0, big"1e123456789") # use smaller exponent, cf. JuliaLang/julia#48678
+        large_expo = interval(0, big"1e123456789") # use "small" exponent, cf. JuliaLang/julia#48678
 
         @testset "Standard format" begin
-            setdisplay(:standard)
+            setdisplay(:infsup)
 
             @testset "6 significant digits" begin
                 setdisplay(; sigdigits = 6)
@@ -181,7 +179,7 @@ setprecision(BigFloat, 256) do
 
 
         @testset "Standard format" begin
-            setdisplay(:standard)
+            setdisplay(:infsup)
 
             @testset "6 significant digits" begin
                 setdisplay(; sigdigits = 6)
@@ -224,5 +222,5 @@ setprecision(BigFloat, 256) do
         end
     end
 
-    setdisplay(:standard; sigdigits = 6, decorations = true) # reset to default display options
+    setdisplay(:infsup; sigdigits = 6, decorations = true) # reset to default display options
 end

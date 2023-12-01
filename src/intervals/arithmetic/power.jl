@@ -32,9 +32,9 @@ Base.@assume_effects :terminates_locally function _positive_power_by_squaring(x:
     return y
 end
 
-nthpow(x::BareInterval{T}, n::Integer) where {T<:NumTypes} = BareInterval{T}(nthpow(_bigequiv(x), n))
+pown(x::BareInterval{T}, n::Integer) where {T<:NumTypes} = BareInterval{T}(pown(_bigequiv(x), n))
 
-function nthpow(a::BareInterval{BigFloat}, n::Integer)
+function pown(a::BareInterval{BigFloat}, n::Integer)
     isempty_interval(a) && return a
     iszero(n) && return one(BareInterval{BigFloat})
     n == 1 && return a
@@ -86,11 +86,11 @@ end
 
 Implement the `pow` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-^(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes} = BareInterval{T}(_bigequiv(x)^y)
+Base.:^(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes} = BareInterval{T}(_bigequiv(x)^y)
 
-^(x::BareInterval, y::BareInterval) = ^(promote(x, y)...)
+Base.:^(x::BareInterval, y::BareInterval) = ^(promote(x, y)...)
 
-function ^(x::BareInterval{BigFloat}, y::BareInterval)
+function Base.:^(x::BareInterval{BigFloat}, y::BareInterval)
     isempty_interval(y) && return y
     domain = _unsafe_bareinterval(BigFloat, zero(BigFloat), typemax(BigFloat))
     x = intersect_interval(x, domain)
@@ -113,7 +113,7 @@ function _pow(a::BareInterval{BigFloat}, x::BigFloat)
         return emptyinterval(BareInterval{BigFloat})
     end
 
-    isinteger(x) && return nthpow(a, Integer(x))
+    isinteger(x) && return pown(a, Integer(x))
     x == 0.5 && return sqrt(a)
 
     a = intersect_interval(a, domain)
@@ -153,7 +153,7 @@ function _pow(a::BareInterval{BigFloat}, x::Rational{T}) where {T<:Integer}
         return emptyinterval(a)
     end
 
-    isinteger(x) && return nthpow(a, T(x))
+    isinteger(x) && return pown(a, T(x))
 
     x == (1//2) && return sqrt(a)
 
@@ -167,16 +167,16 @@ function _pow(a::BareInterval{BigFloat}, x::Rational{T}) where {T<:Integer}
         a = intersect_interval(a, _unsafe_bareinterval(BigFloat, zero(BigFloat), typemax(BigFloat)))
     end
 
-    b = nthroot(a, q)
+    b = rootn(a, q)
 
     p == 1 && return b
 
-    return nthpow(b, p)
+    return pown(b, p)
 end
 
 for f ∈ (:exp, :expm1)
     @eval begin
-        function $f(a::BareInterval{T}) where {T<:NumTypes}
+        function Base.$f(a::BareInterval{T}) where {T<:NumTypes}
             isempty_interval(a) && return a
             return @round( T, $f(inf(a)), $f(sup(a)) )
         end
@@ -185,9 +185,9 @@ end
 
 for f ∈ (:exp2, :exp10, :cbrt)
     @eval begin
-        $f(a::BareInterval{T}) where {T<:NumTypes} = BareInterval{T}($f(_bigequiv(a)))  # no CRlibm version
+        Base.$f(a::BareInterval{T}) where {T<:NumTypes} = BareInterval{T}($f(_bigequiv(a)))  # no CRlibm version
 
-        function $f(a::BareInterval{BigFloat})
+        function Base.$f(a::BareInterval{BigFloat})
             isempty_interval(a) && return a
             return @round( BigFloat, $f(inf(a)), $f(sup(a)) )
         end
@@ -195,37 +195,37 @@ for f ∈ (:exp2, :exp10, :cbrt)
 end
 
 for f ∈ (:log, :log2, :log10)
-    @eval function $f(a::BareInterval{T}) where {T<:NumTypes}
+    @eval function Base.$f(a::BareInterval{T}) where {T<:NumTypes}
         domain = _unsafe_bareinterval(T, zero(T), typemax(T))
         a = intersect_interval(a, domain)
 
-        (isempty_interval(a) || sup(a) ≤ 0) && return emptyinterval(BareInterval{T})
+        isempty_interval(a) | (sup(a) ≤ 0) && return emptyinterval(BareInterval{T})
 
         return @round( T, $f(inf(a)), $f(sup(a)) )
     end
 end
 
-function log1p(a::BareInterval{T}) where {T<:NumTypes}
+function Base.log1p(a::BareInterval{T}) where {T<:NumTypes}
     domain = _unsafe_bareinterval(T, -one(T), typemax(T))
     a = intersect_interval(a, domain)
 
-    (isempty_interval(a) || sup(a) ≤ -1) && return emptyinterval(BareInterval{T})
+    isempty_interval(a) | (sup(a) ≤ -1) && return emptyinterval(BareInterval{T})
 
     @round( T, log1p(inf(a)), log1p(sup(a)) )
 end
 
 """
-    nthroot(a::BareInterval, n::Integer)
+    rootn(a::BareInterval, n::Integer)
 
 Compute the real `n`-th root of `a`.
 """
-function nthroot(a::BareInterval{BigFloat}, n::Integer)
+function rootn(a::BareInterval{BigFloat}, n::Integer)
     isempty_interval(a) && return a
     n == 1 && return a
     n == 2 && return sqrt(a)
     n == 0 && return emptyinterval(a)
     # n < 0 && isthinzero(a) && return emptyinterval(a)
-    n < 0 && return inv(nthroot(a, -n))
+    n < 0 && return inv(rootn(a, -n))
 
     alo, ahi = bounds(a)
     ahi < 0 && iseven(n) && return emptyinterval(BareInterval{BigFloat})
@@ -241,17 +241,17 @@ function nthroot(a::BareInterval{BigFloat}, n::Integer)
     return bareinterval(BigFloat, low , high)
 end
 
-function nthroot(a::BareInterval{T}, n::Integer) where {T<:NumTypes}
+function rootn(a::BareInterval{T}, n::Integer) where {T<:NumTypes}
     n == 1 && return a
     n == 2 && return sqrt(a)
 
     abig = _bigequiv(a)
     if n < 0
-        issubnormal(mag(a)) && return inv(nthroot(a, -n))
-        return BareInterval{T}(inv(nthroot(abig, -n)))
+        issubnormal(mag(a)) && return inv(rootn(a, -n))
+        return BareInterval{T}(inv(rootn(abig, -n)))
     end
 
-    b = nthroot(abig, n)
+    b = rootn(abig, n)
     return BareInterval{T}(b)
 end
 
@@ -260,7 +260,7 @@ end
 
 Compute the hypotenuse.
 """
-hypot(x::BareInterval, y::BareInterval) = sqrt(nthpow(x, 2) + nthpow(y, 2))
+Base.hypot(x::BareInterval, y::BareInterval) = sqrt(pown(x, 2) + pown(y, 2))
 
 """
     fastpow(x::BareInterval, n::Integer)
@@ -304,14 +304,14 @@ fastpow(x::BareInterval{T}, y::S) where {T<:NumTypes,S<:Real} =
 # overwrite behaviour for small integer powers from https://github.com/JuliaLang/julia/pull/24240
 Base.literal_pow(::typeof(^), x::Interval, ::Val{p}) where {p} = x^p
 
-function nthpow(x::Interval, n::Integer)
-    r = nthpow(bareinterval(x), n)
+function pown(x::Interval, n::Integer)
+    r = pown(bareinterval(x), n)
     d = min(decoration(x), decoration(r))
     d = min(d, ifelse(n < 0 && in_interval(0, x), trv, d))
     return _unsafe_interval(r, d, isguaranteed(x))
 end
 
-function ^(xx::Interval, qq::Interval)
+function Base.:^(xx::Interval, qq::Interval)
     x = bareinterval(xx)
     q = bareinterval(qq)
     r = x^q
@@ -324,12 +324,12 @@ function ^(xx::Interval, qq::Interval)
     end
     return _unsafe_interval(r, trv, t)
 end
-^(x::Interval, y::Real) = ^(promote(x, y)...)
-^(x::Real, y::Interval) = ^(promote(x, y)...)
+Base.:^(x::Interval, y::Real) = ^(promote(x, y)...)
+Base.:^(x::Real, y::Interval) = ^(promote(x, y)...)
 # needed to resolve ambiguities
-^(x::Interval, n::Integer) = x ^ (n//1)
+Base.:^(x::Interval, n::Integer) = x ^ (n//1)
 for S ∈ (:Rational, :AbstractFloat)
-    @eval function ^(x::Interval{T}, y::$S) where {T<:NumTypes}
+    @eval function Base.:^(x::Interval{T}, y::$S) where {T<:NumTypes}
         domain = _unsafe_bareinterval(T, zero(T), typemax(T))
         bx = bareinterval(x)
         bx = intersect_interval(bx, domain)
@@ -346,7 +346,7 @@ for S ∈ (:Rational, :AbstractFloat)
 end
 
 for f ∈ (:exp, :exp2, :exp10, :expm1, :cbrt)
-    @eval function $f(xx::Interval)
+    @eval function Base.$f(xx::Interval)
         x = bareinterval(xx)
         r = $f(x)
         d = min(decoration(r), decoration(xx))
@@ -355,35 +355,35 @@ for f ∈ (:exp, :exp2, :exp10, :expm1, :cbrt)
 end
 
 for f ∈ (:log, :log2, :log10)
-    @eval function $f(a::Interval{T}) where {T<:NumTypes}
+    @eval function Base.$f(a::Interval{T}) where {T<:NumTypes}
         domain = _unsafe_bareinterval(T, zero(T), typemax(T))
         x = bareinterval(a)
         r = $f(x)
         d = min(decoration(a), decoration(r))
-        d = min(d, ifelse(isstrictsubset_interval(x, domain), d, trv))
+        d = min(d, ifelse(isinterior(x, domain), d, trv))
         return _unsafe_interval(r, d, isguaranteed(a))
     end
 end
 
-function log1p(a::Interval{T}) where {T<:NumTypes}
+function Base.log1p(a::Interval{T}) where {T<:NumTypes}
     domain = _unsafe_bareinterval(T, -one(T), typemax(T))
     x = bareinterval(a)
     r = log1p(x)
     d = min(decoration(a), decoration(r))
-    d = min(d, ifelse(isstrictsubset_interval(x, domain), d, trv))
+    d = min(d, ifelse(isinterior(x, domain), d, trv))
     return _unsafe_interval(r, d, isguaranteed(a))
 end
 
-function nthroot(a::Interval{T}, n::Integer) where {T<:NumTypes}
+function rootn(a::Interval{T}, n::Integer) where {T<:NumTypes}
     domain = _unsafe_bareinterval(T, ifelse(iseven(n), zero(T), typemin(T)), typemax(T))
     x = bareinterval(a)
-    r = nthroot(x, n)
+    r = rootn(x, n)
     d = min(decoration(a), decoration(r))
     d = min(d, ifelse(issubset_interval(x, domain), d, trv))
     return _unsafe_interval(r, d, isguaranteed(a))
 end
 
-hypot(x::Interval, y::Interval) = sqrt(x^2 + y^2)
+Base.hypot(x::Interval, y::Interval) = sqrt(x^2 + y^2)
 
 function fastpow(xx::Interval, qq::Interval)
     x = bareinterval(xx)

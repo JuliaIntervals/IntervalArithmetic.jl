@@ -3,47 +3,47 @@
 # Section 10.5.3
 
 """
-    abs(a::BareInterval)
-    abs(a::Interval)
+    abs(x::BareInterval)
+    abs(x::Interval)
 
 Implement the `abs` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function abs(a::BareInterval{T}) where {T<:NumTypes}
-    isempty_interval(a) && return a
-    return _unsafe_bareinterval(T, mig(a), mag(a))
+function Base.abs(x::BareInterval{T}) where {T<:NumTypes}
+    isempty_interval(x) && return x
+    return _unsafe_bareinterval(T, mig(x), mag(x))
 end
 
-abs(a::Interval) = _unsafe_interval(abs(bareinterval(a)), decoration(a), isguaranteed(a))
+Base.abs(x::Interval) = _unsafe_interval(abs(bareinterval(x)), decoration(x), isguaranteed(x))
 
 """
-    abs2(a::BareInterval)
-    abs2(a::Interval)
+    abs2(x::BareInterval)
+    abs2(x::Interval)
 
-Implement the square absolute value; this is semantically equivalent to `nthpow(a, 2)`.
+Implement the square absolute value; this is semantically equivalent to `pown(x, 2)`.
 """
-abs2(a::BareInterval) = nthpow(a, 2) # not in the IEEE Standard 1788-2015
+Base.abs2(x::BareInterval) = pown(x, 2) # not in the IEEE Standard 1788-2015
 
-abs2(a::Interval) = _unsafe_interval(abs2(bareinterval(a)), decoration(a), isguaranteed(a))
+Base.abs2(x::Interval) = _unsafe_interval(abs2(bareinterval(x)), decoration(x), isguaranteed(x))
 
 for f ∈ (:min, :max)
     @eval begin
         """
-            $($f)(a::BareInterval, b::BareInterval)
-            $($f)(a::Interval, b::Interval)
+            $($f)(x::BareInterval, y::BareInterval)
+            $($f)(x::Interval, y::Interval)
 
         Implement the `$($f)` function of the IEEE Standard 1788-2015 (Table 9.1).
         """
-        function $f(a::BareInterval{T}, b::BareInterval{T}) where {T<:NumTypes}
-            isempty_interval(a) && return a
-            isempty_interval(b) && return b
-            return _unsafe_bareinterval(T, $f(inf(a), inf(b)), $f(sup(a), sup(b)))
+        function Base.$f(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
+            isempty_interval(x) && return x
+            isempty_interval(y) && return y
+            return _unsafe_bareinterval(T, $f(inf(x), inf(y)), $f(sup(x), sup(y)))
         end
-        $f(a::BareInterval, b::BareInterval) = $f(promote(a, b)...)
+        Base.$f(x::BareInterval, y::BareInterval) = $f(promote(x, y)...)
 
-        function $f(a::Interval, b::Interval)
-            r = $f(bareinterval(a), bareinterval(b))
-            d = min(decoration(a), decoration(b))
-            t = isguaranteed(a) & isguaranteed(b)
+        function Base.$f(x::Interval, y::Interval)
+            r = $f(bareinterval(x), bareinterval(y))
+            d = min(decoration(x), decoration(y))
+            t = isguaranteed(x) & isguaranteed(y)
             return _unsafe_interval(r, d, t)
         end
     end

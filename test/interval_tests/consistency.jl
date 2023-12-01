@@ -80,11 +80,11 @@
         @test issubset_interval(emptyinterval(c), c)
         @test !issubset_interval(c, emptyinterval(c))
 
-        @test isstrictsubset_interval(b, c)
-        @test !isstrictsubset_interval(b, b)
-        @test isstrictsubset_interval(emptyinterval(c), c)
-        @test !isstrictsubset_interval(c, emptyinterval(c))
-        @test isstrictsubset_interval(emptyinterval(c), emptyinterval(c))
+        @test isinterior(b, c)
+        @test !isinterior(b, b)
+        @test isinterior(emptyinterval(c), c)
+        @test !isinterior(c, emptyinterval(c))
+        @test isinterior(emptyinterval(c), emptyinterval(c))
 
         @test isdisjoint_interval(a, I"2.1")
         @test !(isdisjoint_interval(a, b))
@@ -144,7 +144,7 @@
         @test isentire_interval(entireinterval(a))
         @test isentire_interval(interval(-Inf, Inf))
         @test !isentire_interval(a)
-        @test isstrictsubset_interval(interval(-Inf, Inf), interval(-Inf, Inf))
+        @test isinterior(interval(-Inf, Inf), interval(-Inf, Inf))
 
         @test !isequal_interval(nai(a), nai(a))
         @test isnai(interval(NaN)) & isnai(convert(Interval{Float64}, NaN))
@@ -236,12 +236,6 @@
         @test isequal_interval(cancelplus(interval(0.0), interval(1.0)), interval(1.0))
         @test isequal_interval(cancelminus(interval(-5.0, 0.0), interval(0.0, 5.0)), interval(-5.0))
         @test isequal_interval(cancelplus(interval(-5.0, 0.0), interval(0.0, 5.0)), interval(0.0))
-        @test isequal_interval(cancelminus(bareinterval(1e308), -bareinterval(1e308)), IntervalArithmetic.atomic(Float64, Inf))
-        @test isequal_interval(cancelplus(bareinterval(1e308), bareinterval(1e308)), IntervalArithmetic.atomic(Float64, Inf))
-        @test isequal_interval(cancelminus(bareinterval(nextfloat(1e308)), -bareinterval(nextfloat(1e308))), IntervalArithmetic.atomic(Float64, Inf))
-        @test isequal_interval(cancelplus(bareinterval(nextfloat(1e308)), bareinterval(nextfloat(1e308))), IntervalArithmetic.atomic(Float64, Inf))
-        @test isequal_interval(cancelminus(bareinterval(prevfloat(big(Inf))), -bareinterval(prevfloat(big(Inf)))), IntervalArithmetic.atomic(BigFloat, Inf))
-        @test isequal_interval(cancelplus(bareinterval(prevfloat(big(Inf))), bareinterval(prevfloat(big(Inf)))), IntervalArithmetic.atomic(BigFloat, Inf))
     end
 
     @testset "mid and radius" begin

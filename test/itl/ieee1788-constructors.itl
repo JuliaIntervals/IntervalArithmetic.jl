@@ -1,0 +1,85 @@
+/*
+
+Test cases for interval constructors from IEEE Std 1788-2015
+
+Copyright 2016 Oliver Heimlich (oheim@posteo.de)
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.  This file is offered as-is,
+without any warranty.
+
+*/
+
+
+// According to the examples in Section 7.4.2, unbounded intervals can be constructed with non-common inputs.
+testcase IEEE1788.a {
+    b-numsToInterval -infinity infinity = [entire];
+}
+
+// Examples from Sections 9.7.1 and 9.8
+testcase IEEE1788.b {
+    b-textToInterval "[1.2345]" = [0X1.3C083126E978DP+0, 0X1.3C083126E978EP+0];
+    b-textToInterval "[1,+infinity]" = [1.0, infinity];
+    d-textToInterval "[1,1e3]_com" = [1.0, 1000.0]_com;
+    d-textToInterval "[1,1E3]_COM" = [1.0, 1000.0]_com;
+}
+
+// Examples from Table 9.4
+testcase IEEE1788.c {
+    b-textToInterval "[1.e-3, 1.1e-3]" = [0X4.189374BC6A7ECP-12, 0X4.816F0068DB8BCP-12];
+    b-textToInterval "[-0x1.3p-1, 2/3]" = [-0X9.8000000000000P-4, +0XA.AAAAAAAAAAAB0P-4];
+    b-textToInterval "[3.56]" = [0X3.8F5C28F5C28F4P+0, 0X3.8F5C28F5C28F6P+0];
+    b-textToInterval "3.56?1" = [0X3.8CCCCCCCCCCCCP+0, 0X3.91EB851EB8520P+0];
+    b-textToInterval "3.56?1e2" = [355.0, 357.0];
+    b-textToInterval "3.560?2" = [0X3.8ED916872B020P+0, 0X3.8FDF3B645A1CCP+0];
+    b-textToInterval "3.56?" = [0X3.8E147AE147AE0P+0, 0X3.90A3D70A3D70CP+0];
+    b-textToInterval "3.560?2u" = [0X3.8F5C28F5C28F4P+0, 0X3.8FDF3B645A1CCP+0];
+    b-textToInterval "-10?" = [-10.5, -9.5];
+    b-textToInterval "-10?u" = [-10.0, -9.5];
+    b-textToInterval "-10?12" = [-22.0, 2.0];
+}
+
+// Examples from Section 10.5.1
+testcase IEEE1788.d {
+    b-textToInterval "[1.234e5,Inf]" = [123400.0, infinity];
+    b-textToInterval "3.1416?1" = [0X3.24395810624DCP+0, 0X3.24467381D7DC0P+0];
+    b-textToInterval "[Empty]" = [empty];
+}
+
+// Example from Section 11.3
+testcase IEEE1788.e {
+    d-numsToInterval 2 1 = [nai] signal UndefinedOperation;
+}
+
+// Examples from Table 12.1
+testcase IEEE1788.e {
+    d-textToInterval "[ ]" = [empty]_trv;
+    d-textToInterval "[entire]" = [-infinity, +infinity]_dac;
+    d-textToInterval "[1.e-3, 1.1e-3]" = [0X4.189374BC6A7ECP-12, 0X4.816F0068DB8BCP-12]_com;
+    d-textToInterval "[-Inf, 2/3]" = [-infinity, +0XA.AAAAAAAAAAAB0P-4]_dac;
+    d-textToInterval "[0x1.3p-1,]" = [0x1.3p-1, infinity]_dac;
+    d-textToInterval "[,]" = [entire]_dac;
+    d-textToInterval "3.56?1" = [0X3.8CCCCCCCCCCCCP+0, 0X3.91EB851EB8520P+0]_com;
+    d-textToInterval "3.56?1e2" = [355.0, 357.0]_com;
+    d-textToInterval "3.560?2" = [0X3.8ED916872B020P+0, 0X3.8FDF3B645A1CCP+0]_com;
+    d-textToInterval "3.56?" = [0X3.8E147AE147AE0P+0, 0X3.90A3D70A3D70CP+0]_com;
+    d-textToInterval "3.560?2u" = [0X3.8F5C28F5C28F4P+0, 0X3.8FDF3B645A1CCP+0]_com;
+    d-textToInterval "-10?" = [-10.5, -9.5]_com;
+    d-textToInterval "-10?u" = [-10.0, -9.5]_com;
+    d-textToInterval "-10?12" = [-22.0, 2.0]_com;
+    d-textToInterval "-10??u" = [-10.0, infinity]_dac;
+    d-textToInterval "-10??" = [-infinity, infinity]_dac;
+    d-textToInterval "[nai]" = [nai];
+    d-textToInterval "3.56?1_def" = [0X3.8CCCCCCCCCCCCP+0, 0X3.91EB851EB8520P+0]_def;
+}
+
+// Examples from Section 12.11.3
+testcase IEEE1788.f {
+    b-textToInterval "[]" = [empty];
+    b-textToInterval "[empty]" = [empty];
+    b-textToInterval "[ empty ]" = [empty];
+    b-textToInterval "[,]" = [entire];
+    b-textToInterval "[ entire ]" = [entire];
+}
+

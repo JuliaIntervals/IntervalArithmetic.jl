@@ -1,0 +1,131 @@
+/*
+
+Unit tests from libieeep1788 for the interval overlap operation
+(Original author: Marco Nehmeier)
+converted into portable ITL format by Oliver Heimlich.
+
+Copyright 2013-2015 Marco Nehmeier (nehmeier@informatik.uni-wuerzburg.de)
+Copyright 2015-2017 Oliver Heimlich (oheim@posteo.de)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+*/
+
+testcase minimal_overlap_test {
+    overlap [empty] [empty] = bothEmpty;
+    overlap [empty] [1.0,2.0] = firstEmpty;
+    overlap [1.0,2.0] [empty] = secondEmpty;
+
+    overlap [-infinity,2.0] [3.0,infinity] = before;
+    overlap [-infinity,2.0] [3.0,4.0] = before;
+    overlap [2.0,2.0] [3.0,4.0] = before;
+    overlap [1.0,2.0] [3.0,4.0] = before;
+    overlap [1.0,2.0] [3.0,3.0] = before;
+    overlap [2.0,2.0] [3.0,3.0] = before;
+    overlap [2.0,2.0] [3.0,infinity] = before;
+
+    overlap [-infinity,2.0] [2.0,3.0] = meets;
+    overlap [1.0,2.0] [2.0,3.0] = meets;
+    overlap [1.0,2.0] [2.0,infinity] = meets;
+
+    overlap [1.0,2.0] [1.5,2.5] = overlaps;
+
+    overlap [1.0,2.0] [1.0,infinity] = starts;
+    overlap [1.0,2.0] [1.0,3.0] = starts;
+    overlap [1.0,1.0] [1.0,3.0] = starts;
+
+    overlap [1.0,2.0] [entire] = containedBy;
+    overlap [1.0,2.0] [-infinity,3.0] = containedBy;
+    overlap [1.0,2.0] [0.0,3.0] = containedBy;
+    overlap [2.0,2.0] [0.0,3.0] = containedBy;
+    overlap [2.0,2.0] [0.0,infinity] = containedBy;
+
+    overlap [1.0,2.0] [-infinity,2.0] = finishes;
+    overlap [1.0,2.0] [0.0,2.0] = finishes;
+    overlap [2.0,2.0] [0.0,2.0] = finishes;
+
+    overlap [1.0,2.0] [1.0,2.0] = equals;
+    overlap [1.0,1.0] [1.0,1.0] = equals;
+    overlap [-infinity,1.0] [-infinity,1.0] = equals;
+    overlap [entire] [entire] = equals;
+
+    overlap [3.0,4.0] [2.0,2.0] = after;
+    overlap [3.0,4.0] [1.0,2.0] = after;
+    overlap [3.0,3.0] [1.0,2.0] = after;
+    overlap [3.0,3.0] [2.0,2.0] = after;
+    overlap [3.0,infinity] [2.0,2.0] = after;
+
+    overlap [2.0,3.0] [1.0,2.0] = metBy;
+    overlap [2.0,3.0] [-infinity,2.0] = metBy;
+
+    overlap [1.5,2.5] [1.0,2.0] = overlappedBy;
+    overlap [1.5,2.5] [-infinity,2.0] = overlappedBy;
+
+    overlap [1.0,infinity] [1.0,2.0] = startedBy;
+    overlap [1.0,3.0] [1.0,2.0] = startedBy;
+    overlap [1.0,3.0] [1.0,1.0] = startedBy;
+
+    overlap [-infinity,3.0] [1.0,2.0] = contains;
+    overlap [entire] [1.0,2.0] = contains;
+    overlap [0.0,3.0] [1.0,2.0] = contains;
+    overlap [0.0,3.0] [2.0,2.0] = contains;
+
+    overlap [-infinity,2.0] [1.0,2.0] = finishedBy;
+    overlap [0.0,2.0] [1.0,2.0] = finishedBy;
+    overlap [0.0,2.0] [2.0,2.0] = finishedBy;
+}
+
+testcase minimal_overlap_dec_test {
+    overlap [empty]_trv [empty]_trv = bothEmpty;
+    overlap [empty]_trv [1.0,2.0]_com = firstEmpty;
+    overlap [1.0,2.0]_def [empty]_trv = secondEmpty;
+
+    overlap [2.0,2.0]_def [3.0,4.0]_def = before;
+    overlap [1.0,2.0]_dac [3.0,4.0]_com = before;
+    overlap [1.0,2.0]_com [3.0,3.0]_trv = before;
+    overlap [2.0,2.0]_trv [3.0,3.0]_def = before;
+
+    overlap [1.0,2.0]_def [2.0,3.0]_def = meets;
+
+    overlap [1.0,2.0]_dac [1.5,2.5]_def = overlaps;
+
+    overlap [1.0,2.0]_def [1.0,3.0]_com = starts;
+    overlap [1.0,1.0]_trv [1.0,3.0]_def = starts;
+
+    overlap [1.0,2.0]_def [0.0,3.0]_dac = containedBy;
+    overlap [2.0,2.0]_trv [0.0,3.0]_def = containedBy;
+
+    overlap [1.0,2.0]_trv [0.0,2.0]_com = finishes;
+    overlap [2.0,2.0]_def [0.0,2.0]_dac = finishes;
+
+    overlap [1.0,2.0]_def [1.0,2.0]_def = equals;
+    overlap [1.0,1.0]_dac [1.0,1.0]_dac = equals;
+
+    overlap [3.0,4.0]_trv [2.0,2.0]_trv = after;
+    overlap [3.0,4.0]_def [1.0,2.0]_def = after;
+    overlap [3.0,3.0]_com [1.0,2.0]_dac = after;
+    overlap [3.0,3.0]_def [2.0,2.0]_trv = after;
+
+    overlap [2.0,3.0]_def [1.0,2.0]_trv = metBy;
+
+    overlap [1.5,2.5]_com [1.0,2.0]_com = overlappedBy;
+
+    overlap [1.0,3.0]_dac [1.0,2.0]_def = startedBy;
+    overlap [1.0,3.0]_com [1.0,1.0]_dac = startedBy;
+
+    overlap [0.0,3.0]_com [1.0,2.0]_dac = contains;
+    overlap [0.0,3.0]_com [2.0,2.0]_def = contains;
+
+    overlap [0.0,2.0]_def [1.0,2.0]_trv = finishedBy;
+    overlap [0.0,2.0]_dac [2.0,2.0]_def = finishedBy;
+}

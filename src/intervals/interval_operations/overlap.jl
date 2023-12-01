@@ -1,67 +1,62 @@
 # This file contains the `overlap` function required for set-based flavor in
-# Section 10.6.4 of the IEEE Standard 1788-2015.
+# Section 10.6.4 of the IEEE Standard 1788-2015
 
 """
-    Overlap <: EnumX{Int32}
+    Overlap
 
-Struct containing the `overlap` instances included in the IEEE Standard 1788-2015.
-They are numerated starting on 1. To see the distinct instances, type
-`IntervalArithmetic.Overlap.T`.
+Module containing the enumeration constant `State` described in Section 10.6.4
+of the IEEE Standard 1788-2015.
 """
-@enumx Overlap begin
-    both_empty = 1
-    first_empty
-    second_empty
-    before
-    meets
-    overlaps
-    starts
-    contained_by
-    finishes
-    equals
-    finished_by
-    contains
-    started_by
-    overlapped_by
-    met_by
-    after
+module Overlap
+    @enum State begin
+        both_empty = 1
+        first_empty
+        second_empty
+        before
+        meets
+        overlaps
+        starts
+        contained_by
+        finishes
+        equals
+        finished_by
+        contains
+        started_by
+        overlapped_by
+        met_by
+        after
+    end
 end
 
-
-
-# bare intervals
-
 """
-    overlap(a, b)
+    overlap(x::BareInterval, y::BareInterval)
+    overlap(x::Interval, y::Interval)
 
-Implement the `overlap` function according to the IEEE Standard 1788-2015
-(Section 10.6.4 and Table 10.7).
+Implement the `overlap` function of the IEEE Standard 1788-2015 (Table 10.7).
 """
-function overlap(a::BareInterval, b::BareInterval)
-    # At least one interval is empty
-    isempty_interval(a) && isempty_interval(b) && return Overlap.both_empty
-    isempty_interval(a) && return Overlap.first_empty
-    isempty_interval(b) && return Overlap.second_empty
+function overlap(x::BareInterval, y::BareInterval)
+    # at least one interval is empty
+    isempty_interval(x) & isempty_interval(y) && return Overlap.both_empty
+    isempty_interval(x) && return Overlap.first_empty
+    isempty_interval(y) && return Overlap.second_empty
 
-    # States with both intervals non-empty
-    sup(a) < inf(b) && return Overlap.before
-    inf(a) != sup(a) && inf(b) != sup(b) && sup(a) == inf(b) && return Overlap.meets
-    inf(a) < inf(b) && sup(a) < sup(b) && sup(a) > inf(b) && return Overlap.overlaps
-    inf(a) == inf(b) && sup(a) < sup(b) && return Overlap.starts
-    inf(b) < inf(a) && sup(a) < sup(b) && return Overlap.contained_by
-    inf(b) < inf(a) && sup(a) == sup(b) && return Overlap.finishes
-    isequal_interval(a, b) && return Overlap.equals
-    inf(a) < inf(b) && sup(a) == sup(b) && return Overlap.finished_by
-    inf(b) > inf(a) && sup(a) > sup(b) && return Overlap.contains
-    inf(a) == inf(b) && sup(a) > sup(b) && return Overlap.started_by
-    inf(a) > inf(b) && sup(a) > sup(b) && inf(a) < sup(b) && return Overlap.overlapped_by
-    inf(a) != sup(a) && inf(b) != sup(b) && inf(a) == sup(b) && return Overlap.met_by
-    sup(b) < sup(a) && return Overlap.after
+    # states with both intervals non-empty
+    sup(x) < inf(y) && return Overlap.before
+    (inf(x) != sup(x)) & (inf(y) != sup(y)) & (sup(x) == inf(y)) && return Overlap.meets
+    (inf(x) < inf(y)) & (sup(x) < sup(y)) & (sup(x) > inf(y)) && return Overlap.overlaps
+    (inf(x) == inf(y)) & (sup(x) < sup(y)) && return Overlap.starts
+    (inf(y) < inf(x)) & (sup(x) < sup(y)) && return Overlap.contained_by
+    (inf(y) < inf(x)) & (sup(x) == sup(y)) && return Overlap.finishes
+    isequal_interval(x, y) && return Overlap.equals
+    (inf(x) < inf(y)) & (sup(x) == sup(y)) && return Overlap.finished_by
+    (inf(y) > inf(x)) & (sup(x) > sup(y)) && return Overlap.contains
+    (inf(x) == inf(y)) & (sup(x) > sup(y)) && return Overlap.started_by
+    (inf(x) > inf(y)) & (sup(x) > sup(y)) & (inf(x) < sup(y)) && return Overlap.overlapped_by
+    (inf(x) != sup(x)) & (inf(y) != sup(y)) & (inf(x) == sup(y)) && return Overlap.met_by
+    (sup(y) < sup(x)) && return Overlap.after
 end
 
-
-
-# decorated intervals
-# TODO: handle NaI differently
-
-overlap(x::Interval, y::Interval) = overlap(bareinterval(x), bareinterval(y))
+function overlap(x::Interval, y::Interval)
+    isnai(x) | isnai(y) && return throw(ArgumentError("overlap is not defined for NaI"))
+    return overlap(bareinterval(x), bareinterval(y))
+end

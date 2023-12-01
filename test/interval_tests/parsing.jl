@@ -1,7 +1,7 @@
 @testset "BareInterval" begin
     for T ∈ (Float16, Float32, Float64, BigFloat)
         @test isequal_interval(parse(BareInterval{T}, "[1, 2]"), bareinterval(T, 1, 2))
-        if T !== BigFloat
+        if T != BigFloat
             @test isequal_interval(parse(BareInterval{T}, "[1e-324, 1e400]"), bareinterval(T, 0, Inf))
         else
             @test isequal_interval(parse(BareInterval{BigFloat}, "[1e-324, 1e400]"), bareinterval(big"1e-324", big"1e400"))
@@ -17,7 +17,7 @@ end
 @testset "Interval" begin
     for T ∈ (Float16, Float32, Float64, BigFloat)
         @test isequal_interval(parse(Interval{T}, "[1, 2]"), interval(T, 1, 2))
-        if T !== BigFloat
+        if T != BigFloat
             @test isequal_interval(parse(Interval{T}, "[1e-324, 1e400]"), interval(T, 0, Inf))
         else
             @test isequal_interval(parse(Interval{BigFloat}, "[1e-324, 1e400]"), interval(big"1e-324", big"1e400"))

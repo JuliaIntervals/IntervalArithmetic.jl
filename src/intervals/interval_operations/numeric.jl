@@ -26,7 +26,7 @@ function inf(x::Interval{<:Rational})
     return inf(bareinterval(x))
 end
 
-inf(x::Real) = x
+inf(x::Real) = inf(interval(x))
 
 """
     sup(x)
@@ -50,7 +50,7 @@ function sup(x::Interval{<:Rational})
     return sup(bareinterval(x))
 end
 
-sup(x::Real) = x
+sup(x::Real) = sup(interval(x))
 
 """
     bounds(x)
@@ -73,7 +73,7 @@ function bounds(x::Interval{<:Rational})
     return bounds(bareinterval(x))
 end
 
-bounds(x::Real) = (x, x)
+bounds(x::Real) = bounds(interval(x))
 
 """
     mid(x)
@@ -121,7 +121,7 @@ function mid(x::Interval{<:Rational})
     return mid(bareinterval(x))
 end
 
-mid(x::Real) = x
+mid(x::Real) = mid(interval(x))
 mid(x::Complex) = complex(mid(real(x)), mid(imag(x)))
 
 """
@@ -175,7 +175,7 @@ function scaled_mid(x::Interval{<:Rational}, α::Real)
     return scaled_mid(bareinterval(x), α)
 end
 
-scaled_mid(x::Real, ::Real) = x
+scaled_mid(x::Real, α::Real) = scaled_mid(interval(x), α)
 scaled_mid(x::Complex, α::Real) = complex(scaled_mid(real(x), α), scaled_mid(imag(x), α))
 
 """
@@ -207,7 +207,7 @@ function diam(x::Interval{<:Rational})
     return diam(bareinterval(x))
 end
 
-diam(x::Real) = zero(x)
+diam(x::Real) = diam(interval(x))
 diam(x::Complex) = max(diam(real(x)), diam(imag(x)))
 
 """
@@ -236,7 +236,7 @@ function radius(x::Interval{<:Rational})
     return radius(bareinterval(x))
 end
 
-radius(x::Real) = zero(x)
+radius(x::Real) = radius(interval(x))
 radius(x::Complex) = max(radius(real(x)), radius(imag(x)))
 
 """
@@ -264,7 +264,7 @@ function midradius(x::Interval{<:Rational})
     return midradius(bareinterval(x))
 end
 
-midradius(x::Real) = (mid(x), radius(x))
+midradius(x::Real) = midradius(interval(x))
 midradius(x::Complex) = (mid(x), radius(x))
 
 """
@@ -294,7 +294,7 @@ function mag(x::Interval{<:Rational})
     return mag(bareinterval(x))
 end
 
-mag(x::Real) = abs(x)
+mag(x::Real) = mag(interval(x))
 mag(x::Complex) = max(mag(real(x)), mag(imag(x)))
 
 """
@@ -326,8 +326,8 @@ function mig(x::Interval{<:Rational})
     return mig(bareinterval(x))
 end
 
-mig(x::Real) = abs(x)
-mig(x::Complex) = min(mag(real(x)), mag(imag(x)))
+mig(x::Real) = mig(interval(x))
+mig(x::Complex) = min(mig(real(x)), mig(imag(x)))
 
 """
     dist(x, y)
