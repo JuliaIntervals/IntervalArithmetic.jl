@@ -1,10 +1,10 @@
-mutable struct DisplayParameters
+mutable struct DisplayOptions
     format      :: Symbol
     decorations :: Bool
     sigdigits   :: Int
 end
 
-function Base.show(io::IO, ::MIME"text/plain", params::DisplayParameters)
+function Base.show(io::IO, ::MIME"text/plain", params::DisplayOptions)
     println(io, "Display options:")
     println(io, "  - format: ", params.format)
     println(io, "  - decorations: ", params.decorations)
@@ -15,7 +15,7 @@ function Base.show(io::IO, ::MIME"text/plain", params::DisplayParameters)
     end
 end
 
-const display_params = DisplayParameters(:infsup, true, 6) # default
+const display_options = DisplayOptions(:infsup, true, 6) # default
 
 """
     setdisplay(format::Symbol; decorations::Bool, sigdigits::Int)
@@ -42,7 +42,7 @@ julia> x = interval(0.1, 0.3) # default display options
 [0.0999999, 0.300001]_com
 
 julia> setdisplay(:full)
-Display parameters:
+Display options:
   - format: full
   - decorations: true
   - significant digits: 6 (ignored)
@@ -51,8 +51,8 @@ julia> x
 Interval(0.09999999999999999, 0.30000000000000004, com)
 
 julia> setdisplay(:infsup; sigdigits = 3)
-Display parameters:
-  - format: standard
+Display options:
+  - format: infsup
   - decorations: true
   - significant digits: 3
 
@@ -60,8 +60,8 @@ julia> x
 [0.0999, 0.301]_com
 
 julia> setdisplay(; decorations = false)
-Display parameters:
-  - format: standard
+Display options:
+  - format: infsup
   - decorations: false
   - significant digits: 3
 
@@ -69,27 +69,27 @@ julia> x
 [0.0999, 0.301]
 ```
 """
-function setdisplay(format::Symbol = display_params.format;
-        decorations::Bool = display_params.decorations,
-        sigdigits::Int = display_params.sigdigits)
+function setdisplay(format::Symbol = display_options.format;
+        decorations::Bool = display_options.decorations,
+        sigdigits::Int = display_options.sigdigits)
 
     format ∉ (:infsup, :midpoint, :full) && return throw(ArgumentError("`format` must be `:infsup`, `:midpoint` or `:full`"))
     sigdigits < 1 && return throw(ArgumentError("`sigdigits` must be `≥ 1`"))
 
-    display_params.format = format
-    display_params.decorations = decorations
-    display_params.sigdigits = sigdigits
+    display_options.format = format
+    display_options.decorations = decorations
+    display_options.sigdigits = sigdigits
 
-    return display_params
+    return display_options
 end
 
 # printing mechanism
 
 Base.show(io::IO, ::MIME"text/plain", a::Union{BareInterval,Interval,Complex{<:Interval}}) =
-    print(io, _str_repr(a, display_params.format))
+    print(io, _str_repr(a, display_options.format))
 
 function Base.show(io::IO, a::Union{BareInterval,Interval,Complex{<:Interval}})
-    get(io, :compact, false) && return print(io, _str_repr(a, display_params.format))
+    get(io, :compact, false) && return print(io, _str_repr(a, display_options.format))
     return print(io, _str_repr(a, :full))
 end
 
@@ -117,7 +117,7 @@ function _str_repr(a::Interval{T}, format::Symbol) where {T<:NumTypes}
     str_interval = _str_basic_repr(a.bareinterval, format) # use `a.bareinterval` to not print a warning if `a` is an NaI
     if isguaranteed(a)
         format === :full && return string("Interval{", T, "}(", str_interval, ", ", decoration(a), ')')
-        display_params.decorations || return str_interval
+        display_options.decorations || return str_interval
         if format === :midpoint && str_interval != "∅"
             str_interval = string('(', str_interval, ')')
         end
@@ -127,7 +127,7 @@ function _str_repr(a::Interval{T}, format::Symbol) where {T<:NumTypes}
         if format === :midpoint && str_interval != "∅"
             str_interval = string('(', str_interval, ')')
         end
-        display_params.decorations || return string(str_interval, "_NG")
+        display_options.decorations || return string(str_interval, "_NG")
         return string(str_interval, '_', decoration(a), "_NG")
     end
 end
@@ -140,14 +140,14 @@ function _str_repr(a::Interval{BigFloat}, format::Symbol)
         if format === :midpoint && str_interval != "∅"
             str_interval = string('(', str_interval, ')')
         end
-        display_params.decorations || return string(str_interval, _subscriptify(precision(BigFloat)))
+        display_options.decorations || return string(str_interval, _subscriptify(precision(BigFloat)))
         return string(str_interval, _subscriptify(precision(BigFloat)), '_', decoration(a))
     else
         format === :full && return string("Interval{", T, "}(", str_interval, ", ", decoration(a), ", NG)")
         if format === :midpoint && str_interval != "∅"
             str_interval = string('(', str_interval, ')')
         end
-        display_params.decorations || return string(str_interval, _subscriptify(precision(BigFloat)), "_NG")
+        display_options.decorations || return string(str_interval, _subscriptify(precision(BigFloat)), "_NG")
         return string(str_interval, _subscriptify(precision(BigFloat)), '_', decoration(a), "_NG")
     end
 end
@@ -157,17 +157,17 @@ function _str_repr(x::Complex{<:Interval}, format::Symbol)
     if format === :full
         return string(_str_repr(real(x), format), " + ", _str_repr(imag(x), format), "im")
     elseif format === :infsup
-        display_params.decorations && return string(_str_repr(real(x), format), " + (", _str_repr(imag(x), format), ")im")
+        display_options.decorations && return string(_str_repr(real(x), format), " + (", _str_repr(imag(x), format), ")im")
         return string(_str_repr(real(x), format), " + ", _str_repr(imag(x), format), "im")
     else
-        display_params.decorations && return string(_str_repr(real(x), format), " + (", _str_repr(imag(x), format), ")im")
+        display_options.decorations && return string(_str_repr(real(x), format), " + (", _str_repr(imag(x), format), ")im")
         return string('(', _str_repr(real(x), format), ") + (", _str_repr(imag(x), format), ")im")
     end
 end
 
 function _str_repr(x::Complex{Interval{BigFloat}}, format::Symbol)
     # `format` is either `:infsup`, `:midpoint` or `:full`
-    display_params.decorations && return string(_str_repr(real(x), format), " + (", _str_repr(imag(x), format), ")im")
+    display_options.decorations && return string(_str_repr(real(x), format), " + (", _str_repr(imag(x), format), ")im")
     return string(_str_repr(real(x), format), " + ", _str_repr(imag(x), format), "im")
 end
 
@@ -177,7 +177,7 @@ function _str_basic_repr(a::BareInterval{<:AbstractFloat}, format::Symbol)
     # `format` is either `:infsup`, `:midpoint` or `:full`
     # do not use `inf(a)` to avoid `-0.0`
     isempty_interval(a) && return "∅"
-    sigdigits = display_params.sigdigits
+    sigdigits = display_options.sigdigits
     if format === :full
         return string(a.lo, ", ", sup(a))
     elseif format === :midpoint
@@ -197,7 +197,7 @@ function _str_basic_repr(a::BareInterval{Float32}, format::Symbol)
     # `format` is either `:infsup`, `:midpoint` or `:full`
     # do not use `inf(a)` to avoid `-0.0`
     isempty_interval(a) && return "∅"
-    sigdigits = display_params.sigdigits
+    sigdigits = display_options.sigdigits
     if format === :full
         lo = replace(string(a.lo, "f0"), "NaNf0" => "NaN32", "Inff0" => "Inf32")
         if contains(lo, 'e')
@@ -239,7 +239,7 @@ function _str_basic_repr(a::BareInterval{Float16}, format::Symbol)
     # `format` is either `:infsup`, `:midpoint` or `:full`
     # do not use `inf(a)` to avoid `-0.0`
     isempty_interval(a) && return "∅"
-    sigdigits = display_params.sigdigits
+    sigdigits = display_options.sigdigits
     if format === :full
         output = string("Float16(", a.lo, "), Float16(", sup(a), ')')
         return replace(output, "Float16(NaN)" => "NaN16", "Float16(-Inf)" => "-Inf16", "Float16(Inf)" => "Inf16")
