@@ -117,10 +117,3 @@ abs(z::Complex{<:Interval}) = sqrt(abs2(z))
 # function norm(z::Complex{T}, p=2) where T<:Interval
 #     return (abs(z)^(p))^(1 / p)
 # end
-
-mid(z::Complex) = complex(mid(real(z)), mid(imag(z)))
-diam(z::Complex) = max(diam(real(z)), diam(imag(z)))
-radius(z::Complex) = max(radius(real(z)), radius(imag(z)))
-midradius(z::Complex) = (mid(z), radius(z))
-mag(z::Complex) = sup(abs(z))
-mig(z::Complex) = inf(abs(z))

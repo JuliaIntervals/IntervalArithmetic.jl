@@ -1,6 +1,3 @@
-using IntervalArithmetic
-using Test
-
 @testset "sinh" begin
     @test isequal_interval(sinh(emptyinterval()), emptyinterval())
     @test isequal_interval(sinh(interval(0.5)), interval(0.5210953054937473, 0.5210953054937474))

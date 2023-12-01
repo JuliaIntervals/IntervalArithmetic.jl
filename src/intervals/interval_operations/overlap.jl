@@ -27,19 +27,23 @@ They are numerated starting on 1. To see the distinct instances, type
     after
 end
 
+
+
+# bare intervals
+
 """
-    overlap(a::Interval, b::Interval)
+    overlap(a, b)
 
 Implement the `overlap` function according to the IEEE Standard 1788-2015
 (Section 10.6.4 and Table 10.7).
 """
-function overlap(a::Interval, b::Interval)
+function overlap(a::BareInterval, b::BareInterval)
     # At least one interval is empty
     isempty_interval(a) && isempty_interval(b) && return Overlap.both_empty
     isempty_interval(a) && return Overlap.first_empty
     isempty_interval(b) && return Overlap.second_empty
 
-    # States with both intervals nonempty
+    # States with both intervals non-empty
     sup(a) < inf(b) && return Overlap.before
     inf(a) != sup(a) && inf(b) != sup(b) && sup(a) == inf(b) && return Overlap.meets
     inf(a) < inf(b) && sup(a) < sup(b) && sup(a) > inf(b) && return Overlap.overlaps
@@ -54,3 +58,10 @@ function overlap(a::Interval, b::Interval)
     inf(a) != sup(a) && inf(b) != sup(b) && inf(a) == sup(b) && return Overlap.met_by
     sup(b) < sup(a) && return Overlap.after
 end
+
+
+
+# decorated intervals
+# TODO: handle NaI differently
+
+overlap(x::Interval, y::Interval) = overlap(bareinterval(x), bareinterval(y))

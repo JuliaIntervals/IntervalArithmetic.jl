@@ -2,120 +2,95 @@
 # Section 9.1 of the IEEE Standard 1788-2015 and required for set-based flavor
 # in Section 10.5.3
 
-+(a::Interval) = a # not in the IEEE Standard 1788-2015
++(a::BareInterval) = a # not in the IEEE Standard 1788-2015
+
++(a::Interval) = a
 
 """
+    +(a::BareInterval, b::BareInterval)
     +(a::Interval, b::Interval)
-    +(a::Interval, b::Real)
-    +(a::Real, b::Interval)
 
 Implement the `add` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function +(a::Interval{T}, b::Interval{T}) where {T<:NumTypes}
+function +(a::BareInterval{T}, b::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(a) && return a
     isempty_interval(b) && return b
     return @round(T, inf(a) + inf(b), sup(a) + sup(b))
 end
++(a::BareInterval, b::BareInterval) = +(promote(a, b)...)
 
-+(a::Interval, b::Interval) = +(promote(a, b)...)
-
-function +(a::Interval{T}, b::T) where {T<:NumTypes}
-    isempty_interval(a) && return a
-    isfinite(b) || return emptyinterval(T)
-    return @round(T, inf(a) + b, sup(a) + b)
+function +(a::Interval, b::Interval)
+    r = bareinterval(a) + bareinterval(b)
+    d = min(decoration(a), decoration(b), decoration(r))
+    t = isguaranteed(a) & isguaranteed(b)
+    return _unsafe_interval(r, d, t)
 end
 
-+(a::Interval{T}, b::Real) where {T<:NumTypes} = a + interval(T, b)
-
-+(a::Real, b::Interval{T}) where {T<:NumTypes} = b + a
-
 """
+    -(a::BareInterval)
     -(a::Interval)
 
 Implement the `neg` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
--(a::Interval{T}) where {T<:NumTypes} = unsafe_interval(T, -sup(a), -inf(a))
+-(a::BareInterval{T}) where {T<:NumTypes} = _unsafe_bareinterval(T, -sup(a), -inf(a))
+
+-(a::Interval) = _unsafe_interval(-bareinterval(a), decoration(a), isguaranteed(a))
 
 """
+    -(a::BareInterval, b::BareInterval)
     -(a::Interval, b::Interval)
-    -(a::Interval, b::Real)
-    -(a::Real, b::Interval)
 
 Implement the `sub` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function -(a::Interval{T}, b::Interval{T}) where {T<:NumTypes}
+function -(a::BareInterval{T}, b::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(a) && return a
     isempty_interval(b) && return b
     return @round(T, inf(a) - sup(b), sup(a) - inf(b))
 end
+-(a::BareInterval, b::BareInterval) = -(promote(a, b)...)
 
--(a::Interval, b::Interval) = -(promote(a, b)...)
-
-function -(a::Interval{T}, b::T) where {T<:NumTypes}
-    isempty_interval(a) && return a
-    return @round(T, inf(a) - b, sup(a) - b)
+function -(a::Interval, b::Interval)
+    r = bareinterval(a) - bareinterval(b)
+    d = min(decoration(a), decoration(b), decoration(r))
+    t = isguaranteed(a) & isguaranteed(b)
+    return _unsafe_interval(r, d, t)
 end
 
-function -(b::T, a::Interval{T}) where {T<:NumTypes}
-    isempty_interval(a) && return a
-    return @round(T, b - sup(a), b - inf(a))
-end
-
--(a::Interval{T}, b::Real) where {T<:NumTypes} = a - interval(T, b)
-
--(a::Real, b::Interval{T}) where {T<:NumTypes} = interval(T, a) - b
-
 """
-    unsafe_scale(a::Interval, α)
-
-Multiply an interval by a positive scalar. For efficiency, does not check that
-the constant is positive.
-"""
-unsafe_scale(a::Interval{T}, α::T) where {T<:NumTypes} = @round(T, inf(a) * α, sup(a) * α)
-
-"""
+    *(a::BareInterval, b::BareInterval)
     *(a::Interval, b::Interval)
-    *(a::Interval, b::Real)
-    *(a::Real, b::Interval)
 
 Implement the `mul` function of the IEEE Standard 1788-2015 (Table 9.1).
 
 !!! note
-    The behavior of the multiplication is flavor dependent for some edge cases.
+    The behavior of `*` is flavor dependent for some edge cases.
 """
-function *(a::Interval{T}, b::Interval{T}) where {T<:NumTypes}
+function *(a::BareInterval{T}, b::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(a) && return a
     isempty_interval(b) && return b
     isthinzero(a) && return a
     isthinzero(b) && return b
-    isbounded(a) && isbounded(b) && return mult(*, a, b)
-    return mult((x, y, r) -> unbounded_mult(T, x, y, r), a, b)
+    isbounded(a) && isbounded(b) && return _mult(*, a, b)
+    return _mult((x, y, r) -> _unbounded_mult(x, y, r), a, b)
 end
+*(a::BareInterval, b::BareInterval) = *(promote(a, b)...)
 
-*(a::Interval, b::Interval) = *(promote(a, b)...)
-
-function *(a::Interval{T}, b::T) where {T<:NumTypes}
-    (isempty_interval(a) || isthinzero(a) || isone(b)) && return a
-    isfinite(b) || return emptyinterval(T)
-    if b ≥ 0
-        return @round(T, inf(a) * b, sup(a) * b)
-    else
-        return @round(T, sup(a) * b, inf(a) * b)
-    end
+function *(a::Interval, b::Interval)
+    r = bareinterval(a) * bareinterval(b)
+    d = min(decoration(a), decoration(b), decoration(r))
+    t = isguaranteed(a) & isguaranteed(b)
+    return _unsafe_interval(r, d, t)
 end
-
-*(a::Interval{T}, b::Real) where {T<:NumTypes} = a * interval(T, b)
-
-*(a::Real, b::Interval{T}) where {T<:NumTypes} = b * a
 
 # helper functions for multiplication
-function unbounded_mult(::Type{T}, x::T, y::T, r::RoundingMode) where {T<:NumTypes}
+
+function _unbounded_mult(x::T, y::T, r::RoundingMode) where {T<:NumTypes}
     iszero(x) && return sign(y) * zero_times_infinity(T)
     iszero(y) && return sign(x) * zero_times_infinity(T)
     return *(x, y, r)
 end
 
-function mult(op, a::Interval{T}, b::Interval{T}) where {T<:NumTypes}
+function _mult(op, a::BareInterval{T}, b::BareInterval{T}) where {T<:NumTypes}
     if inf(b) ≥ 0
         inf(a) ≥ 0 && return @round(T, op(inf(a), inf(b)), op(sup(a), sup(b)))
         sup(a) ≤ 0 && return @round(T, op(inf(a), sup(b)), op(sup(a), inf(b)))
@@ -133,16 +108,43 @@ function mult(op, a::Interval{T}, b::Interval{T}) where {T<:NumTypes}
 end
 
 """
+    inv(a::BareInterval)
+    inv(a::Interval)
+
+Implement the `recip` function of the IEEE Standard 1788-2015 (Table 9.1).
+
+!!! note
+    The behavior of `inv` is flavor dependent for some edge cases.
+"""
+function inv(a::BareInterval{T}) where {T<:NumTypes}
+    isempty_interval(a) && return a
+    if in_interval(0, a)
+        inf(a) < 0 == sup(a) && return @round(T, typemin(T), inv(inf(a)))
+        inf(a) == 0 < sup(a) && return @round(T, inv(sup(a)), typemax(T))
+        inf(a) < 0 < sup(a) && return entireinterval(BareInterval{T})
+        isthinzero(a) && return div_by_thin_zero(_unsafe_bareinterval(T, one(T), one(T)))
+    end
+    return @round(T, inv(sup(a)), inv(inf(a)))
+end
+
+function inv(a::Interval)
+    x = bareinterval(a)
+    r = inv(x)
+    d = min(decoration(a), decoration(r))
+    d = min(d, ifelse(in_interval(0, x), trv, d))
+    return _unsafe_interval(r, d, isguaranteed(a))
+end
+
+"""
+    /(a::BareInterval, b::BareInterval)
     /(a::Interval, b::Interval)
-    /(a::Interval, b::Real)
-    /(a::Real, b::Interval)
 
 Implement the `div` function of the IEEE Standard 1788-2015 (Table 9.1).
 
 !!! note
-    The behavior of the division is flavor dependent for some edge cases.
+    The behavior of `/` is flavor dependent for some edge cases.
 """
-function /(a::Interval{T}, b::Interval{T}) where {T<:NumTypes}
+function /(a::BareInterval{T}, b::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(a) && return a
     isempty_interval(b) && return b
     isthinzero(b) && return div_by_thin_zero(a)
@@ -159,92 +161,71 @@ function /(a::Interval{T}, b::Interval{T}) where {T<:NumTypes}
         if iszero(inf(b))
             inf(a) ≥ 0 && return @round(T, inf(a)/sup(b), typemax(T))
             sup(a) ≤ 0 && return @round(T, typemin(T), sup(a)/sup(b))
-            return entireinterval(T)
+            return entireinterval(BareInterval{T})
         elseif sup(b) == 0
             inf(a) ≥ 0 && return @round(T, typemin(T), inf(a)/inf(b))
             sup(a) ≤ 0 && return @round(T, sup(a)/inf(b), typemax(T))
-            return entireinterval(T)
+            return entireinterval(BareInterval{T})
         else
-            return entireinterval(T)
+            return entireinterval(BareInterval{T})
         end
     end
 end
+/(a::BareInterval, b::BareInterval) = /(promote(a, b)...)
+\(a::BareInterval, b::BareInterval) = /(b, a)
 
-/(a::Interval, b::Interval) = /(promote(a, b)...)
-
-function /(a::Interval{T}, b::T) where {T<:NumTypes}
-    isempty_interval(a) && return a
-    isfinite(b) || return emptyinterval(T)
-    iszero(b) && return div_by_thin_zero(a)
-    if b ≥ 0
-        return @round(T, inf(a)/b, sup(a)/b)
-    else
-        return @round(T, sup(a)/b, inf(a)/b)
-    end
+function /(a::Interval, b::Interval)
+    x = bareinterval(b)
+    r = bareinterval(a) / x
+    d = min(decoration(a), decoration(b), decoration(r))
+    d = min(d, ifelse(in_interval(0, x), trv, d))
+    t = isguaranteed(a) & isguaranteed(b)
+    return _unsafe_interval(r, d, t)
 end
 
-/(a::Interval{T}, b::Real) where {T<:NumTypes} = a / interval(T, b)
+"""
+    //(a::BareInterval, b::BareInterval)
+    //(a::Interval, b::Interval)
 
-/(a::Real, b::Interval{T}) where {T<:NumTypes} = interval(T, a) / b
+Implement the rational division; this is semantically equivalent to `a / b`.
+"""
+//(a::BareInterval, b::BareInterval) = a / b # not in the IEEE Standard 1788-2015
+
+//(a::Interval, b::Interval) = /(a, b)
 
 """
-    inv(a::Interval)
+    muladd(a::BareInterval, b::BareInterval c::BareInterval)
+    muladd(a::Interval, b::Interval c::Interval)
 
-Implement the `recip` function of the IEEE Standard 1788-2015 (Table 9.1).
-
-!!! note
-    The behavior of the division is flavor dependent for some edge cases.
+Implement the combined multiply-add; this is semantically equivalent to `a * b + c`
 """
-function inv(a::Interval{T}) where {T<:NumTypes}
-    isempty_interval(a) && return a
-    if in_interval(0, a)
-        inf(a) < 0 == sup(a) && return @round(T, typemin(T), inv(inf(a)))
-        inf(a) == 0 < sup(a) && return @round(T, inv(sup(a)), typemax(T))
-        inf(a) < 0 < sup(a) && return entireinterval(T)
-        isthinzero(a) && return div_by_thin_zero(one(Interval{T}))
-    end
-    return @round(T, inv(sup(a)), inv(inf(a)))
+muladd(a::F, b::F, c::F) where {F<:BareInterval} = a * b + c # not in the IEEE Standard 1788-2015
+muladd(a::BareInterval, b::BareInterval, c::BareInterval) = muladd(promote(a, b, c)...)
+
+function muladd(a::Interval, b::Interval, c::Interval)
+    r = muladd(bareinterval(a), bareinterval(b), bareinterval(c))
+    d = min(decoration(a), decoration(b), decoration(c), decoration(r))
+    t = isguaranteed(a) & isguaranteed(b) & isguaranteed(c)
+    return _unsafe_interval(r, d, t)
 end
 
-# rational division
-//(a::Interval, b::Interval) = a / b
-
-min_ignore_nans(args...) = minimum(filter(x -> !isnan(x), args))
-
-max_ignore_nans(args...) = maximum(filter(x -> !isnan(x), args))
-
-
-
-muladd(a::F, b::F, c::F) where {F<:Interval} = a * b + c
-
-muladd(a::Interval, b::Interval, c::Interval) = muladd(promote(a, b, c)...)
-
-muladd(a::Interval{T}, b::Interval{S}, c::Number) where {T<:NumTypes,S<:NumTypes} = muladd(promote(a, b, interval(promote_numtype(T, S), c))...)
-muladd(a::Interval{T}, b::Number, c::Interval{S}) where {T<:NumTypes,S<:NumTypes} = muladd(promote(a, interval(promote_numtype(T, S), b), c)...)
-muladd(a::Number, b::Interval{T}, c::Interval{S}) where {T<:NumTypes,S<:NumTypes} = muladd(promote(interval(promote_numtype(T, S), a), b, c)...)
-
-muladd(a::Interval{T}, b::Number, c::Number) where {T<:NumTypes} = muladd(a, interval(T, b), interval(T, c))
-muladd(a::Number, b::Interval{T}, c::Number) where {T<:NumTypes} = muladd(interval(T, a), b, interval(T, c))
-muladd(a::Number, b::Number, c::Interval{T}) where {T<:NumTypes} = muladd(interval(T, a), interval(T, b), c)
-
 """
+    fma(a::BareInterval, b::BareInterval, c::BareInterval)
     fma(a::Interval, b::Interval, c::Interval)
-
-Fused multiply-add.
 
 Implement the `fma` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function fma(a::Interval{T}, b::Interval{T}, c::Interval{T}) where {T<:NumTypes}
+function fma(a::BareInterval{T}, b::BareInterval{T}, c::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(a) && return a
     isempty_interval(b) && return b
     isempty_interval(c) && return c
 
     if isentire_interval(a)
         isthinzero(b) && return c
-        return entireinterval(T)
+        return entireinterval(BareInterval{T})
     elseif isentire_interval(b)
         isthinzero(a) && return c
-        return entireinterval(T)
+        return entireinterval(BareInterval{T})
     end
 
     lo = setrounding(T, RoundDown) do
@@ -252,7 +233,7 @@ function fma(a::Interval{T}, b::Interval{T}, c::Interval{T}) where {T<:NumTypes}
         lo2 = fma(inf(a), sup(b), inf(c))
         lo3 = fma(sup(a), inf(b), inf(c))
         lo4 = fma(sup(a), sup(b), inf(c))
-        min_ignore_nans(lo1, lo2, lo3, lo4)
+        return minimum(filter(x -> !isnan(x), (lo1, lo2, lo3, lo4)))
     end
 
     hi = setrounding(T, RoundUp) do
@@ -260,25 +241,38 @@ function fma(a::Interval{T}, b::Interval{T}, c::Interval{T}) where {T<:NumTypes}
         hi2 = fma(inf(a), sup(b), sup(c))
         hi3 = fma(sup(a), inf(b), sup(c))
         hi4 = fma(sup(a), sup(b), sup(c))
-        max_ignore_nans(hi1, hi2, hi3, hi4)
+        return maximum(filter(x -> !isnan(x), (hi1, hi2, hi3, hi4)))
     end
 
-    return unsafe_interval(T, lo, hi)
+    return _unsafe_bareinterval(T, lo, hi)
+end
+fma(a::BareInterval, b::BareInterval, c::BareInterval) = fma(promote(a, b, c)...)
+
+function fma(a::Interval, b::Interval, c::Interval)
+    r = fma(bareinterval(a), bareinterval(b), bareinterval(c))
+    d = min(decoration(a), decoration(b), decoration(c), decoration(r))
+    t = isguaranteed(a) & isguaranteed(b) & isguaranteed(c)
+    return _unsafe_interval(r, d, t)
 end
 
-fma(a::Interval, b::Interval, c::Interval) = fma(promote(a, b, c)...)
-
 """
-    sqrt(a::Interval)
-
-Square root of an interval.
+    sqrt(a::BareInterval)
 
 Implement the `sqrt` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function sqrt(a::Interval{T}) where {T<:NumTypes}
-    domain = unsafe_interval(T, zero(T), typemax(T))
+function sqrt(a::BareInterval{T}) where {T<:NumTypes}
+    domain = _unsafe_bareinterval(T, zero(T), typemax(T))
     x = intersect_interval(a, domain)
     isempty_interval(x) && return x
     lo, hi = bounds(x)
-    return @round(T, sqrt(lo), sqrt(hi)) # `sqrt` is correctly-rounded
+    return @round(T, sqrt(lo), sqrt(hi))
+end
+
+function sqrt(a::Interval{T}) where {T<:NumTypes}
+    domain = _unsafe_bareinterval(T, zero(T), typemax(T))
+    x = bareinterval(a)
+    r = sqrt(x)
+    d = min(decoration(a), decoration(r))
+    d = min(d, ifelse(issubset_interval(x, domain), d, trv))
+    return _unsafe_interval(r, d, isguaranteed(a))
 end

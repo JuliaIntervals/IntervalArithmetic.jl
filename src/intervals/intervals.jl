@@ -1,5 +1,6 @@
 # Construction and composability with numbers
 include("construction.jl")
+include("parsing.jl")
 include("real_interface.jl")
 
 # Rounding
@@ -15,7 +16,6 @@ include("arithmetic/basic.jl")
 include("arithmetic/hyperbolic.jl")
 include("arithmetic/integer.jl")
 include("arithmetic/power.jl")
-include("arithmetic/signbit.jl")
 include("arithmetic/trigonometric.jl")
 
 # Other functions
@@ -26,6 +26,7 @@ include("interval_operations/boolean.jl")
 include("interval_operations/overlap.jl")
 include("interval_operations/numeric.jl")
 include("interval_operations/set_operations.jl")
+include("interval_operations/bisect.jl")
 
 # Multidimensional functions
 include("multidim.jl")

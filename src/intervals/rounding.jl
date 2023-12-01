@@ -98,6 +98,16 @@ function sqrt(a::T, rounding_mode::RoundingMode) where {T<:Rational}
     end
 end
 
+
+for f in (:exp2, :exp10, :cbrt)
+    @eval function ($f)(x::BigFloat, r::RoundingMode)  # add BigFloat functions with rounding:
+        setrounding(BigFloat, r) do
+            ($f)(x)
+        end
+    end
+end
+
+
 rounding_directions = [
     (:down, RoundingMode{:Down}, prevfloat),
     (:up, RoundingMode{:Up}, nextfloat)
@@ -229,5 +239,29 @@ for f in (:+, :-, :*, :/, :^, :atan)
     # No rounding
     @eval function $f(::IntervalRounding{:none}, a, b, r::RoundingMode)
         return $f(a, b)
+    end
+end
+
+# prevents multiple threads from calling `setprecision` concurrently, used in `_bigequiv`
+const precision_lock = ReentrantLock()
+
+"""
+    _bigequiv(x)
+
+Create a `BigFloat` equivalent with the same underlying precision as `x`.
+"""
+function _bigequiv(x::BareInterval{T}) where {T<:NumTypes}
+    lock(precision_lock) do
+        setprecision(precision(float(T))) do
+            return BareInterval{BigFloat}(x)
+        end
+    end
+end
+
+function _bigequiv(x::T) where {T<:NumTypes}
+    lock(precision_lock) do
+        setprecision(precision(float(T))) do
+            return BigFloat(x)
+        end
     end
 end

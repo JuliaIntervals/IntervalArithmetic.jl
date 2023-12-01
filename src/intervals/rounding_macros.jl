@@ -44,5 +44,5 @@ The macro uses the internal `round_expr` function to transform e.g.
 `a + b` into `+(a, b, RoundDown)`.
 """
 macro round(T, ex1, ex2)
-    return :(unsafe_interval($(esc(T)), $(round_expr(ex1, RoundDown)), $(round_expr(ex2, RoundUp))))
+    return :(_unsafe_bareinterval($(esc(T)), $(round_expr(ex1, RoundDown)), $(round_expr(ex2, RoundUp))))
 end

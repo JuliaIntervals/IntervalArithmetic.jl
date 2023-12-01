@@ -3,39 +3,48 @@
 # Section 10.5.3
 
 """
+    abs(a::BareInterval)
     abs(a::Interval)
 
 Implement the `abs` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function abs(a::Interval{T}) where {T<:NumTypes}
+function abs(a::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(a) && return a
-    return unsafe_interval(T, mig(a), mag(a))
+    return _unsafe_bareinterval(T, mig(a), mag(a))
 end
 
-abs2(a::Interval) = a^2
+abs(a::Interval) = _unsafe_interval(abs(bareinterval(a)), decoration(a), isguaranteed(a))
 
 """
-    min(a::Interval, b::Interval)
+    abs2(a::BareInterval)
+    abs2(a::Interval)
 
-Implement the `min` function of the IEEE Standard 1788-2015 (Table 9.1).
+Implement the square absolute value; this is semantically equivalent to `nthpow(a, 2)`.
 """
-function min(a::Interval{T}, b::Interval{T}) where {T<:NumTypes}
-    isempty_interval(a) && return a
-    isempty_interval(b) && return b
-    return unsafe_interval(T, min(inf(a), inf(b)), min(sup(a), sup(b)))
+abs2(a::BareInterval) = nthpow(a, 2) # not in the IEEE Standard 1788-2015
+
+abs2(a::Interval) = _unsafe_interval(abs2(bareinterval(a)), decoration(a), isguaranteed(a))
+
+for f ∈ (:min, :max)
+    @eval begin
+        """
+            $($f)(a::BareInterval, b::BareInterval)
+            $($f)(a::Interval, b::Interval)
+
+        Implement the `$($f)` function of the IEEE Standard 1788-2015 (Table 9.1).
+        """
+        function $f(a::BareInterval{T}, b::BareInterval{T}) where {T<:NumTypes}
+            isempty_interval(a) && return a
+            isempty_interval(b) && return b
+            return _unsafe_bareinterval(T, $f(inf(a), inf(b)), $f(sup(a), sup(b)))
+        end
+        $f(a::BareInterval, b::BareInterval) = $f(promote(a, b)...)
+
+        function $f(a::Interval, b::Interval)
+            r = $f(bareinterval(a), bareinterval(b))
+            d = min(decoration(a), decoration(b))
+            t = isguaranteed(a) & isguaranteed(b)
+            return _unsafe_interval(r, d, t)
+        end
+    end
 end
-
-min(a::Interval, b::Interval) = min(promote(a, b)...)
-
-"""
-    max(a::Interval, b::Interval)
-
-Implement the `max` function of the IEEE Standard 1788-2015 (Table 9.1).
-"""
-function max(a::Interval{T}, b::Interval{T}) where {T<:NumTypes}
-    isempty_interval(a) && return a
-    isempty_interval(b) && return b
-    return unsafe_interval(T, max(inf(a), inf(b)), max(sup(a), sup(b)))
-end
-
-max(a::Interval, b::Interval) = max(promote(a, b)...)
