@@ -401,6 +401,12 @@ interval(a::Tuple; format::Symbol = :standard) = interval(a...; format = format)
 
 # standard format
 
+"""
+    _interval_standard(T<:NumTypes, a, b, [d::Decoration])
+
+Internal constructor for intervals described by their lower and upper bounds,
+i.e. of the form ``[a, b]``.
+"""
 function _interval_standard(::Type{T}, a, b, d::Decoration) where {T<:NumTypes}
     lo = inf(a)
     hi = sup(b)
@@ -432,6 +438,12 @@ _interval_standard(::Type{T}, a, b::Complex) where {T<:NumTypes} =
 
 # midpoint constructors
 
+"""
+    _interval_midpoint(T<:NumTypes, m, r, [d::Decoration])
+
+Internal constructor for intervals described by their midpoint and radius,
+i.e. of the form ``m \\pm r`.
+"""
 function _interval_midpoint(::Type{T}, m, r, d::Decoration) where {T<:NumTypes}
     x = _interval_standard(T, m, m, d)
     return _interval_standard(T, inf(x - r), sup(x + r), d)
