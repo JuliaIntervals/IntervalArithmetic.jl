@@ -26,7 +26,7 @@ function inf(x::Interval{<:Rational})
     return inf(bareinterval(x))
 end
 
-inf(x::Real) = inf(interval(x))
+inf(x::Real) = inf(x)
 
 """
     sup(x)
@@ -50,7 +50,7 @@ function sup(x::Interval{<:Rational})
     return sup(bareinterval(x))
 end
 
-sup(x::Real) = sup(interval(x))
+sup(x::Real) = sup(x)
 
 """
     bounds(x)
@@ -73,7 +73,7 @@ function bounds(x::Interval{<:Rational})
     return bounds(bareinterval(x))
 end
 
-bounds(x::Real) = bounds(interval(x))
+bounds(x::Real) = bounds(x)
 
 """
     mid(x)
