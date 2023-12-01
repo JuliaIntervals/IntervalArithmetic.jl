@@ -72,52 +72,54 @@ Base.hash(x::Interval, h::UInt) = hash(sup(x), hash(inf(x), hash(Interval, h)))
 #
 
 for T ∈ (:BareInterval, :Interval)
-    Base.:(==)(::$T, ::$T) = # also returned when calling `≤`, `≥`, `isequal`
-        throw(ArgumentError("`==` is purposely not supported for intervals. See instead `isequal_interval`"))
+    @eval begin
+        Base.:(==)(::$T, ::$T) = # also returned when calling `≤`, `≥`, `isequal`
+            throw(ArgumentError("`==` is purposely not supported for intervals. See instead `isequal_interval`"))
 
-    Base.:<(::$T, ::$T) = # also returned when calling `isless`, `>`
-        throw(ArgumentError("`<` is purposely not supported for intervals. See instead `isstrictless`, `strictprecedes`"))
+        Base.:<(::$T, ::$T) = # also returned when calling `isless`, `>`
+            throw(ArgumentError("`<` is purposely not supported for intervals. See instead `isstrictless`, `strictprecedes`"))
 
-    Base.isdisjoint(::$T, ::$T) =
-        throw(ArgumentError("`isdisjoint` is purposely not supported for intervals. See instead `isdisjoint_interval`"))
+        Base.isdisjoint(::$T, ::$T) =
+            throw(ArgumentError("`isdisjoint` is purposely not supported for intervals. See instead `isdisjoint_interval`"))
 
-    Base.issubset(::$T, ::$T) =
-        throw(ArgumentError("`issubset` is purposely not supported for intervals. See instead `issubset_interval`"))
+        Base.issubset(::$T, ::$T) =
+            throw(ArgumentError("`issubset` is purposely not supported for intervals. See instead `issubset_interval`"))
 
-    Base.issetequal(::$T, ::$T) =
-        throw(ArgumentError("`issetequal` is purposely not supported for intervals. See instead `isequal_interval`"))
+        Base.issetequal(::$T, ::$T) =
+            throw(ArgumentError("`issetequal` is purposely not supported for intervals. See instead `isequal_interval`"))
 
-    Base.in(::$T, ::$T) =
-        throw(ArgumentError("`in` is purposely not supported for intervals. See instead `in_interval`"))
+        Base.in(::$T, ::$T) =
+            throw(ArgumentError("`in` is purposely not supported for intervals. See instead `in_interval`"))
 
-    Base.isempty(::$T) =
-        throw(ArgumentError("`isempty` is purposely not supported for intervals. See instead `isempty_interval`"))
+        Base.isempty(::$T) =
+            throw(ArgumentError("`isempty` is purposely not supported for intervals. See instead `isempty_interval`"))
 
-    Base.isfinite(::$T) = # also returned when calling `isinf`
-        throw(ArgumentError("`isfinite` is purposely not supported for intervals. See instead `isbounded`"))
+        Base.isfinite(::$T) = # also returned when calling `isinf`
+            throw(ArgumentError("`isfinite` is purposely not supported for intervals. See instead `isbounded`"))
 
-    Base.isnan(::$T) =
-        throw(ArgumentError("`isnan` is purposely not supported for intervals. See instead `isnai`"))
+        Base.isnan(::$T) =
+            throw(ArgumentError("`isnan` is purposely not supported for intervals. See instead `isnai`"))
 
-    Base.isinteger(::$T) =
-        throw(ArgumentError("`isinteger` is purposely not supported for intervals. See instead `isthininteger`"))
+        Base.isinteger(::$T) =
+            throw(ArgumentError("`isinteger` is purposely not supported for intervals. See instead `isthininteger`"))
 
-    Base.intersect(::$T) =
-        throw(ArgumentError("`intersect` is purposely not supported for intervals. See instead `intersect_interval`"))
+        Base.intersect(::$T) =
+            throw(ArgumentError("`intersect` is purposely not supported for intervals. See instead `intersect_interval`"))
 
-    Base.union!(::AbstractSet, ::$T) = # also returned when calling `intersect`, `symdiff` with intervals
-        throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
-    Base.union!(::AbstractVector{S}, ::$T) where {S} =
-        throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
-    Base.union!(::AbstractVector{S}, ::$T, ::Any, ::Any...) where {S} =
-        throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
-    Base.union!(::AbstractVector{S}, ::$T, ::$T, ::Any...) where {S} =
-        throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
-    Base.union!(::AbstractVector{S}, ::Any, ::$T, ::Any...) where {S} =
-        throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
+        Base.union!(::AbstractSet, ::$T) = # also returned when calling `intersect`, `symdiff` with intervals
+            throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
+        Base.union!(::AbstractVector{S}, ::$T) where {S} =
+            throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
+        Base.union!(::AbstractVector{S}, ::$T, ::Any, ::Any...) where {S} =
+            throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
+        Base.union!(::AbstractVector{S}, ::$T, ::$T, ::Any...) where {S} =
+            throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
+        Base.union!(::AbstractVector{S}, ::Any, ::$T, ::Any...) where {S} =
+            throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
 
-    Base.setdiff(::$T) =
-        throw(ArgumentError("`setdiff` is purposely not supported for intervals. See instead `setdiff_interval`"))
-    Base.setdiff!(::AbstractSet, ::$T) =
-        throw(ArgumentError("`setdiff!` is purposely not supported for intervals. See instead `setdiff_interval`"))
+        Base.setdiff(::$T) =
+            throw(ArgumentError("`setdiff` is purposely not supported for intervals. See instead `setdiff_interval`"))
+        Base.setdiff!(::AbstractSet, ::$T) =
+            throw(ArgumentError("`setdiff!` is purposely not supported for intervals. See instead `setdiff_interval`"))
+    end
 end
