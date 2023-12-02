@@ -506,6 +506,7 @@ i.e. of the form ``m \\pm r`.
 """
 function _interval_midpoint(::Type{T}, m, r, d::Decoration = com) where {T<:NumTypes}
     x = _interval_infsup(T, m, m, d)
+    r = _interval_infsup(T, r, r, d)
     return _interval_infsup(T, x - r, x + r, d)
 end
 
