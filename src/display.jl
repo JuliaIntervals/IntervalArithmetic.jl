@@ -54,7 +54,7 @@ Display options:
   - significant digits: 6 (ignored)
 
 julia> x
-Interval(0.1, 0.3, com)
+Interval{Float64}(0.1, 0.3, com)
 
 julia> setdisplay(:infsup; sigdigits = 3)
 Display options:
