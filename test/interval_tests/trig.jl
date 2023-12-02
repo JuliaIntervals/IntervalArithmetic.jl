@@ -7,7 +7,7 @@ end
     @test isequal_interval(sin(interval(0.5)), interval(0.47942553860420295, 0.47942553860420301))
     @test isequal_interval(sin(interval(0.5, 1.67)), interval(4.7942553860420295e-01, 1.0))
     @test isequal_interval(sin(interval(1.67, 3.2)), interval(-5.8374143427580093e-02, 9.9508334981018021e-01))
-    @test_broken isequal_interval(sin(interval(2.1, 5.6)), interval(-1.0, 0.863209366648874))
+    @test isequal_interval(sin(interval(2.1, 5.6)), interval(-1.0, 0.8632093666488738))
     @test isequal_interval(sin(interval(0.5, 8.5)), interval(-1.0, 1.0))
     @test isequal_interval(sin(interval(Float64, -4.5, 0.1)), interval(-1.0, 0.9775301176650971))
     @test isequal_interval(sin(interval(Float64, 1.3, 6.3)), interval(-1.0, 1.0))
@@ -24,7 +24,7 @@ end
 @testset "cos" begin
     @test isequal_interval(cos(interval(0.5)), interval(0.87758256189037265, 0.87758256189037276))
     @test isequal_interval(cos(interval(0.5, 1.67)), interval(cos(1.67, RoundDown), cos(0.5, RoundUp)))
-    @test_broken isequal_interval(cos(interval(2.1, 5.6)), interval(-1.0, 0.77556587851025016))
+    @test isequal_interval(cos(interval(2.1, 5.6)), interval(-1.0, 0.7755658785102496))
     @test isequal_interval(cos(interval(0.5, 8.5)), interval(-1.0, 1.0))
     @test isequal_interval(cos(interval(1.67, 3.2)), interval(-1.0, -0.09904103659872801))
 

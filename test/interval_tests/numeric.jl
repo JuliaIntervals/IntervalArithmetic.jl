@@ -270,7 +270,7 @@ end
         @test isequal_interval(cbrt(interval(2, 3)), interval(1.259921049894873, 1.4422495703074085))
         @test isequal_interval(cbrt(big(interval(2, 3))), interval(big"1.259921049894873164767210607278228350570251464701507980081975112155299676513956", big"1.442249570307408382321638310780109588391869253499350577546416194541687596830003"))
         @test issubset_interval(cbrt(big(interval(2, 3))), cbrt(interval(2, 3)))
-        @test_skip ismissing(cbrt(big(interval(3, 4))) == cbrt(interval(3, 4)))
+        @test issubset_interval(Interval{Float64}(cbrt(big(interval(3, 4)))), cbrt(interval(3, 4)))
         @test isequal_interval(cbrt(interval(2f0, 3f0)), interval(1.259921f0, 1.4422497f0))
         @test issubset_interval(cbrt(interval(2, 3)), cbrt(interval(2f0, 3f0)))
     end
