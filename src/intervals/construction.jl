@@ -396,7 +396,7 @@ julia> interval(1, π)
 Interval{Float64}(1.0, 3.1415926535897936, com)
 
 julia> interval(BigFloat, 1, π)
-Interval{BigFloat}(1.0, 3.141592653589793238462643383279502884197169399375105820974944592307816406286233)
+Interval{BigFloat}(1.0, 3.141592653589793238462643383279502884197169399375105820974944592307816406286233, com)
 ```
 """
 function interval(::Type{T}, a, b, d::Decoration; format::Symbol = :infsup) where {T<:NumTypes}

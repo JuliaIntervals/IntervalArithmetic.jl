@@ -38,7 +38,13 @@ left unchanged.
 # Examples
 
 ```jldoctest
-julia> x = interval(0.1, 0.3) # default display options
+julia> setdisplay(:infsup; decorations = true, sigdigits = 6) # default display options
+Display options:
+  - format: infsup
+  - decorations: true
+  - significant digits: 6
+
+julia> x = interval(0.1, 0.3)
 [0.0999999, 0.300001]_com
 
 julia> setdisplay(:full)
@@ -48,7 +54,7 @@ Display options:
   - significant digits: 6 (ignored)
 
 julia> x
-Interval(0.09999999999999999, 0.30000000000000004, com)
+Interval(0.1, 0.3, com)
 
 julia> setdisplay(:infsup; sigdigits = 3)
 Display options:

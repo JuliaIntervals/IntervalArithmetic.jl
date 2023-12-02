@@ -32,6 +32,8 @@ julia> IntervalArithmetic.default_flavor()
 IntervalArithmetic.Flavor{:set_based}()
 
 julia> isempty_interval(bareinterval(Inf, Inf))
+┌ Warning: invalid interval, empty interval is returned
+└ @ IntervalArithmetic ~/work/IntervalArithmetic.jl/IntervalArithmetic.jl/src/intervals/construction.jl:202
 true
 
 julia> isempty_interval(bareinterval(0)/bareinterval(0))
