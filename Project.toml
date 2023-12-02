@@ -13,7 +13,7 @@ SetRounding = "3cc68bcd-71a2-5612-b932-767ffbe40ab0"
 DiffRules = "b552c78f-8df3-52c6-915a-8e097449b14b"
 
 [extensions]
-IADiffRulesExt = "DiffRules"
+IntervalArithmeticDiffRulesExt = "DiffRules"
 
 [compat]
 CRlibm = "0.7, 0.8, 1"

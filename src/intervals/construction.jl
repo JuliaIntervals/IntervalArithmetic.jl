@@ -501,8 +501,8 @@ _interval_infsup(::Type{T}, a, b::Complex, d::Decoration = com) where {T<:NumTyp
 """
     _interval_midpoint(T<:NumTypes, m, r, d = com)
 
-Internal constructor for intervals described by their midpoint and radius,
-i.e. of the form ``m \\pm r`.
+Internal constructor for intervals described by their midpoint and radius, i.e.
+of the form ``m \\pm r``.
 """
 function _interval_midpoint(::Type{T}, m, r, d::Decoration = com) where {T<:NumTypes}
     x = _interval_infsup(T, m, m, d)

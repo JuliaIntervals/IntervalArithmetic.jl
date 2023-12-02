@@ -1,4 +1,4 @@
-module IADiffRulesExt
+module IntervalArithmeticDiffRulesExt
 
 using IntervalArithmetic, DiffRules
 
