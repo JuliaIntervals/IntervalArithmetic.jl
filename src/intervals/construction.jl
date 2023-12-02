@@ -367,7 +367,7 @@ Interval(x::Union{BareInterval,Interval}) = interval(bareinterval(x))
 #
 
 """
-    interval([T<:Union{Rational,AbstractFloat}=default_numtype()], a, b, [d::Decoration])
+    interval([T<:Union{Rational,AbstractFloat}=default_numtype()], a, b, d = com)
 
 Create the interval ``[a, b]`` according to the IEEE Standard 1788-2015. The
 validity of the interval is checked by [`is_valid_interval`](@ref): if `true`
@@ -399,65 +399,22 @@ julia> interval(BigFloat, 1, π)
 Interval{BigFloat}(1.0, 3.141592653589793238462643383279502884197169399375105820974944592307816406286233, com)
 ```
 """
-function interval(::Type{T}, a, b, d::Decoration; format::Symbol = :infsup) where {T<:NumTypes}
+function interval(::Type{T}, a, b, d::Decoration = com; format::Symbol = :infsup) where {T<:NumTypes}
     format === :infsup && return _interval_infsup(T, a, b, d)
     format === :midpoint && return _interval_midpoint(T, a, b, d)
     return throw(ArgumentError("`format` must be `:infsup` or `:midpoint`"))
 end
-interval(a, b, d::Decoration; format::Symbol = :infsup) = interval(promote_numtype(numtype(a), numtype(b)), a, b, d; format = format)
+interval(a, b, d::Decoration = com; format::Symbol = :infsup) = interval(promote_numtype(numtype(a), numtype(b)), a, b, d; format = format)
 
-function interval(::Type{T}, a, b; format::Symbol = :infsup) where {T<:NumTypes}
-    format === :infsup && return _interval_infsup(T, a, b)
-    format === :midpoint && return _interval_midpoint(T, a, b)
-    return throw(ArgumentError("`format` must be `:infsup` or `:midpoint`"))
-end
-interval(a, b; format::Symbol = :infsup) = interval(promote_numtype(numtype(a), numtype(b)), a, b; format = format)
-
-function interval(::Type{T}, a, d::Decoration; format::Symbol = :infsup) where {T<:NumTypes}
+function interval(::Type{T}, a, d::Decoration = com; format::Symbol = :infsup) where {T<:NumTypes}
     (format === :infsup) | (format === :midpoint) && return _interval_infsup(T, a, a, d)
     return throw(ArgumentError("`format` must be `:infsup` or `:midpoint`"))
 end
-function interval(::Type{T}, x::BareInterval, d::Decoration; format::Symbol = :infsup) where {T<:NumTypes}
-    if d == ill
-        @warn "invalid interval, NaI is returned"
-        return nai(T)
-    else
-        (format === :infsup) | (format === :midpoint) && return _unsafe_interval(bareinterval(T, x), min(decoration(x), d), isguaranteed(x)) # assumes valid interval
-        return throw(ArgumentError("`format` must be `:infsup` or `:midpoint`"))
-    end
-end
-function interval(::Type{T}, x::Interval, d::Decoration; format::Symbol = :infsup) where {T<:NumTypes}
-    if d == ill
-        @warn "invalid interval, NaI is returned"
-        return nai(T)
-    else
-        # use `x.bareinterval` to not print a warning if `x` is an NaI
-        (format === :infsup) | (format === :midpoint) && return _unsafe_interval(bareinterval(T, x.bareinterval), min(decoration(x), d), isguaranteed(x)) # assumes valid interval
-        return throw(ArgumentError("`format` must be `:infsup` or `:midpoint`"))
-    end
-end
-interval(a, d::Decoration; format::Symbol = :infsup) = interval(promote_numtype(numtype(a), numtype(a)), a, d; format = format)
-
-function interval(::Type{T}, a; format::Symbol = :infsup) where {T<:NumTypes}
-    (format === :infsup) | (format === :midpoint) && return _interval_infsup(T, a, a)
-    return throw(ArgumentError("`format` must be `:infsup` or `:midpoint`"))
-end
-function interval(::Type{T}, x::BareInterval; format::Symbol = :infsup) where {T<:NumTypes}
-    (format === :infsup) | (format === :midpoint) && return _unsafe_interval(bareinterval(T, x), decoration(x), isguaranteed(x)) # assumes valid interval
-    return throw(ArgumentError("`format` must be `:infsup` or `:midpoint`"))
-end
-function interval(::Type{T}, x::Interval; format::Symbol = :infsup) where {T<:NumTypes}
-    # use `x.bareinterval` to not print warning if `x` is an NaI
-    (format === :infsup) | (format === :midpoint) && return _unsafe_interval(bareinterval(T, x.bareinterval), decoration(x), isguaranteed(x)) # assumes valid interval
-    return throw(ArgumentError("`format` must be `:infsup` or `:midpoint`"))
-end
-interval(a; format::Symbol = :infsup) = interval(promote_numtype(numtype(a), numtype(a)), a; format = format)
+interval(a, d::Decoration = com; format::Symbol = :infsup) = interval(promote_numtype(numtype(a), numtype(a)), a, d; format = format)
 
 # some useful extra constructor
-interval(::Type{T}, a::Tuple, d::Decoration; format::Symbol = :infsup) where {T<:NumTypes} = interval(T, a..., d; format = format)
-interval(a::Tuple, d::Decoration; format::Symbol = :infsup) = interval(a..., d; format = format)
-interval(::Type{T}, a::Tuple; format::Symbol = :infsup) where {T<:NumTypes} = interval(T, a...; format = format)
-interval(a::Tuple; format::Symbol = :infsup) = interval(a...; format = format)
+interval(::Type{T}, a::Tuple, d::Decoration = com; format::Symbol = :infsup) where {T<:NumTypes} = interval(T, a..., d; format = format)
+interval(a::Tuple, d::Decoration = com; format::Symbol = :infsup) = interval(a..., d; format = format)
 interval(A::AbstractArray; format::Symbol = :infsup) = interval.(A; format = format)
 
 # standard format
@@ -491,76 +448,88 @@ function _interval_infsup(::Type{T}, a, b) where {T<:NumTypes}
     end
 end
 
-_interval_infsup(::Type{T}, a::Complex, b::Complex, d::Decoration) where {T<:NumTypes} =
-    complex(_interval_infsup(T, real(a), real(b), d), _interval_infsup(T, imag(a), imag(b), d))
-_interval_infsup(::Type{T}, a::Complex, b, d::Decoration) where {T<:NumTypes} =
-    complex(_interval_infsup(T, real(a), b, d), _interval_infsup(T, imag(a), d))
-_interval_infsup(::Type{T}, a, b::Complex, d::Decoration) where {T<:NumTypes} =
-    complex(_interval_infsup(T, a, real(b), d), _interval_infsup(T, imag(b), d))
+# needed for special warnings and propagation of `isguaranteed`
+function _interval_infsup(::Type{T}, x::Union{BareInterval,Interval}, y::Union{BareInterval,Interval}, d::Decoration) where {T<:NumTypes}
+    lo = _inf(x)
+    hi = _sup(y)
+    t = isguaranteed(x) & isguaranteed(y)
+    if d == ill
+        @warn "invalid interval, NaI is returned"
+        return _unsafe_interval(nai(T).bareinterval, ill, t)
+    elseif isempty_interval(x) && isempty_interval(y)
+        return _unsafe_interval(emptyinterval(BareInterval{T}), trv, t)
+    elseif !is_valid_interval(lo, hi)
+        @warn "invalid interval, NaI is returned"
+        return _unsafe_interval(nai(T).bareinterval, ill, t)
+    else
+        z = _unsafe_bareinterval(T, lo, hi)
+        return _unsafe_interval(z, min(decoration(x), decoration(y), decoration(z), d), t)
+    end
+end
+function _interval_infsup(::Type{T}, x::Union{BareInterval,Interval}, y, d::Decoration) where {T<:NumTypes}
+    lo = _inf(x)
+    hi = _sup(y)
+    if !is_valid_interval(lo, hi) || d == ill
+        @warn "invalid interval, NaI is returned"
+        return nai(T)
+    else
+        z = _unsafe_bareinterval(T, lo, hi)
+        return _unsafe_interval(z, min(decoration(x), decoration(z), d), isguaranteed(x))
+    end
+end
+function _interval_infsup(::Type{T}, x, y::Union{BareInterval,Interval}, d::Decoration) where {T<:NumTypes}
+    lo = _inf(x)
+    hi = _sup(y)
+    if !is_valid_interval(lo, hi) || d == ill
+        @warn "invalid interval, NaI is returned"
+        return nai(T)
+    else
+        z = _unsafe_bareinterval(T, lo, hi)
+        return _unsafe_interval(z, min(decoration(y), decoration(z), d), isguaranteed(y))
+    end
+end
 
-_interval_infsup(::Type{T}, a::Complex, b::Complex) where {T<:NumTypes} =
-    complex(_interval_infsup(T, real(a), real(b)), _interval_infsup(T, imag(a), imag(b)))
-_interval_infsup(::Type{T}, a::Complex, b) where {T<:NumTypes} =
-    complex(_interval_infsup(T, real(a), b), _interval_infsup(T, imag(a)))
-_interval_infsup(::Type{T}, a, b::Complex) where {T<:NumTypes} =
-    complex(_interval_infsup(T, a, real(b)), _interval_infsup(T, imag(b)))
+_interval_infsup(::Type{T}, a::Complex, b::Complex, d::Decoration = com) where {T<:NumTypes} =
+    complex(_interval_infsup(T, real(a), real(b), d), _interval_infsup(T, imag(a), imag(b), d))
+_interval_infsup(::Type{T}, a::Complex, b, d::Decoration = com) where {T<:NumTypes} =
+    complex(_interval_infsup(T, real(a), b, d), _interval_infsup(T, imag(a), d))
+_interval_infsup(::Type{T}, a, b::Complex, d::Decoration = com) where {T<:NumTypes} =
+    complex(_interval_infsup(T, a, real(b), d), _interval_infsup(T, imag(b), d))
 
 # midpoint constructors
 
 """
-    _interval_midpoint(T<:NumTypes, m, r, [d::Decoration])
+    _interval_midpoint(T<:NumTypes, m, r, d = com)
 
 Internal constructor for intervals described by their midpoint and radius,
 i.e. of the form ``m \\pm r`.
 """
-function _interval_midpoint(::Type{T}, m, r, d::Decoration) where {T<:NumTypes}
+function _interval_midpoint(::Type{T}, m, r, d::Decoration = com) where {T<:NumTypes}
     x = _interval_infsup(T, m, m, d)
-    return _interval_infsup(T, _inf(x - r), _sup(x + r), d)
-end
-function _interval_midpoint(::Type{T}, m, r) where {T<:NumTypes}
-    x = _interval_infsup(T, m, m)
-    return _interval_infsup(T, _inf(x - r), _sup(x + r))
+    return _interval_infsup(T, x - r, x + r, d)
 end
 
-_interval_midpoint(::Type{T}, m::Complex, r, d::Decoration) where {T<:NumTypes} =
+_interval_midpoint(::Type{T}, m::Complex, r, d::Decoration = com) where {T<:NumTypes} =
     complex(_interval_midpoint(T, real(m), r, d), _interval_midpoint(T, imag(m), r, d))
-_interval_midpoint(::Type{T}, m::Complex, r) where {T<:NumTypes} =
-    complex(_interval_midpoint(T, real(m), r), _interval_midpoint(T, imag(m), r))
 
-function _interval_midpoint(::Type{T}, m, r::Complex{<:Interval}, d::Decoration) where {T<:NumTypes}
+function _interval_midpoint(::Type{T}, m, r::Complex{<:Interval}, d::Decoration = com) where {T<:NumTypes}
     isthinzero(imag(r)) || return throw(DomainError(r, "imaginary part must be zero"))
     return _interval_midpoint(T, m, real(r), d)
 end
-function _interval_midpoint(::Type{T}, m, r::Complex{<:Interval}) where {T<:NumTypes}
-    isthinzero(imag(r)) || return throw(DomainError(r, "imaginary part must be zero"))
-    return _interval_midpoint(T, m, real(r))
-end
 
-function _interval_midpoint(::Type{T}, m, r::Complex, d::Decoration) where {T<:NumTypes}
+function _interval_midpoint(::Type{T}, m, r::Complex, d::Decoration = com) where {T<:NumTypes}
     iszero(imag(r)) || return throw(DomainError(r, "imaginary part must be zero"))
     return _interval_midpoint(T, m, real(r), d)
 end
-function _interval_midpoint(::Type{T}, m, r::Complex) where {T<:NumTypes}
-    iszero(imag(r)) || return throw(DomainError(r, "imaginary part must be zero"))
-    return _interval_midpoint(T, m, real(r))
-end
 
-function _interval_midpoint(::Type{T}, m::Complex, r::Complex{<:Interval}, d::Decoration) where {T<:NumTypes}
+function _interval_midpoint(::Type{T}, m::Complex, r::Complex{<:Interval}, d::Decoration = com) where {T<:NumTypes}
     isthinzero(imag(r)) || return throw(DomainError(r, "imaginary part must be zero"))
     return _interval_midpoint(T, m, real(r), d)
 end
-function _interval_midpoint(::Type{T}, m::Complex, r::Complex{<:Interval}) where {T<:NumTypes}
-    isthinzero(imag(r)) || return throw(DomainError(r, "imaginary part must be zero"))
-    return _interval_midpoint(T, m, real(r))
-end
 
-function _interval_midpoint(::Type{T}, m::Complex, r::Complex, d::Decoration) where {T<:NumTypes}
+function _interval_midpoint(::Type{T}, m::Complex, r::Complex, d::Decoration = com) where {T<:NumTypes}
     iszero(imag(r)) || return throw(DomainError(r, "imaginary part must be zero"))
     return _interval_midpoint(T, m, real(r), d)
-end
-function _interval_midpoint(::Type{T}, m::Complex, r::Complex) where {T<:NumTypes}
-    iszero(imag(r)) || return throw(DomainError(r, "imaginary part must be zero"))
-    return _interval_midpoint(T, m, real(r))
 end
 
 # promotion
