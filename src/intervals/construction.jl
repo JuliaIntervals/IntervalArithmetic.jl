@@ -107,11 +107,11 @@ Internal constructor which assumes that `is_valid_interval(lo, hi) == true`.
 _unsafe_bareinterval
 
 _normalisezero(a) = ifelse(iszero(a), zero(a), a)
-# used only to construct intervals
-_inf(a::BareInterval) = a.lo
-_sup(a::BareInterval) = a.hi
-_inf(a::Real) = a
-_sup(a::Real) = a
+# used only to construct intervals; needed to avoid `inf` and `sup` normalization
+_inf(x::BareInterval) = x.lo
+_sup(x::BareInterval) = x.hi
+_inf(x::Real) = x
+_sup(x::Real) = x
 #
 
 _unsafe_bareinterval(::Type{T}, a::Rational, b::Rational) where {S<:Integer,T<:Rational{S}} =
@@ -160,7 +160,7 @@ for sym ∈ (:(:ℯ), :(:φ))
     end
 end
 
-BareInterval{T}(x::BareInterval) where {T<:NumTypes} = bareinterval(T, x)
+BareInterval{T}(x::BareInterval) where {T<:NumTypes} = convert(BareInterval{T}, x)
 
 """
     bareinterval([T<:Union{Rational,AbstractFloat}=default_numtype()], a, b)
@@ -220,6 +220,11 @@ bareinterval(a::Tuple) = bareinterval(T, a...)
     return :($res) # set body of the function to return the precomputed result
 end
 
+# atomic constructor
+
+atomic(::Type{T}, x::AbstractString) where {T<:NumTypes} = parse(BareInterval{T}, x)
+atomic(::Type{T}, x::T) where {T<:NumTypes} = atomic(T, string(x))
+
 # promotion
 
 Base.promote_rule(::Type{BareInterval{T}}, ::Type{BareInterval{S}}) where {T<:NumTypes,S<:NumTypes} =
@@ -227,8 +232,8 @@ Base.promote_rule(::Type{BareInterval{T}}, ::Type{BareInterval{S}}) where {T<:Nu
 
 # conversion
 
-Base.convert(::Type{BareInterval{T}}, a::BareInterval) where {T<:NumTypes} =
-    bareinterval(T, a)
+Base.convert(::Type{BareInterval{T}}, x::BareInterval) where {T<:NumTypes} =
+    bareinterval(T, x)
 
 
 
@@ -359,10 +364,9 @@ isguaranteed(x::Interval) = x.isguaranteed
 isguaranteed(::BareInterval) = true
 isguaranteed(x::Complex{<:Interval}) = isguaranteed(real(x)) & isguaranteed(imag(x))
 
-Interval{T}(x::Union{BareInterval,Interval}, d::Decoration) where {T<:NumTypes} = interval(T, bareinterval(T, x), d)
-Interval{T}(x::Union{BareInterval,Interval}) where {T<:NumTypes} = interval(T, bareinterval(T, x))
-Interval(x::Union{BareInterval,Interval}, d::Decoration) = interval(bareinterval(x), d)
-Interval(x::Union{BareInterval,Interval}) = interval(bareinterval(x))
+Interval{T}(x::Interval) where {T<:NumTypes} = convert(Interval{T}, x) # needed to resolve method ambiguity
+# Interval{T}(x) where {T<:NumTypes} = convert(Interval{T}, x)
+# Interval{T}(x::Interval{T}) where {T<:NumTypes} = convert(Interval{T}, x) # needed to resolve method ambiguity
 
 #
 

@@ -326,7 +326,7 @@ function Base.:^(xx::Interval, qq::Interval)
 end
 Base.:^(x::Interval, y::Real) = ^(promote(x, y)...)
 Base.:^(x::Real, y::Interval) = ^(promote(x, y)...)
-# needed to resolve ambiguities
+# needed to resolve method ambiguities
 Base.:^(x::Interval, n::Integer) = x ^ (n//1)
 for S ∈ (:Rational, :AbstractFloat)
     @eval function Base.:^(x::Interval{T}, y::$S) where {T<:NumTypes}

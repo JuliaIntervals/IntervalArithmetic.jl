@@ -108,4 +108,4 @@ intersect_interval(interval(1, 2), interval(2))
 
 ## Custom interval bounds type
 
-A `BareInterval{T}` or `Interval{T}` has the restriction `T <: Union{Rational,AbstractFloat}` which is type for the bounds of the interval. Supposing one wishes to use their own numeric type `MyNumType <: Union{Rational,AbstractFloat}`, they must provide their own arithmetic operations (with correct rounding!).
+A `BareInterval{T}` or `Interval{T}` have the restriction `T <: Union{Rational,AbstractFloat}` which is the parametric type for the bounds of the interval. Supposing one wishes to use their own numeric type `MyNumType <: Union{Rational,AbstractFloat}`, they must provide their own arithmetic operations (with correct rounding!).
