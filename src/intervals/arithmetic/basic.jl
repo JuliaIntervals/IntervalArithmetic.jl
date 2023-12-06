@@ -193,6 +193,16 @@ Implement the rational division; this is semantically equivalent to `a / b`.
 
 //(a::Interval, b::Interval) = /(a, b)
 
+# Arithmetic operations with intervals yield guaranteed results
+for (T, fc) in ((:BareInterval, :(bareinterval)), (:Interval, :(interval)))
+    for op in (:+, :-, :*, :/, ://)
+        @eval begin
+            $(op)(n::Integer, x::$T) = $(op)($fc(n), x)
+            $(op)(x::$T, n::Integer) = $(op)(x, $fc(n))
+        end
+    end
+end
+
 """
     muladd(a::BareInterval, b::BareInterval c::BareInterval)
     muladd(a::Interval, b::Interval c::Interval)
