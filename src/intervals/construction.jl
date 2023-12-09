@@ -245,7 +245,7 @@ true
 ```
 """
 atomic(::Type{T}, x::AbstractString) where {T<:NumTypes} = parse(BareInterval{T}, x)
-atomic(::Type{T}, x::T) where {T<:NumTypes} = atomic(T, string(x))
+atomic(::Type{T}, x) where {T<:NumTypes} = atomic(T, string(x))
 
 # promotion
 
@@ -593,6 +593,9 @@ function Base.convert(::Type{Interval{T}}, x::Complex{<:Interval}) where {T<:Num
     return convert(Interval{T}, real(x))
 end
 
+Base.convert(::Type{Interval{T}}, x::AbstractIrrational) where {T<:NumTypes} =
+    interval(T, x) # always guaranteed since an `AbstractIrrational` is a defined fixed constant
+
 function Base.convert(::Type{Interval{T}}, x::Real) where {T<:NumTypes}
     y = interval(T, x)
     return _unsafe_interval(bareinterval(y), decoration(y), false)
@@ -601,4 +604,68 @@ end
 function Base.convert(::Type{Interval{T}}, x::Complex) where {T<:NumTypes}
     iszero(imag(x)) || return throw(DomainError(x, "imaginary part must be zero"))
     return convert(Interval{T}, real(x))
+end
+
+
+
+
+
+# macro
+
+"""
+    @interval(T, expr)
+    @interval(T, expr1, expr2)
+
+Walk through an expression and wrap each argument of functions with the internal
+constructor [`atomic`](@ref).
+
+# Examples
+
+```jldoctest
+julia> setdisplay(:full);
+
+julia> @macroexpand IntervalArithmetic.@interval Float64 sin(1)
+:(sin(IntervalArithmetic.interval(IntervalArithmetic.atomic(Float64, 1))))
+
+julia> IntervalArithmetic.@interval Float64 sin(1) exp(1)
+Interval{Float64}(0.8414709848078965, 2.7182818284590455, com)
+```
+"""
+macro interval(T, expr)
+    return _wrap_interval(T, expr)
+end
+
+macro interval(T, expr1, expr2)
+    x = _wrap_interval(T, expr1)
+    y = _wrap_interval(T, expr2)
+    return :(interval($(esc(T)), $x, $y))
+end
+
+_wrap_interval(T::Symbol, x) = :(interval(atomic($(esc(T)), $x)))
+
+_wrap_interval(T::Symbol, x::Symbol) = :(interval(atomic($(esc(T)), $(esc(x)))))
+
+function _wrap_interval(T::Symbol, expr::Expr)
+    if expr.head ∈ (:(.), :ref, :macrocall) # a.i, or a[i], or BigInt
+        return :(interval($(esc(T)), $(esc(expr)), $(esc(expr))))
+    end
+
+    new_expr = copy(expr)
+
+    first = 1 # where to start processing arguments
+
+    if expr.head === :call
+        first = 2 # skip operator
+        if expr.args[1] ∉ (:+, :-, :*, :/, :^)
+            new_expr.args[1] = :($(esc(expr.args[1]))) # escape functions
+        end
+    end
+
+    for (i, arg) ∈ enumerate(expr.args)
+        if i ≥ first
+            new_expr.args[i] = _wrap_interval(T, arg)
+        end
+    end
+
+    return new_expr
 end
