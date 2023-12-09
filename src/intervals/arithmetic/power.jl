@@ -32,6 +32,24 @@ Base.@assume_effects :terminates_locally function _positive_power_by_squaring(x:
     return y
 end
 
+"""
+    pown(x, n)
+
+Implement the `pown` function of the IEEE Standard 1788-2015 (Table 9.1).
+
+# Examples
+
+```jldoctest
+julia> pown(bareinterval(2, 3), 2)
+[4.0, 9.0]
+
+julia> pown(interval(-1, 1), 3)
+[-1.0, 1.0]_com
+
+julia> pown(interval(-1, 1), -3)
+(-∞, ∞)_trv
+```
+"""
 pown(x::BareInterval{T}, n::Integer) where {T<:NumTypes} = BareInterval{T}(pown(_bigequiv(x), n))
 
 function pown(a::BareInterval{BigFloat}, n::Integer)
@@ -82,9 +100,27 @@ function pown(a::BareInterval{BigFloat}, n::Integer)
 end
 
 """
-    ^(x::BareInterval, y::BareInterval)
+    ^(x, y)
+
+Compute the power of the positive real part of `x` by `y`. In particular, even
+if `y` is a thin integer, this is not equivalent to `pown(x, sup(y))`.
 
 Implement the `pow` function of the IEEE Standard 1788-2015 (Table 9.1).
+
+See also: [`pown`](@ref).
+
+# Examples
+
+```jldoctest
+julia> bareinterval(2, 3) ^ bareinterval(2)
+[4.0, 9.0]
+
+julia> interval(-1, 1) ^ interval(3)
+[0.0, 1.0]_com
+
+julia> interval(-1, 1) ^ interval(-3)
+[1.0, ∞)_trv
+```
 """
 Base.:^(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes} = BareInterval{T}(_bigequiv(x)^y)
 
@@ -218,6 +254,8 @@ end
     rootn(a::BareInterval, n::Integer)
 
 Compute the real `n`-th root of `a`.
+
+Implement the `rootn` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function rootn(a::BareInterval{BigFloat}, n::Integer)
     isempty_interval(a) && return a
