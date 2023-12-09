@@ -31,7 +31,6 @@ Interval{Rational{Int64}}(1//1, 85563208//27235615, com)
 julia> 0.1..0.3
 Interval{Float64}(0.1, 0.3, com)
 ```
-```
 """
 .. = interval
 
