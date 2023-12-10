@@ -7,8 +7,6 @@ include("real_interface.jl")
 
 # Rounding
 include("rounding.jl")
-    export IntervalRounding
-include("rounding_macros.jl")
 
 # Flavors
 include("flavors.jl")

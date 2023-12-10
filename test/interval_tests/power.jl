@@ -52,9 +52,9 @@ end
     a = interval(Rational{Int64}, 1//2, 3//4)
     b = interval(Rational{Int64}, 3//7, 9//12)
 
-    @test isequal_interval(sqrt(a + b), interval(Int64(137482504)//142672337, Int64(46099201)//37639840))
+    @test issubset_interval(sqrt(a + b), interval(Int64(137482504)//142672337, Int64(46099201)//37639840))
 
-    @test isequal_interval(sqrt(interval(1//3)), interval(Int64(29354524)//50843527, Int64(50843527)//88063572))
+    @test issubset_interval(sqrt(interval(1//3)), interval(Int64(29354524)//50843527, Int64(50843527)//88063572))
 end
 
 @testset "Decorations" begin

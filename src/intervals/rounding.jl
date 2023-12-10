@@ -1,287 +1,11 @@
-#= Design summary:
-
-This is a so-called "traits-based" design, as follows.
-
-The main body of the file defines versions of elementary functions with all allowed
-interval rounding types, e.g.
-+(IntervalRounding{:fast}(), a, b, RoundDown)
-+(IntervalRounding{:tight}(), a, b, RoundDown)
-+(IntervalRounding{:accurate}(), a, b, RoundDown)
-+(IntervalRounding{:slow}(), a, b, RoundDown)
-+(IntervalRounding{:none}(), a, b, RoundDown)
-
-The current allowed rounding types are
-- :fast  # fast, tight (correct) rounding with errorfree arithmetic via FastRounding.jl
-- :tight  # tight (correct) rounding with improved errorfree arithmetic via RoundingEmulator.jl
-- :accurate  # fast "accurate" rounding using prevfloat and nextfloat  (slightly wider than needed)
-- :slow  # tight (correct) rounding by changing rounding mode (slow)
-- :none  # no rounding (for speed comparisons; no enclosure is guaranteed)
-
-All function on intervals are then defined by default as
-    +(IntervalArithmetic.interval_rounding(), a, b, RoundDown)
-
-By rededfining `IntervalArithmetic.interval_rounding()`, the user can
-select the default.
-
-Moreover the `:slow` rounding mode is used as a fallback if the chosen
-rounding mode is not available.
-This is done by defining the generic case as
-    +(::IntervalRounding, a, b, RoundDown) = +(IntervalRounding{:slow}(), a, b, RoundDown)
-=#
-
-
-"""
-    IntervalRounding{T}
-
-Interval rounding trait type.
-
-Allowed rounding types are
-- `:tight`: fast, tight (correct) rounding with errorfree arithmetic via
-            FastRounding.jl.
-- `:accurate`: fast "accurate" rounding using prevfloat and nextfloat
-               (slightly wider than needed).
-- `:slow`: tight (correct) rounding by changing rounding mode (slow).
-- `:none`: no rounding (for speed comparisons; no enclosure is guaranteed).
-"""
-struct IntervalRounding{T} end
-
-## Default
-const rounding_types = (:fast, :tight, :accurate, :slow, :none)
-
-interval_rounding() = IntervalRounding{:tight}()
-
-# BigFloat conversion
-Base.convert(::Type{BigFloat}, x, rounding_mode::RoundingMode) =
-    setrounding(BigFloat, rounding_mode) do
-        convert(BigFloat, x)
-    end
-
-# Parsing from string
-Base.parse(::Type{T}, x::AbstractString, rounding_mode::RoundingMode) where T = setrounding(Float64, rounding_mode) do
-    return float(parse(T, x))
-end
-
-# use higher precision float parser to get round issues on Windows
-@static if Sys.iswindows()
-    function Base.parse(::Type{Float64}, s::AbstractString, r::RoundingMode)
-        a = setprecision(BigFloat, 53) do
-                setrounding(BigFloat, r) do
-                    parse(BigFloat, s)   # correctly takes account of rounding mode
-                end
-            end
-
-        return Float64(a, r)
-    end
-
-    function Base.parse(::Type{T}, s::AbstractString, r::RoundingMode) where {T <: Union{Float16, Float32}}
-        return T(parse(Float64, s, r), r)
-    end
-end
-
-
-## Functions that are the same for all rounding types:
-Base.:+(a::T, ::RoundingMode) where {T<:AbstractFloat} =  a  # ignore rounding
-Base.:-(a::T, ::RoundingMode) where {T<:AbstractFloat} = -a  # ignore rounding
-Base.zero(::Interval{T}, ::RoundingMode) where {T<:AbstractFloat} = zero(T)
-Base.zero(::Type{T}, ::RoundingMode) where {T<:AbstractFloat} = zero(T)
-
-## Rationals
-# TODO Restore full support for rational intervals
-# no-ops for rational rounding:
-for f ∈ (:+, :-, :*, :/)
-    @eval Base.$f(a::T, b::T, ::RoundingMode) where {T<:Rational} = $f(a, b)
-end
-
-function Base.sqrt(a::T, rounding_mode::RoundingMode) where {T<:Rational}
-    setrounding(float(T), rounding_mode) do
-        return sqrt(float(a))
-    end
-end
-
-
-for f ∈ (:exp2, :exp10, :cbrt)
-    @eval function Base.$f(x::BigFloat, r::RoundingMode)  # add BigFloat functions with rounding:
-        setrounding(BigFloat, r) do
-            $f(x)
-        end
-    end
-end
-
-
-rounding_directions = [
-    (:down, RoundingMode{:Down}, prevfloat),
-    (:up, RoundingMode{:Up}, nextfloat)
-]
-
-for (dir, RoundingDirection, outfloat) ∈ rounding_directions
-    #= :fast and :tight for functions supported by FastRounding.jl
-        and RoundingEmulator.jl respectively =#
-    # NOTE RoundingEmulator.jl only works with Float32 and Float64
-    for (op, f) ∈ ( (:+, :add), (:-, :sub), (:*, :mul), (:/, :div) )
-        @eval function Base.$op(::IntervalRounding{:fast}, a, b, ::$RoundingDirection)
-            return FastRounding.$(Symbol(f, "_round"))(a, b, $RoundingDirection())
-        end
-
-        @eval function Base.$op(
-                ::IntervalRounding{:tight}, a::T, b::T,
-                ::$RoundingDirection) where {T<:Union{Float32, Float64}}
-            return RoundingEmulator.$(Symbol(f, "_", dir))(a, b)
-        end
-    end
-
-    # Sqrt
-    @eval function Base.sqrt(::IntervalRounding{:fast}, a, ::$RoundingDirection)
-        return FastRounding.sqrt_round(a, $dir)
-    end
-
-    @eval function Base.sqrt(::IntervalRounding{:tight}, a::Union{Float32, Float64}, ::$RoundingDirection)
-        return RoundingEmulator.$(Symbol("sqrt_", dir))(a)
-    end
-
-    # Inverse
-    @eval function Base.inv(::IntervalRounding{:fast}, a, ::$RoundingDirection)
-        return FastRounding.inv_round(a, $dir)
-    end
-
-    @eval function Base.inv(::IntervalRounding{:tight}, a::Union{Float32, Float64}, ::$RoundingDirection)
-        return RoundingEmulator.$(Symbol("div_", dir))(one(a), a)
-    end
-
-    #= :accurate and :slow =#
-    # Power
-    @eval function Base.:^(::IntervalRounding{:accurate}, a::AbstractFloat, b, ::$RoundingDirection)
-        return $outfloat(a^b)
-    end
-
-    @eval function Base.:^(::IntervalRounding{:slow}, a::BigFloat, b::AbstractFloat, ::$RoundingDirection)
-        setrounding(BigFloat, $RoundingDirection()) do
-            return a^b
-        end
-    end
-
-    # Correct rounding of other floats must pass through BigFloat
-    @eval function Base.:^(::IntervalRounding{:slow}, a::T, b, ::$RoundingDirection) where {T<:AbstractFloat}
-        setprecision(BigFloat, 53) do
-            return T(^(IntervalRounding{:slow}, BigFloat(a), b, $RoundingDirection()))
-        end
-    end
-
-    # Binary function
-    for f ∈ (:+, :-, :*, :/, :^, :atan)
-        @eval function Base.$f(::IntervalRounding{:accurate}, a::T, b::T, ::$RoundingDirection) where {T<:AbstractFloat}
-            return $outfloat($f(a, b))
-        end
-
-        @eval function Base.$f(::IntervalRounding{:slow}, a::T, b::T, ::$RoundingDirection) where {T<:AbstractFloat}
-            setrounding(T, $RoundingDirection()) do
-                return $f(a, b)
-            end
-        end
-    end
-
-    # Unary functions not in CRlibm
-    for f ∈ (:sqrt, :inv, :cot, :sec, :csc, :acot,
-            :tanh, :coth, :sech, :csch, :asinh, :acosh, :atanh, :acoth)
-        @eval function Base.$f(::IntervalRounding{:accurate}, a::AbstractFloat, ::$RoundingDirection)
-            return $outfloat($f(a))
-        end
-
-        @eval function Base.$f(::IntervalRounding{:slow}, a::T, ::$RoundingDirection) where {T<:AbstractFloat}
-            setrounding(T, $RoundingDirection()) do
-                return $f(a)
-            end
-        end
-    end
-
-    # Functions defined in CRlibm
-    for f ∈ CRlibm.functions
-        if isdefined(Base, f)
-            @eval function Base.$f(::IntervalRounding{:accurate}, a::AbstractFloat, ::$RoundingDirection)
-                return $outfloat($f(a))
-            end
-
-            @eval function Base.$f(::IntervalRounding{:slow}, a::AbstractFloat, ::$RoundingDirection)
-                return CRlibm.$f(a, $RoundingDirection())
-            end
-        else
-            @eval function $f(::IntervalRounding{:accurate}, a::AbstractFloat, ::$RoundingDirection)
-                return $outfloat($f(a))
-            end
-
-            @eval function $f(::IntervalRounding{:slow}, a::AbstractFloat, ::$RoundingDirection)
-                return CRlibm.$f(a, $RoundingDirection())
-            end
-        end
-    end
-end
-
-#= Default definitions, fallback and :none =#
-# Unary functions
-for f ∈ vcat(CRlibm.functions, [:sqrt, :inv, :cot, :sec, :csc, :acot, :tanh, :coth, :sech, :csch, :asinh, :acosh, :atanh, :acoth])
-    if isdefined(Base, f)
-        @eval Base.$f(a::AbstractFloat, r::RoundingMode) = $f(interval_rounding(), a, r)
-        @eval Base.$f(a::Real, r::RoundingMode) = $f(interval_rounding(), float(a), r)
-
-        # Fallback to :slow if the requested interval rounding is unavailable
-        @eval function Base.$f(::IntervalRounding, a, r::RoundingMode)
-            return $f(IntervalRounding{:slow}(), a, r)
-        end
-
-        # No rounding
-        @eval function Base.$f(::IntervalRounding{:none}, a, r::RoundingMode)
-            return $f(a)
-        end
-    else
-        @eval $f(a::AbstractFloat, r::RoundingMode) = $f(interval_rounding(), a, r)
-        @eval $f(a::Real, r::RoundingMode) = $f(interval_rounding(), float(a), r)
-
-        # Fallback to :slow if the requested interval rounding is unavailable
-        @eval function $f(::IntervalRounding, a, r::RoundingMode)
-            return $f(IntervalRounding{:slow}(), a, r)
-        end
-
-        # No rounding
-        @eval function $f(::IntervalRounding{:none}, a, r::RoundingMode)
-            return $f(a)
-        end
-    end
-end
-
-# Binary functions
-for f ∈ (:+, :-, :*, :/, :^, :atan)
-    @eval Base.$f(a::T, b::T, r::RoundingMode) where {T<:AbstractFloat} = $f(interval_rounding(), a, b, r)
-    @eval Base.$f(a::Real, b::AbstractFloat, r::RoundingMode) = $f(interval_rounding(), promote(a, b)..., r)
-    @eval Base.$f(a::AbstractFloat, b::Real, r::RoundingMode) = $f(interval_rounding(), promote(a, b)..., r)
-    @eval Base.$f(a::AbstractFloat, b::AbstractFloat, r::RoundingMode) = $f(interval_rounding(), promote(a, b)..., r)
-    @eval Base.$f(a::Real, b::Real, r::RoundingMode) = $f(interval_rounding(), float(a), float(b), r)
-
-    # Fallback to :slow if the requested interval rounding is unavailable
-    @eval function Base.$f(::IntervalRounding, a, b, r::RoundingMode)
-        return $f(IntervalRounding{:slow}(), a, b, r)
-    end
-
-    # No rounding
-    @eval function Base.$f(::IntervalRounding{:none}, a, b, r::RoundingMode)
-        return $f(a, b)
-    end
-end
-
 # prevents multiple threads from calling `setprecision` concurrently, used in `_bigequiv`
 const precision_lock = ReentrantLock()
 
 """
     _bigequiv(x)
 
-Create a `BigFloat` equivalent with the same underlying precision as `x`.
+Create a `BigFloat` with the same underlying precision.
 """
-function _bigequiv(x::BareInterval{T}) where {T<:NumTypes}
-    lock(precision_lock) do
-        setprecision(precision(float(T))) do
-            return BareInterval{BigFloat}(x)
-        end
-    end
-end
-
 function _bigequiv(x::T) where {T<:NumTypes}
     lock(precision_lock) do
         setprecision(precision(float(T))) do
@@ -289,3 +13,225 @@ function _bigequiv(x::T) where {T<:NumTypes}
         end
     end
 end
+
+_bigequiv(x::BigFloat) = x
+
+
+
+
+
+"""
+    IntervalRounding
+
+Interval rounding type.
+
+Available rounding types:
+- `:tight`: rounding via `prevfloat` and `nextfloat` (cf. [RoundingEmulator.jl](https://github.com/matsueushi/RoundingEmulator.jl)).
+- `:slow`: rounding via `setrounding`.
+- `:none`: no rounding (non-rigorous numerics).
+"""
+struct IntervalRounding{T} end
+
+interval_rounding() = IntervalRounding{:tight}()
+
+#
+
+for (f, fname) ∈ ((:+, :add), (:-, :sub), (:*, :mul), (:/, :div))
+    g = Symbol(:_, fname, :_round)
+
+    @eval begin
+        $g(x::T, y::T, r::RoundingMode) where {T<:AbstractFloat} = $g(interval_rounding(), x, y, r)
+        $g(x::T, y::T, ::RoundingMode) where {T<:Rational} = $f(x, y) # exact operation
+
+        $g(::IntervalRounding, x::T, y::T, r::RoundingMode) where {T<:AbstractFloat} =
+            $g(IntervalRounding{:slow}(), x, y, r)
+        $g(::IntervalRounding{:fast}, x::T, y::T, r::RoundingMode) where {T<:Union{Float32,Float64}} =
+            FastRounding.$(Symbol(fname, "_round"))(x, y, r)
+        $g(::IntervalRounding{:tight}, x::T, y::T, ::RoundingMode{:Down}) where {T<:Union{Float32,Float64}} =
+            RoundingEmulator.$(Symbol(fname, :_down))(x, y)
+        $g(::IntervalRounding{:tight}, x::T, y::T, ::RoundingMode{:Up}) where {T<:Union{Float32,Float64}} =
+            RoundingEmulator.$(Symbol(fname, :_up))(x, y)
+        function $g(::IntervalRounding{:slow}, x::T, y::T, r::RoundingMode) where {T<:AbstractFloat}
+            bigx = _bigequiv(x)
+            bigy = _bigequiv(y)
+            return setrounding(BigFloat, r) do
+                return $f(bigx, bigy)
+            end
+        end
+        $g(::IntervalRounding{:none}, x::T, y::T, ::RoundingMode) where {T<:AbstractFloat} = $f(x, y)
+    end
+end
+
+#
+
+_pow_round(x::T, y::T, r::RoundingMode) where {T<:AbstractFloat} = _pow_round(interval_rounding(), x, y, r)
+_pow_round(x::AbstractFloat, n::Integer, r::RoundingMode) = _pow_round(promote(x, n)..., r)
+_pow_round(x::T, y::T, ::RoundingMode) where {T<:Rational} = ^(x, y) # exact operation
+_pow_round(x::Rational, n::Integer, ::RoundingMode) = ^(x, n) # exact operation
+
+_pow_round(::IntervalRounding, x::T, y::T, r::RoundingMode) where {T<:AbstractFloat} =
+    _pow_round(IntervalRounding{:slow}(), x, y, r)
+function _pow_round(::IntervalRounding{:slow}, x::T, y::T, r::RoundingMode) where {T<:AbstractFloat}
+    bigx = _bigequiv(x)
+    bigy = _bigequiv(y)
+    return setrounding(BigFloat, r) do
+        return ^(bigx, bigy)
+    end
+end
+_pow_round(::IntervalRounding{:none}, x::T, y::T, ::RoundingMode) where {T<:AbstractFloat} = ^(x, y)
+
+#
+
+_inv_round(x::AbstractFloat, r::RoundingMode) = _inv_round(interval_rounding(), x, r)
+_inv_round(x::Rational, ::RoundingMode) = inv(x) # exact operation
+
+_inv_round(::IntervalRounding, x::AbstractFloat, r::RoundingMode) =
+    _inv_round(IntervalRounding{:slow}(), x, r)
+_inv_round(::IntervalRounding{:fast}, x::Union{Float32,Float64}, r::RoundingMode) =
+    FastRounding.inv_round(x, r)
+_inv_round(::IntervalRounding{:tight}, x::Union{Float32,Float64}, ::RoundingMode{:Down}) =
+    RoundingEmulator.div_down(one(x), x)
+_inv_round(::IntervalRounding{:tight}, x::Union{Float32,Float64}, ::RoundingMode{:Up}) =
+    RoundingEmulator.div_up(one(x), x)
+function _inv_round(::IntervalRounding{:slow}, x::AbstractFloat, r::RoundingMode)
+    bigx = _bigequiv(x)
+    return setrounding(BigFloat, r) do
+        return inv(bigx)
+    end
+end
+_inv_round(::IntervalRounding{:none}, x::AbstractFloat, ::RoundingMode) = inv(x)
+
+#
+
+_sqrt_round(x::NumTypes, r::RoundingMode) = _sqrt_round(interval_rounding(), float(x), r) # rationals are converted to floats
+
+_sqrt_round(::IntervalRounding, x::AbstractFloat, r::RoundingMode) =
+    _sqrt_round(IntervalRounding{:slow}(), x, r)
+_sqrt_round(::IntervalRounding{:fast}, x::Union{Float32,Float64}, r::RoundingMode) =
+    FastRounding.sqrt_round(x, r)
+_sqrt_round(::IntervalRounding{:tight}, x::Union{Float32,Float64}, ::RoundingMode{:Down}) =
+    RoundingEmulator.sqrt_down(x)
+_sqrt_round(::IntervalRounding{:tight}, x::Union{Float32,Float64}, ::RoundingMode{:Up}) =
+    RoundingEmulator.sqrt_up(x)
+function _sqrt_round(::IntervalRounding{:slow}, x::AbstractFloat, r::RoundingMode)
+    bigx = _bigequiv(x)
+    return setrounding(BigFloat, r) do
+        return sqrt(bigx)
+    end
+end
+_sqrt_round(::IntervalRounding{:none}, x::AbstractFloat, ::RoundingMode) = sqrt(x)
+
+#
+
+_atan_round(x::T, y::T, r::RoundingMode) where {T<:NumTypes} = _atan_round(interval_rounding(), promote(float(x), float(y))..., r) # rationals are converted to floats
+
+_atan_round(::IntervalRounding, x::T, y::T, r::RoundingMode) where {T<:AbstractFloat} =
+    _atan_round(IntervalRounding{:slow}(), x, y, r)
+function _atan_round(::IntervalRounding{:slow}, x::T, y::T, r::RoundingMode) where {T<:AbstractFloat}
+    bigx = _bigequiv(x)
+    bigy = _bigequiv(y)
+    return setrounding(BigFloat, r) do
+        return atan(bigx, bigy)
+    end
+end
+_atan_round(::IntervalRounding{:none}, x::T, y::T, ::RoundingMode) where {T<:AbstractFloat} = atan(x, y)
+
+#
+
+for f ∈ [:cbrt, :exp2, :exp10, :cot, :sec, :csc, :acot, :tanh, :coth, :sech, :csch, :asinh, :acosh, :atanh, :acoth]
+    g = Symbol(:_, f, :_round)
+
+    @eval begin
+        $g(x::NumTypes, r::RoundingMode) = $g(interval_rounding(), float(x), r) # rationals are converted to floats
+
+        $g(::IntervalRounding, x::AbstractFloat, r::RoundingMode) = $g(IntervalRounding{:slow}(), x, r)
+        function $g(::IntervalRounding{:slow}, x::AbstractFloat, r::RoundingMode)
+            bigx = _bigequiv(x)
+            return setrounding(BigFloat, r) do
+                return $f(bigx)
+            end
+        end
+        $g(::IntervalRounding{:none}, x::AbstractFloat, ::RoundingMode) = $f(x)
+    end
+end
+
+#
+
+for f ∈ CRlibm.functions
+    if isdefined(Base, f)
+        g = Symbol(:_, f, :_round)
+
+        @eval begin
+            $g(x::NumTypes, r::RoundingMode) = $g(interval_rounding(), float(x), r) # rationals are converted to floats
+
+            $g(::IntervalRounding, x::AbstractFloat, r::RoundingMode) = $g(IntervalRounding{:slow}(), x, r)
+            $g(::IntervalRounding{:slow}, x::AbstractFloat, r::RoundingMode) = CRlibm.$f(x, r)
+            $g(::IntervalRounding{:none}, x::AbstractFloat, ::RoundingMode) = CRlibm.$f(x)
+        end
+    end
+end
+
+
+
+
+
+"""
+    @round(T, ex1, ex2)
+
+Macro for internal use that creates an interval by rounding down `ex1` and
+rounding up `ex2`. Each expression may consist of only a *single* operation that
+needs rounding, e.g. `a.lo + b.lo` or `sin(a.lo)`. It also handles `min(...)`
+and `max(...)`, where the arguments are each themselves single operations.
+
+The macro uses the internal `_round_expr` function to transform e.g. `a + b` into
+`+(a, b, RoundDown)`.
+"""
+macro round(T, ex1, ex2)
+    return :(_unsafe_bareinterval($(esc(T)), $(_round_expr(ex1, RoundDown)), $(_round_expr(ex2, RoundUp))))
+end
+
+"""
+    _round_expr(ex::Expr, rounding_mode::RoundingMode)
+
+Transforms a single expression by applying a rounding mode, e.g.
+
+- `a + b` into `+(a, b, RoundDown)`
+- `sin(a)` into `sin(a, RoundDown)`
+"""
+function _round_expr(ex::Expr, r::RoundingMode)
+    if ex.head == :call
+        op = ex.args[1]
+        if op ∈ (:min, :max)
+            mapped_args = _round_expr.(ex.args[2:end], r)
+            return :( $op($(mapped_args...)) )
+        elseif op ∈ (:typemin, :typemax, :one, :zero)
+            return :( $(esc(ex)) )
+        elseif length(ex.args) == 3 # binary operator
+            if op == :+
+                return :( _add_round($(esc(ex.args[2])), $(esc(ex.args[3])), $r) )
+            elseif op == :-
+                return :( _sub_round($(esc(ex.args[2])), $(esc(ex.args[3])), $r) )
+            elseif op == :*
+                return :( _mul_round($(esc(ex.args[2])), $(esc(ex.args[3])), $r) )
+            elseif op == :/
+                return :( _div_round($(esc(ex.args[2])), $(esc(ex.args[3])), $r) )
+            elseif op == :^
+                return :( _pow_round($(esc(ex.args[2])), $(esc(ex.args[3])), $r) )
+            elseif op == :_unbounded_mul
+                return :( _unbounded_mul($(esc(ex.args[2])), $(esc(ex.args[3])), $r) )
+            else
+                op2 = Symbol(:_, op, :_round)
+                return :( $op2($(esc(ex.args[2])), $(esc(ex.args[3])), $r) )
+            end
+        elseif op ∈ (:+, :-) # unary operator that does not need rounding
+            return :( $(esc(ex)) )
+        else # unary operator
+            op2 = Symbol(:_, op, :_round)
+            return :( $op2($(esc(ex.args[2])), $r) )
+        end
+    else
+        return :( $(esc(ex)) )
+    end
+end
+
+_round_expr(ex, _) = ex

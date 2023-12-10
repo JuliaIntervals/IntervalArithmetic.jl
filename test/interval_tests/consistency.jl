@@ -32,7 +32,6 @@
         @test isequal_interval(interval(0.25) - one(c)/interval(4), zero(c))
         @test isequal_interval(emptyinterval(a) - interval(0, 1), emptyinterval(a))
         @test isequal_interval(interval(0, 1) - emptyinterval(a), emptyinterval(a))
-        @test isequal_interval(a*b, interval(*(inf(a), inf(b), RoundDown), *(sup(a), sup(b), RoundUp)))
         @test isequal_interval(interval(0, 1) * emptyinterval(a), emptyinterval(a))
         @test isequal_interval(a * interval(0), zero(a))
     end
@@ -275,16 +274,6 @@
         @test issubset_interval(log(interval(-2, 5)), interval(-Inf, log(interval(5))))
     end
 
-    # @testset "Interval rounding tests" begin
-    #     # setrounding(Interval, :wide)
-    #     @test rounding(Interval) == :wide
-    #
-    #     @test_throws ArgumentError # setrounding(Interval, :hello)
-    #
-    #     # setrounding(Interval, :narrow)
-    #     @test rounding(Interval) == :narrow
-    # end
-
     @testset "Interval power of an interval" begin
         a = interval(1, 2)
         b = interval(3, 4)
@@ -317,21 +306,21 @@
     end
 
     @testset "Type stability" begin
-        for T in (Float32, Float64, BigFloat)
+        for T ∈ (Float32, Float64, BigFloat)
 
             xs = [interval(3, 4), interval(0, 4), interval(0), interval(-4, 0), interval(-4, 4), interval(-Inf, 4), interval(4, Inf), interval(-Inf, Inf)]
 
-            for x in xs
-                for y in xs
+            for x ∈ xs
+                for y ∈ xs
                     xx = Interval{T}(x)
                     yy = Interval{T}(y)
 
-                    for op in (+, -, *, /, atan)
-                        # @inferred op(x, y)  TODO solve the problem for *
+                    for op ∈ (+, -, *, /, atan)
+                        @inferred op(x, y)
                     end
                 end
 
-                for op in (sin, cos, exp, log, tan, abs, mid, diam)
+                for op ∈ (sin, cos, exp, log, tan, abs, mid, diam)
                     @inferred op(x)
                 end
             end

@@ -23,7 +23,6 @@ end
 
 @testset "cos" begin
     @test isequal_interval(cos(interval(0.5)), interval(0.87758256189037265, 0.87758256189037276))
-    @test isequal_interval(cos(interval(0.5, 1.67)), interval(cos(1.67, RoundDown), cos(0.5, RoundUp)))
     @test isequal_interval(cos(interval(2.1, 5.6)), interval(-1.0, 0.7755658785102496))
     @test isequal_interval(cos(interval(0.5, 8.5)), interval(-1.0, 1.0))
     @test isequal_interval(cos(interval(1.67, 3.2)), interval(-1.0, -0.09904103659872801))

@@ -74,7 +74,7 @@ function Base.:*(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
     isthinzero(x) && return x
     isthinzero(y) && return y
     isbounded(x) & isbounded(y) && return _mult(*, x, y)
-    return _mult((x, y, r) -> _unbounded_mult(x, y, r), x, y)
+    return _mult(_unbounded_mul, x, y)
 end
 Base.:*(x::BareInterval, y::BareInterval) = *(promote(x, y)...)
 
@@ -87,26 +87,28 @@ end
 
 # helper functions for multiplication
 
-function _unbounded_mult(x::T, y::T, r::RoundingMode) where {T<:NumTypes}
+function _unbounded_mul(x::T, y::T, r::RoundingMode) where {T<:NumTypes}
     iszero(x) && return sign(y) * zero_times_infinity(T)
     iszero(y) && return sign(x) * zero_times_infinity(T)
-    return *(x, y, r)
+    return _mul_round(x, y, r)
 end
 
-function _mult(op, a::BareInterval{T}, b::BareInterval{T}) where {T<:NumTypes}
-    if inf(b) ≥ 0
-        inf(a) ≥ 0 && return @round(T, op(inf(a), inf(b)), op(sup(a), sup(b)))
-        sup(a) ≤ 0 && return @round(T, op(inf(a), sup(b)), op(sup(a), inf(b)))
-        return @round(T, inf(a)*sup(b), sup(a)*sup(b)) # 0 ∈ a
-    elseif sup(b) ≤ 0
-        inf(a) ≥ 0 && return @round(T, op(sup(a), inf(b)), op(inf(a), sup(b)))
-        sup(a) ≤ 0 && return @round(T, op(sup(a), sup(b)), op(inf(a), inf(b)))
-        return @round(T, sup(a)*inf(b), inf(a)*inf(b)) # 0 ∈ a
-    else
-        inf(a) > 0 && return @round(T, op(sup(a), inf(b)), op(sup(a), sup(b)))
-        sup(a) < 0 && return @round(T, op(inf(a), sup(b)), op(inf(a), inf(b)))
-        return @round(T, min( op(inf(a), sup(b)), op(sup(a), inf(b)) ),
-                         max( op(inf(a), inf(b)), op(sup(a), sup(b)) ))
+for f ∈ (:_unbounded_mul, :*)
+    @eval function _mult(::typeof($f), x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
+        if inf(y) ≥ 0
+            inf(x) ≥ 0 && return @round(T, $f(inf(x), inf(y)), $f(sup(x), sup(y)))
+            sup(x) ≤ 0 && return @round(T, $f(inf(x), sup(y)), $f(sup(x), inf(y)))
+            return @round(T, inf(x)*sup(y), sup(x)*sup(y))
+        elseif sup(y) ≤ 0
+            inf(x) ≥ 0 && return @round(T, $f(sup(x), inf(y)), $f(inf(x), sup(y)))
+            sup(x) ≤ 0 && return @round(T, $f(sup(x), sup(y)), $f(inf(x), inf(y)))
+            return @round(T, sup(x)*inf(y), inf(x)*inf(y))
+        else
+            inf(x) > 0 && return @round(T, $f(sup(x), inf(y)), $f(sup(x), sup(y)))
+            sup(x) < 0 && return @round(T, $f(inf(x), sup(y)), $f(inf(x), inf(y)))
+            return @round(T, min( $f(inf(x), sup(y)), $f(sup(x), inf(y)) ),
+                             max( $f(inf(x), inf(y)), $f(sup(x), sup(y)) ))
+        end
     end
 end
 
@@ -147,27 +149,27 @@ Implement the `div` function of the IEEE Standard 1788-2015 (Table 9.1).
 !!! note
     The behavior of `/` is flavor dependent for some edge cases.
 """
-function Base.:/(a::BareInterval{T}, b::BareInterval{T}) where {T<:NumTypes}
-    isempty_interval(a) && return a
-    isempty_interval(b) && return b
-    isthinzero(b) && return div_by_thin_zero(a)
-    if inf(b) > 0 # b strictly positive
-        inf(a) ≥ 0 && return @round(T, inf(a)/sup(b), sup(a)/inf(b))
-        sup(a) ≤ 0 && return @round(T, inf(a)/inf(b), sup(a)/sup(b))
-        return @round(T, inf(a)/inf(b), sup(a)/inf(b)) # 0 ∈ a
-    elseif sup(b) < 0 # b strictly negative
-        inf(a) ≥ 0 && return @round(T, sup(a)/sup(b), inf(a)/inf(b))
-        sup(a) ≤ 0 && return @round(T, sup(a)/inf(b), inf(a)/sup(b))
-        return @round(T, sup(a)/sup(b), inf(a)/sup(b)) # 0 ∈ a
-    else # 0 ∈ b
-        isthinzero(a) && return a
-        if iszero(inf(b))
-            inf(a) ≥ 0 && return @round(T, inf(a)/sup(b), typemax(T))
-            sup(a) ≤ 0 && return @round(T, typemin(T), sup(a)/sup(b))
+function Base.:/(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
+    isempty_interval(x) && return x
+    isempty_interval(y) && return y
+    isthinzero(y) && return div_by_thin_zero(x)
+    if inf(y) > 0
+        inf(x) ≥ 0 && return @round(T, inf(x)/sup(y), sup(x)/inf(y))
+        sup(x) ≤ 0 && return @round(T, inf(x)/inf(y), sup(x)/sup(y))
+        return @round(T, inf(x)/inf(y), sup(x)/inf(y))
+    elseif sup(y) < 0
+        inf(x) ≥ 0 && return @round(T, sup(x)/sup(y), inf(x)/inf(y))
+        sup(x) ≤ 0 && return @round(T, sup(x)/inf(y), inf(x)/sup(y))
+        return @round(T, sup(x)/sup(y), inf(x)/sup(y))
+    else
+        isthinzero(x) && return x
+        if iszero(inf(y))
+            inf(x) ≥ 0 && return @round(T, inf(x)/sup(y), typemax(T))
+            sup(x) ≤ 0 && return @round(T, typemin(T), sup(x)/sup(y))
             return entireinterval(BareInterval{T})
-        elseif sup(b) == 0
-            inf(a) ≥ 0 && return @round(T, typemin(T), inf(a)/inf(b))
-            sup(a) ≤ 0 && return @round(T, sup(a)/inf(b), typemax(T))
+        elseif sup(y) == 0
+            inf(x) ≥ 0 && return @round(T, typemin(T), inf(x)/inf(y))
+            sup(x) ≤ 0 && return @round(T, sup(x)/inf(y), typemax(T))
             return entireinterval(BareInterval{T})
         else
             return entireinterval(BareInterval{T})
@@ -186,16 +188,6 @@ function Base.:/(x::Interval, y::Interval)
 end
 
 Base.:\(x::BareInterval, y::BareInterval) = /(y, x)
-
-"""
-    //(x::BareInterval, y::BareInterval)
-    //(x::Interval, y::Interval)
-
-Implement the rational division; this is semantically equivalent to `x / y`.
-"""
-Base.://(x::BareInterval, y::BareInterval) = /(x, y) # not in the IEEE Standard 1788-2015
-
-Base.://(x::Interval, y::Interval) = /(x, y)
 
 """
     muladd(x::BareInterval, y::BareInterval z::BareInterval)
@@ -269,8 +261,7 @@ function Base.sqrt(x::BareInterval{T}) where {T<:NumTypes}
     domain = _unsafe_bareinterval(T, zero(T), typemax(T))
     x = intersect_interval(x, domain)
     isempty_interval(x) && return x
-    lo, hi = bounds(x)
-    return @round(T, sqrt(lo), sqrt(hi))
+    return @round(T, sqrt(inf(x)), sqrt(sup(x)))
 end
 
 function Base.sqrt(x::Interval{T}) where {T<:NumTypes}

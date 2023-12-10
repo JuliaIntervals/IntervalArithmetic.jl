@@ -14,9 +14,7 @@ end
 
     ## Basic arithmetic
     @test isequal_interval(+a, a)
-    @test isequal_interval(a + b, interval(+(inf(a), inf(b), RoundDown), +(sup(a), sup(b), RoundUp)))
     @test isequal_interval(-a, interval(-sup(a), -inf(a)))
-    @test isequal_interval(a - b, interval(-(inf(a), sup(b), RoundDown), -(sup(a), inf(b), RoundUp)))
     for f in (:+, :-, :*, :/)
         @eval begin
             @test isequal_interval($f(interval(Float64, pi), interval(Float32, pi)),
@@ -28,7 +26,6 @@ end
 
     @test isequal_interval(interval(-30.0,-15.0) / interval(-5.0,-3.0), interval(3.0, 10.0))
     @test isequal_interval(interval(-30,-15) / interval(-5,-3), interval(3.0, 10.0))
-    @test isequal_interval(b/a, interval(/(inf(b), sup(a), RoundDown), /(sup(b), inf(a), RoundUp)))
     @test isequal_interval(a/c, interval(0.025, 4.4))
     @test isequal_interval(c/interval(4.0), interval(6.25e-02, 1e+00))
     @test isequal_interval(c/zero(c), emptyinterval(c))
@@ -116,7 +113,7 @@ end
     @test dist(interval(1, 27)^interval(1/3), interval(1, 3)) < 2*inf(eps(interval(1, 3)))
     @test dist(interval(1, 27)^interval(1/3), interval(1, 3)) < 2*inf(eps(interval(1, 3)))
     @test issubset_interval(interval(1, 3), interval(1, 27)^interval(1//3))
-    @test isequal_interval(interval(0.1, 0.7)^interval(1//3), interval(0.4641588833612778, 0.8879040017426008)) # interval(0.46415888336127786, 0.8879040017426008)
+    @test isequal_interval(interval(0.1, 0.7)^interval(1//3), interval(0.46415888336127786, 0.8879040017426008))
     @test dist(interval(0.1, 0.7)^interval(1/3),
         interval(0.46415888336127786, 0.8879040017426008)) < 2*inf(eps(interval(0.1, 0.7)^interval(1/3)))
 
@@ -152,9 +149,7 @@ end
     @test issubset_interval(log2(interval(BigFloat, 1//2)), log2(interval(1//2)))
     @test isequal_interval(log2(interval(0.25, 0.5)), interval(-2.0, -1.0))
     @test in_interval(log10(big(1//10)), log10(interval(1//10)))
-    @test isequal_interval(log10(interval(0.01, 0.1)), interval(log10(0.01, RoundDown), log10(0.1, RoundUp)))
 
-    @test isequal_interval(log1p(interval(-0.5, 0.1)), interval(log1p(-0.5, RoundDown), log1p(0.1, RoundUp)))
     @test isequal_interval(log1p(interval(-10.0)), emptyinterval())
 end
 

@@ -16,26 +16,43 @@ See also: [`pown`](@ref).
 
 ```jldoctest
 julia> bareinterval(2, 3) ^ bareinterval(2)
-[4.0, 9.0]
+BareInterval{Float64}(4.0, 9.0)
 
 julia> interval(-1, 1) ^ interval(3)
-[0.0, 1.0]_com
+Interval{Float64}(0.0, 1.0, com)
 
 julia> interval(-1, 1) ^ interval(-3)
-[1.0, ∞)_trv
+Interval{Float64}(1.0, Inf, trv)
 ```
 """
-Base.:^(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes} = # no CRlibm version
-    BareInterval{T}(_bigequiv(x)^y)
-
-Base.:^(x::BareInterval, y::BareInterval) = ^(promote(x, y)...)
-
-function Base.:^(x::BareInterval{BigFloat}, y::BareInterval)
+function Base.:^(x::BareInterval{T}, y::BareInterval{T}) where {T<:AbstractFloat}
     isempty_interval(y) && return y
-    domain = _unsafe_bareinterval(BigFloat, zero(BigFloat), typemax(BigFloat))
+    domain = _unsafe_bareinterval(T, zero(T), typemax(T))
     x = intersect_interval(x, domain)
     isempty_interval(x) && return x
+    isthin(y) && return _pow(x, sup(y))
     return hull(_pow(x, inf(y)), _pow(x, sup(y)))
+end
+function Base.:^(x::BareInterval{T}, y::BareInterval{T}) where {T<:Rational}
+    isempty_interval(y) && return y
+    domain = _unsafe_bareinterval(T, zero(T), typemax(T))
+    x = intersect_interval(x, domain)
+    isempty_interval(x) && return x
+    isthin(y) && return _pow(x, sup(y))
+    return hull(_pow(x, inf(y)), _pow(x, sup(y)))
+end
+Base.:^(x::BareInterval{<:AbstractFloat}, y::BareInterval{<:AbstractFloat}) = ^(promote(x, y)...)
+Base.:^(x::BareInterval{<:Rational}, y::BareInterval{<:Rational}) = ^(promote(x, y)...)
+Base.:^(x::BareInterval{<:Rational}, y::BareInterval{<:AbstractFloat}) = ^(promote(x, y)...)
+# specialize on rational to improve exactness
+function Base.:^(x::BareInterval{T}, y::BareInterval{S}) where {T<:NumTypes,S<:Rational}
+    R = promote_numtype(T, S)
+    isempty_interval(y) && return emptyinterval(BareInterval{R})
+    domain = _unsafe_bareinterval(T, zero(T), typemax(T))
+    x = intersect_interval(x, domain)
+    isempty_interval(x) && return emptyinterval(BareInterval{R})
+    isthin(y) && return BareInterval{R}(_pow(x, sup(y)))
+    return BareInterval{R}(hull(_pow(x, inf(y)), _pow(x, sup(y))))
 end
 
 function Base.:^(x::Interval, y::Interval)
@@ -48,42 +65,42 @@ function Base.:^(x::Interval, y::Interval)
     return _unsafe_interval(r, d, t)
 end
 
+Base.:^(n::Integer, y::Interval) = ^(n//one(n), y)
+Base.:^(x::Interval, n::Integer) = ^(x, n//one(n))
+Base.:^(x::Rational, y::Interval) = ^(convert(Interval{typeof(x)}, x), y)
+Base.:^(x::Interval, y::Rational) = ^(x, convert(Interval{typeof(y)}, y))
+
 # overwrite behaviour for small integer powers from https://github.com/JuliaLang/julia/pull/24240
 Base.literal_pow(::typeof(^), x::Interval, ::Val{n}) where {n} = x^n
 
-Base.:^(x::Interval, n::Integer) = ^(promote(x, n)...)
-
 # helper functions for power
 
-_pow(x::BareInterval{BigFloat}, y::AbstractFloat) = _pow(x, big(y))
-
-function _pow(x::BareInterval{BigFloat}, y::BigFloat)
-    domain = _unsafe_bareinterval(BigFloat, zero(BigFloat), typemax(BigFloat))
-
+function _pow(x::BareInterval{T}, y::T) where {T<:NumTypes}
     if isthinzero(x)
-        y > 0 && return zero(BareInterval{BigFloat})
-        return emptyinterval(BareInterval{BigFloat})
+        y > 0 && return zero(BareInterval{T})
+        return emptyinterval(BareInterval{T})
     end
 
     isinteger(y) && return pown(x, Integer(y))
     y == 0.5 && return sqrt(x)
 
+    domain = _unsafe_bareinterval(T, zero(T), typemax(T))
     x = intersect_interval(x, domain)
     isempty_interval(x) && return x
 
-    M = typemax(BigFloat)
-    MM = typemax(BareInterval{BigFloat})
+    M = typemax(T)
+    MM = typemax(BareInterval{T})
 
-    lo = @round(BigFloat, inf(x)^y, inf(x)^y)
+    lo = @round(T, inf(x)^y, inf(x)^y)
     lo = (inf(lo) == M) ? MM : lo
 
-    lo1 = @round(BigFloat, inf(x)^y, inf(x)^y)
+    lo1 = @round(T, inf(x)^y, inf(x)^y)
     lo1 = (inf(lo1) == M) ? MM : lo1
 
-    hi = @round(BigFloat, sup(x)^y, sup(x)^y)
+    hi = @round(T, sup(x)^y, sup(x)^y)
     hi = (inf(hi) == M) ? MM : hi
 
-    hi1 = @round(BigFloat, sup(x)^y, sup(x)^y)
+    hi1 = @round(T, sup(x)^y, sup(x)^y)
     hi1 = (inf(hi1) == M) ? MM : hi1
 
     lo = hull(lo, lo1)
@@ -92,7 +109,7 @@ function _pow(x::BareInterval{BigFloat}, y::BigFloat)
     return hull(lo, hi)
 end
 
-function _pow(x::BareInterval{BigFloat}, y::Rational{T}) where {T<:Integer}
+function _pow(x::BareInterval{T}, y::Rational{S}) where {T<:NumTypes,S<:Integer}
     p = y.num
     q = y.den
 
@@ -101,25 +118,25 @@ function _pow(x::BareInterval{BigFloat}, y::Rational{T}) where {T<:Integer}
     y < 0 && return inv(_pow(x, -y))
 
     if isthinzero(x)
-        y > zero(y) && return zero(x)
-        return emptyinterval(x)
+        y > 0 && return x
+        return emptyinterval(BareInterval{T})
     end
 
-    isinteger(y) && return pown(x, T(y))
+    isinteger(y) && return pown(x, S(y))
 
     y == (1//2) && return sqrt(x)
 
     lo, hi = bounds(x)
 
     if lo < 0
-        return emptyinterval(BareInterval{BigFloat})
+        return emptyinterval(BareInterval{T})
     end
 
     if lo < 0 && hi ≥ 0
-        x = intersect_interval(x, _unsafe_bareinterval(BigFloat, zero(BigFloat), typemax(BigFloat)))
+        x = intersect_interval(x, _unsafe_bareinterval(T, zero(T), typemax(T)))
     end
 
-    return pown(rootn(x, q), ifelse(p == 1, q, p))
+    return pown(rootn(x, q), p)
 end
 
 """
@@ -130,58 +147,57 @@ Implement the `pown` function of the IEEE Standard 1788-2015 (Table 9.1).
 # Examples
 
 ```jldoctest
+julia> setdisplay(:full);
+
 julia> pown(bareinterval(2, 3), 2)
-[4.0, 9.0]
+BareInterval{Float64}(4.0, 9.0)
 
 julia> pown(interval(-1, 1), 3)
-[-1.0, 1.0]_com
+Interval{Float64}(-1.0, 1.0, com)
 
 julia> pown(interval(-1, 1), -3)
-(-∞, ∞)_trv
+Interval{Float64}(-Inf, Inf, trv)
 ```
 """
-pown(x::BareInterval{T}, n::Integer) where {T<:NumTypes} = # no CRlibm version
-    BareInterval{T}(pown(_bigequiv(x), n))
-
-function pown(x::BareInterval{BigFloat}, n::Integer)
+function pown(x::BareInterval{T}, n::Integer) where {T<:NumTypes}
     isempty_interval(x) && return x
-    iszero(n) && return one(BareInterval{BigFloat})
+    iszero(n) && return one(BareInterval{T})
     n == 1 && return x
-    (n < 0) & isthinzero(x) && return emptyinterval(BareInterval{BigFloat})
+    (n < 0) & isthinzero(x) && return emptyinterval(BareInterval{T})
 
     if isodd(n)
         isentire_interval(x) && return x
         if n > 0
-            inf(x) == 0 && return @round(BigFloat, zero(BigFloat), sup(x)^n)
-            sup(x) == 0 && return @round(BigFloat, inf(x)^n, zero(BigFloat))
-            return @round(BigFloat, inf(x)^n, sup(x)^n)
+            inf(x) == 0 && return @round(T, zero(T), sup(x)^n)
+            sup(x) == 0 && return @round(T, inf(x)^n, zero(T))
+            return @round(T, inf(x)^n, sup(x)^n)
         else
             if inf(x) ≥ 0
-                inf(x) == 0 && return @round(BigFloat, sup(x)^n, typemax(BigFloat))
-                return @round(BigFloat, sup(x)^n, inf(x)^n)
+                inf(x) == 0 && return @round(T, sup(x)^n, typemax(T))
+                return @round(T, sup(x)^n, inf(x)^n)
             elseif sup(x) ≤ 0
-                sup(x) == 0 && return @round(BigFloat, typemin(BigFloat), inf(x)^n)
-                return @round(BigFloat, sup(x)^n, inf(x)^n)
+                sup(x) == 0 && return @round(T, typemin(T), inf(x)^n)
+                return @round(T, sup(x)^n, inf(x)^n)
             else
-                return entireinterval(x)
+                return entireinterval(BareInterval{T})
             end
         end
     else
         if n > 0
             if inf(x) ≥ 0
-                return @round(BigFloat, inf(x)^n, sup(x)^n)
+                return @round(T, inf(x)^n, sup(x)^n)
             elseif sup(x) ≤ 0
-                return @round(BigFloat, sup(x)^n, inf(x)^n)
+                return @round(T, sup(x)^n, inf(x)^n)
             else
-                return @round(BigFloat, mig(x)^n, mag(x)^n)
+                return @round(T, mig(x)^n, mag(x)^n)
             end
         else
             if inf(x) ≥ 0
-                return @round(BigFloat, sup(x)^n, inf(x)^n)
+                return @round(T, sup(x)^n, inf(x)^n)
             elseif sup(x) ≤ 0
-                return @round(BigFloat, inf(x)^n, sup(x)^n)
+                return @round(T, inf(x)^n, sup(x)^n)
             else
-                return @round(BigFloat, mag(x)^n, mig(x)^n)
+                return @round(T, mag(x)^n, mig(x)^n)
             end
         end
     end
@@ -206,30 +222,19 @@ function rootn(x::BareInterval{T}, n::Integer) where {T<:NumTypes}
     n == 0 && return emptyinterval(BareInterval{T})
     n == 1 && return x
     n == 2 && return sqrt(x)
-    n > 0 && return BareInterval{T}(rootn(_bigequiv(x), n))
-    issubnormal(mag(x)) && return inv(rootn(x, -n))
-    return BareInterval{T}(inv(rootn(_bigequiv(x), -n)))
-end
-
-function rootn(x::BareInterval{BigFloat}, n::Integer)
-    isempty_interval(x) && return x
-    n == 0 && return emptyinterval(BareInterval{BigFloat})
-    n == 1 && return x
-    n == 2 && return sqrt(x)
     n < 0 && return inv(rootn(x, -n))
 
-    domain = _unsafe_bareinterval(BigFloat, ifelse(iseven(n), zero(BigFloat), typemin(BigFloat)), typemax(BigFloat))
+    domain = _unsafe_bareinterval(T, ifelse(iseven(n), zero(T), typemin(T)), typemax(T))
     x = intersect_interval(x, domain)
     isempty_interval(x) && return x
 
     # no CRlibm version
-    lo, hi = bounds(x)
-    ui = convert(Culong, n)
-    low = BigFloat()
-    high = BigFloat()
-    ccall((:mpfr_rootn_ui, :libmpfr), Int32, (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode), low, lo, ui, MPFRRoundDown)
-    ccall((:mpfr_rootn_ui, :libmpfr), Int32, (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode), high, hi, ui, MPFRRoundUp)
-    return _unsafe_bareinterval(BigFloat, low, high)
+    N = convert(Culong, n)
+    lo = BigFloat()
+    hi = BigFloat()
+    ccall((:mpfr_rootn_ui, :libmpfr), Int32, (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode), lo, inf(x), N, MPFRRoundDown)
+    ccall((:mpfr_rootn_ui, :libmpfr), Int32, (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode), hi, sup(x), N, MPFRRoundUp)
+    return _unsafe_bareinterval(T, lo, hi)
 end
 
 function rootn(x::Interval{T}, n::Integer) where {T<:NumTypes}
@@ -240,7 +245,6 @@ function rootn(x::Interval{T}, n::Integer) where {T<:NumTypes}
     d = min(d, ifelse(issubset_interval(bx, domain), d, trv))
     return _unsafe_interval(r, d, isguaranteed(x))
 end
-
 
 """
     hypot(x, y)
@@ -331,32 +335,19 @@ end
 
 #
 
-for f ∈ (:exp, :expm1)
+for f ∈ (:cbrt, :exp, :exp2, :exp10, :expm1)
     @eval begin
         function Base.$f(x::BareInterval{T}) where {T<:NumTypes}
             isempty_interval(x) && return x
             return @round(T, $f(inf(x)), $f(sup(x)))
         end
-    end
-end
 
-for f ∈ (:exp2, :exp10, :cbrt) # no CRlibm version
-    @eval begin
-        Base.$f(x::BareInterval{T}) where {T<:NumTypes} = BareInterval{T}($f(_bigequiv(x)))
-
-        function Base.$f(x::BareInterval{BigFloat})
-            isempty_interval(x) && return x
-            return @round(BigFloat, $f(inf(x)), $f(sup(x)) )
+        function Base.$f(x::Interval)
+            bx = bareinterval(x)
+            r = $f(bx)
+            d = min(decoration(r), decoration(x))
+            return _unsafe_interval(r, d, isguaranteed(x))
         end
-    end
-end
-
-for f ∈ (:exp, :exp2, :exp10, :expm1, :cbrt)
-    @eval function Base.$f(x::Interval)
-        bx = bareinterval(x)
-        r = $f(bx)
-        d = min(decoration(r), decoration(x))
-        return _unsafe_interval(r, d, isguaranteed(x))
     end
 end
 
