@@ -18,7 +18,7 @@ end
 function bisect(x::Interval, α::Real=0.5)
     bx = bareinterval(x)
     r₁, r₂ = bisect(bx, α)
-    d₁, d₂ = min(decoration(x), decoration(r₁), trv), min(decoration(x), decoration(r₂), trv)
+    d₁, d₂ = min(decoration(x), decoration(r₁)), min(decoration(x), decoration(r₂))
     t = isguaranteed(x)
     return (_unsafe_interval(r₁, d₁, t), _unsafe_interval(r₂, d₂, t))
 end
@@ -51,7 +51,7 @@ function mince(x::Interval{T}, n::Integer) where {T<:NumTypes}
     t = isguaranteed(x)
     @inbounds for i ∈ 1:n
         rᵢ = _unsafe_bareinterval(T, nodes[i], nodes[i+1])
-        dᵢ = min(d, decoration(rᵢ), trv)
+        dᵢ = min(d, decoration(rᵢ))
         v[i] = _unsafe_interval(rᵢ, dᵢ, t)
     end
     return v
