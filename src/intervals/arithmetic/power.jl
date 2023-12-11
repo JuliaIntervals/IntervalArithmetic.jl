@@ -99,6 +99,11 @@ function pow(x::BareInterval{T}, y::BareInterval{S}) where {T<:NumTypes,S<:Ratio
     return BareInterval{R}(hull(_pow(x, inf(y)), _pow(x, sup(y))))
 end
 
+pow(n::Integer, y::BareInterval) = pow(n//one(n), y)
+pow(x::BareInterval, n::Integer) = pow(x, n//one(n))
+pow(x::Real, y::Interval) = pow(bareinterval(x), y)
+pow(x::Interval, y::Real) = pow(x, bareinterval(y))
+
 function pow(x::Interval, y::Interval)
     bx = bareinterval(x)
     by = bareinterval(y)
@@ -111,8 +116,8 @@ end
 
 pow(n::Integer, y::Interval) = pow(n//one(n), y)
 pow(x::Interval, n::Integer) = pow(x, n//one(n))
-pow(x::Rational, y::Interval) = pow(convert(Interval{typeof(x)}, x), y)
-pow(x::Interval, y::Rational) = pow(x, convert(Interval{typeof(y)}, y))
+pow(x::Real, y::Interval) = pow(interval(x), y)
+pow(x::Interval, y::Real) = pow(x, interval(y))
 
 # helper functions for power
 

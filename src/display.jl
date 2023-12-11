@@ -149,7 +149,7 @@ function _str_repr(a::Interval{BigFloat}, format::Symbol)
         display_options.decorations || return string(str_interval, _subscriptify(precision(BigFloat)))
         return string(str_interval, _subscriptify(precision(BigFloat)), '_', decoration(a))
     else
-        format === :full && return string("Interval{", T, "}(", str_interval, ", ", decoration(a), ", NG)")
+        format === :full && return string("Interval{", BigFloat, "}(", str_interval, ", ", decoration(a), ", NG)")
         if format === :midpoint && str_interval != "∅"
             str_interval = string('(', str_interval, ')')
         end
