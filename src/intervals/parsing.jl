@@ -233,12 +233,22 @@ function _parse(::Type{T}, str::AbstractString) where {T<:NumTypes}
     end
 end
 
-function _parse_num(::Type{T}, str::AbstractString, rounding_mode::RoundingMode) where {T<:AbstractFloat}
+function _parse_num(::Type{T}, str::AbstractString, r::RoundingMode) where {T<:AbstractFloat}
     if '/' ∈ str
         num, denum = parse.(BigInt, split(str, '/'; keepempty = false))
-        return T(num//denum, rounding_mode)
+        return T(num//denum, r)
+    else
+        return T(parse(BigFloat, str), r)
     end
-    return T(parse(BigFloat, str), rounding_mode)
+end
+
+function _parse_num(::Type{BigFloat}, str::AbstractString, r::RoundingMode)
+    if '/' ∈ str
+        num, denum = parse.(BigInt, split(str, '/'; keepempty = false))
+        return BigFloat(num//denum, r)
+    else
+        return BigFloat(str, r)
+    end
 end
 
 function _parse_num(::Type{T}, str::AbstractString, ::RoundingMode{:Down}) where {S<:Integer,T<:Rational{S}}

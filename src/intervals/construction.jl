@@ -220,33 +220,6 @@ bareinterval(a::Tuple) = bareinterval(T, a...)
     return :($res) # set body of the function to return the precomputed result
 end
 
-"""
-    atomic(T<:Union{Rational,AbstractFloat}, x)
-
-Create an interval according to the IEEE Standard 1788-2015. The returned
-`BareInterval{T}` always contains the value `x`; this is semantically equivalent
-to `parse(BareInterval{T}, string(x))`.
-
-# Examples
-```jldoctest
-julia> setdisplay(:full);
-
-julia> x = IntervalArithmetic.atomic(Float64, 0.1)
-BareInterval{Float64}(0.09999999999999999, 0.1)
-
-julia> in_interval(1//10, IntervalArithmetic.atomic(Float64, 0.1))
-true
-
-julia> IntervalArithmetic.atomic(Float64, 0.3)
-BareInterval{Float64}(0.3, 0.30000000000000004)
-
-julia> in_interval(3//10, IntervalArithmetic.atomic(Float64, 0.3))
-true
-```
-"""
-atomic(::Type{T}, x::AbstractString) where {T<:NumTypes} = parse(BareInterval{T}, x)
-atomic(::Type{T}, x) where {T<:NumTypes} = atomic(T, string(x))
-
 # promotion
 
 Base.promote_rule(::Type{BareInterval{T}}, ::Type{BareInterval{S}}) where {T<:NumTypes,S<:NumTypes} =
@@ -441,6 +414,7 @@ interval(a, d::Decoration = com; format::Symbol = :infsup) = interval(promote_nu
 # some useful extra constructor
 interval(::Type{T}, a::Tuple, d::Decoration = com; format::Symbol = :infsup) where {T<:NumTypes} = interval(T, a..., d; format = format)
 interval(a::Tuple, d::Decoration = com; format::Symbol = :infsup) = interval(a..., d; format = format)
+interval(::Type{T}, A::AbstractArray; format::Symbol = :infsup) where {T<:NumTypes} = interval.(T, A; format = format)
 interval(A::AbstractArray; format::Symbol = :infsup) = interval.(A; format = format)
 
 # standard format
@@ -606,6 +580,35 @@ function Base.convert(::Type{Interval{T}}, x::Complex) where {T<:NumTypes}
     return convert(Interval{T}, real(x))
 end
 
+"""
+    atomic(T<:Union{Rational,AbstractFloat}, x)
+
+Create an interval according to the IEEE Standard 1788-2015. The returned
+`Interval{T}` always contains the value `x`; this is semantically equivalent
+to `parse(Interval{T}, string(x))` if `x` is a `Number`.
+
+# Examples
+
+```jldoctest
+julia> setdisplay(:full);
+
+julia> x = IntervalArithmetic.atomic(Float64, 0.1)
+BareInterval{Float64}(0.09999999999999999, 0.1)
+
+julia> in_interval(1//10, IntervalArithmetic.atomic(Float64, 0.1))
+true
+
+julia> IntervalArithmetic.atomic(Float64, 0.3)
+BareInterval{Float64}(0.3, 0.30000000000000004)
+
+julia> in_interval(3//10, IntervalArithmetic.atomic(Float64, 0.3))
+true
+```
+"""
+atomic(::Type{T}, x::AbstractString) where {T<:NumTypes} = parse(Interval{T}, x)
+atomic(::Type{T}, x::Interval) where {T<:NumTypes} = interval(T, x)
+atomic(::Type{T}, x::Number) where {T<:NumTypes} = atomic(T, string(x))
+
 
 
 
@@ -641,9 +644,9 @@ macro interval(T, expr1, expr2)
     return :(interval($(esc(T)), $x, $y))
 end
 
-_wrap_interval(T::Symbol, x) = :(interval(atomic($(esc(T)), $x)))
+_wrap_interval(T::Symbol, x) = :(atomic($(esc(T)), $x))
 
-_wrap_interval(T::Symbol, x::Symbol) = :(interval(atomic($(esc(T)), $(esc(x)))))
+_wrap_interval(T::Symbol, x::Symbol) = :(atomic($(esc(T)), $(esc(x))))
 
 function _wrap_interval(T::Symbol, expr::Expr)
     if expr.head ∈ (:(.), :ref, :macrocall) # a.i, or a[i], or BigInt
