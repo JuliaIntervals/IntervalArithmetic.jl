@@ -14,6 +14,8 @@ See also: [`pow`](@ref) and [`pown`](@ref).
 # Examples
 
 ```jldoctest
+julia> setdisplay(:full);
+
 julia> bareinterval(2, 3) ^ bareinterval(2)
 BareInterval{Float64}(4.0, 9.0)
 
@@ -55,6 +57,8 @@ See also: [`pown`](@ref).
 # Examples
 
 ```jldoctest
+julia> setdisplay(:full);
+
 julia> pow(bareinterval(2, 3), bareinterval(2))
 BareInterval{Float64}(4.0, 9.0)
 
