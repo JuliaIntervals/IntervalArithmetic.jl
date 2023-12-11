@@ -22,4 +22,9 @@ include("display.jl")
 
 include("symbols.jl")
 
+# convenient alias
+const RealOrComplexI{T} = Union{Interval{T},Complex{Interval{T}}}
+const ComplexI{T} = Complex{Interval{T}}
+    export RealOrComplexI, ComplexI
+
 end
