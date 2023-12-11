@@ -207,24 +207,23 @@ end
 
     @testset "Fast integer powers" begin
         x = interval(1, 2)
-        @test isequal_interval(fastpow(x, 2), fastpow(-x, 2))
-        @test isequal_interval(fastpow(-x, 2), interval(1, 4))
-        @test isequal_interval(fastpow(-x, 3), interval(-8.0, -1.0))
+        @test isequal_interval(fastpow(x, 2), interval(1, 4))
+        @test isequal_interval(fastpow(x, 3), interval(1, 8))
+        @test isempty_interval(fastpow(-x, 3))
 
         @test isequal_interval(fastpow(interval(-1, 2), 2), interval(0, 4))
-        @test isequal_interval(fastpow(interval(-1, 2), 3), interval(-1, 8))
+        @test isequal_interval(fastpow(interval(-1, 2), 3), interval(0, 8))
         @test isequal_interval(fastpow(interval(-1, 2), 4), interval(0, 16))
 
-        @test isequal_interval(fastpow(interval(-2, -1), interval(4)), interval(1, 16))
-        @test isequal_interval(fastpow(interval(-2, -1), interval(-1, -1)), interval(-1, -0.5))
+        @test isempty_interval(fastpow(interval(-2, -1), interval(-1, -1)))
 
         @test isequal_interval(fastpow(interval(BigFloat, -1, 2), 2), interval(0, 4))
-        @test isequal_interval(fastpow(interval(BigFloat, -1, 2), 3), interval(-1, 8))
+        @test isequal_interval(fastpow(interval(BigFloat, -1, 2), 3), interval(0, 8))
         @test isequal_interval(fastpow(interval(BigFloat, 1, 2), 2), interval(1, 4))
 
-        x = interval(pi)
-        @test issubset_interval(x^100, fastpow(x, 100))
-        @test issubset_interval(x^50, fastpow(x, 50))
+        x = interval(π)
+        @test isinterior(x^100, fastpow(x, 100))
+        @test isinterior(x^50, fastpow(x, 50))
         @test isinterior(x^50, fastpow(x, 50))
 
         x = interval(2)

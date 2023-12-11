@@ -60,7 +60,7 @@ function Base.:^(x::Interval, y::Interval)
     by = bareinterval(y)
     r = bx^by
     d = min(decoration(x), decoration(y), decoration(r))
-    d = min(d, ifelse((in_interval(0, bx) & (inf(by) ≤ 0)) | ((inf(bx) < 0) & !isthininteger(by)), trv, d))
+    d = min(d, ifelse((inf(bx) > 0) | ((inf(bx) == 0) & (inf(by) > 0)), d, trv))
     t = isguaranteed(x) & isguaranteed(y)
     return _unsafe_interval(r, d, t)
 end
@@ -256,14 +256,25 @@ Base.hypot(x::Interval, y::Interval) = sqrt(x^2 + y^2)
 A faster implementation of `x^n`; the returned interval may be slightly large
 than `x^n`.
 """
+function fastpow(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
+    isthininteger(y) && return fastpow(x, Integer(sup(y)))
+    domain = _unsafe_bareinterval(T, zero(T), typemax(T))
+    x = intersect_interval(x, domain)
+    isempty_interval(x) && return x
+    inf(y) > 0 == sup(x) && return zero(BareInterval{T})
+    return exp(y * log(x))
+end
+
+fastpow(x::BareInterval, y::BareInterval) = fastpow(promote(x, y)...)
+
 function fastpow(x::BareInterval{T}, n::Integer) where {T<:NumTypes}
     n < 0 && return inv(fastpow(x, -n))
+    domain = _unsafe_bareinterval(T, zero(T), typemax(T))
+    x = intersect_interval(x, domain)
     isempty_interval(x) && return x
     if iseven(n) && in_interval(0, x)
-        xmig = mig(x)
         xmag = mag(x)
-        return hull(zero(x),
-                    _positive_power_by_squaring(bareinterval(T, xmig, xmig), n),
+        return hull(zero(BareInterval{T}),
                     _positive_power_by_squaring(bareinterval(T, xmag, xmag), n))
     else
         xinf = inf(x)
@@ -271,11 +282,6 @@ function fastpow(x::BareInterval{T}, n::Integer) where {T<:NumTypes}
         return hull(_positive_power_by_squaring(bareinterval(T, xinf, xinf), n),
                     _positive_power_by_squaring(bareinterval(T, xsup, xsup), n))
     end
-end
-
-function fastpow(x::BareInterval, y::BareInterval)
-    isthininteger(y) && return fastpow(x, Integer(sup(y)))
-    return exp(y * log(x))
 end
 
 fastpow(x::BareInterval{T}, y::S) where {T<:NumTypes,S<:Real} =
@@ -286,7 +292,7 @@ function fastpow(x::Interval, y::Interval)
     by = bareinterval(y)
     r = fastpow(bx, by)
     d = min(decoration(x), decoration(y), decoration(r))
-    d = min(d, ifelse((in_interval(0, bx) & (inf(by) ≤ 0)) | ((inf(bx) < 0) & !isthininteger(by)), trv, d))
+    d = min(d, ifelse((inf(bx) > 0) | ((inf(bx) == 0) & (inf(by) > 0)), d, trv))
     t = isguaranteed(x) & isguaranteed(y)
     return _unsafe_interval(r, d, t)
 end
@@ -295,7 +301,7 @@ function fastpow(x::Interval, y::Real)
     bx = bareinterval(x)
     r = fastpow(bx, y)
     d = min(decoration(x), decoration(r))
-    d = min(d, ifelse((in_interval(0, bx) & (y ≤ 0)) | ((inf(bx) < 0) & !isinteger(y)), trv, d))
+    d = min(d, ifelse((inf(bx) > 0) | ((inf(bx) == 0) & (y > 0)), d, trv))
     return _unsafe_interval(r, d, isguaranteed(x))
 end
 
