@@ -1,21 +1,17 @@
 module IntervalArithmetic
 
 import CRlibm
-import FastRounding
 import RoundingEmulator
+import Base.MPFR
 
 using SetRounding
-
-import Base.MPFR: MPFRRoundingMode
-import Base.MPFR: MPFRRoundUp, MPFRRoundDown, MPFRRoundNearest, MPFRRoundToZero, MPFRRoundFromZero
 
 function __init__()
     setrounding(BigFloat, RoundNearest)
 end
 
-function Base.setrounding(f::Function, ::Type{Rational{T}}, rounding_mode::RoundingMode) where {T<:Integer}
-    return setrounding(f, float(Rational{T}), rounding_mode)
-end
+Base.setrounding(f::Function, ::Type{Rational{T}}, rounding_mode::RoundingMode) where {T<:Integer} =
+    setrounding(f, float(Rational{T}), rounding_mode)
 
 #
 

@@ -228,13 +228,7 @@ function rootn(x::BareInterval{T}, n::Integer) where {T<:NumTypes}
     x = intersect_interval(x, domain)
     isempty_interval(x) && return x
 
-    # no CRlibm version
-    N = convert(Culong, n)
-    lo = BigFloat()
-    hi = BigFloat()
-    ccall((:mpfr_rootn_ui, :libmpfr), Int32, (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode), lo, inf(x), N, MPFRRoundDown)
-    ccall((:mpfr_rootn_ui, :libmpfr), Int32, (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFRRoundingMode), hi, sup(x), N, MPFRRoundUp)
-    return _unsafe_bareinterval(T, lo, hi)
+    return @round(T, rootn(inf(x), n), rootn(sup(x), n))
 end
 
 function rootn(x::Interval{T}, n::Integer) where {T<:NumTypes}
@@ -269,13 +263,13 @@ function fastpow(x::BareInterval{T}, n::Integer) where {T<:NumTypes}
         xmig = mig(x)
         xmag = mag(x)
         return hull(zero(x),
-                _positive_power_by_squaring(_unsafe_bareinterval(T, xmig, xmig), n),
-                _positive_power_by_squaring(_unsafe_bareinterval(T, xmag, xmag), n))
+                    _positive_power_by_squaring(bareinterval(T, xmig, xmig), n),
+                    _positive_power_by_squaring(bareinterval(T, xmag, xmag), n))
     else
         xinf = inf(x)
         xsup = sup(x)
-        return hull(_positive_power_by_squaring(_unsafe_bareinterval(T, xinf, xinf), n),
-                    _positive_power_by_squaring(_unsafe_bareinterval(T, xsup, xsup), n))
+        return hull(_positive_power_by_squaring(bareinterval(T, xinf, xinf), n),
+                    _positive_power_by_squaring(bareinterval(T, xsup, xsup), n))
     end
 end
 

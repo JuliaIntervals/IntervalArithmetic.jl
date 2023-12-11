@@ -5,7 +5,6 @@ version = "0.21.2"
 
 [deps]
 CRlibm = "96374032-68de-5a5b-8d9e-752f78720389"
-FastRounding = "fa42c844-2597-5d31-933b-ebd51ab2693f"
 RoundingEmulator = "5eaf0fd0-dfba-4ccb-bf02-d820a40db705"
 SetRounding = "3cc68bcd-71a2-5612-b932-767ffbe40ab0"
 
@@ -18,7 +17,6 @@ IntervalArithmeticDiffRulesExt = "DiffRules"
 [compat]
 CRlibm = "0.7, 0.8, 1"
 DiffRules = "1"
-FastRounding = "0.2, 0.3"
 RoundingEmulator = "0.2"
 SetRounding = "0.2"
 julia = "1.9"

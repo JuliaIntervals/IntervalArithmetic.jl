@@ -26,7 +26,8 @@ _bigequiv(x::BigFloat) = x
 Interval rounding type.
 
 Available rounding types:
-- `:tight`: rounding via `prevfloat` and `nextfloat` (cf. [RoundingEmulator.jl](https://github.com/matsueushi/RoundingEmulator.jl)).
+- `:fast`: rounding via `prevfloat` and `nextfloat`.
+- `:tight`: rounding via [RoundingEmulator.jl](https://github.com/matsueushi/RoundingEmulator.jl).
 - `:slow`: rounding via `setrounding`.
 - `:none`: no rounding (non-rigorous numerics).
 """
@@ -45,8 +46,10 @@ for (f, fname) ∈ ((:+, :add), (:-, :sub), (:*, :mul), (:/, :div))
 
         $g(::IntervalRounding, x::T, y::T, r::RoundingMode) where {T<:AbstractFloat} =
             $g(IntervalRounding{:slow}(), x, y, r)
-        $g(::IntervalRounding{:fast}, x::T, y::T, r::RoundingMode) where {T<:Union{Float32,Float64}} =
-            FastRounding.$(Symbol(fname, "_round"))(x, y, r)
+        $g(::IntervalRounding{:fast}, x::T, y::T, ::RoundingMode{:Down}) where {T<:AbstractFloat} =
+            prevfloat($f(x, y))
+        $g(::IntervalRounding{:fast}, x::T, y::T, ::RoundingMode{:Up}) where {T<:AbstractFloat} =
+            nextfloat($f(x, y))
         $g(::IntervalRounding{:tight}, x::T, y::T, ::RoundingMode{:Down}) where {T<:Union{Float32,Float64}} =
             RoundingEmulator.$(Symbol(fname, :_down))(x, y)
         $g(::IntervalRounding{:tight}, x::T, y::T, ::RoundingMode{:Up}) where {T<:Union{Float32,Float64}} =
@@ -71,6 +74,10 @@ _pow_round(x::Rational, n::Integer, ::RoundingMode) = ^(x, n) # exact operation
 
 _pow_round(::IntervalRounding, x::T, y::T, r::RoundingMode) where {T<:AbstractFloat} =
     _pow_round(IntervalRounding{:slow}(), x, y, r)
+_pow_round(::IntervalRounding{:fast}, x::T, y::T, ::RoundingMode{:Down}) where {T<:AbstractFloat} =
+    prevfloat(^(x, y))
+_pow_round(::IntervalRounding{:fast}, x::T, y::T, ::RoundingMode{:Up}) where {T<:AbstractFloat} =
+    nextfloat(^(x, y))
 function _pow_round(::IntervalRounding{:slow}, x::T, y::T, r::RoundingMode) where {T<:AbstractFloat}
     bigx = _bigequiv(x)
     bigy = _bigequiv(y)
@@ -87,8 +94,10 @@ _inv_round(x::Rational, ::RoundingMode) = inv(x) # exact operation
 
 _inv_round(::IntervalRounding, x::AbstractFloat, r::RoundingMode) =
     _inv_round(IntervalRounding{:slow}(), x, r)
-_inv_round(::IntervalRounding{:fast}, x::Union{Float32,Float64}, r::RoundingMode) =
-    FastRounding.inv_round(x, r)
+_inv_round(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Down}) =
+    prevfloat(inv(x))
+_inv_round(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Up}) =
+    nextfloat(inv(x))
 _inv_round(::IntervalRounding{:tight}, x::Union{Float32,Float64}, ::RoundingMode{:Down}) =
     RoundingEmulator.div_down(one(x), x)
 _inv_round(::IntervalRounding{:tight}, x::Union{Float32,Float64}, ::RoundingMode{:Up}) =
@@ -107,8 +116,10 @@ _sqrt_round(x::NumTypes, r::RoundingMode) = _sqrt_round(interval_rounding(), flo
 
 _sqrt_round(::IntervalRounding, x::AbstractFloat, r::RoundingMode) =
     _sqrt_round(IntervalRounding{:slow}(), x, r)
-_sqrt_round(::IntervalRounding{:fast}, x::Union{Float32,Float64}, r::RoundingMode) =
-    FastRounding.sqrt_round(x, r)
+_sqrt_round(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Down}) =
+    prevfloat(sqrt(x))
+_sqrt_round(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Up}) =
+    nextfloat(sqrt(x))
 _sqrt_round(::IntervalRounding{:tight}, x::Union{Float32,Float64}, ::RoundingMode{:Down}) =
     RoundingEmulator.sqrt_down(x)
 _sqrt_round(::IntervalRounding{:tight}, x::Union{Float32,Float64}, ::RoundingMode{:Up}) =
@@ -123,10 +134,36 @@ _sqrt_round(::IntervalRounding{:none}, x::AbstractFloat, ::RoundingMode) = sqrt(
 
 #
 
+_rootn_round(x::NumTypes, n::Integer, r::RoundingMode) = _rootn_round(interval_rounding(), float(x), n, r) # rationals are converted to floats
+
+_rootn_round(::IntervalRounding, x::AbstractFloat, n::Integer, r::RoundingMode) =
+    _rootn_round(IntervalRounding{:slow}(), x, n, r)
+_rootn_round(::IntervalRounding{:fast}, x::AbstractFloat, n::Integer, ::RoundingMode{:Down}) =
+    prevfloat(x^(1//n))
+_rootn_round(::IntervalRounding{:fast}, x::AbstractFloat, n::Integer, ::RoundingMode{:Up}) =
+    nextfloat(x^(1//n))
+function _rootn_round(::IntervalRounding{:slow}, x::AbstractFloat, n::Integer, ::RoundingMode{:Down})
+    r = BigFloat()
+    ccall((:mpfr_rootn_ui, :libmpfr), Int32, (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFR.MPFRRoundingMode), r, x, convert(Culong, n), MPFR.MPFRRoundDown)
+    return r
+end
+function _rootn_round(::IntervalRounding{:slow}, x::AbstractFloat, n::Integer, ::RoundingMode{:Up})
+    r = BigFloat()
+    ccall((:mpfr_rootn_ui, :libmpfr), Int32, (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFR.MPFRRoundingMode), r, x, convert(Culong, n), MPFR.MPFRRoundUp)
+    return r
+end
+_rootn_round(::IntervalRounding{:none}, x::AbstractFloat, n::Integer, ::RoundingMode) = x^(1//n)
+
+#
+
 _atan_round(x::T, y::T, r::RoundingMode) where {T<:NumTypes} = _atan_round(interval_rounding(), promote(float(x), float(y))..., r) # rationals are converted to floats
 
 _atan_round(::IntervalRounding, x::T, y::T, r::RoundingMode) where {T<:AbstractFloat} =
     _atan_round(IntervalRounding{:slow}(), x, y, r)
+_atan_round(::IntervalRounding{:fast}, x::T, y::T, ::RoundingMode{:Down}) where {T<:AbstractFloat} =
+    prevfloat(atan(x, y))
+_atan_round(::IntervalRounding{:fast}, x::T, y::T, ::RoundingMode{:Up}) where {T<:AbstractFloat} =
+    nextfloat(atan(x, y))
 function _atan_round(::IntervalRounding{:slow}, x::T, y::T, r::RoundingMode) where {T<:AbstractFloat}
     bigx = _bigequiv(x)
     bigy = _bigequiv(y)
@@ -145,6 +182,10 @@ for f ∈ [:cbrt, :exp2, :exp10, :cot, :sec, :csc, :acot, :tanh, :coth, :sech, :
         $g(x::NumTypes, r::RoundingMode) = $g(interval_rounding(), float(x), r) # rationals are converted to floats
 
         $g(::IntervalRounding, x::AbstractFloat, r::RoundingMode) = $g(IntervalRounding{:slow}(), x, r)
+        $g(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Down}) =
+            prevfloat($f(x))
+        $g(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Up}) =
+            nextfloat($f(x))
         function $g(::IntervalRounding{:slow}, x::AbstractFloat, r::RoundingMode)
             bigx = _bigequiv(x)
             return setrounding(BigFloat, r) do
@@ -165,8 +206,12 @@ for f ∈ CRlibm.functions
             $g(x::NumTypes, r::RoundingMode) = $g(interval_rounding(), float(x), r) # rationals are converted to floats
 
             $g(::IntervalRounding, x::AbstractFloat, r::RoundingMode) = $g(IntervalRounding{:slow}(), x, r)
+            $g(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Down}) =
+                prevfloat($f(x))
+            $g(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Up}) =
+                nextfloat($f(x))
             $g(::IntervalRounding{:slow}, x::AbstractFloat, r::RoundingMode) = CRlibm.$f(x, r)
-            $g(::IntervalRounding{:none}, x::AbstractFloat, ::RoundingMode) = CRlibm.$f(x)
+            $g(::IntervalRounding{:none}, x::AbstractFloat, ::RoundingMode) = $f(x)
         end
     end
 end
