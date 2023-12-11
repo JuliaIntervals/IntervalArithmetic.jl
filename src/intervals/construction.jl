@@ -593,13 +593,13 @@ to `parse(Interval{T}, string(x))` if `x` is a `Number`.
 julia> setdisplay(:full);
 
 julia> x = IntervalArithmetic.atomic(Float64, 0.1)
-BareInterval{Float64}(0.09999999999999999, 0.1)
+Interval{Float64}(0.09999999999999999, 0.1, com)
 
 julia> in_interval(1//10, IntervalArithmetic.atomic(Float64, 0.1))
 true
 
 julia> IntervalArithmetic.atomic(Float64, 0.3)
-BareInterval{Float64}(0.3, 0.30000000000000004)
+Interval{Float64}(0.3, 0.30000000000000004, com)
 
 julia> in_interval(3//10, IntervalArithmetic.atomic(Float64, 0.3))
 true
