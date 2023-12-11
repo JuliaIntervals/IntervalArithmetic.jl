@@ -76,67 +76,29 @@ Base.literal_pow(::typeof(^), x::Interval, ::Val{n}) where {n} = x^n
 # helper functions for power
 
 function _pow(x::BareInterval{T}, y::T) where {T<:NumTypes}
-    if isthinzero(x)
-        y > 0 && return zero(BareInterval{T})
+    # assume `inf(x) ≥ 0` and `!isempty_interval(x)`
+    if sup(x) == 0
+        y > 0 && return x # zero(x)
         return emptyinterval(BareInterval{T})
+    else
+        isinteger(y) && return pown(x, Integer(y))
+        y == 0.5 && return sqrt(x)
+        lo = @round(T, inf(x)^y, inf(x)^y)
+        hi = @round(T, sup(x)^y, sup(x)^y)
+        return hull(lo, hi)
     end
-
-    isinteger(y) && return pown(x, Integer(y))
-    y == 0.5 && return sqrt(x)
-
-    domain = _unsafe_bareinterval(T, zero(T), typemax(T))
-    x = intersect_interval(x, domain)
-    isempty_interval(x) && return x
-
-    M = typemax(T)
-    MM = typemax(BareInterval{T})
-
-    lo = @round(T, inf(x)^y, inf(x)^y)
-    lo = (inf(lo) == M) ? MM : lo
-
-    lo1 = @round(T, inf(x)^y, inf(x)^y)
-    lo1 = (inf(lo1) == M) ? MM : lo1
-
-    hi = @round(T, sup(x)^y, sup(x)^y)
-    hi = (inf(hi) == M) ? MM : hi
-
-    hi1 = @round(T, sup(x)^y, sup(x)^y)
-    hi1 = (inf(hi1) == M) ? MM : hi1
-
-    lo = hull(lo, lo1)
-    hi = hull(hi, hi1)
-
-    return hull(lo, hi)
 end
 
 function _pow(x::BareInterval{T}, y::Rational{S}) where {T<:NumTypes,S<:Integer}
-    p = y.num
-    q = y.den
-
-    isempty_interval(x) && return x
-    iszero(y) && return one(x)
-    y < 0 && return inv(_pow(x, -y))
-
-    if isthinzero(x)
-        y > 0 && return x
+    # assume `inf(x) ≥ 0` and `!isempty_interval(x)`
+    if sup(x) == 0
+        y > 0 && return x # zero(x)
         return emptyinterval(BareInterval{T})
+    else
+        isinteger(y) && return pown(x, S(y))
+        y == (1//2) && return sqrt(x)
+        return pown(rootn(x, y.den), y.num)
     end
-
-    isinteger(y) && return pown(x, S(y))
-
-    y == (1//2) && return sqrt(x)
-
-    lo, hi = bounds(x)
-
-    if lo < 0
-        return emptyinterval(BareInterval{T})
-    end
-
-    if lo < 0 && hi ≥ 0
-        x = intersect_interval(x, _unsafe_bareinterval(T, zero(T), typemax(T)))
-    end
-
-    return pown(rootn(x, q), p)
 end
 
 """
@@ -164,7 +126,6 @@ function pown(x::BareInterval{T}, n::Integer) where {T<:NumTypes}
     iszero(n) && return one(BareInterval{T})
     n == 1 && return x
     (n < 0) & isthinzero(x) && return emptyinterval(BareInterval{T})
-
     if isodd(n)
         isentire_interval(x) && return x
         if n > 0
@@ -257,12 +218,17 @@ A faster implementation of `x^n`; the returned interval may be slightly large
 than `x^n`.
 """
 function fastpow(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
+    isempty_interval(y) && return y
     isthininteger(y) && return fastpow(x, Integer(sup(y)))
     domain = _unsafe_bareinterval(T, zero(T), typemax(T))
     x = intersect_interval(x, domain)
     isempty_interval(x) && return x
-    inf(y) > 0 == sup(x) && return zero(BareInterval{T})
-    return exp(y * log(x))
+    if sup(x) == 0
+        sup(y) > 0 && return x # zero(x)
+        return emptyinterval(BareInterval{T})
+    else
+        return exp(y * log(x))
+    end
 end
 
 fastpow(x::BareInterval, y::BareInterval) = fastpow(promote(x, y)...)
@@ -272,15 +238,11 @@ function fastpow(x::BareInterval{T}, n::Integer) where {T<:NumTypes}
     domain = _unsafe_bareinterval(T, zero(T), typemax(T))
     x = intersect_interval(x, domain)
     isempty_interval(x) && return x
-    if iseven(n) && in_interval(0, x)
-        xmag = mag(x)
-        return hull(zero(BareInterval{T}),
-                    _positive_power_by_squaring(bareinterval(T, xmag, xmag), n))
+    if sup(x) == 0
+        n > 0 && return x # zero(x)
+        return emptyinterval(BareInterval{T}) # n == 0
     else
-        xinf = inf(x)
-        xsup = sup(x)
-        return hull(_positive_power_by_squaring(bareinterval(T, xinf, xinf), n),
-                    _positive_power_by_squaring(bareinterval(T, xsup, xsup), n))
+        return _positive_power_by_squaring(x, n)
     end
 end
 

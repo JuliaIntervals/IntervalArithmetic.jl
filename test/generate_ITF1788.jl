@@ -1,46 +1,3 @@
-"""
-    generate(filename; ofolder="", failure=false)
-
-Generates the julia tests from the file filename. The tests in filename must be written
-using the ITL domain specific language. The tests are written in a .jl file with the same
-name of filename. The folder where to save the output file is specifified
-
-If failure=true, than each test is also executed before printing to the target file. If the
-test fails, then the test is generated as ´@test_broken`.
-"""
-function generate(filename)
-
-    # read file
-    src = joinpath(@__DIR__, "itl", filename)
-    f = open(src)
-    lines = readlines(f)
-    close(f)
-
-    # file where to Write
-    dest = joinpath("ITF1788_tests", filename[1:end-4]*".jl")
-    mkpath("ITF1788_tests")
-    f = open(dest; write=true)
-
-    # where testcase blocks start
-    rx_start = r"^\s*testcase\s+\S+\s+\{\s*$"
-    rx_end = r"^\s*\}\s*$"
-    block_start = findall(x -> occursin(rx_start, x), lines)
-    block_end = findall(x -> occursin(rx_end, x), lines)
-
-    # check opening and closing blocks match
-    length(block_start) == length(block_end) || throw(ArgumentError("opening and closing braces not not much in $filename"))
-
-    for (bstart, bend) in zip(block_start, block_end)
-        testset = parse_block(lines[bstart:bend])
-        write(f, testset)
-    end
-
-    close(f)
-    nothing
-end
-
-#
-
 functions = Dict(
     "atan2" => x -> "atan($x)",
     "add" => x -> "+($x)",
@@ -132,66 +89,79 @@ functions = Dict(
     "sum_sqr_nearest" => x -> "sum($x.^2)"
 )
 
-#
+"""
+    generate(filename::AbstractString)
+
+Generate the julia tests from the file `filename` contained in a folder named
+`itl` located in the current directory. The file must have the extension `.itl`.
+The output is a Julia file with the same name, with the extension `.jl`, located
+in the folder named `ITF1788_tests`. Return the path of the output file.
+"""
+function generate(filename::AbstractString)
+    src = joinpath(@__DIR__, "itl", filename)
+    lines = readlines(src)
+
+    mkpath("ITF1788_tests")
+    dest = joinpath("ITF1788_tests", replace(filename, ".itl" => ".jl"))
+
+    open(dest, "w") do io
+        rx_start = r"^\s*testcase\s+\S+\s+\{\s*$" # where testcase blocks start
+        rx_end = r"^\s*\}\s*$" # where testcase blocks end
+
+        block_start = findall(line -> occursin(rx_start, line), lines)
+        block_end = findall(line -> occursin(rx_end, line), lines)
+
+        length(block_start) == length(block_end) || throw(ArgumentError("opening and closing braces do not match in $filename"))
+
+        for (bstart, bend) ∈ zip(block_start, block_end)
+            testset = parse_block(view(lines, bstart:bend))
+            write(io, testset)
+        end
+    end
+
+    return dest
+end
 
 function parse_block(block)
-    bname = match(r"^\s*testcase\s+(\S+)\s+\{\s*$", block[1])[1]
+    blockname = match(r"^\s*testcase\s+(\S+)\s+\{\s*$", block[1])[1]
 
-    testset = """@testset "$bname" begin
+    testset = """@testset "$blockname" begin
             """
-    ind = "    "
-    for i in 2:length(block)-1
+    indentation = "    "
+    for i ∈ 2:length(block)-1
         line = strip(block[i])
-        (isempty(line) || startswith(line, "//")) && continue
+        isempty(line) | startswith(line, "//") && continue
         command = parse_command(line)
         testset = """$testset
-        $ind$command
+        $indentation$command
         """
     end
     testset = """$testset
             end
             """
+
+    return testset
 end
 
-"""
-
-This function parses a line into julia code, e.g.
-
-```
-add [1, 2] [1, 2] = [2, 4]
-```
-
-is parsed into
-```
-@test +(Interval(1, 2), Interval(1, 2)) === Interval(2, 4)
-```
-"""
+# e.g. `add [1, 2] [1, 2] = [2, 4]` is parsed as `@test +(interval(1, 2), interval(1, 2)) === interval(2, 4)`
 function parse_command(line)
     # extract parts in line
     m = match(r"^(.+)=(.+);$", line)
     lhs = m[1]
-    rhs = m[2]
-    rhs = split(rhs, "signal")
-    warn = length(rhs) > 1 ? rhs[2] : ""
-    rhs = rhs[1]
+    vrhs = split(m[2], "signal")
+    haswarning = length(vrhs) > 1
+    rhs = vrhs[1]
 
     lhs = parse_lhs(lhs)
     rhs = parse_rhs(rhs)
 
     expr = build_expression(lhs, rhs)
 
-    # known broken test, unrelated to interval airthmetic
-    command  = occursin("dot_nearest {0x10000000000001p0, 0x1p104} {0x0fffffffffffffp0, -1.0} = -1.0", line) ?
+    # one known broken test, unrelated to interval airthmetic
+    command = occursin("dot_nearest {0x10000000000001p0, 0x1p104} {0x0fffffffffffffp0, -1.0} = -1.0", line) ?
         "@test_broken $expr" : "@test $expr"
 
-    # try
-    #     res = eval(Meta.parse(expr))
-    #     command = res ? "@test $expr" : "@test_broken $expr"
-    # catch
-    #     command = "@test_broken $expr"
-    # end
-
-    command = isempty(warn) ? command : "@test_logs (:warn,) $command"
+    command = haswarning ? "@test_logs (:warn,) $command" : command
 
     return command
 end
@@ -207,8 +177,7 @@ function parse_lhs(lhs)
     fname == "d-textToInterval" && return "parse(Interval{Float64}, $args)"
 
     # input numbers
-    args = replace(args, "infinity" => "Inf")
-    args = replace(args, "X" => "x")
+    args = replace(args, "infinity" => "Inf", "X" => "x")
     if fname == "b-numsToInterval"
         args = join(split(args), ',')
         return "bareinterval($args)"
@@ -221,9 +190,10 @@ function parse_lhs(lhs)
 
     # input intervals
     rx = r"\[([^\]]+)\](?:_(\w+))?"
-    for m in eachmatch(rx, args)
+    for m ∈ eachmatch(rx, args)
         args = replace(args, m.match => parse_interval(m[1], m[2]))
     end
+
     args = replace(args, " " => ", ")
     args = replace(args, ",," => ",")
     args = replace(args, "{" => "[")
@@ -232,19 +202,12 @@ function parse_lhs(lhs)
     return functions[fname](args)
 end
 
-function int_to_float(x)
-    if isnothing(tryparse(Int, x))
-        return x
-    else
-        return x * ".0"
-    end
-end
+int_to_float(x) = x * ifelse(isnothing(tryparse(Int64, x)), "", ".0")
 
 function parse_rhs(rhs)
-    rhs = strip(rhs)
-    rhs = replace(rhs, "infinity" => "Inf")
-    rhs = replace(rhs, "X" => "x")
-    rhs = replace(rhs,
+    rhs = replace(strip(rhs),
+        "infinity"     => "Inf",
+        "X"            => "x",
         "bothEmpty"    => "IntervalArithmetic.Overlap.both_empty",
         "firstEmpty"   => "IntervalArithmetic.Overlap.first_empty",
         "secondEmpty"  => "IntervalArithmetic.Overlap.second_empty",
@@ -261,36 +224,36 @@ function parse_rhs(rhs)
         "overlappedBy" => "IntervalArithmetic.Overlap.overlapped_by",
         "metBy"        => "IntervalArithmetic.Overlap.met_by",
         "after"        => "IntervalArithmetic.Overlap.after")
-    if '[' ∉ rhs # one or more scalar/bolean values separated by space
-        return map(int_to_float, split(rhs))
-    else # one or more intervals
+    if occursin('[', rhs) # one or more intervals
         rx = r"\[([^\]]+)\](?:_(\w+))?"
-        ivals = [parse_interval(m[1], m[2]; check=false) for m in eachmatch(rx, rhs)]
+        ivals = [parse_interval(m[1], m[2]) for m ∈ eachmatch(rx, rhs)]
         return ivals
+    else # one or more scalar/boolean values separated by space
+        return map(int_to_float, split(rhs))
     end
 end
 
-function parse_interval(ival, dec; check=true)
-    ival == "nai" && return "nai()"
+function parse_interval(ival::AbstractString, dec::Union{Nothing,AbstractString})
+    ival == "nai" && return "nai(Interval{Float64})"
     if ival == "entire"
         ival =  "entireinterval(BareInterval{Float64})"
     elseif ival == "empty"
         ival = "emptyinterval(BareInterval{Float64})"
     else
-        ival = check ? "bareinterval($ival)" : "bareinterval($ival)"
+        ival = "bareinterval($ival)"
     end
-    isnothing(dec) || (ival = "interval($ival, $dec)")
-    return ival
+    isnothing(dec) && return ival
+    return "interval($ival, $dec)"
 end
 
-function build_expression(lhs, rhs::AbstractString)
+function build_expression(lhs::AbstractString, rhs::Vector)
+    length(rhs) == 1 && return build_expression(lhs, rhs[1])
+    expr = [build_expression(lhs * "[$i]", r) for (i, r) ∈ enumerate(rhs)]
+    return join(expr, " && ")
+end
+
+function build_expression(lhs::AbstractString, rhs::AbstractString)
     rhs == "nai()" && return "isnai($lhs)"
     rhs == "NaN" && return "isnan($lhs)"
     return "$lhs === $rhs"
-end
-
-function build_expression(lhs, rhs::Vector)
-    length(rhs) == 1 && return build_expression(lhs, rhs[1])
-    expr = [build_expression(lhs*"[$i]", r) for (i, r) in enumerate(rhs)]
-    return join(expr, " && ")
 end
