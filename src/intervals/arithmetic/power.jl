@@ -5,6 +5,46 @@
 """
     ^(x, y)
 
+Compute the power of the positive real part of `x` by `y`. This function is not
+in the IEEE Standard 1788-2015. This is equivalent to `pow(x, y)`, unless
+`isthininteger(y)` is true in which case it is equivalent to `pown(x, sup(y))`.
+
+See also: [`pow`](@ref) and [`pown`](@ref).
+
+# Examples
+
+```jldoctest
+julia> bareinterval(2, 3) ^ bareinterval(2)
+BareInterval{Float64}(4.0, 9.0)
+
+julia> interval(-1, 1) ^ interval(3)
+Interval{Float64}(-1.0, 1.0, com)
+
+julia> interval(-1, 1) ^ interval(-3)
+Interval{Float64}(1.0, Inf, trv)
+```
+"""
+function Base.:^(x::BareInterval, y::BareInterval)
+    isthininteger(y) && return pown(x, Integer(sup(y)))
+    return pow(x, y)
+end
+
+function Base.:^(x::Interval, y::Interval)
+    isthininteger(y) && return pown(x, Integer(sup(y)))
+    return pow(x, y)
+end
+
+Base.:^(n::Integer, y::Interval) = ^(n//one(n), y)
+Base.:^(x::Interval, n::Integer) = ^(x, n//one(n))
+Base.:^(x::Rational, y::Interval) = ^(convert(Interval{typeof(x)}, x), y)
+Base.:^(x::Interval, y::Rational) = ^(x, convert(Interval{typeof(y)}, y))
+
+# overwrite behaviour for small integer powers from https://github.com/JuliaLang/julia/pull/24240
+Base.literal_pow(::typeof(^), x::Interval, ::Val{n}) where {n} = x^n
+
+"""
+    pow(x, y)
+
 Compute the power of the positive real part of `x` by `y`. In particular, even
 if `y` is a thin integer, this is not equivalent to `pown(x, sup(y))`.
 
@@ -15,17 +55,17 @@ See also: [`pown`](@ref).
 # Examples
 
 ```jldoctest
-julia> bareinterval(2, 3) ^ bareinterval(2)
+julia> pow(bareinterval(2, 3), bareinterval(2))
 BareInterval{Float64}(4.0, 9.0)
 
-julia> interval(-1, 1) ^ interval(3)
+julia> pow(interval(-1, 1), interval(3))
 Interval{Float64}(0.0, 1.0, trv)
 
-julia> interval(-1, 1) ^ interval(-3)
+julia> pow(interval(-1, 1), interval(-3))
 Interval{Float64}(1.0, Inf, trv)
 ```
 """
-function Base.:^(x::BareInterval{T}, y::BareInterval{T}) where {T<:AbstractFloat}
+function pow(x::BareInterval{T}, y::BareInterval{T}) where {T<:AbstractFloat}
     isempty_interval(y) && return y
     domain = _unsafe_bareinterval(T, zero(T), typemax(T))
     x = intersect_interval(x, domain)
@@ -33,7 +73,7 @@ function Base.:^(x::BareInterval{T}, y::BareInterval{T}) where {T<:AbstractFloat
     isthin(y) && return _pow(x, sup(y))
     return hull(_pow(x, inf(y)), _pow(x, sup(y)))
 end
-function Base.:^(x::BareInterval{T}, y::BareInterval{T}) where {T<:Rational}
+function pow(x::BareInterval{T}, y::BareInterval{T}) where {T<:Rational}
     isempty_interval(y) && return y
     domain = _unsafe_bareinterval(T, zero(T), typemax(T))
     x = intersect_interval(x, domain)
@@ -41,11 +81,11 @@ function Base.:^(x::BareInterval{T}, y::BareInterval{T}) where {T<:Rational}
     isthin(y) && return _pow(x, sup(y))
     return hull(_pow(x, inf(y)), _pow(x, sup(y)))
 end
-Base.:^(x::BareInterval{<:AbstractFloat}, y::BareInterval{<:AbstractFloat}) = ^(promote(x, y)...)
-Base.:^(x::BareInterval{<:Rational}, y::BareInterval{<:Rational}) = ^(promote(x, y)...)
-Base.:^(x::BareInterval{<:Rational}, y::BareInterval{<:AbstractFloat}) = ^(promote(x, y)...)
+pow(x::BareInterval{<:AbstractFloat}, y::BareInterval{<:AbstractFloat}) = pow(promote(x, y)...)
+pow(x::BareInterval{<:Rational}, y::BareInterval{<:Rational}) = pow(promote(x, y)...)
+pow(x::BareInterval{<:Rational}, y::BareInterval{<:AbstractFloat}) = pow(promote(x, y)...)
 # specialize on rational to improve exactness
-function Base.:^(x::BareInterval{T}, y::BareInterval{S}) where {T<:NumTypes,S<:Rational}
+function pow(x::BareInterval{T}, y::BareInterval{S}) where {T<:NumTypes,S<:Rational}
     R = promote_numtype(T, S)
     isempty_interval(y) && return emptyinterval(BareInterval{R})
     domain = _unsafe_bareinterval(T, zero(T), typemax(T))
@@ -55,23 +95,20 @@ function Base.:^(x::BareInterval{T}, y::BareInterval{S}) where {T<:NumTypes,S<:R
     return BareInterval{R}(hull(_pow(x, inf(y)), _pow(x, sup(y))))
 end
 
-function Base.:^(x::Interval, y::Interval)
+function pow(x::Interval, y::Interval)
     bx = bareinterval(x)
     by = bareinterval(y)
-    r = bx^by
+    r = pow(bx, by)
     d = min(decoration(x), decoration(y), decoration(r))
     d = min(d, ifelse((inf(bx) > 0) | ((inf(bx) == 0) & (inf(by) > 0)), d, trv))
     t = isguaranteed(x) & isguaranteed(y)
     return _unsafe_interval(r, d, t)
 end
 
-Base.:^(n::Integer, y::Interval) = ^(n//one(n), y)
-Base.:^(x::Interval, n::Integer) = ^(x, n//one(n))
-Base.:^(x::Rational, y::Interval) = ^(convert(Interval{typeof(x)}, x), y)
-Base.:^(x::Interval, y::Rational) = ^(x, convert(Interval{typeof(y)}, y))
-
-# overwrite behaviour for small integer powers from https://github.com/JuliaLang/julia/pull/24240
-Base.literal_pow(::typeof(^), x::Interval, ::Val{n}) where {n} = x^n
+pow(n::Integer, y::Interval) = pow(n//one(n), y)
+pow(x::Interval, n::Integer) = pow(x, n//one(n))
+pow(x::Rational, y::Interval) = pow(convert(Interval{typeof(x)}, x), y)
+pow(x::Interval, y::Rational) = pow(x, convert(Interval{typeof(y)}, y))
 
 # helper functions for power
 
@@ -212,10 +249,10 @@ Base.hypot(x::BareInterval, y::BareInterval) = sqrt(pown(x, 2) + pown(y, 2))
 Base.hypot(x::Interval, y::Interval) = sqrt(x^2 + y^2)
 
 """
-    fastpow(x, n)
+    fastpow(x, y)
 
-A faster implementation of `x^n`; the returned interval may be slightly large
-than `x^n`.
+A faster implementation of `pow(x, y)`, at the cost of maybe returning a
+slightly larger interval.
 """
 function fastpow(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(y) && return y
