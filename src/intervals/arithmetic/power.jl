@@ -2,12 +2,30 @@
 # of the IEEE Standard 1788-2015 and required for set-based flavor in Section
 # 10.5.3
 
+# power mechanism used in `^`
+
 """
-    ^(x, y)
+    PowerMode
+
+Power mode type for `^`.
+
+Available mode types:
+- `:fast`: `x ^ y` is semantically equivalent to `fastpow(x, y)`.
+- `:slow`: `x ^ y` is semantically equivalent to `pow(x, y)`, unless
+`isthininteger(y)` is true in which case it is semantically equivalent to
+`pown(x, sup(y))`.
+"""
+struct PowerMode{T} end
+
+power_mode() = PowerMode{:slow}()
+
+"""
+    ^(x::BareInterval, y::BareInterval)
+    ^(x::Interval, y::Interval)
 
 Compute the power of the positive real part of `x` by `y`. This function is not
-in the IEEE Standard 1788-2015. This is equivalent to `pow(x, y)`, unless
-`isthininteger(y)` is true in which case it is equivalent to `pown(x, sup(y))`.
+in the IEEE Standard 1788-2015. Its behaviour depend on the current
+[`PowerMode`](@ref).
 
 See also: [`pow`](@ref) and [`pown`](@ref).
 
@@ -27,13 +45,13 @@ Interval{Float64}(-Inf, Inf, trv)
 ```
 """
 function Base.:^(x::BareInterval, y::BareInterval)
-    isthininteger(y) && return pown(x, Integer(sup(y)))
-    return pow(x, y)
+    isthininteger(y) && return _select_pown(power_mode(), x, Integer(sup(y)))
+    return _select_pow(power_mode(), x, y)
 end
 
 function Base.:^(x::Interval, y::Interval)
-    isthininteger(y) && return pown(x, Integer(sup(y)))
-    return pow(x, y)
+    isthininteger(y) && return _select_pown(power_mode(), x, Integer(sup(y)))
+    return _select_pow(power_mode(), x, y)
 end
 
 Base.:^(n::Integer, y::Interval) = ^(n//one(n), y)
@@ -43,6 +61,13 @@ Base.:^(x::Interval, y::Rational) = ^(x, convert(Interval{typeof(y)}, y))
 
 # overwrite behaviour for small integer powers from https://github.com/JuliaLang/julia/pull/24240
 Base.literal_pow(::typeof(^), x::Interval, ::Val{n}) where {n} = x^n
+
+# helper functions for power
+
+_select_pow(::PowerMode{:fast}, x, y) = fastpow(x, y)
+_select_pown(::PowerMode{:fast}, x, y) = fastpow(x, y)
+_select_pow(::PowerMode{:slow}, x, y) = pow(x, y)
+_select_pown(::PowerMode{:slow}, x, y) = pown(x, y)
 
 """
     pow(x, y)
@@ -101,8 +126,8 @@ end
 
 pow(n::Integer, y::BareInterval) = pow(n//one(n), y)
 pow(x::BareInterval, n::Integer) = pow(x, n//one(n))
-pow(x::Real, y::Interval) = pow(bareinterval(x), y)
-pow(x::Interval, y::Real) = pow(x, bareinterval(y))
+pow(x::Real, y::BareInterval) = pow(bareinterval(x), y)
+pow(x::BareInterval, y::Real) = pow(x, bareinterval(y))
 
 function pow(x::Interval, y::Interval)
     bx = bareinterval(x)
@@ -277,8 +302,6 @@ function fastpow(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
     end
 end
 
-fastpow(x::BareInterval, y::BareInterval) = fastpow(promote(x, y)...)
-
 function fastpow(x::BareInterval{T}, n::Integer) where {T<:NumTypes}
     n < 0 && return inv(fastpow(x, -n))
     domain = _unsafe_bareinterval(T, zero(T), typemax(T))
@@ -292,8 +315,8 @@ function fastpow(x::BareInterval{T}, n::Integer) where {T<:NumTypes}
     end
 end
 
-fastpow(x::BareInterval{T}, y::S) where {T<:NumTypes,S<:Real} =
-    fastpow(x, bareinterval(promote_numtype(T, S), y))
+fastpow(x::BareInterval, y::BareInterval) = fastpow(promote(x, y)...)
+fastpow(x::BareInterval, y::Real) = fastpow(x, bareinterval(y))
 
 function fastpow(x::Interval, y::Interval)
     bx = bareinterval(x)
@@ -305,13 +328,7 @@ function fastpow(x::Interval, y::Interval)
     return _unsafe_interval(r, d, t)
 end
 
-function fastpow(x::Interval, y::Real)
-    bx = bareinterval(x)
-    r = fastpow(bx, y)
-    d = min(decoration(x), decoration(r))
-    d = min(d, ifelse((inf(bx) > 0) | ((inf(bx) == 0) & (y > 0)), d, trv))
-    return _unsafe_interval(r, d, isguaranteed(x))
-end
+fastpow(x::Interval, y::Real) = fastpow(x, interval(y))
 
 # helper function for fast power
 
