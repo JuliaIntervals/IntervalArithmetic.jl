@@ -211,37 +211,7 @@ end
 
 Implement the `fma` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function Base.fma(x::BareInterval{T}, y::BareInterval{T}, z::BareInterval{T}) where {T<:NumTypes}
-    isempty_interval(x) && return x
-    isempty_interval(y) && return y
-    isempty_interval(z) && return z
-
-    if isentire_interval(x)
-        isthinzero(y) && return z
-        return entireinterval(BareInterval{T})
-    elseif isentire_interval(y)
-        isthinzero(x) && return z
-        return entireinterval(BareInterval{T})
-    end
-
-    lo = setrounding(T, RoundDown) do
-        lo1 = fma(inf(x), inf(y), inf(z))
-        lo2 = fma(inf(x), sup(y), inf(z))
-        lo3 = fma(sup(x), inf(y), inf(z))
-        lo4 = fma(sup(x), sup(y), inf(z))
-        return minimum(filter(x -> !isnan(x), (lo1, lo2, lo3, lo4)))
-    end
-
-    hi = setrounding(T, RoundUp) do
-        hi1 = fma(inf(x), inf(y), sup(z))
-        hi2 = fma(inf(x), sup(y), sup(z))
-        hi3 = fma(sup(x), inf(y), sup(z))
-        hi4 = fma(sup(x), sup(y), sup(z))
-        return maximum(filter(x -> !isnan(x), (hi1, hi2, hi3, hi4)))
-    end
-
-    return _unsafe_bareinterval(T, lo, hi)
-end
+Base.fma(x::BareInterval{T}, y::BareInterval{T}, z::BareInterval{T}) where {T<:NumTypes} = x * y + z
 Base.fma(x::BareInterval, y::BareInterval, z::BareInterval) = fma(promote(x, y, z)...)
 
 function Base.fma(x::Interval, y::Interval, z::Interval)
