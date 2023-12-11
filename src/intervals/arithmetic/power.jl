@@ -21,7 +21,7 @@ julia> interval(-1, 1) ^ interval(3)
 Interval{Float64}(-1.0, 1.0, com)
 
 julia> interval(-1, 1) ^ interval(-3)
-Interval{Float64}(1.0, Inf, trv)
+Interval{Float64}(-Inf, Inf, trv)
 ```
 """
 function Base.:^(x::BareInterval, y::BareInterval)

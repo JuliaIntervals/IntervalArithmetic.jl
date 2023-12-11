@@ -627,10 +627,10 @@ constructor [`atomic`](@ref).
 ```jldoctest
 julia> setdisplay(:full);
 
-julia> @macroexpand IntervalArithmetic.@interval Float64 sin(1)
-:(sin(IntervalArithmetic.interval(IntervalArithmetic.atomic(Float64, 1))))
+julia> @macroexpand @interval Float64 sin(1)
+:(sin(IntervalArithmetic.atomic(Float64, 1)))
 
-julia> IntervalArithmetic.@interval Float64 sin(1) exp(1)
+julia> @interval Float64 sin(1) exp(1)
 Interval{Float64}(0.8414709848078965, 2.7182818284590455, com)
 ```
 """
