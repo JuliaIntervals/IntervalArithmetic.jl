@@ -69,13 +69,10 @@ treated as multi-dimensional intervals.
 function interiordiff(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
     isinterior(x, y) && return BareInterval{T}[] # or `[emptyinterval(BareInterval{T})]`?
     isdisjoint_interval(x, y) && return [x]
-    isequal_interval(x, y) && return [_unsafe_bareinterval(T, inf(x), inf(x)), _unsafe_bareinterval(T, sup(x), sup(x))]
-
     inter = intersect_interval(x, y)
-    inf(x) == inf(inter) && return [_unsafe_bareinterval(T, sup(inter), sup(x))]
-    sup(x) == sup(inter) && return [_unsafe_bareinterval(T, inf(x), inf(inter))]
-
-    return [_unsafe_bareinterval(T, inf(x), inf(y)), _unsafe_bareinterval(T, sup(y), sup(x))]
+    issubset_interval(y, x) && return [_unsafe_bareinterval(T, inf(x), inf(inter)), _unsafe_bareinterval(T, sup(inter), sup(x))]
+    isweakless(x, inter) && return [_unsafe_bareinterval(T, inf(x), inf(inter))]
+    return [_unsafe_bareinterval(T, sup(inter), sup(x))]
 end
 interiordiff(x::BareInterval, y::BareInterval) = interiordiff(promote(x, y)...)
 

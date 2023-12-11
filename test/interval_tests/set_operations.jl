@@ -25,8 +25,8 @@ end
 
     y = interval(2, 5)
 
-    @test all(isequal_interval.(interiordiff(x, y), [interval(4)]))
-    @test all(isequal_interval.(interiordiff(y, x), [interval(4, 5)]))
+    @test all(isequal_interval.(interiordiff(x, y), [interval(2)]))
+    @test all(isequal_interval.(interiordiff(y, x), [interval(2), interval(4, 5)]))
 
     x = interval(2, 5)
     y = interval(3, 4)
