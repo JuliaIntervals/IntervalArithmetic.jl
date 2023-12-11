@@ -11,7 +11,7 @@ Split the `i`-th component of a vector `x` at a relative position `α`, where
 function bisect(x::BareInterval{T}, α::Real=0.5) where {T<:NumTypes}
     0 ≤ α ≤ 1 || return throw(DomainError(α, "bisect only accepts a relative position α between 0 and 1"))
     isatomic(x) && return (x, emptyinterval(BareInterval{T}))
-    m = scaled_mid(x, α)
+    m = _relpoint(x, α)
     return (_unsafe_bareinterval(T, inf(x), m), _unsafe_bareinterval(T, m, sup(x)))
 end
 
@@ -28,6 +28,41 @@ function bisect(x::AbstractVector, i::Integer, α::Real=0.5)
     x₂ = copy(x)
     x₁[i], x₂[i] = bisect(x[i], α)
     return (x₁, x₂)
+end
+
+# helper functions for bisection
+
+function _relpoint(x::BareInterval{T}, α::Real) where {T<:AbstractFloat}
+    α == 0.5 && return mid(x)
+    isempty_interval(x) && return convert(T, NaN)
+    if isentire_interval(x)
+        α > 0.5 && return prevfloat(typemax(T))
+        return nextfloat(typemin(T))
+    else
+        lo, hi = bounds(x)
+        lo == typemin(T) && return nextfloat(lo) # cf. Section 12.12.8
+        hi == typemax(T) && return prevfloat(hi) # cf. Section 12.12.8
+        β = convert(T, α)
+        midpoint = β * (hi - lo) + lo
+        isfinite(midpoint) && return _normalisezero(midpoint)
+        return _normalisezero((1 - β) * lo + β * hi)
+    end
+end
+function _relpoint(x::BareInterval{T}, α::Real) where {T<:Rational}
+    α == 0.5 && return mid(x)
+    isempty_interval(x) && return throw(ArgumentError("cannot compute the midpoint of empty intervals; cannot return a `Rational` NaN"))
+    if isentire_interval(x)
+        α > 0.5 && return prevfloat(typemax(T))
+        return nextfloat(typemin(T))
+    else
+        lo, hi = bounds(x)
+        lo == typemin(T) && return nextfloat(lo) # cf. Section 12.12.8
+        hi == typemax(T) && return prevfloat(hi) # cf. Section 12.12.8
+        β = convert(T, α)
+        midpoint = β * (hi - lo) + lo
+        isfinite(midpoint) && return _normalisezero(midpoint)
+        return _normalisezero((1 - β) * lo + β * hi)
+    end
 end
 
 """

@@ -11,8 +11,8 @@ negative zero is returned.
 
 Implement the `inf` function of the IEEE Standard 1788-2015 (Table 9.2).
 
-See also: [`sup`](@ref), [`bounds`](@ref), [`mid`](@ref), [`scaled_mid`](@ref),
-[`diam`](@ref), [`radius`](@ref) and [`midradius`](@ref).
+See also: [`sup`](@ref), [`bounds`](@ref), [`mid`](@ref), [`diam`](@ref),
+[`radius`](@ref) and [`midradius`](@ref).
 """
 inf(x::BareInterval{T}) where {T<:AbstractFloat} = ifelse(isnan(x.lo), typemax(T), ifelse(iszero(x.lo), copysign(x.lo, -1), x.lo))
 inf(x::BareInterval{<:Rational}) = x.lo
@@ -35,8 +35,8 @@ Upper bound, or supremum, of `x`.
 
 Implement the `sup` function of the IEEE Standard 1788-2015 (Table 9.2).
 
-See also: [`inf`](@ref), [`bounds`](@ref), [`mid`](@ref), [`scaled_mid`](@ref),
-[`diam`](@ref), [`radius`](@ref) and [`midradius`](@ref).
+See also: [`inf`](@ref), [`bounds`](@ref), [`mid`](@ref), [`diam`](@ref),
+[`radius`](@ref) and [`midradius`](@ref).
 """
 sup(x::BareInterval{T}) where {T<:AbstractFloat} = ifelse(isnan(x.hi), typemin(T), x.hi)
 sup(x::BareInterval{<:Rational}) = x.hi
@@ -58,8 +58,8 @@ sup(x::Real) = sup(interval(x))
 Bounds of `x` given as a tuple. Unlike [`inf`](@ref), this function does
 not normalize the infimum of the interval.
 
-See also: [`inf`](@ref), [`sup`](@ref), [`mid`](@ref), [`scaled_mid`](@ref),
-[`diam`](@ref), [`radius`](@ref) and [`midradius`](@ref).
+See also: [`inf`](@ref), [`sup`](@ref), [`mid`](@ref), [`diam`](@ref),
+[`radius`](@ref) and [`midradius`](@ref).
 """
 bounds(x::BareInterval{T}) where {T<:AbstractFloat} = (ifelse(isnan(x.lo), typemax(T), x.lo), x.hi)
 bounds(x::BareInterval{<:Rational}) = (inf(x), sup(x))
@@ -82,34 +82,32 @@ Midpoint of `x`.
 
 Implement the `mid` function of the IEEE Standard 1788-2015 (Table 9.2).
 
-See also: [`inf`](@ref), [`sup`](@ref), [`bounds`](@ref), [`scaled_mid`](@ref),
-[`diam`](@ref), [`radius`](@ref) and [`midradius`](@ref).
+See also: [`inf`](@ref), [`sup`](@ref), [`bounds`](@ref), [`diam`](@ref),
+[`radius`](@ref) and [`midradius`](@ref).
 """
 function mid(x::BareInterval{T}) where {T<:AbstractFloat}
     isempty_interval(x) && return convert(T, NaN)
     isentire_interval(x) && return zero(T)
-
-    inf(x) == typemin(T) && return nextfloat(inf(x)) # cf. Section 12.12.8
-    sup(x) == typemax(T) && return prevfloat(sup(x)) # cf. Section 12.12.8
-
-    midpoint = (inf(x) + sup(x)) / 2
+    lo, hi = bounds(x)
+    lo == typemin(T) && return nextfloat(lo) # cf. Section 12.12.8
+    hi == typemax(T) && return prevfloat(hi) # cf. Section 12.12.8
+    midpoint = (lo + hi) / 2
     isfinite(midpoint) && return _normalisezero(midpoint)
     # fallback in case of overflow
     # cannot be the default, since it does not pass several IEEE 1788-2015 tests for small floats
-    return _normalisezero(inf(x) / 2 + sup(x) / 2)
+    return _normalisezero(lo / 2 + hi / 2)
 end
 function mid(x::BareInterval{T}) where {T<:Rational}
     isempty_interval(x) && return throw(ArgumentError("cannot compute the midpoint of empty intervals; cannot return a `Rational` NaN"))
     isentire_interval(x) && return zero(T)
-
-    inf(x) == typemin(T) && return nextfloat(inf(x)) # cf. Section 12.12.8
-    sup(x) == typemax(T) && return prevfloat(sup(x)) # cf. Section 12.12.8
-
-    midpoint = (inf(x) + sup(x)) / 2
+    lo, hi = bounds(x)
+    lo == typemin(T) && return nextfloat(lo) # cf. Section 12.12.8
+    hi == typemax(T) && return prevfloat(hi) # cf. Section 12.12.8
+    midpoint = (lo + hi) / 2
     isfinite(midpoint) && return _normalisezero(midpoint)
     # fallback in case of overflow
     # cannot be the default, since it does not pass several IEEE 1788-2015 tests for small floats
-    return _normalisezero(inf(x) / 2 + sup(x) / 2)
+    return _normalisezero(lo / 2 + hi / 2)
 end
 
 function mid(x::Interval{T}) where {T<:AbstractFloat}
@@ -125,60 +123,6 @@ mid(x::Real) = mid(interval(x))
 mid(x::Complex) = complex(mid(real(x)), mid(imag(x)))
 
 """
-    scaled_mid(x, α)
-
-Intermediate midpoint of the interval `x` at a relative position `α`.
-
-!!! note
-    For unbounded intervals in `:set_based` flavor, `scaled_mid(x, 0.5) != mid(x)`.
-
-See also: [`inf`](@ref), [`sup`](@ref), [`bounds`](@ref), [`mid`](@ref),
-[`diam`](@ref), [`radius`](@ref) and [`midradius`](@ref).
-"""
-function scaled_mid(x::BareInterval{T}, α::Real) where {T<:AbstractFloat}
-    0 ≤ α ≤ 1 || return throw(DomainError(α, "scaled_mid only accepts a relative position α between 0 and 1"))
-    isempty_interval(x) && return convert(T, NaN)
-
-    lo = (inf(x) == typemin(T) ? nextfloat(inf(x)) : inf(x))
-    hi = (sup(x) == typemax(T) ? prevfloat(sup(x)) : sup(x))
-
-    β = convert(T, α)
-
-    midpoint = β * (hi - lo) + lo
-    isfinite(midpoint) && return midpoint
-    # fallback in case of overflow
-    # cannot be the default, since it does not pass several IEEE 1788-2015 tests for small floats
-    return (1 - β) * lo + β * hi
-end
-function scaled_mid(x::BareInterval{T}, α::Real) where {T<:Rational}
-    0 ≤ α ≤ 1 || return throw(DomainError(α, "scaled_mid only accepts a relative position α between 0 and 1"))
-    isempty_interval(x) && return throw(ArgumentError("cannot compute the scaled midpoint of empty intervals; cannot return a `Rational` NaN"))
-
-    lo = (inf(x) == typemin(T) ? nextfloat(inf(x)) : inf(x))
-    hi = (sup(x) == typemax(T) ? prevfloat(sup(x)) : sup(x))
-
-    β = convert(T, α)
-
-    midpoint = β * (hi - lo) + lo
-    isfinite(midpoint) && return midpoint
-    # fallback in case of overflow
-    # cannot be the default, since it does not pass several IEEE 1788-2015 tests for small floats
-    return (1 - β) * lo + β * hi
-end
-
-function scaled_mid(x::Interval{T}, α::Real) where {T<:AbstractFloat}
-    isnai(x) && return convert(T, NaN)
-    return scaled_mid(bareinterval(x), α)
-end
-function scaled_mid(x::Interval{<:Rational}, α::Real)
-    isnai(x) && return throw(ArgumentError("cannot compute the scaled midpoint of an NaI; cannot return a `Rational` NaN"))
-    return scaled_mid(bareinterval(x), α)
-end
-
-scaled_mid(x::Real, α::Real) = scaled_mid(interval(x), α)
-scaled_mid(x::Complex, α::Real) = complex(scaled_mid(real(x), α), scaled_mid(imag(x), α))
-
-"""
     diam(x)
 
 Diameter of `x`. If `x` is complex, then the diameter is the maximum diameter
@@ -187,7 +131,7 @@ between its real and imaginary parts.
 Implement the `wid` function of the IEEE Standard 1788-2015 (Table 9.2).
 
 See also: [`inf`](@ref), [`sup`](@ref), [`bounds`](@ref), [`mid`](@ref),
-[`scaled_mid`](@ref), [`radius`](@ref) and [`midradius`](@ref).
+[`radius`](@ref) and [`midradius`](@ref).
 """
 function diam(x::BareInterval{T}) where {T<:AbstractFloat}
     isempty_interval(x) && return convert(T, NaN)
@@ -220,7 +164,7 @@ parts.
 Implement the `rad` function of the IEEE Standard 1788-2015 (Table 9.2).
 
 See also: [`inf`](@ref), [`sup`](@ref), [`bounds`](@ref), [`mid`](@ref),
-[`scaled_mid`](@ref), [`diam`](@ref) and [`midradius`](@ref).
+[`diam`](@ref) and [`midradius`](@ref).
 """
 function radius(x::BareInterval)
     _, r = midradius(x)
@@ -248,7 +192,7 @@ Function required by the IEEE Standard 1788-2015 in Section 10.5.9 for the
 set-based flavor.
 
 See also: [`inf`](@ref), [`sup`](@ref), [`bounds`](@ref), [`mid`](@ref),
-[`scaled_mid`](@ref), [`mid`](@ref) and [`radius`](@ref).
+[`mid`](@ref) and [`radius`](@ref).
 """
 function midradius(x::BareInterval)
     m = mid(x)

@@ -173,18 +173,11 @@
         @test isnan(mid(emptyinterval()))
     end
 
-    @testset "scaled mid" begin
-        @test scaled_mid(interval(0, 1), 0.75) == 0.75
-        @test scaled_mid(interval(1, Inf), 0.75) > 0
-        @test scaled_mid(interval(-Inf, Inf), 0.75) > 0
-        @test scaled_mid(interval(-Inf, Inf), 0.25) < 0
-    end
-
     @testset "mid with large floats" begin
         @test mid(interval(0.8e308, 1.2e308)) == 1e308
         @test mid(interval(-1e308, 1e308)) == 0
-        @test isfinite(scaled_mid(interval(0.8e308, 1.2e308), 0.75))
-        @test isfinite(scaled_mid(interval(-1e308, 1e308), 0.75))
+        @test isfinite(mid(interval(0.8e308, 1.2e308)))
+        @test isfinite(mid(interval(-1e308, 1e308)))
     end
 
     @testset "diam" begin
