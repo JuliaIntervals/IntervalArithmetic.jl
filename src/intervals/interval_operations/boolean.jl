@@ -26,6 +26,8 @@ isequal_interval(x::Complex, y::Complex) = isequal_interval(real(x), real(y)) & 
 isequal_interval(x::Complex, y::Real) = isequal_interval(real(x), y) & isthinzero(imag(x))
 isequal_interval(x::Real, y::Complex) = isequal_interval(x, real(y)) & isthinzero(imag(y))
 
+isequal_interval(x) = Base.Fix2(isequal_interval, x)
+
 """
     issubset_interval(x, y)
 
@@ -196,6 +198,8 @@ in_interval(::Interval, ::Interval) =
 in_interval(x::Complex, y::Complex) = in_interval(real(x), real(y)) & in_interval(imag(x), imag(y))
 in_interval(x::Complex, y::Real) = in_interval(real(x), y) & isthinzero(imag(x))
 in_interval(x::Real, y::Complex) = in_interval(x, real(y)) & in_interval(0, imag(y))
+
+in_interval(x) = Base.Fix2(in_interval, x)
 
 """
     isempty_interval(x)
