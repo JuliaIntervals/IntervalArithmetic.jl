@@ -19,7 +19,7 @@ julia> bareinterval(2, 3) ^ bareinterval(2)
 BareInterval{Float64}(4.0, 9.0)
 
 julia> interval(-1, 1) ^ interval(3)
-Interval{Float64}(0.0, 1.0, com)
+Interval{Float64}(0.0, 1.0, trv)
 
 julia> interval(-1, 1) ^ interval(-3)
 Interval{Float64}(1.0, Inf, trv)
