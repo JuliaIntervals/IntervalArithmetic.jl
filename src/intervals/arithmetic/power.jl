@@ -1,6 +1,7 @@
 # This file contains the functions described as "Power functions" in Section 9.1
 # of the IEEE Standard 1788-2015 and required for set-based flavor in Section
 # 10.5.3
+# Some of the "Recommended operations" (Section 10.6.1) are also present
 
 # power mechanism used in `^`
 
@@ -278,10 +279,12 @@ end
     hypot(x, y)
 
 Compute the hypotenuse; this relies on `^` internally.
-"""
-Base.hypot(x::BareInterval, y::BareInterval) = (x ^ bareinterval(2//1) + y ^ bareinterval(2//1)) ^ bareinterval(1//2)
 
-Base.hypot(x::Interval, y::Interval) = (x ^ interval(2//1) + y ^ interval(2//1)) ^ bareinterval(1//2)
+Implement the `hypot` function of the IEEE Standard 1788-2015 (Table 10.5).
+"""
+Base.hypot(x::BareInterval, y::BareInterval) = sqrt(pown(x, 2) + pown(y, 2))
+
+Base.hypot(x::Interval, y::Interval) = sqrt(pown(x, 2) + pown(y, 2))
 
 """
     fastpow(x, y)
