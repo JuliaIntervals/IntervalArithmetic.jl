@@ -8,14 +8,14 @@ to the midpoint.
 Split the `i`-th component of a vector `x` at a relative position `α`, where
 `α = 0.5` corresponds to the midpoint.
 """
-function bisect(x::BareInterval{T}, α::Real=0.5) where {T<:NumTypes}
+function bisect(x::BareInterval{T}, α::Real = 0.5) where {T<:NumTypes}
     0 ≤ α ≤ 1 || return throw(DomainError(α, "`bisect` only accepts a relative position between 0 and 1"))
     isatomic(x) && return (x, emptyinterval(BareInterval{T}))
     m = _relpoint(x, α)
     return (_unsafe_bareinterval(T, inf(x), m), _unsafe_bareinterval(T, m, sup(x)))
 end
 
-function bisect(x::Interval, α::Real=0.5)
+function bisect(x::Interval, α::Real = 0.5)
     bx = bareinterval(x)
     r₁, r₂ = bisect(bx, α)
     d₁, d₂ = min(decoration(x), decoration(r₁)), min(decoration(x), decoration(r₂))
@@ -23,7 +23,7 @@ function bisect(x::Interval, α::Real=0.5)
     return (_unsafe_interval(r₁, d₁, t), _unsafe_interval(r₂, d₂, t))
 end
 
-function bisect(x::AbstractVector, i::Integer, α::Real=0.5)
+function bisect(x::AbstractVector, i::Integer, α::Real = 0.5)
     x₁ = copy(x)
     x₂ = copy(x)
     x₁[i], x₂[i] = bisect(x[i], α)

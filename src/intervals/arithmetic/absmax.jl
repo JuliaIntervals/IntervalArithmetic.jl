@@ -15,6 +15,8 @@ end
 
 Base.abs(x::Interval) = _unsafe_interval(abs(bareinterval(x)), decoration(x), isguaranteed(x))
 
+Base.abs(x::Complex{<:Interval}) = hypot(real(x), imag(y))
+
 """
     abs2(x::BareInterval)
     abs2(x::Interval)
@@ -23,7 +25,13 @@ Implement the square absolute value; this is semantically equivalent to `pown(x,
 """
 Base.abs2(x::BareInterval) = pown(x, 2) # not in the IEEE Standard 1788-2015
 
-Base.abs2(x::Interval) = _unsafe_interval(abs2(bareinterval(x)), decoration(x), isguaranteed(x))
+function Base.abs2(x::Interval)
+    r = abs2(bareinterval(x))
+    d = min(decoration(x), decoration(r))
+    return _unsafe_interval(r, d, isguaranteed(x))
+end
+
+Base.abs2(x::Complex{<:Interval}) = pown(real(x), 2) + pown(imag(x), 2)
 
 for f ∈ (:min, :max)
     @eval begin
