@@ -10,7 +10,9 @@
 Power mode type for `^`.
 
 Available mode types:
-- `:fast` (default): `x ^ y` is semantically equivalent to `fastpow(x, y)`.
+- `:fast` (default): `x ^ y` is semantically equivalent to `fastpow(x, y)`,
+unless `isthininteger(y)` is true in which case it is semantically equivalent to
+`pown(x, sup(y))`.
 - `:slow`: `x ^ y` is semantically equivalent to `pow(x, y)`, unless
 `isthininteger(y)` is true in which case it is semantically equivalent to
 `pown(x, sup(y))`.
@@ -65,7 +67,7 @@ Base.literal_pow(::typeof(^), x::Interval, ::Val{n}) where {n} = x^n
 # helper functions for power
 
 _select_pow(::PowerMode{:fast}, x, y) = fastpow(x, y)
-_select_pown(::PowerMode{:fast}, x, y) = fastpow(x, y)
+_select_pown(::PowerMode{:fast}, x, y) = fastpown(x, y)
 _select_pow(::PowerMode{:slow}, x, y) = pow(x, y)
 _select_pown(::PowerMode{:slow}, x, y) = pown(x, y)
 
@@ -194,7 +196,7 @@ Interval{Float64}(-Inf, Inf, trv)
 """
 function pown(x::BareInterval{T}, n::Integer) where {T<:NumTypes}
     isempty_interval(x) && return x
-    iszero(n) && return one(BareInterval{T})
+    n == 0 && return one(BareInterval{T})
     n == 1 && return x
     (n < 0) & isthinzero(x) && return emptyinterval(BareInterval{T})
     if isodd(n)
@@ -275,12 +277,11 @@ end
 """
     hypot(x, y)
 
-Compute the hypotenuse; this is semantically equivalent to
-`sqrt(pown(x, 2) + pown(y, 2))`.
+Compute the hypotenuse; this relies on `^` internally.
 """
-Base.hypot(x::BareInterval, y::BareInterval) = sqrt(pown(x, 2) + pown(y, 2))
+Base.hypot(x::BareInterval, y::BareInterval) = (x ^ bareinterval(2//1) + y ^ bareinterval(2//1)) ^ bareinterval(1//2)
 
-Base.hypot(x::Interval, y::Interval) = sqrt(x^2 + y^2)
+Base.hypot(x::Interval, y::Interval) = (x ^ interval(2//1) + y ^ interval(2//1)) ^ bareinterval(1//2)
 
 """
     fastpow(x, y)
@@ -356,6 +357,27 @@ Base.@assume_effects :terminates_locally function _positive_power_by_squaring(x:
         y *= x
     end
     return y
+end
+
+"""
+    fastpown(x, n)
+
+A faster implementation of `pown(x, y)`, at the cost of maybe returning a
+slightly larger interval.
+"""
+function fastpown(x::BareInterval{T}, n::Integer) where {T<:NumTypes}
+    isempty_interval(x) && return x
+    n == 0 && return one(BareInterval{T})
+    n == 1 && return x
+    (n < 0) & isthinzero(x) && return emptyinterval(BareInterval{T})
+    return _positive_power_by_squaring(x, n)
+end
+
+function fastpown(x::Interval, n::Integer)
+    r = pown(bareinterval(x), n)
+    d = min(decoration(x), decoration(r))
+    d = min(d, ifelse((n < 0) & in_interval(0, x), trv, d))
+    return _unsafe_interval(r, d, isguaranteed(x))
 end
 
 #
