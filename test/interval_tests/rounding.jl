@@ -1,9 +1,9 @@
 x = interval(0.5)
 
-@testset "IntervalRounding{:fast}" begin
-    IntervalArithmetic.interval_rounding() = IntervalArithmetic.IntervalRounding{:fast}()
-    @test isequal_interval(sin(x), interval(0.47942553860420295, 0.47942553860420306))
-end
+# @testset "IntervalRounding{:fast}" begin
+#     IntervalArithmetic.interval_rounding() = IntervalArithmetic.IntervalRounding{:fast}()
+#     @test isequal_interval(sin(x), interval(0.47942553860420295, 0.47942553860420306))
+# end
 
 @testset "IntervalRounding{:tight}" begin
     IntervalArithmetic.interval_rounding() = IntervalArithmetic.IntervalRounding{:tight}()
