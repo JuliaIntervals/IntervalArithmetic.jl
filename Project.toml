@@ -14,7 +14,7 @@ DiffRules = "b552c78f-8df3-52c6-915a-8e097449b14b"
 IntervalArithmeticDiffRulesExt = "DiffRules"
 
 [compat]
-CRlibm = "0.7, 0.8, 1"
+CRlibm = "1"
 DiffRules = "1"
 RoundingEmulator = "0.2"
 julia = "1.9"
