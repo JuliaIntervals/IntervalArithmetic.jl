@@ -8,8 +8,8 @@ include("real_interface.jl")
 # Rounding
 include("rounding.jl")
 
-# Flavors
-include("flavors.jl")
+# Flavor
+include("flavor.jl")
 
 # Arithmetic
 include("arithmetic/absmax.jl")

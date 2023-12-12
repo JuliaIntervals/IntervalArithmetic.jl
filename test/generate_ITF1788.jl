@@ -101,21 +101,23 @@ function generate(filename::AbstractString)
     src = joinpath(@__DIR__, "itl", filename)
     lines = readlines(src)
 
+    rx_start = r"^\s*testcase\s+\S+\s+\{\s*$" # where testcase blocks start
+    rx_end = r"^\s*\}\s*$" # where testcase blocks end
+    block_start = findall(line -> occursin(rx_start, line), lines)
+    block_end = findall(line -> occursin(rx_end, line), lines)
+
+    len = length(block_start)
+    len == length(block_end) || return throw(ArgumentError("opening and closing braces do not match in $filename"))
+
     mkpath("ITF1788_tests")
     dest = joinpath("ITF1788_tests", replace(filename, ".itl" => ".jl"))
 
     open(dest, "w") do io
-        rx_start = r"^\s*testcase\s+\S+\s+\{\s*$" # where testcase blocks start
-        rx_end = r"^\s*\}\s*$" # where testcase blocks end
-
-        block_start = findall(line -> occursin(rx_start, line), lines)
-        block_end = findall(line -> occursin(rx_end, line), lines)
-
-        length(block_start) == length(block_end) || throw(ArgumentError("opening and closing braces do not match in $filename"))
-
+        i = 1
         for (bstart, bend) ∈ zip(block_start, block_end)
             testset = parse_block(view(lines, bstart:bend))
-            write(io, testset)
+            i < len ? write(io, testset * "\n") : write(io, testset)
+            i += 1
         end
     end
 

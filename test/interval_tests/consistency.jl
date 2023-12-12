@@ -271,9 +271,9 @@
         a = interval(1, 2)
         b = interval(3, 4)
 
-        @test isequal_interval(a^b, interval(1, 16))
-        @test isequal_interval(a^interval(0.5, 1), a)
-        @test isequal_interval(a^interval(0.3, 0.5), interval(1, sqrt(2)))
+        @test isequal_interval(pow(a, b), interval(1, 16))
+        @test isequal_interval(pow(a, interval(0.5, 1)), a)
+        @test isequal_interval(pow(a, interval(0.3, 0.5)), interval(1, sqrt(2)))
     end
 
     @testset "isatomic" begin
