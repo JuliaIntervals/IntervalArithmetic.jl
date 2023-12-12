@@ -8,10 +8,8 @@ open("tests_warning.log", "w") do io
     redirect_stderr(io) do
         # interval tests
         for f ∈ readdir("interval_tests"; join = true)
-            if !occursin("complex", f)
-                @testset "$f" begin
-                    include(f)
-                end
+            @testset "$f" begin
+                include(f)
             end
         end
         # ITF1788 tests

@@ -15,7 +15,7 @@ end
 
 Base.abs(x::Interval) = _unsafe_interval(abs(bareinterval(x)), decoration(x), isguaranteed(x))
 
-Base.abs(x::Complex{<:Interval}) = hypot(real(x), imag(y))
+Base.abs(x::Complex{<:Interval}) = hypot(real(x), imag(x))
 
 """
     abs2(x::BareInterval)

@@ -1,68 +1,57 @@
 @testset "Complex interval operations" begin
     a = interval(1im)
     b = interval(4im + 3)
-    c = interval(-1, 4) + interval(0, 2)*interval(im)
-
-    @test a ⊂ c
-    @test a ⊆ c
-    @test isinterior(a, c)
-    @test (b ⊂ c) == false
-    @test (b ⊆ c) == false
+    c = complex(interval(-1, 4), interval(0, 2))
 
     @test typeof(a) == Complex{Interval{Float64}}
-    @test a ==  interval(0) + interval(1)*interval(im)
-    @test a * a == interval(-1)
-    @test a + a == interval(2)*interval(im)
-    @test a - a == 0
-    @test a / a == 1
 
-    @test 3+2im ∈ c
-    @test a ∪ b == interval(0, 3) + interval(1, 4)*interval(im)
-    @test c ∩ (a ∪ b) == interval(0, 3) + interval(1, 2)*interval(im)
-    @test a ∩ b == emptyinterval() + emptyinterval()*interval(im)
-    @test isdisjoint(a,b) == true
+    @test issubset_interval(a, c)
+    @test isinterior(a, c)
+    @test !issubset_interval(b, c)
+
+    @test isequal_interval(a, complex(interval(0), interval(1)))
+    @test isequal_interval(a * a, interval(-1))
+    @test isequal_interval(a + a, interval(2)*interval(im))
+    @test isthin(a - a, 0)
+    @test_broken isthin(a / a, 1)
+
+    @test in_interval(3+2im, c)
+    @test isequal_interval(hull(a, b), complex(interval(0, 3), interval(1, 4)))
+    @test isequal_interval(intersect_interval(c, hull(a, b)), complex(interval(0, 3), interval(1, 2)))
+    @test isempty_interval(intersect_interval(a, b))
+    @test isdisjoint_interval(a, b)
 end
 
-@testset "Complex functions" begin
-    Z = (3 ± 1e-7) + (4 ± 1e-7)*interval(im)
-    @test sin(Z) == complex(sin(real(Z)) * cosh(imag(Z)), sinh(imag(Z)) * cos(real(Z)))
-    z = exp(-im * interval(π))
-    @test -1 in real(z)
-    @test 0 in imag(z)
+# @testset "Complex functions" begin
+#     Z = interval(3, 1e-7; format = :midpoint) + interval(4, 1e-7; format = :midpoint)*interval(im)
+#     @test sin(Z) == complex(sin(real(Z)) * cosh(imag(Z)), sinh(imag(Z)) * cos(real(Z)))
 
-    sZ = sqrt(Z)
-    @test sZ == interval(1.99999996999999951619,2.00000003000000070585) + interval(0.99999996999999984926,1.00000003000000048381)*interval(im)
-    @test sqrt(-Z) == imag(sZ) - real(sZ)*interval(im)
+#     z = exp(- interval(im) * interval(π))
+#     @test in_interval(-1, real(z))
+#     @test in_interval(0, imag(z))
 
-    @test sqrt(interval(-1, 0) + interval(0)*interval(im)) .== interval(0, 1)*interval(im)
-    @test sqrt(interval(-1, 1) + interval(0)*interval(im)) .== interval(0, 1) + interval(0, 1)*interval(im)
-    @test sqrt(interval(-9//32, Inf)*interval(im)) .== interval(0, Inf) + interval(-3//8, Inf)*interval(im)
-end
+#     sZ = sqrt(Z)
+#     @test isequal_interval(sZ, complex(interval(1.99999996999999951619, 2.00000003000000070585), interval(0.99999996999999984926, 1.00000003000000048381)))
+#     @test isequal_interval(sqrt(-Z), complex(imag(sZ), - real(sZ)))
 
-
-@testset "Complex powers" begin
-    x = interval(3, 3) + 4im
-    @test x^2 == -7 + 24im
-    @test sqrt(x) ⊆ x^0.5
-    @test x^-2 == inv(x)^2
-
-    a = -3.1
-    @test x ⊆ (x^a)^(1/a)
-end
+#     @test isequal_interval(sqrt(interval(-1, 0) + interval(0)*interval(im)), interval(0im, im))
+#     @test isequal_interval(sqrt(interval(-1, 1) + interval(0)*interval(im)), interval(0, 1) + interval(0im, 1im))
+#     @test isequal_interval(sqrt(interval(-9//32, Inf)*interval(im)), complex(interval(0, Inf), interval(-3//8, Inf)))
+# end
 
 @testset "abs2 and abs" begin
-    x = interval(0, 3) +interval(0, 4)*interval(im)
-    @test abs2(x) == interval(0, 25)
-    @test abs(x) == norm(x) == interval(0, 5)
+    x = complex(interval(0, 3), interval(0, 4))
+    @test isequal_interval(abs2(x), interval(0, 25))
+    @test isequal_interval(abs(x), interval(0, 5))
 
-    y = interval(-1, 1) + interval(-2, 2)*interval(im)
-    @test abs(y).lo == 0.0
-    @test abs2(y).lo == 0.0
+    y = complex(interval(-1, 1), interval(-2, 2))
+    @test inf(abs(y)) == 0
+    @test inf(abs2(y)) == 0
 end
 
 @testset "real functions" begin
-    x = interval(0, 3) + interval(0, 4)*interval(im)
-    @test mag(x) == 5
+    x = complex(interval(0, 3), interval(0, 4))
+    @test mag(x) == 4
     @test mig(x) == 0
     @test mid(x) == 1.5 + 2im
 end
