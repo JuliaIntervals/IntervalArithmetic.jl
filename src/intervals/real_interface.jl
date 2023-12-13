@@ -30,10 +30,14 @@ end
 
 for f ∈ (:zero, :one)
     @eval begin
-        Base.$f(::T) where {T<:BareInterval} = $f(T)
         Base.$f(::Type{BareInterval{T}}) where {T<:NumTypes} = _unsafe_bareinterval(T, $f(T), $f(T))
-        Base.$f(::T) where {T<:Interval} = $f(T)
+        Base.$f(::BareInterval{T}) where {T<:NumTypes} = $f(BareInterval{T})
+
         Base.$f(::Type{Interval{T}}) where {T<:NumTypes} = _unsafe_interval($f(BareInterval{T}), com, true)
+        Base.$f(x::Interval{T}) where {T<:NumTypes} = _unsafe_interval($f(BareInterval{T}), com, isguaranteed(x))
+
+        Base.$f(::Type{Complex{Interval{T}}}) where {T<:NumTypes} = complex($f(Interval{T}), $f(Interval{T}))
+        Base.$f(x::Complex{<:Interval}) = complex($f(real(x)), $f(imag(x)))
     end
 end
 
@@ -47,17 +51,17 @@ Base.typemax(::Type{BareInterval{T}}) where {T<:NumTypes} =
 Base.typemax(::Type{Interval{T}}) where {T<:NumTypes} =
     _unsafe_interval(typemax(BareInterval{T}), dac, true)
 
-function Base.eps(a::BareInterval{T}) where {T<:NumTypes}
-    x = max(eps(inf(a)), eps(sup(a)))
-    return _unsafe_bareinterval(T, x, x)
-end
-Base.eps(x::Interval) = _unsafe_interval(eps(bareinterval(x)), com, true)
 function Base.eps(::Type{BareInterval{T}}) where {T<:NumTypes}
     x = eps(T)
     return _unsafe_bareinterval(T, x, x)
 end
+function Base.eps(x::BareInterval{T}) where {T<:NumTypes}
+    y = max(eps(inf(x)), eps(sup(x)))
+    return _unsafe_bareinterval(T, y, y)
+end
 Base.eps(::Type{Interval{T}}) where {T<:NumTypes} =
     _unsafe_interval(eps(BareInterval{T}), com, true)
+Base.eps(x::Interval) = _unsafe_interval(eps(bareinterval(x)), com, isguaranteed(x))
 
 """
     hash(x::BareInterval, h::UInt)
