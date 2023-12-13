@@ -235,36 +235,25 @@ end
 
 function _parse_num(::Type{T}, str::AbstractString, r::RoundingMode) where {T<:AbstractFloat}
     if '/' ∈ str
-        num, denum = parse.(BigInt, split(str, '/'; keepempty = false))
+        num, denum = map(s -> parse(BigInt, s), eachsplit(str, '/'; keepempty = false))
         return T(num//denum, r)
     else
-        return T(parse(BigFloat, str), r)
-    end
-end
-
-function _parse_num(::Type{BigFloat}, str::AbstractString, r::RoundingMode)
-    if '/' ∈ str
-        num, denum = parse.(BigInt, split(str, '/'; keepempty = false))
-        return BigFloat(num//denum, r)
-    else
-        return BigFloat(str, r)
+        return T(BigFloat(str, r), r)
     end
 end
 
 function _parse_num(::Type{T}, str::AbstractString, ::RoundingMode{:Down}) where {S<:Integer,T<:Rational{S}}
     '/' ∈ str && return parse(T, str)
-    x = parse(BigFloat, str)
-    y = prevfloat(x)
-    z = rationalize(S, y)
-    z < x && return z
-    return rationalize(S, prevfloat(y))
+    x = BigFloat(str, RoundDown)
+    z = rationalize(S, x)
+    z ≤ x && return z
+    return rationalize(S, prevfloat(x))
 end
 
 function _parse_num(::Type{T}, str::AbstractString, ::RoundingMode{:Up}) where {S<:Integer,T<:Rational{S}}
     '/' ∈ str && return parse(T, str)
-    x = parse(BigFloat, str)
-    y = nextfloat(x)
-    z = rationalize(S, y)
-    z > x && return z
-    return rationalize(S, nextfloat(y))
+    x = BigFloat(str, RoundUp)
+    z = rationalize(S, x)
+    z ≥ x && return z
+    return rationalize(S, nextfloat(x))
 end
