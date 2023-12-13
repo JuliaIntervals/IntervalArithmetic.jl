@@ -633,11 +633,11 @@ macro interval(T, expr1, expr2)
     return :(interval($(esc(T)), $x, $y))
 end
 
-_wrap_interval(T::Symbol, x) = :(atomic($(esc(T)), $x))
+_wrap_interval(T, x) = :(atomic($(esc(T)), $x))
 
-_wrap_interval(T::Symbol, x::Symbol) = :(atomic($(esc(T)), $(esc(x))))
+_wrap_interval(T, x::Symbol) = :(atomic($(esc(T)), $(esc(x))))
 
-function _wrap_interval(T::Symbol, expr::Expr)
+function _wrap_interval(T, expr::Expr)
     if expr.head ∈ (:(.), :ref, :macrocall) # a.i, or a[i], or BigInt
         return :(interval($(esc(T)), $(esc(expr)), $(esc(expr))))
     end
