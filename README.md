@@ -9,7 +9,7 @@
 
 IntervalArithmetic.jl is a Julia package for validated numerics in Julia. All calculations are carried out using [interval arithmetic](https://en.wikipedia.org/wiki/Interval_arithmetic) where quantities are treated as intervals. The final result is a rigorous enclosure of the true value.
 
-We are working towards having the IntervalArithmetic library be conformant with the [IEEE 1788-2015 Standard for Interval Arithmetic](https://standards.ieee.org/findstds/standard/1788-2015.html). To do so, we have incorporated tests from the [ITF1788 test suite](https://github.com/JuliaIntervals/ITF1788.jl).
+The IntervalArithmetic library is compliant with the [IEEE 1788-2015 Standard for Interval Arithmetic](https://standards.ieee.org/findstds/standard/1788-2015.html).
 
 The IntervalArithmetic library is part of the [JuliaInterval organisation](https://juliaintervals.github.io).
 
