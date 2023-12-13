@@ -1,18 +1,14 @@
 # This file contains the functions described as "Boolean functions of intervals"
 # in Section 9.5 of the IEEE Standard 1788-2015 and required for set-based
 # flavor in Section 10.5.9
-# Some other (non required) related functions are also present, as well as some of
-# the "Recommended operations" (Section 10.6.3)
+# Some other (non required) related functions are also present, as well as some
+# of the "Recommended operations" (Section 10.6.3)
 
-# equivalent to `<` but with `(Inf < Inf) == true`
-function _strictlessprime(x::Real, y::Real)
-    (isinf(x) || isinf(y)) && x == y && return true
-    return x < y
-end
+# used internally, equivalent to `<` but with `(Inf < Inf) == true`
+_strictlessprime(x::Real, y::Real) = (x < y) | ((isinf(x) | isinf(y)) & (x == y))
 
 """
-    isequal_interval(x::BareInterval, y::BareInterval)
-    isequal_interval(x::Interval, y::Interval)
+    isequal_interval(x, y)
 
 Test whether `x` and `y` are identical.
 
@@ -21,80 +17,117 @@ Implement the `equal` function of the IEEE Standard 1788-2015 (Table 9.3).
 isequal_interval(x::BareInterval, y::BareInterval) = (inf(x) == inf(y)) & (sup(x) == sup(y))
 
 function isequal_interval(x::Interval, y::Interval)
-    (isnai(x) | isnai(y)) && return false
+    isnai(x) | isnai(y) && return false
     return isequal_interval(bareinterval(x), bareinterval(y))
 end
 
+isequal_interval(x, y, z, w...) = isequal_interval(x, y) & isequal_interval(y, z, w...)
+isequal_interval(x::Complex, y::Complex) = isequal_interval(real(x), real(y)) & isequal_interval(imag(x), imag(y))
+isequal_interval(x::Complex, y::Real) = isequal_interval(real(x), y) & isthinzero(imag(x))
+isequal_interval(x::Real, y::Complex) = isequal_interval(x, real(y)) & isthinzero(imag(y))
+
+isequal_interval(x) = Base.Fix2(isequal_interval, x)
+
 """
-    issubset_interval(x::BareInterval, y::BareInterval)
-    issubset_interval(x::Interval, y::Interval)
+    issubset_interval(x, y)
 
 Test whether `x` is contained in `y`.
 
 Implement the `subset` function of the IEEE Standard 1788-2015 (Table 9.3).
 """
-issubset_interval(x::BareInterval, y::BareInterval) =
-    (inf(y) ≤ inf(x)) & (sup(x) ≤ sup(y))
+issubset_interval(x::BareInterval, y::BareInterval) = (inf(y) ≤ inf(x)) & (sup(x) ≤ sup(y))
 
 function issubset_interval(x::Interval, y::Interval)
-    (isnai(x) | isnai(y)) && return false
+    isnai(x) | isnai(y) && return false
     return issubset_interval(bareinterval(x), bareinterval(y))
 end
 
-"""
-    isstrictsubset_interval(x::BareInterval, y::BareInterval)
-    isstrictsubset_interval(x::Interval, y::Interval)
+issubset_interval(x, y, z, w...) = issubset_interval(x, y) & issubset_interval(y, z, w...)
+issubset_interval(x::Complex, y::Complex) = issubset_interval(real(x), real(y)) & issubset_interval(imag(x), imag(y))
+issubset_interval(x::Complex, y::Real) = issubset_interval(real(x), y) & isthinzero(imag(x))
+issubset_interval(x::Real, y::Complex) = issubset_interval(x, real(y)) & in_interval(0, imag(y))
 
+"""
+    isinterior(x, y)
 
 Test whether `x` is in the interior of `y`.
 
 Implement the `interior` function of the IEEE Standard 1788-2015 (Table 9.3).
+
+See also: [`isstrictsubset`](@ref).
 """
-isstrictsubset_interval(x::BareInterval, y::BareInterval) =
+isinterior(x::BareInterval, y::BareInterval) =
     _strictlessprime(inf(y), inf(x)) & _strictlessprime(sup(x), sup(y))
 
-function isstrictsubset_interval(x::Interval, y::Interval)
-    (isnai(x) | isnai(y)) && return false
-    return isstrictsubset_interval(bareinterval(x), bareinterval(y))
+function isinterior(x::Interval, y::Interval)
+    isnai(x) | isnai(y) && return false
+    return isinterior(bareinterval(x), bareinterval(y))
 end
 
+isinterior(x::AbstractVector, y::AbstractVector) = all(t -> isinterior(t[1], t[2]), zip(x, y))
+
+isinterior(x, y, z, w...) = isinterior(x, y) & isinterior(y, z, w...)
+isinterior(x::Complex, y::Complex) =
+    (isinterior(real(x), real(y)) & issubset_interval(imag(x), imag(y))) |
+    (issubset_interval(real(x), real(y)) & isinterior(imag(x), imag(y)))
+isinterior(x::Complex, y::Real) = isinterior(real(x), y) & isthinzero(imag(x))
+isinterior(x::Real, y::Complex) = isinterior(x, real(y)) & in_interval(0, imag(y))
+
 """
-    isweakless(x::BareInterval, y::BareInterval)
-    isweakless(x::Interval, y::Interval)
+    isstrictsubset(x, y)
+
+Test whether `x` is a strict subset of `y`. If `x` and `y` are intervals, this
+is semantically equivalent to `isinterior(x, y)`. If `x` and `y` are vectors, at
+least one component of `x` must be in the interior of `y`.
+
+See also: [`isinterior`](@ref).
+"""
+isstrictsubset(x::BareInterval, y::BareInterval) = isinterior(x, y)
+
+isstrictsubset(x::Interval, y::Interval) = isinterior(x, y)
+
+isstrictsubset(x::AbstractVector, y::AbstractVector) = any(t -> isinterior(t[1], t[2]), zip(x, y))
+
+isstrictsubset(x, y, z, w...) = isstrictsubset(x, y) & isstrictsubset(y, z, w...)
+isstrictsubset(x::Complex, y::Complex) =
+    (isstrictsubset(real(x), real(y)) & issubset_interval(imag(x), imag(y))) |
+    (issubset_interval(real(x), real(y)) & isstrictsubset(imag(x), imag(y)))
+isstrictsubset(x::Complex, y::Real) = isstrictsubset(real(x), y) & isthinzero(imag(x))
+isstrictsubset(x::Real, y::Complex) = isstrictsubset(x, real(y)) & in_interval(0, imag(y))
+
+"""
+    isweakless(x, y)
 
 Test whether `inf(x) ≤ inf(y)` and `sup(x) ≤ sup(y)`, where `<` is replaced by
 `≤` for infinite values.
 
 Implement the `less` function of the IEEE Standard 1788-2015 (Table 10.3).
 """
-isweakless(x::BareInterval, y::BareInterval) =
-    (inf(x) ≤ inf(y)) & (sup(x) ≤ sup(y))
+isweakless(x::BareInterval, y::BareInterval) = (inf(x) ≤ inf(y)) & (sup(x) ≤ sup(y))
 
 function isweakless(x::Interval, y::Interval)
-    (isnai(x) | isnai(y)) && return false
+    isnai(x) | isnai(y) && return false
     return isweakless(bareinterval(x), bareinterval(y))
 end
 
 """
-    isstrictless(x::BareInterval, y::BareInterval)
-    isstrictless(x::Interval, y::Interval)
+    isstrictless(x, y)
 
 Test whether `inf(x) < inf(y)` and `sup(x) < sup(y)`, where `<` is replaced by
 `≤` for infinite values.
 
 Implement the `strictLess` function of the IEEE Standard 1788-2015 (Table 10.3).
 """
-isstrictless(x::BareInterval, y::BareInterval) =
+isstrictless(x::BareInterval, y::BareInterval) = # this may be flavor dependent? Should _strictlessprime be < for cset flavor?
     _strictlessprime(inf(x), inf(y)) & _strictlessprime(sup(x), sup(y))
 
 function isstrictless(x::Interval, y::Interval)
-    (isnai(x) | isnai(y)) && return false
+    isnai(x) | isnai(y) && return false
     return isstrictless(bareinterval(x), bareinterval(y))
 end
 
 """
-    precedes(x::BareInterval, y::BareInterval)
-    precedes(x::Interval, y::Interval)
+    precedes(x, y)
 
 Test whether any element of `x` is lesser or equal to every elements of `y`.
 
@@ -103,49 +136,44 @@ Implement the `precedes` function of the IEEE Standard 1788-2015 (Table 10.3).
 precedes(x::BareInterval, y::BareInterval) = sup(x) ≤ inf(y)
 
 function precedes(x::Interval, y::Interval)
-    (isnai(x) | isnai(y)) && return false
+    isnai(x) | isnai(y) && return false
     return precedes(bareinterval(x), bareinterval(y))
 end
 
 """
-    strictprecedes(x::BareInterval, y::BareInterval)
-    strictprecedes(x::Interval, y::Interval)
+    strictprecedes(x, y)
 
 Test whether any element of `x` is strictly lesser than every elements of `y`.
 
 Implement the `strictPrecedes` function of the IEEE Standard 1788-2015 (Table 10.3).
 """
-function strictprecedes(x::BareInterval, y::BareInterval)
-    (isempty_interval(x) | isempty_interval(y)) && return true
-    return sup(x) < inf(y)
-end
+strictprecedes(x::BareInterval, y::BareInterval) = isempty_interval(x) | isempty_interval(y) | (sup(x) < inf(y))
 
 function strictprecedes(x::Interval, y::Interval)
-    (isnai(x) | isnai(y)) && return false
+    isnai(x) | isnai(y) && return false
     return strictprecedes(bareinterval(x), bareinterval(y))
 end
 
 """
-    isdisjoint_interval(x::BareInterval, y::BareInterval)
-    isdisjoint_interval(x::Interval, y::Interval)
+    isdisjoint_interval(x, y)
 
 Test whether `x` and `y` have no common elements.
 
 Implement the `disjoint` function of the IEEE Standard 1788-2015 (Table 9.3).
 """
-function isdisjoint_interval(a::BareInterval, b::BareInterval)
-    (isempty_interval(a) | isempty_interval(b)) && return true
-    return _strictlessprime(sup(b), inf(a)) | _strictlessprime(sup(a), inf(b))
-end
+isdisjoint_interval(a::BareInterval, b::BareInterval) =
+    isempty_interval(a) | isempty_interval(b) | _strictlessprime(sup(b), inf(a)) | _strictlessprime(sup(a), inf(b))
 
 function isdisjoint_interval(x::Interval, y::Interval)
-    (isnai(x) | isnai(y)) && return false
+    isnai(x) | isnai(y) && return false
     return isdisjoint_interval(bareinterval(x), bareinterval(y))
 end
 
+isdisjoint_interval(x::Complex, y::Complex) =
+    isdisjoint_interval(real(x), real(y)) | isdisjoint_interval(imag(x), imag(y))
+
 """
-    in_interval(x::Real, y::BareInterval)
-    in_interval(x::Real, y::Interval)
+    in_interval(x, y)
 
 Test whether `x` is an element of `y`.
 
@@ -162,46 +190,62 @@ function in_interval(x::Real, y::Interval)
 end
 
 in_interval(::BareInterval, ::BareInterval) =
-    throw(ArgumentError("`in_interval` is purposely not supported for two interval arguments. See instead `issubset_interval`."))
+    throw(ArgumentError("`in_interval` is purposely not supported for two interval arguments. See instead `issubset_interval`"))
 
 in_interval(::Interval, ::Interval) =
-    throw(ArgumentError("`in_interval` is purposely not supported for two interval arguments. See instead `issubset_interval`."))
+    throw(ArgumentError("`in_interval` is purposely not supported for two interval arguments. See instead `issubset_interval`"))
+
+in_interval(x::Complex, y::Complex) = in_interval(real(x), real(y)) & in_interval(imag(x), imag(y))
+in_interval(x::Complex, y::Real) = in_interval(real(x), y) & isthinzero(imag(x))
+in_interval(x::Real, y::Complex) = in_interval(x, real(y)) & in_interval(0, imag(y))
+
+in_interval(x) = Base.Fix2(in_interval, x)
 
 """
-    isempty_interval(x::BareInterval)
-    isempty_interval(x::Interval)
+    isempty_interval(x)
 
 Test whether `x` contains no elements.
 
 Implement the `isEmpty` function of the IEEE Standard 1788-2015 (Section 10.6.3).
 """
-isempty_interval(x::BareInterval{T}) where {T<:NumTypes} =
-    (inf(x) == typemax(T)) & (sup(x) == typemin(T))
+isempty_interval(x::BareInterval{T}) where {T<:NumTypes} = (inf(x) == typemax(T)) & (sup(x) == typemin(T))
 
 function isempty_interval(x::Interval)
     isnai(x) && return false
     return isempty_interval(bareinterval(x))
 end
 
+isempty_interval(x::Complex) = isempty_interval(real(x)) & isempty_interval(imag(x))
+
 """
-    isentire_interval(x::BareInterval)
-    isentire_interval(x::Interval)
+    isentire_interval(x)
 
 Test whether `x` is the entire real line.
 
 Implement the `isEntire` function of the IEEE Standard 1788-2015 (Section 10.6.3).
 """
-isentire_interval(x::BareInterval{T}) where {T<:NumTypes} =
-    (inf(x) == typemin(T)) & (sup(x) == typemax(T))
+isentire_interval(x::BareInterval{T}) where {T<:NumTypes} = (inf(x) == typemin(T)) & (sup(x) == typemax(T))
 
 function isentire_interval(x::Interval)
     isnai(x) && return false
     return isentire_interval(bareinterval(x))
 end
 
+isentire_interval(x::Complex) = isentire_interval(real(x)) & isentire_interval(imag(x))
+
 """
-    isbounded(x::BareInterval)
-    isbounded(x::Interval)
+    isnai(x)
+
+Test whether `x` is an NaI (Not an Interval).
+"""
+isnai(::BareInterval) = false
+
+isnai(x::Interval) = decoration(x) == ill
+
+isnai(x::Complex) = isnai(real(x)) & isnai(imag(x))
+
+"""
+    isbounded(x)
 
 Test whether `x` is empty or has finite bounds.
 """
@@ -212,9 +256,10 @@ function isbounded(x::Interval)
     return isbounded(bareinterval(x))
 end
 
+isbounded(x::Complex) = isbounded(real(x)) & isbounded(imag(x))
+
 """
-    isbounded(x::BareInterval)
-    isbounded(x::Interval)
+    isunbounded(x)
 
 Test whether `x` is not empty and has infinite bounds.
 """
@@ -225,21 +270,15 @@ function isunbounded(x::Interval)
     return isunbounded(bareinterval(x))
 end
 
-"""
-    isnai(x::BareInterval)
-    isnai(x::Interval)
-
-Test whether `x` is an NaI.
-"""
-isnai(::BareInterval) = false
-
-isnai(x::Interval) = decoration(x) == ill
+isunbounded(x::Complex) = isunbounded(real(x)) | isunbounded(imag(x))
 
 """
-    iscommon(x::BareInterval)
-    iscommon(x::Interval)
+    iscommon(x)
 
-Test whether `x` is non-empty and bounded.
+Test whether `x` is not empty and bounded.
+
+!!! note
+    This is does not take into consideration the decoration of the interval.
 """
 iscommon(x::BareInterval) = !(isentire_interval(x) | isempty_interval(x) | isunbounded(x))
 
@@ -248,24 +287,27 @@ function iscommon(x::Interval)
     return iscommon(bareinterval(x))
 end
 
-"""
-    isatomic(x::BareInterval)
-    isatomic(x::Interval)
+iscommon(x::Complex) = iscommon(real(x)) & iscommon(imag(x))
 
-Test whether `x` is unable to be split. This occurs when the interval is empty,
-or when the upper bound equals the lower bound or the bounds are consecutive
+"""
+    isatomic(x)
+
+Test whether `x` is unable to be split. This occurs if the interval is empty,
+or if its lower and upper bounds are equal, or if the bounds are consecutive
 floating-point numbers.
 """
-isatomic(x::BareInterval) = isempty_interval(x) | (inf(x) == sup(x)) | (sup(x) == nextfloat(inf(x)))
+isatomic(x::BareInterval{<:AbstractFloat}) = isempty_interval(x) | (inf(x) == sup(x)) | (sup(x) == nextfloat(inf(x)))
+isatomic(x::BareInterval{<:Rational}) = isempty_interval(x) | (inf(x) == sup(x))
 
 function isatomic(x::Interval)
     isnai(x) && return false
     return isatomic(bareinterval(x))
 end
 
+isatomic(x::Complex) = isatomic(real(x)) & isatomic(imag(x))
+
 """
-    isthin(x::BareInterval)
-    isthin(x::Interval)
+    isthin(x)
 
 Test whether `x` contains only a real.
 
@@ -278,9 +320,10 @@ function isthin(x::Interval)
     return isthin(bareinterval(x))
 end
 
+isthin(x::Complex) = isthin(real(x)) & isthin(imag(x))
+
 """
-    isthin(x::BareInterval, y::Number)
-    isthin(x::Interval, y::Number)
+    isthin(x, y)
 
 Test whether `x` contains only `y`.
 """
@@ -291,9 +334,10 @@ function isthin(x::Interval, y::Number)
     return isthin(bareinterval(x), y)
 end
 
+isthin(x::Complex, y::Number) = isthin(real(x), y) & isthin(imag(x), y)
+
 """
-    isthinzero(x::BareInterval)
-    isthinzero(x::Interval)
+    isthinzero(x)
 
 Test whether `x` contains only zero.
 """
@@ -304,9 +348,10 @@ function isthinzero(x::Interval)
     return isthinzero(bareinterval(x))
 end
 
+isthinzero(x::Complex) = isthinzero(real(x)) & isthinzero(imag(x))
+
 """
-    isthininteger(x::BareInterval)
-    isthininteger(x::Interval)
+    isthininteger(x)
 
 Test whether `x` contains only an integer.
 """
@@ -317,18 +362,4 @@ function isthininteger(x::Interval)
     return isthininteger(bareinterval(x))
 end
 
-
-
-# extension
-
-isequal_interval(x, y, z, w...) = isequal_interval(x, y) & isequal_interval(y, z, w...)
-isequal_interval(x::Complex, y::Complex) = isequal_interval(real(x), real(y)) & isequal_interval(imag(x), imag(y))
-isequal_interval(x::Complex, y::Real) = isequal_interval(real(x), y) & isthinzero(imag(x))
-isequal_interval(x::Real, y::Complex) = isequal_interval(x, real(y)) & isthinzero(imag(y))
-
-isdisjoint_interval(x::Complex, y::Complex) =
-    isdisjoint_interval(real(x), real(y)) | isdisjoint_interval(imag(x), imag(y))
-
-in_interval(x::Complex, y::Complex) = in_interval(real(x), real(y)) & in_interval(imag(x), imag(y))
-in_interval(x::Complex, y::Real) = in_interval(real(x), y) & in_interval(imag(x), 0)
-in_interval(x::Real, y::Complex) = in_interval(x, real(y)) & in_interval(0, imag(y))
+isthininteger(x::Complex) = isthininteger(real(x)) & isthininteger(imag(x))

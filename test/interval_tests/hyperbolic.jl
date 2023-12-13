@@ -50,7 +50,6 @@ end
     end
 end
 
-# TODO For reason unkown these tests fail when put in the previous testset
 @testset "tanh with Float32" begin
     @test issubset_interval(tanh(interval(0.5)), tanh(interval(Float32, 0.5, 0.5)))
     @test issubset_interval(tanh(interval(0.5, 1.67)), tanh(interval(Float32, 0.5, 1.67)))

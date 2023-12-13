@@ -14,7 +14,7 @@ using IntervalArithmetic.Symbols
 end
 
 
-@testset "setdiff_interval" begin
+@testset "interiordiff" begin
     function sameset(A, B)
         length(A) != length(B) && return false
         for a ∈ A
@@ -33,21 +33,21 @@ end
     X = [2..4, 3..5]
     Y = [3..5, 4..6]
     @test sameset(
-        setdiff_interval(X, Y),
+        interiordiff(X, Y),
         [ [3..4, 3..4],
           [2..3, 3..5] ])
 
     X = [2..5, 3..6]
     Y = [-10..10, 4..5]
     @test sameset(
-        setdiff_interval(X, Y),
+        interiordiff(X, Y),
         [ [2..5, 3..4],
           [2..5, 5..6] ])
 
     X = [2..5, 3..6]
     Y = [4..6, 4..5]
     @test sameset(
-        setdiff_interval(X, Y),
+        interiordiff(X, Y),
         [ [4..5, 3..4],
           [4..5, 5..6],
           [2..4, 3..6] ])
@@ -55,7 +55,7 @@ end
     X = [2..5, 3..6]
     Y = [3..4, 4..5]
     @test sameset(
-        setdiff_interval(X, Y),
+        interiordiff(X, Y),
         [ [3..4, 3..4],
           [3..4, 5..6],
           [2..3, 3..6],
@@ -63,16 +63,16 @@ end
 
     X = [2..5, 3..6]
     Y = [2..4, 10..20]
-    @test sameset(setdiff_interval(X, Y), typeof(X)[X])
+    @test sameset(interiordiff(X, Y), typeof(X)[X])
 
     X = [2..5, 3..6]
     Y = [-10..10, -10..10]
-    @test sameset(setdiff_interval(X, Y), typeof(X)[])
+    @test sameset(interiordiff(X, Y), typeof(X)[])
 
     X = [1..4, 3..6, 7..10]
     Y = [2..3, 4..5, 8..9]
     @test sameset(
-        setdiff_interval(X, Y),
+        interiordiff(X, Y),
         [ [2..3, 4..5, 7..8],
           [2..3, 4..5, 9..10],
           [2..3, 3..4, 7..10],
@@ -83,7 +83,7 @@ end
     X = [-Inf..Inf, 1..2]
     Y = [1..2, -1..1.5]
     @test sameset(
-        setdiff_interval(X, Y),
+        interiordiff(X, Y),
         [ [-Inf..1, 1..2],
           [2..Inf, 1..2],
           [1..2, 1.5..2] ])
@@ -140,11 +140,11 @@ end
     @test all(isequal_interval.( w[1], [interval(0, 1), interval(0, 0.5)] )) &
           all(isequal_interval.( w[2], [interval(0, 1), interval(0.5, 2)] ))
     w = bisect(v, 1)
-    @test all(isequal_interval.( w[1], [interval(0, 0.49609375), interval(0, 2)] )) &
-          all(isequal_interval.( w[2], [interval(0.49609375, 1), interval(0, 2)] ))
+    @test all(isequal_interval.( w[1], [interval(0, 0.5), interval(0, 2)] )) &
+          all(isequal_interval.( w[2], [interval(0.5, 1), interval(0, 2)] ))
     w = bisect(v, 2)
-    @test all(isequal_interval.( w[1], [interval(0, 1), interval(0.0, 0.9921875)] )) &
-          all(isequal_interval.( w[2], [interval(0, 1), interval(0.9921875, 2.0)] ))
+    @test all(isequal_interval.( w[1], [interval(0, 1), interval(0, 1)] )) &
+          all(isequal_interval.( w[2], [interval(0, 1), interval(1, 2)] ))
 
     v = [interval(-Inf, Inf), interval(-Inf, Inf)]
     w = bisect(v, 1, 0.5)

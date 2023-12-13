@@ -7,7 +7,7 @@ IntervalArithmetic.jl is a Julia package for validated numerics in Julia. All ca
 ## Installation
 
 ```@repl
-using Pkg # Julia v1.8 or above
+using Pkg # Julia v1.9 or above
 redirect_stderr(devnull) do # hide
 Pkg.add("IntervalArithmetic")
 end # hide

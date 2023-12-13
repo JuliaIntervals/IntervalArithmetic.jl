@@ -1,41 +1,27 @@
 # This file contains the two-output division requested for set-based flavor in
 # Section 10.5.5 of the IEEE Standard 1788-2015
 
-
-
-# bare intervals
-
 """
-    extended_div(a::BareInterval, b::BareInterval)
+    extended_div(x, y)
 
 Two-output division.
 
 Implement the `mulRevToPair` function of the IEEE Standard 1788-2015 (Section 10.5.5).
 """
-function extended_div(a::BareInterval{T}, b::BareInterval{T}) where {T<:NumTypes}
-    alo, ahi = bounds(a)
-    blo, bhi = bounds(b)
-    z = zero(T)
-    if 0 < bhi && 0 > blo && !in_interval(0, a)
-        if ahi < 0
-            return (a / _unsafe_bareinterval(T, z, bhi), a / _unsafe_bareinterval(T, blo, z))
-            # return (_unsafe_bareinterval(T, T(-Inf), ahi / bhi), _unsafe_bareinterval(T, ahi / blo, T(Inf)))
-        elseif alo > 0
-            return (a / _unsafe_bareinterval(T, blo, z), a / _unsafe_bareinterval(T, z, bhi))
-            # return (_unsafe_bareinterval(T, T(-Inf), alo / blo), _unsafe_bareinterval(T, alo / bhi, T(Inf)))
+function extended_div(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
+    ylo, yhi = bounds(y)
+    if 0 < yhi && 0 > ylo && !in_interval(0, x)
+        if sup(x) < 0
+            return (x / _unsafe_bareinterval(T, zero(T), yhi), x / _unsafe_bareinterval(T, ylo, zero(T)))
+        elseif inf(x) > 0
+            return (x / _unsafe_bareinterval(T, ylo, zero(T)), x / _unsafe_bareinterval(T, zero(T), yhi))
         end
-
-    elseif in_interval(0, a) && in_interval(0, b)
+    elseif in_interval(0, x) && in_interval(0, y)
         return (entireinterval(BareInterval{T}), emptyinterval(BareInterval{T}))
-
     else
-        return (a / b, emptyinterval(BareInterval{T}))
+        return (x / y, emptyinterval(BareInterval{T}))
     end
 end
-
-
-
-# decorated intervals
 
 function extended_div(x::Interval, y::Interval)
     bx = bareinterval(x)

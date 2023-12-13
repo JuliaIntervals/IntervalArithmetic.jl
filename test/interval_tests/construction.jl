@@ -1,10 +1,13 @@
-@testset "Difference between checked and unchecked Intervals" begin
-    @test isequal_interval(IntervalArithmetic._unsafe_bareinterval(Float64, 1, 2), bareinterval(1, 2))
+@testset "Difference between checked and unchecked bare intervals" begin
+    @test IntervalArithmetic._unsafe_bareinterval(Float64, 1, 2) === bareinterval(1, 2)
 
     @test inf(IntervalArithmetic._unsafe_bareinterval(Float64, 3, 2)) == 3
+    @test isempty_interval(bareinterval(3, 2))
     @test isnai(interval(3, 2))
 
+    # `:set_based` flavor
     @test sup(IntervalArithmetic._unsafe_bareinterval(Float64, Inf, Inf)) == Inf
+    @test isempty_interval(bareinterval(Inf, Inf))
     @test isnai(interval(Inf, Inf))
 end
 
@@ -152,4 +155,10 @@ end
     @test isequal_interval(convert(Interval{Float64}, 1+0im), convert(Interval{Float64}, interval(1+0im)), interval(1))
     @test_throws DomainError convert(Interval{Float64}, 1+im)
     @test_throws DomainError convert(Interval{Float64}, interval(1+im))
+end
+
+@testset "Propagation of `isguaranteed" begin
+    @test !isguaranteed(interval(convert(Interval{Float64}, 0), interval(convert(Interval{Float64}, 1))))
+    @test !isguaranteed(interval(0, convert(Interval{Float64}, 1)))
+    @test !isguaranteed(interval(convert(Interval{Float64}, 0), 1))
 end

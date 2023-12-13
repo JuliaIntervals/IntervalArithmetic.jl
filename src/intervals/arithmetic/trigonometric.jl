@@ -4,14 +4,20 @@
 
 # not in the IEEE Standard 1788-2015
 
-rad2deg(a::BareInterval{T}) where {T<:NumTypes} = (a / bareinterval(T, π)) * bareinterval(T, 180)
-rad2deg(a::Interval{T}) where {T<:NumTypes} = (a / interval(T, π)) * interval(T, 180)
+Base.rad2deg(x::BareInterval{T}) where {T<:NumTypes} = (x / bareinterval(T, π)) * bareinterval(T, 180)
+Base.rad2deg(x::Interval{T}) where {T<:NumTypes} = (x / interval(T, π)) * interval(T, 180)
 
-deg2rad(a::BareInterval{T}) where {T<:NumTypes} = (a * bareinterval(T, π)) / bareinterval(T, 180)
-deg2rad(a::Interval{T}) where {T<:NumTypes} = (a * interval(T, π)) / interval(T, 180)
+Base.deg2rad(x::BareInterval{T}) where {T<:NumTypes} = (x * bareinterval(T, π)) / bareinterval(T, 180)
+Base.deg2rad(x::Interval{T}) where {T<:NumTypes} = (x * interval(T, π)) / interval(T, 180)
 
-sincospi(a::BareInterval) = (sinpi(a), cospi(a))
-sincospi(a::Interval) = (sinpi(a), cospi(a))
+Base.sincospi(x::BareInterval) = (sinpi(x), cospi(x))
+Base.sincospi(x::Interval) = (sinpi(x), cospi(x))
+
+Base.sinpi(x::BareInterval{T}) where {T<:NumTypes} = sin(x * bareinterval(T, π))
+Base.sinpi(x::Interval{T}) where {T<:NumTypes} = sin(x * interval(T, π))
+
+Base.cospi(x::BareInterval{T}) where {T<:NumTypes} = cos(x * bareinterval(T, π))
+Base.cospi(x::Interval{T}) where {T<:NumTypes} = cos(x * interval(T, π))
 
 #
 
@@ -56,12 +62,12 @@ function _quadrant(x::Float64)
 end
 
 """
-    sin(a::BareInterval)
-    sin(a::Interval)
+    sin(::BareInterval)
+    sin(::Interval)
 
 Implement the `sin` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function sin(a::BareInterval{T}) where {T<:NumTypes}
+function Base.sin(a::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(a) && return a
 
     whole_range = _unsafe_bareinterval(T, -one(T), one(T))
@@ -105,7 +111,7 @@ function sin(a::BareInterval{T}) where {T<:NumTypes}
     end
 end
 
-function sin(a::BareInterval{Float64})
+function Base.sin(a::BareInterval{Float64})
     isempty_interval(a) && return a
 
     whole_range = _unsafe_bareinterval(Float64, -1.0, 1.0)
@@ -146,22 +152,19 @@ function sin(a::BareInterval{Float64})
     end
 end
 
-function sin(a::Interval)
+function Base.sin(a::Interval)
     r = sin(bareinterval(a))
     d = min(decoration(a), decoration(r))
     return _unsafe_interval(r, d, isguaranteed(a))
 end
 
-sinpi(a::BareInterval{T}) where {T<:NumTypes} = sin(a * bareinterval(T, π)) # not in the IEEE Standard 1788-2015
-sinpi(a::Interval{T}) where {T<:NumTypes} = sin(a * interval(T, π))
-
 """
-    cos(a::BareInterval)
-    cos(a::Interval)
+    cos(::BareInterval)
+    cos(::Interval)
 
 Implement the `cos` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function cos(a::BareInterval{T}) where {T<:NumTypes}
+function Base.cos(a::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(a) && return a
 
     whole_range = _unsafe_bareinterval(T, -one(T), one(T))
@@ -203,7 +206,7 @@ function cos(a::BareInterval{T}) where {T<:NumTypes}
     end
 end
 
-function cos(a::BareInterval{Float64})
+function Base.cos(a::BareInterval{Float64})
     isempty_interval(a) && return a
 
     whole_range = _unsafe_bareinterval(Float64, -1.0, 1.0)
@@ -244,22 +247,19 @@ function cos(a::BareInterval{Float64})
     end
 end
 
-function cos(a::Interval)
-    r = cos(bareinterval(a))
-    d = min(decoration(a), decoration(r))
-    return _unsafe_interval(r, d, isguaranteed(a))
+function Base.cos(x::Interval)
+    r = cos(bareinterval(x))
+    d = min(decoration(x), decoration(r))
+    return _unsafe_interval(r, d, isguaranteed(x))
 end
 
-cospi(a::BareInterval{T}) where {T<:NumTypes} = cos(a * bareinterval(T, π)) # not in the IEEE Standard 1788-2015
-cospi(a::Interval{T}) where {T<:NumTypes} = cos(a * interval(T, π))
-
 """
-    tan(a::BareInterval)
-    tan(a::Interval)
+    tan(::BareInterval)
+    tan(::Interval)
 
 Implement the `tan` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function tan(a::BareInterval{T}) where {T<:NumTypes}
+function Base.tan(a::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(a) && return a
 
     diam(a) > inf(bareinterval(T, π)) && return entireinterval(BareInterval{T})
@@ -285,14 +285,14 @@ function tan(a::BareInterval{T}) where {T<:NumTypes}
     return @round(T, tan(alo), tan(ahi))
 end
 
-function tan(a::BareInterval{Float64})
+function Base.tan(a::BareInterval{Float64})
     isempty_interval(a) && return a
 
     diam(a) > inf(bareinterval(Float64, π)) && return entireinterval(BareInterval{Float64})
 
     alo, ahi = bounds(a)
-    lo_quadrant, lo = _quadrant(alo)
-    hi_quadrant, hi = _quadrant(ahi)
+    lo_quadrant, _ = _quadrant(alo)
+    hi_quadrant, _ = _quadrant(ahi)
 
     lo_quadrant_mod = mod(lo_quadrant, 2)
     hi_quadrant_mod = mod(hi_quadrant, 2)
@@ -309,7 +309,7 @@ function tan(a::BareInterval{Float64})
     return @round(Float64, tan(alo), tan(ahi))
 end
 
-function tan(a::Interval)
+function Base.tan(a::Interval)
     r = tan(bareinterval(a))
     d = min(decoration(a), decoration(r))
     d = min(d, ifelse(isbounded(r), d, trv))
@@ -317,12 +317,12 @@ function tan(a::Interval)
 end
 
 """
-    cot(a::BareInterval)
-    cot(a::Interval)
+    cot(::BareInterval)
+    cot(::Interval)
 
 Implement the `cot` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function cot(a::BareInterval{T}) where {T<:NumTypes}
+function Base.cot(a::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(a) && return a
 
     diam(a) > inf(bareinterval(T, π)) && return entireinterval(BareInterval{T})
@@ -360,14 +360,53 @@ function cot(a::BareInterval{T}) where {T<:NumTypes}
     end
 end
 
-cot(a::BareInterval{Float64}) = atomic(Float64, cot(_bigequiv(a)))
+function Base.cot(a::BareInterval{Float64})
+    isempty_interval(a) && return a
+
+    diam(a) > inf(bareinterval(Float64, π)) && return entireinterval(BareInterval{Float64})
+
+    isthinzero(a) && return emptyinterval(BareInterval{Float64})
+
+    alo, ahi = bounds(a)
+    lo_quadrant, _ = _quadrant(alo)
+    hi_quadrant, _ = _quadrant(ahi)
+
+    lo_quadrant = mod(lo_quadrant, 4)
+    hi_quadrant = mod(hi_quadrant, 4)
+
+    # Different cases depending on the two quadrants:
+    if lo_quadrant == hi_quadrant
+        iszero(alo) && return @round(Float64, cot(ahi), typemax(Float64))
+
+        return @round(Float64, cot(ahi), cot(alo))
+
+    elseif (lo_quadrant == 3 && iszero(hi_quadrant)) || (lo_quadrant == 1 && hi_quadrant ==2)
+        iszero(ahi) && return @round(Float64, typemin(Float64), cot(alo))
+
+        return entireinterval(BareInterval{Float64})
+
+    elseif (iszero(lo_quadrant) && hi_quadrant == 1) || (lo_quadrant == 2 && hi_quadrant == 3)
+        return @round(Float64, cot(ahi), cot(alo))
+
+    elseif ( lo_quadrant == 2 && iszero(hi_quadrant))
+        iszero(ahi) && return @round(Float64, typemin(Float64), cot(alo))
+
+        return entireinterval(BareInterval{Float64})
+
+    else
+        return entireinterval(BareInterval{Float64})
+    end
+end
+
+# automatically defined for `Interval` since it is a subtype of `Real`
 
 """
-    sec(a::BareInterval)
+    sec(::BareInterval)
+    sec(::Interval)
 
 Implement the `sec` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function sec(a::BareInterval{T}) where {T<:NumTypes}
+function Base.sec(a::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(a) && return a
 
     diam(a) > inf(interval(T, π)) && return entireinterval(BareInterval{T})
@@ -399,14 +438,47 @@ function sec(a::BareInterval{T}) where {T<:NumTypes}
     end
 end
 
-sec(a::BareInterval{Float64}) = atomic(Float64, sec(_bigequiv(a)))
+function Base.sec(a::BareInterval{Float64})
+    isempty_interval(a) && return a
+
+    diam(a) > inf(interval(Float64, π)) && return entireinterval(BareInterval{Float64})
+
+    alo, ahi = bounds(a)
+    lo_quadrant, _ = _quadrant(alo)
+    hi_quadrant, _ = _quadrant(ahi)
+
+    lo_quadrant = mod(lo_quadrant, 4)
+    hi_quadrant = mod(hi_quadrant, 4)
+
+    # Different cases depending on the two quadrants:
+    if lo_quadrant == hi_quadrant  # Interval limits in the same quadrant
+        lo = @round(Float64, sec(alo), sec(alo))
+        hi = @round(Float64, sec(ahi), sec(ahi))
+        return hull(lo, hi)
+
+    elseif (iszero(lo_quadrant) && hi_quadrant == 1) || (lo_quadrant == 2 && hi_quadrant ==3)
+        return entireinterval(BareInterval{Float64})
+
+    elseif lo_quadrant == 3 && iszero(hi_quadrant)
+        return @round(Float64, one(Float64), max(sec(alo), sec(ahi)))
+
+    elseif lo_quadrant == 1 && hi_quadrant == 2
+        return @round(Float64, min(sec(alo), sec(ahi)), -one(Float64))
+
+    else
+        return entireinterval(BareInterval{Float64})
+    end
+end
+
+# automatically defined for `Interval` since it is a subtype of `Real`
 
 """
-    csc(a::BareInterval)
+    csc(::BareInterval)
+    csc(::Interval)
 
 Implement the `csc` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function csc(a::BareInterval{T}) where {T<:NumTypes}
+function Base.csc(a::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(a) && return a
 
     diam(a) > inf(bareinterval(T, π)) && return entireinterval(BareInterval{T})
@@ -449,15 +521,58 @@ function csc(a::BareInterval{T}) where {T<:NumTypes}
     end
 end
 
-csc(a::BareInterval{Float64}) = atomic(Float64, csc(_bigequiv(a)))
+function Base.csc(a::BareInterval{Float64})
+    isempty_interval(a) && return a
+
+    diam(a) > inf(bareinterval(Float64, π)) && return entireinterval(BareInterval{Float64})
+
+    isthinzero(a) && return emptyinterval(BareInterval{Float64})
+
+    alo, ahi = bounds(a)
+    lo_quadrant, _ = _quadrant(alo)
+    hi_quadrant, _ = _quadrant(ahi)
+
+    lo_quadrant = mod(lo_quadrant, 4)
+    hi_quadrant = mod(hi_quadrant, 4)
+
+    # Different cases depending on the two quadrants:
+    if lo_quadrant == hi_quadrant
+        iszero(alo) && return @round(Float64, csc(ahi), typemax(Float64))
+
+        lo = @round(Float64, csc(alo), csc(alo))
+        hi = @round(Float64, csc(ahi), csc(ahi))
+        return hull(lo, hi)
+
+    elseif (lo_quadrant == 3 && iszero(hi_quadrant)) || (lo_quadrant == 1 && hi_quadrant == 2)
+        iszero(ahi) && return @round(Float64, typemin(Float64), csc(alo))
+
+        return entireinterval(BareInterval{Float64})
+
+    elseif iszero(lo_quadrant) && hi_quadrant == 1
+        return @round(Float64, one(Float64), max(csc(alo), csc(ahi)))
+
+    elseif lo_quadrant == 2 && hi_quadrant == 3
+        return @round(Float64, min(csc(alo), csc(ahi)), -one(Float64))
+
+    elseif ( lo_quadrant == 2 && iszero(hi_quadrant))
+        iszero(ahi) && return @round(Float64, typemin(Float64), -one(Float64))
+
+        return entireinterval(BareInterval{Float64})
+
+    else
+        return entireinterval(BareInterval{Float64})
+    end
+end
+
+# automatically defined for `Interval` since it is a subtype of `Real`
 
 """
-    asin(a::BareInterval)
-    asin(a::Interval)
+    asin(::BareInterval)
+    asin(::Interval)
 
 Implement the `asin` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function asin(a::BareInterval{T}) where {T<:NumTypes}
+function Base.asin(a::BareInterval{T}) where {T<:NumTypes}
     domain = _unsafe_bareinterval(T, -one(T), one(T))
     a = intersect_interval(a, domain)
     isempty_interval(a) && return a
@@ -465,7 +580,7 @@ function asin(a::BareInterval{T}) where {T<:NumTypes}
     return @round(T, asin(alo), asin(ahi))
 end
 
-function asin(a::Interval{T}) where {T<:NumTypes}
+function Base.asin(a::Interval{T}) where {T<:NumTypes}
     domain = _unsafe_bareinterval(T, -one(T), one(T))
     x = bareinterval(a)
     r = asin(x)
@@ -475,12 +590,12 @@ function asin(a::Interval{T}) where {T<:NumTypes}
 end
 
 """
-    acos(a::BareInterval)
-    acos(a::Interval)
+    acos(::BareInterval)
+    acos(::Interval)
 
 Implement the `acos` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function acos(a::BareInterval{T}) where {T<:NumTypes}
+function Base.acos(a::BareInterval{T}) where {T<:NumTypes}
     domain = _unsafe_bareinterval(T, -one(T), one(T))
     a = intersect_interval(a, domain)
     isempty_interval(a) && return a
@@ -488,7 +603,7 @@ function acos(a::BareInterval{T}) where {T<:NumTypes}
     return @round(T, acos(ahi), acos(alo))
 end
 
-function acos(a::Interval{T}) where {T<:NumTypes}
+function Base.acos(a::Interval{T}) where {T<:NumTypes}
     domain = _unsafe_bareinterval(T, -one(T), one(T))
     x = bareinterval(a)
     r = acos(x)
@@ -498,114 +613,112 @@ function acos(a::Interval{T}) where {T<:NumTypes}
 end
 
 """
-    atan(a::BareInterval)
-    atan(a::Interval)
+    atan(::BareInterval)
+    atan(::Interval)
 
 Implement the `atan` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function atan(a::BareInterval{T}) where {T<:NumTypes}
-    isempty_interval(a) && return a
-    alo, ahi = bounds(a)
-    return @round(T, atan(alo), atan(ahi))
+function Base.atan(x::BareInterval{T}) where {T<:NumTypes}
+    isempty_interval(x) && return x
+    return @round(T, atan(inf(x)), atan(sup(x)))
 end
 
-function atan(a::Interval)
-    r = atan(bareinterval(a))
-    d = min(decoration(a), decoration(r))
-    return _unsafe_interval(r, d, isguaranteed(a))
+function Base.atan(x::Interval)
+    r = atan(bareinterval(x))
+    d = min(decoration(x), decoration(r))
+    return _unsafe_interval(r, d, isguaranteed(x))
 end
 
-function atan(y::BareInterval{T}, x::BareInterval{S}) where {T<:NumTypes,S<:NumTypes}
-    F = BareInterval{promote_type(T, S)}
-    (isempty_interval(y) || isempty_interval(x)) && return emptyinterval(F)
-    return F(atan(_bigequiv(y), _bigequiv(x)))
-end
-
-function atan(y::BareInterval{BigFloat}, x::BareInterval{BigFloat})
+function Base.atan(y::BareInterval{T}, x::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(y) && return y
     isempty_interval(x) && return x
 
     ylo, yhi = bounds(y)
     xlo, xhi = bounds(x)
-    z = zero(BigFloat)
+    z = zero(T)
 
     # Prevent nonsense results when y has a signed zero:
     if iszero(ylo)
-        y = _unsafe_bareinterval(BigFloat, z, yhi)
+        y = _unsafe_bareinterval(T, z, yhi)
     end
 
     if iszero(yhi)
-        y = _unsafe_bareinterval(BigFloat, ylo, z)
+        y = _unsafe_bareinterval(T, ylo, z)
     end
 
     # Check cases based on x
     if isthinzero(x)
-        isthinzero(y) && return emptyinterval(BareInterval{BigFloat})
-        ylo ≥ z && return _half_pi(BigFloat)
-        yhi ≤ z && return -_half_pi(BigFloat)
-        return _half_range_atan(BigFloat)
+        isthinzero(y) && return emptyinterval(BareInterval{T})
+        ylo ≥ z && return _half_pi(T)
+        yhi ≤ z && return -_half_pi(T)
+        return _half_range_atan(T)
 
     elseif xlo > z
         isthinzero(y) && return y
         ylo ≥ z &&
-            return @round(BigFloat, atan(ylo, xhi), atan(yhi, xlo)) # refinement lo bound
+            return @round(T, atan(ylo, xhi), atan(yhi, xlo)) # refinement lo bound
         yhi ≤ z &&
-            return @round(BigFloat, atan(ylo, xlo), atan(yhi, xhi))
-        return @round(BigFloat, atan(ylo, xlo), atan(yhi, xlo))
+            return @round(T, atan(ylo, xlo), atan(yhi, xhi))
+        return @round(T, atan(ylo, xlo), atan(yhi, xlo))
 
     elseif xhi < z
-        isthinzero(y) && return bareinterval(BigFloat, π)
+        isthinzero(y) && return bareinterval(T, π)
         ylo ≥ z &&
-            return @round(BigFloat, atan(yhi, xhi), atan(ylo, xlo))
+            return @round(T, atan(yhi, xhi), atan(ylo, xlo))
         yhi < z &&
-            return @round(BigFloat, atan(yhi, xlo), atan(ylo, xhi))
-        return _range_atan(BigFloat)
+            return @round(T, atan(yhi, xlo), atan(ylo, xhi))
+        return _range_atan(T)
 
     else # z ∈ x
         if iszero(xlo)
             isthinzero(y) && return y
             ylo ≥ z &&
-                return _unsafe_bareinterval(BigFloat, atan(ylo, xhi, RoundDown), sup(_half_range_atan(BigFloat)))
+                return _unsafe_bareinterval(T, _atan_round(ylo, xhi, RoundDown), sup(_half_range_atan(T)))
             yhi ≤ z &&
-                return _unsafe_bareinterval(BigFloat, inf(_half_range_atan(BigFloat)), atan(yhi, xhi, RoundUp))
-            return _half_range_atan(BigFloat)
+                return _unsafe_bareinterval(T, inf(_half_range_atan(T)), _atan_round(yhi, xhi, RoundUp))
+            return _half_range_atan(T)
 
         elseif iszero(xhi)
-            isthinzero(y) && return bareinterval(BigFloat, π)
+            isthinzero(y) && return bareinterval(T, π)
             ylo ≥ z &&
-                return _unsafe_bareinterval(BigFloat, inf(_half_pi(BigFloat)), atan(ylo, xlo, RoundUp))
+                return _unsafe_bareinterval(T, inf(_half_pi(T)), _atan_round(ylo, xlo, RoundUp))
             yhi < z &&
-                return _unsafe_bareinterval(BigFloat, atan(yhi, xlo, RoundDown), inf(-_half_pi(BigFloat)))
-            return _range_atan(BigFloat)
+                return _unsafe_bareinterval(T, _atan_round(yhi, xlo, RoundDown), sup(-_half_pi(T)))
+            return _range_atan(T)
         else
             ylo ≥ z &&
-                return @round(BigFloat, atan(ylo, xhi), atan(ylo, xlo))
+                return @round(T, atan(ylo, xhi), atan(ylo, xlo))
             yhi < z &&
-                return @round(BigFloat, atan(yhi, xlo), atan(yhi, xhi))
-            return _range_atan(BigFloat)
+                return @round(T, atan(yhi, xlo), atan(yhi, xhi))
+            return _range_atan(T)
         end
     end
 end
 
-function atan(b::Interval, a::Interval)
-    y = bareinterval(b)
-    x = bareinterval(a)
-    r = atan(y, x)
-    d = min(decoration(b), decoration(a), decoration(r))
-    d = min(d, ifelse(in_interval(0, y),
-            ifelse(in_interval(0, x), trv,
-                ifelse(sup(x) < 0, ifelse(inf(y) < 0, def, dac), d)),
+Base.atan(y::BareInterval, x::BareInterval) = atan(promote(y, x)...)
+
+function Base.atan(y::Interval, x::Interval)
+    by = bareinterval(y)
+    bx = bareinterval(x)
+    r = atan(by, bx)
+    d = min(decoration(y), decoration(x), decoration(r))
+    d = min(d, ifelse(in_interval(0, by),
+            ifelse(in_interval(0, bx), trv,
+                ifelse(sup(bx) < 0, ifelse(inf(by) < 0, def, dac), d)),
         d))
-    return _unsafe_interval(r, d, isguaranteed(a))
+    t = isguaranteed(y) & isguaranteed(x)
+    return _unsafe_interval(r, d, t)
 end
 
 """
-    acot(a::BareInterval)
+    acot(::BareInterval)
+    acot(::Interval)
 
 Implement the `acot` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function acot(a::BareInterval{T}) where {T<:NumTypes}
-    isempty_interval(a) && return a
-    return atomic(T, bareinterval(T, acot(_bigequiv(sup(a))), acot(_bigequiv(inf(a)))))
-    # return atomic(T, @round(BigFloat, acot(_bigequiv(sup(a))), acot(_bigequiv(inf(a)))))
+function Base.acot(x::BareInterval{T}) where {T<:NumTypes}
+    isempty_interval(x) && return x
+    return @round(T, acot(sup(x)), acot(inf(x)))
 end
+
+# automatically defined for `Interval` since it is a subtype of `Real`

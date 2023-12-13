@@ -6,12 +6,18 @@ module Symbols
 """
     ..(a, b)
 
-Create an interval according to the IEEE Standard 1788-2015. This is
+Create the interval ``[a, b]`` according to the IEEE Standard 1788-2015. This is
 semantically equivalent to [`interval(a, b)`](@ref).
+
+!!! danger
+    Nothing is done to compensate for the fact that floating point literals are
+    rounded to the nearest when parsed (e.g. `0.1`). In such cases, parse the
+    string containing the desired value to ensure its tight enclosure.
 
 See also: [`interval`](@ref), [`±`](@ref) and [`@I_str`](@ref).
 
 # Examples
+
 ```jldoctest
 julia> using IntervalArithmetic
 
@@ -25,7 +31,6 @@ Interval{Rational{Int64}}(1//1, 85563208//27235615, com)
 julia> 0.1..0.3
 Interval{Float64}(0.1, 0.3, com)
 ```
-```
 """
 .. = interval
 
@@ -37,14 +42,15 @@ Create the interval ``[m - r, m + r]`` according to the IEEE Standard 1788-2015.
 Despite using the midpoint-radius notation, the returned interval is still an
 [`Interval`](@ref) represented by its bounds.
 
-!!! warning
+!!! danger
     Nothing is done to compensate for the fact that floating point literals are
-    rounded to the nearest when parsed (e.g. 0.1). In such cases, use the string
-    macro [`@I_str`](@ref) to ensure tight enclosure around the typed numbers.
+    rounded to the nearest when parsed (e.g. `0.1`). In such cases, parse the
+    string containing the desired value to ensure its tight enclosure.
 
 See also: [`interval`](@ref), [`..`](@ref) and [`@I_str`](@ref).
 
 # Examples
+
 ```jldoctest
 julia> using IntervalArithmetic
 
@@ -78,9 +84,9 @@ Unicode alias of [`strictprecedes`](@ref).
 """
     ⪽(a, b)
 
-Unicode alias of [`isstrictsubset_interval`](@ref).
+Unicode alias of [`isinterior`](@ref).
 """
-⪽ = isstrictsubset_interval
+⪽ = isinterior
 
 """
     ∅

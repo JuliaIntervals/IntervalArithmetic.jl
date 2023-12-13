@@ -1,0 +1,302 @@
+/*
+
+Unit tests from libieeep1788 for interval constructors
+(Original author: Marco Nehmeier)
+converted into portable ITL format by Oliver Heimlich.
+
+Copyright 2013-2015 Marco Nehmeier (nehmeier@informatik.uni-wuerzburg.de)
+Copyright 2015-2017 Oliver Heimlich (oheim@posteo.de)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+*/
+
+testcase minimal_nums_to_interval_test {
+    b-numsToInterval -1.0 1.0 = [-1.0,1.0];
+    b-numsToInterval -infinity 1.0 = [-infinity,1.0];
+    b-numsToInterval -1.0 infinity = [-1.0,infinity];
+    b-numsToInterval -infinity infinity = [-infinity,infinity];
+
+    b-numsToInterval NaN NaN = [empty] signal UndefinedOperation;
+    b-numsToInterval 1.0 -1.0 = [empty] signal UndefinedOperation;
+    b-numsToInterval -infinity -infinity = [empty] signal UndefinedOperation;
+    b-numsToInterval infinity infinity = [empty] signal UndefinedOperation;
+}
+
+testcase minimal_nums_to_decorated_interval_test {
+    d-numsToInterval -1.0 1.0 = [-1.0,1.0]_com;
+    d-numsToInterval -infinity 1.0 = [-infinity,1.0]_dac;
+    d-numsToInterval -1.0 infinity = [-1.0,infinity]_dac;
+    d-numsToInterval -infinity infinity = [-infinity,infinity]_dac;
+
+    d-numsToInterval NaN NaN = [nai] signal UndefinedOperation;
+    d-numsToInterval 1.0 -1.0 = [nai] signal UndefinedOperation;
+    d-numsToInterval -infinity -infinity = [nai] signal UndefinedOperation;
+    d-numsToInterval infinity infinity = [nai] signal UndefinedOperation;
+}
+
+testcase minimal_text_to_interval_test {
+    b-textToInterval "[ Empty  ]" = [empty];
+    b-textToInterval "[ Empty  ]_trv" = [empty] signal UndefinedOperation;
+    b-textToInterval "[  ]" = [empty];
+    b-textToInterval "[  ]_trv" = [empty] signal UndefinedOperation;
+
+    b-textToInterval "[,]" = [-infinity,infinity];
+    b-textToInterval "[,]_trv" = [empty] signal UndefinedOperation;
+    b-textToInterval "[ entire  ]" = [-infinity,infinity];
+    b-textToInterval "[ ENTIRE ]_dac" = [empty] signal UndefinedOperation;
+    b-textToInterval "[ ENTIRE ]" = [-infinity,infinity];
+    b-textToInterval "[ -inf , INF  ]" = [-infinity,infinity];
+    b-textToInterval "[ -inf, INF ]_def" = [empty] signal UndefinedOperation;
+
+    b-textToInterval "[-1.0,1.0]" = [-1.0,1.0];
+    b-textToInterval "[  -1.0  ,  1.0  ]" = [-1.0,1.0];
+    b-textToInterval "[  -1.0  , 1.0]" = [-1.0,1.0];
+
+    b-textToInterval "[-1,]" = [-1.0,infinity];
+    b-textToInterval "[-1.0, +inf]" = [-1.0,infinity];
+    b-textToInterval "[-1.0, +infinity]" = [-1.0,infinity];
+
+    b-textToInterval "[-Inf, 1.000 ]" = [-infinity,1.0];
+    b-textToInterval "[-Infinity, 1.000 ]" = [-infinity,1.0];
+
+    b-textToInterval "[1.0E+400 ]" = [0x1.fffffffffffffp+1023,infinity];
+
+    b-textToInterval "[ -4/2, 10/5 ]" = [-2.0,2.0];
+    b-textToInterval "[ -1/10, 1/10 ]" = [-0.1,0.1];
+
+    b-textToInterval "0.0?" = [-0.05,0.05];
+    b-textToInterval "0.0?u" = [0.0,0.05];
+    b-textToInterval "0.0?d" = [-0.05,0.0];
+    
+    b-textToInterval "2.5?" = [0x1.3999999999999p+1,0x1.4666666666667p+1];
+    b-textToInterval "2.5?u" = [2.5,0x1.4666666666667p+1];
+    b-textToInterval "2.5?d" = [0x1.3999999999999p+1,2.5];
+
+    b-textToInterval "0.000?5" = [-0.005,0.005];
+    b-textToInterval "0.000?5u" = [0.0,0.005];
+    b-textToInterval "0.000?5d" = [-0.005,0.0];
+
+    b-textToInterval "2.500?5" = [0x1.3f5c28f5c28f5p+1,0x1.40a3d70a3d70bp+1];
+    b-textToInterval "2.500?5u" = [2.5,0x1.40a3d70a3d70bp+1];
+    b-textToInterval "2.500?5d" = [0x1.3f5c28f5c28f5p+1,2.5];
+
+    b-textToInterval "0.0??" = [-infinity,infinity];
+    b-textToInterval "0.0??u" = [0.0,infinity];
+    b-textToInterval "0.0??d" = [-infinity,0.0];
+
+    b-textToInterval "2.5??" = [-infinity,infinity];
+    b-textToInterval "2.5??u" = [2.5,infinity];
+    b-textToInterval "2.5??d" = [-infinity,2.5];
+
+    b-textToInterval "2.500?5e+27" = [0x1.01fa19a08fe7fp+91,0x1.0302cc4352683p+91];
+    b-textToInterval "2.500?5ue4" = [0x1.86ap+14,0x1.8768p+14];
+    b-textToInterval "2.500?5de-5" = [0x1.a2976f1cee4d5p-16,0x1.a36e2eb1c432dp-16];
+
+    b-textToInterval "10?3" = [7.0,13.0];
+    b-textToInterval "10?3e380" = [0x1.fffffffffffffp+1023,infinity];
+
+    b-textToInterval "1.0000000000000001?1" = [1.0,0x1.0000000000001p+0];
+
+    // 10?18 + 308 zeros
+    b-textToInterval "10?1800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" = [-infinity,infinity];
+
+    b-textToInterval "[ Nai  ]" = [empty] signal UndefinedOperation;
+    b-textToInterval "[ Nai  ]_ill" = [empty] signal UndefinedOperation;
+    b-textToInterval "[ Nai  ]_trv" = [empty] signal UndefinedOperation;
+    b-textToInterval "[ Empty  ]_ill" = [empty] signal UndefinedOperation;
+    b-textToInterval "[  ]_com" = [empty] signal UndefinedOperation;
+    b-textToInterval "[,]_com" = [empty] signal UndefinedOperation;
+    b-textToInterval "[   Entire ]_com" = [empty] signal UndefinedOperation;
+    b-textToInterval "[ -inf ,  INF ]_com" = [empty] signal UndefinedOperation;
+    b-textToInterval "[  -1.0  , 1.0]_ill" = [empty] signal UndefinedOperation;
+    b-textToInterval "[  -1.0  , 1.0]_fooo" = [empty] signal UndefinedOperation;
+    b-textToInterval "[  -1.0  , 1.0]_da" = [empty] signal UndefinedOperation;
+    b-textToInterval "[-1.0,]_com" = [empty] signal UndefinedOperation;
+    b-textToInterval "[-Inf, 1.000 ]_ill" = [empty] signal UndefinedOperation;
+    b-textToInterval "[-I  nf, 1.000 ]" = [empty] signal UndefinedOperation;
+    b-textToInterval "[-Inf, 1.0  00 ]" = [empty] signal UndefinedOperation;
+    b-textToInterval "[-Inf ]" = [empty] signal UndefinedOperation;
+    b-textToInterval "[Inf , INF]" = [empty] signal UndefinedOperation;
+    b-textToInterval "[ foo ]" = [empty] signal UndefinedOperation;
+    // b-textToInterval "0.0??_com" = [empty] signal UndefinedOperation;
+    // b-textToInterval "0.0??u_ill" = [empty] signal UndefinedOperation;
+    // b-textToInterval "0.0??d_com" = [empty] signal UndefinedOperation;
+
+    b-textToInterval "[1.0000000000000002,1.0000000000000001]" = [1.0,0x1.0000000000001p+0] signal PossiblyUndefinedOperation;
+    b-textToInterval "[10000000000000001/10000000000000000,10000000000000002/10000000000000001]" = [1.0,0x1.0000000000001p+0] signal PossiblyUndefinedOperation;
+    b-textToInterval "[0x1.00000000000002p0,0x1.00000000000001p0]" = [1.0,0x1.0000000000001p+0] signal PossiblyUndefinedOperation;
+}
+
+testcase minimal_text_to_decorated_interval_test {
+    d-textToInterval "[ Empty  ]" = [empty]_trv;
+    d-textToInterval "[ Empty  ]_trv" = [empty]_trv;
+    d-textToInterval "[  ]" = [empty]_trv;
+    d-textToInterval "[  ]_trv" = [empty]_trv;
+
+    d-textToInterval "[,]" = [entire]_dac;
+    d-textToInterval "[,]_trv" = [entire]_trv;
+    d-textToInterval "[ entire  ]" = [entire]_dac;
+    d-textToInterval "[ ENTIRE ]_dac" = [entire]_dac;
+    d-textToInterval "[ -inf , INF  ]" = [entire]_dac;
+    d-textToInterval "[ -inf, INF ]_def" = [entire]_def;
+
+    d-textToInterval "[-1.0,1.0]" = [-1.0,1.0]_com;
+    d-textToInterval "[  -1.0  ,  1.0  ]_com" = [-1.0,1.0]_com;
+    d-textToInterval "[  -1.0  , 1.0]_trv" = [-1.0,1.0]_trv;
+
+    d-textToInterval "[-1,]" = [-1.0,infinity]_dac;
+    d-textToInterval "[-1.0, +inf]_def" = [-1.0,infinity]_def;
+    d-textToInterval "[-1.0, +infinity]_def" = [-1.0,infinity]_def;
+
+    d-textToInterval "[-Inf, 1.000 ]" = [-infinity,1.0]_dac;
+    d-textToInterval "[-Infinity, 1.000 ]_trv" = [-infinity,1.0]_trv;
+
+    d-textToInterval "[1.0E+400 ]_com" = [0x1.fffffffffffffp+1023,infinity]_dac;
+
+    d-textToInterval "[ -4/2, 10/5 ]_com" = [-2.0,2.0]_com;
+    d-textToInterval "[ -1/10, 1/10 ]_com" = [-0.1,0.1]_com;
+
+    d-textToInterval "0.0?" = [-0.05,0.05]_com;
+    d-textToInterval "0.0?u_trv" = [0.0,0.05]_trv;
+    d-textToInterval "0.0?d_dac" = [-0.05,0.0]_dac;
+
+    d-textToInterval "2.5?" = [0x1.3999999999999p+1,0x1.4666666666667p+1]_com;
+    d-textToInterval "2.5?u" = [2.5,0x1.4666666666667p+1]_com;
+    d-textToInterval "2.5?d_trv" = [0x1.3999999999999p+1,2.5]_trv;
+
+    d-textToInterval "0.000?5" = [-0.005,0.005]_com;
+    d-textToInterval "0.000?5u_def" = [0.0,0.005]_def;
+    d-textToInterval "0.000?5d" = [-0.005,0.0]_com;
+
+    d-textToInterval "2.500?5" = [0x1.3f5c28f5c28f5p+1,0x1.40a3d70a3d70bp+1]_com;
+    d-textToInterval "2.500?5u" = [2.5,0x1.40a3d70a3d70bp+1]_com;
+    d-textToInterval "2.500?5d" = [0x1.3f5c28f5c28f5p+1,2.5]_com;
+
+    d-textToInterval "0.0??_dac" = [-infinity,infinity]_dac;
+    d-textToInterval "0.0??u_trv" = [0.0,infinity]_trv;
+    d-textToInterval "0.0??d" = [-infinity,0.0]_dac;
+
+    d-textToInterval "2.5??" = [-infinity,infinity]_dac;
+    d-textToInterval "2.5??u_def" = [2.5,infinity]_def;
+    d-textToInterval "2.5??d_dac" = [-infinity,2.5]_dac;
+
+    d-textToInterval "2.500?5e+27" = [0x1.01fa19a08fe7fp+91,0x1.0302cc4352683p+91]_com;
+    d-textToInterval "2.500?5ue4_def" = [0x1.86ap+14,0x1.8768p+14]_def;
+    d-textToInterval "2.500?5de-5" = [0x1.a2976f1cee4d5p-16,0x1.a36e2eb1c432dp-16]_com;
+
+    d-textToInterval "[ Nai  ]" = [nai];
+
+    // 10?18 + 308 zeros + _com
+    d-textToInterval "10?1800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000_com" = [-infinity,infinity]_dac;
+
+    d-textToInterval "10?3_com" = [7.0,13.0]_com;
+    d-textToInterval "10?3e380_com" = [0x1.fffffffffffffp+1023,infinity]_dac;
+
+    d-textToInterval "[ Nai  ]_ill" = [nai] signal UndefinedOperation;
+    d-textToInterval "[ Nai  ]_trv" = [nai] signal UndefinedOperation;
+    d-textToInterval "[ Empty  ]_ill" = [nai] signal UndefinedOperation;
+    d-textToInterval "[  ]_com" = [nai] signal UndefinedOperation;
+    d-textToInterval "[,]_com" = [nai] signal UndefinedOperation;
+    d-textToInterval "[   Entire ]_com" = [nai] signal UndefinedOperation;
+    d-textToInterval "[ -inf ,  INF ]_com" = [nai] signal UndefinedOperation;
+    d-textToInterval "[  -1.0  , 1.0]_ill" = [nai] signal UndefinedOperation;
+    d-textToInterval "[  -1.0  , 1.0]_fooo" = [nai] signal UndefinedOperation;
+    d-textToInterval "[  -1.0  , 1.0]_da" = [nai] signal UndefinedOperation;
+    d-textToInterval "[-1.0,]_com" = [nai] signal UndefinedOperation;
+    d-textToInterval "[-Inf, 1.000 ]_ill" = [nai] signal UndefinedOperation;
+    d-textToInterval "[-I  nf, 1.000 ]" = [nai] signal UndefinedOperation;
+    d-textToInterval "[-Inf, 1.0  00 ]" = [nai] signal UndefinedOperation;
+    d-textToInterval "[-Inf ]" = [nai] signal UndefinedOperation;
+    d-textToInterval "[Inf , INF]" = [nai] signal UndefinedOperation;
+    d-textToInterval "[ foo ]" = [nai] signal UndefinedOperation;
+    d-textToInterval "0.0??_com" = [nai] signal UndefinedOperation;
+    d-textToInterval "0.0??u_ill" = [nai] signal UndefinedOperation;
+    d-textToInterval "0.0??d_com" = [nai] signal UndefinedOperation;
+    d-textToInterval "0.0??_com" = [nai] signal UndefinedOperation;
+    d-textToInterval "[1.0,2.0" = [nai] signal UndefinedOperation;
+
+    d-textToInterval "[1.0000000000000002,1.0000000000000001]" = [1.0,0x1.0000000000001p+0]_com signal PossiblyUndefinedOperation;
+    d-textToInterval "[10000000000000001/10000000000000000,10000000000000002/10000000000000001]" = [1.0,0x1.0000000000001p+0]_com signal PossiblyUndefinedOperation;
+    d-textToInterval "[0x1.00000000000002p0,0x1.00000000000001p0]" = [1.0,0x1.0000000000001p+0]_com signal PossiblyUndefinedOperation;
+}
+
+testcase minimal_interval_part_test {
+    intervalPart [-0x1.99999A842549Ap+4,0X1.9999999999999P-4]_trv = [-0x1.99999A842549Ap+4,0X1.9999999999999P-4];
+    intervalPart [-0X1.99999C0000000p+4,0X1.9999999999999P-4]_com = [-0X1.99999C0000000p+4,0X1.9999999999999P-4];
+    intervalPart [-0x1.99999A842549Ap+4,0x1.99999A0000000p-4]_dac = [-0x1.99999A842549Ap+4,0x1.99999A0000000p-4];
+    intervalPart [-0X1.99999C0000000p+4,0x1.99999A0000000p-4]_def = [-0X1.99999C0000000p+4,0x1.99999A0000000p-4];
+    intervalPart [-0x0.0000000000001p-1022,-0x0.0000000000001p-1022]_trv = [-0x0.0000000000001p-1022,-0x0.0000000000001p-1022];
+    intervalPart [-0x0.0000000000001p-1022,0x0.0000000000001p-1022]_trv = [-0x0.0000000000001p-1022,0x0.0000000000001p-1022];
+    intervalPart [0x0.0000000000001p-1022,0x0.0000000000001p-1022]_trv = [0x0.0000000000001p-1022,0x0.0000000000001p-1022];
+    intervalPart [-0x1.fffffffffffffp+1023,-0x1.fffffffffffffp+1023]_trv = [-0x1.fffffffffffffp+1023,-0x1.fffffffffffffp+1023];
+    intervalPart [-0x1.fffffffffffffp+1023,0x1.fffffffffffffp+1023]_trv = [-0x1.fffffffffffffp+1023,0x1.fffffffffffffp+1023];
+    intervalPart [0x1.fffffffffffffp+1023,0x1.fffffffffffffp+1023]_trv = [0x1.fffffffffffffp+1023,0x1.fffffffffffffp+1023];
+    intervalPart [-infinity,infinity]_trv = [-infinity,infinity];
+    intervalPart [empty]_trv = [empty];
+    intervalPart [-0X1.99999C0000000p+4,0X1.9999999999999P-4]_com = [-0X1.99999C0000000p+4,0X1.9999999999999P-4];
+
+    intervalPart [nai] = [empty] signal IntvlPartOfNaI;
+}
+
+testcase minimal_new_dec_test {
+    newDec [-0x1.99999A842549Ap+4,0X1.9999999999999P-4] = [-0x1.99999A842549Ap+4,0X1.9999999999999P-4]_com;
+    newDec [-0X1.99999C0000000p+4,0X1.9999999999999P-4] = [-0X1.99999C0000000p+4,0X1.9999999999999P-4]_com;
+    newDec [-0x1.99999A842549Ap+4,0x1.99999A0000000p-4] = [-0x1.99999A842549Ap+4,0x1.99999A0000000p-4]_com;
+    newDec [-0X1.99999C0000000p+4,0x1.99999A0000000p-4] = [-0X1.99999C0000000p+4,0x1.99999A0000000p-4]_com;
+    newDec [-0x0.0000000000001p-1022,-0x0.0000000000001p-1022] = [-0x0.0000000000001p-1022,-0x0.0000000000001p-1022]_com;
+    newDec [-0x0.0000000000001p-1022,0x0.0000000000001p-1022] = [-0x0.0000000000001p-1022,0x0.0000000000001p-1022]_com;
+    newDec [0x0.0000000000001p-1022,0x0.0000000000001p-1022] = [0x0.0000000000001p-1022,0x0.0000000000001p-1022]_com;
+    newDec [-0x1.fffffffffffffp+1023,-0x1.fffffffffffffp+1023] = [-0x1.fffffffffffffp+1023,-0x1.fffffffffffffp+1023]_com;
+    newDec [-0x1.fffffffffffffp+1023,0x1.fffffffffffffp+1023] = [-0x1.fffffffffffffp+1023,0x1.fffffffffffffp+1023]_com;
+    newDec [0x1.fffffffffffffp+1023,0x1.fffffffffffffp+1023] = [0x1.fffffffffffffp+1023,0x1.fffffffffffffp+1023]_com;
+    newDec [-infinity,infinity] = [-infinity,infinity]_dac;
+    newDec [empty] = [empty]_trv;
+    newDec [-0X1.99999C0000000p+4,0X1.9999999999999P-4] = [-0X1.99999C0000000p+4,0X1.9999999999999P-4]_com;
+}
+
+testcase minimal_set_dec_test {
+    setDec [-0x1.99999A842549Ap+4,0X1.9999999999999P-4] trv = [-0x1.99999A842549Ap+4,0X1.9999999999999P-4]_trv;
+    setDec [-0X1.99999C0000000p+4,0X1.9999999999999P-4] com = [-0X1.99999C0000000p+4,0X1.9999999999999P-4]_com;
+    setDec [-0x1.99999A842549Ap+4,0x1.99999A0000000p-4] dac = [-0x1.99999A842549Ap+4,0x1.99999A0000000p-4]_dac;
+    setDec [-0X1.99999C0000000p+4,0x1.99999A0000000p-4] def = [-0X1.99999C0000000p+4,0x1.99999A0000000p-4]_def;
+    setDec [-0x0.0000000000001p-1022,-0x0.0000000000001p-1022] trv = [-0x0.0000000000001p-1022,-0x0.0000000000001p-1022]_trv;
+    setDec [-0x0.0000000000001p-1022,0x0.0000000000001p-1022] def = [-0x0.0000000000001p-1022,0x0.0000000000001p-1022]_def;
+    setDec [0x0.0000000000001p-1022,0x0.0000000000001p-1022] dac = [0x0.0000000000001p-1022,0x0.0000000000001p-1022]_dac;
+    setDec [-0x1.fffffffffffffp+1023,-0x1.fffffffffffffp+1023] com = [-0x1.fffffffffffffp+1023,-0x1.fffffffffffffp+1023]_com;
+    setDec [-0x1.fffffffffffffp+1023,0x1.fffffffffffffp+1023] def = [-0x1.fffffffffffffp+1023,0x1.fffffffffffffp+1023]_def;
+    setDec [0x1.fffffffffffffp+1023,0x1.fffffffffffffp+1023] trv = [0x1.fffffffffffffp+1023,0x1.fffffffffffffp+1023]_trv;
+    setDec [-infinity,infinity] dac = [-infinity,infinity]_dac;
+    setDec [empty] trv = [empty]_trv;
+    setDec [-0X1.99999C0000000p+4,0X1.9999999999999P-4] com = [-0X1.99999C0000000p+4,0X1.9999999999999P-4]_com;
+
+    setDec [empty] def = [empty]_trv;
+    setDec [empty] dac = [empty]_trv;
+    setDec [empty] com = [empty]_trv;
+    setDec [1.0,infinity] com = [1.0,infinity]_dac;
+    setDec [-infinity,3.0] com = [-infinity,3.0]_dac;
+    setDec [-infinity,infinity] com = [-infinity,infinity]_dac;
+    setDec [empty] ill = [nai] signal UndefinedOperation;
+    setDec [-infinity,3.0] ill = [nai] signal UndefinedOperation;
+    setDec [-1.0,3.0] ill = [nai] signal UndefinedOperation;
+}
+
+testcase minimal_decoration_part_test {
+    decorationPart [nai] = ill;
+    decorationPart [empty]_trv = trv;
+    decorationPart [-1.0,3.0]_trv = trv;
+    decorationPart [-1.0,3.0]_def = def;
+    decorationPart [-1.0,3.0]_dac = dac;
+    decorationPart [-1.0,3.0]_com = com;
+}
+

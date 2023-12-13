@@ -1,0 +1,255 @@
+/*
+
+Unit tests from libieeep1788 for interval numeric operations
+(Original author: Marco Nehmeier)
+converted into portable ITL format by Oliver Heimlich.
+
+Copyright 2013-2015 Marco Nehmeier (nehmeier@informatik.uni-wuerzburg.de)
+Copyright 2015-2017 Oliver Heimlich (oheim@posteo.de)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+*/
+
+
+testcase minimal_inf_test {
+    inf [empty] = +infinity;
+    inf [-infinity,+infinity] = -infinity;
+    inf [1.0,2.0] = 1.0;
+    inf [-3.0,-2.0] = -3.0;
+    inf [-infinity,2.0] = -infinity;
+    inf [-infinity,0.0] = -infinity;
+    inf [-infinity,-0.0] = -infinity;
+    inf [-2.0,infinity] = -2.0;
+    inf [0.0,infinity] = -0.0;
+    inf [-0.0,infinity] = -0.0;
+    inf [-0.0,0.0] = -0.0;
+    inf [0.0,-0.0] = -0.0;
+    inf [0.0,0.0] = -0.0;
+    inf [-0.0,-0.0] = -0.0;
+}
+
+testcase minimal_inf_dec_test {
+    inf [nai] = NaN;
+    inf [empty]_trv = +infinity;
+    inf [-infinity,+infinity]_def = -infinity;
+    inf [1.0,2.0]_com = 1.0;
+    inf [-3.0,-2.0]_trv = -3.0;
+    inf [-infinity,2.0]_dac = -infinity;
+    inf [-infinity,0.0]_def = -infinity;
+    inf [-infinity,-0.0]_trv = -infinity;
+    inf [-2.0,infinity]_trv = -2.0;
+    inf [0.0,infinity]_def = -0.0;
+    inf [-0.0,infinity]_trv = -0.0;
+    inf [-0.0,0.0]_dac = -0.0;
+    inf [0.0,-0.0]_trv = -0.0;
+    inf [0.0,0.0]_trv = -0.0;
+    inf [-0.0,-0.0]_trv = -0.0;
+}
+
+testcase minimal_sup_test {
+    sup [empty] = -infinity;
+    sup [-infinity,+infinity] = +infinity;
+    sup [1.0,2.0] = 2.0;
+    sup [-3.0,-2.0] = -2.0;
+    sup [-infinity,2.0] = 2.0;
+    sup [-infinity,0.0] = 0.0;
+    sup [-infinity,-0.0] = 0.0;
+    sup [-2.0,infinity] = infinity;
+    sup [0.0,infinity] = infinity;
+    sup [-0.0,infinity] = infinity;
+    sup [-0.0,0.0] = 0.0;
+    sup [0.0,-0.0] = 0.0;
+    sup [0.0,0.0] = 0.0;
+    sup [-0.0,-0.0] = 0.0;
+}
+
+testcase minimal_sup_dec_test {
+    sup [nai] = NaN;
+    sup [empty]_trv = -infinity;
+    sup [-infinity,+infinity]_def = +infinity;
+    sup [1.0,2.0]_com = 2.0;
+    sup [-3.0,-2.0]_trv = -2.0;
+    sup [-infinity,2.0]_dac = 2.0;
+    sup [-infinity,0.0]_def = 0.0;
+    sup [-infinity,-0.0]_trv = 0.0;
+    sup [-2.0,infinity]_trv = infinity;
+    sup [0.0,infinity]_def = infinity;
+    sup [-0.0,infinity]_trv = infinity;
+    sup [-0.0,0.0]_dac = +0.0;
+    sup [0.0,-0.0]_trv = +0.0;
+    sup [0.0,0.0]_trv = +0.0;
+    sup [-0.0,-0.0]_trv = +0.0;
+}
+
+testcase minimal_mid_test {
+    mid [empty] = NaN;
+    mid [-infinity,+infinity] = 0.0;
+    mid [-0x1.FFFFFFFFFFFFFp1023,+0x1.FFFFFFFFFFFFFp1023] = 0.0;
+    mid [0.0,2.0] = 1.0;
+    mid [2.0,2.0] = 2.0;
+    mid [-2.0,2.0] = 0.0;
+    mid [0.0,infinity] = 0x1.FFFFFFFFFFFFFp1023;
+    mid [-infinity,1.2] = -0x1.FFFFFFFFFFFFFp1023;
+    mid [-0X0.0000000000002P-1022,0X0.0000000000001P-1022] = 0.0;
+    mid [-0X0.0000000000001P-1022,0X0.0000000000002P-1022] = 0.0;
+    mid [0X1.FFFFFFFFFFFFFP+1022,0X1.FFFFFFFFFFFFFP+1023] = 0X1.7FFFFFFFFFFFFP+1023;
+    mid [0X0.0000000000001P-1022,0X0.0000000000003P-1022] = 0X0.0000000000002P-1022;
+}
+
+testcase minimal_mid_dec_test {
+    mid [empty]_trv = NaN;
+    mid [nai] = NaN;
+    mid [-infinity,+infinity]_def = 0.0;
+    mid [-0x1.FFFFFFFFFFFFFp1023,+0x1.FFFFFFFFFFFFFp1023]_trv = 0.0;
+    mid [0.0,2.0]_com = 1.0;
+    mid [2.0,2.0]_dac = 2.0;
+    mid [-2.0,2.0]_trv = 0.0;
+    mid [0.0,infinity]_trv = 0x1.FFFFFFFFFFFFFp1023;
+    mid [-infinity,1.2]_trv = -0x1.FFFFFFFFFFFFFp1023;
+    mid [-0X0.0000000000002P-1022,0X0.0000000000001P-1022]_trv = 0.0;
+    mid [-0X0.0000000000001P-1022,0X0.0000000000002P-1022]_trv = 0.0;
+    mid [0X1.FFFFFFFFFFFFFP+1022,0X1.FFFFFFFFFFFFFP+1023]_trv = 0X1.7FFFFFFFFFFFFP+1023;
+    mid [0X0.0000000000001P-1022,0X0.0000000000003P-1022]_trv = 0X0.0000000000002P-1022;
+}
+
+testcase minimal_rad_test {
+    rad [0.0,2.0] = 1.0;
+    rad [2.0,2.0] = 0.0;
+    rad [empty] = NaN;
+    rad [-infinity,+infinity] = infinity;
+    rad [0.0,infinity] = infinity;
+    rad [-infinity, 1.2] = infinity;
+    rad [-0X0.0000000000002P-1022,0X0.0000000000001P-1022] = 0X0.0000000000002P-1022;
+    rad [0X0.0000000000001P-1022,0X0.0000000000002P-1022] = 0X0.0000000000001P-1022;
+    rad [0X1P+0,0X1.0000000000003P+0] = 0X1P-51;
+}
+
+testcase minimal_rad_dec_test {
+    rad [0.0,2.0]_trv = 1.0;
+    rad [2.0,2.0]_com = 0.0;
+    rad [empty]_trv = NaN;
+    rad [nai] = NaN;
+    rad [-infinity,+infinity]_trv = infinity;
+    rad [0.0,infinity]_def = infinity;
+    rad [-infinity, 1.2]_trv = infinity;
+    rad [-0X0.0000000000002P-1022,0X0.0000000000001P-1022]_trv = 0X0.0000000000002P-1022;
+    rad [0X0.0000000000001P-1022,0X0.0000000000002P-1022]_trv = 0X0.0000000000001P-1022;
+    rad [0X1P+0,0X1.0000000000003P+0]_trv = 0X1P-51;
+}
+
+testcase minimal_mid_rad_test {
+    midRad [empty] = NaN NaN;
+    midRad [-infinity,infinity] = 0.0 infinity;
+    midRad [-0X1.FFFFFFFFFFFFFP+1023,0X1.FFFFFFFFFFFFFP+1023] = 0.0 0X1.FFFFFFFFFFFFFP+1023;
+    midRad [0.0,2.0] = 1.0 1.0;
+    midRad [2.0,2.0] = 2.0 0.0;
+    midRad [-2.0,2.0] = 0.0 2.0;
+    midRad [0.0,infinity] = 0X1.FFFFFFFFFFFFFP+1023 infinity;
+    midRad [-infinity, 1.2] = -0X1.FFFFFFFFFFFFFP+1023 infinity;
+    midRad [-0X0.0000000000002P-1022,0X0.0000000000001P-1022] = 0.0 0X0.0000000000002P-1022;
+    midRad [-0X0.0000000000001P-1022,0X0.0000000000002P-1022] = 0.0 0X0.0000000000002P-1022;
+    midRad [0X1.FFFFFFFFFFFFFP+1022,0X1.FFFFFFFFFFFFFP+1023] = 0X1.7FFFFFFFFFFFFP+1023 0x1.0p+1022;
+    midRad [0X0.0000000000001P-1022,0X0.0000000000003P-1022] = 0X0.0000000000002P-1022 0X0.0000000000001P-1022;
+}
+
+testcase minimal_mid_rad_dec_test {
+    midRad [empty] = NaN NaN;
+    midRad [nai] = NaN NaN;
+    midRad [-infinity,infinity]_def = 0.0 infinity;
+    midRad [-0X1.FFFFFFFFFFFFFP+1023,0X1.FFFFFFFFFFFFFP+1023]_trv = 0.0 0X1.FFFFFFFFFFFFFP+1023;
+    midRad [0.0,2.0]_com = 1.0 1.0;
+    midRad [2.0,2.0]_dac = 2.0 0.0;
+    midRad [-2.0,2.0]_trv = 0.0 2.0;
+    midRad [0.0,infinity]_trv = 0X1.FFFFFFFFFFFFFP+1023 infinity;
+    midRad [-infinity, 1.2]_trv = -0X1.FFFFFFFFFFFFFP+1023 infinity;
+    midRad [-0X0.0000000000002P-1022,0X0.0000000000001P-1022]_trv = 0.0 0X0.0000000000002P-1022;
+    midRad [-0X0.0000000000001P-1022,0X0.0000000000002P-1022]_trv = 0.0 0X0.0000000000002P-1022;
+    midRad [0X1.FFFFFFFFFFFFFP+1022,0X1.FFFFFFFFFFFFFP+1023]_trv = 0X1.7FFFFFFFFFFFFP+1023 0x1.0p+1022;
+    midRad [0X0.0000000000001P-1022,0X0.0000000000003P-1022]_trv = 0X0.0000000000002P-1022 0X0.0000000000001P-1022;
+}
+
+testcase minimal_wid_test {
+    wid [2.0,2.0] = 0.0;
+    wid [1.0,2.0] = 1.0;
+    wid [1.0,infinity] = infinity;
+    wid [-infinity,2.0] = infinity;
+    wid [-infinity,+infinity] = infinity;
+    wid [empty] = NaN;
+    wid [0X1P+0,0X1.0000000000001P+0] = 0X1P-52;
+    wid [0X1P-1022,0X1.0000000000001P-1022] = 0X0.0000000000001P-1022;
+}
+
+testcase minimal_wid_dec_test {
+    wid [2.0,2.0]_com = 0.0;
+    wid [1.0,2.0]_trv = 1.0;
+    wid [1.0,infinity]_trv = infinity;
+    wid [-infinity,2.0]_def = infinity;
+    wid [-infinity,+infinity]_trv = infinity;
+    wid [empty]_trv = NaN;
+    wid [nai] = NaN;
+    wid [0X1P+0,0X1.0000000000001P+0]_trv = 0X1P-52;
+    wid [0X1P-1022,0X1.0000000000001P-1022]_trv = 0X0.0000000000001P-1022;
+}
+
+testcase minimal_mag_test {
+    mag [1.0,2.0] = 2.0;
+    mag [-4.0,2.0] = 4.0;
+    mag [-infinity,2.0] = infinity;
+    mag [1.0,infinity] = infinity;
+    mag [-infinity,+infinity] = infinity;
+    mag [empty] = NaN;
+    mag [-0.0,0.0] = 0.0;
+    mag [-0.0,-0.0] = 0.0;
+}
+
+testcase minimal_mag_dec_test {
+    mag [1.0,2.0]_com = 2.0;
+    mag [-4.0,2.0]_trv = 4.0;
+    mag [-infinity,2.0]_trv = infinity;
+    mag [1.0,infinity]_def = infinity;
+    mag [-infinity,+infinity]_trv = infinity;
+    mag [empty]_trv = NaN;
+    mag [nai] = NaN;
+    mag [-0.0,0.0]_trv = 0.0;
+    mag [-0.0,-0.0]_trv = 0.0;
+}
+
+testcase minimal_mig_test {
+    mig [1.0,2.0] = 1.0;
+    mig [-4.0,2.0] = 0.0;
+    mig [-4.0,-2.0] = 2.0;
+    mig [-infinity,2.0] = 0.0;
+    mig [-infinity,-2.0] = 2.0;
+    mig [-1.0,infinity] = 0.0;
+    mig [1.0,infinity] = 1.0;
+    mig [-infinity,+infinity] = 0.0;
+    mig [empty] = NaN;
+    mig [-0.0,0.0] = 0.0;
+    mig [-0.0,-0.0] = 0.0;
+}
+
+testcase minimal_mig_dec_test {
+    mig [1.0,2.0]_com = 1.0;
+    mig [-4.0,2.0]_trv = 0.0;
+    mig [-4.0,-2.0]_trv = 2.0;
+    mig [-infinity,2.0]_def = 0.0;
+    mig [-infinity,-2.0]_trv = 2.0;
+    mig [-1.0,infinity]_trv = 0.0;
+    mig [1.0,infinity]_trv = 1.0;
+    mig [-infinity,+infinity]_trv = 0.0;
+    mig [empty]_trv = NaN;
+    mig [nai] = NaN;
+    mig [-0.0,0.0]_trv = 0.0;
+    mig [-0.0,-0.0]_trv = 0.0;
+}

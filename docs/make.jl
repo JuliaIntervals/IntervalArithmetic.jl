@@ -23,7 +23,8 @@ makedocs(;
             "Constructing intervals" => "manual/construction.md",
             "Usage" => "manual/usage.md",
             "API" => "manual/api.md"
-        ]
+        ],
+        "Examples" => ["Rigorous computation of ``\\pi``" => "examples/pi.md"],
     ],
     warnonly = true
 )

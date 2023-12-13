@@ -1,10 +1,10 @@
 @testset "BareInterval" begin
     for T ∈ (Float16, Float32, Float64, BigFloat)
         @test isequal_interval(parse(BareInterval{T}, "[1, 2]"), bareinterval(T, 1, 2))
-        if T !== BigFloat
+        if T != BigFloat
             @test isequal_interval(parse(BareInterval{T}, "[1e-324, 1e400]"), bareinterval(T, 0, Inf))
         else
-            @test isequal_interval(parse(BareInterval{BigFloat}, "[1e-324, 1e400]"), bareinterval(big"1e-324", big"1e400"))
+            @test isequal_interval(parse(BareInterval{BigFloat}, "[1e-324, 1e400]"), bareinterval(BigFloat("1e-324", RoundDown), BigFloat("1e400", RoundUp)))
         end
         @test isequal_interval(parse(BareInterval{T}, "[2,infinity]"), bareinterval(T, 2, Inf))
         @test isempty_interval(parse(BareInterval{T}, "[foobar]"))
@@ -17,10 +17,10 @@ end
 @testset "Interval" begin
     for T ∈ (Float16, Float32, Float64, BigFloat)
         @test isequal_interval(parse(Interval{T}, "[1, 2]"), interval(T, 1, 2))
-        if T !== BigFloat
+        if T != BigFloat
             @test isequal_interval(parse(Interval{T}, "[1e-324, 1e400]"), interval(T, 0, Inf))
         else
-            @test isequal_interval(parse(Interval{BigFloat}, "[1e-324, 1e400]"), interval(big"1e-324", big"1e400"))
+            @test isequal_interval(parse(Interval{BigFloat}, "[1e-324, 1e400]"), interval(BigFloat("1e-324", RoundDown), BigFloat("1e400", RoundUp)))
         end
         @test isequal_interval(parse(Interval{T}, "[2,infinity]"), interval(T, 2, Inf))
         @test isnai(parse(Interval{T}, "[foobar]"))

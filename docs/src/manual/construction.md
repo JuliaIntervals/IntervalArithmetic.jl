@@ -148,7 +148,7 @@ The submodule `IntervalArithmetic.Symbols` exports the infix operator `..` and `
 
 ```@repl construction
 using IntervalArithmetic.Symbols
-0.1 .. 0.2 # interval(0.1, 0.2; format = :standard)
+0.1 .. 0.2 # interval(0.1, 0.2; format = :infsup)
 0.1 ± 0.2 # interval(0.1, 0.2; format = :midpoint)
 ```
 

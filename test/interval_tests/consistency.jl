@@ -32,7 +32,6 @@
         @test isequal_interval(interval(0.25) - one(c)/interval(4), zero(c))
         @test isequal_interval(emptyinterval(a) - interval(0, 1), emptyinterval(a))
         @test isequal_interval(interval(0, 1) - emptyinterval(a), emptyinterval(a))
-        @test isequal_interval(a*b, interval(*(inf(a), inf(b), RoundDown), *(sup(a), sup(b), RoundUp)))
         @test isequal_interval(interval(0, 1) * emptyinterval(a), emptyinterval(a))
         @test isequal_interval(a * interval(0), zero(a))
     end
@@ -80,11 +79,11 @@
         @test issubset_interval(emptyinterval(c), c)
         @test !issubset_interval(c, emptyinterval(c))
 
-        @test isstrictsubset_interval(b, c)
-        @test !isstrictsubset_interval(b, b)
-        @test isstrictsubset_interval(emptyinterval(c), c)
-        @test !isstrictsubset_interval(c, emptyinterval(c))
-        @test isstrictsubset_interval(emptyinterval(c), emptyinterval(c))
+        @test isinterior(b, c)
+        @test !isinterior(b, b)
+        @test isinterior(emptyinterval(c), c)
+        @test !isinterior(c, emptyinterval(c))
+        @test isinterior(emptyinterval(c), emptyinterval(c))
 
         @test isdisjoint_interval(a, I"2.1")
         @test !(isdisjoint_interval(a, b))
@@ -144,7 +143,7 @@
         @test isentire_interval(entireinterval(a))
         @test isentire_interval(interval(-Inf, Inf))
         @test !isentire_interval(a)
-        @test isstrictsubset_interval(interval(-Inf, Inf), interval(-Inf, Inf))
+        @test isinterior(interval(-Inf, Inf), interval(-Inf, Inf))
 
         @test !isequal_interval(nai(a), nai(a))
         @test isnai(interval(NaN)) & isnai(convert(Interval{Float64}, NaN))
@@ -174,18 +173,11 @@
         @test isnan(mid(emptyinterval()))
     end
 
-    @testset "scaled mid" begin
-        @test scaled_mid(interval(0, 1), 0.75) == 0.75
-        @test scaled_mid(interval(1, Inf), 0.75) > 0
-        @test scaled_mid(interval(-Inf, Inf), 0.75) > 0
-        @test scaled_mid(interval(-Inf, Inf), 0.25) < 0
-    end
-
     @testset "mid with large floats" begin
         @test mid(interval(0.8e308, 1.2e308)) == 1e308
         @test mid(interval(-1e308, 1e308)) == 0
-        @test isfinite(scaled_mid(interval(0.8e308, 1.2e308), 0.75))
-        @test isfinite(scaled_mid(interval(-1e308, 1e308), 0.75))
+        @test isfinite(mid(interval(0.8e308, 1.2e308)))
+        @test isfinite(mid(interval(-1e308, 1e308)))
     end
 
     @testset "diam" begin
@@ -236,12 +228,6 @@
         @test isequal_interval(cancelplus(interval(0.0), interval(1.0)), interval(1.0))
         @test isequal_interval(cancelminus(interval(-5.0, 0.0), interval(0.0, 5.0)), interval(-5.0))
         @test isequal_interval(cancelplus(interval(-5.0, 0.0), interval(0.0, 5.0)), interval(0.0))
-        @test isequal_interval(cancelminus(bareinterval(1e308), -bareinterval(1e308)), IntervalArithmetic.atomic(Float64, Inf))
-        @test isequal_interval(cancelplus(bareinterval(1e308), bareinterval(1e308)), IntervalArithmetic.atomic(Float64, Inf))
-        @test isequal_interval(cancelminus(bareinterval(nextfloat(1e308)), -bareinterval(nextfloat(1e308))), IntervalArithmetic.atomic(Float64, Inf))
-        @test isequal_interval(cancelplus(bareinterval(nextfloat(1e308)), bareinterval(nextfloat(1e308))), IntervalArithmetic.atomic(Float64, Inf))
-        @test isequal_interval(cancelminus(bareinterval(prevfloat(big(Inf))), -bareinterval(prevfloat(big(Inf)))), IntervalArithmetic.atomic(BigFloat, Inf))
-        @test isequal_interval(cancelplus(bareinterval(prevfloat(big(Inf))), bareinterval(prevfloat(big(Inf)))), IntervalArithmetic.atomic(BigFloat, Inf))
     end
 
     @testset "mid and radius" begin
@@ -281,23 +267,13 @@
         @test issubset_interval(log(interval(-2, 5)), interval(-Inf, log(interval(5))))
     end
 
-    # @testset "Interval rounding tests" begin
-    #     # setrounding(Interval, :wide)
-    #     @test rounding(Interval) == :wide
-    #
-    #     @test_throws ArgumentError # setrounding(Interval, :hello)
-    #
-    #     # setrounding(Interval, :narrow)
-    #     @test rounding(Interval) == :narrow
-    # end
-
     @testset "Interval power of an interval" begin
         a = interval(1, 2)
         b = interval(3, 4)
 
-        @test isequal_interval(a^b, interval(1, 16))
-        @test isequal_interval(a^interval(0.5, 1), a)
-        @test isequal_interval(a^interval(0.3, 0.5), interval(1, sqrt(2)))
+        @test isequal_interval(pow(a, b), interval(1, 16))
+        @test isequal_interval(pow(a, interval(0.5, 1)), a)
+        @test isequal_interval(pow(a, interval(0.3, 0.5)), interval(1, sqrt(2)))
     end
 
     @testset "isatomic" begin
@@ -323,21 +299,21 @@
     end
 
     @testset "Type stability" begin
-        for T in (Float32, Float64, BigFloat)
+        for T ∈ (Float32, Float64, BigFloat)
 
             xs = [interval(3, 4), interval(0, 4), interval(0), interval(-4, 0), interval(-4, 4), interval(-Inf, 4), interval(4, Inf), interval(-Inf, Inf)]
 
-            for x in xs
-                for y in xs
+            for x ∈ xs
+                for y ∈ xs
                     xx = Interval{T}(x)
                     yy = Interval{T}(y)
 
-                    for op in (+, -, *, /, atan)
-                        # @inferred op(x, y)  TODO solve the problem for *
+                    for op ∈ (+, -, *, /, atan)
+                        @inferred op(x, y)
                     end
                 end
 
-                for op in (sin, cos, exp, log, tan, abs, mid, diam)
+                for op ∈ (sin, cos, exp, log, tan, abs, mid, diam)
                     @inferred op(x)
                 end
             end

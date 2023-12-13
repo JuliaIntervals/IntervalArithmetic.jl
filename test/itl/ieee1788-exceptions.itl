@@ -1,0 +1,19 @@
+/*
+
+Test cases for interval exceptions from IEEE Std 1788-2015
+
+Copyright 2016 Oliver Heimlich (oheim@posteo.de)
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.  This file is offered as-is,
+without any warranty.
+
+*/
+
+testcase exceptions {
+    b-textToInterval "[+infinity]" = [empty] signal UndefinedOperation;
+    b-numsToInterval +infinity -infinity = [empty] signal UndefinedOperation;
+    intervalPart [nai] = [empty] signal IntvlPartOfNaI;
+    b-textToInterval "[1.0000000000000001, 1.0000000000000002]" = [1.0, 0x1.0000000000001p+0] signal PossiblyUndefinedOperation;
+}
