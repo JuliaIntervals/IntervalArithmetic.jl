@@ -17,7 +17,7 @@ include("arithmetic/basic.jl")
 include("arithmetic/hyperbolic.jl")
 include("arithmetic/integer.jl")
 include("arithmetic/power.jl")
-    export pow, pown, rootn, fastpow
+    export pow, pown, rootn, fastpow, fastpown
 include("arithmetic/trigonometric.jl")
 
 # Other functions
