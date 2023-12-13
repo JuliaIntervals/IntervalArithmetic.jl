@@ -26,7 +26,7 @@ function forward_sum(N)
     S_N = interval(0)
 
     for i ∈ 1:N
-        S_N += @interval Float64 1 / i ^ 2
+        S_N += interval(1) / interval(i) ^ interval(2)
     end
 
     T_N = interval(1) / interval(N, N+1)
@@ -54,7 +54,7 @@ function backward_sum(N)
     S_N = interval(0)
 
     for i ∈ N:-1:1
-        S_N += @interval Float64 1 / i ^ 2
+        S_N += interval(1) / interval(i) ^ interval(2)
     end
 
     T_N = interval(1) / interval(N, N+1)
