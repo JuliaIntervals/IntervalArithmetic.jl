@@ -14,7 +14,9 @@ open("tests_warning.log", "w") do io
         end
         # ITF1788 tests
         for f ∈ readdir("itl")
-            generate(f)
+            if !occursin("LICENSE", f)
+                generate(f)
+            end
         end
         for f ∈ readdir("ITF1788_tests"; join = true)
             @testset "$f" begin
