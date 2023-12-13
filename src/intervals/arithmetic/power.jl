@@ -372,12 +372,16 @@ function fastpown(x::BareInterval{T}, n::Integer) where {T<:NumTypes}
     isempty_interval(x) && return x
     n == 0 && return one(BareInterval{T})
     n == 1 && return x
-    (n < 0) & isthinzero(x) && return emptyinterval(BareInterval{T})
-    return _positive_power_by_squaring(x, n)
+    if n < 0
+        isthinzero(x) && return emptyinterval(BareInterval{T})
+        return inv(fastpown(x, -n))
+    else
+        return _positive_power_by_squaring(x, n)
+    end
 end
 
 function fastpown(x::Interval, n::Integer)
-    r = pown(bareinterval(x), n)
+    r = fastpown(bareinterval(x), n)
     d = min(decoration(x), decoration(r))
     d = min(d, ifelse((n < 0) & in_interval(0, x), trv, d))
     return _unsafe_interval(r, d, isguaranteed(x))
