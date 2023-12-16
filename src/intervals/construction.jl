@@ -596,6 +596,8 @@ true
 """
 atomic(::Type{T}, x::AbstractString) where {T<:NumTypes} = parse(Interval{T}, x)
 atomic(::Type{T}, x::Interval) where {T<:NumTypes} = interval(T, x)
+atomic(::Type{T}, x::Integer) where {T<:NumTypes} = interval(T, x)
+atomic(::Type{T}, x::AbstractIrrational) where {T<:NumTypes} = interval(T, x)
 function atomic(::Type{T}, x::Number) where {T<:NumTypes}
     str = string(x)
     return interval(T, _parse_num(T, str, RoundDown), _parse_num(T, str, RoundUp))
