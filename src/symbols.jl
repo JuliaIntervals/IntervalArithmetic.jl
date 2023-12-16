@@ -5,6 +5,7 @@ module Symbols
 
 """
     ..(a, b)
+    a .. b
 
 Create the interval ``[a, b]`` according to the IEEE Standard 1788-2015. This is
 semantically equivalent to [`interval(a, b)`](@ref).
@@ -32,7 +33,7 @@ julia> 0.1..0.3
 Interval{Float64}(0.1, 0.3, com)
 ```
 """
-.. = interval
+..(a, b) = interval(a, b; format = :infsup)
 
 """
     ±(m, r)
@@ -68,25 +69,28 @@ Interval{Rational{Int64}}(-85563208//27235615, 85563208//27235615, com)
 ±(m, r) = interval(m, r; format = :midpoint)
 
 """
-    ≛(a, b)
+    ≛(x, y)
+    x ≛ y
 
 Unicode alias of [`isequal_interval`](@ref).
 """
-≛ = isequal_interval
+≛(x, y) = isequal_interval(x, y)
 
 """
-    ≺(a, b)
+    ≺(x, y)
+    x ≺ y
 
 Unicode alias of [`strictprecedes`](@ref).
 """
-≺ = strictprecedes
+≺(x, y) = strictprecedes(x, y)
 
 """
-    ⪽(a, b)
+    ⪽(x, y)
+    x ⪽ y
 
 Unicode alias of [`isinterior`](@ref).
 """
-⪽ = isinterior
+⪽(x, y) = isinterior(x, y)
 
 """
     ∅
