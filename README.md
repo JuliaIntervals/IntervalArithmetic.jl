@@ -5,7 +5,7 @@
 
 [![DOI](https://zenodo.org/badge/87007945.svg)](https://zenodo.org/badge/latestdoi/87007945)
 
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliaintervals.github.io/IntervalArithmetic.jl/stable)
+[![Dev Docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliaintervals.github.io/IntervalArithmetic.jl/dev)
 
 IntervalArithmetic.jl is a Julia package for validated numerics in Julia. All calculations are carried out using [interval arithmetic](https://en.wikipedia.org/wiki/Interval_arithmetic) where quantities are treated as intervals. The final result is a rigorous enclosure of the true value.
 
