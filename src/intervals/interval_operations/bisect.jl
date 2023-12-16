@@ -74,13 +74,28 @@ Split the `i`-th component of a vector `x` in `n[i]` intervals of the
 same diameter; `n` can be a tuple of integers, or a single integer in which case
 the same `n` is used for all the components of `x`.
 """
-function mince(x::BareInterval{T}, n::Integer) where {T<:NumTypes}
+mince(x::BareInterval{T}, n::Integer) where {T<:NumTypes} = mince!(Vector{BareInterval{T}}(undef, n), x, n)
+
+mince(x::Interval{T}, n::Integer) where {T<:NumTypes} = mince!(Vector{Interval{T}}(undef, n), x, n)
+
+mince(x::AbstractVector, n::NTuple{N,Integer}) where {N} = mince!(Vector{typeof(x)}(undef, prod(n)), x, n)
+
+mince(x::AbstractVector, n::Integer) = mince(x, ntuple(_ -> n, length(x)))
+
+"""
+    mince!(v, x, n)
+
+In-place version of [`mince`](@ref).
+"""
+function mince!(v::AbstractVector{<:BareInterval}, x::BareInterval{T}, n::Integer) where {T<:NumTypes}
     nodes = LinRange(inf(x), sup(x), n+1)
-    return [_unsafe_bareinterval(T, nodes[i], nodes[i+1]) for i ∈ 1:n]
+    @inbounds for i ∈ 1:n
+        v[i] = _unsafe_bareinterval(T, nodes[i], nodes[i+1])
+    end
+    return v
 end
 
-function mince(x::Interval{T}, n::Integer) where {T<:NumTypes}
-    v = Vector{Interval{T}}(undef, n)
+function mince!(v::AbstractVector{<:Interval}, x::Interval{T}, n::Integer) where {T<:NumTypes}
     nodes = LinRange(inf(x), sup(x), n+1)
     d = decoration(x)
     t = isguaranteed(x)
@@ -91,17 +106,6 @@ function mince(x::Interval{T}, n::Integer) where {T<:NumTypes}
     end
     return v
 end
-
-mince(x::AbstractVector, n::Integer) = mince(x, ntuple(_ -> n, length(x)))
-
-mince(x::AbstractVector, n::NTuple{N,Integer}) where {N} = mince!(Vector{typeof(x)}(undef, prod(n)), x, n)
-
-"""
-    mince!(v, x, n)
-
-In-place version of [`mince`](@ref).
-"""
-mince!(v::AbstractVector, x::AbstractVector, n::Integer) = mince!(v, x, ntuple(_ -> n, length(x)))
 
 function mince!(v::AbstractVector, x::AbstractVector, n::NTuple{N,Integer}) where {N}
     len = length(x)
@@ -117,3 +121,5 @@ function mince!(v::AbstractVector, x::AbstractVector, n::NTuple{N,Integer}) wher
     end
     return v
 end
+
+mince!(v::AbstractVector, x::AbstractVector, n::Integer) = mince!(v, x, ntuple(_ -> n, length(x)))

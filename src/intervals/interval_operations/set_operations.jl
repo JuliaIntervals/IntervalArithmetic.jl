@@ -66,52 +66,112 @@ hull(x::Complex, y::Real) = complex(hull(real(x), y), hull(imag(x), zero(y)))
 Remove the interior of `y` from `x`. If `x` and `y` are vectors, then they are
 treated as multi-dimensional intervals.
 """
-function interiordiff(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
-    isinterior(x, y) && return BareInterval{T}[] # or `[emptyinterval(BareInterval{T})]`?
-    isdisjoint_interval(x, y) && return [x]
-    inter = intersect_interval(x, y)
-    issubset_interval(y, x) && return [_unsafe_bareinterval(T, inf(x), inf(inter)), _unsafe_bareinterval(T, sup(inter), sup(x))]
-    isweakless(x, inter) && return [_unsafe_bareinterval(T, inf(x), inf(inter))]
-    return [_unsafe_bareinterval(T, sup(inter), sup(x))]
-end
-interiordiff(x::BareInterval, y::BareInterval) = interiordiff(promote(x, y)...)
+interiordiff(x::BareInterval, y::BareInterval) =
+    interiordiff!(Vector{promote_type(typeof(x), typeof(y))}(undef, 0), x, y)
 
-function interiordiff(x::Interval, y::Interval)
-    r = interiordiff(bareinterval(x), bareinterval(y))
-    t = isguaranteed(x) & isguaranteed(y)
-    return _unsafe_interval.(r, min.(decoration(x), decoration(y), decoration.(r), trv), t)
-end
+interiordiff(x::Interval, y::Interval) =
+    interiordiff!(Vector{promote_type(typeof(x), typeof(y))}(undef, 0), x, y)
 
-function interiordiff(x::AbstractVector, y::AbstractVector)
+interiordiff(x::AbstractVector, y::AbstractVector) =
+    interiordiff!(Vector{promote_type(typeof(x), typeof(y))}(undef, 0), x, y)
+
+"""
+    interiordiff(x, y)
+
+In-place version of [`interiordiff`](@ref).
+"""
+function interiordiff!(v::AbstractVector, x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
+    if isinterior(x, y)
+        empty!(v)
+    elseif isdisjoint_interval(x, y)
+        resize!(v, 1)
+        @inbounds v[begin] = x
+    else
+        inter = intersect_interval(x, y)
+        if issubset_interval(y, x)
+            resize!(v, 2)
+            @inbounds v[begin] = _unsafe_bareinterval(T, inf(x), inf(inter))
+            @inbounds v[end] = _unsafe_bareinterval(T, sup(inter), sup(x))
+        elseif isweakless(x, inter)
+            resize!(v, 1)
+            @inbounds v[begin] = _unsafe_bareinterval(T, inf(x), inf(inter))
+        else
+            resize!(v, 1)
+            @inbounds v[begin] = _unsafe_bareinterval(T, sup(inter), sup(x))
+        end
+    end
+    return v
+end
+interiordiff!(v::AbstractVector, x::BareInterval, y::BareInterval) = interiordiff!(v, promote(x, y)...)
+
+function interiordiff!(v::AbstractVector, x::Interval{T}, y::Interval{T}) where {T<:NumTypes}
+    if isinterior(x, y)
+        empty!(v)
+    elseif isdisjoint_interval(x, y)
+        resize!(v, 1)
+        @inbounds v[begin] = x
+    else
+        d = min(decoration(x), decoration(y))
+        t = isguaranteed(x) & isguaranteed(y)
+        inter = intersect_interval(x, y)
+        if issubset_interval(y, x)
+            resize!(v, 2)
+            r1 = _unsafe_bareinterval(T, inf(x), inf(inter))
+            d1 = min(d, decoration(r1), trv)
+            @inbounds v[begin] = _unsafe_interval(r1, d1, t)
+            r2 = _unsafe_bareinterval(T, sup(inter), sup(x))
+            d2 = min(d, decoration(r2), trv)
+            @inbounds v[end] = _unsafe_interval(r2, d2, t)
+        elseif isweakless(x, inter)
+            resize!(v, 1)
+            r1 = _unsafe_bareinterval(T, inf(x), inf(inter))
+            d1 = min(d, decoration(r1), trv)
+            @inbounds v[begin] = _unsafe_interval(r1, d1, t)
+        else
+            resize!(v, 1)
+            r2 = _unsafe_bareinterval(T, sup(inter), sup(x))
+            d2 = min(d, decoration(r2), trv)
+            @inbounds v[begin] = _unsafe_interval(r2, d2, t)
+        end
+    end
+    return v
+end
+interiordiff!(v::AbstractVector, x::Interval, y::Interval) = interiordiff!(v, promote(x, y)...)
+
+function interiordiff!(v::AbstractVector{<:AbstractVector}, x::AbstractVector, y::AbstractVector)
     # start from the total overlap (in all directions); expand each direction in turn
 
     N = length(x)
     len = length(y)
     N == len || return throw(DimensionMismatch("x has length $N, y has length $len"))
 
-    T = promote_type(typeof(x), typeof(y))
+    if any(t -> isdisjoint_interval(t[1], t[2]), zip(x, y))
+        resize!(v, 1)
+        @inbounds v[begin] = copy(x)
+    else
+        resize!(v, 2*N)
 
-    any(t -> isdisjoint_interval(t[1], t[2]), zip(x, y)) && return T[x]
+        offset = 0
+        x_bis = copy(x)
 
-    result_list = Vector{T}(undef, 2*N)
-    offset = 0
-    x_bis = copy(x)
-
-    @inbounds for i ∈ eachindex(x, y)
-        h₁, h₂, inter = _interiordiff(x[i], y[i])
-        u = similar(T, N)
-        v = similar(T, N)
-        @inbounds for j ∈ eachindex(u)
-            u[j] = ifelse(j == i, h₁, x_bis[j])
-            v[j] = ifelse(j == i, h₂, x_bis[j])
+        @inbounds for i ∈ eachindex(x, y)
+            h₁, h₂, inter = _interiordiff(x[i], y[i])
+            u₁ = similar(eltype(v), N)
+            u₂ = similar(eltype(v), N)
+            @inbounds for j ∈ eachindex(u₁)
+                u₁[j] = ifelse(j == i, h₁, x_bis[j])
+                u₂[j] = ifelse(j == i, h₂, x_bis[j])
+            end
+            v[begin+offset] = u₁
+            v[begin+1+offset] = u₂
+            offset += 2
+            x_bis[i] = inter
         end
-        result_list[begin+offset] = u
-        result_list[begin+1+offset] = v
-        offset += 2
-        x_bis[i] = inter
+
+        filter!(z -> !any(x -> isempty_interval(x) | isnai(x), z), v)
     end
 
-    return filter!(z -> !any(x -> isempty_interval(x) | isnai(x), z), result_list)
+    return v
 end
 
 function _interiordiff(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
