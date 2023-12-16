@@ -15,7 +15,7 @@ The IntervalArithmetic library is part of the [JuliaInterval organisation](https
 
 ## Documentation
 
-The official documentation is available online: https://juliaintervals.github.io/IntervalArithmetic.jl/stable.
+The official documentation is available online: https://juliaintervals.github.io/IntervalArithmetic.jl/dev.
 
 ## Installation
 
