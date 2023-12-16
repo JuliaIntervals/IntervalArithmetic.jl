@@ -80,7 +80,7 @@ end
     @test typeof(x) == Complex{Interval{Float64}}
     @test isequal_interval(x, complex(interval(1), interval(2)))
 
-    @test IntervalArithmetic.Symbols.:(..) === interval
+    @test IntervalArithmetic.Symbols.:..(1, 2) === interval(1, 2; format = :infsup)
 end
 
 @testset "Irrationals" begin
