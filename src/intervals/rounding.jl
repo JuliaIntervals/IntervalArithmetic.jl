@@ -200,18 +200,23 @@ end
 
 for f ∈ CRlibm.functions
     if isdefined(Base, f)
-        g = Symbol(:_, f, :_round)
+        f_round = Symbol(:_, f, :_round)
 
         @eval begin
-            $g(x::NumTypes, r::RoundingMode) = $g(interval_rounding(), float(x), r) # rationals are converted to floats
+            $f_round(x::NumTypes, r::RoundingMode) = $f_round(interval_rounding(), float(x), r) # rationals are converted to floats
 
-            $g(::IntervalRounding, x::AbstractFloat, r::RoundingMode) = $g(IntervalRounding{:slow}(), x, r)
-            # $g(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Down}) =
+            $f_round(::IntervalRounding, x::AbstractFloat, r::RoundingMode) = $f_round(IntervalRounding{:slow}(), x, r)
+            # $f_round(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Down}) =
             #     prevfloat($f(x))
-            # $g(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Up}) =
+            # $f_round(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Up}) =
             #     nextfloat($f(x))
-            $g(::IntervalRounding{:slow}, x::AbstractFloat, r::RoundingMode) = CRlibm.$f(x, r)
-            $g(::IntervalRounding{:none}, x::AbstractFloat, ::RoundingMode) = $f(x)
+            $f_round(::IntervalRounding{:slow}, x::AbstractFloat, r::RoundingMode) = CRlibm.$f(x, r)
+            function $f_round(::IntervalRounding{:slow}, x::BigFloat, r::RoundingMode)
+                return setrounding(BigFloat, r) do
+                    return $f(x)
+                end
+            end
+            $f_round(::IntervalRounding{:none}, x::AbstractFloat, ::RoundingMode) = $f(x)
         end
     end
 end
