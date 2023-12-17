@@ -210,19 +210,10 @@ for f ∈ CRlibm.functions
             #     prevfloat($f(x))
             # $f_round(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Up}) =
             #     nextfloat($f(x))
-            if Int == Int32 # to avoid StackOverflow; for 32 bit systems, CRlibm.jl shadows MPFR and methods for `BigFloat` result in StackOverflow
-                function $f_round(::IntervalRounding{:slow}, x::AbstractFloat, r::RoundingMode)
-                    bigx = _bigequiv(x)
-                    return setrounding(BigFloat, r) do
-                        return $f(bigx)
-                    end
-                end
-            else
-                $f_round(::IntervalRounding{:slow}, x::AbstractFloat, r::RoundingMode) = CRlibm.$f(x, r)
-                function $f_round(::IntervalRounding{:slow}, x::BigFloat, r::RoundingMode)
-                    return setrounding(BigFloat, r) do
-                        return $f(x)
-                    end
+            $f_round(::IntervalRounding{:slow}, x::AbstractFloat, r::RoundingMode) = CRlibm.$f(x, r)
+            function $f_round(::IntervalRounding{:slow}, x::BigFloat, r::RoundingMode)
+                return setrounding(BigFloat, r) do
+                    return $f(x)
                 end
             end
             $f_round(::IntervalRounding{:none}, x::AbstractFloat, ::RoundingMode) = $f(x)
