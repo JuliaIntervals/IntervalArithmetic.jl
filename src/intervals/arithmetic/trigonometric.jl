@@ -12,7 +12,7 @@ function _quadrant(x::T) where {T<:AbstractFloat}
     return 1 # [π/2, π]
 end
 
-function _quadrantpi(x::T) where {T<:AbstractFloat} # for `sinpi` and `cospi`
+function _quadrantpi(x::T) where {T<:NumTypes} # for `sinpi` and `cospi`
     x_mod2 = rem(x, 2)
     -2x_mod2 > 1 && return 2 # [-π, -π/2)
     x_mod2 < 0 && return 3 # [-π/2, 0)
