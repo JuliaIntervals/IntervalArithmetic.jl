@@ -53,8 +53,11 @@ function Base.:^(x::BareInterval, y::BareInterval)
 end
 
 function Base.:^(x::Interval, y::Interval)
-    isthininteger(y) && return _select_pown(power_mode(), x, Integer(sup(y)))
-    return _select_pow(power_mode(), x, y)
+    isthininteger(y) || return _select_pow(power_mode(), x, y)
+    r = _select_pown(power_mode(), x, Integer(sup(y)))
+    d = min(decoration(r), decoration(y))
+    t = isguaranteed(r) & isguaranteed(y)
+    return _unsafe_interval(bareinterval(r), d, t)
 end
 
 Base.:^(n::Integer, y::Interval) = ^(n//one(n), y)
