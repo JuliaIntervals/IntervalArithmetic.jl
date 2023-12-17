@@ -376,7 +376,8 @@ function fastpown(x::BareInterval{T}, n::Integer) where {T<:NumTypes}
         isthinzero(x) && return emptyinterval(BareInterval{T})
         return inv(fastpown(x, -n))
     else
-        return _positive_power_by_squaring(x, n)
+        range = _unsafe_bareinterval(T, ifelse(iseven(n), zero(T), typemin(T)), typemax(T))
+        return intersect_interval(_positive_power_by_squaring(x, n), range)
     end
 end
 
