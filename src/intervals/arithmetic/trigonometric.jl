@@ -2,6 +2,24 @@
 # Section 9.1 of the IEEE Standard 1788-2015 and required for set-based flavor
 # in Section 10.5.3
 
+# helper functions
+
+function _quadrant(x::T) where {T<:AbstractFloat}
+    x_mod2pi = rem2pi(x, RoundNearest)
+    -2x_mod2pi > π && return 2 # [-π, -π/2)
+    x_mod2pi < 0 && return 3 # [-π/2, 0)
+    2x_mod2pi < π && return 0 # [0, π/2)
+    return 1 # [π/2, π]
+end
+
+function _quadrantpi(x::T) where {T<:AbstractFloat} # for `sinpi` and `cospi`
+    x_mod2 = rem(x, 2)
+    -2x_mod2 > 1 && return 2 # [-π, -π/2)
+    x_mod2 < 0 && return 3 # [-π/2, 0)
+    2x_mod2 < 1 && return 0 # [0, π/2)
+    return 1 # [π/2, π]
+end
+
 # not in the IEEE Standard 1788-2015
 
 Base.rad2deg(x::BareInterval{T}) where {T<:NumTypes} = (x / bareinterval(T, π)) * bareinterval(T, 180)
@@ -13,53 +31,7 @@ Base.deg2rad(x::Interval{T}) where {T<:NumTypes} = (x * interval(T, π)) / inter
 Base.sincospi(x::BareInterval) = (sinpi(x), cospi(x))
 Base.sincospi(x::Interval) = (sinpi(x), cospi(x))
 
-Base.sinpi(x::BareInterval{T}) where {T<:NumTypes} = sin(x * bareinterval(T, π))
-Base.sinpi(x::Interval{T}) where {T<:NumTypes} = sin(x * interval(T, π))
-
-Base.cospi(x::BareInterval{T}) where {T<:NumTypes} = cos(x * bareinterval(T, π))
-Base.cospi(x::Interval{T}) where {T<:NumTypes} = cos(x * interval(T, π))
-
 #
-
-_unsafe_scale(a::BareInterval{T}, α::T) where {T<:NumTypes} = @round(T, inf(a) * α, sup(a) * α) # assumes `α` is postive
-
-_half_pi(::Type{T}) where {T<:NumTypes} = _unsafe_scale(bareinterval(T, π), convert(T, 0.5))
-_two_pi(::Type{T}) where {T<:NumTypes} = _unsafe_scale(bareinterval(T, π), convert(T, 2))
-
-function _range_atan(::Type{T}) where {T<:NumTypes}
-    temp = sup(bareinterval(T, π))
-    return _unsafe_bareinterval(T, -temp, temp)
-end
-
-_half_range_atan(::Type{T}) where {T<:NumTypes} = _unsafe_scale(_range_atan(T), convert(T, 0.5))
-
-"""
-    _find_quadrants(x)
-
-Finds the quadrant(s) corresponding to a given floating-point
-number. The quadrants are labelled as 0 for x ∈ [0, π/2], etc.
-A tuple of two quadrants is returned.
-The minimum or maximum must then be chosen appropriately.
-
-This is a rather indirect way to determine if π/2 and 3π/2 are contained
-in the interval; cf. the formula for sine of an interval in
-Tucker, *Validated Numerics*.
-"""
-function _find_quadrants(::Type{T}, x) where {T<:NumTypes}
-    temp = _unsafe_bareinterval(T, x, x) / _half_pi(T)
-    return floor(inf(temp)), floor(sup(temp))
-end
-
-# Quadrant function for Float64 specialized methods
-function _quadrant(x::Float64)
-    x_mod2pi = rem2pi(x, RoundNearest)  # gives result in [-pi, pi]
-
-    x_mod2pi < -(π/2) && return (2, x_mod2pi)
-    x_mod2pi < 0 && return (3, x_mod2pi)
-    x_mod2pi ≤ (π/2) && return (0, x_mod2pi)
-
-    return 1, x_mod2pi
-end
 
 """
     sin(::BareInterval)
@@ -67,95 +39,87 @@ end
 
 Implement the `sin` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function Base.sin(a::BareInterval{T}) where {T<:NumTypes}
-    isempty_interval(a) && return a
+function Base.sin(x::BareInterval{T}) where {T<:NumTypes}
+    isempty_interval(x) && return x
 
-    whole_range = _unsafe_bareinterval(T, -one(T), one(T))
+    d = diam(x)
+    inf_two_pi = _mul_round(convert(T, 2), inf(bareinterval(T, π)), RoundDown)
+    d ≥ inf_two_pi && return _unsafe_bareinterval(T, -one(T), one(T))
 
-    diam(a) > inf(_two_pi(T)) && return whole_range
+    lo, hi = bounds(x)
 
-    # The following is equivalent to doing temp = a / _half_pi  and
-    # taking floor(inf(a)), floor(sup(a))
-    alo, ahi = bounds(a)
-    lo_quadrant = minimum(_find_quadrants(T, alo))
-    hi_quadrant = maximum(_find_quadrants(T, ahi))
+    lo_quadrant = _quadrant(lo)
+    hi_quadrant = _quadrant(hi)
 
-    if hi_quadrant - lo_quadrant > 4  # close to limits
-        return whole_range
-    end
-
-    lo_quadrant = mod(lo_quadrant, 4)
-    hi_quadrant = mod(hi_quadrant, 4)
-
-    # Different cases depending on the two quadrants:
     if lo_quadrant == hi_quadrant
-        ahi - alo > inf(bareinterval(T, π)) && return whole_range  # in same quadrant but separated by almost 2pi
-        lo = @round(T, sin(alo), sin(alo))
-        hi = @round(T, sin(ahi), sin(ahi))
-        return hull(lo, hi)
+        d ≥ π && return _unsafe_bareinterval(T, -one(T), one(T))
+        (lo_quadrant == 1) | (lo_quadrant == 2) && return @round(T, sin(hi), sin(lo)) # decreasing
+        return @round(T, sin(lo), sin(hi))
 
     elseif lo_quadrant == 3 && hi_quadrant == 0
-        return @round(T, sin(alo), sin(ahi))
+        return @round(T, sin(lo), sin(hi)) # increasing
 
     elseif lo_quadrant == 1 && hi_quadrant == 2
-        return @round(T, sin(ahi), sin(alo))
+        return @round(T, sin(hi), sin(lo)) # decreasing
 
-    elseif ( lo_quadrant == 0 || lo_quadrant == 3 ) && ( hi_quadrant == 1 || hi_quadrant == 2 )
-        return @round(T, min(sin(alo), sin(ahi)), one(T))
+    elseif (lo_quadrant == 0 || lo_quadrant == 3) && (hi_quadrant == 1 || hi_quadrant == 2)
+        return @round(T, min(sin(lo), sin(hi)), one(T))
 
-    elseif ( lo_quadrant == 1 || lo_quadrant == 2 ) && ( hi_quadrant == 3 || hi_quadrant == 0 )
-        return @round(T, -one(T), max(sin(alo), sin(ahi)))
+    elseif (lo_quadrant == 1 || lo_quadrant == 2) && (hi_quadrant == 3 || hi_quadrant == 0)
+        return @round(T, -one(T), max(sin(lo), sin(hi)))
 
-    else  # if( iszero(lo_quadrant) && hi_quadrant == 3 ) || ( lo_quadrant == 2 && hi_quadrant == 1 )
-        return whole_range
+    else # (lo_quadrant == 0 && hi_quadrant == 3) || (lo_quadrant == 2 && hi_quadrant == 1)
+        return _unsafe_bareinterval(T, -one(T), one(T))
+
     end
 end
 
-function Base.sin(a::BareInterval{Float64})
-    isempty_interval(a) && return a
+function Base.sin(x::Interval)
+    r = sin(bareinterval(x))
+    d = min(decoration(x), decoration(r))
+    return _unsafe_interval(r, d, isguaranteed(x))
+end
 
-    whole_range = _unsafe_bareinterval(Float64, -1.0, 1.0)
+# not in the IEEE Standard 1788-2015
 
-    diam(a) > inf(_two_pi(Float64)) && return whole_range
+function Base.sinpi(x::BareInterval{T}) where {T<:NumTypes}
+    isempty_interval(x) && return x
 
-    alo, ahi = bounds(a)
-    lo_quadrant, lo = _quadrant(alo)
-    hi_quadrant, hi = _quadrant(ahi)
+    d = diam(x)
+    d ≥ 2 && return _unsafe_bareinterval(T, -one(T), one(T))
 
-    lo, hi = alo, ahi  # should be able to use the modulo version of a, but doesn't seem to work
+    lo, hi = bounds(x)
 
-    # Different cases depending on the two quadrants:
+    lo_quadrant = _quadrantpi(lo)
+    hi_quadrant = _quadrantpi(hi)
+
     if lo_quadrant == hi_quadrant
-        ahi - alo > inf(bareinterval(Float64, π)) && return whole_range
-
-        if lo_quadrant == 1 || lo_quadrant == 2
-            # negative slope
-            return @round(Float64, sin(hi), sin(lo))
-        else
-            return @round(Float64, sin(lo), sin(hi))
-        end
+        d ≥ 1 && return _unsafe_bareinterval(T, -one(T), one(T))
+        (lo_quadrant == 1) | (lo_quadrant == 2) && return @round(T, sinpi(hi), sinpi(lo)) # decreasing
+        return @round(T, sinpi(lo), sinpi(hi))
 
     elseif lo_quadrant == 3 && hi_quadrant == 0
-        return @round(Float64, sin(lo), sin(hi))
+        return @round(T, sinpi(lo), sinpi(hi)) # increasing
 
     elseif lo_quadrant == 1 && hi_quadrant == 2
-        return @round(Float64, sin(hi), sin(lo))
+        return @round(T, sinpi(hi), sinpi(lo)) # decreasing
 
-    elseif ( lo_quadrant == 0 || lo_quadrant == 3 ) && ( hi_quadrant == 1 || hi_quadrant == 2 )
-        return @round(Float64, min(sin(lo), sin(hi)), 1.0)
+    elseif (lo_quadrant == 0 || lo_quadrant == 3) && (hi_quadrant == 1 || hi_quadrant == 2)
+        return @round(T, min(sinpi(lo), sinpi(hi)), one(T))
 
-    elseif ( lo_quadrant == 1 || lo_quadrant == 2 ) && ( hi_quadrant == 3 || hi_quadrant == 0 )
-        return @round(Float64, -1.0, max(sin(lo), sin(hi)))
+    elseif (lo_quadrant == 1 || lo_quadrant == 2) && (hi_quadrant == 3 || hi_quadrant == 0)
+        return @round(T, -one(T), max(sinpi(lo), sinpi(hi)))
 
-    else # if ( iszero(lo_quadrant) && hi_quadrant == 3 ) || ( lo_quadrant == 2 && hi_quadrant == 1 )
-        return whole_range
+    else # (lo_quadrant == 0 && hi_quadrant == 3) || (lo_quadrant == 2 && hi_quadrant == 1)
+        return _unsafe_bareinterval(T, -one(T), one(T))
+
     end
 end
 
-function Base.sin(a::Interval)
-    r = sin(bareinterval(a))
-    d = min(decoration(a), decoration(r))
-    return _unsafe_interval(r, d, isguaranteed(a))
+function Base.sinpi(x::Interval)
+    r = sinpi(bareinterval(x))
+    d = min(decoration(x), decoration(r))
+    return _unsafe_interval(r, d, isguaranteed(x))
 end
 
 """
@@ -164,91 +128,85 @@ end
 
 Implement the `cos` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function Base.cos(a::BareInterval{T}) where {T<:NumTypes}
-    isempty_interval(a) && return a
+function Base.cos(x::BareInterval{T}) where {T<:NumTypes}
+    isempty_interval(x) && return x
 
-    whole_range = _unsafe_bareinterval(T, -one(T), one(T))
+    d = diam(x)
+    inf_two_pi = _mul_round(convert(T, 2), inf(bareinterval(T, π)), RoundDown)
+    d ≥ inf_two_pi && return _unsafe_bareinterval(T, -one(T), one(T))
 
-    diam(a) > inf(_two_pi(T)) && return whole_range
+    lo, hi = bounds(x)
 
-    alo, ahi = bounds(a)
-    lo_quadrant = minimum(_find_quadrants(T, alo))
-    hi_quadrant = maximum(_find_quadrants(T, ahi))
+    lo_quadrant = _quadrant(lo)
+    hi_quadrant = _quadrant(hi)
 
-    if hi_quadrant - lo_quadrant > 4  # close to limits
-        return whole_range
-    end
-
-    lo_quadrant = mod(lo_quadrant, 4)
-    hi_quadrant = mod(hi_quadrant, 4)
-
-    # Different cases depending on the two quadrants:
-    if lo_quadrant == hi_quadrant  # Interval limits in the same quadrant
-        ahi - alo > inf(bareinterval(T, π)) && return whole_range
-        lo = @round(T, cos(alo), cos(alo))
-        hi = @round(T, cos(ahi), cos(ahi))
-        return hull(lo, hi)
+    if lo_quadrant == hi_quadrant
+        d ≥ π && return _unsafe_bareinterval(T, -one(T), one(T))
+        (lo_quadrant == 2) | (lo_quadrant == 3) && return @round(T, cos(lo), cos(hi)) # increasing
+        return @round(T, cos(hi), cos(lo))
 
     elseif lo_quadrant == 2 && hi_quadrant == 3
-        return @round(T, cos(alo), cos(ahi))
+        return @round(T, cos(lo), cos(hi))
 
     elseif lo_quadrant == 0 && hi_quadrant == 1
-        return @round(T, cos(ahi), cos(alo))
+        return @round(T, cos(hi), cos(lo))
 
-    elseif ( lo_quadrant == 2 || lo_quadrant == 3 ) && ( hi_quadrant == 0 || hi_quadrant == 1 )
-        return @round(T, min(cos(alo), cos(ahi)), one(T))
+    elseif (lo_quadrant == 2 || lo_quadrant == 3) && (hi_quadrant == 0 || hi_quadrant == 1)
+        return @round(T, min(cos(lo), cos(hi)), one(T))
 
-    elseif ( lo_quadrant == 0 || lo_quadrant == 1 ) && ( hi_quadrant == 2 || hi_quadrant == 3 )
-        return @round(T, -one(T), max(cos(alo), cos(ahi)))
+    elseif (lo_quadrant == 0 || lo_quadrant == 1) && (hi_quadrant == 2 || hi_quadrant == 3)
+        return @round(T, -one(T), max(cos(lo), cos(hi)))
 
-    else  # if ( lo_quadrant == 3 && hi_quadrant == 2 ) || ( lo_quadrant == 1 && iszero(hi_quadrant) )
-        return whole_range
-    end
-end
+    else # (lo_quadrant == 3 && hi_quadrant == 2) || (lo_quadrant == 1 && hi_quadrant == 0)
+        return _unsafe_bareinterval(T, -one(T), one(T))
 
-function Base.cos(a::BareInterval{Float64})
-    isempty_interval(a) && return a
-
-    whole_range = _unsafe_bareinterval(Float64, -1.0, 1.0)
-
-    diam(a) > inf(_two_pi(Float64)) && return whole_range
-
-    alo, ahi = bounds(a)
-    lo_quadrant, lo = _quadrant(alo)
-    hi_quadrant, hi = _quadrant(ahi)
-
-    lo, hi = alo, ahi  # should be able to use the modulo version of a, but doesn't seem to work
-
-    # Different cases depending on the two quadrants:
-    if lo_quadrant == hi_quadrant # Interval limits in the same quadrant
-        ahi - alo > inf(bareinterval(Float64, π)) && return whole_range
-
-        if lo_quadrant == 2 || lo_quadrant == 3
-            # positive slope
-            return @round(Float64, cos(lo), cos(hi))
-        else
-            return @round(Float64, cos(hi), cos(lo))
-        end
-
-    elseif lo_quadrant == 2 && hi_quadrant == 3
-        return @round(Float64, cos(lo), cos(hi))
-
-    elseif lo_quadrant == 0 && hi_quadrant == 1
-        return @round(Float64, cos(hi), cos(lo))
-
-    elseif ( lo_quadrant == 2 || lo_quadrant == 3 ) && ( hi_quadrant == 0 || hi_quadrant == 1 )
-        return @round(Float64, min(cos(lo), cos(hi)), 1.0)
-
-    elseif ( lo_quadrant == 0 || lo_quadrant == 1 ) && ( hi_quadrant == 2 || hi_quadrant == 3 )
-        return @round(Float64, -1.0, max(cos(lo), cos(hi)))
-
-    else #if ( lo_quadrant == 3 && hi_quadrant == 2 ) || ( lo_quadrant == 1 && iszero(hi_quadrant) )
-        return whole_range
     end
 end
 
 function Base.cos(x::Interval)
     r = cos(bareinterval(x))
+    d = min(decoration(x), decoration(r))
+    return _unsafe_interval(r, d, isguaranteed(x))
+end
+
+# not in the IEEE Standard 1788-2015
+
+function Base.cospi(x::BareInterval{T}) where {T<:NumTypes}
+    isempty_interval(x) && return x
+
+    d = diam(x)
+    d ≥ 2 && return _unsafe_bareinterval(T, -one(T), one(T))
+
+    lo, hi = bounds(x)
+
+    lo_quadrant = _quadrantpi(lo)
+    hi_quadrant = _quadrantpi(hi)
+
+    if lo_quadrant == hi_quadrant
+        d ≥ 1 && return _unsafe_bareinterval(T, -one(T), one(T))
+        (lo_quadrant == 2) | (lo_quadrant == 3) && return @round(T, cospi(lo), cospi(hi)) # increasing
+        return @round(T, cospi(hi), cospi(lo))
+
+    elseif lo_quadrant == 2 && hi_quadrant == 3
+        return @round(T, cospi(lo), cospi(hi))
+
+    elseif lo_quadrant == 0 && hi_quadrant == 1
+        return @round(T, cospi(hi), cospi(lo))
+
+    elseif (lo_quadrant == 2 || lo_quadrant == 3) && (hi_quadrant == 0 || hi_quadrant == 1)
+        return @round(T, min(cospi(lo), cospi(hi)), one(T))
+
+    elseif (lo_quadrant == 0 || lo_quadrant == 1) && (hi_quadrant == 2 || hi_quadrant == 3)
+        return @round(T, -one(T), max(cospi(lo), cospi(hi)))
+
+    else # (lo_quadrant == 3 && hi_quadrant == 2) || (lo_quadrant == 1 && hi_quadrant == 0)
+        return _unsafe_bareinterval(T, -one(T), one(T))
+
+    end
+end
+
+function Base.cospi(x::Interval)
+    r = cospi(bareinterval(x))
     d = min(decoration(x), decoration(r))
     return _unsafe_interval(r, d, isguaranteed(x))
 end
@@ -259,61 +217,32 @@ end
 
 Implement the `tan` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function Base.tan(a::BareInterval{T}) where {T<:NumTypes}
-    isempty_interval(a) && return a
+function Base.tan(x::BareInterval{T}) where {T<:NumTypes}
+    isempty_interval(x) && return x
 
-    diam(a) > inf(bareinterval(T, π)) && return entireinterval(BareInterval{T})
+    diam(x) > π && return entireinterval(BareInterval{T})
 
-    alo, ahi = bounds(a)
-    lo_quadrant = minimum(_find_quadrants(T, alo))
-    hi_quadrant = maximum(_find_quadrants(T, ahi))
+    lo, hi = bounds(x)
 
+    lo_quadrant = _quadrant(lo)
+    hi_quadrant = _quadrant(hi)
     lo_quadrant_mod = mod(lo_quadrant, 2)
     hi_quadrant_mod = mod(hi_quadrant, 2)
 
-    if iszero(lo_quadrant_mod) && hi_quadrant_mod == 1
-        # check if really contains singularity:
-        if issubset_interval(_unsafe_scale(_half_pi(T), hi_quadrant), a)
-            return entireinterval(BareInterval{T})  # crosses singularity
-        end
+    if (lo_quadrant_mod == 0 && hi_quadrant_mod == 1) || (lo_quadrant_mod == hi_quadrant_mod && hi_quadrant != lo_quadrant)
+        return entireinterval(BareInterval{T}) # cross singularity
 
-    elseif lo_quadrant_mod == hi_quadrant_mod && hi_quadrant > lo_quadrant
-        # must cross singularity
-        return entireinterval(BareInterval{T})
+    else
+        return @round(T, tan(lo), tan(hi))
 
     end
-    return @round(T, tan(alo), tan(ahi))
 end
 
-function Base.tan(a::BareInterval{Float64})
-    isempty_interval(a) && return a
-
-    diam(a) > inf(bareinterval(Float64, π)) && return entireinterval(BareInterval{Float64})
-
-    alo, ahi = bounds(a)
-    lo_quadrant, _ = _quadrant(alo)
-    hi_quadrant, _ = _quadrant(ahi)
-
-    lo_quadrant_mod = mod(lo_quadrant, 2)
-    hi_quadrant_mod = mod(hi_quadrant, 2)
-
-    if iszero(lo_quadrant_mod) && hi_quadrant_mod == 1
-        return entireinterval(BareInterval{Float64})  # crosses singularity
-
-    elseif lo_quadrant_mod == hi_quadrant_mod && hi_quadrant != lo_quadrant
-        # must cross singularity
-        return entireinterval(BareInterval{Float64})
-
-    end
-
-    return @round(Float64, tan(alo), tan(ahi))
-end
-
-function Base.tan(a::Interval)
-    r = tan(bareinterval(a))
-    d = min(decoration(a), decoration(r))
+function Base.tan(x::Interval)
+    r = tan(bareinterval(x))
+    d = min(decoration(x), decoration(r))
     d = min(d, ifelse(isbounded(r), d, trv))
-    return _unsafe_interval(r, d, isguaranteed(a))
+    return _unsafe_interval(r, d, isguaranteed(x))
 end
 
 """
@@ -322,79 +251,27 @@ end
 
 Implement the `cot` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function Base.cot(a::BareInterval{T}) where {T<:NumTypes}
-    isempty_interval(a) && return a
+function Base.cot(x::BareInterval{T}) where {T<:NumTypes}
+    isempty_interval(x) && return x
 
-    diam(a) > inf(bareinterval(T, π)) && return entireinterval(BareInterval{T})
+    diam(x) > π && return entireinterval(BareInterval{T})
 
-    isthinzero(a) && return emptyinterval(BareInterval{T})
+    isthinzero(x) && return emptyinterval(BareInterval{T})
 
-    alo, ahi = bounds(a)
-    lo_quadrant = minimum(_find_quadrants(T, alo))
-    hi_quadrant = maximum(_find_quadrants(T, ahi))
+    lo, hi = bounds(x)
 
-    lo_quadrant = mod(lo_quadrant, 4)
-    hi_quadrant = mod(hi_quadrant, 4)
+    lo_quadrant = _quadrant(lo)
+    hi_quadrant = _quadrant(hi)
 
-    # Different cases depending on the two quadrants:
-    if lo_quadrant == hi_quadrant
-        iszero(alo) && return @round(T, cot(ahi), typemax(T))
+    if (lo_quadrant == 2 || lo_quadrant == 3) && hi == 0
+        return @round(T, typemin(T), cot(lo)) # singularity from the left
 
-        return @round(T, cot(ahi), cot(alo))
-
-    elseif (lo_quadrant == 3 && iszero(hi_quadrant)) || (lo_quadrant == 1 && hi_quadrant ==2)
-        iszero(ahi) && return @round(T, typemin(T), cot(alo))
-
-        return entireinterval(BareInterval{T})
-
-    elseif (iszero(lo_quadrant) && hi_quadrant == 1) || (lo_quadrant == 2 && hi_quadrant == 3)
-        return @round(T, cot(ahi), cot(alo))
-
-    elseif ( lo_quadrant == 2 && iszero(hi_quadrant))
-        iszero(ahi) && return @round(T, typemin(T), cot(alo))
-
-        return entireinterval(BareInterval{T})
+    elseif (lo_quadrant == hi_quadrant) || (lo_quadrant == 0 && hi_quadrant == 1) || (lo_quadrant == 2 && hi_quadrant == 3)
+        return @round(T, cot(hi), cot(lo))
 
     else
-        return entireinterval(BareInterval{T})
-    end
-end
+        return entireinterval(BareInterval{T}) # cross singularity
 
-function Base.cot(a::BareInterval{Float64})
-    isempty_interval(a) && return a
-
-    diam(a) > inf(bareinterval(Float64, π)) && return entireinterval(BareInterval{Float64})
-
-    isthinzero(a) && return emptyinterval(BareInterval{Float64})
-
-    alo, ahi = bounds(a)
-    lo_quadrant, _ = _quadrant(alo)
-    hi_quadrant, _ = _quadrant(ahi)
-
-    lo_quadrant = mod(lo_quadrant, 4)
-    hi_quadrant = mod(hi_quadrant, 4)
-
-    # Different cases depending on the two quadrants:
-    if lo_quadrant == hi_quadrant
-        iszero(alo) && return @round(Float64, cot(ahi), typemax(Float64))
-
-        return @round(Float64, cot(ahi), cot(alo))
-
-    elseif (lo_quadrant == 3 && iszero(hi_quadrant)) || (lo_quadrant == 1 && hi_quadrant ==2)
-        iszero(ahi) && return @round(Float64, typemin(Float64), cot(alo))
-
-        return entireinterval(BareInterval{Float64})
-
-    elseif (iszero(lo_quadrant) && hi_quadrant == 1) || (lo_quadrant == 2 && hi_quadrant == 3)
-        return @round(Float64, cot(ahi), cot(alo))
-
-    elseif ( lo_quadrant == 2 && iszero(hi_quadrant))
-        iszero(ahi) && return @round(Float64, typemin(Float64), cot(alo))
-
-        return entireinterval(BareInterval{Float64})
-
-    else
-        return entireinterval(BareInterval{Float64})
     end
 end
 
@@ -406,67 +283,29 @@ end
 
 Implement the `sec` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function Base.sec(a::BareInterval{T}) where {T<:NumTypes}
-    isempty_interval(a) && return a
+function Base.sec(x::BareInterval{T}) where {T<:NumTypes}
+    isempty_interval(x) && return x
 
-    diam(a) > inf(interval(T, π)) && return entireinterval(BareInterval{T})
+    diam(x) > π && return entireinterval(BareInterval{T})
 
-    alo, ahi = bounds(a)
-    lo_quadrant = minimum(_find_quadrants(T, alo))
-    hi_quadrant = maximum(_find_quadrants(T, ahi))
+    lo, hi = bounds(x)
 
-    lo_quadrant = mod(lo_quadrant, 4)
-    hi_quadrant = mod(hi_quadrant, 4)
+    lo_quadrant = _quadrant(lo)
+    hi_quadrant = _quadrant(hi)
 
-    # Different cases depending on the two quadrants:
-    if lo_quadrant == hi_quadrant  # Interval limits in the same quadrant
-        lo = @round(T, sec(alo), sec(alo))
-        hi = @round(T, sec(ahi), sec(ahi))
-        return hull(lo, hi)
-
-    elseif (iszero(lo_quadrant) && hi_quadrant == 1) || (lo_quadrant == 2 && hi_quadrant ==3)
-        return entireinterval(BareInterval{T})
-
-    elseif lo_quadrant == 3 && iszero(hi_quadrant)
-        return @round(T, one(T), max(sec(alo), sec(ahi)))
+    if lo_quadrant == hi_quadrant
+        (lo_quadrant == 0) | (lo_quadrant == 1) && return @round(T, sec(lo), sec(hi)) # increasing
+        return @round(T, sec(hi), sec(lo))
 
     elseif lo_quadrant == 1 && hi_quadrant == 2
-        return @round(T, min(sec(alo), sec(ahi)), -one(T))
+        return @round(T, min(sec(lo), sec(hi)), -one(T))
+
+    elseif lo_quadrant == 3 && hi_quadrant == 0
+        return @round(T, one(T), max(sec(lo), sec(hi)))
 
     else
         return entireinterval(BareInterval{T})
-    end
-end
 
-function Base.sec(a::BareInterval{Float64})
-    isempty_interval(a) && return a
-
-    diam(a) > inf(interval(Float64, π)) && return entireinterval(BareInterval{Float64})
-
-    alo, ahi = bounds(a)
-    lo_quadrant, _ = _quadrant(alo)
-    hi_quadrant, _ = _quadrant(ahi)
-
-    lo_quadrant = mod(lo_quadrant, 4)
-    hi_quadrant = mod(hi_quadrant, 4)
-
-    # Different cases depending on the two quadrants:
-    if lo_quadrant == hi_quadrant  # Interval limits in the same quadrant
-        lo = @round(Float64, sec(alo), sec(alo))
-        hi = @round(Float64, sec(ahi), sec(ahi))
-        return hull(lo, hi)
-
-    elseif (iszero(lo_quadrant) && hi_quadrant == 1) || (lo_quadrant == 2 && hi_quadrant ==3)
-        return entireinterval(BareInterval{Float64})
-
-    elseif lo_quadrant == 3 && iszero(hi_quadrant)
-        return @round(Float64, one(Float64), max(sec(alo), sec(ahi)))
-
-    elseif lo_quadrant == 1 && hi_quadrant == 2
-        return @round(Float64, min(sec(alo), sec(ahi)), -one(Float64))
-
-    else
-        return entireinterval(BareInterval{Float64})
     end
 end
 
@@ -478,89 +317,36 @@ end
 
 Implement the `csc` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function Base.csc(a::BareInterval{T}) where {T<:NumTypes}
-    isempty_interval(a) && return a
+function Base.csc(x::BareInterval{T}) where {T<:NumTypes}
+    isempty_interval(x) && return x
 
-    diam(a) > inf(bareinterval(T, π)) && return entireinterval(BareInterval{T})
+    diam(x) > π && return entireinterval(BareInterval{T})
 
-    isthinzero(a) && return emptyinterval(BareInterval{T})
+    isthinzero(x) && return emptyinterval(BareInterval{T})
 
-    alo, ahi = bounds(a)
-    lo_quadrant = minimum(_find_quadrants(T, alo))
-    hi_quadrant = maximum(_find_quadrants(T, ahi))
+    lo, hi = bounds(x)
 
-    lo_quadrant = mod(lo_quadrant, 4)
-    hi_quadrant = mod(hi_quadrant, 4)
+    lo_quadrant = _quadrant(lo)
+    hi_quadrant = _quadrant(hi)
 
-    # Different cases depending on the two quadrants:
-    if lo_quadrant == hi_quadrant
-        iszero(alo) && return @round(T, csc(ahi), typemax(T))
+    if (lo_quadrant == 2 || lo_quadrant == 3) && hi == 0
+        # singularity from the left
+        lo_quadrant == 2 && return @round(T, typemin(T), -one(T))
+        return @round(T, typemin(T), csc(lo))
 
-        lo = @round(T, csc(alo), csc(alo))
-        hi = @round(T, csc(ahi), csc(ahi))
-        return hull(lo, hi)
+    elseif lo_quadrant == hi_quadrant
+        (lo_quadrant == 0) | (lo_quadrant == 3) && return @round(T, csc(hi), csc(lo)) # decreasing
+        return @round(T, csc(lo), csc(hi))
 
-    elseif (lo_quadrant == 3 && iszero(hi_quadrant)) || (lo_quadrant == 1 && hi_quadrant == 2)
-        iszero(ahi) && return @round(T, typemin(T), csc(alo))
-
-        return entireinterval(BareInterval{T})
-
-    elseif iszero(lo_quadrant) && hi_quadrant == 1
-        return @round(T, one(T), max(csc(alo), csc(ahi)))
+    elseif lo_quadrant == 0 && hi_quadrant == 1
+        return @round(T, one(T), max(csc(lo), csc(hi)))
 
     elseif lo_quadrant == 2 && hi_quadrant == 3
-        return @round(T, min(csc(alo), csc(ahi)), -one(T))
-
-    elseif ( lo_quadrant == 2 && iszero(hi_quadrant))
-        iszero(ahi) && return @round(T, typemin(T), -one(T))
-
-        return entireinterval(BareInterval{T})
+        return @round(T, min(csc(lo), csc(hi)), -one(T))
 
     else
         return entireinterval(BareInterval{T})
-    end
-end
 
-function Base.csc(a::BareInterval{Float64})
-    isempty_interval(a) && return a
-
-    diam(a) > inf(bareinterval(Float64, π)) && return entireinterval(BareInterval{Float64})
-
-    isthinzero(a) && return emptyinterval(BareInterval{Float64})
-
-    alo, ahi = bounds(a)
-    lo_quadrant, _ = _quadrant(alo)
-    hi_quadrant, _ = _quadrant(ahi)
-
-    lo_quadrant = mod(lo_quadrant, 4)
-    hi_quadrant = mod(hi_quadrant, 4)
-
-    # Different cases depending on the two quadrants:
-    if lo_quadrant == hi_quadrant
-        iszero(alo) && return @round(Float64, csc(ahi), typemax(Float64))
-
-        lo = @round(Float64, csc(alo), csc(alo))
-        hi = @round(Float64, csc(ahi), csc(ahi))
-        return hull(lo, hi)
-
-    elseif (lo_quadrant == 3 && iszero(hi_quadrant)) || (lo_quadrant == 1 && hi_quadrant == 2)
-        iszero(ahi) && return @round(Float64, typemin(Float64), csc(alo))
-
-        return entireinterval(BareInterval{Float64})
-
-    elseif iszero(lo_quadrant) && hi_quadrant == 1
-        return @round(Float64, one(Float64), max(csc(alo), csc(ahi)))
-
-    elseif lo_quadrant == 2 && hi_quadrant == 3
-        return @round(Float64, min(csc(alo), csc(ahi)), -one(Float64))
-
-    elseif ( lo_quadrant == 2 && iszero(hi_quadrant))
-        iszero(ahi) && return @round(Float64, typemin(Float64), -one(Float64))
-
-        return entireinterval(BareInterval{Float64})
-
-    else
-        return entireinterval(BareInterval{Float64})
     end
 end
 
@@ -572,21 +358,20 @@ end
 
 Implement the `asin` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function Base.asin(a::BareInterval{T}) where {T<:NumTypes}
+function Base.asin(x::BareInterval{T}) where {T<:NumTypes}
     domain = _unsafe_bareinterval(T, -one(T), one(T))
-    a = intersect_interval(a, domain)
-    isempty_interval(a) && return a
-    alo, ahi = bounds(a)
-    return @round(T, asin(alo), asin(ahi))
+    x = intersect_interval(x, domain)
+    isempty_interval(x) && return x
+    return @round(T, asin(inf(x)), asin(sup(x)))
 end
 
-function Base.asin(a::Interval{T}) where {T<:NumTypes}
+function Base.asin(x::Interval{T}) where {T<:NumTypes}
     domain = _unsafe_bareinterval(T, -one(T), one(T))
-    x = bareinterval(a)
-    r = asin(x)
-    d = min(decoration(a), decoration(r))
-    d = min(d, ifelse(issubset_interval(x, domain), d, trv))
-    return _unsafe_interval(r, d, isguaranteed(a))
+    bx = bareinterval(x)
+    r = asin(bx)
+    d = min(decoration(x), decoration(r))
+    d = min(d, ifelse(issubset_interval(bx, domain), d, trv))
+    return _unsafe_interval(r, d, isguaranteed(x))
 end
 
 """
@@ -595,21 +380,20 @@ end
 
 Implement the `acos` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function Base.acos(a::BareInterval{T}) where {T<:NumTypes}
+function Base.acos(x::BareInterval{T}) where {T<:NumTypes}
     domain = _unsafe_bareinterval(T, -one(T), one(T))
-    a = intersect_interval(a, domain)
-    isempty_interval(a) && return a
-    alo, ahi = bounds(a)
-    return @round(T, acos(ahi), acos(alo))
+    x = intersect_interval(x, domain)
+    isempty_interval(x) && return x
+    return @round(T, acos(sup(x)), acos(inf(x)))
 end
 
-function Base.acos(a::Interval{T}) where {T<:NumTypes}
+function Base.acos(x::Interval{T}) where {T<:NumTypes}
     domain = _unsafe_bareinterval(T, -one(T), one(T))
-    x = bareinterval(a)
-    r = acos(x)
-    d = min(decoration(a), decoration(r))
-    d = min(d, ifelse(issubset_interval(x, domain), d, trv))
-    return _unsafe_interval(r, d, isguaranteed(a))
+    bx = bareinterval(x)
+    r = acos(bx)
+    d = min(decoration(x), decoration(r))
+    d = min(d, ifelse(issubset_interval(bx, domain), d, trv))
+    return _unsafe_interval(r, d, isguaranteed(x))
 end
 
 """
@@ -629,87 +413,6 @@ function Base.atan(x::Interval)
     return _unsafe_interval(r, d, isguaranteed(x))
 end
 
-function Base.atan(y::BareInterval{T}, x::BareInterval{T}) where {T<:NumTypes}
-    isempty_interval(y) && return y
-    isempty_interval(x) && return x
-
-    ylo, yhi = bounds(y)
-    xlo, xhi = bounds(x)
-    z = zero(T)
-
-    # Prevent nonsense results when y has a signed zero:
-    if iszero(ylo)
-        y = _unsafe_bareinterval(T, z, yhi)
-    end
-
-    if iszero(yhi)
-        y = _unsafe_bareinterval(T, ylo, z)
-    end
-
-    # Check cases based on x
-    if isthinzero(x)
-        isthinzero(y) && return emptyinterval(BareInterval{T})
-        ylo ≥ z && return _half_pi(T)
-        yhi ≤ z && return -_half_pi(T)
-        return _half_range_atan(T)
-
-    elseif xlo > z
-        isthinzero(y) && return y
-        ylo ≥ z &&
-            return @round(T, atan(ylo, xhi), atan(yhi, xlo)) # refinement lo bound
-        yhi ≤ z &&
-            return @round(T, atan(ylo, xlo), atan(yhi, xhi))
-        return @round(T, atan(ylo, xlo), atan(yhi, xlo))
-
-    elseif xhi < z
-        isthinzero(y) && return bareinterval(T, π)
-        ylo ≥ z &&
-            return @round(T, atan(yhi, xhi), atan(ylo, xlo))
-        yhi < z &&
-            return @round(T, atan(yhi, xlo), atan(ylo, xhi))
-        return _range_atan(T)
-
-    else # z ∈ x
-        if iszero(xlo)
-            isthinzero(y) && return y
-            ylo ≥ z &&
-                return _unsafe_bareinterval(T, _atan_round(ylo, xhi, RoundDown), sup(_half_range_atan(T)))
-            yhi ≤ z &&
-                return _unsafe_bareinterval(T, inf(_half_range_atan(T)), _atan_round(yhi, xhi, RoundUp))
-            return _half_range_atan(T)
-
-        elseif iszero(xhi)
-            isthinzero(y) && return bareinterval(T, π)
-            ylo ≥ z &&
-                return _unsafe_bareinterval(T, inf(_half_pi(T)), _atan_round(ylo, xlo, RoundUp))
-            yhi < z &&
-                return _unsafe_bareinterval(T, _atan_round(yhi, xlo, RoundDown), sup(-_half_pi(T)))
-            return _range_atan(T)
-        else
-            ylo ≥ z &&
-                return @round(T, atan(ylo, xhi), atan(ylo, xlo))
-            yhi < z &&
-                return @round(T, atan(yhi, xlo), atan(yhi, xhi))
-            return _range_atan(T)
-        end
-    end
-end
-
-Base.atan(y::BareInterval, x::BareInterval) = atan(promote(y, x)...)
-
-function Base.atan(y::Interval, x::Interval)
-    by = bareinterval(y)
-    bx = bareinterval(x)
-    r = atan(by, bx)
-    d = min(decoration(y), decoration(x), decoration(r))
-    d = min(d, ifelse(in_interval(0, by),
-            ifelse(in_interval(0, bx), trv,
-                ifelse(sup(bx) < 0, ifelse(inf(by) < 0, def, dac), d)),
-        d))
-    t = isguaranteed(y) & isguaranteed(x)
-    return _unsafe_interval(r, d, t)
-end
-
 """
     acot(::BareInterval)
     acot(::Interval)
@@ -722,3 +425,85 @@ function Base.acot(x::BareInterval{T}) where {T<:NumTypes}
 end
 
 # automatically defined for `Interval` since it is a subtype of `Real`
+
+"""
+    atan(::BareInterval, ::BareInterval)
+    atan(::Interval, ::Interval)
+
+Implement the `atan2` function of the IEEE Standard 1788-2015 (Table 9.1).
+"""
+function Base.atan(y::BareInterval{T}, x::BareInterval{T}) where {T<:NumTypes}
+    isempty_interval(y) && return y
+    isempty_interval(x) && return x
+
+    ylo, yhi = bounds(y)
+    xlo, xhi = bounds(x)
+
+    if isthinzero(x)
+        isthinzero(y) && return emptyinterval(BareInterval{T})
+        ylo ≥ 0 && return _half_pi(T)
+        yhi ≤ 0 && return -_half_pi(T)
+        return _half_range_atan(T)
+
+    elseif xlo > 0
+        isthinzero(y) && return y
+        ylo ≥ 0 && return @round(T, atan(ylo, xhi), atan(yhi, xlo)) # refinement lo bound
+        yhi ≤ 0 && return @round(T, atan(ylo, xlo), atan(yhi, xhi))
+        return @round(T, atan(ylo, xlo), atan(yhi, xlo))
+
+    elseif xhi < 0
+        isthinzero(y) && return bareinterval(T, π)
+        ylo ≥ 0 && return @round(T, atan(yhi, xhi), atan(ylo, xlo))
+        yhi < 0 && return @round(T, atan(yhi, xlo), atan(ylo, xhi))
+        return _range_atan(T)
+
+    else
+        if iszero(xlo)
+            isthinzero(y) && return y
+            ylo ≥ 0 && return _unsafe_bareinterval(T, _atan_round(ylo, xhi, RoundDown), sup(_half_range_atan(T)))
+            yhi ≤ 0 && return _unsafe_bareinterval(T, inf(_half_range_atan(T)), _atan_round(yhi, xhi, RoundUp))
+            return _half_range_atan(T)
+
+        elseif iszero(xhi)
+            isthinzero(y) && return bareinterval(T, π)
+            ylo ≥ 0 && return _unsafe_bareinterval(T, inf(_half_pi(T)), _atan_round(ylo, xlo, RoundUp))
+            yhi < 0 && return _unsafe_bareinterval(T, _atan_round(yhi, xlo, RoundDown), sup(-_half_pi(T)))
+            return _range_atan(T)
+
+        else
+            ylo ≥ 0 && return @round(T, atan(ylo, xhi), atan(ylo, xlo))
+            yhi < 0 && return @round(T, atan(yhi, xlo), atan(yhi, xhi))
+            return _range_atan(T)
+
+        end
+    end
+end
+
+Base.atan(y::BareInterval, x::BareInterval) = atan(promote(y, x)...)
+
+function Base.atan(y::Interval, x::Interval)
+    by = bareinterval(y)
+    bx = bareinterval(x)
+    r = atan(by, bx)
+    d = min(decoration(y), decoration(x), decoration(r))
+    d = min(d,
+            ifelse(in_interval(0, by),
+                ifelse(in_interval(0, bx), trv,
+                    ifelse(sup(bx) < 0, ifelse(inf(by) < 0, def, dac), d)),
+            d))
+    t = isguaranteed(y) & isguaranteed(x)
+    return _unsafe_interval(r, d, t)
+end
+
+# helper functions
+
+_unsafe_scale(x::BareInterval{T}, α::T) where {T<:NumTypes} = @round(T, inf(x) * α, sup(x) * α) # assume `α` is postive
+
+_half_pi(::Type{T}) where {T<:NumTypes} = _unsafe_scale(bareinterval(T, π), convert(T, 0.5))
+
+function _range_atan(::Type{T}) where {T<:NumTypes}
+    x = sup(bareinterval(T, π))
+    return _unsafe_bareinterval(T, -x, x)
+end
+
+_half_range_atan(::Type{T}) where {T<:NumTypes} = _unsafe_scale(_range_atan(T), convert(T, 0.5))
