@@ -4,6 +4,12 @@
 
 # helper functions
 
+_quadrant_down(x::T) where {T<:Rational} = _quadrant(float(T)(x, RoundDown))
+_quadrant_down(x::T) where {T<:AbstractFloat} = _quadrant(x)
+
+_quadrant_up(x::T) where {T<:Rational} = _quadrant(float(T)(x, RoundUp))
+_quadrant_up(x::T) where {T<:AbstractFloat} = _quadrant(x)
+
 function _quadrant(x::T) where {T<:AbstractFloat}
     x_mod2pi = rem2pi(x, RoundNearest)
     -2x_mod2pi > π && return 2 # [-π, -π/2)
@@ -48,8 +54,8 @@ function Base.sin(x::BareInterval{T}) where {T<:NumTypes}
 
     lo, hi = bounds(x)
 
-    lo_quadrant = _quadrant(lo)
-    hi_quadrant = _quadrant(hi)
+    lo_quadrant = _quadrant_down(lo)
+    hi_quadrant = _quadrant_up(hi)
 
     if lo_quadrant == hi_quadrant
         d ≥ π && return _unsafe_bareinterval(T, -one(T), one(T))
@@ -137,8 +143,8 @@ function Base.cos(x::BareInterval{T}) where {T<:NumTypes}
 
     lo, hi = bounds(x)
 
-    lo_quadrant = _quadrant(lo)
-    hi_quadrant = _quadrant(hi)
+    lo_quadrant = _quadrant_down(lo)
+    hi_quadrant = _quadrant_up(hi)
 
     if lo_quadrant == hi_quadrant
         d ≥ π && return _unsafe_bareinterval(T, -one(T), one(T))
@@ -224,8 +230,8 @@ function Base.tan(x::BareInterval{T}) where {T<:NumTypes}
 
     lo, hi = bounds(x)
 
-    lo_quadrant = _quadrant(lo)
-    hi_quadrant = _quadrant(hi)
+    lo_quadrant = _quadrant_down(lo)
+    hi_quadrant = _quadrant_up(hi)
     lo_quadrant_mod = mod(lo_quadrant, 2)
     hi_quadrant_mod = mod(hi_quadrant, 2)
 
@@ -260,8 +266,8 @@ function Base.cot(x::BareInterval{T}) where {T<:NumTypes}
 
     lo, hi = bounds(x)
 
-    lo_quadrant = _quadrant(lo)
-    hi_quadrant = _quadrant(hi)
+    lo_quadrant = _quadrant_down(lo)
+    hi_quadrant = _quadrant_up(hi)
 
     if (lo_quadrant == 2 || lo_quadrant == 3) && hi == 0
         return @round(T, typemin(T), cot(lo)) # singularity from the left
@@ -290,8 +296,8 @@ function Base.sec(x::BareInterval{T}) where {T<:NumTypes}
 
     lo, hi = bounds(x)
 
-    lo_quadrant = _quadrant(lo)
-    hi_quadrant = _quadrant(hi)
+    lo_quadrant = _quadrant_down(lo)
+    hi_quadrant = _quadrant_up(hi)
 
     if lo_quadrant == hi_quadrant
         (lo_quadrant == 0) | (lo_quadrant == 1) && return @round(T, sec(lo), sec(hi)) # increasing
@@ -326,8 +332,8 @@ function Base.csc(x::BareInterval{T}) where {T<:NumTypes}
 
     lo, hi = bounds(x)
 
-    lo_quadrant = _quadrant(lo)
-    hi_quadrant = _quadrant(hi)
+    lo_quadrant = _quadrant_down(lo)
+    hi_quadrant = _quadrant_up(hi)
 
     if (lo_quadrant == 2 || lo_quadrant == 3) && hi == 0
         # singularity from the left
