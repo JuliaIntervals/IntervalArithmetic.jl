@@ -115,7 +115,7 @@ function _str_repr(a::BareInterval{BigFloat}, format::Symbol)
     if format === :midpoint && str_interval != "∅"
         str_interval = string('(', str_interval, ')')
     end
-    return string(str_interval, _subscriptify(precision(BigFloat)))
+    return string(str_interval, _str_precision(a))
 end
 
 function _str_repr(a::Interval{T}, format::Symbol) where {T<:NumTypes}
@@ -146,15 +146,15 @@ function _str_repr(a::Interval{BigFloat}, format::Symbol)
         if format === :midpoint && str_interval != "∅"
             str_interval = string('(', str_interval, ')')
         end
-        display_options.decorations || return string(str_interval, _subscriptify(precision(BigFloat)))
-        return string(str_interval, _subscriptify(precision(BigFloat)), '_', decoration(a))
+        display_options.decorations || return string(str_interval, _str_precision(a))
+        return string(str_interval, _str_precision(a), '_', decoration(a))
     else
         format === :full && return string("Interval{", BigFloat, "}(", str_interval, ", ", decoration(a), ", NG)")
         if format === :midpoint && str_interval != "∅"
             str_interval = string('(', str_interval, ')')
         end
-        display_options.decorations || return string(str_interval, _subscriptify(precision(BigFloat)), "_NG")
-        return string(str_interval, _subscriptify(precision(BigFloat)), '_', decoration(a), "_NG")
+        display_options.decorations || return string(str_interval, _str_precision(a), "_NG")
+        return string(str_interval, _str_precision(a), '_', decoration(a), "_NG")
     end
 end
 
@@ -175,6 +175,16 @@ function _str_repr(x::Complex{Interval{BigFloat}}, format::Symbol)
     # `format` is either `:infsup`, `:midpoint` or `:full`
     display_options.decorations && return string(_str_repr(real(x), format), " + (", _str_repr(imag(x), format), ")im")
     return string(_str_repr(real(x), format), " + ", _str_repr(imag(x), format), "im")
+end
+
+#
+
+function _str_precision(x)
+    plo = precision(inf(x))
+    phi = precision(sup(x))
+    pstr = _subscriptify(plo)
+    plo == phi && return pstr
+    return string(pstr, "_", _subscriptify(phi))
 end
 
 #
