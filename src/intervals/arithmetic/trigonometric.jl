@@ -32,14 +32,20 @@ end
 
 # not in the IEEE Standard 1788-2015
 
-Base.rad2deg(x::BareInterval{T}) where {T<:NumTypes} = (x / bareinterval(T, π)) * bareinterval(T, 180)
-Base.rad2deg(x::Interval{T}) where {T<:NumTypes} = (x / interval(T, π)) * interval(T, 180)
+Base.rad2deg(x::BareInterval{T}) where {T<:NumTypes} = (x * bareinterval(T, 180)) / bareinterval(T, π)
+Base.rad2deg(x::Interval{T}) where {T<:NumTypes} = (x * interval(T, 180)) / interval(T, π)
 
-Base.deg2rad(x::BareInterval{T}) where {T<:NumTypes} = (x * bareinterval(T, π)) / bareinterval(T, 180)
-Base.deg2rad(x::Interval{T}) where {T<:NumTypes} = (x * interval(T, π)) / interval(T, 180)
+Base.deg2rad(x::BareInterval{T}) where {T<:NumTypes} = (x / bareinterval(T, 180)) * bareinterval(T, π)
+Base.deg2rad(x::Interval{T}) where {T<:NumTypes} = (x / interval(T, 180)) * interval(T, π)
 
 Base.sincospi(x::BareInterval) = (sinpi(x), cospi(x))
 Base.sincospi(x::Interval) = (sinpi(x), cospi(x))
+
+Base.sind(x::BareInterval{T}) where {T<:NumTypes} = sinpi(x / bareinterval(T, 180))
+Base.sind(x::Interval{T}) where {T<:NumTypes} = sinpi(x / interval(T, 180))
+
+Base.cosd(x::BareInterval{T}) where {T<:NumTypes} = cospi(x / bareinterval(T, 180))
+Base.cosd(x::Interval{T}) where {T<:NumTypes} = cospi(x / interval(T, 180))
 
 #
 
