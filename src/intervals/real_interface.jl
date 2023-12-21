@@ -35,11 +35,14 @@ for f ∈ (:zero, :one)
 
         Base.$f(::Type{Interval{T}}) where {T<:NumTypes} = _unsafe_interval($f(BareInterval{T}), com, true)
         Base.$f(x::Interval{T}) where {T<:NumTypes} = _unsafe_interval($f(BareInterval{T}), com, isguaranteed(x))
-
-        Base.$f(::Type{Complex{Interval{T}}}) where {T<:NumTypes} = complex($f(Interval{T}), $f(Interval{T}))
-        Base.$f(x::Complex{<:Interval}) = complex($f(real(x)), $f(imag(x)))
     end
 end
+
+Base.zero(::Type{Complex{Interval{T}}}) where {T<:NumTypes} = complex(zero(Interval{T}), zero(Interval{T}))
+Base.zero(x::Complex{<:Interval}) = complex(zero(real(x)), zero(imag(x)))
+
+Base.one(::Type{Complex{Interval{T}}}) where {T<:NumTypes} = complex(one(Interval{T}), zero(Interval{T}))
+Base.one(x::Complex{<:Interval}) = complex(one(real(x)), zero(imag(x)))
 
 Base.typemin(::Type{BareInterval{T}}) where {T<:NumTypes} =
     _unsafe_bareinterval(T, typemin(T), nextfloat(typemin(T)))

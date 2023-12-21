@@ -36,6 +36,14 @@
         @test isequal_interval(a * interval(0), zero(a))
     end
 
+    @testset "real interface" begin
+        @test isthinzero(zero(Interval{Float64}))
+        @test isthinzero(zero(Complex{Interval{Float64}}))
+
+        @test isthinone(one(Interval{Float64}))
+        @test isthinone(one(Complex{Interval{Float64}}))
+    end
+
     @testset "inv" begin
         @test isequal_interval(inv( zero(a) ), emptyinterval())  # Only for set based flavor
         @test isequal_interval(inv( interval(0, 1) ), interval(1, Inf))
