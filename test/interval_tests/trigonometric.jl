@@ -42,6 +42,10 @@ end
     @test isequal_interval(sinpi(interval(0.5, 1.5)), interval(-1 , 1))
     @test issubset_interval(interval(1/sqrt(2) , 1), sinpi(interval(0.25, 0.75)))
     @test issubset_interval(interval(-1/sqrt(2) , 1/sqrt(2)), sinpi(interval(-0.25, 0.25)))
+    @test isthin(sinpi(interval(1.0)), 0)
+    @test isthin(sinpi(interval(2.0)), 0)
+    @test isthin(sinpi(interval(0.5)), 1)
+    @test isthin(sinpi(interval(1.5)), -1)
 end
 
 @testset "cospi" begin
@@ -50,6 +54,10 @@ end
     @test issubset_interval(interval(-1 , 0), cospi(interval(0.5, 1.5)))
     @test issubset_interval(interval(-1/sqrt(2) , 1/sqrt(2)), cospi(interval(0.25, 0.75)))
     @test isequal_interval(cospi(interval(-0.25, 0.25)), interval(1/sqrt(2) , 1))
+    @test isthin(cospi(interval(1.0)), -1)
+    @test isthin(cospi(interval(2.0)), 1)
+    @test isthin(cospi(interval(0.5)), 0)
+    @test isthin(cospi(interval(1.5)), 0)
 end
 
 @testset "sincospi" begin
