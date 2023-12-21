@@ -20,10 +20,14 @@ end
 
 function _quadrantpi(x::NumTypes) # used in `sinpi` and `cospi`
     x_mod2 = rem(x, 2)
-    -2x_mod2 > 1 && return 2 # [-π, -π/2)
+    2x_mod2 < -3 && return 0 # [-2π, -3π/2)
+    x_mod2 < -1 && return 1 # [-3π/2, -π)
+    2x_mod2 < -1 && return 2 # [-π, -π/2)
     x_mod2 < 0 && return 3 # [-π/2, 0)
     2x_mod2 < 1 && return 0 # [0, π/2)
-    return 1 # [π/2, π]
+    x_mod2 < 1 && return 1 # [π/2, π)
+    2x_mod2 < 3 && return 2 # [π, 3π/2)
+    return 3 # [3π/2, 2π]
 end
 
 # not in the IEEE Standard 1788-2015
