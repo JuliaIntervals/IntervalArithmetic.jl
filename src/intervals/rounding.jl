@@ -202,31 +202,29 @@ for f ∈ CRlibm.functions
     if isdefined(Base, f)
         f_round = Symbol(:_, f, :_round)
 
-        @eval begin
-            $f_round(x::NumTypes, r::RoundingMode) = $f_round(interval_rounding(), float(x), r) # rationals are converted to floats
+        @eval $f_round(x::NumTypes, r::RoundingMode) = $f_round(interval_rounding(), float(x), r) # rationals are converted to floats
 
-            $f_round(::IntervalRounding, x::AbstractFloat, r::RoundingMode) = $f_round(IntervalRounding{:slow}(), x, r)
-            # $f_round(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Down}) =
-            #     prevfloat($f(x))
-            # $f_round(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Up}) =
-            #     nextfloat($f(x))
-            if Int == Int32 && f ∈ (:sinpi, :cospi) # to avoid StackOverflow for 32 bit systems; CRlibm.jl shadows MPFR which does not include `sinpi` and `cospi`
-                function $f_round(::IntervalRounding{:slow}, x::AbstractFloat, r::RoundingMode)
-                    bigx = _bigequiv(x)
-                    return setrounding(BigFloat, r) do
-                        return $f(bigx)
-                    end
-                end
-            else
-                $f_round(::IntervalRounding{:slow}, x::AbstractFloat, r::RoundingMode) = CRlibm.$f(x, r)
-                function $f_round(::IntervalRounding{:slow}, x::BigFloat, r::RoundingMode)
-                    return setrounding(BigFloat, r) do
-                        return $f(x)
-                    end
+        @eval $f_round(::IntervalRounding, x::AbstractFloat, r::RoundingMode) = $f_round(IntervalRounding{:slow}(), x, r)
+        # @eval $f_round(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Down}) =
+        #     prevfloat($f(x))
+        # @eval $f_round(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Up}) =
+        #     nextfloat($f(x))
+        if Int == Int32 && f ∈ (:sinpi, :cospi) # to avoid StackOverflow for 32 bit systems; CRlibm.jl shadows MPFR which does not include `sinpi` and `cospi`
+            @eval function $f_round(::IntervalRounding{:slow}, x::AbstractFloat, r::RoundingMode)
+                bigx = _bigequiv(x)
+                return setrounding(BigFloat, r) do
+                    return $f(bigx)
                 end
             end
-            $f_round(::IntervalRounding{:none}, x::AbstractFloat, ::RoundingMode) = $f(x)
+        else
+            @eval $f_round(::IntervalRounding{:slow}, x::AbstractFloat, r::RoundingMode) = CRlibm.$f(x, r)
+            @eval function $f_round(::IntervalRounding{:slow}, x::BigFloat, r::RoundingMode)
+                return setrounding(BigFloat, r) do
+                    return $f(x)
+                end
+            end
         end
+        @eval $f_round(::IntervalRounding{:none}, x::AbstractFloat, ::RoundingMode) = $f(x)
     end
 end
 

@@ -185,7 +185,7 @@ function Base.cospi(x::BareInterval{T}) where {T<:NumTypes}
 
     lo, hi = bounds(x)
 
-    isthin(x) & isinteger(2lo) && return zero(BareInterval{T}) # by-pass rounding to improve accuracy for 32 bit systems
+    isthin(x) & !isinteger(lo) & isinteger(2lo) && return zero(BareInterval{T}) # by-pass rounding to improve accuracy for 32 bit systems
 
     lo_quadrant = _quadrantpi(lo)
     hi_quadrant = _quadrantpi(hi)
