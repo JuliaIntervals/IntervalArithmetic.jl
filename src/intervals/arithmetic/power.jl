@@ -281,7 +281,7 @@ end
 """
     hypot(x, y)
 
-Compute the hypotenuse; this relies on `^` internally.
+Compute the hypotenuse.
 
 Implement the `hypot` function of the IEEE Standard 1788-2015 (Table 10.5).
 """

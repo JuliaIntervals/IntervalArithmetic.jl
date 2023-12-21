@@ -140,6 +140,11 @@ function Base.inv(x::Interval)
     return _unsafe_interval(r, d, isguaranteed(x))
 end
 
+function Base.inv(x::Complex{<:Interval})
+    d = abs2(x)
+    return complex(real(x) / d, -imag(x) / d)
+end
+
 """
     /(x::BareInterval, y::BareInterval)
     /(x::Interval, y::Interval)
@@ -186,6 +191,10 @@ function Base.:/(x::Interval, y::Interval)
     t = isguaranteed(x) & isguaranteed(y)
     return _unsafe_interval(r, d, t)
 end
+
+Base.:/(x::Complex{<:Interval}, y::Complex{<:Interval}) = x * inv(y)
+Base.:/(x::Complex{<:Interval}, y::Interval) = x * inv(y)
+Base.:/(x::Interval, y::Complex{<:Interval}) = x * inv(y)
 
 Base.:\(x::BareInterval, y::BareInterval) = /(y, x)
 

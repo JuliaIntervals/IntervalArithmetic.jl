@@ -22,6 +22,13 @@
     @test isdisjoint_interval(a, b)
 end
 
+@testset "Inverse roots of unity" begin
+    for i ∈ 0:99
+        @test issubset_interval(cispi( -interval(i)/interval(50) ), inv(cispi( interval(i)/interval(50) ))) &&
+            radius( inv(cispi( interval(i)/interval(50) )) ) < 10eps()
+    end
+end
+
 # @testset "Complex functions" begin
 #     Z = interval(3, 1e-7; format = :midpoint) + interval(4, 1e-7; format = :midpoint)*interval(im)
 #     @test sin(Z) == complex(sin(real(Z)) * cosh(imag(Z)), sinh(imag(Z)) * cos(real(Z)))
