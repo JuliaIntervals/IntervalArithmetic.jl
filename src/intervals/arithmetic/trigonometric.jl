@@ -10,7 +10,7 @@ _quadrant_down(x::T) where {T<:AbstractFloat} = _quadrant(x)
 _quadrant_up(x::T) where {T<:Rational} = _quadrant(float(T)(x, RoundUp))
 _quadrant_up(x::T) where {T<:AbstractFloat} = _quadrant(x)
 
-function _quadrant(x::T) where {T<:AbstractFloat}
+function _quadrant(x::AbstractFloat)
     x_mod2pi = rem2pi(x, RoundNearest)
     -2x_mod2pi > π && return 2 # [-π, -π/2)
     x_mod2pi < 0 && return 3 # [-π/2, 0)
@@ -18,7 +18,7 @@ function _quadrant(x::T) where {T<:AbstractFloat}
     return 1 # [π/2, π]
 end
 
-function _quadrantpi(x::T) where {T<:NumTypes} # for `sinpi` and `cospi`
+function _quadrantpi(x::NumTypes) # used in `sinpi` and `cospi`
     x_mod2 = rem(x, 2)
     -2x_mod2 > 1 && return 2 # [-π, -π/2)
     x_mod2 < 0 && return 3 # [-π/2, 0)
@@ -184,6 +184,8 @@ function Base.cospi(x::BareInterval{T}) where {T<:NumTypes}
     d ≥ 2 && return _unsafe_bareinterval(T, -one(T), one(T))
 
     lo, hi = bounds(x)
+
+    isthin(x) & isinteger(2lo) && return zero(BareInterval{T}) # by-pass rounding to improve accuracy for 32 bit systems
 
     lo_quadrant = _quadrantpi(lo)
     hi_quadrant = _quadrantpi(hi)
