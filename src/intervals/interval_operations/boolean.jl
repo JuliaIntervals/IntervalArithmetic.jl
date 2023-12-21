@@ -351,6 +351,20 @@ end
 isthinzero(x::Complex) = isthinzero(real(x)) & isthinzero(imag(x))
 
 """
+    isthinone(x)
+
+Test whether `x` contains only one.
+"""
+isthinone(x::BareInterval) = isone(inf(x)) & isone(sup(x))
+
+function isthinone(x::Interval)
+    isnai(x) && return false
+    return isthinone(bareinterval(x))
+end
+
+isthinone(x::Complex) = isthinone(real(x)) & isthinzero(imag(x))
+
+"""
     isthininteger(x)
 
 Test whether `x` contains only an integer.

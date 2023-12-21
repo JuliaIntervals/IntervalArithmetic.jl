@@ -30,7 +30,7 @@ include("interval_operations/extended_div.jl")
 include("interval_operations/boolean.jl")
     export isempty_interval, isentire_interval, isequal_interval, in_interval,
         issubset_interval, isinterior, precedes, strictprecedes,
-        isdisjoint_interval, isweakless, isstrictless, isthin, isthinzero,
+        isdisjoint_interval, isweakless, isstrictless, isthin, isthinzero, isthinone
         isbounded, isunbounded, isnai, iscommon, isatomic
 include("interval_operations/overlap.jl")
     export Overlap, overlap
