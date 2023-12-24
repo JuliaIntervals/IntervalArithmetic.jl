@@ -107,9 +107,6 @@ for T ∈ (:BareInterval, :Interval)
         Base.isnan(::$T) =
             throw(ArgumentError("`isnan` is purposely not supported for intervals. See instead `isnai`"))
 
-        Base.isinteger(::$T) =
-            throw(ArgumentError("`isinteger` is purposely not supported for intervals. See instead `isthininteger`"))
-
         Base.intersect(::$T) =
             throw(ArgumentError("`intersect` is purposely not supported for intervals. See instead `intersect_interval`"))
 
@@ -130,3 +127,38 @@ for T ∈ (:BareInterval, :Interval)
             throw(ArgumentError("`setdiff!` is purposely not supported for intervals. See instead `interiordiff`"))
     end
 end
+
+# allow pointwise equality
+
+Base.:(==)(x::BareInterval, y::Number) = inf(x) == sup(x) == y
+Base.:(==)(x::Number, y::BareInterval) = inf(x) == sup(x) == y
+function Base.:(==)(x::Interval, y::Number)
+    isnai(x) && return false
+    return ==(bareinterval(x), y)
+end
+function Base.:(==)(x::Number, y::Interval)
+    isnai(x) && return false
+    return ==(bareinterval(x), y)
+end
+Base.:(==)(x::Complex{<:Interval}, y::Number) = ==(real(x), y) & ==(imag(x), y)
+Base.:(==)(x::Number, y::Complex{<:Interval}) = ==(x, real(y)) & ==(x, imag(y))
+Base.:(==)(::Complex{<:Interval}, ::Complex{<:Interval}) = throw(ArgumentError("`==` is purposely not supported for intervals. See instead `isequal_interval`"))
+
+Base.iszero(x::BareInterval) = iszero(inf(x)) & iszero(sup(x))
+function Base.iszero(x::Interval)
+    isnai(x) && return false
+    return iszero(bareinterval(x))
+end
+
+Base.isone(x::BareInterval) = isone(inf(x)) & isone(sup(x))
+function Base.isone(x::Interval)
+    isnai(x) && return false
+    return isone(bareinterval(x))
+end
+
+Base.isinteger(x::BareInterval) = (inf(x) == sup(x)) & isinteger(inf(x))
+function Base.isinteger(x::Interval)
+    isnai(x) && return false
+    return isinteger(bareinterval(x))
+end
+Base.isinteger(x::Complex{<:Interval}) = isinteger(real(x)) & iszero(imag(x))
