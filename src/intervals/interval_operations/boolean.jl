@@ -376,4 +376,4 @@ function isthininteger(x::Interval)
     return isthininteger(bareinterval(x))
 end
 
-isthininteger(x::Complex) = isthininteger(real(x)) & isthininteger(imag(x))
+isthininteger(x::Complex) = isthininteger(real(x)) & isthinzero(imag(x))
