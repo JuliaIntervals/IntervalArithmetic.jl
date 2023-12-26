@@ -47,7 +47,7 @@ The above computation shows that the midpoint of the computed interval is correc
 in_interval(π, pi_interval)
 ```
 
-Lastly, let us note that, due to floating-point arithmetics, computing the sum in the opposite direction yields a more accurate answer:
+Lastly, let us note that, due to floating-point arithmetic, computing the sum in the opposite direction yields a more accurate answer:
 
 ```@example pi
 function backward_sum(N)
