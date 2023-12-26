@@ -21,9 +21,9 @@ On the other hand, the squaring function is non-monotone, thus it is given by th
 ```math
 [a, b]^2 \bydef
 \begin{cases}
-[a^2, b^2], &  0 < a < b,
-[0, \max(a^2, b^2)], & a < 0 < b,
-[b^2, a^2], & a < b < 0.
+[a^2, b^2], &  0 \le a \le b, \\
+[0, \max(a^2, b^2)], & a \le 0 \le b, \\
+[b^2, a^2], & a \le b \le 0.
 \end{cases}
 ```
 
