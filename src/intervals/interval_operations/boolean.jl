@@ -64,7 +64,12 @@ function isinterior(x::Interval, y::Interval)
     return isinterior(bareinterval(x), bareinterval(y))
 end
 
-isinterior(x::AbstractVector, y::AbstractVector) = all(t -> isinterior(t[1], t[2]), zip(x, y))
+function isinterior(x::AbstractVector, y::AbstractVector)
+    n = length(x)
+    m = length(y)
+    n == m || return throw(DimensionMismatch("dimensions must match: x has length $n, y has length $m"))
+    return all(t -> isinterior(t[1], t[2]), zip(x, y))
+end
 
 isinterior(x, y, z, w...) = isinterior(x, y) & isinterior(y, z, w...)
 isinterior(x::Complex, y::Complex) =
@@ -86,7 +91,7 @@ isstrictsubset(x::BareInterval, y::BareInterval) = isinterior(x, y)
 
 isstrictsubset(x::Interval, y::Interval) = isinterior(x, y)
 
-isstrictsubset(x::AbstractVector, y::AbstractVector) = any(t -> isinterior(t[1], t[2]), zip(x, y))
+isstrictsubset(x::AbstractVector, y::AbstractVector) = isinterior(x, y) & any(t -> isinterior(t[1], t[2]), zip(x, y))
 
 isstrictsubset(x, y, z, w...) = isstrictsubset(x, y) & isstrictsubset(y, z, w...)
 isstrictsubset(x::Complex, y::Complex) =
@@ -179,12 +184,13 @@ Test whether `x` is an element of `y`.
 
 Implement the `isMember` function of the IEEE Standard 1788-2015 (Section 10.6.3).
 """
-function in_interval(x::Real, y::BareInterval)
+function in_interval(x::Number, y::BareInterval)
     isinf(x) && return contains_infinity(y)
     return inf(y) ≤ x ≤ sup(y)
 end
+in_interval(x::Complex, y::BareInterval) = in_interval(real(x), y) & iszero(imag(x))
 
-function in_interval(x::Real, y::Interval)
+function in_interval(x::Number, y::Interval)
     isnai(y) && return false
     return in_interval(x, bareinterval(y))
 end
@@ -196,8 +202,8 @@ in_interval(::Interval, ::Interval) =
     throw(ArgumentError("`in_interval` is purposely not supported for two interval arguments. See instead `issubset_interval`"))
 
 in_interval(x::Complex, y::Complex) = in_interval(real(x), real(y)) & in_interval(imag(x), imag(y))
-in_interval(x::Complex, y::Real) = in_interval(real(x), y) & isthinzero(imag(x))
-in_interval(x::Real, y::Complex) = in_interval(x, real(y)) & in_interval(0, imag(y))
+in_interval(x::Complex, y::Number) = in_interval(real(x), y) & iszero(imag(x))
+in_interval(x::Number, y::Complex) = in_interval(x, real(y)) & in_interval(0, imag(y))
 
 in_interval(x) = Base.Fix2(in_interval, x)
 
@@ -328,13 +334,18 @@ isthin(x::Complex) = isthin(real(x)) & isthin(imag(x))
 Test whether `x` contains only `y`.
 """
 isthin(x::BareInterval, y::Number) = inf(x) == sup(x) == y
+isthin(x::BareInterval, y::Complex) = isthin(x, real(y)) & iszero(imag(y))
 
 function isthin(x::Interval, y::Number)
     isnai(x) && return false
     return isthin(bareinterval(x), y)
 end
 
-isthin(x::Complex, y::Number) = isthin(real(x), y) & isthin(imag(x), y)
+isthin(x::Complex, y::Complex) = isthin(real(x), real(y)) & isthin(imag(x), imag(y))
+isthin(x::Complex, y::Number) = isthin(real(x), real(y)) & isthinzero(imag(x))
+isthin(x::Number, y::Complex) = isthin(real(x), real(y)) & iszero(imag(y))
+
+isthin(x::BareInterval, y::Interval) = throw(MethodError(isthin, (x, y)))
 
 """
     isthinzero(x)

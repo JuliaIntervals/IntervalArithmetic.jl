@@ -151,6 +151,8 @@ function Base.:(==)(x::Interval, y::Number)
     return bareinterval(x) == y
 end
 Base.:(==)(x::Number, y::Interval) = y == x
+Base.:(==)(x::BareInterval, y::Interval) = throw(MethodError(==, (x, y)))
+Base.:(==)(x::Interval, y::BareInterval) = throw(MethodError(==, (x, y)))
 
 Base.iszero(x::BareInterval) = iszero(inf(x)) & iszero(sup(x))
 function Base.iszero(x::Interval)
