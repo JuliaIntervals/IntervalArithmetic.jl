@@ -151,9 +151,6 @@ function Base.:(==)(x::Interval, y::Number)
     return bareinterval(x) == y
 end
 Base.:(==)(x::Number, y::Interval) = y == x
-Base.:(==)(x::Complex{<:Interval}, y::Number) = (real(x) == y) & (imag(x) == y)
-Base.:(==)(x::Number, y::Complex{<:Interval}) = y == x
-Base.:(==)(::Complex{<:Interval}, ::Complex{<:Interval}) = throw(ArgumentError("`==` is purposely not supported for intervals. See instead `isequal_interval`"))
 
 Base.iszero(x::BareInterval) = iszero(inf(x)) & iszero(sup(x))
 function Base.iszero(x::Interval)
