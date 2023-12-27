@@ -130,18 +130,29 @@ end
 
 # allow pointwise equality
 
+"""
+    ==(::BareInterval, ::Number)
+    ==(::Number, ::BareInterval)
+    ==(::Interval, ::Number)
+    ==(::Number, ::Interval)
+
+Test whether an interval is the singleton of a given number. In other words, the
+result is true if and only if the interval contains only that number.
+
+!!! note
+    Comparison between intervals is purposely disallowed. Indeed, equality
+    between non-singleton intervals has distinct properties, notably ``x = y``
+    does not imply ``x - y = 0``. See instead [`isequal_interval`](@ref).
+"""
 Base.:(==)(x::BareInterval, y::Number) = inf(x) == sup(x) == y
-Base.:(==)(x::Number, y::BareInterval) = inf(x) == sup(x) == y
+Base.:(==)(x::Number, y::BareInterval) = y == x
 function Base.:(==)(x::Interval, y::Number)
     isnai(x) && return false
-    return ==(bareinterval(x), y)
+    return bareinterval(x) == y
 end
-function Base.:(==)(x::Number, y::Interval)
-    isnai(x) && return false
-    return ==(bareinterval(x), y)
-end
-Base.:(==)(x::Complex{<:Interval}, y::Number) = ==(real(x), y) & ==(imag(x), y)
-Base.:(==)(x::Number, y::Complex{<:Interval}) = ==(x, real(y)) & ==(x, imag(y))
+Base.:(==)(x::Number, y::Interval) = y == x
+Base.:(==)(x::Complex{<:Interval}, y::Number) = (real(x) == y) & (imag(x) == y)
+Base.:(==)(x::Number, y::Complex{<:Interval}) = y == x
 Base.:(==)(::Complex{<:Interval}, ::Complex{<:Interval}) = throw(ArgumentError("`==` is purposely not supported for intervals. See instead `isequal_interval`"))
 
 Base.iszero(x::BareInterval) = iszero(inf(x)) & iszero(sup(x))
@@ -161,4 +172,3 @@ function Base.isinteger(x::Interval)
     isnai(x) && return false
     return isinteger(bareinterval(x))
 end
-Base.isinteger(x::Complex{<:Interval}) = isinteger(real(x)) & iszero(imag(x))
