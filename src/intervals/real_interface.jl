@@ -107,9 +107,6 @@ for T ∈ (:BareInterval, :Interval)
         Base.isnan(::$T) =
             throw(ArgumentError("`isnan` is purposely not supported for intervals. See instead `isnai`"))
 
-        Base.isinteger(::$T) =
-            throw(ArgumentError("`isinteger` is purposely not supported for intervals. See instead `isthininteger`"))
-
         Base.intersect(::$T) =
             throw(ArgumentError("`intersect` is purposely not supported for intervals. See instead `intersect_interval`"))
 
@@ -129,4 +126,48 @@ for T ∈ (:BareInterval, :Interval)
         Base.setdiff!(::AbstractSet, ::$T) =
             throw(ArgumentError("`setdiff!` is purposely not supported for intervals. See instead `interiordiff`"))
     end
+end
+
+# allow pointwise equality
+
+"""
+    ==(::BareInterval, ::Number)
+    ==(::Number, ::BareInterval)
+    ==(::Interval, ::Number)
+    ==(::Number, ::Interval)
+
+Test whether an interval is the singleton of a given number. In other words, the
+result is true if and only if the interval contains only that number.
+
+!!! note
+    Comparison between intervals is purposely disallowed. Indeed, equality
+    between non-singleton intervals has distinct properties, notably ``x = y``
+    does not imply ``x - y = 0``. See instead [`isequal_interval`](@ref).
+"""
+Base.:(==)(x::BareInterval, y::Number) = inf(x) == sup(x) == y
+Base.:(==)(x::Number, y::BareInterval) = y == x
+function Base.:(==)(x::Interval, y::Number)
+    isnai(x) && return false
+    return bareinterval(x) == y
+end
+Base.:(==)(x::Number, y::Interval) = y == x
+Base.:(==)(x::BareInterval, y::Interval) = throw(MethodError(==, (x, y)))
+Base.:(==)(x::Interval, y::BareInterval) = throw(MethodError(==, (x, y)))
+
+Base.iszero(x::BareInterval) = iszero(inf(x)) & iszero(sup(x))
+function Base.iszero(x::Interval)
+    isnai(x) && return false
+    return iszero(bareinterval(x))
+end
+
+Base.isone(x::BareInterval) = isone(inf(x)) & isone(sup(x))
+function Base.isone(x::Interval)
+    isnai(x) && return false
+    return isone(bareinterval(x))
+end
+
+Base.isinteger(x::BareInterval) = (inf(x) == sup(x)) & isinteger(inf(x))
+function Base.isinteger(x::Interval)
+    isnai(x) && return false
+    return isinteger(bareinterval(x))
 end

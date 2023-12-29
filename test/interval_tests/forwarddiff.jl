@@ -46,7 +46,7 @@ end
         dψ(t)   = ForwardDiff.derivative(ψ, t)
         ddψ(t)  = ForwardDiff.derivative(dψ, t)
         dddψ(t) = ForwardDiff.derivative(ddψ, t)
-        @test ψ′(0)   === dψ(0)   && !isguaranteed(ψ′(0))
+        @test        ψ′(0)   === dψ(0)   && !isguaranteed(ψ′(0))
         @test_broken ψ′′(0)  === ddψ(0)  && !isguaranteed(ψ′′(0)) # rely on `Interval{T}(::Real)` being defined
         @test_broken ψ′′′(0) === dddψ(0) && !isguaranteed(ψ′′′(0)) # rely on `Interval{T}(::Real)` being defined
         t₀ = interval(0)
@@ -62,6 +62,6 @@ end
 
         # g(x) = 2^x # not guaranteed
 
-        @test_broken f′(0) === df(0)
+        @test f′(0) === df(0)
     end
 end

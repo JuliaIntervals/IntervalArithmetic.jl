@@ -339,7 +339,10 @@
         @test_throws ArgumentError isempty(x)
         @test_throws ArgumentError isfinite(x)
         @test_throws ArgumentError isnan(x)
-        @test_throws ArgumentError isinteger(x)
+        @test isinteger(x)
+        @test x == 1
+        @test isone(x)
+        @test !iszero(x)
     end
 
 end

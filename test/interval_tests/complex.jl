@@ -13,7 +13,7 @@
     @test isequal_interval(a * a, interval(-1))
     @test isequal_interval(a + a, interval(2)*interval(im))
     @test isthin(a - a, 0)
-    @test_broken isthin(a / a, 1)
+    @test isthin(a / a, 1)
 
     @test in_interval(3+2im, c)
     @test isequal_interval(hull(a, b), complex(interval(0, 3), interval(1, 4)))
