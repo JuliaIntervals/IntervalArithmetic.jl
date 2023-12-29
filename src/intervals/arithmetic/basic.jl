@@ -20,7 +20,7 @@ end
 Base.:+(x::BareInterval, y::BareInterval) = +(promote(x, y)...)
 
 function Base.:+(x::Interval, y::Interval)
-    r = bareinterval(x) + bareinterval(y)
+    @inline r = bareinterval(x) + bareinterval(y)
     d = min(decoration(x), decoration(y), decoration(r))
     t = isguaranteed(x) & isguaranteed(y)
     return _unsafe_interval(r, d, t)
@@ -53,7 +53,7 @@ end
 Base.:-(x::BareInterval, y::BareInterval) = -(promote(x, y)...)
 
 function Base.:-(x::Interval, y::Interval)
-    r = bareinterval(x) - bareinterval(y)
+    @inline r = bareinterval(x) - bareinterval(y)
     d = min(decoration(x), decoration(y), decoration(r))
     t = isguaranteed(x) & isguaranteed(y)
     return _unsafe_interval(r, d, t)
@@ -79,7 +79,7 @@ end
 Base.:*(x::BareInterval, y::BareInterval) = *(promote(x, y)...)
 
 function Base.:*(x::Interval, y::Interval)
-    r = bareinterval(x) * bareinterval(y)
+    @inline r = bareinterval(x) * bareinterval(y)
     d = min(decoration(x), decoration(y), decoration(r))
     t = isguaranteed(x) & isguaranteed(y)
     return _unsafe_interval(r, d, t)
@@ -185,7 +185,7 @@ Base.:/(x::BareInterval, y::BareInterval) = /(promote(x, y)...)
 
 function Base.:/(x::Interval, y::Interval)
     by = bareinterval(y)
-    r = bareinterval(x) / by
+    @inline r = bareinterval(x) / by
     d = min(decoration(x), decoration(y), decoration(r))
     d = min(d, ifelse(in_interval(0, by), trv, d))
     t = isguaranteed(x) & isguaranteed(y)

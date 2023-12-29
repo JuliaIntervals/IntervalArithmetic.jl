@@ -91,7 +91,7 @@ function Base.sin(x::BareInterval{T}) where {T<:NumTypes}
 end
 
 function Base.sin(x::Interval)
-    r = sin(bareinterval(x))
+    @inline r = sin(bareinterval(x))
     d = min(decoration(x), decoration(r))
     return _unsafe_interval(r, d, isguaranteed(x))
 end
@@ -180,7 +180,7 @@ function Base.cos(x::BareInterval{T}) where {T<:NumTypes}
 end
 
 function Base.cos(x::Interval)
-    r = cos(bareinterval(x))
+    @inline r = cos(bareinterval(x))
     d = min(decoration(x), decoration(r))
     return _unsafe_interval(r, d, isguaranteed(x))
 end
@@ -257,7 +257,7 @@ function Base.tan(x::BareInterval{T}) where {T<:NumTypes}
 end
 
 function Base.tan(x::Interval)
-    r = tan(bareinterval(x))
+    @inline r = tan(bareinterval(x))
     d = min(decoration(x), decoration(r))
     d = min(d, ifelse(isbounded(r), d, trv))
     return _unsafe_interval(r, d, isguaranteed(x))
