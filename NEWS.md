@@ -1,6 +1,9 @@
 # News
 
-## master
+## 0.22.2
+
+- add `sind`, `cosd` and `sincosd`
+- pointwise boolean functions are re-introduced (cf. PR [#604](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/604)), namely: `iszero`, `isone`, `isinteger`, and `==(::Interval, ::Number)`/`==(::Number, ::Interval)`
 
 ## 0.22
 
