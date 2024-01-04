@@ -9,12 +9,15 @@ RoundingEmulator = "5eaf0fd0-dfba-4ccb-bf02-d820a40db705"
 
 [weakdeps]
 DiffRules = "b552c78f-8df3-52c6-915a-8e097449b14b"
+RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
 
 [extensions]
 IntervalArithmeticDiffRulesExt = "DiffRules"
+IntervalArithmeticRecipesBaseExt = "RecipesBase"
 
 [compat]
 CRlibm = "1"
 DiffRules = "1"
+RecipesBase = "1"
 RoundingEmulator = "0.2"
 julia = "1.9"
