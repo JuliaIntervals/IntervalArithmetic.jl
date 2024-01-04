@@ -12,6 +12,7 @@ Major changes since 0.20 and 0.21:
 - interval structures:
   - new bare (i.e. no decorations) interval structure `BareInterval`, which is not a subtype of `Real`
   - `Interval` is now decorated (`DecoratedInterval` is removed) and has a new boolean field `isguaranteed`; the `Interval` type is a subtype of `Real`
+  - `IntervalBox` is removed; multi-dimensional intervals are instances of `AbstratcVector{<:Interval}`
 
 - constructors:
   - `@floatinterval` and `@biginterval` are removed; `@interval` accepts a bound type as its first parameter
