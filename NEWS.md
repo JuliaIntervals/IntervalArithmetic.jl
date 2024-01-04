@@ -1,8 +1,8 @@
 # News
 
 ## 0.22.4
-  - no longer generate the ITF1788 test suite automatically (cf. [#606](https://github.com/JuliaIntervals/IntervalArithmetic.jl/issues/606))
-  - no longer write a log for the warnings of the tests
+- no longer generate the ITF1788 test suite automatically, no longer write a log for the warnings of the tests (cf. PR [#607](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/607))
+- add plotting recipes as an extension (cf. [#608](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/608))
 
 ## 0.22.3
 
