@@ -1,6 +1,10 @@
 # News
 
-## 0.22.2
+## 0.22.4
+  - no longer generate the ITF1788 test suite automatically (cf. [#606](https://github.com/JuliaIntervals/IntervalArithmetic.jl/issues/606))
+  - no longer write a log for the warnings of the tests
+
+## 0.22.3
 
 - add `sind`, `cosd` and `sincosd`
 - pointwise boolean functions are re-introduced (cf. PR [#604](https://github.com/JuliaIntervals/IntervalArithmetic.jl/pull/604)), namely: `iszero`, `isone`, `isinteger`, and `==(::Interval, ::Number)`/`==(::Number, ::Interval)`
