@@ -1,7 +1,7 @@
 name = "IntervalArithmetic"
 uuid = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
 repo = "https://github.com/JuliaIntervals/IntervalArithmetic.jl.git"
-version = "0.22.3"
+version = "0.22.4"
 
 [deps]
 CRlibm = "96374032-68de-5a5b-8d9e-752f78720389"
