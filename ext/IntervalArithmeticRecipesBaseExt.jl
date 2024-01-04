@@ -2,7 +2,7 @@ module IntervalArithmeticRecipesBaseExt
 
 using IntervalArithmetic, RecipesBase
 
-@recipe function f(v::AbtrstactVector{<:Interval})
+@recipe function f(v::AbstractVector{<:Interval})
     @assert length(v) == 2
 
     seriesalpha --> 0.5
@@ -16,7 +16,7 @@ using IntervalArithmetic, RecipesBase
     return x, y
 end
 
-@recipe function f(v::AbstractVector{<:AbtrstactVector{<:Interval}})
+@recipe function f(v::AbstractVector{<:AbstractVector{<:Interval}})
     @assert all(vᵢ -> length(vᵢ) == 2, v)
 
     seriestype := :shape
