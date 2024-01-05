@@ -10,8 +10,8 @@ using IntervalArithmetic, RecipesBase
 
     x, y = v
 
-    x = [inf(x), sup(x), sup(x), inf(x)]
-    y = [inf(y), inf(y), sup(y), sup(y)]
+    x = [inf(x), sup(x), sup(x), inf(x), inf(x)]
+    y = [inf(y), inf(y), sup(y), sup(y), inf(y)]
 
     return x, y
 end
@@ -29,8 +29,8 @@ end
     for vᵢ ∈ v
         x, y = vᵢ
         # use NaNs to separate
-        append!(xs, [inf(x), sup(x), sup(x), inf(x), NaN])
-        append!(ys, [inf(y), inf(y), sup(y), sup(y), NaN])
+        append!(xs, [inf(x), sup(x), sup(x), inf(x), inf(x), NaN])
+        append!(ys, [inf(y), inf(y), sup(y), sup(y), inf(y), NaN])
     end
 
     return xs, ys
