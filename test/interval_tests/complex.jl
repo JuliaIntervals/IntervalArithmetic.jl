@@ -20,6 +20,9 @@
     @test isequal_interval(intersect_interval(c, hull(a, b)), complex(interval(0, 3), interval(1, 2)))
     @test isempty_interval(intersect_interval(a, b))
     @test isdisjoint_interval(a, b)
+
+    @test isequal_interval(interval(-1 - im, 0), interval(-1 - im, 0 + 0im))
+    @test isequal_interval(interval(0, 1 + im), interval(0 + 0im, 1 + im))
 end
 
 @testset "Inverse roots of unity" begin
