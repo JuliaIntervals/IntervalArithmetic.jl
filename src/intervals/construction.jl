@@ -481,9 +481,9 @@ end
 _interval_infsup(::Type{T}, a::Complex, b::Complex, d::Decoration = com) where {T<:NumTypes} =
     complex(_interval_infsup(T, real(a), real(b), d), _interval_infsup(T, imag(a), imag(b), d))
 _interval_infsup(::Type{T}, a::Complex, b, d::Decoration = com) where {T<:NumTypes} =
-    complex(_interval_infsup(T, real(a), b, d), _interval_infsup(T, imag(a), imag(a), d))
+    complex(_interval_infsup(T, real(a), real(b), d), _interval_infsup(T, imag(a), imag(b), d))
 _interval_infsup(::Type{T}, a, b::Complex, d::Decoration = com) where {T<:NumTypes} =
-    complex(_interval_infsup(T, a, real(b), d), _interval_infsup(T, imag(b), imag(b), d))
+    complex(_interval_infsup(T, real(a), real(b), d), _interval_infsup(T, imag(a), imag(b), d))
 
 # midpoint constructors
 
