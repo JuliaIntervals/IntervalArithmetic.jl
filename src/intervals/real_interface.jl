@@ -137,14 +137,18 @@ end
     ==(::Number, ::Interval)
 
 Test whether an interval is the singleton of a given number. In other words, the
-result is true if and only if the interval contains only that number.
+result is true if and only if the interval contains only that number. This
+function errors whenever the input interval is not a singleton.
 
 !!! note
     Comparison between intervals is purposely disallowed. Indeed, equality
     between non-singleton intervals has distinct properties, notably ``x = y``
     does not imply ``x - y = 0``. See instead [`isequal_interval`](@ref).
 """
-Base.:(==)(x::BareInterval, y::Number) = inf(x) == sup(x) == y
+function Base.:(==)(x::BareInterval, y::Number)
+    isthin(x) || return throw(ArgumentError("`==` is only supported between thin intervals and numbers"))
+    return inf(x) == y
+end
 Base.:(==)(x::Number, y::BareInterval) = y == x
 function Base.:(==)(x::Interval, y::Number)
     isnai(x) && return false
@@ -154,19 +158,49 @@ Base.:(==)(x::Number, y::Interval) = y == x
 Base.:(==)(x::BareInterval, y::Interval) = throw(MethodError(==, (x, y)))
 Base.:(==)(x::Interval, y::BareInterval) = throw(MethodError(==, (x, y)))
 
-Base.iszero(x::BareInterval) = iszero(inf(x)) & iszero(sup(x))
+"""
+    iszero(::BareInterval)
+    iszero(::Interval)
+
+Test whether an interval is the singleton of zero. This function errors whenever
+the input interval is not a singleton.
+"""
+function Base.iszero(x::BareInterval)
+    isthin(x) || return throw(ArgumentError("`iszero` is only supported for thin intervals"))
+    return iszero(inf(x))
+end
 function Base.iszero(x::Interval)
     isnai(x) && return false
     return iszero(bareinterval(x))
 end
 
-Base.isone(x::BareInterval) = isone(inf(x)) & isone(sup(x))
+"""
+    isone(::BareInterval)
+    isone(::Interval)
+
+Test whether an interval is the singleton of one. This function errors whenever
+the input interval is not a singleton.
+"""
+function Base.isone(x::BareInterval)
+    isthin(x) || return throw(ArgumentError("`isone` is only supported for thin intervals"))
+    return isone(inf(x))
+end
 function Base.isone(x::Interval)
     isnai(x) && return false
     return isone(bareinterval(x))
 end
 
-Base.isinteger(x::BareInterval) = (inf(x) == sup(x)) & isinteger(inf(x))
+"""
+    isinteger(::BareInterval)
+    isinteger(::Interval)
+
+Test whether an interval is the singleton of an integer. This function errors
+whenever the input interval is not a singleton.
+"""
+function Base.isinteger(x::BareInterval)
+    isthin(x) || return throw(ArgumentError("`isinteger` is only supported for thin intervals"))
+    return isinteger(inf(x))
+end
 function Base.isinteger(x::Interval)
     isnai(x) && return false
     return isinteger(bareinterval(x))
