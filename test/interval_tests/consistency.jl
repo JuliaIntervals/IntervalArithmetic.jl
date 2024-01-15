@@ -181,6 +181,11 @@
         @test isnan(mid(emptyinterval()))
     end
 
+    @testset "mid with α" begin
+        @test_throws DomainError mid(interval(1, 2), 1.2)
+        @test_throws DomainError mid(interval(1, 2), -0.7)
+    end
+
     @testset "mid with large floats" begin
         @test mid(interval(0.8e308, 1.2e308)) == 1e308
         @test mid(interval(-1e308, 1e308)) == 0
