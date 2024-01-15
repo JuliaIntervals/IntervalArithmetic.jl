@@ -256,7 +256,7 @@ end
 
 # CRlibm functions
 
-for f ∈ [:exp, :expm1, :log, :log1p, :log2, :log10, :sin, :cos, :tan, :asin, :acos, :atan, :sinh, :cosh, :sinpi, :cospi, :tanpi, :atanpi]
+for f ∈ [:exp, :expm1, :log, :log1p, :log2, :log10, :sin, :cos, :tan, :asin, :acos, :atan, :sinh, :cosh, :sinpi, :cospi]
     if isdefined(Base, f)
         f_round = Symbol(:_, f, :_round)
         crlibm_f_d = string(f, "_rd")
@@ -270,17 +270,19 @@ for f ∈ [:exp, :expm1, :log, :log1p, :log2, :log10, :sin, :cos, :tan, :asin, :
         #     prevfloat($f(x))
         # @eval $f_round(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Up}) =
         #     nextfloat($f(x))
-        if Int == Int32 # issues with CRlibm for 32 bit systems, use MPFR
-            @eval function $f_round(::IntervalRounding{:slow}, x::AbstractFloat, r::RoundingMode)
-                prec = precision(x)
-                bigx = BigFloat(x; precision = prec)
-                bigz = BigFloat(; precision = prec)
-                @ccall Base.MPFR.libmpfr.$mpfr_f(
-                    bigz::Ref{BigFloat},
-                    bigx::Ref{BigFloat},
-                    r::Base.MPFR.MPFRRoundingMode
-                )::Int32
-                return bigz
+        if Int == Int32 && f ∈ (:sinpi, :cospi) # issues with CRlibm for 32 bit systems, use MPFR (only available since Julia v1.10)
+            if VERSION ≥ v"1.10"
+                @eval function $f_round(::IntervalRounding{:slow}, x::AbstractFloat, r::RoundingMode)
+                    prec = precision(x)
+                    bigx = BigFloat(x; precision = prec)
+                    bigz = BigFloat(; precision = prec)
+                    @ccall Base.MPFR.libmpfr.$mpfr_f(
+                        bigz::Ref{BigFloat},
+                        bigx::Ref{BigFloat},
+                        r::Base.MPFR.MPFRRoundingMode
+                    )::Int32
+                    return bigz
+                end
             end
         else
             @eval $f_round(::IntervalRounding{:tight}, x::Float16, r::RoundingMode) = Float16($f_round(Float64(x), r), r)
