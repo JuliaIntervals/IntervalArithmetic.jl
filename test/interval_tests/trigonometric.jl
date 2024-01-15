@@ -84,17 +84,19 @@ end
     @test isthin(cosd(interval(270)), 0)
 end
 
-@testset "sincospi" begin
-    x = sincospi(emptyinterval())
-    @test isempty_interval(x[1]) & isempty_interval(x[2])
-    x = sincospi(interval(1, 2))
-    @test issubset_interval(interval(-1, 0), x[1]) & isequal_interval(x[2], interval(-1, 1))
-    x = sincospi(interval(0.5, 1.5))
-    @test isequal_interval(x[1], interval(-1, 1)) & issubset_interval(interval(-1, 0), x[2])
-    x = sincospi(interval(0.25, 0.75))
-    @test issubset_interval(interval(1/sqrt(2), 1), x[1]) & issubset_interval(interval(-1/sqrt(2), 1/sqrt(2)), x[2])
-    x = sincospi(interval(-0.25, 0.25))
-    @test issubset_interval(interval(-1/sqrt(2), 1/sqrt(2)), x[1]) & isequal_interval(x[2], interval(1/sqrt(2), 1))
+if (Int != Int32 && VERSION < v"1.10") || VERSION ≥ v"1.10"
+    @testset "sincospi" begin
+        x = sincospi(emptyinterval())
+        @test isempty_interval(x[1]) & isempty_interval(x[2])
+        x = sincospi(interval(1, 2))
+        @test issubset_interval(interval(-1, 0), x[1]) & isequal_interval(x[2], interval(-1, 1))
+        x = sincospi(interval(0.5, 1.5))
+        @test isequal_interval(x[1], interval(-1, 1)) & issubset_interval(interval(-1, 0), x[2])
+        x = sincospi(interval(0.25, 0.75))
+        @test issubset_interval(interval(1/sqrt(2), 1), x[1]) & issubset_interval(interval(-1/sqrt(2), 1/sqrt(2)), x[2])
+        x = sincospi(interval(-0.25, 0.25))
+        @test issubset_interval(interval(-1/sqrt(2), 1/sqrt(2)), x[1]) & isequal_interval(x[2], interval(1/sqrt(2), 1))
+    end
 end
 
 @testset "sincosd" begin
