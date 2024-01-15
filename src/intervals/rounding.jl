@@ -1,25 +1,3 @@
-# prevents multiple threads from calling `setprecision` concurrently, used in `_bigequiv`
-const precision_lock = ReentrantLock()
-
-"""
-    _bigequiv(x)
-
-Create a `BigFloat` with the same underlying precision.
-"""
-function _bigequiv(x::T) where {T<:NumTypes}
-    lock(precision_lock) do
-        setprecision(precision(float(T))) do
-            return BigFloat(x)
-        end
-    end
-end
-
-_bigequiv(x::BigFloat) = x
-
-
-
-
-
 """
     IntervalRounding
 
@@ -28,7 +6,7 @@ Interval rounding type.
 Available rounding types:
 - `:fast` (unsupported): rounding via `prevfloat` and `nextfloat`.
 - `:tight`: rounding via [RoundingEmulator.jl](https://github.com/matsueushi/RoundingEmulator.jl).
-- `:slow`: rounding via `setrounding`.
+- `:slow`: rounding via `BigFloat`.
 - `:none`: no rounding (non-rigorous numerics).
 """
 struct IntervalRounding{T} end
@@ -39,6 +17,7 @@ interval_rounding() = IntervalRounding{:tight}()
 
 for (f, fname) ∈ ((:+, :add), (:-, :sub), (:*, :mul), (:/, :div))
     g = Symbol(:_, fname, :_round)
+    mpfr_f = Symbol(:mpfr_, fname)
 
     @eval begin
         $g(x::T, y::T, r::RoundingMode) where {T<:AbstractFloat} = $g(interval_rounding(), x, y, r)
@@ -55,11 +34,17 @@ for (f, fname) ∈ ((:+, :add), (:-, :sub), (:*, :mul), (:/, :div))
         $g(::IntervalRounding{:tight}, x::T, y::T, ::RoundingMode{:Up}) where {T<:Union{Float32,Float64}} =
             RoundingEmulator.$(Symbol(fname, :_up))(x, y)
         function $g(::IntervalRounding{:slow}, x::T, y::T, r::RoundingMode) where {T<:AbstractFloat}
-            bigx = _bigequiv(x)
-            bigy = _bigequiv(y)
-            return setrounding(BigFloat, r) do
-                return $f(bigx, bigy)
-            end
+            prec = max(precision(x), precision(y))
+            bigx = BigFloat(x; precision = prec)
+            bigy = BigFloat(y; precision = prec)
+            bigz = BigFloat(; precision = prec)
+            @ccall Base.MPFR.libmpfr.$mpfr_f(
+                bigz::Ref{BigFloat},
+                bigx::Ref{BigFloat},
+                bigy::Ref{BigFloat},
+                r::Base.MPFR.MPFRRoundingMode
+            )::Int32
+            return bigz
         end
         $g(::IntervalRounding{:none}, x::T, y::T, ::RoundingMode) where {T<:AbstractFloat} = $f(x, y)
     end
@@ -79,11 +64,17 @@ _pow_round(::IntervalRounding, x::T, y::T, r::RoundingMode) where {T<:AbstractFl
 # _pow_round(::IntervalRounding{:fast}, x::T, y::T, ::RoundingMode{:Up}) where {T<:AbstractFloat} =
 #     nextfloat(^(x, y))
 function _pow_round(::IntervalRounding{:slow}, x::T, y::T, r::RoundingMode) where {T<:AbstractFloat}
-    bigx = _bigequiv(x)
-    bigy = _bigequiv(y)
-    return setrounding(BigFloat, r) do
-        return ^(bigx, bigy)
-    end
+    prec = max(precision(x), precision(y))
+    bigx = BigFloat(x; precision = prec)
+    bigy = BigFloat(y; precision = prec)
+    bigz = BigFloat(; precision = prec)
+    @ccall Base.MPFR.libmpfr.mpfr_pow(
+        bigz::Ref{BigFloat},
+        bigx::Ref{BigFloat},
+        bigy::Ref{BigFloat},
+        r::Base.MPFR.MPFRRoundingMode
+    )::Int32
+    return bigz
 end
 _pow_round(::IntervalRounding{:none}, x::T, y::T, ::RoundingMode) where {T<:AbstractFloat} = ^(x, y)
 
@@ -103,16 +94,22 @@ _inv_round(::IntervalRounding{:tight}, x::Union{Float32,Float64}, ::RoundingMode
 _inv_round(::IntervalRounding{:tight}, x::Union{Float32,Float64}, ::RoundingMode{:Up}) =
     RoundingEmulator.div_up(one(x), x)
 function _inv_round(::IntervalRounding{:slow}, x::AbstractFloat, r::RoundingMode)
-    bigx = _bigequiv(x)
-    return setrounding(BigFloat, r) do
-        return inv(bigx)
-    end
+    prec = precision(x)
+    bigx = BigFloat(x; precision = prec)
+    bigz = BigFloat(; precision = prec)
+    @ccall Base.MPFR.libmpfr.mpfr_div(
+        bigz::Ref{BigFloat},
+        one(bigx)::Ref{BigFloat},
+        bigx::Ref{BigFloat},
+        r::Base.MPFR.MPFRRoundingMode
+    )::Int32
+    return bigz
 end
 _inv_round(::IntervalRounding{:none}, x::AbstractFloat, ::RoundingMode) = inv(x)
 
 #
 
-_sqrt_round(x::NumTypes, r::RoundingMode) = _sqrt_round(interval_rounding(), float(x), r) # rationals are converted to floats
+_sqrt_round(x::AbstractFloat, r::RoundingMode) = _sqrt_round(interval_rounding(), x, r)
 
 _sqrt_round(::IntervalRounding, x::AbstractFloat, r::RoundingMode) =
     _sqrt_round(IntervalRounding{:slow}(), x, r)
@@ -125,16 +122,21 @@ _sqrt_round(::IntervalRounding{:tight}, x::Union{Float32,Float64}, ::RoundingMod
 _sqrt_round(::IntervalRounding{:tight}, x::Union{Float32,Float64}, ::RoundingMode{:Up}) =
     RoundingEmulator.sqrt_up(x)
 function _sqrt_round(::IntervalRounding{:slow}, x::AbstractFloat, r::RoundingMode)
-    bigx = _bigequiv(x)
-    return setrounding(BigFloat, r) do
-        return sqrt(bigx)
-    end
+    prec = precision(x)
+    bigx = BigFloat(x; precision = prec)
+    bigz = BigFloat(; precision = prec)
+    @ccall Base.MPFR.libmpfr.mpfr_sqrt(
+        bigz::Ref{BigFloat},
+        bigx::Ref{BigFloat},
+        r::Base.MPFR.MPFRRoundingMode
+    )::Int32
+    return bigz
 end
 _sqrt_round(::IntervalRounding{:none}, x::AbstractFloat, ::RoundingMode) = sqrt(x)
 
 #
 
-_rootn_round(x::NumTypes, n::Integer, r::RoundingMode) = _rootn_round(interval_rounding(), float(x), n, r) # rationals are converted to floats
+_rootn_round(x::AbstractFloat, n::Integer, r::RoundingMode) = _rootn_round(interval_rounding(), x, n, r)
 
 _rootn_round(::IntervalRounding, x::AbstractFloat, n::Integer, r::RoundingMode) =
     _rootn_round(IntervalRounding{:slow}(), x, n, r)
@@ -142,21 +144,23 @@ _rootn_round(::IntervalRounding, x::AbstractFloat, n::Integer, r::RoundingMode) 
 #     prevfloat(x^(1//n))
 # _rootn_round(::IntervalRounding{:fast}, x::AbstractFloat, n::Integer, ::RoundingMode{:Up}) =
 #     nextfloat(x^(1//n))
-function _rootn_round(::IntervalRounding{:slow}, x::AbstractFloat, n::Integer, ::RoundingMode{:Down})
-    r = BigFloat()
-    ccall((:mpfr_rootn_ui, :libmpfr), Int32, (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFR.MPFRRoundingMode), r, x, convert(Culong, n), MPFR.MPFRRoundDown)
-    return r
-end
-function _rootn_round(::IntervalRounding{:slow}, x::AbstractFloat, n::Integer, ::RoundingMode{:Up})
-    r = BigFloat()
-    ccall((:mpfr_rootn_ui, :libmpfr), Int32, (Ref{BigFloat}, Ref{BigFloat}, Culong, MPFR.MPFRRoundingMode), r, x, convert(Culong, n), MPFR.MPFRRoundUp)
-    return r
+function _rootn_round(::IntervalRounding{:slow}, x::AbstractFloat, n::Integer, r::RoundingMode)
+    prec = precision(x)
+    bigx = BigFloat(x; precision = prec)
+    bigz = BigFloat(; precision = prec)
+    @ccall Base.MPFR.libmpfr.mpfr_rootn_ui(
+        bigz::Ref{BigFloat},
+        bigx::Ref{BigFloat},
+        n::Culong,
+        r::Base.MPFR.MPFRRoundingMode
+    )::Int32
+    return bigz
 end
 _rootn_round(::IntervalRounding{:none}, x::AbstractFloat, n::Integer, ::RoundingMode) = x^(1//n)
 
 #
 
-_atan_round(x::T, y::T, r::RoundingMode) where {T<:NumTypes} = _atan_round(interval_rounding(), promote(float(x), float(y))..., r) # rationals are converted to floats
+_atan_round(x::T, y::T, r::RoundingMode) where {T<:AbstractFloat} = _atan_round(interval_rounding(), x, y, r)
 
 _atan_round(::IntervalRounding, x::T, y::T, r::RoundingMode) where {T<:AbstractFloat} =
     _atan_round(IntervalRounding{:slow}(), x, y, r)
@@ -165,21 +169,28 @@ _atan_round(::IntervalRounding, x::T, y::T, r::RoundingMode) where {T<:AbstractF
 # _atan_round(::IntervalRounding{:fast}, x::T, y::T, ::RoundingMode{:Up}) where {T<:AbstractFloat} =
 #     nextfloat(atan(x, y))
 function _atan_round(::IntervalRounding{:slow}, x::T, y::T, r::RoundingMode) where {T<:AbstractFloat}
-    bigx = _bigequiv(x)
-    bigy = _bigequiv(y)
-    return setrounding(BigFloat, r) do
-        return atan(bigx, bigy)
-    end
+    prec = max(precision(x), precision(y))
+    bigx = BigFloat(x; precision = prec)
+    bigy = BigFloat(y; precision = prec)
+    bigz = BigFloat(; precision = prec)
+    @ccall Base.MPFR.libmpfr.mpfr_atan2(
+        bigz::Ref{BigFloat},
+        bigx::Ref{BigFloat},
+        bigy::Ref{BigFloat},
+        r::Base.MPFR.MPFRRoundingMode
+    )::Int32
+    return bigz
 end
 _atan_round(::IntervalRounding{:none}, x::T, y::T, ::RoundingMode) where {T<:AbstractFloat} = atan(x, y)
 
 #
 
-for f ∈ [:cbrt, :exp2, :exp10, :cot, :sec, :csc, :acot, :tanh, :coth, :sech, :csch, :asinh, :acosh, :atanh, :acoth]
+for f ∈ [:cbrt, :exp2, :exp10, :cot, :sec, :csc, :tanh, :coth, :sech, :csch, :asinh, :acosh, :atanh]
     f_round = Symbol(:_, f, :_round)
+    mpfr_f = Symbol(:mpfr_, f)
 
     @eval begin
-        $f_round(x::NumTypes, r::RoundingMode) = $f_round(interval_rounding(), float(x), r) # rationals are converted to floats
+        $f_round(x::AbstractFloat, r::RoundingMode) = $f_round(interval_rounding(), x, r)
 
         $f_round(::IntervalRounding, x::AbstractFloat, r::RoundingMode) = $f_round(IntervalRounding{:slow}(), x, r)
         # $f_round(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Down}) =
@@ -187,41 +198,106 @@ for f ∈ [:cbrt, :exp2, :exp10, :cot, :sec, :csc, :acot, :tanh, :coth, :sech, :
         # $f_round(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Up}) =
         #     nextfloat($f(x))
         function $f_round(::IntervalRounding{:slow}, x::AbstractFloat, r::RoundingMode)
-            bigx = _bigequiv(x)
-            return setrounding(BigFloat, r) do
-                return $f(bigx)
-            end
+            prec = precision(x)
+            bigx = BigFloat(x; precision = prec)
+            bigz = BigFloat(; precision = prec)
+            @ccall Base.MPFR.libmpfr.$mpfr_f(
+                bigz::Ref{BigFloat},
+                bigx::Ref{BigFloat},
+                r::Base.MPFR.MPFRRoundingMode
+            )::Int32
+            return bigz
         end
         $f_round(::IntervalRounding{:none}, x::AbstractFloat, ::RoundingMode) = $f(x)
     end
 end
 
-#
+for (f, g) ∈ [(:acot, :atan), (:acoth, :atanh)]
+    f_round = Symbol(:_, f, :_round)
+    g_round = Symbol(:_, g, :_round)
 
-for f ∈ CRlibm.functions
+    @eval begin
+        $f_round(x::AbstractFloat, r::RoundingMode) = $f_round(interval_rounding(), x, r)
+
+        $f_round(::IntervalRounding, x::AbstractFloat, r::RoundingMode) = $f_round(IntervalRounding{:slow}(), x, r)
+        # $f_round(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Down}) =
+        #     prevfloat($f(x))
+        # $f_round(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Up}) =
+        #     nextfloat($f(x))
+        function $f_round(ir::IntervalRounding{:slow}, x::AbstractFloat, r::RoundingMode{:Down})
+            prec = precision(x)
+            bigx = BigFloat(x; precision = prec + 10)
+            bigz = BigFloat(; precision = prec + 10)
+            @ccall Base.MPFR.libmpfr.mpfr_div(
+                bigz::Ref{BigFloat},
+                one(bigx)::Ref{BigFloat},
+                bigx::Ref{BigFloat},
+                RoundUp::Base.MPFR.MPFRRoundingMode
+            )::Int32
+            bigw = $g_round(ir, bigz, r)
+            return BigFloat(bigw, r; precision = prec)
+        end
+        function $f_round(ir::IntervalRounding{:slow}, x::AbstractFloat, r::RoundingMode{:Up})
+            prec = precision(x)
+            bigx = BigFloat(x; precision = prec + 32)
+            bigz = BigFloat(; precision = prec + 32)
+            @ccall Base.MPFR.libmpfr.mpfr_div(
+                bigz::Ref{BigFloat},
+                one(bigx)::Ref{BigFloat},
+                bigx::Ref{BigFloat},
+                RoundDown::Base.MPFR.MPFRRoundingMode
+            )::Int32
+            bigw = $g_round(ir, bigz, r)
+            return BigFloat(bigw, r; precision = prec)
+        end
+        $f_round(::IntervalRounding{:none}, x::AbstractFloat, ::RoundingMode) = $f(x)
+    end
+end
+
+# CRlibm functions
+
+for f ∈ [:exp, :expm1, :log, :log1p, :log2, :log10, :sin, :cos, :tan, :asin, :acos, :atan, :sinh, :cosh, :sinpi, :cospi, :tanpi, :atanpi]
     if isdefined(Base, f)
         f_round = Symbol(:_, f, :_round)
+        crlibm_f_d = string(f, "_rd")
+        crlibm_f_u = string(f, "_ru")
+        mpfr_f = Symbol(:mpfr_, f)
 
-        @eval $f_round(x::NumTypes, r::RoundingMode) = $f_round(interval_rounding(), float(x), r) # rationals are converted to floats
+        @eval $f_round(x::AbstractFloat, r::RoundingMode) = $f_round(interval_rounding(), x, r)
 
         @eval $f_round(::IntervalRounding, x::AbstractFloat, r::RoundingMode) = $f_round(IntervalRounding{:slow}(), x, r)
         # @eval $f_round(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Down}) =
         #     prevfloat($f(x))
         # @eval $f_round(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Up}) =
         #     nextfloat($f(x))
-        if Int == Int32 && f ∈ (:sinpi, :cospi) # to avoid StackOverflow for 32 bit systems; CRlibm.jl shadows MPFR which does not include `sinpi` and `cospi`
+        if Int == Int32 # issues with CRlibm for 32 bit systems, use MPFR
             @eval function $f_round(::IntervalRounding{:slow}, x::AbstractFloat, r::RoundingMode)
-                bigx = _bigequiv(x)
-                return setrounding(BigFloat, r) do
-                    return $f(bigx)
-                end
+                prec = precision(x)
+                bigx = BigFloat(x; precision = prec)
+                bigz = BigFloat(; precision = prec)
+                @ccall Base.MPFR.libmpfr.$mpfr_f(
+                    bigz::Ref{BigFloat},
+                    bigx::Ref{BigFloat},
+                    r::Base.MPFR.MPFRRoundingMode
+                )::Int32
+                return bigz
             end
         else
-            @eval $f_round(::IntervalRounding{:slow}, x::AbstractFloat, r::RoundingMode) = CRlibm.$f(x, r)
-            @eval function $f_round(::IntervalRounding{:slow}, x::BigFloat, r::RoundingMode)
-                return setrounding(BigFloat, r) do
-                    return $f(x)
-                end
+            @eval $f_round(::IntervalRounding{:slow}, x::Float16, r::RoundingMode) = Float16($f_round(Float64(x), r), r)
+            @eval $f_round(::IntervalRounding{:slow}, x::Float32, r::RoundingMode) = Float32($f_round(Float64(x), r), r)
+            @eval $f_round(::IntervalRounding{:slow}, x::Float64, r::RoundingMode{:Down}) = ccall(($crlibm_f_d, CRlibm_jll.libcrlibm), Float64, (Float64,), x)
+            @eval $f_round(::IntervalRounding{:slow}, x::Float64, r::RoundingMode{:Up}) = ccall(($crlibm_f_u, CRlibm_jll.libcrlibm), Float64, (Float64,), x)
+
+            @eval function $f_round(::IntervalRounding{:slow}, x::AbstractFloat, r::RoundingMode)
+                prec = precision(x)
+                bigx = BigFloat(x; precision = prec)
+                bigz = BigFloat(; precision = prec)
+                @ccall Base.MPFR.libmpfr.$mpfr_f(
+                    bigz::Ref{BigFloat},
+                    bigx::Ref{BigFloat},
+                    r::Base.MPFR.MPFRRoundingMode
+                )::Int32
+                return bigz
             end
         end
         @eval $f_round(::IntervalRounding{:none}, x::AbstractFloat, ::RoundingMode) = $f(x)

@@ -4,7 +4,7 @@ repo = "https://github.com/JuliaIntervals/IntervalArithmetic.jl.git"
 version = "0.22.5"
 
 [deps]
-CRlibm = "96374032-68de-5a5b-8d9e-752f78720389"
+CRlibm_jll = "4e9b3aee-d8a1-5a3d-ad8b-7d824db253f0"
 RoundingEmulator = "5eaf0fd0-dfba-4ccb-bf02-d820a40db705"
 
 [weakdeps]
@@ -16,7 +16,7 @@ IntervalArithmeticDiffRulesExt = "DiffRules"
 IntervalArithmeticRecipesBaseExt = "RecipesBase"
 
 [compat]
-CRlibm = "1"
+CRlibm_jll = "1"
 DiffRules = "1"
 RecipesBase = "1"
 RoundingEmulator = "0.2"

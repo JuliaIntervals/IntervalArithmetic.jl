@@ -4,29 +4,23 @@
 
 # helper functions
 
-_quadrant_down(x::T) where {T<:Rational} = _quadrant(float(T)(x, RoundDown))
-_quadrant_down(x::T) where {T<:AbstractFloat} = _quadrant(x)
-
-_quadrant_up(x::T) where {T<:Rational} = _quadrant(float(T)(x, RoundUp))
-_quadrant_up(x::T) where {T<:AbstractFloat} = _quadrant(x)
-
 function _quadrant(x::AbstractFloat)
-    x_mod2pi = rem2pi(x, RoundNearest)
-    -2x_mod2pi > π && return 2 # [-π, -π/2)
-    x_mod2pi < 0 && return 3 # [-π/2, 0)
-    2x_mod2pi < π && return 0 # [0, π/2)
+    r = rem2pi(x, RoundNearest)
+    -2r > π && return 2 # [-π, -π/2)
+    r   < 0 && return 3 # [-π/2, 0)
+    2r  < π && return 0 # [0, π/2)
     return 1 # [π/2, π]
 end
 
-function _quadrantpi(x::NumTypes) # used in `sinpi` and `cospi`
-    x_mod2 = rem(x, 2)
-    2x_mod2 < -3 && return 0 # [-2π, -3π/2)
-    x_mod2 < -1 && return 1 # [-3π/2, -π)
-    2x_mod2 < -1 && return 2 # [-π, -π/2)
-    x_mod2 < 0 && return 3 # [-π/2, 0)
-    2x_mod2 < 1 && return 0 # [0, π/2)
-    x_mod2 < 1 && return 1 # [π/2, π)
-    2x_mod2 < 3 && return 2 # [π, 3π/2)
+function _quadrantpi(x::AbstractFloat) # used in `sinpi` and `cospi`
+    r = rem(x, 2)
+    2r < -3 && return 0 # [-2π, -3π/2)
+    r  < -1 && return 1 # [-3π/2, -π)
+    2r < -1 && return 2 # [-π, -π/2)
+    r  <  0 && return 3 # [-π/2, 0)
+    2r <  1 && return 0 # [0, π/2)
+    r  <  1 && return 1 # [π/2, π)
+    2r <  3 && return 2 # [π, 3π/2)
     return 3 # [3π/2, 2π]
 end
 
@@ -55,17 +49,16 @@ Base.cosd(x::Interval{T}) where {T<:NumTypes} = cospi(x / interval(T, 180))
 
 Implement the `sin` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function Base.sin(x::BareInterval{T}) where {T<:NumTypes}
+function Base.sin(x::BareInterval{T}) where {T<:AbstractFloat}
     isempty_interval(x) && return x
 
     d = diam(x)
-    inf_two_pi = _mul_round(convert(T, 2), inf(bareinterval(T, π)), RoundDown)
-    d ≥ inf_two_pi && return _unsafe_bareinterval(T, -one(T), one(T))
+    d/2 ≥ π && return _unsafe_bareinterval(T, -one(T), one(T))
 
     lo, hi = bounds(x)
 
-    lo_quadrant = _quadrant_down(lo)
-    hi_quadrant = _quadrant_up(hi)
+    lo_quadrant = _quadrant(lo)
+    hi_quadrant = _quadrant(hi)
 
     if lo_quadrant == hi_quadrant
         d ≥ π && return _unsafe_bareinterval(T, -one(T), one(T))
@@ -90,6 +83,8 @@ function Base.sin(x::BareInterval{T}) where {T<:NumTypes}
     end
 end
 
+Base.sin(x::BareInterval{<:Rational}) = sin(float(x))
+
 function Base.sin(x::Interval)
     @inline r = sin(bareinterval(x))
     d = min(decoration(x), decoration(r))
@@ -98,7 +93,7 @@ end
 
 # not in the IEEE Standard 1788-2015
 
-function Base.sinpi(x::BareInterval{T}) where {T<:NumTypes}
+function Base.sinpi(x::BareInterval{T}) where {T<:AbstractFloat}
     isempty_interval(x) && return x
 
     d = diam(x)
@@ -132,6 +127,8 @@ function Base.sinpi(x::BareInterval{T}) where {T<:NumTypes}
     end
 end
 
+Base.sinpi(x::BareInterval{<:Rational}) = sinpi(float(x))
+
 function Base.sinpi(x::Interval)
     r = sinpi(bareinterval(x))
     d = min(decoration(x), decoration(r))
@@ -144,17 +141,16 @@ end
 
 Implement the `cos` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function Base.cos(x::BareInterval{T}) where {T<:NumTypes}
+function Base.cos(x::BareInterval{T}) where {T<:AbstractFloat}
     isempty_interval(x) && return x
 
     d = diam(x)
-    inf_two_pi = _mul_round(convert(T, 2), inf(bareinterval(T, π)), RoundDown)
-    d ≥ inf_two_pi && return _unsafe_bareinterval(T, -one(T), one(T))
+    d/2 ≥ π && return _unsafe_bareinterval(T, -one(T), one(T))
 
     lo, hi = bounds(x)
 
-    lo_quadrant = _quadrant_down(lo)
-    hi_quadrant = _quadrant_up(hi)
+    lo_quadrant = _quadrant(lo)
+    hi_quadrant = _quadrant(hi)
 
     if lo_quadrant == hi_quadrant
         d ≥ π && return _unsafe_bareinterval(T, -one(T), one(T))
@@ -179,6 +175,8 @@ function Base.cos(x::BareInterval{T}) where {T<:NumTypes}
     end
 end
 
+Base.cos(x::BareInterval{<:Rational}) = cos(float(x))
+
 function Base.cos(x::Interval)
     @inline r = cos(bareinterval(x))
     d = min(decoration(x), decoration(r))
@@ -187,7 +185,7 @@ end
 
 # not in the IEEE Standard 1788-2015
 
-function Base.cospi(x::BareInterval{T}) where {T<:NumTypes}
+function Base.cospi(x::BareInterval{T}) where {T<:AbstractFloat}
     isempty_interval(x) && return x
 
     d = diam(x)
@@ -223,6 +221,8 @@ function Base.cospi(x::BareInterval{T}) where {T<:NumTypes}
     end
 end
 
+Base.cospi(x::BareInterval{<:Rational}) = cospi(float(x))
+
 function Base.cospi(x::Interval)
     r = cospi(bareinterval(x))
     d = min(decoration(x), decoration(r))
@@ -235,15 +235,15 @@ end
 
 Implement the `tan` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function Base.tan(x::BareInterval{T}) where {T<:NumTypes}
+function Base.tan(x::BareInterval{T}) where {T<:AbstractFloat}
     isempty_interval(x) && return x
 
     diam(x) > π && return entireinterval(BareInterval{T})
 
     lo, hi = bounds(x)
 
-    lo_quadrant = _quadrant_down(lo)
-    hi_quadrant = _quadrant_up(hi)
+    @show lo_quadrant = _quadrant(lo)
+    @show hi_quadrant = _quadrant(hi)
     lo_quadrant_mod = mod(lo_quadrant, 2)
     hi_quadrant_mod = mod(hi_quadrant, 2)
 
@@ -255,6 +255,8 @@ function Base.tan(x::BareInterval{T}) where {T<:NumTypes}
 
     end
 end
+
+Base.tan(x::BareInterval{<:Rational}) = tan(float(x))
 
 function Base.tan(x::Interval)
     @inline r = tan(bareinterval(x))
@@ -269,7 +271,7 @@ end
 
 Implement the `cot` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function Base.cot(x::BareInterval{T}) where {T<:NumTypes}
+function Base.cot(x::BareInterval{T}) where {T<:AbstractFloat}
     isempty_interval(x) && return x
 
     diam(x) > π && return entireinterval(BareInterval{T})
@@ -278,8 +280,8 @@ function Base.cot(x::BareInterval{T}) where {T<:NumTypes}
 
     lo, hi = bounds(x)
 
-    lo_quadrant = _quadrant_down(lo)
-    hi_quadrant = _quadrant_up(hi)
+    lo_quadrant = _quadrant(lo)
+    hi_quadrant = _quadrant(hi)
 
     if (lo_quadrant == 2 || lo_quadrant == 3) && hi == 0
         return @round(T, typemin(T), cot(lo)) # singularity from the left
@@ -293,6 +295,8 @@ function Base.cot(x::BareInterval{T}) where {T<:NumTypes}
     end
 end
 
+Base.cot(x::BareInterval{<:Rational}) = cot(float(x))
+
 # automatically defined for `Interval` since it is a subtype of `Real`
 
 """
@@ -301,15 +305,15 @@ end
 
 Implement the `sec` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function Base.sec(x::BareInterval{T}) where {T<:NumTypes}
+function Base.sec(x::BareInterval{T}) where {T<:AbstractFloat}
     isempty_interval(x) && return x
 
     diam(x) > π && return entireinterval(BareInterval{T})
 
     lo, hi = bounds(x)
 
-    lo_quadrant = _quadrant_down(lo)
-    hi_quadrant = _quadrant_up(hi)
+    lo_quadrant = _quadrant(lo)
+    hi_quadrant = _quadrant(hi)
 
     if lo_quadrant == hi_quadrant
         (lo_quadrant == 0) | (lo_quadrant == 1) && return @round(T, sec(lo), sec(hi)) # increasing
@@ -327,6 +331,8 @@ function Base.sec(x::BareInterval{T}) where {T<:NumTypes}
     end
 end
 
+Base.sec(x::BareInterval{<:Rational}) = sec(float(x))
+
 # automatically defined for `Interval` since it is a subtype of `Real`
 
 """
@@ -335,7 +341,7 @@ end
 
 Implement the `csc` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function Base.csc(x::BareInterval{T}) where {T<:NumTypes}
+function Base.csc(x::BareInterval{T}) where {T<:AbstractFloat}
     isempty_interval(x) && return x
 
     diam(x) > π && return entireinterval(BareInterval{T})
@@ -344,8 +350,8 @@ function Base.csc(x::BareInterval{T}) where {T<:NumTypes}
 
     lo, hi = bounds(x)
 
-    lo_quadrant = _quadrant_down(lo)
-    hi_quadrant = _quadrant_up(hi)
+    lo_quadrant = _quadrant(lo)
+    hi_quadrant = _quadrant(hi)
 
     if (lo_quadrant == 2 || lo_quadrant == 3) && hi == 0
         # singularity from the left
@@ -368,6 +374,8 @@ function Base.csc(x::BareInterval{T}) where {T<:NumTypes}
     end
 end
 
+Base.csc(x::BareInterval{<:Rational}) = csc(float(x))
+
 # automatically defined for `Interval` since it is a subtype of `Real`
 
 """
@@ -376,12 +384,14 @@ end
 
 Implement the `asin` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function Base.asin(x::BareInterval{T}) where {T<:NumTypes}
+function Base.asin(x::BareInterval{T}) where {T<:AbstractFloat}
     domain = _unsafe_bareinterval(T, -one(T), one(T))
     x = intersect_interval(x, domain)
     isempty_interval(x) && return x
     return @round(T, asin(inf(x)), asin(sup(x)))
 end
+
+Base.asin(x::BareInterval{<:Rational}) = asin(float(x))
 
 function Base.asin(x::Interval{T}) where {T<:NumTypes}
     domain = _unsafe_bareinterval(T, -one(T), one(T))
@@ -398,12 +408,14 @@ end
 
 Implement the `acos` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function Base.acos(x::BareInterval{T}) where {T<:NumTypes}
+function Base.acos(x::BareInterval{T}) where {T<:AbstractFloat}
     domain = _unsafe_bareinterval(T, -one(T), one(T))
     x = intersect_interval(x, domain)
     isempty_interval(x) && return x
     return @round(T, acos(sup(x)), acos(inf(x)))
 end
+
+Base.acos(x::BareInterval{<:Rational}) = acos(float(x))
 
 function Base.acos(x::Interval{T}) where {T<:NumTypes}
     domain = _unsafe_bareinterval(T, -one(T), one(T))
@@ -420,10 +432,12 @@ end
 
 Implement the `atan` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function Base.atan(x::BareInterval{T}) where {T<:NumTypes}
+function Base.atan(x::BareInterval{T}) where {T<:AbstractFloat}
     isempty_interval(x) && return x
     return @round(T, atan(inf(x)), atan(sup(x)))
 end
+
+Base.atan(x::BareInterval{<:Rational}) = atan(float(x))
 
 function Base.atan(x::Interval)
     r = atan(bareinterval(x))
@@ -437,10 +451,12 @@ end
 
 Implement the `acot` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function Base.acot(x::BareInterval{T}) where {T<:NumTypes}
+function Base.acot(x::BareInterval{T}) where {T<:AbstractFloat}
     isempty_interval(x) && return x
     return @round(T, acot(sup(x)), acot(inf(x)))
 end
+
+Base.acot(x::BareInterval{<:Rational}) = acot(float(x))
 
 # automatically defined for `Interval` since it is a subtype of `Real`
 
@@ -450,7 +466,7 @@ end
 
 Implement the `atan2` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function Base.atan(y::BareInterval{T}, x::BareInterval{T}) where {T<:NumTypes}
+function Base.atan(y::BareInterval{T}, x::BareInterval{T}) where {T<:AbstractFloat}
     isempty_interval(y) && return y
     isempty_interval(x) && return x
 
@@ -496,6 +512,8 @@ function Base.atan(y::BareInterval{T}, x::BareInterval{T}) where {T<:NumTypes}
         end
     end
 end
+
+Base.atan(y::BareInterval{T}, x::BareInterval{T}) where {T<:Rational} = atan(float(y), float(x))
 
 Base.atan(y::BareInterval, x::BareInterval) = atan(promote(y, x)...)
 
