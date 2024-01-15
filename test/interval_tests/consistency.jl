@@ -184,6 +184,11 @@
     @testset "mid with α" begin
         @test_throws DomainError mid(interval(1, 2), 1.2)
         @test_throws DomainError mid(interval(1, 2), -0.7)
+        @test mid(interval(0, 1), 0.75) == 0.75
+        @test mid(interval(0, 1000), 0.125) == 125
+        @test mid(interval(1, Inf), 0.75) > 0
+        @test mid(interval(-Inf, Inf), 0.75) > 0
+        @test mid(interval(-Inf, Inf), 0.25) < 0
     end
 
     @testset "mid with large floats" begin
