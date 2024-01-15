@@ -283,10 +283,10 @@ for f ∈ [:exp, :expm1, :log, :log1p, :log2, :log10, :sin, :cos, :tan, :asin, :
                 return bigz
             end
         else
-            @eval $f_round(::IntervalRounding{:slow}, x::Float16, r::RoundingMode) = Float16($f_round(Float64(x), r), r)
-            @eval $f_round(::IntervalRounding{:slow}, x::Float32, r::RoundingMode) = Float32($f_round(Float64(x), r), r)
-            @eval $f_round(::IntervalRounding{:slow}, x::Float64, r::RoundingMode{:Down}) = ccall(($crlibm_f_d, CRlibm_jll.libcrlibm), Float64, (Float64,), x)
-            @eval $f_round(::IntervalRounding{:slow}, x::Float64, r::RoundingMode{:Up}) = ccall(($crlibm_f_u, CRlibm_jll.libcrlibm), Float64, (Float64,), x)
+            @eval $f_round(::IntervalRounding{:tight}, x::Float16, r::RoundingMode) = Float16($f_round(Float64(x), r), r)
+            @eval $f_round(::IntervalRounding{:tight}, x::Float32, r::RoundingMode) = Float32($f_round(Float64(x), r), r)
+            @eval $f_round(::IntervalRounding{:tight}, x::Float64, r::RoundingMode{:Down}) = ccall(($crlibm_f_d, CRlibm_jll.libcrlibm), Float64, (Float64,), x)
+            @eval $f_round(::IntervalRounding{:tight}, x::Float64, r::RoundingMode{:Up}) = ccall(($crlibm_f_u, CRlibm_jll.libcrlibm), Float64, (Float64,), x)
 
             @eval function $f_round(::IntervalRounding{:slow}, x::AbstractFloat, r::RoundingMode)
                 prec = precision(x)
