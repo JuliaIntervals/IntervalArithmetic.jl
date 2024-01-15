@@ -84,43 +84,62 @@ Implement the `mid` function of the IEEE Standard 1788-2015 (Table 9.2).
 
 See also: [`inf`](@ref), [`sup`](@ref), [`bounds`](@ref), [`diam`](@ref),
 [`radius`](@ref) and [`midradius`](@ref).
+
+
+    mid(x, α)
+
+Relative midpoint of `x`, for `α` between 0 and 1.
+
+`mid(x, 0)` is the lower bound of the interval, `mid(x, 1)` the upper bound,
+and `mid(x, 0.5)` the midpoint.
 """
-function mid(x::BareInterval{T}) where {T<:AbstractFloat}
+function mid(x::BareInterval{T}, α = 0.5) where {T<:AbstractFloat}
+    !(0 <= α <= 1) && throw(DomainError(α, "α must be between 0 and 1"))
     isempty_interval(x) && return convert(T, NaN)
-    isentire_interval(x) && return zero(T)
-    lo, hi = bounds(x)
-    lo == typemin(T) && return nextfloat(lo) # cf. Section 12.12.8
-    hi == typemax(T) && return prevfloat(hi) # cf. Section 12.12.8
-    midpoint = (lo + hi) / 2
-    isfinite(midpoint) && return _normalisezero(midpoint)
-    # fallback in case of overflow
-    # cannot be the default, since it does not pass several IEEE 1788-2015 tests for small floats
-    return _normalisezero(lo / 2 + hi / 2)
+    if isentire_interval(x)
+        α == 0.5 && return zero(T)
+        α > 0.5 && return prevfloat(typemax(T))
+        return nextfloat(typemin(T))
+    else
+        lo, hi = bounds(x)
+        lo == typemin(T) && return nextfloat(lo) # cf. Section 12.12.8
+        hi == typemax(T) && return prevfloat(hi) # cf. Section 12.12.8
+        β = convert(T, α)
+        midpoint = β * (hi + lo * (1/β - 1)) # Exactly 0.5 * (hi + lo) for β = 0.5
+        isfinite(midpoint) && return _normalisezero(midpoint)
+        return _normalisezero((1 - β) * lo + β * hi)
+    end
 end
-function mid(x::BareInterval{T}) where {T<:Rational}
+function mid(x::BareInterval{T}, α = 1//2) where {T<:Rational}
+    !(0 <= α <= 1) && throw(DomainError(α, "α must be between 0 and 1"))
     isempty_interval(x) && return throw(ArgumentError("cannot compute the midpoint of empty intervals; cannot return a `Rational` NaN"))
-    isentire_interval(x) && return zero(T)
-    lo, hi = bounds(x)
-    lo == typemin(T) && return nextfloat(lo) # cf. Section 12.12.8
-    hi == typemax(T) && return prevfloat(hi) # cf. Section 12.12.8
-    midpoint = (lo + hi) / 2
-    isfinite(midpoint) && return _normalisezero(midpoint)
-    # fallback in case of overflow
-    # cannot be the default, since it does not pass several IEEE 1788-2015 tests for small floats
-    return _normalisezero(lo / 2 + hi / 2)
+    if isentire_interval(x)
+        α == 0.5 && return zero(T)
+        α > 0.5 && return prevfloat(typemax(T))
+        return nextfloat(typemin(T))
+    else
+        lo, hi = bounds(x)
+        lo == typemin(T) && return nextfloat(lo) # cf. Section 12.12.8
+        hi == typemax(T) && return prevfloat(hi) # cf. Section 12.12.8
+        β = convert(T, α)
+        midpoint = β * (hi - lo) + lo
+        isfinite(midpoint) && return _normalisezero(midpoint)
+        return _normalisezero((1 - β) * lo + β * hi)
+    end
 end
-
-function mid(x::Interval{T}) where {T<:AbstractFloat}
+function mid(x::Interval{T}, α = 0.5) where {T<:AbstractFloat}
+    !(0 <= α <= 1) && throw(DomainError(α, "α must be between 0 and 1"))
     isnai(x) && return convert(T, NaN)
-    return mid(bareinterval(x))
+    return mid(bareinterval(x), α)
 end
-function mid(x::Interval{<:Rational})
+function mid(x::Interval{<:Rational}, α = 1//2)
+    !(0 <= α <= 1) && throw(DomainError(α, "α must be between 0 and 1"))
     isnai(x) && return throw(ArgumentError("cannot compute the midpoint of an NaI; cannot return a `Rational` NaN"))
-    return mid(bareinterval(x))
+    return mid(bareinterval(x), α)
 end
 
-mid(x::Real) = mid(interval(x))
-mid(x::Complex) = complex(mid(real(x)), mid(imag(x)))
+mid(x::Real, α = 0.5) = mid(interval(x), α)
+mid(x::Complex, α = 0.5) = complex(mid(real(x), α), mid(imag(x), α))
 
 """
     diam(x)
