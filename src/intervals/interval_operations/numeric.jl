@@ -76,25 +76,19 @@ end
 bounds(x::Real) = bounds(interval(x))
 
 """
-    mid(x)
+    mid(x, α = 0.5)
 
-Midpoint of `x`.
+Relative midpoint of `x`, for `α` between 0 and 1 such that `mid(x, 0)` is the
+lower bound of the interval, `mid(x, 1)` its upper bound, and `mid(x, 0.5)` its
+midpoint.
 
 Implement the `mid` function of the IEEE Standard 1788-2015 (Table 9.2).
 
 See also: [`inf`](@ref), [`sup`](@ref), [`bounds`](@ref), [`diam`](@ref),
 [`radius`](@ref) and [`midradius`](@ref).
-
-
-    mid(x, α)
-
-Relative midpoint of `x`, for `α` between 0 and 1.
-
-`mid(x, 0)` is the lower bound of the interval, `mid(x, 1)` the upper bound,
-and `mid(x, 0.5)` the midpoint.
 """
 function mid(x::BareInterval{T}, α = 0.5) where {T<:AbstractFloat}
-    !(0 <= α <= 1) && throw(DomainError(α, "α must be between 0 and 1"))
+    0 ≤ α ≤ 1 || throw(DomainError(α, "α must be between 0 and 1"))
     isempty_interval(x) && return convert(T, NaN)
     if isentire_interval(x)
         α == 0.5 && return zero(T)
@@ -105,13 +99,13 @@ function mid(x::BareInterval{T}, α = 0.5) where {T<:AbstractFloat}
         lo == typemin(T) && return nextfloat(lo) # cf. Section 12.12.8
         hi == typemax(T) && return prevfloat(hi) # cf. Section 12.12.8
         β = convert(T, α)
-        midpoint = β * (hi + lo * (1/β - 1)) # Exactly 0.5 * (hi + lo) for β = 0.5
+        midpoint = β * (hi + lo * (1/β - 1)) # exactly 0.5 * (hi + lo) for β = 0.5
         isfinite(midpoint) && return _normalisezero(midpoint)
         return _normalisezero((1 - β) * lo + β * hi)
     end
 end
 function mid(x::BareInterval{T}, α = 1//2) where {T<:Rational}
-    !(0 <= α <= 1) && throw(DomainError(α, "α must be between 0 and 1"))
+    0 ≤ α ≤ 1 || throw(DomainError(α, "α must be between 0 and 1"))
     isempty_interval(x) && return throw(ArgumentError("cannot compute the midpoint of empty intervals; cannot return a `Rational` NaN"))
     if isentire_interval(x)
         α == 0.5 && return zero(T)
@@ -127,13 +121,14 @@ function mid(x::BareInterval{T}, α = 1//2) where {T<:Rational}
         return _normalisezero((1 - β) * lo + β * hi)
     end
 end
+
 function mid(x::Interval{T}, α = 0.5) where {T<:AbstractFloat}
-    !(0 <= α <= 1) && throw(DomainError(α, "α must be between 0 and 1"))
+    0 ≤ α ≤ 1 || throw(DomainError(α, "α must be between 0 and 1"))
     isnai(x) && return convert(T, NaN)
     return mid(bareinterval(x), α)
 end
 function mid(x::Interval{<:Rational}, α = 1//2)
-    !(0 <= α <= 1) && throw(DomainError(α, "α must be between 0 and 1"))
+    0 ≤ α ≤ 1 || throw(DomainError(α, "α must be between 0 and 1"))
     isnai(x) && return throw(ArgumentError("cannot compute the midpoint of an NaI; cannot return a `Rational` NaN"))
     return mid(bareinterval(x), α)
 end
