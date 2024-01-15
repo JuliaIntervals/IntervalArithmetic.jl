@@ -8,9 +8,7 @@ Create a `BigFloat` with the same underlying precision.
 """
 function _bigequiv(x::T) where {T<:NumTypes}
     lock(precision_lock) do
-        setprecision(precision(float(T))) do
-            return BigFloat(x)
-        end
+        BigFloat(x, precision = precision(float(T)))
     end
 end
 
