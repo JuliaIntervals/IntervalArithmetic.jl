@@ -242,8 +242,8 @@ function Base.tan(x::BareInterval{T}) where {T<:AbstractFloat}
 
     lo, hi = bounds(x)
 
-    @show lo_quadrant = _quadrant(lo)
-    @show hi_quadrant = _quadrant(hi)
+    lo_quadrant = _quadrant(lo)
+    hi_quadrant = _quadrant(hi)
     lo_quadrant_mod = mod(lo_quadrant, 2)
     hi_quadrant_mod = mod(hi_quadrant, 2)
 
