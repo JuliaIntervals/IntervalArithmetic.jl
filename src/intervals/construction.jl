@@ -83,14 +83,14 @@ struct BareInterval{T<:NumTypes}
 
     # need explicit signatures to avoid method ambiguities
 
-    global _unsafe_bareinterval(::Type{T}, a::T, b::T) where {S<:Integer,T<:Rational{S}} =
+    global __unsafe_bareinterval(::Type{T}, a::T, b::T) where {S<:Integer,T<:Rational{S}} =
         new{T}(_normalisezero(a), _normalisezero(b))
-    _unsafe_bareinterval(::Type{T}, a::T, b::T) where {S<:Union{Int8,UInt8},T<:Rational{S}} =
+    __unsafe_bareinterval(::Type{T}, a::T, b::T) where {S<:Union{Int8,UInt8},T<:Rational{S}} =
         new{T}(_normalisezero(a), _normalisezero(b))
-    _unsafe_bareinterval(::Type{T}, a::T, b::T) where {S<:Union{Int16,UInt16},T<:Rational{S}} =
+    __unsafe_bareinterval(::Type{T}, a::T, b::T) where {S<:Union{Int16,UInt16},T<:Rational{S}} =
         new{T}(_normalisezero(a), _normalisezero(b))
 
-    _unsafe_bareinterval(::Type{T}, a::T, b::T) where {T<:AbstractFloat} =
+    __unsafe_bareinterval(::Type{T}, a::T, b::T) where {T<:AbstractFloat} =
         new{T}(_normalisezero(a), _normalisezero(b))
 end
 
@@ -104,7 +104,31 @@ Internal constructor which assumes that `is_valid_interval(lo, hi) == true`.
     Since misuse of this function can deeply corrupt code, its usage is
     **strongly discouraged** in favour of [`bareinterval`](@ref).
 """
-_unsafe_bareinterval
+_unsafe_bareinterval(::Type{T}, a, b) where {T<:NumTypes} = __unsafe_bareinterval(T, a, b)
+
+_unsafe_bareinterval(::Type{T}, ::AbstractIrrational, ::AbstractIrrational) where {T<:NumTypes} = throw(ArgumentError("only π, γ and catalan are correctly rounded irrationals"))
+_unsafe_bareinterval(::Type{T}, ::AbstractIrrational, _) where {T<:NumTypes} = throw(ArgumentError("only π, γ and catalan are correctly rounded irrationals"))
+_unsafe_bareinterval(::Type{T}, _, ::AbstractIrrational) where {T<:NumTypes} = throw(ArgumentError("only π, γ and catalan are correctly rounded irrationals"))
+for irr1 ∈ (:(:π), :(:γ), :(:catalan))
+    for irr2 ∈ (:(:π), :(:γ), :(:catalan))
+        @eval begin
+            function _unsafe_bareinterval(::Type{T}, a::Irrational{$irr1}, b::Irrational{$irr2}) where {T<:NumTypes}
+                big_x = __unsafe_bareinterval(big(float(T)), a, b)
+                return __unsafe_bareinterval(T, _inf(big_x), _sup(big_x))
+            end
+        end
+    end
+    @eval begin
+        function _unsafe_bareinterval(::Type{T}, a::Irrational{$irr1}, b) where {T<:NumTypes}
+            big_x = __unsafe_bareinterval(big(float(T)), a, b)
+            return __unsafe_bareinterval(T, _inf(big_x), _sup(big_x))
+        end
+        function _unsafe_bareinterval(::Type{T}, a, b::Irrational{$irr1}) where {T<:NumTypes}
+            big_x = __unsafe_bareinterval(big(float(T)), a, b)
+            return __unsafe_bareinterval(T, _inf(big_x), _sup(big_x))
+        end
+    end
+end
 
 _normalisezero(a) = ifelse(iszero(a), zero(a), a)
 # used only to construct intervals; needed to avoid `inf` and `sup` normalization
@@ -114,51 +138,68 @@ _inf(x::Real) = x
 _sup(x::Real) = x
 #
 
-_unsafe_bareinterval(::Type{T}, a::Rational, b::Rational) where {S<:Integer,T<:Rational{S}} =
-    _unsafe_bareinterval(T, T(a), T(b))
-_unsafe_bareinterval(::Type{T}, a::Rational, b::Rational) where {S<:Union{Int8,UInt8},T<:Rational{S}} =
-    _unsafe_bareinterval(T, T(a), T(b))
-_unsafe_bareinterval(::Type{T}, a::Rational, b::Rational) where {S<:Union{Int16,UInt16},T<:Rational{S}} =
-    _unsafe_bareinterval(T, T(a), T(b))
-_unsafe_bareinterval(::Type{T}, a::Rational, b) where {S<:Integer,T<:Rational{S}} =
-    _unsafe_bareinterval(T, T(a), rationalize(S, nextfloat(float(S)(b, RoundUp))))
-_unsafe_bareinterval(::Type{T}, a, b::Rational) where {S<:Integer,T<:Rational{S}} =
-    _unsafe_bareinterval(T, rationalize(S, nextfloat(float(S)(a, RoundDown))), T(b))
-function _unsafe_bareinterval(::Type{T}, a, b) where {S<:Integer,T<:Rational{S}}
-    R = float(S)
-    return _unsafe_bareinterval(T, rationalize(S, prevfloat(R(a, RoundDown))), rationalize(S, nextfloat(R(b, RoundUp))))
-end
-# need the following since `float(Int8) == float(Int16) == Float64`
-_unsafe_bareinterval(::Type{T}, a, b) where {S<:Union{Int8,UInt8},T<:Rational{S}} =
-    _unsafe_bareinterval(T, rationalize(S, prevfloat(Float16(a, RoundDown))), rationalize(S, nextfloat(Float16(b, RoundUp))))
-_unsafe_bareinterval(::Type{T}, a, b) where {S<:Union{Int16,UInt16},T<:Rational{S}} =
-    _unsafe_bareinterval(T, rationalize(S, prevfloat(Float32(a, RoundDown))), rationalize(S, nextfloat(Float32(b, RoundUp))))
-
-_unsafe_bareinterval(::Type{T}, a, b) where {T<:AbstractFloat} = _unsafe_bareinterval(T, T(a, RoundDown), T(b, RoundUp))
-
-# by-pass the absence of `BigFloat(..., ROUNDING_MODE)` (cf. base/irrationals.jl)
-# for some irrationals defined in MathConstants (cf. base/mathconstants.jl)
-for sym ∈ (:(:ℯ), :(:φ))
-    @eval begin
-        _unsafe_bareinterval(::Type{BigFloat}, a::Irrational{:ℯ}, b::Irrational{$sym}) =
-            _unsafe_bareinterval(BigFloat, BigFloat(Float64(a, RoundDown), RoundDown), BigFloat(Float64(b, RoundUp), RoundUp))
-        _unsafe_bareinterval(::Type{BigFloat}, a::Irrational{:φ}, b::Irrational{$sym}) =
-            _unsafe_bareinterval(BigFloat, BigFloat(Float64(a, RoundDown), RoundDown), BigFloat(Float64(b, RoundUp), RoundUp))
-        _unsafe_bareinterval(::Type{BigFloat}, a::Irrational{$sym}, b) =
-            _unsafe_bareinterval(BigFloat, BigFloat(Float64(a, RoundDown), RoundDown), BigFloat(b, RoundUp))
-        _unsafe_bareinterval(::Type{BigFloat}, a, b::Irrational{$sym}) =
-            _unsafe_bareinterval(BigFloat, BigFloat(a, RoundDown), BigFloat(Float64(b, RoundUp), RoundUp))
-
-        _unsafe_bareinterval(::Type{Rational{BigInt}}, a::Irrational{:ℯ}, b::Irrational{$sym}) =
-            _unsafe_bareinterval(Rational{BigInt}, BigFloat(Float64(a, RoundDown), RoundDown), BigFloat(Float64(b, RoundUp), RoundUp))
-        _unsafe_bareinterval(::Type{Rational{BigInt}}, a::Irrational{:φ}, b::Irrational{$sym}) =
-            _unsafe_bareinterval(Rational{BigInt}, BigFloat(Float64(a, RoundDown), RoundDown), BigFloat(Float64(b, RoundUp), RoundUp))
-        _unsafe_bareinterval(::Type{Rational{BigInt}}, a::Irrational{$sym}, b) =
-            _unsafe_bareinterval(Rational{BigInt}, BigFloat(Float64(a, RoundDown), RoundDown), BigFloat(b, RoundUp))
-        _unsafe_bareinterval(::Type{Rational{BigInt}}, a, b::Irrational{$sym}) =
-            _unsafe_bareinterval(Rational{BigInt}, BigFloat(a, RoundDown), BigFloat(Float64(b, RoundUp), RoundUp))
+function __unsafe_bareinterval(::Type{T}, a::Rational, b::Rational) where {S<:Integer,T<:Rational{S}}
+    if S <: BigInt
+        return __unsafe_bareinterval(T, T(a), T(b))
+    elseif typemax(S) < abs(a)
+        R = float(S)
+        return __unsafe_bareinterval(T, rationalize(S, prevfloat(R(a, RoundDown))), rationalize(S, nextfloat(R(b, RoundUp))))
+    elseif typemax(S) < abs(b)
+        R = float(S)
+        return __unsafe_bareinterval(T, T(a), rationalize(S, nextfloat(R(b, RoundUp))))
+    else
+        return __unsafe_bareinterval(T, T(a), T(b))
     end
 end
+function __unsafe_bareinterval(::Type{T}, a::Rational, b::Rational) where {S<:Union{Int8,UInt8},T<:Rational{S}}
+    if S <: BigInt
+        return __unsafe_bareinterval(T, T(a), T(b))
+    elseif typemax(S) < abs(a)
+        R = float(S)
+        return __unsafe_bareinterval(T, rationalize(S, prevfloat(R(a, RoundDown))), rationalize(S, nextfloat(R(b, RoundUp))))
+    elseif typemax(S) < abs(b)
+        R = float(S)
+        return __unsafe_bareinterval(T, T(a), rationalize(S, nextfloat(R(b, RoundUp))))
+    else
+        return __unsafe_bareinterval(T, T(a), T(b))
+    end
+end
+function __unsafe_bareinterval(::Type{T}, a::Rational, b::Rational) where {S<:Union{Int16,UInt16},T<:Rational{S}}
+    if S <: BigInt
+        return __unsafe_bareinterval(T, T(a), T(b))
+    elseif typemax(S) < abs(a)
+        R = float(S)
+        return __unsafe_bareinterval(T, rationalize(S, prevfloat(R(a, RoundDown))), rationalize(S, nextfloat(R(b, RoundUp))))
+    elseif typemax(S) < abs(b)
+        R = float(S)
+        return __unsafe_bareinterval(T, T(a), rationalize(S, nextfloat(R(b, RoundUp))))
+    else
+        return __unsafe_bareinterval(T, T(a), T(b))
+    end
+end
+function __unsafe_bareinterval(::Type{T}, a::Rational, b) where {S<:Integer,T<:Rational{S}}
+    R = float(S)
+    S <: BigInt && return __unsafe_bareinterval(T, T(a), rationalize(S, nextfloat(R(b, RoundUp))))
+    typemax(S) < abs(a) && return __unsafe_bareinterval(T, rationalize(S, prevfloat(R(a, RoundDown))), rationalize(S, nextfloat(R(b, RoundUp))))
+    return __unsafe_bareinterval(T, T(a), rationalize(S, nextfloat(R(b, RoundUp))))
+end
+function __unsafe_bareinterval(::Type{T}, a, b::Rational) where {S<:Integer,T<:Rational{S}}
+    R = float(S)
+    S <: BigInt && return __unsafe_bareinterval(T, rationalize(S, prevfloat(R(a, RoundDown))), T(b))
+    typemax(S) < abs(b) && return __unsafe_bareinterval(T, rationalize(S, prevfloat(R(a, RoundDown))), rationalize(S, nextfloat(R(b, RoundUp))))
+    return __unsafe_bareinterval(T, rationalize(S, prevfloat(R(a, RoundDown))), T(b))
+end
+function __unsafe_bareinterval(::Type{T}, a, b) where {S<:Integer,T<:Rational{S}}
+    R = float(S)
+    return __unsafe_bareinterval(T, rationalize(S, prevfloat(R(a, RoundDown))), rationalize(S, nextfloat(R(b, RoundUp))))
+end
+# need the following since `float(Int8) == float(Int16) == Float64`
+__unsafe_bareinterval(::Type{T}, a, b) where {S<:Union{Int8,UInt8},T<:Rational{S}} =
+    __unsafe_bareinterval(T, rationalize(S, prevfloat(Float16(a, RoundDown))), rationalize(S, nextfloat(Float16(b, RoundUp))))
+__unsafe_bareinterval(::Type{T}, a, b) where {S<:Union{Int16,UInt16},T<:Rational{S}} =
+    __unsafe_bareinterval(T, rationalize(S, prevfloat(Float32(a, RoundDown))), rationalize(S, nextfloat(Float32(b, RoundUp))))
+
+__unsafe_bareinterval(::Type{T}, a, b) where {T<:AbstractFloat} = __unsafe_bareinterval(T, T(a, RoundDown), T(b, RoundUp))
 
 BareInterval{T}(x::BareInterval) where {T<:NumTypes} = convert(BareInterval{T}, x)
 
@@ -216,8 +257,8 @@ bareinterval(a::Tuple) = bareinterval(T, a...)
 
 # note: generated functions must be defined after all the methods they use
 @generated function bareinterval(::Type{T}, a::AbstractIrrational) where {T<:NumTypes}
-    res = _unsafe_bareinterval(T, a(), a()) # precompute the interval
-    return :($res) # set body of the function to return the precomputed result
+    x = _unsafe_bareinterval(T, a(), a()) # precompute the interval
+    return :($x) # set body of the function to return the precomputed result
 end
 
 # promotion
@@ -312,8 +353,8 @@ Internal constructor which assumes that `bareinterval` and its decoration
 _unsafe_interval
 
 # used only to construct intervals
-_inf(a::Interval) = a.bareinterval.lo
-_sup(a::Interval) = a.bareinterval.hi
+_inf(x::Interval) = x.bareinterval.lo
+_sup(x::Interval) = x.bareinterval.hi
 #
 
 function bareinterval(x::Interval)
