@@ -31,7 +31,7 @@ Some flavors `F` include:
 julia> IntervalArithmetic.default_flavor()
 IntervalArithmetic.Flavor{:set_based}()
 
-julia> is_valid_interval(Inf, Inf)
+julia> IntervalArithmetic.is_valid_interval(Inf, Inf)
 false
 
 julia> isempty_interval(bareinterval(0)/bareinterval(0))
