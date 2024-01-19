@@ -84,7 +84,7 @@ end
 end
 
 @testset "Irrationals" begin
-    for irr ∈ (MathConstants.:e, MathConstants.:γ, MathConstants.:π, MathConstants.:φ, MathConstants.:ℯ)
+    for irr ∈ (MathConstants.:π, MathConstants.:γ, MathConstants.:catalan, MathConstants.:φ, MathConstants.:ℯ)
         for T ∈ (Float16, Float32, Float64, BigFloat)
             @test in_interval(irr, interval(T, irr))
             if T !== BigFloat
@@ -157,7 +157,7 @@ end
     @test_throws DomainError convert(Interval{Float64}, interval(1+im))
 end
 
-@testset "Propagation of `isguaranteed" begin
+@testset "Propagation of `isguaranteed`" begin
     @test !isguaranteed(interval(convert(Interval{Float64}, 0), interval(convert(Interval{Float64}, 1))))
     @test !isguaranteed(interval(0, convert(Interval{Float64}, 1)))
     @test !isguaranteed(interval(convert(Interval{Float64}, 0), 1))
