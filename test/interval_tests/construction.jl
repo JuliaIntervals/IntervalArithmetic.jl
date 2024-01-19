@@ -84,7 +84,7 @@ end
 end
 
 @testset "Irrationals" begin
-    for irr ∈ (MathConstants.:π, MathConstants.:γ, MathConstants.:catalan)
+    for irr ∈ (MathConstants.:π, MathConstants.:γ, MathConstants.:catalan, MathConstants.:φ, MathConstants.:ℯ)
         for T ∈ (Float16, Float32, Float64, BigFloat)
             @test in_interval(irr, interval(T, irr))
             if T !== BigFloat
@@ -93,15 +93,6 @@ end
         end
         for T ∈ [InteractiveUtils.subtypes(Signed) ; InteractiveUtils.subtypes(Unsigned)]
             @test in_interval(irr, interval(Rational{T}, irr))
-        end
-    end
-
-    for irr ∈ (MathConstants.:φ, MathConstants.:ℯ)
-        for T ∈ (Float16, Float32, Float64, BigFloat)
-            @test_throws ArgumentError interval(T, irr)
-        end
-        for T ∈ [InteractiveUtils.subtypes(Signed) ; InteractiveUtils.subtypes(Unsigned)]
-            @test_throws ArgumentError interval(Rational{T}, irr)
         end
     end
 end
