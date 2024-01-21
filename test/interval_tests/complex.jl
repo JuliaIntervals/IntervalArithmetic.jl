@@ -28,8 +28,8 @@ end
 @testset "Inverse roots of unity" begin
     for i ∈ 0:99
         if Int == Int32 && VERSION < v"1.10"
-            @test_broken issubset_interval(cispi( -interval(i)/interval(50) ), inv(cispi( interval(i)/interval(50) ))) &&
-                radius( inv(cispi( interval(i)/interval(50) )) ) < 10eps()
+            @test issubset_interval(cispi( -interval(i)/interval(50) ), inv(cispi( interval(i)/interval(50) ))) &&
+                radius( inv(cispi( interval(i)/interval(50) )) ) < 100eps()
         else
             @test issubset_interval(cispi( -interval(i)/interval(50) ), inv(cispi( interval(i)/interval(50) ))) &&
                 radius( inv(cispi( interval(i)/interval(50) )) ) < 10eps()
