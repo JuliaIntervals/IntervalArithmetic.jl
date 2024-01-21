@@ -61,10 +61,17 @@ end
     @test isequal_interval(sind(interval(90, 270)), interval(-1 , 1))
     @test issubset_interval(interval(1/sqrt(2) , 1), sind(interval(45, 135)))
     @test issubset_interval(interval(-1/sqrt(2) , 1/sqrt(2)), sind(interval(-45, 45)))
-    @test isthin(sind(interval(180)), 0)
-    @test isthin(sind(interval(360)), 0)
-    @test isthin(sind(interval(90)), 1)
-    @test isthin(sind(interval(270)), -1)
+    if Int == Int32 && VERSION < v"1.10"
+        @test in_interval(0, sind(interval(180)))
+        @test in_interval(0, sind(interval(360)))
+        @test in_interval(1, sind(interval(90)))
+        @test in_interval(-1, sind(interval(270)))
+    else
+        @test isthin(sind(interval(180)), 0)
+        @test isthin(sind(interval(360)), 0)
+        @test isthin(sind(interval(90)), 1)
+        @test isthin(sind(interval(270)), -1)
+    end
 end
 
 @testset "cospi" begin
@@ -92,10 +99,17 @@ end
     @test issubset_interval(interval(-1 , 0), cosd(interval(90, 270)))
     @test issubset_interval(interval(-1/sqrt(2) , 1/sqrt(2)), cosd(interval(45, 135)))
     @test isequal_interval(cosd(interval(-45, 45)), interval(1/sqrt(2) , 1))
-    @test isthin(cosd(interval(180)), -1)
-    @test isthin(cosd(interval(360)), 1)
-    @test isthin(cosd(interval(90)), 0)
-    @test isthin(cosd(interval(270)), 0)
+    if Int == Int32 && VERSION < v"1.10"
+        @test in_interval(-1, cosd(interval(180)))
+        @test in_interval(1, cosd(interval(360)))
+        @test in_interval(0, cosd(interval(90)))
+        @test in_interval(0, cosd(interval(270)))
+    else
+        @test isthin(cosd(interval(180)), -1)
+        @test isthin(cosd(interval(360)), 1)
+        @test isthin(cosd(interval(90)), 0)
+        @test isthin(cosd(interval(270)), 0)
+    end
 end
 
 @testset "sincospi" begin
