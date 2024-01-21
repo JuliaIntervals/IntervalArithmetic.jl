@@ -127,6 +127,10 @@ function Base.sinpi(x::BareInterval{T}) where {T<:AbstractFloat}
     end
 end
 
+if Int == Int32 && VERSION < v"1.10"
+    Base.sinpi(x::BareInterval{Float32}) = sin(x * interval(T, π))
+end
+
 Base.sinpi(x::BareInterval{<:Rational}) = sinpi(float(x))
 
 function Base.sinpi(x::Interval)
@@ -219,6 +223,10 @@ function Base.cospi(x::BareInterval{T}) where {T<:AbstractFloat}
         return _unsafe_bareinterval(T, -one(T), one(T))
 
     end
+end
+
+if Int == Int32 && VERSION < v"1.10"
+    Base.cospi(x::BareInterval{Float32}) = cos(x * interval(T, π))
 end
 
 Base.cospi(x::BareInterval{<:Rational}) = cospi(float(x))

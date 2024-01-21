@@ -36,80 +36,78 @@ end
     @test issubset_interval(cos(interval(BigFloat, 1.3, 6.3)), cos(interval(1.3, 6.3)))
 end
 
-if (Int != Int32 && VERSION < v"1.10") || VERSION ≥ v"1.10"
-    @testset "sinpi" begin
-        @test isempty_interval(sinpi(emptyinterval()))
-        @test issubset_interval(interval(-1 , 0), sinpi(interval(1, 2)))
-        @test isequal_interval(sinpi(interval(0.5, 1.5)), interval(-1 , 1))
-        @test issubset_interval(interval(1/sqrt(2) , 1), sinpi(interval(0.25, 0.75)))
-        @test issubset_interval(interval(-1/sqrt(2) , 1/sqrt(2)), sinpi(interval(-0.25, 0.25)))
-        @test isthin(sinpi(interval(1.0)), 0)
-        @test isthin(sinpi(interval(2.0)), 0)
-        @test isthin(sinpi(interval(0.5)), 1)
-        @test isthin(sinpi(interval(1.5)), -1)
-    end
+@testset "sinpi" begin
+    @test isempty_interval(sinpi(emptyinterval()))
+    @test issubset_interval(interval(-1 , 0), sinpi(interval(1, 2)))
+    @test isequal_interval(sinpi(interval(0.5, 1.5)), interval(-1 , 1))
+    @test issubset_interval(interval(1/sqrt(2) , 1), sinpi(interval(0.25, 0.75)))
+    @test issubset_interval(interval(-1/sqrt(2) , 1/sqrt(2)), sinpi(interval(-0.25, 0.25)))
+    @test isthin(sinpi(interval(1.0)), 0)
+    @test isthin(sinpi(interval(2.0)), 0)
+    @test isthin(sinpi(interval(0.5)), 1)
+    @test isthin(sinpi(interval(1.5)), -1)
+end
 
-    @testset "sind" begin
-        @test isempty_interval(sind(emptyinterval()))
-        @test issubset_interval(interval(-1 , 0), sind(interval(180, 360)))
-        @test isequal_interval(sind(interval(90, 270)), interval(-1 , 1))
-        @test issubset_interval(interval(1/sqrt(2) , 1), sind(interval(45, 135)))
-        @test issubset_interval(interval(-1/sqrt(2) , 1/sqrt(2)), sind(interval(-45, 45)))
-        @test isthin(sind(interval(180)), 0)
-        @test isthin(sind(interval(360)), 0)
-        @test isthin(sind(interval(90)), 1)
-        @test isthin(sind(interval(270)), -1)
-    end
+@testset "sind" begin
+    @test isempty_interval(sind(emptyinterval()))
+    @test issubset_interval(interval(-1 , 0), sind(interval(180, 360)))
+    @test isequal_interval(sind(interval(90, 270)), interval(-1 , 1))
+    @test issubset_interval(interval(1/sqrt(2) , 1), sind(interval(45, 135)))
+    @test issubset_interval(interval(-1/sqrt(2) , 1/sqrt(2)), sind(interval(-45, 45)))
+    @test isthin(sind(interval(180)), 0)
+    @test isthin(sind(interval(360)), 0)
+    @test isthin(sind(interval(90)), 1)
+    @test isthin(sind(interval(270)), -1)
+end
 
-    @testset "cospi" begin
-        @test isempty_interval(cospi(emptyinterval()))
-        @test isequal_interval(cospi(interval(1, 2)), interval(-1 , 1))
-        @test issubset_interval(interval(-1 , 0), cospi(interval(0.5, 1.5)))
-        @test issubset_interval(interval(-1/sqrt(2) , 1/sqrt(2)), cospi(interval(0.25, 0.75)))
-        @test isequal_interval(cospi(interval(-0.25, 0.25)), interval(1/sqrt(2) , 1))
-        @test isthin(cospi(interval(1.0)), -1)
-        @test isthin(cospi(interval(2.0)), 1)
-        @test isthin(cospi(interval(0.5)), 0)
-        @test isthin(cospi(interval(1.5)), 0)
-    end
+@testset "cospi" begin
+    @test isempty_interval(cospi(emptyinterval()))
+    @test isequal_interval(cospi(interval(1, 2)), interval(-1 , 1))
+    @test issubset_interval(interval(-1 , 0), cospi(interval(0.5, 1.5)))
+    @test issubset_interval(interval(-1/sqrt(2) , 1/sqrt(2)), cospi(interval(0.25, 0.75)))
+    @test isequal_interval(cospi(interval(-0.25, 0.25)), interval(1/sqrt(2) , 1))
+    @test isthin(cospi(interval(1.0)), -1)
+    @test isthin(cospi(interval(2.0)), 1)
+    @test isthin(cospi(interval(0.5)), 0)
+    @test isthin(cospi(interval(1.5)), 0)
+end
 
-    @testset "cosd" begin
-        @test isempty_interval(cosd(emptyinterval()))
-        @test isequal_interval(cosd(interval(180, 360)), interval(-1 , 1))
-        @test issubset_interval(interval(-1 , 0), cosd(interval(90, 270)))
-        @test issubset_interval(interval(-1/sqrt(2) , 1/sqrt(2)), cosd(interval(45, 135)))
-        @test isequal_interval(cosd(interval(-45, 45)), interval(1/sqrt(2) , 1))
-        @test isthin(cosd(interval(180)), -1)
-        @test isthin(cosd(interval(360)), 1)
-        @test isthin(cosd(interval(90)), 0)
-        @test isthin(cosd(interval(270)), 0)
-    end
+@testset "cosd" begin
+    @test isempty_interval(cosd(emptyinterval()))
+    @test isequal_interval(cosd(interval(180, 360)), interval(-1 , 1))
+    @test issubset_interval(interval(-1 , 0), cosd(interval(90, 270)))
+    @test issubset_interval(interval(-1/sqrt(2) , 1/sqrt(2)), cosd(interval(45, 135)))
+    @test isequal_interval(cosd(interval(-45, 45)), interval(1/sqrt(2) , 1))
+    @test isthin(cosd(interval(180)), -1)
+    @test isthin(cosd(interval(360)), 1)
+    @test isthin(cosd(interval(90)), 0)
+    @test isthin(cosd(interval(270)), 0)
+end
 
-    @testset "sincospi" begin
-        x = sincospi(emptyinterval())
-        @test isempty_interval(x[1]) & isempty_interval(x[2])
-        x = sincospi(interval(1, 2))
-        @test issubset_interval(interval(-1, 0), x[1]) & isequal_interval(x[2], interval(-1, 1))
-        x = sincospi(interval(0.5, 1.5))
-        @test isequal_interval(x[1], interval(-1, 1)) & issubset_interval(interval(-1, 0), x[2])
-        x = sincospi(interval(0.25, 0.75))
-        @test issubset_interval(interval(1/sqrt(2), 1), x[1]) & issubset_interval(interval(-1/sqrt(2), 1/sqrt(2)), x[2])
-        x = sincospi(interval(-0.25, 0.25))
-        @test issubset_interval(interval(-1/sqrt(2), 1/sqrt(2)), x[1]) & isequal_interval(x[2], interval(1/sqrt(2), 1))
-    end
+@testset "sincospi" begin
+    x = sincospi(emptyinterval())
+    @test isempty_interval(x[1]) & isempty_interval(x[2])
+    x = sincospi(interval(1, 2))
+    @test issubset_interval(interval(-1, 0), x[1]) & isequal_interval(x[2], interval(-1, 1))
+    x = sincospi(interval(0.5, 1.5))
+    @test isequal_interval(x[1], interval(-1, 1)) & issubset_interval(interval(-1, 0), x[2])
+    x = sincospi(interval(0.25, 0.75))
+    @test issubset_interval(interval(1/sqrt(2), 1), x[1]) & issubset_interval(interval(-1/sqrt(2), 1/sqrt(2)), x[2])
+    x = sincospi(interval(-0.25, 0.25))
+    @test issubset_interval(interval(-1/sqrt(2), 1/sqrt(2)), x[1]) & isequal_interval(x[2], interval(1/sqrt(2), 1))
+end
 
-    @testset "sincosd" begin
-        x = sincosd(emptyinterval())
-        @test isempty_interval(x[1]) & isempty_interval(x[2])
-        x = sincosd(interval(180, 380))
-        @test issubset_interval(interval(-1, 0), x[1]) & isequal_interval(x[2], interval(-1, 1))
-        x = sincosd(interval(90, 270))
-        @test isequal_interval(x[1], interval(-1, 1)) & issubset_interval(interval(-1, 0), x[2])
-        x = sincosd(interval(45, 135))
-        @test issubset_interval(interval(1/sqrt(2), 1), x[1]) & issubset_interval(interval(-1/sqrt(2), 1/sqrt(2)), x[2])
-        x = sincosd(interval(-45, 45))
-        @test issubset_interval(interval(-1/sqrt(2), 1/sqrt(2)), x[1]) & isequal_interval(x[2], interval(1/sqrt(2), 1))
-    end
+@testset "sincosd" begin
+    x = sincosd(emptyinterval())
+    @test isempty_interval(x[1]) & isempty_interval(x[2])
+    x = sincosd(interval(180, 380))
+    @test issubset_interval(interval(-1, 0), x[1]) & isequal_interval(x[2], interval(-1, 1))
+    x = sincosd(interval(90, 270))
+    @test isequal_interval(x[1], interval(-1, 1)) & issubset_interval(interval(-1, 0), x[2])
+    x = sincosd(interval(45, 135))
+    @test issubset_interval(interval(1/sqrt(2), 1), x[1]) & issubset_interval(interval(-1/sqrt(2), 1/sqrt(2)), x[2])
+    x = sincosd(interval(-45, 45))
+    @test issubset_interval(interval(-1/sqrt(2), 1/sqrt(2)), x[1]) & isequal_interval(x[2], interval(1/sqrt(2), 1))
 end
 
 @testset "tan" begin
