@@ -1,12 +1,8 @@
 module IntervalArithmetic
 
-import CRlibm
+import CRlibm_jll
 import RoundingEmulator
 import Base.MPFR
-
-function __init__()
-    setrounding(BigFloat, RoundNearest)
-end
 
 #
 

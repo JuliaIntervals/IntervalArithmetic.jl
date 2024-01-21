@@ -255,7 +255,7 @@ Compute the real `n`-th root of `x`.
 
 Implement the `rootn` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function rootn(x::BareInterval{T}, n::Integer) where {T<:NumTypes}
+function rootn(x::BareInterval{T}, n::Integer) where {T<:AbstractFloat}
     isempty_interval(x) && return x
     n == 0 && return emptyinterval(BareInterval{T})
     n == 1 && return x
@@ -268,6 +268,8 @@ function rootn(x::BareInterval{T}, n::Integer) where {T<:NumTypes}
 
     return @round(T, rootn(inf(x), n), rootn(sup(x), n))
 end
+
+rootn(x::BareInterval{<:Rational}) = rootn(float(x))
 
 function rootn(x::Interval{T}, n::Integer) where {T<:NumTypes}
     domain = _unsafe_bareinterval(T, ifelse(iseven(n), zero(T), typemin(T)), typemax(T))
@@ -395,10 +397,12 @@ end
 
 for f ∈ (:cbrt, :exp, :exp2, :exp10, :expm1)
     @eval begin
-        function Base.$f(x::BareInterval{T}) where {T<:NumTypes}
+        function Base.$f(x::BareInterval{T}) where {T<:AbstractFloat}
             isempty_interval(x) && return x
             return @round(T, $f(inf(x)), $f(sup(x)))
         end
+
+        Base.$f(x::BareInterval{<:Rational}) = $f(float(x))
 
         function Base.$f(x::Interval)
             bx = bareinterval(x)
@@ -413,12 +417,14 @@ end
 
 for f ∈ (:log, :log2, :log10)
     @eval begin
-        function Base.$f(x::BareInterval{T}) where {T<:NumTypes}
+        function Base.$f(x::BareInterval{T}) where {T<:AbstractFloat}
             domain = _unsafe_bareinterval(T, zero(T), typemax(T))
             x = intersect_interval(x, domain)
             isempty_interval(x) | (sup(x) == 0) && return emptyinterval(BareInterval{T})
             return @round(T, $f(inf(x)), $f(sup(x)))
         end
+
+        Base.$f(x::BareInterval{<:Rational}) = $f(float(x))
 
         function Base.$f(x::Interval{T}) where {T<:NumTypes}
             domain = _unsafe_bareinterval(T, zero(T), typemax(T))
@@ -431,12 +437,14 @@ for f ∈ (:log, :log2, :log10)
     end
 end
 
-function Base.log1p(x::BareInterval{T}) where {T<:NumTypes}
+function Base.log1p(x::BareInterval{T}) where {T<:AbstractFloat}
     domain = _unsafe_bareinterval(T, -one(T), typemax(T))
     x = intersect_interval(x, domain)
     isempty_interval(x) | (sup(x) == -1) && return emptyinterval(BareInterval{T})
     return @round(T, log1p(inf(x)), log1p(sup(x)))
 end
+
+Base.log1p(x::BareInterval{<:Rational}) = log1p(float(x))
 
 function Base.log1p(x::Interval{T}) where {T<:NumTypes}
     domain = _unsafe_bareinterval(T, -one(T), typemax(T))
