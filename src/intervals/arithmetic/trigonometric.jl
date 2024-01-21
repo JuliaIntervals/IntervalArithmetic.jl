@@ -94,7 +94,7 @@ end
 # not in the IEEE Standard 1788-2015
 
 if Int == Int32 && VERSION < v"1.10"
-    Base.sinpi(x::BareInterval{T}) where {T<:AbstractFloat} = sin(x * interval(T, π))
+    Base.sinpi(x::BareInterval{T}) where {T<:AbstractFloat} = sin(x * bareinterval(T, π))
 else
     function Base.sinpi(x::BareInterval{T}) where {T<:AbstractFloat}
         isempty_interval(x) && return x
@@ -190,7 +190,7 @@ end
 # not in the IEEE Standard 1788-2015
 
 if Int == Int32 && VERSION < v"1.10"
-    Base.cospi(x::BareInterval{T}) where {T<:AbstractFloat} = cos(x * interval(T, π))
+    Base.cospi(x::BareInterval{T}) where {T<:AbstractFloat} = cos(x * bareinterval(T, π))
 else
     function Base.cospi(x::BareInterval{T}) where {T<:AbstractFloat}
         isempty_interval(x) && return x
