@@ -93,42 +93,42 @@ end
 
 # not in the IEEE Standard 1788-2015
 
-function Base.sinpi(x::BareInterval{T}) where {T<:AbstractFloat}
-    isempty_interval(x) && return x
-
-    d = diam(x)
-    d ≥ 2 && return _unsafe_bareinterval(T, -one(T), one(T))
-
-    lo, hi = bounds(x)
-
-    lo_quadrant = _quadrantpi(lo)
-    hi_quadrant = _quadrantpi(hi)
-
-    if lo_quadrant == hi_quadrant
-        d ≥ 1 && return _unsafe_bareinterval(T, -one(T), one(T))
-        (lo_quadrant == 1) | (lo_quadrant == 2) && return @round(T, sinpi(hi), sinpi(lo)) # decreasing
-        return @round(T, sinpi(lo), sinpi(hi))
-
-    elseif lo_quadrant == 3 && hi_quadrant == 0
-        return @round(T, sinpi(lo), sinpi(hi)) # increasing
-
-    elseif lo_quadrant == 1 && hi_quadrant == 2
-        return @round(T, sinpi(hi), sinpi(lo)) # decreasing
-
-    elseif (lo_quadrant == 0 || lo_quadrant == 3) && (hi_quadrant == 1 || hi_quadrant == 2)
-        return @round(T, min(sinpi(lo), sinpi(hi)), one(T))
-
-    elseif (lo_quadrant == 1 || lo_quadrant == 2) && (hi_quadrant == 3 || hi_quadrant == 0)
-        return @round(T, -one(T), max(sinpi(lo), sinpi(hi)))
-
-    else # (lo_quadrant == 0 && hi_quadrant == 3) || (lo_quadrant == 2 && hi_quadrant == 1)
-        return _unsafe_bareinterval(T, -one(T), one(T))
-
-    end
-end
-
 if Int == Int32 && VERSION < v"1.10"
-    Base.sinpi(x::BareInterval{Float32}) = sin(x * interval(T, π))
+    Base.sinpi(x::BareInterval{T}) where {T<:AbstractFloat} = sin(x * interval(T, π))
+else
+    function Base.sinpi(x::BareInterval{T}) where {T<:AbstractFloat}
+        isempty_interval(x) && return x
+
+        d = diam(x)
+        d ≥ 2 && return _unsafe_bareinterval(T, -one(T), one(T))
+
+        lo, hi = bounds(x)
+
+        lo_quadrant = _quadrantpi(lo)
+        hi_quadrant = _quadrantpi(hi)
+
+        if lo_quadrant == hi_quadrant
+            d ≥ 1 && return _unsafe_bareinterval(T, -one(T), one(T))
+            (lo_quadrant == 1) | (lo_quadrant == 2) && return @round(T, sinpi(hi), sinpi(lo)) # decreasing
+            return @round(T, sinpi(lo), sinpi(hi))
+
+        elseif lo_quadrant == 3 && hi_quadrant == 0
+            return @round(T, sinpi(lo), sinpi(hi)) # increasing
+
+        elseif lo_quadrant == 1 && hi_quadrant == 2
+            return @round(T, sinpi(hi), sinpi(lo)) # decreasing
+
+        elseif (lo_quadrant == 0 || lo_quadrant == 3) && (hi_quadrant == 1 || hi_quadrant == 2)
+            return @round(T, min(sinpi(lo), sinpi(hi)), one(T))
+
+        elseif (lo_quadrant == 1 || lo_quadrant == 2) && (hi_quadrant == 3 || hi_quadrant == 0)
+            return @round(T, -one(T), max(sinpi(lo), sinpi(hi)))
+
+        else # (lo_quadrant == 0 && hi_quadrant == 3) || (lo_quadrant == 2 && hi_quadrant == 1)
+            return _unsafe_bareinterval(T, -one(T), one(T))
+
+        end
+    end
 end
 
 Base.sinpi(x::BareInterval{<:Rational}) = sinpi(float(x))
@@ -189,44 +189,44 @@ end
 
 # not in the IEEE Standard 1788-2015
 
-function Base.cospi(x::BareInterval{T}) where {T<:AbstractFloat}
-    isempty_interval(x) && return x
-
-    d = diam(x)
-    d ≥ 2 && return _unsafe_bareinterval(T, -one(T), one(T))
-
-    lo, hi = bounds(x)
-
-    isthin(x) & !isinteger(lo) & isinteger(2lo) && return zero(BareInterval{T}) # by-pass rounding to improve accuracy for 32 bit systems
-
-    lo_quadrant = _quadrantpi(lo)
-    hi_quadrant = _quadrantpi(hi)
-
-    if lo_quadrant == hi_quadrant
-        d ≥ 1 && return _unsafe_bareinterval(T, -one(T), one(T))
-        (lo_quadrant == 2) | (lo_quadrant == 3) && return @round(T, cospi(lo), cospi(hi)) # increasing
-        return @round(T, cospi(hi), cospi(lo))
-
-    elseif lo_quadrant == 2 && hi_quadrant == 3
-        return @round(T, cospi(lo), cospi(hi))
-
-    elseif lo_quadrant == 0 && hi_quadrant == 1
-        return @round(T, cospi(hi), cospi(lo))
-
-    elseif (lo_quadrant == 2 || lo_quadrant == 3) && (hi_quadrant == 0 || hi_quadrant == 1)
-        return @round(T, min(cospi(lo), cospi(hi)), one(T))
-
-    elseif (lo_quadrant == 0 || lo_quadrant == 1) && (hi_quadrant == 2 || hi_quadrant == 3)
-        return @round(T, -one(T), max(cospi(lo), cospi(hi)))
-
-    else # (lo_quadrant == 3 && hi_quadrant == 2) || (lo_quadrant == 1 && hi_quadrant == 0)
-        return _unsafe_bareinterval(T, -one(T), one(T))
-
-    end
-end
-
 if Int == Int32 && VERSION < v"1.10"
-    Base.cospi(x::BareInterval{Float32}) = cos(x * interval(T, π))
+    Base.cospi(x::BareInterval{T}) where {T<:AbstractFloat} = cos(x * interval(T, π))
+else
+    function Base.cospi(x::BareInterval{T}) where {T<:AbstractFloat}
+        isempty_interval(x) && return x
+
+        d = diam(x)
+        d ≥ 2 && return _unsafe_bareinterval(T, -one(T), one(T))
+
+        lo, hi = bounds(x)
+
+        isthin(x) & !isinteger(lo) & isinteger(2lo) && return zero(BareInterval{T}) # by-pass rounding to improve accuracy for 32 bit systems
+
+        lo_quadrant = _quadrantpi(lo)
+        hi_quadrant = _quadrantpi(hi)
+
+        if lo_quadrant == hi_quadrant
+            d ≥ 1 && return _unsafe_bareinterval(T, -one(T), one(T))
+            (lo_quadrant == 2) | (lo_quadrant == 3) && return @round(T, cospi(lo), cospi(hi)) # increasing
+            return @round(T, cospi(hi), cospi(lo))
+
+        elseif lo_quadrant == 2 && hi_quadrant == 3
+            return @round(T, cospi(lo), cospi(hi))
+
+        elseif lo_quadrant == 0 && hi_quadrant == 1
+            return @round(T, cospi(hi), cospi(lo))
+
+        elseif (lo_quadrant == 2 || lo_quadrant == 3) && (hi_quadrant == 0 || hi_quadrant == 1)
+            return @round(T, min(cospi(lo), cospi(hi)), one(T))
+
+        elseif (lo_quadrant == 0 || lo_quadrant == 1) && (hi_quadrant == 2 || hi_quadrant == 3)
+            return @round(T, -one(T), max(cospi(lo), cospi(hi)))
+
+        else # (lo_quadrant == 3 && hi_quadrant == 2) || (lo_quadrant == 1 && hi_quadrant == 0)
+            return _unsafe_bareinterval(T, -one(T), one(T))
+
+        end
+    end
 end
 
 Base.cospi(x::BareInterval{<:Rational}) = cospi(float(x))
