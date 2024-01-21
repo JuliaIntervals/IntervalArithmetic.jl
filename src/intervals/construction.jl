@@ -148,7 +148,7 @@ __float(::Type{T}) where {T<:Union{Int16,UInt16}} = Float32
 BareInterval{T}(x::BareInterval) where {T<:NumTypes} = convert(BareInterval{T}, x)
 
 """
-    bareinterval([T<:Union{Rational,AbstractFloat}=default_numtype()], a, b)
+    bareinterval(T, a, b)
 
 Create the bare interval ``[a, b]`` according to the IEEE Standard 1788-2015.
 The validity of the interval is checked by [`is_valid_interval`](@ref): if
@@ -180,7 +180,7 @@ julia> bareinterval(BigFloat, 1, π)
 BareInterval{BigFloat}(1.0, 3.141592653589793238462643383279502884197169399375105820974944592307816406286233)
 ```
 """
-function bareinterval(::Type{T}, a, b) where {T<:NumTypes}
+function bareinterval(::Type{T}, a, b) where {T}
     lo = _inf(a)
     hi = _sup(b)
     is_valid_interval(lo, hi) && return _unsafe_bareinterval(T, lo, hi)
@@ -189,15 +189,15 @@ function bareinterval(::Type{T}, a, b) where {T<:NumTypes}
 end
 bareinterval(a, b) = bareinterval(promote_numtype(numtype(a), numtype(b)), a, b)
 
-bareinterval(::Type{T}, a) where {T<:NumTypes} = bareinterval(T, a, a)
+bareinterval(::Type{T}, a) where {T} = bareinterval(T, a, a)
 bareinterval(a) = bareinterval(promote_numtype(numtype(a), numtype(a)), a)
 
-bareinterval(::Type{T}, a::BareInterval) where {T<:NumTypes} =
+bareinterval(::Type{T}, a::BareInterval) where {T} =
     _unsafe_bareinterval(T, _inf(a), _sup(a)) # assumes valid interval
 
 # some useful extra constructor
-bareinterval(::Type{T}, a::Tuple) where {T<:NumTypes} = bareinterval(T, a...)
-bareinterval(a::Tuple) = bareinterval(T, a...)
+bareinterval(::Type{T}, a::Tuple) where {T} = bareinterval(T, a...)
+bareinterval(a::Tuple) = bareinterval(a...)
 
 # promotion
 
@@ -299,7 +299,7 @@ function bareinterval(x::Interval)
     decoration(x) == ill && @warn "interval part of NaI"
     return x.bareinterval
 end
-bareinterval(::Type{T}, x::Interval) where {T<:NumTypes} = bareinterval(T, bareinterval(x))
+bareinterval(::Type{T}, x::Interval) where {T} = bareinterval(T, bareinterval(x))
 decoration(x::Interval) = x.decoration
 
 """
@@ -345,7 +345,7 @@ Interval{T}(x::Interval) where {T<:NumTypes} = convert(Interval{T}, x) # needed 
 #
 
 """
-    interval([T<:Union{Rational,AbstractFloat}=default_numtype()], a, b, d = com)
+    interval(T, a, b, d = com)
 
 Create the interval ``[a, b]`` according to the IEEE Standard 1788-2015. The
 validity of the interval is checked by [`is_valid_interval`](@ref): if `true`
@@ -377,23 +377,23 @@ julia> interval(BigFloat, 1, π)
 Interval{BigFloat}(1.0, 3.141592653589793238462643383279502884197169399375105820974944592307816406286233, com)
 ```
 """
-function interval(::Type{T}, a, b, d::Decoration = com; format::Symbol = :infsup) where {T<:NumTypes}
+function interval(::Type{T}, a, b, d::Decoration = com; format::Symbol = :infsup) where {T}
     format === :infsup && return _interval_infsup(T, a, b, d)
     format === :midpoint && return _interval_midpoint(T, a, b, d)
     return throw(ArgumentError("`format` must be `:infsup` or `:midpoint`"))
 end
 interval(a, b, d::Decoration = com; format::Symbol = :infsup) = interval(promote_numtype(numtype(a), numtype(b)), a, b, d; format = format)
 
-function interval(::Type{T}, a, d::Decoration = com; format::Symbol = :infsup) where {T<:NumTypes}
+function interval(::Type{T}, a, d::Decoration = com; format::Symbol = :infsup) where {T}
     (format === :infsup) | (format === :midpoint) && return _interval_infsup(T, a, a, d)
     return throw(ArgumentError("`format` must be `:infsup` or `:midpoint`"))
 end
 interval(a, d::Decoration = com; format::Symbol = :infsup) = interval(promote_numtype(numtype(a), numtype(a)), a, d; format = format)
 
 # some useful extra constructor
-interval(::Type{T}, a::Tuple, d::Decoration = com; format::Symbol = :infsup) where {T<:NumTypes} = interval(T, a..., d; format = format)
+interval(::Type{T}, a::Tuple, d::Decoration = com; format::Symbol = :infsup) where {T} = interval(T, a..., d; format = format)
 interval(a::Tuple, d::Decoration = com; format::Symbol = :infsup) = interval(a..., d; format = format)
-interval(::Type{T}, A::AbstractArray; format::Symbol = :infsup) where {T<:NumTypes} = interval.(T, A; format = format)
+interval(::Type{T}, A::AbstractArray; format::Symbol = :infsup) where {T} = interval.(T, A; format = format)
 interval(A::AbstractArray; format::Symbol = :infsup) = interval.(A; format = format)
 
 # standard format
