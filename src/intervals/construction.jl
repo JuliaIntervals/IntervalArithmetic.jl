@@ -393,8 +393,14 @@ interval(a, d::Decoration = com; format::Symbol = :infsup) = interval(promote_nu
 # some useful extra constructor
 interval(::Type{T}, a::Tuple, d::Decoration = com; format::Symbol = :infsup) where {T} = interval(T, a..., d; format = format)
 interval(a::Tuple, d::Decoration = com; format::Symbol = :infsup) = interval(a..., d; format = format)
-interval(::Type{T}, A::AbstractArray; format::Symbol = :infsup) where {T} = interval.(T, A; format = format)
-interval(A::AbstractArray; format::Symbol = :infsup) = interval.(A; format = format)
+for D ∈ (:Decoration, :(AbstractArray{Decoration}))
+    @eval begin
+        interval(::Type{T}, A::AbstractArray, d::$D = com; format::Symbol = :infsup) where {T} = interval.(T, A, d; format = format)
+        interval(A::AbstractArray, d::$D = com; format::Symbol = :infsup) = interval.(A, d; format = format)
+        interval(::Type{T}, A::AbstractArray, B::AbstractArray, d::$D = com; format::Symbol = :infsup) where {T} = interval.(T, A, B, d; format = format)
+        interval(A::AbstractArray, B::AbstractArray, d::$D = com; format::Symbol = :infsup) = interval.(A, B, d; format = format)
+    end
+end
 
 # standard format
 
