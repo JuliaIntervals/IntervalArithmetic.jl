@@ -66,7 +66,8 @@ Base.:^(x::Rational, y::Interval) = ^(convert(Interval{typeof(x)}, x), y)
 Base.:^(x::Interval, y::Rational) = ^(x, convert(Interval{typeof(y)}, y))
 
 # overwrite behaviour for small integer powers from https://github.com/JuliaLang/julia/pull/24240
-Base.literal_pow(::typeof(^), x::Interval, ::Val{n}) where {n} = x^n
+# Base.literal_pow(::typeof(^), x::Interval, ::Val{n}) where {n} = x^n
+Base.literal_pow(::typeof(^), x::Interval, ::Val{n}) where {n} = _select_pown(power_mode(), x, n)
 
 # helper functions for power
 
