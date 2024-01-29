@@ -5,31 +5,22 @@
 # helper functions
 
 function _quadrant(x::AbstractFloat)
+    # NOTE: this algorithm may be flawed as it relies on `rem2pi(x, RoundNearest)`
+    # to yield a very tight result. This is not guaranteed by Julia, see e.g.
+    # https://github.com/JuliaLang/julia/blob/9669eecc99bc4553e28d94d7dd3dc9fd40b3bf3f/base/mpfr.jl#L845-L846
     PI_LO, PI_HI = bounds(bareinterval(typeof(x), π))
-
-    rlo = rem2pi(x, RoundDown) # [0, 2π]
-    qlo =        2rlo ≥ 3PI_HI ? 3 :
-        3PI_LO ≥ 2rlo ≥ 2PI_HI ? 2 :
-        2PI_LO ≥ 2rlo ≥  PI_HI ? 1 :
-         PI_LO ≥ 2rlo          ? 0 :
-        return throw(ArgumentError("could not determine a specific quadrant, got $qlo"))
-    rlo == x && return qlo
-
-    rhi = rem2pi(x, RoundUp) # [-2π, 0]
-    qhi =        -2rhi ≥ 3PI_HI ? 0 :
-        3PI_LO ≥ -2rhi ≥ 2PI_HI ? 1 :
-        2PI_LO ≥ -2rhi ≥  PI_HI ? 2 :
-         PI_LO ≥ -2rhi          ? 3 :
-        return throw(ArgumentError("could not determine a specific quadrant, got $qhi"))
-    rhi == x && return qhi
-
-    qlo == qhi && return qlo
-
-    return throw(ArgumentError("could not determine a specific quadrant, got $qlo and $qhi"))
+    r = rem2pi(x, RoundNearest)
+    r2 = 2r # should be exact for floats
+    r2 ≤ -PI_HI && return 2 # [-π, -π/2)
+    r2 < -PI_LO && return throw(ArgumentError("could not determine if $x is lesser or greater than -π/2"))
+    r2 <  0     && return 3 # [-π/2, 0)
+    r2 ≤  PI_LO && return 0 # [0, π/2)
+    r2 <  PI_HI && return throw(ArgumentError("could not determine if $x is lesser or greater than π/2"))
+    return 1 # [π/2, π]
 end
 
 function _quadrantpi(x::AbstractFloat) # used in `sinpi` and `cospi`
-    r = rem(x, 2) # [-2, 2] (should be exact for floats)
+    r = rem(x, 2) # [-2, 2], should be exact for floats
     2r < -3 && return 0 # [-2π, -3π/2)
     r  < -1 && return 1 # [-3π/2, -π)
     2r < -1 && return 2 # [-π, -π/2)
