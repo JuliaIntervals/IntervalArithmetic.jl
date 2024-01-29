@@ -4,8 +4,13 @@
 # Some other (non required) related functions are also present, as well as some
 # of the "Recommended operations" (Section 10.6.3)
 
-# used internally, equivalent to `<` but with `(Inf < Inf) == true`
-_strictlessprime(x::Real, y::Real) = (x < y) | ((isinf(x) | isinf(y)) & (x == y))
+#
+
+_strictlessprime(x::Real, y::Real) = _strictlessprime(default_flavor(), x, y)
+_strictlessprime(::Flavor{:set_based}, x::Real, y::Real) =
+    (x < y) | ((isinf(x) | isinf(y)) & (x == y)) # equivalent to `<` but with `(Inf < Inf) == true`
+
+#
 
 """
     isequal_interval(x, y)
@@ -28,6 +33,8 @@ isequal_interval(x::Real, y::Complex) = isequal_interval(x, real(y)) & isthinzer
 
 isequal_interval(x) = Base.Fix2(isequal_interval, x)
 
+isequal_interval(x::Number, y::Number) = isequal_interval(interval(x), interval(y))
+
 """
     issubset_interval(x, y)
 
@@ -46,6 +53,8 @@ issubset_interval(x, y, z, w...) = issubset_interval(x, y) & issubset_interval(y
 issubset_interval(x::Complex, y::Complex) = issubset_interval(real(x), real(y)) & issubset_interval(imag(x), imag(y))
 issubset_interval(x::Complex, y::Real) = issubset_interval(real(x), y) & isthinzero(imag(x))
 issubset_interval(x::Real, y::Complex) = issubset_interval(x, real(y)) & in_interval(0, imag(y))
+
+issubset_interval(x::Number, y::Number) = issubset_interval(interval(x), interval(y))
 
 """
     isinterior(x, y)
@@ -78,6 +87,8 @@ isinterior(x::Complex, y::Complex) =
 isinterior(x::Complex, y::Real) = isinterior(real(x), y) & isthinzero(imag(x))
 isinterior(x::Real, y::Complex) = isinterior(x, real(y)) & in_interval(0, imag(y))
 
+isinterior(x::Number, y::Number) = isinterior(interval(x), interval(y))
+
 """
     isstrictsubset(x, y)
 
@@ -100,6 +111,8 @@ isstrictsubset(x::Complex, y::Complex) =
 isstrictsubset(x::Complex, y::Real) = isstrictsubset(real(x), y) & isthinzero(imag(x))
 isstrictsubset(x::Real, y::Complex) = isstrictsubset(x, real(y)) & in_interval(0, imag(y))
 
+isstrictsubset(x::Number, y::Number) = isstrictsubset(interval(x), interval(y))
+
 """
     isweakless(x, y)
 
@@ -115,6 +128,8 @@ function isweakless(x::Interval, y::Interval)
     return isweakless(bareinterval(x), bareinterval(y))
 end
 
+isweakless(x::Number, y::Number) = isweakless(interval(x), interval(y))
+
 """
     isstrictless(x, y)
 
@@ -123,13 +138,15 @@ Test whether `inf(x) < inf(y)` and `sup(x) < sup(y)`, where `<` is replaced by
 
 Implement the `strictLess` function of the IEEE Standard 1788-2015 (Table 10.3).
 """
-isstrictless(x::BareInterval, y::BareInterval) = # this may be flavor dependent? Should _strictlessprime be < for cset flavor?
+isstrictless(x::BareInterval, y::BareInterval) =
     _strictlessprime(inf(x), inf(y)) & _strictlessprime(sup(x), sup(y))
 
 function isstrictless(x::Interval, y::Interval)
     isnai(x) | isnai(y) && return false
     return isstrictless(bareinterval(x), bareinterval(y))
 end
+
+isstrictless(x::Number, y::Number) = isstrictless(interval(x), interval(y))
 
 """
     precedes(x, y)
@@ -145,6 +162,8 @@ function precedes(x::Interval, y::Interval)
     return precedes(bareinterval(x), bareinterval(y))
 end
 
+precedes(x::Number, y::Number) = precedes(interval(x), interval(y))
+
 """
     strictprecedes(x, y)
 
@@ -158,6 +177,8 @@ function strictprecedes(x::Interval, y::Interval)
     isnai(x) | isnai(y) && return false
     return strictprecedes(bareinterval(x), bareinterval(y))
 end
+
+strictprecedes(x::Number, y::Number) = strictprecedes(interval(x), interval(y))
 
 """
     isdisjoint_interval(x, y)
@@ -176,6 +197,8 @@ end
 
 isdisjoint_interval(x::Complex, y::Complex) =
     isdisjoint_interval(real(x), real(y)) | isdisjoint_interval(imag(x), imag(y))
+
+isdisjoint_interval(x::Number, y::Number) = isdisjoint_interval(interval(x), interval(y))
 
 """
     in_interval(x, y)
@@ -207,6 +230,8 @@ in_interval(x::Number, y::Complex) = in_interval(x, real(y)) & in_interval(0, im
 
 in_interval(x) = Base.Fix2(in_interval, x)
 
+in_interval(x::Number, y::Number) = in_interval(interval(x), interval(y))
+
 """
     isempty_interval(x)
 
@@ -222,6 +247,8 @@ function isempty_interval(x::Interval)
 end
 
 isempty_interval(x::Complex) = isempty_interval(real(x)) & isempty_interval(imag(x))
+
+isempty_interval(x::Number) = isempty_interval(interval(x))
 
 """
     isentire_interval(x)
@@ -239,6 +266,8 @@ end
 
 isentire_interval(x::Complex) = isentire_interval(real(x)) & isentire_interval(imag(x))
 
+isentire_interval(::Number) = false
+
 """
     isnai(x)
 
@@ -249,6 +278,8 @@ isnai(::BareInterval) = false
 isnai(x::Interval) = decoration(x) == ill
 
 isnai(x::Complex) = isnai(real(x)) & isnai(imag(x))
+
+isnai(x::Number) = isnai(interval(x))
 
 """
     isbounded(x)
@@ -264,6 +295,8 @@ end
 
 isbounded(x::Complex) = isbounded(real(x)) & isbounded(imag(x))
 
+isbounded(x::Number) = isbounded(interval(x))
+
 """
     isunbounded(x)
 
@@ -277,6 +310,8 @@ function isunbounded(x::Interval)
 end
 
 isunbounded(x::Complex) = isunbounded(real(x)) | isunbounded(imag(x))
+
+isunbounded(x::Number) = isunbounded(interval(x))
 
 """
     iscommon(x)
@@ -295,6 +330,8 @@ end
 
 iscommon(x::Complex) = iscommon(real(x)) & iscommon(imag(x))
 
+iscommon(x::Number) = iscommon(interval(x))
+
 """
     isatomic(x)
 
@@ -312,6 +349,8 @@ end
 
 isatomic(x::Complex) = isatomic(real(x)) & isatomic(imag(x))
 
+isatomic(x::Number) = isatomic(interval(x))
+
 """
     isthin(x)
 
@@ -327,6 +366,8 @@ function isthin(x::Interval)
 end
 
 isthin(x::Complex) = isthin(real(x)) & isthin(imag(x))
+
+isthin(x::Number) = isthin(interval(x)) # NOTE: isthin(pi) returns false
 
 """
     isthin(x, y)
@@ -347,6 +388,8 @@ isthin(x::Number, y::Complex) = isthin(real(x), real(y)) & iszero(imag(y))
 
 isthin(x::BareInterval, y::Interval) = throw(MethodError(isthin, (x, y)))
 
+isthin(x::Number, y::Number) = isthin(interval(x), y) # NOTE: isthin(Inf, Inf) returns false
+
 """
     isthinzero(x)
 
@@ -360,6 +403,8 @@ function isthinzero(x::Interval)
 end
 
 isthinzero(x::Complex) = isthinzero(real(x)) & isthinzero(imag(x))
+
+isthinzero(x::Number) = isthinzero(interval(x))
 
 """
     isthinone(x)
@@ -375,6 +420,8 @@ end
 
 isthinone(x::Complex) = isthinone(real(x)) & isthinzero(imag(x))
 
+isthinone(x::Number) = isthinone(interval(x))
+
 """
     isthininteger(x)
 
@@ -388,3 +435,5 @@ function isthininteger(x::Interval)
 end
 
 isthininteger(x::Complex) = isthininteger(real(x)) & isthinzero(imag(x))
+
+isthininteger(x::Number) = isthininteger(interval(x))

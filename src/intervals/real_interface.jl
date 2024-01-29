@@ -80,32 +80,15 @@ Base.hash(x::Interval, h::UInt) = hash(sup(x), hash(inf(x), hash(Interval, h)))
 
 for T ∈ (:BareInterval, :Interval)
     @eval begin
-        Base.:(==)(::$T, ::$T) = # also returned when calling `≤`, `≥`, `isequal`
-            throw(ArgumentError("`==` is purposely not supported for intervals. See instead `isequal_interval`"))
+        Base.isdisjoint(::$T, ::$T) = throw(ArgumentError("`isdisjoint` is purposely not supported for intervals. See instead `isdisjoint_interval`"))
 
-        Base.:<(::$T, ::$T) = # also returned when calling `isless`, `>`
-            throw(ArgumentError("`<` is purposely not supported for intervals. See instead `isstrictless`, `strictprecedes`"))
+        Base.issubset(::$T, ::$T) = throw(ArgumentError("`issubset` is purposely not supported for intervals. See instead `issubset_interval`"))
 
-        Base.isdisjoint(::$T, ::$T) =
-            throw(ArgumentError("`isdisjoint` is purposely not supported for intervals. See instead `isdisjoint_interval`"))
+        Base.issetequal(::$T, ::$T) = throw(ArgumentError("`issetequal` is purposely not supported for intervals. See instead `isequal_interval`"))
 
-        Base.issubset(::$T, ::$T) =
-            throw(ArgumentError("`issubset` is purposely not supported for intervals. See instead `issubset_interval`"))
+        Base.in(::$T, ::$T) = throw(ArgumentError("`in` is purposely not supported for intervals. See instead `in_interval`"))
 
-        Base.issetequal(::$T, ::$T) =
-            throw(ArgumentError("`issetequal` is purposely not supported for intervals. See instead `isequal_interval`"))
-
-        Base.in(::$T, ::$T) =
-            throw(ArgumentError("`in` is purposely not supported for intervals. See instead `in_interval`"))
-
-        Base.isempty(::$T) =
-            throw(ArgumentError("`isempty` is purposely not supported for intervals. See instead `isempty_interval`"))
-
-        Base.isfinite(::$T) = # also returned when calling `isinf`
-            throw(ArgumentError("`isfinite` is purposely not supported for intervals. See instead `isbounded`"))
-
-        Base.isnan(::$T) =
-            throw(ArgumentError("`isnan` is purposely not supported for intervals. See instead `isnai`"))
+        Base.isempty(::$T) = throw(ArgumentError("`isempty` is purposely not supported for intervals. See instead `isempty_interval`"))
 
         Base.intersect(::$T) =
             throw(ArgumentError("`intersect` is purposely not supported for intervals. See instead `intersect_interval`"))
@@ -136,72 +119,144 @@ end
     ==(::Interval, ::Number)
     ==(::Number, ::Interval)
 
-Test whether an interval is the singleton of a given number. In other words, the
-result is true if and only if the interval contains only that number. This
-function errors whenever the input interval is not a singleton.
+Equivalent to `isthin`, but throws an error whenever the input interval is not
+thin.
 
 !!! note
     Comparison between intervals is purposely disallowed. Indeed, equality
     between non-singleton intervals has distinct properties, notably ``x = y``
     does not imply ``x - y = 0``. See instead [`isequal_interval`](@ref).
+
+See also: [`isthin`](@ref).
 """
-function Base.:(==)(x::BareInterval, y::Number)
-    isthin(x) || return throw(ArgumentError("`==` is only supported between thin intervals and numbers"))
+function Base.:(==)(x::Union{BareInterval,Interval}, y::Union{BareInterval,Interval}) # also returned when calling `≤`, `≥`, `isequal`
+    isthin(y) || return throw(ArgumentError("`==` is only supported for thin intervals. See instead `isequal_interval`"))
+    # `y` is not empty, nor an NaI
+    return x == inf(y)
+end
+function Base.:(==)(x::Union{BareInterval,Interval}, y::Number)
+    isthin(x) || return throw(ArgumentError("`==` is only supported between thin intervals and numbers. See instead `isequal_interval`"))
+    # `x` is not empty, nor an NaI
     return inf(x) == y
 end
-Base.:(==)(x::Number, y::BareInterval) = y == x
-function Base.:(==)(x::Interval, y::Number)
-    isnai(x) && return false
-    return bareinterval(x) == y
+Base.:(==)(x::Number, y::Union{BareInterval,Interval}) = y == x
+function Base.:(==)(x::Union{BareInterval,Interval}, y::Complex)
+    isthin(x) || return throw(ArgumentError("`==` is only supported between thin intervals and numbers. See instead `isequal_interval`"))
+    # `x` is not empty, nor an NaI
+    return inf(x) == y
 end
-Base.:(==)(x::Number, y::Interval) = y == x
+Base.:(==)(x::Complex, y::Union{BareInterval,Interval}) = y == x
+
 Base.:(==)(x::BareInterval, y::Interval) = throw(MethodError(==, (x, y)))
 Base.:(==)(x::Interval, y::BareInterval) = throw(MethodError(==, (x, y)))
+Base.:(==)(x::BareInterval, y::Complex{<:Interval}) = throw(MethodError(==, (x, y)))
+Base.:(==)(x::Complex{<:Interval}, y::BareInterval) = throw(MethodError(==, (x, y)))
+
+"""
+    <(::BareInterval, ::Real)
+    <(::Real, ::BareInterval)
+    <(::Interval, ::Real)
+    <(::Real, ::Interval)
+
+Equivalent to `strictprecedes`, but throws an error whenever the input interval
+is not thin.
+
+!!! note
+    Comparison between intervals is purposely disallowed. Indeed, equality
+    between non-singleton intervals has distinct properties, notably ``x < y``
+    does not imply ``x - y < 0``. See instead [`isequal_interval`](@ref).
+
+See also: [`strictprecedes`](@ref).
+"""
+function Base.:<(x::Union{BareInterval,Interval}, y::Union{BareInterval,Interval}) # also returned when calling `isless`, `>`
+    isthin(y) || return throw(ArgumentError("`<` is only supported for thin intervals. See instead `isstrictless`, `strictprecedes`"))
+    # `y` is not empty, nor an NaI
+    return x < inf(y)
+end
+function Base.:<(x::Union{BareInterval,Interval}, y::Real)
+    isthin(x) || return throw(ArgumentError("`<` is only supported between thin intervals and numbers. See instead `isequal_interval`"))
+    # `x` is not empty, nor an NaI
+    return inf(x) < y
+end
+function Base.:<(x::Real, y::Union{BareInterval,Interval})
+    isthin(y) || return throw(ArgumentError("`<` is only supported between thin intervals and numbers. See instead `isequal_interval`"))
+    # `y` is not empty, nor an NaI
+    return x < inf(y)
+end
+
+Base.:<(x::BareInterval, y::Interval) = throw(MethodError(<, (x, y)))
+Base.:<(x::Interval, y::BareInterval) = throw(MethodError(<, (x, y)))
+
+"""
+    isnan(::BareInterval)
+    isnan(::Interval)
+
+Return `false`, but throws an error whenever the input interval is not thin.
+
+See also: [`isbounded`](@ref).
+"""
+function Base.isnan(x::Union{BareInterval,Interval})
+    isthin(x) || return throw(ArgumentError("`isnan` is only supported for thin intervals. See instead `isnai`"))
+    # `x` is not empty, nor an NaI
+    return false
+end
+
+"""
+    isfinite(::BareInterval)
+    isfinite(::Interval)
+
+Equivalent to `isbounded`, but throws an error whenever the input interval is
+not thin.
+
+See also: [`isbounded`](@ref).
+"""
+function Base.isfinite(x::Union{BareInterval,Interval}) # also returned when calling `isinf`
+    isthin(x) || return throw(ArgumentError("`isfinite` is only supported for thin intervals. See instead `isbounded`"))
+    # `x` is not empty, nor an NaI
+    return isfinite(inf(x))
+end
 
 """
     iszero(::BareInterval)
     iszero(::Interval)
 
-Test whether an interval is the singleton of zero. This function errors whenever
-the input interval is not a singleton.
+Equivalent to `isthinzero`, but throws an error whenever the input interval is
+not thin.
+
+See also: [`isthinzero`](@ref).
 """
-function Base.iszero(x::BareInterval)
-    isthin(x) || return throw(ArgumentError("`iszero` is only supported for thin intervals"))
+function Base.iszero(x::Union{BareInterval,Interval})
+    isthin(x) || return throw(ArgumentError("`iszero` is only supported for thin intervals. See instead `isthinzero`"))
+    # `x` is not empty, nor an NaI
     return iszero(inf(x))
-end
-function Base.iszero(x::Interval)
-    isnai(x) && return false
-    return iszero(bareinterval(x))
 end
 
 """
     isone(::BareInterval)
     isone(::Interval)
 
-Test whether an interval is the singleton of one. This function errors whenever
-the input interval is not a singleton.
+Equivalent to `isthinone`, but throws an error whenever the input interval is
+not thin.
+
+See also: [`isthinone`](@ref).
 """
-function Base.isone(x::BareInterval)
-    isthin(x) || return throw(ArgumentError("`isone` is only supported for thin intervals"))
+function Base.isone(x::Union{BareInterval,Interval})
+    isthin(x) || return throw(ArgumentError("`isone` is only supported for thin intervals. See instead `isthinone`"))
+    # `x` is not empty, nor an NaI
     return isone(inf(x))
-end
-function Base.isone(x::Interval)
-    isnai(x) && return false
-    return isone(bareinterval(x))
 end
 
 """
     isinteger(::BareInterval)
     isinteger(::Interval)
 
-Test whether an interval is the singleton of an integer. This function errors
-whenever the input interval is not a singleton.
+Equivalent to `isthininteger`, but throws an error whenever the input interval is
+not thin.
+
+See also: [`isthininteger`](@ref).
 """
-function Base.isinteger(x::BareInterval)
-    isthin(x) || return throw(ArgumentError("`isinteger` is only supported for thin intervals"))
+function Base.isinteger(x::Union{BareInterval,Interval})
+    isthin(x) || return throw(ArgumentError("`isinteger` is only supported for thin intervals. See instead `isthininteger`"))
+    # `x` is not empty, nor an NaI
     return isinteger(inf(x))
-end
-function Base.isinteger(x::Interval)
-    isnai(x) && return false
-    return isinteger(bareinterval(x))
 end
