@@ -12,10 +12,10 @@ function _quadrant(x::AbstractFloat)
     r = rem2pi(x, RoundNearest)
     r2 = 2r # should be exact for floats
     r2 ≤ -PI_HI && return 2 # [-π, -π/2)
-    r2 < -PI_LO && return throw(ArgumentError("could not determine if $x is lesser or greater than -π/2"))
+    r2 < -PI_LO && return throw(ArgumentError("could not determine the quadrant, the remainder $r of the division of $x by 2π is lesser or greater than -π/2"))
     r2 <  0     && return 3 # [-π/2, 0)
     r2 ≤  PI_LO && return 0 # [0, π/2)
-    r2 <  PI_HI && return throw(ArgumentError("could not determine if $x is lesser or greater than π/2"))
+    r2 <  PI_HI && return throw(ArgumentError("could not determine the quadrant, the remainder $r of the division of $x by 2π is lesser or greater than π/2"))
     return 1 # [π/2, π]
 end
 
