@@ -5,15 +5,22 @@
 # helper functions
 
 function _quadrant(x::AbstractFloat)
+    # NOTE: this algorithm may be flawed as it relies on `rem2pi(x, RoundNearest)`
+    # to yield a very tight result. This is not guaranteed by Julia, see e.g.
+    # https://github.com/JuliaLang/julia/blob/9669eecc99bc4553e28d94d7dd3dc9fd40b3bf3f/base/mpfr.jl#L845-L846
+    PI_LO, PI_HI = bounds(bareinterval(typeof(x), π))
     r = rem2pi(x, RoundNearest)
-    -2r > π && return 2 # [-π, -π/2)
-    r   < 0 && return 3 # [-π/2, 0)
-    2r  < π && return 0 # [0, π/2)
+    r2 = 2r # should be exact for floats
+    r2 ≤ -PI_HI && return 2 # [-π, -π/2)
+    r2 < -PI_LO && return throw(ArgumentError("could not determine the quadrant, the remainder $r of the division of $x by 2π is lesser or greater than -π/2"))
+    r2 <  0     && return 3 # [-π/2, 0)
+    r2 ≤  PI_LO && return 0 # [0, π/2)
+    r2 <  PI_HI && return throw(ArgumentError("could not determine the quadrant, the remainder $r of the division of $x by 2π is lesser or greater than π/2"))
     return 1 # [π/2, π]
 end
 
 function _quadrantpi(x::AbstractFloat) # used in `sinpi` and `cospi`
-    r = rem(x, 2)
+    r = rem(x, 2) # [-2, 2], should be exact for floats
     2r < -3 && return 0 # [-2π, -3π/2)
     r  < -1 && return 1 # [-3π/2, -π)
     2r < -1 && return 2 # [-π, -π/2)
@@ -52,8 +59,9 @@ Implement the `sin` function of the IEEE Standard 1788-2015 (Table 9.1).
 function Base.sin(x::BareInterval{T}) where {T<:AbstractFloat}
     isempty_interval(x) && return x
 
+    PI_HI = sup(bareinterval(T, π))
     d = diam(x)
-    d/2 ≥ π && return _unsafe_bareinterval(T, -one(T), one(T))
+    d ≥ 2PI_HI && return _unsafe_bareinterval(T, -one(T), one(T))
 
     lo, hi = bounds(x)
 
@@ -61,7 +69,7 @@ function Base.sin(x::BareInterval{T}) where {T<:AbstractFloat}
     hi_quadrant = _quadrant(hi)
 
     if lo_quadrant == hi_quadrant
-        d ≥ π && return _unsafe_bareinterval(T, -one(T), one(T))
+        d ≥ PI_HI && return _unsafe_bareinterval(T, -one(T), one(T))
         (lo_quadrant == 1) | (lo_quadrant == 2) && return @round(T, sin(hi), sin(lo)) # decreasing
         return @round(T, sin(lo), sin(hi))
 
@@ -148,8 +156,9 @@ Implement the `cos` function of the IEEE Standard 1788-2015 (Table 9.1).
 function Base.cos(x::BareInterval{T}) where {T<:AbstractFloat}
     isempty_interval(x) && return x
 
+    PI_HI = sup(bareinterval(T, π))
     d = diam(x)
-    d/2 ≥ π && return _unsafe_bareinterval(T, -one(T), one(T))
+    d ≥ 2PI_HI && return _unsafe_bareinterval(T, -one(T), one(T))
 
     lo, hi = bounds(x)
 
@@ -157,7 +166,7 @@ function Base.cos(x::BareInterval{T}) where {T<:AbstractFloat}
     hi_quadrant = _quadrant(hi)
 
     if lo_quadrant == hi_quadrant
-        d ≥ π && return _unsafe_bareinterval(T, -one(T), one(T))
+        d ≥ PI_HI && return _unsafe_bareinterval(T, -one(T), one(T))
         (lo_quadrant == 2) | (lo_quadrant == 3) && return @round(T, cos(lo), cos(hi)) # increasing
         return @round(T, cos(hi), cos(lo))
 
@@ -246,7 +255,7 @@ Implement the `tan` function of the IEEE Standard 1788-2015 (Table 9.1).
 function Base.tan(x::BareInterval{T}) where {T<:AbstractFloat}
     isempty_interval(x) && return x
 
-    diam(x) > π && return entireinterval(BareInterval{T})
+    diam(x) > sup(bareinterval(T, π)) && return entireinterval(BareInterval{T})
 
     lo, hi = bounds(x)
 
@@ -282,7 +291,7 @@ Implement the `cot` function of the IEEE Standard 1788-2015 (Table 9.1).
 function Base.cot(x::BareInterval{T}) where {T<:AbstractFloat}
     isempty_interval(x) && return x
 
-    diam(x) > π && return entireinterval(BareInterval{T})
+    diam(x) > sup(bareinterval(T, π)) && return entireinterval(BareInterval{T})
 
     isthinzero(x) && return emptyinterval(BareInterval{T})
 
@@ -316,7 +325,7 @@ Implement the `sec` function of the IEEE Standard 1788-2015 (Table 9.1).
 function Base.sec(x::BareInterval{T}) where {T<:AbstractFloat}
     isempty_interval(x) && return x
 
-    diam(x) > π && return entireinterval(BareInterval{T})
+    diam(x) > sup(bareinterval(T, π)) && return entireinterval(BareInterval{T})
 
     lo, hi = bounds(x)
 
@@ -352,7 +361,7 @@ Implement the `csc` function of the IEEE Standard 1788-2015 (Table 9.1).
 function Base.csc(x::BareInterval{T}) where {T<:AbstractFloat}
     isempty_interval(x) && return x
 
-    diam(x) > π && return entireinterval(BareInterval{T})
+    diam(x) > sup(bareinterval(T, π)) && return entireinterval(BareInterval{T})
 
     isthinzero(x) && return emptyinterval(BareInterval{T})
 
