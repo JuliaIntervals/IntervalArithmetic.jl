@@ -90,3 +90,14 @@ end
 #     @test real(b) == interval(-13.12878308146216, -13.128783081462153)
 #     @test imag(b) == interval(-15.200784463067956, -15.20078446306795)
 # end
+
+@testset "Literal powers" begin
+    x = interval(-1,1)
+    n = 2
+    @test isguaranteed(x ^ 2)
+    @test !isguaranteed(x ^ n)
+    @test_broken isguaranteed(x ^ 2.0)
+    @test_broken isguaranteed(x ^ 2305843009213693952)
+    @test isequal_interval(x^2, interval(0,1))
+    @test isequal_interval(x^3, x)
+end
