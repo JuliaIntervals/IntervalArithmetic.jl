@@ -132,18 +132,18 @@ See also: [`isthin`](@ref).
 function Base.:(==)(x::Union{BareInterval,Interval}, y::Union{BareInterval,Interval}) # also returned when calling `≤`, `≥`, `isequal`
     isthin(y) || return throw(ArgumentError("`==` is only supported for thin intervals. See instead `isequal_interval`"))
     # `y` is not empty, nor an NaI
-    return x == inf(y)
+    return x == sup(y)
 end
 function Base.:(==)(x::Union{BareInterval,Interval}, y::Number)
     isthin(x) || return throw(ArgumentError("`==` is only supported between thin intervals and numbers. See instead `isequal_interval`"))
     # `x` is not empty, nor an NaI
-    return inf(x) == y
+    return sup(x) == y
 end
 Base.:(==)(x::Number, y::Union{BareInterval,Interval}) = y == x
 function Base.:(==)(x::Union{BareInterval,Interval}, y::Complex)
     isthin(x) || return throw(ArgumentError("`==` is only supported between thin intervals and numbers. See instead `isequal_interval`"))
     # `x` is not empty, nor an NaI
-    return inf(x) == y
+    return sup(x) == y
 end
 Base.:(==)(x::Complex, y::Union{BareInterval,Interval}) = y == x
 
@@ -171,17 +171,17 @@ See also: [`strictprecedes`](@ref).
 function Base.:<(x::Union{BareInterval,Interval}, y::Union{BareInterval,Interval}) # also returned when calling `isless`, `>`
     isthin(y) || return throw(ArgumentError("`<` is only supported for thin intervals. See instead `isstrictless`, `strictprecedes`"))
     # `y` is not empty, nor an NaI
-    return x < inf(y)
+    return x < sup(y)
 end
 function Base.:<(x::Union{BareInterval,Interval}, y::Real)
     isthin(x) || return throw(ArgumentError("`<` is only supported between thin intervals and numbers. See instead `isequal_interval`"))
     # `x` is not empty, nor an NaI
-    return inf(x) < y
+    return sup(x) < y
 end
 function Base.:<(x::Real, y::Union{BareInterval,Interval})
     isthin(y) || return throw(ArgumentError("`<` is only supported between thin intervals and numbers. See instead `isequal_interval`"))
     # `y` is not empty, nor an NaI
-    return x < inf(y)
+    return x < sup(y)
 end
 
 Base.:<(x::BareInterval, y::Interval) = throw(MethodError(<, (x, y)))
@@ -213,7 +213,7 @@ See also: [`isbounded`](@ref).
 function Base.isfinite(x::Union{BareInterval,Interval}) # also returned when calling `isinf`
     isthin(x) || return throw(ArgumentError("`isfinite` is only supported for thin intervals. See instead `isbounded`"))
     # `x` is not empty, nor an NaI
-    return isfinite(inf(x))
+    return isfinite(sup(x))
 end
 
 """
@@ -228,7 +228,7 @@ See also: [`isthinzero`](@ref).
 function Base.iszero(x::Union{BareInterval,Interval})
     isthin(x) || return throw(ArgumentError("`iszero` is only supported for thin intervals. See instead `isthinzero`"))
     # `x` is not empty, nor an NaI
-    return iszero(inf(x))
+    return iszero(sup(x))
 end
 
 """
@@ -243,7 +243,7 @@ See also: [`isthinone`](@ref).
 function Base.isone(x::Union{BareInterval,Interval})
     isthin(x) || return throw(ArgumentError("`isone` is only supported for thin intervals. See instead `isthinone`"))
     # `x` is not empty, nor an NaI
-    return isone(inf(x))
+    return isone(sup(x))
 end
 
 """
@@ -258,5 +258,5 @@ See also: [`isthininteger`](@ref).
 function Base.isinteger(x::Union{BareInterval,Interval})
     isthin(x) || return throw(ArgumentError("`isinteger` is only supported for thin intervals. See instead `isthininteger`"))
     # `x` is not empty, nor an NaI
-    return isinteger(inf(x))
+    return isinteger(sup(x))
 end
