@@ -367,7 +367,7 @@ end
 
 isthin(x::Complex) = isthin(real(x)) & isthin(imag(x))
 
-isthin(x::Number) = isthin(interval(x)) # NOTE: isthin(pi) returns false
+isthin(x::Number) = isthin(interval(x))
 
 """
     isthin(x, y)
@@ -388,7 +388,7 @@ isthin(x::Number, y::Complex) = isthin(real(x), real(y)) & iszero(imag(y))
 
 isthin(x::BareInterval, y::Interval) = throw(MethodError(isthin, (x, y)))
 
-isthin(x::Number, y::Number) = isthin(interval(x), y) # NOTE: isthin(Inf, Inf) returns false
+isthin(x::Number, y::Number) = isthin(interval(x), y)
 
 """
     isthinzero(x)
