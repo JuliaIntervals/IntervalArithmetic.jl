@@ -28,10 +28,12 @@ include("interval_operations/constants.jl")
 include("interval_operations/extended_div.jl")
     export extended_div
 include("interval_operations/boolean.jl")
-    export isempty_interval, isentire_interval, isequal_interval, in_interval,
-        issubset_interval, isinterior, precedes, strictprecedes,
-        isdisjoint_interval, isweakless, isstrictless, isthin, isthinzero, isthinone,
-        isbounded, isunbounded, isnai, iscommon, isatomic
+    export isequal_interval, issubset_interval, isstrictsubset, isinterior,
+        isdisjoint_interval, isweakless, isstrictless, precedes, strictprecedes,
+        in_interval, isempty_interval, isentire_interval, isnai, isbounded,
+        isunbounded, iscommon, isatomic, isthin, isthinzero, isthinone,
+        isthininteger
+
 include("interval_operations/overlap.jl")
     export Overlap, overlap
 include("interval_operations/numeric.jl")

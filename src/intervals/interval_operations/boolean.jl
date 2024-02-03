@@ -20,11 +20,18 @@ function isequal_interval(x::Interval, y::Interval)
     isnai(x) | isnai(y) && return false
     return isequal_interval(bareinterval(x), bareinterval(y))
 end
+isequal_interval(x::Complex{<:Interval}, y::Complex{<:Interval}) = isequal_interval(real(x), real(y)) & isequal_interval(imag(x), imag(y))
+isequal_interval(x::Complex{<:Interval}, y::Interval) = isequal_interval(real(x), y) & isthinzero(imag(x))
+isequal_interval(x::Interval, y::Complex{<:Interval}) = isequal_interval(x, real(y)) & isthinzero(imag(y))
+
+function isequal_interval(x::AbstractVector, y::AbstractVector)
+    n = length(x)
+    m = length(y)
+    n == m || return throw(DimensionMismatch("dimensions must match: x has length $n, y has length $m"))
+    return all(t -> isequal_interval(t[1], t[2]), zip(x, y))
+end
 
 isequal_interval(x, y, z, w...) = isequal_interval(x, y) & isequal_interval(y, z, w...)
-isequal_interval(x::Complex, y::Complex) = isequal_interval(real(x), real(y)) & isequal_interval(imag(x), imag(y))
-isequal_interval(x::Complex, y::Real) = isequal_interval(real(x), y) & isthinzero(imag(x))
-isequal_interval(x::Real, y::Complex) = isequal_interval(x, real(y)) & isthinzero(imag(y))
 
 isequal_interval(x) = Base.Fix2(isequal_interval, x)
 
@@ -41,16 +48,46 @@ function issubset_interval(x::Interval, y::Interval)
     isnai(x) | isnai(y) && return false
     return issubset_interval(bareinterval(x), bareinterval(y))
 end
+issubset_interval(x::Complex{<:Interval}, y::Complex{<:Interval}) = issubset_interval(real(x), real(y)) & issubset_interval(imag(x), imag(y))
+issubset_interval(x::Complex{<:Interval}, y::Interval) = issubset_interval(real(x), y) & isthinzero(imag(x))
+issubset_interval(x::Interval, y::Complex{<:Interval}) = issubset_interval(x, real(y)) & in_interval(0, imag(y))
+
+function issubset_interval(x::AbstractVector, y::AbstractVector)
+    n = length(x)
+    m = length(y)
+    n == m || return throw(DimensionMismatch("dimensions must match: x has length $n, y has length $m"))
+    return all(t -> issubset_interval(t[1], t[2]), zip(x, y))
+end
 
 issubset_interval(x, y, z, w...) = issubset_interval(x, y) & issubset_interval(y, z, w...)
-issubset_interval(x::Complex, y::Complex) = issubset_interval(real(x), real(y)) & issubset_interval(imag(x), imag(y))
-issubset_interval(x::Complex, y::Real) = issubset_interval(real(x), y) & isthinzero(imag(x))
-issubset_interval(x::Real, y::Complex) = issubset_interval(x, real(y)) & in_interval(0, imag(y))
+
+"""
+    isstrictsubset(x, y)
+
+Test whether `x` is a strict subset of `y`. If `x` and `y` are intervals, this
+is semantically equivalent to `isinterior(x, y)`. If `x` and `y` are vectors,
+`x` must be a subset of `y` with at least one of their component being a strict
+subset.
+
+See also: [`isinterior`](@ref).
+"""
+isstrictsubset(x::BareInterval, y::BareInterval) = isinterior(x, y)
+
+isstrictsubset(x::Interval, y::Interval) = isinterior(x, y)
+isstrictsubset(x::Complex{<:Interval}, y::Complex{<:Interval}) =
+    (isstrictsubset(real(x), real(y)) & issubset_interval(imag(x), imag(y))) | (issubset_interval(real(x), real(y)) & isstrictsubset(imag(x), imag(y)))
+isstrictsubset(x::Complex{<:Interval}, y::Interval) = isstrictsubset(real(x), y) & isthinzero(imag(x))
+isstrictsubset(x::Interval, y::Complex{<:Interval}) = isstrictsubset(x, real(y)) & in_interval(0, imag(y))
+
+isstrictsubset(x::AbstractVector, y::AbstractVector) = issubset_interval(x, y) & any(t -> isstrictsubset(t[1], t[2]), zip(x, y))
+
+isstrictsubset(x, y, z, w...) = isstrictsubset(x, y) & isstrictsubset(y, z, w...)
 
 """
     isinterior(x, y)
 
-Test whether `x` is in the interior of `y`.
+Test whether `x` is in the interior of `y`. If `x` and `y` are intervals, this
+is semantically equivalent to `isstrictsubset(x, y)`.
 
 Implement the `interior` function of the IEEE Standard 1788-2015 (Table 9.3).
 
@@ -63,6 +100,9 @@ function isinterior(x::Interval, y::Interval)
     isnai(x) | isnai(y) && return false
     return isinterior(bareinterval(x), bareinterval(y))
 end
+isinterior(x::Complex{<:Interval}, y::Complex{<:Interval}) = isinterior(real(x), real(y)) & isinterior(imag(x), imag(y))
+isinterior(::Complex{<:Interval}, ::Interval) = false
+isinterior(x::Interval, y::Complex{<:Interval}) = isinterior(x, real(y)) & isinterior(zero(x), imag(y))
 
 function isinterior(x::AbstractVector, y::AbstractVector)
     n = length(x)
@@ -72,33 +112,33 @@ function isinterior(x::AbstractVector, y::AbstractVector)
 end
 
 isinterior(x, y, z, w...) = isinterior(x, y) & isinterior(y, z, w...)
-isinterior(x::Complex, y::Complex) =
-    (isinterior(real(x), real(y)) & issubset_interval(imag(x), imag(y))) |
-    (issubset_interval(real(x), real(y)) & isinterior(imag(x), imag(y)))
-isinterior(x::Complex, y::Real) = isinterior(real(x), y) & isthinzero(imag(x))
-isinterior(x::Real, y::Complex) = isinterior(x, real(y)) & in_interval(0, imag(y))
 
 """
-    isstrictsubset(x, y)
+    isdisjoint_interval(x, y)
 
-Test whether `x` is a strict subset of `y`. If `x` and `y` are intervals, this
-is semantically equivalent to `isinterior(x, y)`. If `x` and `y` are vectors, at
-least one component of `x` must be in the interior of `y`.
+Test whether `x` and `y` have no common elements.
 
-See also: [`isinterior`](@ref).
+Implement the `disjoint` function of the IEEE Standard 1788-2015 (Table 9.3).
 """
-isstrictsubset(x::BareInterval, y::BareInterval) = isinterior(x, y)
+isdisjoint_interval(x::BareInterval, y::BareInterval) =
+    isempty_interval(x) | isempty_interval(y) | _strictlessprime(sup(y), inf(x)) | _strictlessprime(sup(x), inf(y))
 
-isstrictsubset(x::Interval, y::Interval) = isinterior(x, y)
+function isdisjoint_interval(x::Interval, y::Interval)
+    isnai(x) | isnai(y) && return false
+    return isdisjoint_interval(bareinterval(x), bareinterval(y))
+end
+isdisjoint_interval(x::Complex{<:Interval}, y::Complex{<:Interval}) = isdisjoint_interval(real(x), real(y)) | isdisjoint_interval(imag(x), imag(y))
+isdisjoint_interval(x::Complex{<:Interval}, y::Interval) = isdisjoint_interval(real(x), y) | !in_interval(0, imag(x))
+isdisjoint_interval(x::Interval, y::Complex{<:Interval}) = isdisjoint_interval(x, real(y)) | !in_interval(0, imag(y))
 
-isstrictsubset(x::AbstractVector, y::AbstractVector) = isinterior(x, y) & any(t -> isinterior(t[1], t[2]), zip(x, y))
+function isdisjoint_interval(x::AbstractVector, y::AbstractVector)
+    n = length(x)
+    m = length(y)
+    n == m || return throw(DimensionMismatch("dimensions must match: x has length $n, y has length $m"))
+    return any(t -> isdisjoint_interval(t[1], t[2]), zip(x, y))
+end
 
-isstrictsubset(x, y, z, w...) = isstrictsubset(x, y) & isstrictsubset(y, z, w...)
-isstrictsubset(x::Complex, y::Complex) =
-    (isstrictsubset(real(x), real(y)) & issubset_interval(imag(x), imag(y))) |
-    (issubset_interval(real(x), real(y)) & isstrictsubset(imag(x), imag(y)))
-isstrictsubset(x::Complex, y::Real) = isstrictsubset(real(x), y) & isthinzero(imag(x))
-isstrictsubset(x::Real, y::Complex) = isstrictsubset(x, real(y)) & in_interval(0, imag(y))
+isdisjoint_interval(x, y, z, w...) = isdisjoint_interval(x, y) & isdisjoint_interval(y, z, w...)
 
 """
     isweakless(x, y)
@@ -160,24 +200,6 @@ function strictprecedes(x::Interval, y::Interval)
 end
 
 """
-    isdisjoint_interval(x, y)
-
-Test whether `x` and `y` have no common elements.
-
-Implement the `disjoint` function of the IEEE Standard 1788-2015 (Table 9.3).
-"""
-isdisjoint_interval(a::BareInterval, b::BareInterval) =
-    isempty_interval(a) | isempty_interval(b) | _strictlessprime(sup(b), inf(a)) | _strictlessprime(sup(a), inf(b))
-
-function isdisjoint_interval(x::Interval, y::Interval)
-    isnai(x) | isnai(y) && return false
-    return isdisjoint_interval(bareinterval(x), bareinterval(y))
-end
-
-isdisjoint_interval(x::Complex, y::Complex) =
-    isdisjoint_interval(real(x), real(y)) | isdisjoint_interval(imag(x), imag(y))
-
-"""
     in_interval(x, y)
 
 Test whether `x` is an element of `y`.
@@ -189,21 +211,18 @@ function in_interval(x::Number, y::BareInterval)
     return inf(y) ≤ x ≤ sup(y)
 end
 in_interval(x::Complex, y::BareInterval) = in_interval(real(x), y) & iszero(imag(x))
+in_interval(x::Interval, y::BareInterval) = throw(MethodError(in_interval, (x, y)))
+in_interval(::BareInterval, ::BareInterval) =
+    throw(ArgumentError("`in_interval` is purposely not supported for two interval arguments. See instead `issubset_interval`"))
 
 function in_interval(x::Number, y::Interval)
     isnai(y) && return false
     return in_interval(x, bareinterval(y))
 end
-
-in_interval(::BareInterval, ::BareInterval) =
-    throw(ArgumentError("`in_interval` is purposely not supported for two interval arguments. See instead `issubset_interval`"))
-
+in_interval(x::Number, y::Complex{<:Interval}) = in_interval(x, real(y)) & in_interval(0, imag(y))
+in_interval(x::Complex, y::Complex{<:Interval}) = in_interval(real(x), real(y)) & in_interval(imag(x), imag(y))
 in_interval(::Interval, ::Interval) =
     throw(ArgumentError("`in_interval` is purposely not supported for two interval arguments. See instead `issubset_interval`"))
-
-in_interval(x::Complex, y::Complex) = in_interval(real(x), real(y)) & in_interval(imag(x), imag(y))
-in_interval(x::Complex, y::Number) = in_interval(real(x), y) & iszero(imag(x))
-in_interval(x::Number, y::Complex) = in_interval(x, real(y)) & in_interval(0, imag(y))
 
 in_interval(x) = Base.Fix2(in_interval, x)
 
@@ -220,8 +239,9 @@ function isempty_interval(x::Interval)
     isnai(x) && return false
     return isempty_interval(bareinterval(x))
 end
+isempty_interval(x::Complex{<:Interval}) = isempty_interval(real(x)) | isempty_interval(imag(x))
 
-isempty_interval(x::Complex) = isempty_interval(real(x)) & isempty_interval(imag(x))
+isempty_interval(x::AbstractVector) = any(isempty_interval, x)
 
 """
     isentire_interval(x)
@@ -236,8 +256,7 @@ function isentire_interval(x::Interval)
     isnai(x) && return false
     return isentire_interval(bareinterval(x))
 end
-
-isentire_interval(x::Complex) = isentire_interval(real(x)) & isentire_interval(imag(x))
+isentire_interval(x::Complex{<:Interval}) = isentire_interval(real(x)) & isentire_interval(imag(x))
 
 """
     isnai(x)
@@ -247,8 +266,7 @@ Test whether `x` is an NaI (Not an Interval).
 isnai(::BareInterval) = false
 
 isnai(x::Interval) = decoration(x) == ill
-
-isnai(x::Complex) = isnai(real(x)) & isnai(imag(x))
+isnai(x::Complex{<:Interval}) = isnai(real(x)) & isnai(imag(x))
 
 """
     isbounded(x)
@@ -261,8 +279,7 @@ function isbounded(x::Interval)
     isnai(x) && return false
     return isbounded(bareinterval(x))
 end
-
-isbounded(x::Complex) = isbounded(real(x)) & isbounded(imag(x))
+isbounded(x::Complex{<:Interval}) = isbounded(real(x)) & isbounded(imag(x))
 
 """
     isunbounded(x)
@@ -275,8 +292,7 @@ function isunbounded(x::Interval)
     isnai(x) && return false
     return isunbounded(bareinterval(x))
 end
-
-isunbounded(x::Complex) = isunbounded(real(x)) | isunbounded(imag(x))
+isunbounded(x::Complex{<:Interval}) = isunbounded(real(x)) | isunbounded(imag(x))
 
 """
     iscommon(x)
@@ -292,8 +308,7 @@ function iscommon(x::Interval)
     isnai(x) && return false
     return iscommon(bareinterval(x))
 end
-
-iscommon(x::Complex) = iscommon(real(x)) & iscommon(imag(x))
+iscommon(x::Complex{<:Interval}) = iscommon(real(x)) & iscommon(imag(x))
 
 """
     isatomic(x)
@@ -309,8 +324,7 @@ function isatomic(x::Interval)
     isnai(x) && return false
     return isatomic(bareinterval(x))
 end
-
-isatomic(x::Complex) = isatomic(real(x)) & isatomic(imag(x))
+isatomic(x::Complex{<:Interval}) = isatomic(real(x)) & isatomic(imag(x))
 
 """
     isthin(x)
@@ -325,8 +339,7 @@ function isthin(x::Interval)
     isnai(x) && return false
     return isthin(bareinterval(x))
 end
-
-isthin(x::Complex) = isthin(real(x)) & isthin(imag(x))
+isthin(x::Complex{<:Interval}) = isthin(real(x)) & isthin(imag(x))
 
 """
     isthin(x, y)
@@ -335,17 +348,14 @@ Test whether `x` contains only `y`.
 """
 isthin(x::BareInterval, y::Number) = inf(x) == sup(x) == y
 isthin(x::BareInterval, y::Complex) = isthin(x, real(y)) & iszero(imag(y))
+isthin(x::BareInterval, y::Interval) = throw(MethodError(isthin, (x, y)))
 
 function isthin(x::Interval, y::Number)
     isnai(x) && return false
     return isthin(bareinterval(x), y)
 end
-
-isthin(x::Complex, y::Complex) = isthin(real(x), real(y)) & isthin(imag(x), imag(y))
-isthin(x::Complex, y::Number) = isthin(real(x), real(y)) & isthinzero(imag(x))
-isthin(x::Number, y::Complex) = isthin(real(x), real(y)) & iszero(imag(y))
-
-isthin(x::BareInterval, y::Interval) = throw(MethodError(isthin, (x, y)))
+isthin(x::Complex{<:Interval}, y::Number) = isthin(real(x), y) & isthinzero(imag(x))
+isthin(x::Complex{<:Interval}, y::Complex) = isthin(real(x), real(y)) & isthin(imag(x), imag(y))
 
 """
     isthinzero(x)
@@ -358,8 +368,7 @@ function isthinzero(x::Interval)
     isnai(x) && return false
     return isthinzero(bareinterval(x))
 end
-
-isthinzero(x::Complex) = isthinzero(real(x)) & isthinzero(imag(x))
+isthinzero(x::Complex{<:Interval}) = isthinzero(real(x)) & isthinzero(imag(x))
 
 """
     isthinone(x)
@@ -372,8 +381,7 @@ function isthinone(x::Interval)
     isnai(x) && return false
     return isthinone(bareinterval(x))
 end
-
-isthinone(x::Complex) = isthinone(real(x)) & isthinzero(imag(x))
+isthinone(x::Complex{<:Interval}) = isthinone(real(x)) & isthinzero(imag(x))
 
 """
     isthininteger(x)
@@ -386,5 +394,4 @@ function isthininteger(x::Interval)
     isnai(x) && return false
     return isthininteger(bareinterval(x))
 end
-
-isthininteger(x::Complex) = isthininteger(real(x)) & isthinzero(imag(x))
+isthininteger(x::Complex{<:Interval}) = isthininteger(real(x)) & isthinzero(imag(x))

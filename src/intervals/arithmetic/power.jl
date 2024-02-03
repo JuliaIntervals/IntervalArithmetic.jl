@@ -406,9 +406,8 @@ for f ∈ (:cbrt, :exp, :exp2, :exp10, :expm1)
         Base.$f(x::BareInterval{<:Rational}) = $f(float(x))
 
         function Base.$f(x::Interval)
-            bx = bareinterval(x)
-            r = $f(bx)
-            d = min(decoration(r), decoration(x))
+            r = $f(bareinterval(x))
+            d = min(decoration(x), decoration(r))
             return _unsafe_interval(r, d, isguaranteed(x))
         end
     end

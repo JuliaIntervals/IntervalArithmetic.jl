@@ -16,8 +16,7 @@ function bisect(x::BareInterval{T}, α::Real = 0.5) where {T<:NumTypes}
 end
 
 function bisect(x::Interval, α::Real = 0.5)
-    bx = bareinterval(x)
-    r₁, r₂ = bisect(bx, α)
+    r₁, r₂ = bisect(bareinterval(x), α)
     d₁, d₂ = min(decoration(x), decoration(r₁)), min(decoration(x), decoration(r₂))
     t = isguaranteed(x)
     return (_unsafe_interval(r₁, d₁, t), _unsafe_interval(r₂, d₂, t))

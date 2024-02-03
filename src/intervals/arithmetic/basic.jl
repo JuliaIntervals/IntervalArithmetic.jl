@@ -127,7 +127,8 @@ function Base.inv(x::BareInterval{T}) where {T<:NumTypes}
         inf(x) < 0 == sup(x) && return @round(T, typemin(T), inv(inf(x)))
         inf(x) == 0 < sup(x) && return @round(T, inv(sup(x)), typemax(T))
         inf(x) < 0 < sup(x) && return entireinterval(BareInterval{T})
-        isthinzero(x) && return div_by_thin_zero(_unsafe_bareinterval(T, one(T), one(T)))
+        # isthinzero(x)
+        return div_by_thin_zero(_unsafe_bareinterval(T, one(T), one(T)))
     end
     return @round(T, inv(sup(x)), inv(inf(x)))
 end
