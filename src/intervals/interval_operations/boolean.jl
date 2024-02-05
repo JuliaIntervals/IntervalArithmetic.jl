@@ -348,7 +348,8 @@ Test whether `x` contains only `y`.
 """
 isthin(x::BareInterval, y::Number) = inf(x) == sup(x) == y
 isthin(x::BareInterval, y::Complex) = isthin(x, real(y)) & iszero(imag(y))
-isthin(x::BareInterval, y::Interval) = throw(MethodError(isthin, (x, y)))
+isthin(::BareInterval, ::Interval) =
+    throw(ArgumentError("`isthin` is purposely not supported for intervals. See instead `isequal_interval`"))
 
 function isthin(x::Interval, y::Number)
     isnai(x) && return false
