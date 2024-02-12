@@ -5,6 +5,7 @@ version = "0.22.9"
 
 [deps]
 CRlibm_jll = "4e9b3aee-d8a1-5a3d-ad8b-7d824db253f0"
+MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
 RoundingEmulator = "5eaf0fd0-dfba-4ccb-bf02-d820a40db705"
 
 [weakdeps]
