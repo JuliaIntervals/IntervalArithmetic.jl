@@ -29,5 +29,20 @@ macro exact(expr)
         x isa Real && return ExactNumber(x)
         return x
     end
+    display_expr = postwalk(expr) do x
+        x isa Real && return string(ExactNumber(x))
+        return x
+    end
+
+    exact_string = replace(string(display_expr), "\"" => "")
+    @info "With exact number, the expression read\n$exact_string"
     return esc(exact_expr)
 end
+
+Base.string(x::ExactNumber{T}) where {T<:AbstractFloat} =
+    Base.Ryu.writefixed(x.number, 2000, false, false, false, UInt8('.'), true)
+
+Base.string(x::ExactNumber) = string(x.number)
+
+Base.show(io::IO, ::MIME"text/plain", x::ExactNumber{T}) where {T<:AbstractFloat} =
+    print(io, "ExactNumber{$T}($(string(x)))")
