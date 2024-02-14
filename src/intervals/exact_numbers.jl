@@ -26,16 +26,17 @@ Base.convert(::Type{T}, x::ExactNumber) where {T<:Real} =
 
 macro exact(expr)
     exact_expr = postwalk(expr) do x
-        x isa Real && return ExactNumber(x)
-        return x
-    end
-    display_expr = postwalk(expr) do x
-        x isa Real && return string(ExactNumber(x))
+        if x isa Real
+            e = ExactNumber(x)
+            s = string(e)
+            if s != string(x)
+                @warn "$(typeof(x)) displayed as $x is equal to $s"
+            end
+            return e
+        end
         return x
     end
 
-    exact_string = replace(string(display_expr), "\"" => "")
-    @info "With exact number, the expression read\n$exact_string"
     return esc(exact_expr)
 end
 
