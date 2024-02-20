@@ -34,6 +34,14 @@ macro exact(expr)
             end
             return e
         end
+
+        # Unwrap literal powers to be sure the expression uses Base.literal_pow
+        if @capture(x, y_ ^ N_)
+            if N isa ExactNumber{<:Integer}
+                return :($y ^ $N)
+            end
+        end
+
         return x
     end
 
