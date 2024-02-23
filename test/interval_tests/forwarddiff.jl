@@ -16,7 +16,7 @@ end
         @test ForwardDiff.derivative(abs, interval(-2,  2)) === interval(-1,  1, trv)
 
         f(x) = abs(x)^interval(2)
-        @test_broken ForwardDiff.derivative(f, interval(-1, 1)) === interval(-2,  2, trv)
+        @test ForwardDiff.derivative(f, interval(-1, 1)) === interval(-2,  2, trv)
 
         g(x) = abs(x)^2
         @test     ForwardDiff.derivative(g,             interval(-1, 1) )  ===  interval(convert(Interval{Float64}, -2), convert(Interval{Float64}, 2), trv)
@@ -56,12 +56,44 @@ end
     end
 
     @testset "Power" begin
-        f(x)  = interval(2)^x
-        f′(x) = log(interval(2)) * f(x)
-        df(t) = ForwardDiff.derivative(f, t)
+        fxy(xy) = xy[1]^xy[2]
 
-        # g(x) = 2^x # not guaranteed
+        for x in [0.0, 1.1, 2.2]
+            for y in [-3.3, 0.0, 4.4]
+                fx(xx) = xx^y
+                fxi(xx) = xx^interval(y)
+                fy(yy) = x^yy
+                fyi(yy) = interval(x)^yy
 
-        @test f′(0) === df(0)
+                dfdx = ForwardDiff.derivative(fxi, interval(x))
+                dfdy = ForwardDiff.derivative(fyi, interval(y))
+                grad = ForwardDiff.gradient(fxy, [interval(x), interval(y)])
+
+                @test isguaranteed(dfdx)
+                @test isguaranteed(dfdy)
+                @test isguaranteed(grad[1])
+                @test isguaranteed(grad[2])
+                
+                if iszero(x) && y < 0
+                    @test decoration(dfdx) == trv
+                else
+                    @test in_interval(ForwardDiff.derivative(fx, x), dfdx)
+                end
+
+                if iszero(x) && y <= 0 
+                    @test decoration(dfdy) == trv
+                else
+                    @test in_interval(ForwardDiff.derivative(fy, y), dfdy)
+                end
+
+                if iszero(x) && iszero(y)
+                    @test decoration(grad[1]) == trv
+                    @test decoration(dfdx) == com
+                else
+                    @test isequal_interval(dfdx, grad[1])
+                end
+                @test isequal_interval(dfdy, grad[2])
+            end
+        end
     end
 end
