@@ -10,7 +10,7 @@ Base.promote_rule(::Type{ExactNumber{T}}, ::Type{Interval{S}}) where {T<:Real,S<
     Interval{promote_numtype(T, S)}
 
 function Base.convert(::Type{Interval{T}}, x::ExactNumber) where {T<:NumTypes}
-    y = interval(T, x.number)
+    y = interval(T, x)
     return _unsafe_interval(bareinterval(y), decoration(y), true)
 end
 
@@ -23,6 +23,25 @@ Base.promote_rule(::Type{ExactNumber{T}}, ::Type{S}) where {T<:Real,S<:Real} =
 
 Base.convert(::Type{T}, x::ExactNumber) where {T<:Real} =
     convert(T, x.number)
+
+interval(::Type{T}, x::ExactNumber) where {T<:NumTypes} = interval(T, x.number)
+interval(x::ExactNumber) = interval(x.number)
+
+Base.string(x::ExactNumber{T}) where {T<:AbstractFloat} =
+    Base.Ryu.writefixed(x.number, 2000, false, false, false, UInt8('.'), true)
+
+Base.string(x::ExactNumber) = string(x.number)
+
+Base.show(io::IO, ::MIME"text/plain", x::ExactNumber{T}) where {T<:AbstractFloat} =
+    print(io, "ExactNumber{$T}($(string(x)))")
+
+for unary in Symbol.((inv, sqrt, sin, cos, tan, asin, acos, atan, exp, log, sinh, cosh, tanh, asinh, acosh, atanh))
+    @eval (Base.$unary)(x::ExactNumber) = ($unary)(interval(x))
+end
+
+for binary in Symbol.((+, -, *, /, ^))
+    @eval (Base.$binary)(x::ExactNumber, y::ExactNumber) = ($binary)(interval(x), interval(y))
+end
 
 macro exact(expr)
     exact_expr = postwalk(expr) do x
@@ -47,11 +66,3 @@ macro exact(expr)
 
     return esc(exact_expr)
 end
-
-Base.string(x::ExactNumber{T}) where {T<:AbstractFloat} =
-    Base.Ryu.writefixed(x.number, 2000, false, false, false, UInt8('.'), true)
-
-Base.string(x::ExactNumber) = string(x.number)
-
-Base.show(io::IO, ::MIME"text/plain", x::ExactNumber{T}) where {T<:AbstractFloat} =
-    print(io, "ExactNumber{$T}($(string(x)))")
