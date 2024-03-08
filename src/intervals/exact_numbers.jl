@@ -24,6 +24,11 @@ Base.promote_rule(::Type{ExactReal{T}}, ::Type{S}) where {T<:Real,S<:Real} =
 Base.convert(::Type{T}, x::ExactReal) where {T<:Real} =
     convert(T, x.number)
 
+# Remove the fallback for Real number that go to the constructor T(x) and
+# would allow to create ExactReal from other sources than literals.
+Base.convert(::Type{<:ExactReal}, x::Real) =
+    throw(ArgumentError("converting to ExactReal is not allowed"))
+
 interval(::Type{T}, x::ExactReal) where {T<:NumTypes} = interval(T, x.number)
 interval(x::ExactReal) = interval(x.number)
 
