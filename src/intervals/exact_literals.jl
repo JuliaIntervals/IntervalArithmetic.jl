@@ -1,4 +1,4 @@
-struct ExactReal{T <: Real, F} <: Real
+struct ExactReal{T <: Real} <: Real
     value::T
 end
 
