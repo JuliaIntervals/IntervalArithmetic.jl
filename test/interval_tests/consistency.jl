@@ -340,7 +340,9 @@
 
     @testset "Disallowed `Real` functionalities" begin
         x, y = interval(1), interval(2)
-        @test_throws ArgumentError x == y
+        @test x != y
+        @test (interval(1, 2) != y) & (y != interval(1, 2))
+        @test_throws ArgumentError interval(1, 2) == interval(1, 2)
         @test_throws ArgumentError x < y
         @test_throws ArgumentError isdisjoint(x, y)
         @test_throws ArgumentError issubset(x, y)
