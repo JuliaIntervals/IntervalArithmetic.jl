@@ -303,6 +303,25 @@ bareinterval(::Type{T}, x::Interval) where {T} = bareinterval(T, bareinterval(x)
 decoration(x::Interval) = x.decoration
 
 """
+    setdecoration(x::Interval, d::Decoration)
+
+Set the decoration of the interval `x` to `d`, regardless of `decoration(x)`.
+
+!!! warning
+    Since misuse of this function can deeply corrupt code, its usage is
+    **strongly discouraged**.
+
+Implement the `setDec` function of the IEEE Standard 1788-2015 (Section 11.5.2).
+"""
+function setdecoration(x::Interval, d::Decoration)
+    d == ill && return nai(numtype(x))
+    bx = bareinterval(x)
+    isempty_interval(bx) && return _unsafe_interval(bx, trv, isguaranteed(x))
+    ((d == com) & isunbounded(bx)) && return _unsafe_interval(bx, dac, isguaranteed(x))
+    return _unsafe_interval(bx, d, isguaranteed(x))
+end
+
+"""
     isguaranteed(x::BareInterval)
     isguaranteed(x::Interval)
     isguaranteed(x::Complex{<:Interval})
