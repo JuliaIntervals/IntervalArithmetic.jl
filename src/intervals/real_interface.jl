@@ -80,8 +80,11 @@ Base.hash(x::Interval, h::UInt) = hash(sup(x), hash(inf(x), hash(Interval, h)))
 
 for T ∈ (:BareInterval, :Interval)
     @eval begin
-        Base.:(==)(::$T, ::$T) = # also returned when calling `≤`, `≥`, `isequal`
-            throw(ArgumentError("`==` is purposely not supported for intervals. See instead `isequal_interval`"))
+        function Base.:(==)(x::$T, y::$T) # also returned when calling `≤`, `≥`, `isequal`
+            isthin(x) && return sup(x) == y
+            isthin(y) && return x == sup(y)
+            return throw(ArgumentError("`==` is purposely not supported for intervals. See instead `isequal_interval`"))
+        end
 
         Base.:<(::$T, ::$T) = # also returned when calling `isless`, `>`
             throw(ArgumentError("`<` is purposely not supported for intervals. See instead `isstrictless`, `strictprecedes`"))
