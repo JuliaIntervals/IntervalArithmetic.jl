@@ -236,7 +236,6 @@ end
 # note: `isless`, and hence `<`, `min` and `max`, are automatically defined
 
 function decoration(x::BareInterval)
-    isnai(x) && return ill
     isempty_interval(x) && return trv
     isunbounded(x) && return dac
     return com
@@ -305,19 +304,25 @@ decoration(x::Interval) = x.decoration
 """
     setdecoration(x::Interval, d::Decoration)
 
-Set the decoration of the interval `x` to `d`, regardless of `decoration(x)`.
+Return the interval `bareinterval(x)` with decoration `d`, with the following
+exceptions:
+- if `d == ill`, then the output is an NaI
+- if `isempty_interval(bareinterval(x))` and `d != ill`, then the output has
+decoration `trv`
+- if `isunbounded(bareinterval(x))` and `d == com`, then the output has
+decoration `dac`
 
-!!! warning
+!!! danger
     Since misuse of this function can deeply corrupt code, its usage is
     **strongly discouraged**.
 
 Implement the `setDec` function of the IEEE Standard 1788-2015 (Section 11.5.2).
 """
-function setdecoration(x::Interval, d::Decoration)
-    d == ill && return nai(numtype(x))
+function setdecoration(x::Interval{T}, d::Decoration) where {T<:NumTypes}
+    d == ill && return nai(T)
     bx = bareinterval(x)
     isempty_interval(bx) && return _unsafe_interval(bx, trv, isguaranteed(x))
-    ((d == com) & isunbounded(bx)) && return _unsafe_interval(bx, dac, isguaranteed(x))
+    (isunbounded(bx) & (d == com)) && return _unsafe_interval(bx, dac, isguaranteed(x))
     return _unsafe_interval(bx, d, isguaranteed(x))
 end
 
