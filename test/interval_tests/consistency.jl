@@ -34,6 +34,13 @@
         @test isequal_interval(interval(0, 1) - emptyinterval(a), emptyinterval(a))
         @test isequal_interval(interval(0, 1) * emptyinterval(a), emptyinterval(a))
         @test isequal_interval(a * interval(0), zero(a))
+
+        @test decoration(IntervalArithmetic.setdecoration(interval(1, 2), ill)) == ill
+        @test decoration(IntervalArithmetic.setdecoration(emptyinterval(), com)) == trv
+        @test decoration(IntervalArithmetic.setdecoration(interval(1, Inf), com)) == dac
+
+        @test !isnai(IntervalArithmetic.setdecoration(interval(NaN), com))
+        @test decoration(IntervalArithmetic.setdecoration(interval(NaN), com)) == trv
     end
 
     @testset "real interface" begin
