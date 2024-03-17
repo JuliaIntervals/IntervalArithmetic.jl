@@ -369,7 +369,6 @@ function _round_string_down(s::String)
                     idx == 1 ? "." : "",
                     '9'^(len - (idx + 1)))
             return string(new_mantissa, 'e', exponent)
-
         end
     end
 end
