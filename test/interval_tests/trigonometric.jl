@@ -19,6 +19,11 @@ end
     @test issubset_interval(sin(interval(BigFloat, 0.5, 8.5)), sin(interval(0.5, 8.5)))
     @test issubset_interval(sin(interval(BigFloat, -4.5, 0.1)), sin(interval(-4.5, 0.1)))
     @test issubset_interval(sin(interval(BigFloat, 1.3, 6.3)), sin(interval(1.3, 6.3)))
+
+    #
+
+    z = interval(3, 1e-7; format = :midpoint) + interval(4, 1e-7; format = :midpoint) * interval(im)
+    @test issubset_interval(sin(z), complex(sin(real(z)) * cosh(imag(z)), sinh(imag(z)) * cos(real(z))))
 end
 
 @testset "cos" begin
