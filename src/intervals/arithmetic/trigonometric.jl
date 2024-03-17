@@ -99,6 +99,8 @@ function Base.sin(x::Interval)
     return _unsafe_interval(r, d, isguaranteed(x))
 end
 
+Base.sin(x::Complex{Interval{T}}) where {T<:NumTypes} = (cis(x) - cis(-x)) / interval(T, 2im)
+
 # not in the IEEE Standard 1788-2015
 
 if Int == Int32 && VERSION < v"1.10"
@@ -146,6 +148,8 @@ function Base.sinpi(x::Interval)
     d = min(decoration(x), decoration(r))
     return _unsafe_interval(r, d, isguaranteed(x))
 end
+
+Base.sinpi(x::Complex{Interval{T}}) where {T<:NumTypes} = (cispi(x) - cispi(-x)) / interval(T, 2im)
 
 """
     cos(::BareInterval)
@@ -195,6 +199,8 @@ function Base.cos(x::Interval)
     d = min(decoration(x), decoration(r))
     return _unsafe_interval(r, d, isguaranteed(x))
 end
+
+Base.cos(x::Complex{Interval{T}}) where {T<:NumTypes} = (cis(x) + cis(-x)) / interval(T, 2)
 
 # not in the IEEE Standard 1788-2015
 
@@ -246,6 +252,8 @@ function Base.cospi(x::Interval)
     return _unsafe_interval(r, d, isguaranteed(x))
 end
 
+Base.cospi(x::Complex{Interval{T}}) where {T<:NumTypes} = (cispi(x) + cispi(-x)) / interval(T, 2)
+
 """
     tan(::BareInterval)
     tan(::Interval)
@@ -281,6 +289,8 @@ function Base.tan(x::Interval)
     d = min(d, ifelse(isbounded(r), d, trv))
     return _unsafe_interval(r, d, isguaranteed(x))
 end
+
+Base.tan(x::Complex{<:Interval}) = sin(x) / cos(x)
 
 """
     cot(::BareInterval)

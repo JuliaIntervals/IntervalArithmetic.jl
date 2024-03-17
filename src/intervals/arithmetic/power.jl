@@ -413,6 +413,8 @@ for f ∈ (:cbrt, :exp, :exp2, :exp10, :expm1)
     end
 end
 
+Base.exp(x::Complex{<:Interval}) = exp(real(x)) * cis(imag(x))
+
 #
 
 for f ∈ (:log, :log2, :log10)
@@ -436,6 +438,8 @@ for f ∈ (:log, :log2, :log10)
         end
     end
 end
+
+Base.log(x::Complex{<:Interval}) = complex(log(abs(x)), angle(x))
 
 function Base.log1p(x::BareInterval{T}) where {T<:AbstractFloat}
     domain = _unsafe_bareinterval(T, -one(T), typemax(T))
