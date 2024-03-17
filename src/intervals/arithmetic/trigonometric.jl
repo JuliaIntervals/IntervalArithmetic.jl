@@ -99,7 +99,7 @@ function Base.sin(x::Interval)
     return _unsafe_interval(r, d, isguaranteed(x))
 end
 
-Base.sin(x::Complex{Interval{T}}) where {T<:NumTypes} = (cis(x) - cis(-x)) / interval(T, 2im)
+Base.sin(x::Complex{Interval{T}}) where {T<:NumTypes} = complex(sin(real(x)) * cosh(imag(x)), cos(real(x)) * sinh(imag(x)))
 
 # not in the IEEE Standard 1788-2015
 
@@ -149,7 +149,8 @@ function Base.sinpi(x::Interval)
     return _unsafe_interval(r, d, isguaranteed(x))
 end
 
-Base.sinpi(x::Complex{Interval{T}}) where {T<:NumTypes} = (cispi(x) - cispi(-x)) / interval(T, 2im)
+Base.sinpi(x::Complex{Interval{T}}) where {T<:NumTypes} =
+    complex(sinpi(real(x)) * cosh(imag(x) * interval(T, π)), cospi(real(x)) * sinh(imag(x) * interval(T, π)))
 
 """
     cos(::BareInterval)
@@ -200,7 +201,7 @@ function Base.cos(x::Interval)
     return _unsafe_interval(r, d, isguaranteed(x))
 end
 
-Base.cos(x::Complex{Interval{T}}) where {T<:NumTypes} = (cis(x) + cis(-x)) / interval(T, 2)
+Base.cos(x::Complex{Interval{T}}) where {T<:NumTypes} = complex(cos(real(x)) * cosh(imag(x)), -sin(real(x)) * sinh(imag(x)))
 
 # not in the IEEE Standard 1788-2015
 
@@ -252,7 +253,8 @@ function Base.cospi(x::Interval)
     return _unsafe_interval(r, d, isguaranteed(x))
 end
 
-Base.cospi(x::Complex{Interval{T}}) where {T<:NumTypes} = (cispi(x) + cispi(-x)) / interval(T, 2)
+Base.cospi(x::Complex{Interval{T}}) where {T<:NumTypes} =
+    complex(cospi(real(x)) * cosh(imag(x) * interval(T, π)), -sinpi(real(x)) * sinh(imag(x) * interval(T, π)))
 
 """
     tan(::BareInterval)
