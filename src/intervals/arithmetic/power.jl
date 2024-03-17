@@ -288,9 +288,9 @@ Compute the hypotenuse.
 
 Implement the `hypot` function of the IEEE Standard 1788-2015 (Table 10.5).
 """
-Base.hypot(x::BareInterval, y::BareInterval) = sqrt(pown(x, 2) + pown(y, 2))
+Base.hypot(x::BareInterval, y::BareInterval) = sqrt(_select_pown(power_mode(), x, 2) + _select_pown(power_mode(), y, 2))
 
-Base.hypot(x::Interval, y::Interval) = sqrt(pown(x, 2) + pown(y, 2))
+Base.hypot(x::Interval, y::Interval) = sqrt(_select_pown(power_mode(), x, 2) + _select_pown(power_mode(), y, 2))
 
 """
     fastpow(x, y)
