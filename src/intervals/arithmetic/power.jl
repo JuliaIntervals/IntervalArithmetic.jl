@@ -48,8 +48,8 @@ Interval{Float64}(-Inf, Inf, trv)
 ```
 """
 function Base.:^(x::BareInterval, y::BareInterval)
-    isthininteger(y) && return _select_pown(power_mode(), x, Integer(sup(y)))
-    return _select_pow(power_mode(), x, y)
+    isthininteger(y) || return _select_pow(power_mode(), x, y)
+    return _select_pown(power_mode(), x, Integer(sup(y)))
 end
 
 function Base.:^(x::Interval, y::Interval)
@@ -65,9 +65,17 @@ Base.:^(x::Interval, n::Integer) = ^(x, n//one(n))
 Base.:^(x::Rational, y::Interval) = ^(convert(Interval{typeof(x)}, x), y)
 Base.:^(x::Interval, y::Rational) = ^(x, convert(Interval{typeof(y)}, y))
 
+Base.:^(x::Complex{Interval{T}}, y::Complex{Interval{T}}) where {T<:NumTypes} = exp(y * log(x))
+Base.:^(x::Complex{<:Interval}, y::Complex{<:Interval}) = ^(promote(x, y)...)
+Base.:^(x::Complex{<:Interval}, y::Real) = ^(promote(x, y)...)
+Base.:^(x::Real, y::Complex{<:Interval}) = ^(promote(x, y)...)
+# needed to avoid method ambiguities
+Base.:^(x::Complex{<:Interval}, n::Integer) = ^(promote(x, n)...)
+
 # overwrite behaviour for small integer powers from https://github.com/JuliaLang/julia/pull/24240
 # Base.literal_pow(::typeof(^), x::Interval, ::Val{n}) where {n} = x^n
 Base.literal_pow(::typeof(^), x::Interval, ::Val{n}) where {n} = _select_pown(power_mode(), x, n)
+Base.literal_pow(::typeof(^), x::Complex{Interval{T}}, ::Val{n}) where {T<:NumTypes,n} = exp(interval(T, n) * log(x))
 
 # helper functions for power
 
