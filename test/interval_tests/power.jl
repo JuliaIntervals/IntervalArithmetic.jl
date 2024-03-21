@@ -84,12 +84,16 @@ end
     @test isequal_interval(pow(interval(-3, 2), interval(-1, 1)), interval(0, Inf, IntervalArithmetic.trv))
 end
 
-# @testset "Complex{<:Interval}" begin
-#     a = interval(3 + 4im)
-#     b = exp(a)
-#     @test real(b) == interval(-13.12878308146216, -13.128783081462153)
-#     @test imag(b) == interval(-15.200784463067956, -15.20078446306795)
-# end
+@testset "Complex{<:Interval}" begin
+    a = interval(3 + 4im)
+    b = exp(a)
+    @test isequal_interval(real(b), interval(-13.12878308146216, -13.128783081462153))
+    @test isequal_interval(imag(b), interval(-15.200784463067956, -15.20078446306795))
+
+    z = exp(-im * interval(π))
+    @test in_interval(-1, real(z))
+    @test in_interval(0, imag(z))
+end
 
 @testset "Literal powers" begin
     x = interval(-1,1)

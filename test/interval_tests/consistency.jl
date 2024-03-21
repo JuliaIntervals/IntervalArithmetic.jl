@@ -290,6 +290,20 @@
 
         # Test putting functions in interval:
         @test issubset_interval(log(interval(-2, 5)), interval(-Inf, log(interval(5))))
+
+        #
+
+        x = interval(0, 3) + interval(0, 4)*interval(im)
+        @test isequal_interval(abs2(x), interval(0, 25))
+        @test isequal_interval(abs(x), interval(0, 5))
+
+        y = interval(-1, 1) + interval(-2, 2)*interval(im)
+        @test inf(abs(y)) == 0
+        @test inf(abs2(y)) == 0
+
+        @test mag(x) == 4
+        @test mig(x) == 0
+        @test mid(x) == 1.5 + 2im
     end
 
     @testset "Interval power of an interval" begin

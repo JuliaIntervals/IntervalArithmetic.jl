@@ -25,6 +25,10 @@ for f ∈ (:sinh, :tanh, :asinh)
     end
 end
 
+Base.sinh(x::Complex{Interval{T}}) where {T<:NumTypes} = (exp(x) - exp(-x)) / interval(T, 2)
+
+Base.tanh(x::Complex{<:Interval}) = sinh(x) / cosh(x)
+
 """
     cosh(::BareInterval)
     cosh(::Interval)
@@ -43,6 +47,8 @@ function Base.cosh(x::Interval)
     d = min(decoration(x), decoration(r))
     return _unsafe_interval(r, d, isguaranteed(x))
 end
+
+Base.cosh(x::Complex{Interval{T}}) where {T<:NumTypes} = (exp(x) + exp(-x)) / interval(T, 2)
 
 """
     coth(::BareInterval)
