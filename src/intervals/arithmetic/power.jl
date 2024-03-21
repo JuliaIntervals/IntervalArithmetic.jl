@@ -415,6 +415,12 @@ end
 
 Base.exp(x::Complex{<:Interval}) = exp(real(x)) * cis(imag(x))
 
+Base.exp2(x::Complex{<:Interval}) = exp2(real(x)) * cis(imag(x) * log(interval(numtype(x), 2)))
+
+Base.exp10(x::Complex{<:Interval}) = exp10(real(x)) * cis(imag(x) * log(interval(numtype(x), 10)))
+
+Base.expm1(x::Complex{<:Interval}) = exp(x) - interval(numtype(x), 1)
+
 #
 
 for f ∈ (:log, :log2, :log10)
@@ -441,6 +447,10 @@ end
 
 Base.log(x::Complex{<:Interval}) = complex(log(abs(x)), angle(x))
 
+Base.log2(x::Complex{<:Interval}) = complex(log2(abs(x)), angle(x)/log(interval(numtype(x), 2)))
+
+Base.log10(x::Complex{<:Interval}) = complex(log10(abs(x)), angle(x)/log(interval(numtype(x), 10)))
+
 function Base.log1p(x::BareInterval{T}) where {T<:AbstractFloat}
     domain = _unsafe_bareinterval(T, -one(T), typemax(T))
     x = intersect_interval(x, domain)
@@ -458,3 +468,5 @@ function Base.log1p(x::Interval{T}) where {T<:NumTypes}
     d = min(d, ifelse(isinterior(bx, domain), d, trv))
     return _unsafe_interval(r, d, isguaranteed(x))
 end
+
+Base.log1p(x::Complex{<:Interval}) = log(interval(numtype(x), 1) + x)
