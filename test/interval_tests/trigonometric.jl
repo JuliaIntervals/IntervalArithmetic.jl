@@ -307,4 +307,16 @@ end
     @test isequal_interval(sin(x), interval(-1, 1))
     @test isequal_interval(cos(x), interval(-1, 1))
     @test isequal_interval(tan(x), interval(-Inf, Inf))
+
+    setprecision(100) do
+        y = 6381956970095103 * 2.0^797 # worst case for C = pi/2 for Float64
+        yb = 6381956970095103 * big(2.0)^797
+        @test_throws AssertionError IntervalArithmetic._quadrant(y) == IntervalArithmetic._quadrant(yb)
+    end
+    setprecision(1000) do
+        y = 6381956970095103 * 2.0^797 # worst case for C = pi/2 for Float64
+        yb = 6381956970095103 * big(2.0)^797
+        @test IntervalArithmetic._quadrant(y) == IntervalArithmetic._quadrant(yb)
+    end
+
 end
