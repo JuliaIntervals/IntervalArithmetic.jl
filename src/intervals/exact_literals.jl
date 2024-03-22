@@ -50,14 +50,7 @@ end
 
 macro exact_literals(expr)
     exact_expr = postwalk(expr) do x
-        if x isa Real
-            e = ExactReal(x)
-            s = string(e)
-            if s != string(x)
-                @warn "$(typeof(x)) displayed as $x is equal to $s"
-            end
-            return e
-        end
+        x isa Real && return ExactReal(x)
 
         # Unwrap literal powers to be sure the expression uses Base.literal_pow
         if @capture(x, y_ ^ N_)
