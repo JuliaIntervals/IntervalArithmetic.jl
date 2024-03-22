@@ -4,6 +4,8 @@ include("construction.jl")
     Interval, interval, isguaranteed, @interval, @I_str
 include("parsing.jl")
 include("real_interface.jl")
+include("exact_literals.jl")
+    export ExactReal, @exact_literals
 
 # Rounding
 include("rounding.jl")
