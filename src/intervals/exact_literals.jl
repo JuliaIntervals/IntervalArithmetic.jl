@@ -9,10 +9,8 @@ Base.promote_rule(::Type{Interval{T}}, ::Type{ExactReal{S}}) where {T<:NumTypes,
 Base.promote_rule(::Type{ExactReal{T}}, ::Type{Interval{S}}) where {T<:Real,S<:NumTypes} =
     Interval{promote_numtype(T, S)}
 
-function Base.convert(::Type{Interval{T}}, x::ExactReal) where {T<:NumTypes}
-    y = interval(T, x)
-    return _unsafe_interval(bareinterval(y), decoration(y), true)
-end
+Base.convert(::Type{Interval{T}}, x::ExactReal) where {T<:NumTypes} =
+    interval(T, x)
 
 # Promotion to Real
 Base.promote_rule(::Type{T}, ::Type{ExactReal{S}}) where {T<:Real,S<:Real} =
@@ -29,7 +27,7 @@ Base.convert(::Type{T}, x::ExactReal) where {T<:Real} =
 Base.convert(::Type{<:ExactReal}, x::Real) =
     throw(ArgumentError("converting to ExactReal is not allowed"))
 
-interval(::Type{T}, x::ExactReal) where {T<:NumTypes} = interval(T, x.value)
+interval(::Type{T}, x::ExactReal{T}) where {T<:NumTypes} = interval(T, x.value)
 interval(x::ExactReal) = interval(x.value)
 
 Base.string(x::ExactReal{T}) where {T<:AbstractFloat} =
@@ -40,15 +38,18 @@ Base.string(x::ExactReal) = string(x.value)
 Base.show(io::IO, ::MIME"text/plain", x::ExactReal{T}) where {T<:AbstractFloat} =
     print(io, "ExactReal{$T}($(string(x)))")
 
-for unary in Symbol.((inv, sqrt, sin, cos, tan, asin, acos, atan, exp, log, sinh, cosh, tanh, asinh, acosh, atanh))
-    @eval (Base.$unary)(x::ExactReal) = ($unary)(interval(x))
-end
+"""
+    has_exact_display(x::Real)
 
-for binary in Symbol.((+, -, *, /, ^))
-    @eval (Base.$binary)(x::ExactReal, y::ExactReal) = ($binary)(interval(x), interval(y))
-end
+Determine if the display of `x` is equal to the bitwise value of `x`.
 
-macro exact_literals(expr)
+This is famously not true for the float displayed as `0.1`, which is equal to
+`0.1000000000000000055511151231257827021181583404541015625` since `0.1`
+can not be represented exactly as a binary number.
+"""
+has_exact_display(x::Real) = string(x) == string(ExactReal(x))
+
+macro exact_input(expr)
     exact_expr = postwalk(expr) do x
         x isa Real && return ExactReal(x)
 
