@@ -14,7 +14,7 @@
     @test isguaranteed(Z)
     @test in_interval(0, Z)
 
-    @test_throws ArgumentError convert(ExactReal{Float64}, 2)
+    @test_throws MethodError convert(ExactReal{Float64}, 2)
 
     @test has_exact_display(0.5)
     @test !has_exact_display(0.1)
