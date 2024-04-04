@@ -126,8 +126,9 @@ See the doc of ExactReal for more info.
 macro exact_input(expr)
     exact_expr = postwalk(expr) do x
         x isa Real && return ExactReal(x)
+        x === :im && return complex(ExactReal(false), ExactReal(true))
 
-        # Unwrap literal powers to be sure the expression uses Base.literal_pow
+        # unwrap literal powers to ensure that the expression uses Base.literal_pow
         if @capture(x, y_ ^ N_)
             if N isa ExactReal{<:Integer}
                 return :($y ^ $N)
