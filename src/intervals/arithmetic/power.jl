@@ -48,8 +48,8 @@ Interval{Float64}(-Inf, Inf, trv)
 ```
 """
 function Base.:^(x::BareInterval, y::BareInterval)
-    isthininteger(y) && return _select_pown(power_mode(), x, Integer(sup(y)))
-    return _select_pow(power_mode(), x, y)
+    isthininteger(y) || return _select_pow(power_mode(), x, y)
+    return _select_pown(power_mode(), x, Integer(sup(y)))
 end
 
 function Base.:^(x::Interval, y::Interval)
@@ -65,9 +65,17 @@ Base.:^(x::Interval, n::Integer) = ^(x, n//one(n))
 Base.:^(x::Rational, y::Interval) = ^(convert(Interval{typeof(x)}, x), y)
 Base.:^(x::Interval, y::Rational) = ^(x, convert(Interval{typeof(y)}, y))
 
+Base.:^(x::Complex{Interval{T}}, y::Complex{Interval{T}}) where {T<:NumTypes} = exp(y * log(x))
+Base.:^(x::Complex{<:Interval}, y::Complex{<:Interval}) = ^(promote(x, y)...)
+Base.:^(x::Complex{<:Interval}, y::Real) = ^(promote(x, y)...)
+Base.:^(x::Real, y::Complex{<:Interval}) = ^(promote(x, y)...)
+# needed to avoid method ambiguities
+Base.:^(x::Complex{<:Interval}, n::Integer) = ^(promote(x, n)...)
+
 # overwrite behaviour for small integer powers from https://github.com/JuliaLang/julia/pull/24240
 # Base.literal_pow(::typeof(^), x::Interval, ::Val{n}) where {n} = x^n
 Base.literal_pow(::typeof(^), x::Interval, ::Val{n}) where {n} = _select_pown(power_mode(), x, n)
+Base.literal_pow(::typeof(^), x::Complex{Interval{T}}, ::Val{n}) where {T<:NumTypes,n} = exp(interval(T, n) * log(x))
 
 # helper functions for power
 
@@ -413,6 +421,14 @@ for f ∈ (:cbrt, :exp, :exp2, :exp10, :expm1)
     end
 end
 
+Base.exp(x::Complex{<:Interval}) = exp(real(x)) * cis(imag(x))
+
+Base.exp2(x::Complex{<:Interval}) = exp2(real(x)) * cis(imag(x) * log(interval(numtype(x), 2)))
+
+Base.exp10(x::Complex{<:Interval}) = exp10(real(x)) * cis(imag(x) * log(interval(numtype(x), 10)))
+
+Base.expm1(x::Complex{<:Interval}) = exp(x) - interval(numtype(x), 1)
+
 #
 
 for f ∈ (:log, :log2, :log10)
@@ -437,6 +453,12 @@ for f ∈ (:log, :log2, :log10)
     end
 end
 
+Base.log(x::Complex{<:Interval}) = complex(log(abs(x)), angle(x))
+
+Base.log2(x::Complex{<:Interval}) = complex(log2(abs(x)), angle(x)/log(interval(numtype(x), 2)))
+
+Base.log10(x::Complex{<:Interval}) = complex(log10(abs(x)), angle(x)/log(interval(numtype(x), 10)))
+
 function Base.log1p(x::BareInterval{T}) where {T<:AbstractFloat}
     domain = _unsafe_bareinterval(T, -one(T), typemax(T))
     x = intersect_interval(x, domain)
@@ -454,3 +476,5 @@ function Base.log1p(x::Interval{T}) where {T<:NumTypes}
     d = min(d, ifelse(isinterior(bx, domain), d, trv))
     return _unsafe_interval(r, d, isguaranteed(x))
 end
+
+Base.log1p(x::Complex{<:Interval}) = log(interval(numtype(x), 1) + x)
