@@ -159,7 +159,7 @@ julia> g(1.4)
 
 See also: [`ExactReal`](@ref).
 """
-macro exact_input(expr)
+macro exact(expr)
     exact_expr = postwalk(expr) do x
         x isa Real && return ExactReal(x)
 
