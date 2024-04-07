@@ -1,11 +1,11 @@
 @testset "Exact literals" begin
-    x = @exact_input 0.5
+    x = @exact 0.5
     @test (2 * x) isa Float64
     Y = interval(2) * x
     @test isguaranteed(Y)
     @test in_interval(1, Y)
 
-    @exact_input function f(x)
+    @exact function f(x)
        return x^2 - 2x + 1
     end
 
@@ -19,7 +19,7 @@
     @test has_exact_display(0.5)
     @test !has_exact_display(0.1)
 
-    @test (@exact_input 2im) isa Complex{<:ExactReal}
-    @test (@exact_input 1.2 + 3.4im) isa Complex{<:ExactReal}
-    @test_throws ArgumentError (@exact_input 1.2 + 3im)
+    @test (@exact 2im) isa Complex{<:ExactReal}
+    @test (@exact 1.2 + 3.4im) isa Complex{<:ExactReal}
+    @test_throws ArgumentError (@exact 1.2 + 3im)
 end

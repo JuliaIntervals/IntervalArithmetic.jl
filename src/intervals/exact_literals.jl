@@ -43,7 +43,7 @@ julia> [ExactReal(1), interval(2)]
  [2.0, 2.0]_com
 ```
 
-See also: [`@exact_input`](@ref).
+See also: [`@exact`](@ref).
 """
 struct ExactReal{T<:Real} <: Real
     value :: T
@@ -115,7 +115,7 @@ famously not true for the float displayed as `0.1`.
 has_exact_display(x::Real) = string(x) == string(ExactReal(x))
 
 """
-    @exact_input
+    @exact
 
 Wrap every literal numbers of the expression in an `ExactReal`. This macro
 allows defining generic functions, seamlessly accepting both `Number` and
@@ -147,7 +147,7 @@ f (generic function with 1 method)
 julia> f(interval(1, 2))
 [1.29999, 2.50001]_com_NG
 
-julia> @exact_input g(x) = 1.2*x + 0.1
+julia> @exact g(x) = 1.2*x + 0.1
 g (generic function with 1 method)
 
 julia> g(interval(1, 2))
