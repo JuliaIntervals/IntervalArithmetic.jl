@@ -26,21 +26,23 @@ producing the "NG" flag.
 # Examples
 
 ```jldoctest
+julia> setdisplay(:full);
+
 julia> 0.5 * interval(1)
-[0.5, 0.5]_com_NG
+Interval{Float64}(0.5, 0.5, com, NG)
 
 julia> ExactReal(0.5) * interval(1)
-[0.5, 0.5]_com
+Interval{Float64}(0.5, 0.5, com)
 
 julia> [1, interval(2)]
 2-element Vector{Interval{Float64}}:
- [1.0, 1.0]_com_NG
- [2.0, 2.0]_com
+ Interval{Float64}(1.0, 1.0, com, NG)
+ Interval{Float64}(2.0, 2.0, com)
 
 julia> [ExactReal(1), interval(2)]
 2-element Vector{Interval{Float64}}:
- [1.0, 1.0]_com
- [2.0, 2.0]_com
+ Interval{Float64}(1.0, 1.0, com)
+ Interval{Float64}(2.0, 2.0, com)
 ```
 
 See also: [`@exact`](@ref).
@@ -51,36 +53,39 @@ struct ExactReal{T<:Real} <: Real
     ExactReal(value::T) where {T<:Real} = new{T}(value)
 end
 
-interval(::Type{T}, x::ExactReal{T}) where {T<:NumTypes} = interval(T, x.value)
-interval(::Type{T}, x::ExactReal{<:Integer}) where {T<:NumTypes} = interval(T, x.value)
-interval(x::ExactReal) = interval(x.value)
+_value(x::ExactReal) = x.value # hook for interval constructor
+
+# conversion and promotion
 
 Base.convert(::Type{ExactReal{T}}, x::ExactReal{T}) where {T<:Real} = x
-
-# promotion to Interval
-
-Base.promote_rule(::Type{Interval{T}}, ::Type{ExactReal{S}}) where {T<:NumTypes,S<:Real} =
-    Interval{promote_numtype(T, S)}
-
-Base.promote_rule(::Type{ExactReal{T}}, ::Type{Interval{S}}) where {T<:Real,S<:NumTypes} =
-    Interval{promote_numtype(T, S)}
-
-Base.convert(::Type{Interval{T}}, x::ExactReal) where {T<:NumTypes} =
-    interval(T, x.value)
-
-# promotion to Real
-
-Base.promote_rule(::Type{T}, ::Type{ExactReal{S}}) where {T<:Real,S<:Real} =
-    promote_type(T, S)
-
-Base.promote_rule(::Type{ExactReal{T}}, ::Type{S}) where {T<:Real,S<:Real} =
-    promote_type(T, S)
 
 Base.promote_rule(::Type{ExactReal{T}}, ::Type{ExactReal{S}}) where {T<:Real,S<:Real} =
     throw(ArgumentError("promotion between `ExactReal` is not allowed"))
 
+# to Interval
+
+Base.convert(::Type{Interval{T}}, x::ExactReal) where {T<:NumTypes} =
+    interval(T, x.value)
+
+Base.promote_rule(::Type{Interval{T}}, ::Type{ExactReal{S}}) where {T<:NumTypes,S<:Real} =
+    Interval{promote_numtype(T, S)}
+Base.promote_rule(::Type{ExactReal{T}}, ::Type{Interval{S}}) where {T<:Real,S<:NumTypes} =
+    Interval{promote_numtype(T, S)}
+
+# to Real
+
 Base.convert(::Type{T}, x::ExactReal) where {T<:Real} =
     convert(T, x.value)
+
+Base.promote_rule(::Type{T}, ::Type{ExactReal{S}}) where {T<:Real,S<:Real} =
+    promote_type(T, S)
+Base.promote_rule(::Type{ExactReal{T}}, ::Type{S}) where {T<:Real,S<:Real} =
+    promote_type(T, S)
+# needed to resolve method ambiguities
+Base.promote_rule(::Type{ExactReal{T}}, ::Type{Bool}) where {T<:Real} =
+    promote_type(T, Bool)
+Base.promote_rule(::Type{Bool}, ::Type{ExactReal{T}}) where {T<:Real} =
+    promote_type(Bool, T)
 
 # display
 
@@ -92,38 +97,48 @@ Base.string(x::ExactReal) = string(x.value)
 Base.show(io::IO, ::MIME"text/plain", x::ExactReal{T}) where {T<:AbstractFloat} =
     print(io, "ExactReal{$T}($(string(x)))")
 
-# this is always exact
-Base.:(-)(x::ExactReal) = ExactReal(-x.value)
-Base.:(*)(x::ExactReal, y::Bool) = ExactReal(x.value * y)
-Base.:(*)(x::Bool, y::ExactReal) = ExactReal(x * y.value)
+# always exact
 
-Base.complex(x::ExactReal{T}, y::ExactReal{T}) where {T} = Complex(x, y)  
+Base.:-(x::ExactReal) = ExactReal(-x.value)
 
-function Base.complex(::ExactReal{T}, ::ExactReal{S}) where {T, S}
-    throw(ArgumentError(
-        "both the real and imaginary part of an exact complex " *
-        "number must have the same type, since promotion " *
-        "between ExactReal is not allowed"))
+function Base.:+(x::ExactReal, y::Complex{<:ExactReal})
+    iszero(real(y).value) && return complex(x, imag(y))
+    return complex(x + real(y), imag(y))
 end
 
 """
     has_exact_display(x::Real)
 
-Determine if the display of `x` is equal to the bitwise value of `x`. This is
-famously not true for the float displayed as `0.1`.
+Determine if the display of `x` up to 2000 decimals is equal to the bitwise
+value of `x`. This is famously not true for the float displayed as `0.1`.
 """
 has_exact_display(x::Real) = string(x) == string(ExactReal(x))
+
+#
+
+struct ExactIm end
+
+Base.:*(x::ExactReal, ::ExactIm) = complex(ExactReal(zero(x.value)), x)
+Base.:*(::ExactIm, x::ExactReal) = complex(ExactReal(zero(x.value)), x)
+
+Base.:*(x::Real, ::ExactIm) = complex(zero(x), x)
+Base.:*(::ExactIm, x::Real) = complex(zero(x), x)
+
+Base.:*(x::Complex, ::ExactIm) = complex(-imag(x), real(x))
+Base.:*(::ExactIm, x::Complex) = complex(-imag(x), real(x))
+
+#
 
 """
     @exact
 
-Wrap every literal numbers of the expression in an `ExactReal`. This macro
-allows defining generic functions, seamlessly accepting both `Number` and
-`Interval` arguments, without producing the "NG" flag.
+Wrap every literal numbers of the expression in an [`ExactReal`](@ref). This
+macro allows defining generic functions, seamlessly accepting both `Number` and
+[`Interval`](@ref) arguments, without producing the "NG" flag.
 
 !!! danger
-    By using `ExactReal`, users acknowledge the responsibility of ensuring that
-    the number they input corresponds to their intended value.
+    By using [`ExactReal`](@ref), users acknowledge the responsibility of
+    ensuring that the number they input corresponds to their intended value.
     For example, `ExactReal(0.1)` implies that the user knows that ``0.1`` can
     not be represented exactly as a binary number, and that they are using a
     slightly different number than ``0.1``.
@@ -141,17 +156,19 @@ allows defining generic functions, seamlessly accepting both `Number` and
 # Examples
 
 ```jldoctest
+julia> setdisplay(:full);
+
 julia> f(x) = 1.2*x + 0.1
 f (generic function with 1 method)
 
 julia> f(interval(1, 2))
-[1.29999, 2.50001]_com_NG
+Interval{Float64}(1.2999999999999998, 2.5, com, NG)
 
 julia> @exact g(x) = 1.2*x + 0.1
 g (generic function with 1 method)
 
 julia> g(interval(1, 2))
-[1.29999, 2.50001]_com
+Interval{Float64}(1.2999999999999998, 2.5, com)
 
 julia> g(1.4)
 1.78
@@ -162,16 +179,17 @@ See also: [`ExactReal`](@ref).
 macro exact(expr)
     exact_expr = postwalk(expr) do x
         x isa Real && return ExactReal(x)
+        return x
+    end
 
-        # unwrap literal powers to ensure that the expression uses Base.literal_pow
-        if @capture(x, y_ ^ N_)
-            if N isa ExactReal{<:Integer}
-                return :($y ^ $N)
+    exact_expr = prewalk(exact_expr) do x
+        if @capture(x, b_ * im) || @capture(x, im * b_)
+            if b isa ExactReal
+                return :(complex(ExactReal(zero($b.value)), $b))
             end
         end
 
-        # intercept the definition of complex for convenience
-        if @capture(x, a_ + b_ * im)
+        if @capture(x, a_ + b_ * im) || @capture(x, a_ + im * b_) || @capture(x, b_ * im + a_) || @capture(x, im * b_ + a_)
             if a isa ExactReal && b isa ExactReal
                 return :(complex($a, $b))
             end

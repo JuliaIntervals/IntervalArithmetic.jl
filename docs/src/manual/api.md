@@ -1,6 +1,10 @@
 # API
 
+```@meta
+CollapsedDocStrings = true
+```
+
 ```@autodocs
 Modules = [IntervalArithmetic]
-Order   = [:type, :function, :macro, :constant]
+Private = false
 ```

@@ -402,17 +402,19 @@ Interval{BigFloat}(1.0, 3.141592653589793238462643383279502884197169399375105820
 ```
 """
 function interval(::Type{T}, a, b, d::Decoration = com; format::Symbol = :infsup) where {T}
-    format === :infsup && return _interval_infsup(T, a, b, d)
-    format === :midpoint && return _interval_midpoint(T, a, b, d)
+    format === :infsup && return _interval_infsup(T, _value(a), _value(b), d)
+    format === :midpoint && return _interval_midpoint(T, _value(a), _value(b), d)
     return throw(ArgumentError("`format` must be `:infsup` or `:midpoint`"))
 end
-interval(a, b, d::Decoration = com; format::Symbol = :infsup) = interval(promote_numtype(numtype(a), numtype(b)), a, b, d; format = format)
+interval(a, b, d::Decoration = com; format::Symbol = :infsup) = interval(promote_numtype(numtype(_value(a)), numtype(_value(b))), _value(a), _value(b), d; format = format)
 
 function interval(::Type{T}, a, d::Decoration = com; format::Symbol = :infsup) where {T}
-    (format === :infsup) | (format === :midpoint) && return _interval_infsup(T, a, a, d)
+    (format === :infsup) | (format === :midpoint) && return _interval_infsup(T, _value(a), _value(a), d)
     return throw(ArgumentError("`format` must be `:infsup` or `:midpoint`"))
 end
-interval(a, d::Decoration = com; format::Symbol = :infsup) = interval(promote_numtype(numtype(a), numtype(a)), a, d; format = format)
+interval(a, d::Decoration = com; format::Symbol = :infsup) = interval(promote_numtype(numtype(_value(a)), numtype(_value(a))), _value(a), d; format = format)
+
+_value(a) = a # convenient hook, used in exact_literals.jl
 
 # some useful extra constructor
 interval(::Type{T}, a::Tuple, d::Decoration = com; format::Symbol = :infsup) where {T} = interval(T, a..., d; format = format)

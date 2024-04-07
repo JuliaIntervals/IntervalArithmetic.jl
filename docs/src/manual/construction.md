@@ -54,9 +54,9 @@ x = interval(0.5, 3)
 sqrt(x)
 ```
 
-Both input `x` and output `sqrt(x)` are common intervals since they are closed, bounded, non-empty and that ``\sqrt`` is continuous over ``[1/2, 3]``.
+Both input `x` and output `sqrt(x)` are common intervals since they are closed, bounded, non-empty and the square root is continuous over ``[1/2, 3]``.
 
-Observe that these decorations, together with the fact that any element of the interval `sqrt(x)` is also in the interval `x`, imply that the [Schauder Fixed-Point Theorem](https://en.wikipedia.org/wiki/Schauder_fixed-point_theorem) is satisfied. More precisely, this computation proves the existence of a fixed-point of ``\sqrt`` in ``[1/2, 3]`` (in this simple example, ``\sqrt(1) = 1``).
+Observe that these decorations, together with the fact that any element of the interval `sqrt(x)` is also in the interval `x`, imply that the [Schauder Fixed-Point Theorem](https://en.wikipedia.org/wiki/Schauder_fixed-point_theorem) is satisfied. More precisely, this computation proves the existence of a fixed-point of the square root in ``[1/2, 3]`` (in this simple example, ``\sqrt(1) = 1``).
 
 ##### Defined and continuous
 
@@ -90,7 +90,7 @@ x = interval(-3.5, 4)
 sqrt(x)
 ```
 
-The negative part of `x` is discarded before evaluating the ``\sqrt`` function since its domain is ``[0, \infty)``. The process of discarding parts of an interval that are not in the domain of a function is called *loose evaluation*. This event has been recorded by degrading the decoration of the resulting interval to `trv`, indicating that nothing is known about the relationship between `x` and `sqrt(x)`.
+The negative part of `x` is discarded before evaluating the square root since its domain is ``[0, \infty)``. The process of discarding parts of an interval that are not in the domain of a function is called *loose evaluation*. This event has been recorded by degrading the decoration of the resulting interval to `trv`, indicating that nothing is known about the relationship between `x` and `sqrt(x)`.
 
 In this case, we know why the decoration was reduced to `trv`. Generally, if this were just a single step in a longer calculation, a resulting decoration `trv` shows only that something like this occured at some step.
 
@@ -133,7 +133,7 @@ These are all examples of ill-formed intervals, resulting in the decoration `ill
 
 ### Guarantee
 
-A *guarantee* is yet another label, independent of decorations, and not described by the IEEE Standard 1788-2015 specifications. Its purpose is to accomodate for Julia's extensive conversion and promotion system, while retaining reliability in computations. Specifically, an interval `x` constructed via [`interval`](@ref) satisfies `isguaranteed(x) == true`. However, if a call to `convert(::Type{<:Interval}, ::Real)` occurs, then the resulting interval `x` satisfies `isguaranteed(x) == false`, receiving the 'NG' (not guaranteed) label. For instance, consider the following examples:
+A *guarantee* is yet another label, independent of decorations, and not described by the IEEE Standard 1788-2015 specifications. Its purpose is to accomodate for Julia's extensive conversion and promotion system, while retaining reliability in computations. Specifically, an interval `x` constructed via [`interval`](@ref) satisfies `isguaranteed(x) == true`. However, if a call to `convert(::Type{<:Interval}, ::Real)` occurs, then the resulting interval `x` satisfies `isguaranteed(x) == false`, receiving the "NG" (not guaranteed) label. For instance, consider the following examples:
 
 ```@repl construction
  convert(Interval{Float64}, 1.) # considered "not guaranteed" as this call can be done implicitly
