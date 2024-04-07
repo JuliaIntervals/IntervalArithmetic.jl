@@ -55,6 +55,8 @@ interval(::Type{T}, x::ExactReal{T}) where {T<:NumTypes} = interval(T, x.value)
 interval(::Type{T}, x::ExactReal{<:Integer}) where {T<:NumTypes} = interval(T, x.value)
 interval(x::ExactReal) = interval(x.value)
 
+Base.convert(::Type{ExactReal{T}}, x::ExactReal{T}) where {T<:Real} = x
+
 # promotion to Interval
 
 Base.promote_rule(::Type{Interval{T}}, ::Type{ExactReal{S}}) where {T<:NumTypes,S<:Real} =
@@ -91,8 +93,18 @@ Base.show(io::IO, ::MIME"text/plain", x::ExactReal{T}) where {T<:AbstractFloat} 
     print(io, "ExactReal{$T}($(string(x)))")
 
 # this is always exact
-
 Base.:(-)(x::ExactReal) = ExactReal(-x.value)
+Base.:(*)(x::ExactReal, y::Bool) = ExactReal(x.value * y)
+Base.:(*)(x::Bool, y::ExactReal) = ExactReal(x * y.value)
+
+Base.complex(x::ExactReal{T}, y::ExactReal{T}) where {T} = Complex(x, y)  
+
+function Base.complex(::ExactReal{T}, ::ExactReal{S}) where {T, S}
+    throw(ArgumentError(
+        "both the real and imaginary part of an exact complex " *
+        "number must have the same type, since promotion " *
+        "between ExactReal is not allowed"))
+end
 
 """
     has_exact_display(x::Real)
@@ -150,12 +162,18 @@ See also: [`ExactReal`](@ref).
 macro exact_input(expr)
     exact_expr = postwalk(expr) do x
         x isa Real && return ExactReal(x)
-        x === :im && return complex(ExactReal(false), ExactReal(true))
 
         # unwrap literal powers to ensure that the expression uses Base.literal_pow
         if @capture(x, y_ ^ N_)
             if N isa ExactReal{<:Integer}
                 return :($y ^ $N)
+            end
+        end
+
+        # intercept the definition of complex for convenience
+        if @capture(x, a_ + b_ * im)
+            if a isa ExactReal && b isa ExactReal
+                return :(complex($a, $b))
             end
         end
 

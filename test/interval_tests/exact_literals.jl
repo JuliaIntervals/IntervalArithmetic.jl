@@ -18,4 +18,8 @@
 
     @test has_exact_display(0.5)
     @test !has_exact_display(0.1)
+
+    @test (@exact_input 2im) isa Complex{<:ExactReal}
+    @test (@exact_input 1.2 + 3.4im) isa Complex{<:ExactReal}
+    @test_throws ArgumentError (@exact_input 1.2 + 3im)
 end
