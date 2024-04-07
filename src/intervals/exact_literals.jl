@@ -116,19 +116,6 @@ has_exact_display(x::Real) = string(x) == string(ExactReal(x))
 
 #
 
-struct ExactIm end
-
-Base.:*(x::ExactReal, ::ExactIm) = complex(ExactReal(zero(x.value)), x)
-Base.:*(::ExactIm, x::ExactReal) = complex(ExactReal(zero(x.value)), x)
-
-Base.:*(x::Real, ::ExactIm) = complex(zero(x), x)
-Base.:*(::ExactIm, x::Real) = complex(zero(x), x)
-
-Base.:*(x::Complex, ::ExactIm) = complex(-imag(x), real(x))
-Base.:*(::ExactIm, x::Complex) = complex(-imag(x), real(x))
-
-#
-
 """
     @exact
 
