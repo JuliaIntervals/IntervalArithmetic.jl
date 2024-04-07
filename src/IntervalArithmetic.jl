@@ -3,6 +3,7 @@ module IntervalArithmetic
 import CRlibm_jll
 import RoundingEmulator
 import Base.MPFR
+using MacroTools: MacroTools, prewalk, postwalk, @capture
 
 #
 
