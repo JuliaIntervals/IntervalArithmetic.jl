@@ -70,7 +70,9 @@ Base.:^(x::Complex{<:Interval}, y::Complex{<:Interval}) = ^(promote(x, y)...)
 Base.:^(x::Complex{<:Interval}, y::Real) = ^(promote(x, y)...)
 Base.:^(x::Real, y::Complex{<:Interval}) = ^(promote(x, y)...)
 # needed to avoid method ambiguities
+Base.:^(x::Complex{<:Interval}, n::Bool) = ^(promote(x, n)...)
 Base.:^(x::Complex{<:Interval}, n::Integer) = ^(promote(x, n)...)
+Base.:^(x::Complex{<:Interval}, n::Rational) = ^(promote(x, n)...)
 
 # overwrite behaviour for small integer powers from https://github.com/JuliaLang/julia/pull/24240
 # Base.literal_pow(::typeof(^), x::Interval, ::Val{n}) where {n} = x^n
