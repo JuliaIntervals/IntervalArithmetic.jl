@@ -567,6 +567,9 @@ function Base.convert(::Type{Interval{T}}, x::Complex{<:Interval}) where {T<:Num
     return convert(Interval{T}, real(x))
 end
 
+Base.convert(::Type{Complex{Interval{T}}}, x::Interval) where {T<:NumTypes} =
+    interval(T, complex(x))
+
 Base.convert(::Type{Interval{T}}, x::AbstractIrrational) where {T<:NumTypes} =
     interval(T, x) # always guaranteed since an `AbstractIrrational` is a defined fixed constant
 
