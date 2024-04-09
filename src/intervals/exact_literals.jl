@@ -105,10 +105,14 @@ Base.show(io::IO, ::MIME"text/plain", x::ExactReal{T}) where {T<:AbstractFloat} 
 
 Base.:-(x::ExactReal) = ExactReal(-x.value)
 
+# by-pass default
+
 function Base.:+(x::ExactReal, y::Complex{<:ExactReal})
     iszero(real(y).value) && return complex(x, imag(y))
     return complex(x + real(y), imag(y))
 end
+
+Base.:^(x::ExactReal, p::Integer) = ^(promote(x, p)...)
 
 """
     has_exact_display(x::Real)
