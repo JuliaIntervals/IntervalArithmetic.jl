@@ -100,8 +100,12 @@ end
     n = 2
     @test isguaranteed(x ^ 2)
     @test !isguaranteed(x ^ n)
-    @test_broken isguaranteed(x ^ 2.0)
-    @test_broken isguaranteed(x ^ 2305843009213693952)
+    @test !isguaranteed(x ^ 2.0)
+    if VERSION ≥ v"1.12-DEV" && Int != Int32
+        @test isguaranteed(x ^ 2305843009213693952)
+    else
+        @test_broken isguaranteed(x ^ 2305843009213693952)
+    end
     @test isequal_interval(x^2, interval(0,1))
     @test isequal_interval(x^3, x)
 end
