@@ -86,6 +86,10 @@ Base.promote_rule(::Type{ExactReal{T}}, ::Type{Bool}) where {T<:Real} =
     promote_type(T, Bool)
 Base.promote_rule(::Type{Bool}, ::Type{ExactReal{T}}) where {T<:Real} =
     promote_type(Bool, T)
+Base.promote_rule(::Type{ExactReal{T}}, ::Type{BigFloat}) where {T<:Real} =
+    promote_type(T, BigFloat)
+Base.promote_rule(::Type{BigFloat}, ::Type{ExactReal{T}}) where {T<:Real} =
+    promote_type(BigFloat, T)
 
 # display
 
