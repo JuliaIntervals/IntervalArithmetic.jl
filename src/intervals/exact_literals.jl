@@ -64,8 +64,7 @@ Base.promote_rule(::Type{ExactReal{T}}, ::Type{ExactReal{S}}) where {T<:Real,S<:
 
 # to Interval
 
-Base.convert(::Type{Interval{T}}, x::ExactReal) where {T<:NumTypes} =
-    interval(T, x.value)
+Base.convert(::Type{Interval{T}}, x::ExactReal) where {T<:NumTypes} = interval(T, x.value)
 
 Base.promote_rule(::Type{Interval{T}}, ::Type{ExactReal{S}}) where {T<:NumTypes,S<:Real} =
     Interval{promote_numtype(T, S)}
@@ -74,8 +73,10 @@ Base.promote_rule(::Type{ExactReal{T}}, ::Type{Interval{S}}) where {T<:Real,S<:N
 
 # to Real
 
-Base.convert(::Type{T}, x::ExactReal) where {T<:Real} =
-    convert(T, x.value)
+# allows Interval{<:NumTypes}(::ExactReal)
+(::Type{T})(x::ExactReal) where {T<:Real} = convert(T, x)
+
+Base.convert(::Type{T}, x::ExactReal) where {T<:Real} = convert(T, x.value)
 
 Base.promote_rule(::Type{T}, ::Type{ExactReal{S}}) where {T<:Real,S<:Real} =
     promote_type(T, S)
@@ -107,10 +108,15 @@ Base.:-(x::ExactReal) = ExactReal(-x.value)
 
 # by-pass default
 
-function Base.:+(x::ExactReal, y::Complex{<:ExactReal})
-    iszero(real(y).value) && return complex(x, imag(y))
-    return complex(x + real(y), imag(y))
-end
+# function Base.:+(x::ExactReal, y::Complex{<:ExactReal})
+#     iszero(real(y).value) && return complex(x, imag(y))
+#     return complex(x + real(y), imag(y))
+# end
+
+# function Base.:-(x::ExactReal, y::Complex{<:ExactReal})
+#     iszero(real(y).value) && return complex(x, -imag(y))
+#     return complex(x - real(y), -imag(y))
+# end
 
 Base.:^(x::ExactReal, p::Integer) = ^(promote(x, p)...)
 
@@ -178,6 +184,21 @@ macro exact(expr)
     end
 
     exact_expr = prewalk(exact_expr) do x
+        if @capture(x, im)
+            return :(complex(ExactReal(false), ExactReal(true)))
+        end
+
+        if @capture(x, a_ + im) || @capture(x, im + a_)
+            if a isa ExactReal
+                return :(complex($a, ExactReal(one($a.value))))
+            end
+        end
+        if @capture(x, a_ - im) || @capture(x, -im + a_)
+            if a isa ExactReal
+                return :(complex($a, ExactReal(-one($a.value))))
+            end
+        end
+
         if @capture(x, b_ * im) || @capture(x, im * b_)
             if b isa ExactReal
                 return :(complex(ExactReal(zero($b.value)), $b))
@@ -187,6 +208,11 @@ macro exact(expr)
         if @capture(x, a_ + b_ * im) || @capture(x, a_ + im * b_) || @capture(x, b_ * im + a_) || @capture(x, im * b_ + a_)
             if a isa ExactReal && b isa ExactReal
                 return :(complex($a, $b))
+            end
+        end
+        if @capture(x, a_ - b_ * im) || @capture(x, a_ - im * b_) || @capture(x, b_ * im - a_) || @capture(x, im * b_ - a_)
+            if a isa ExactReal && b isa ExactReal
+                return :(complex($a, -$b))
             end
         end
 
