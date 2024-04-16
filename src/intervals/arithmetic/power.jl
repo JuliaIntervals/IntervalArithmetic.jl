@@ -65,7 +65,15 @@ Base.:^(x::Interval, n::Integer) = ^(x, n//one(n))
 Base.:^(x::Rational, y::Interval) = ^(convert(Interval{typeof(x)}, x), y)
 Base.:^(x::Interval, y::Rational) = ^(x, convert(Interval{typeof(y)}, y))
 
-Base.:^(x::Complex{Interval{T}}, y::Complex{Interval{T}}) where {T<:NumTypes} = exp(y * log(x))
+function Base.:^(x::Complex{Interval{T}}, y::Complex{Interval{T}}) where {T<:NumTypes}
+    !isthinzero(x) && return exp(y * log(x))
+    d = min(decoration(x), decoration(y))
+    t = isguaranteed(x) & isguaranteed(y)
+    isthinzero(y) && return complex(_unsafe_interval(one(BareInterval{T}), d, t), _unsafe_interval(zero(BareInterval{T}), d, t))
+    (inf(real(y)) > 0) & !isempty_interval(bareinterval(real(y))) && return complex(_unsafe_interval(zero(BareInterval{T}), d, t), _unsafe_interval(zero(BareInterval{T}), d, t))
+    d = min(d, trv)
+    return complex(_unsafe_interval(emptyinterval(BareInterval{T}), d, t), _unsafe_interval(emptyinterval(BareInterval{T}), d, t))
+end
 Base.:^(x::Complex{<:Interval}, y::Complex{<:Interval}) = ^(promote(x, y)...)
 Base.:^(x::Complex{<:Interval}, y::Real) = ^(promote(x, y)...)
 Base.:^(x::Real, y::Complex{<:Interval}) = ^(promote(x, y)...)
@@ -77,7 +85,15 @@ Base.:^(x::Complex{<:Interval}, n::Rational) = ^(promote(x, n)...)
 # overwrite behaviour for small integer powers from https://github.com/JuliaLang/julia/pull/24240
 # Base.literal_pow(::typeof(^), x::Interval, ::Val{n}) where {n} = x^n
 Base.literal_pow(::typeof(^), x::Interval, ::Val{n}) where {n} = _select_pown(power_mode(), x, n)
-Base.literal_pow(::typeof(^), x::Complex{Interval{T}}, ::Val{n}) where {T<:NumTypes,n} = exp(interval(T, n) * log(x))
+function Base.literal_pow(::typeof(^), x::Complex{Interval{T}}, ::Val{n}) where {T<:NumTypes,n}
+    !isthinzero(x) && return exp(interval(T, n) * log(x))
+    d = decoration(x)
+    t = isguaranteed(x)
+    n == 0 && return complex(_unsafe_interval(one(BareInterval{T}), d, t), _unsafe_interval(zero(BareInterval{T}), d, t))
+    n > 0 && return complex(_unsafe_interval(zero(BareInterval{T}), d, t), _unsafe_interval(zero(BareInterval{T}), d, t))
+    d = min(d, trv)
+    return complex(_unsafe_interval(emptyinterval(BareInterval{T}), d, t), _unsafe_interval(emptyinterval(BareInterval{T}), d, t))
+end
 
 # helper functions for power
 

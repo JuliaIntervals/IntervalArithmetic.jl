@@ -300,6 +300,7 @@ function bareinterval(x::Interval)
 end
 bareinterval(::Type{T}, x::Interval) where {T} = bareinterval(T, bareinterval(x))
 decoration(x::Interval) = x.decoration
+decoration(x::Complex{<:Interval}) = min(decoration(real(x)), decoration(imag(x)))
 
 """
     setdecoration(x::Interval, d::Decoration)

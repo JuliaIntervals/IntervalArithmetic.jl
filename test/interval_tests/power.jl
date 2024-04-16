@@ -93,6 +93,17 @@ end
     z = exp(-im * interval(π))
     @test in_interval(-1, real(z))
     @test in_interval(0, imag(z))
+
+    z = interval(0im)
+    @test isthinzero(z ^ 2)
+    @test isthinone(z ^ 0)
+    @test isempty_interval(z ^ (-1))
+
+    z = interval(0im)
+    @test isthinzero(z ^ interval(2))
+    @test isthinone(z ^ interval(0))
+    @test isempty_interval(z ^ interval(-1))
+    @test isempty_interval(z ^ emptyinterval())
 end
 
 @testset "Literal powers" begin
