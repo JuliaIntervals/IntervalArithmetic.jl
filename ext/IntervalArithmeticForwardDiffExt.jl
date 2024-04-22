@@ -48,4 +48,12 @@ function Base.:(^)(x::Interval, y::Dual{Ty, <:Interval}) where Ty
     return Dual{Ty}(expv, deriv * partials(y))
 end
 
+function Base.:(^)(x::Dual{<:Any, I}, y::ExactReal) where I<:Interval
+    return x^convert(I, y)
+end
+
+function Base.:(^)(x::ExactReal, y::Dual{<:Any, I}) where I<:Interval
+    return convert(I, x)^y
+end
+
 end

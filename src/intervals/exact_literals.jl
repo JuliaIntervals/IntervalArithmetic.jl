@@ -54,6 +54,7 @@ struct ExactReal{T<:Real} <: Real
 end
 
 _value(x::ExactReal) = x.value # hook for interval constructor
+Base.to_index(i::ExactReal{<:Integer}) = i.value  # allow to index with ExactReal
 
 # conversion and promotion
 
