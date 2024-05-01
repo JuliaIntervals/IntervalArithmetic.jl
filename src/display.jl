@@ -45,7 +45,7 @@ julia> setdisplay(:infsup; decorations = true, sigdigits = 6) # default display 
 Display options:
   - format: infsup
   - decorations: true
-  - ng_flag: true
+  - NG flag: true
   - significant digits: 6
 
 julia> x = interval(0.1, 0.3)
@@ -55,7 +55,7 @@ julia> setdisplay(:full)
 Display options:
   - format: full
   - decorations: true
-  - ng_flag: true
+  - NG flag: true
   - significant digits: 6 (ignored)
 
 julia> x
@@ -65,7 +65,7 @@ julia> setdisplay(:infsup; sigdigits = 3)
 Display options:
   - format: infsup
   - decorations: true
-  - ng_flag: true
+  - NG flag: true
   - significant digits: 3
 
 julia> x
@@ -75,7 +75,7 @@ julia> setdisplay(; decorations = false)
 Display options:
   - format: infsup
   - decorations: false
-  - ng_flag: true
+  - NG flag: true
   - significant digits: 3
 
 julia> x
