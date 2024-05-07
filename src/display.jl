@@ -1,6 +1,7 @@
 mutable struct DisplayOptions
     format      :: Symbol
     decorations :: Bool
+    ng_flag     :: Bool
     sigdigits   :: Int
 end
 
@@ -8,6 +9,7 @@ function Base.show(io::IO, ::MIME"text/plain", params::DisplayOptions)
     println(io, "Display options:")
     println(io, "  - format: ", params.format)
     println(io, "  - decorations: ", params.decorations)
+    println(io, "  - NG flag: ", params.ng_flag)
     if params.format === :full
         print(io, "  - significant digits: ", params.sigdigits, " (ignored)")
     else
@@ -15,10 +17,10 @@ function Base.show(io::IO, ::MIME"text/plain", params::DisplayOptions)
     end
 end
 
-const display_options = DisplayOptions(:infsup, true, 6) # default
+const display_options = DisplayOptions(:infsup, true, true, 6) # default
 
 """
-    setdisplay(format::Symbol; decorations::Bool, sigdigits::Int)
+    setdisplay(format::Symbol; decorations::Bool, ng_flag::Bool, sigdigits::Int)
 
 Change the format used by `show` to display intervals.
 
@@ -28,12 +30,13 @@ Possible options:
     - `:midpoint`: display intervals as `m ± r`.
     - `:full`: display interval bounds entirely, ignoring `sigdigits`.
 - `decorations`: display the decorations or not.
+- `ng_flag`: display the NG flag or not.
 - `sigdigits`: number (greater or equal to 1) of significant digits to display.
 
 Initially, the display options are set to
-`setdisplay(:infsup; decorations = false, sigdigits = 6)`. If any of the three
-argument `format`, `decorations` and `sigdigits` is omitted, then their value is
-left unchanged.
+`setdisplay(:infsup; decorations = true, ng_flag = true, sigdigits = 6)`. If any
+of `format`, `decorations`, `ng_flag` and `sigdigits` is omitted, then their
+value is left unchanged.
 
 # Examples
 
@@ -42,6 +45,7 @@ julia> setdisplay(:infsup; decorations = true, sigdigits = 6) # default display 
 Display options:
   - format: infsup
   - decorations: true
+  - NG flag: true
   - significant digits: 6
 
 julia> x = interval(0.1, 0.3)
@@ -51,6 +55,7 @@ julia> setdisplay(:full)
 Display options:
   - format: full
   - decorations: true
+  - NG flag: true
   - significant digits: 6 (ignored)
 
 julia> x
@@ -60,6 +65,7 @@ julia> setdisplay(:infsup; sigdigits = 3)
 Display options:
   - format: infsup
   - decorations: true
+  - NG flag: true
   - significant digits: 3
 
 julia> x
@@ -69,6 +75,7 @@ julia> setdisplay(; decorations = false)
 Display options:
   - format: infsup
   - decorations: false
+  - NG flag: true
   - significant digits: 3
 
 julia> x
@@ -77,6 +84,7 @@ julia> x
 """
 function setdisplay(format::Symbol = display_options.format;
         decorations::Bool = display_options.decorations,
+        ng_flag::Bool = display_options.ng_flag,
         sigdigits::Int = display_options.sigdigits)
 
     format ∉ (:infsup, :midpoint, :full) && return throw(ArgumentError("`format` must be `:infsup`, `:midpoint` or `:full`"))
@@ -84,6 +92,7 @@ function setdisplay(format::Symbol = display_options.format;
 
     display_options.format = format
     display_options.decorations = decorations
+    display_options.ng_flag = ng_flag
     display_options.sigdigits = sigdigits
 
     return display_options
@@ -121,7 +130,7 @@ end
 function _str_repr(a::Interval{T}, format::Symbol) where {T<:NumTypes}
     # `format` is either `:infsup`, `:midpoint` or `:full`
     str_interval = _str_basic_repr(a.bareinterval, format) # use `a.bareinterval` to not print a warning if `a` is an NaI
-    if isguaranteed(a)
+    if isguaranteed(a) || !display_options.ng_flag
         format === :full && return string("Interval{", T, "}(", str_interval, ", ", decoration(a), ')')
         display_options.decorations || return str_interval
         if format === :midpoint && str_interval != "∅"
@@ -141,7 +150,7 @@ end
 function _str_repr(a::Interval{BigFloat}, format::Symbol)
     # `format` is either `:infsup`, `:midpoint` or `:full`
     str_interval = _str_basic_repr(a.bareinterval, format) # use `a.bareinterval` to not print a warning if `a` is an NaI
-    if isguaranteed(a)
+    if isguaranteed(a) || !display_options.ng_flag
         format === :full && return string("Interval{BigFloat}(", str_interval, ", ", decoration(a), ')')
         if format === :midpoint && str_interval != "∅"
             str_interval = string('(', str_interval, ')')
@@ -163,17 +172,17 @@ function _str_repr(x::Complex{<:Interval}, format::Symbol)
     if format === :full
         return string(_str_repr(real(x), format), " + ", _str_repr(imag(x), format), "im")
     elseif format === :infsup
-        display_options.decorations && return string(_str_repr(real(x), format), " + (", _str_repr(imag(x), format), ")im")
+        ((!isguaranteed(x) & display_options.ng_flag) | display_options.decorations) && return string(_str_repr(real(x), format), " + (", _str_repr(imag(x), format), ")im")
         return string(_str_repr(real(x), format), " + ", _str_repr(imag(x), format), "im")
     else
-        display_options.decorations && return string(_str_repr(real(x), format), " + (", _str_repr(imag(x), format), ")im")
+        ((!isguaranteed(x) & display_options.ng_flag) | display_options.decorations) && return string(_str_repr(real(x), format), " + (", _str_repr(imag(x), format), ")im")
         return string('(', _str_repr(real(x), format), ") + (", _str_repr(imag(x), format), ")im")
     end
 end
 
 function _str_repr(x::Complex{Interval{BigFloat}}, format::Symbol)
     # `format` is either `:infsup`, `:midpoint` or `:full`
-    display_options.decorations && return string(_str_repr(real(x), format), " + (", _str_repr(imag(x), format), ")im")
+    ((!isguaranteed(x) & display_options.ng_flag) | display_options.decorations) && return string(_str_repr(real(x), format), " + (", _str_repr(imag(x), format), ")im")
     return string(_str_repr(real(x), format), " + ", _str_repr(imag(x), format), "im")
 end
 
