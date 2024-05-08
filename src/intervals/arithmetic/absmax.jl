@@ -50,7 +50,12 @@ for f ∈ (:min, :max)
             isempty_interval(y) && return y
             return _unsafe_bareinterval(T, $f(inf(x), inf(y)), $f(sup(x), sup(y)))
         end
+        function Base.$f(x::BareInterval{T}, y::Rational) where {T<:NumTypes}
+            isempty_interval(x) && return x
+            return _unsafe_bareinterval(T, $f(inf(x), y), $f(sup(x), y))
+        end
         Base.$f(x::BareInterval, y::BareInterval) = $f(promote(x, y)...)
+        Base.$f(x::BareInterval, y::Rational) = $f(promote(x), y)
 
         function Base.$f(x::Interval, y::Interval)
             r = $f(bareinterval(x), bareinterval(y))
@@ -58,5 +63,14 @@ for f ∈ (:min, :max)
             t = isguaranteed(x) & isguaranteed(y)
             return _unsafe_interval(r, d, t)
         end
+
+        function Base.$f(x::Interval, y::Rational)
+            r = $f(bareinterval(x), y)
+            d = decoration(x)
+            return _unsafe_interval(r, d, false)
+        end
+        Base.$f(x::Rational, y::Interval) = $f(y, x)
     end
 end
+
+Base.clamp(i::Interval, lo, hi) = min(max(i, lo), hi)

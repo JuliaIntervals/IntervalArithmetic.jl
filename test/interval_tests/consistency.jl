@@ -268,7 +268,7 @@
         @test radius(2.125) == 0
     end
 
-    @testset "abs, min, max, sign" begin
+    @testset "abs, min, max, sign, clamp" begin
         @test isequal_interval(abs(entireinterval()), interval(0.0, Inf))
         @test isequal_interval(abs(emptyinterval()), emptyinterval())
         @test isequal_interval(abs(interval(-3.0,1.0)), interval(0.0, 3.0))
@@ -279,14 +279,31 @@
         @test isequal_interval(min(emptyinterval(), interval(3.0,4.0)), emptyinterval())
         @test isequal_interval(min(interval(-3.0,1.0), interval(3.0,4.0)), interval(-3.0, 1.0))
         @test isequal_interval(min(interval(-3.0,-1.0), interval(3.0,4.0)), interval(-3.0, -1.0))
+        @test isequal_interval(min(interval(1, 2), 1.5), interval(1, 1.5))
+        @test isequal_interval(min(interval(1, 2), 0.5), interval(0.5, 0.5))
+        @test isequal_interval(min(interval(1, 2), 2.5), interval(1, 2))
+        @test !isguaranteed(min(interval(1, 2), 1.5))
+        @test isequal_interval(min(1.5, interval(1,2)), interval(1, 1.5))
+        @test !isguaranteed(min(1.5, interval(1,2)))
         @test isequal_interval(max(entireinterval(), interval(3.0,4.0)), interval(3.0, Inf))
         @test isequal_interval(max(emptyinterval(), interval(3.0,4.0)), emptyinterval())
         @test isequal_interval(max(interval(-3.0,1.0), interval(3.0,4.0)), interval(3.0, 4.0))
         @test isequal_interval(max(interval(-3.0,-1.0), interval(3.0,4.0)), interval(3.0, 4.0))
+        @test isequal_interval(max(interval(1, 2), 1.5), interval(1.5, 2))
+        @test isequal_interval(max(interval(1, 2), 0.5), interval(1, 2))
+        @test isequal_interval(max(interval(1, 2), 2.5), interval(2.5, 2.5))
+        @test !isguaranteed(max(interval(1, 2), 1.5))
+        @test isequal_interval(max(1.5, interval(1,2)), interval(1.5, 2))
+        @test !isguaranteed(max(1.5, interval(1,2)))
         @test isequal_interval(sign(entireinterval()), interval(-1.0, 1.0))
         @test isequal_interval(sign(emptyinterval()), emptyinterval())
         @test isequal_interval(sign(interval(-3.0,1.0)), interval(-1.0, 1.0))
         @test isequal_interval(sign(interval(-3.0,-1.0)), interval(-1.0, -1.0))
+        @test isequal_interval(clamp(interval(1, 2), 1.5, 2.5), interval(1.5, 2))
+        @test isequal_interval(clamp(interval(1, 2), 0.5, 1.5), interval(1, 1.5))
+        @test isequal_interval(clamp(interval(1, 2), 2.5, 3.5), interval(2.5, 2.5))
+        @test isequal_interval(clamp(interval(1, 2), 0.5, 2.5), interval(1, 2))
+        @test !isguaranteed(clamp(interval(1, 2), 1.5, 2.5))
 
         # Test putting functions in interval:
         @test issubset_interval(log(interval(-2, 5)), interval(-Inf, log(interval(5))))
