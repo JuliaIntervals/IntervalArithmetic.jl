@@ -106,11 +106,6 @@ Base.show(io::IO, a::Union{BareInterval,Interval,Complex{<:Interval}}) =
 Base.show(io::IO, ::MIME"text/plain", a::Union{BareInterval,Interval,Complex{<:Interval}}) =
     print(io, _str_repr(a, display_options.format))
 
-function Base.show(io::IO, a::Union{BareInterval,Interval,Complex{<:Interval}})
-    get(io, :compact, false) && return print(io, _str_repr(a, display_options.format))
-    return print(io, _str_repr(a, :full))
-end
-
 # `String` representation
 
 function _str_repr(a::BareInterval{T}, format::Symbol) where {T<:NumTypes}
