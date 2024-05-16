@@ -100,6 +100,9 @@ end
 
 # printing mechanism
 
+Base.show(io::IO, a::Union{BareInterval,Interval,Complex{<:Interval}}) =
+    print(io, _str_repr(a, display_options.format))
+
 Base.show(io::IO, ::MIME"text/plain", a::Union{BareInterval,Interval,Complex{<:Interval}}) =
     print(io, _str_repr(a, display_options.format))
 
