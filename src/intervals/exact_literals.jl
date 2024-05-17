@@ -63,6 +63,15 @@ Base.convert(::Type{ExactReal{T}}, x::ExactReal{T}) where {T<:Real} = x
 Base.promote_rule(::Type{ExactReal{T}}, ::Type{ExactReal{S}}) where {T<:Real,S<:Real} =
     throw(ArgumentError("promotion between `ExactReal` is not allowed"))
 
+# to BareInterval
+
+Base.convert(::Type{BareInterval{T}}, x::ExactReal) where {T<:NumTypes} = bareinterval(T, x.value)
+
+Base.promote_rule(::Type{BareInterval{T}}, ::Type{ExactReal{S}}) where {T<:NumTypes,S<:Real} =
+    BareInterval{promote_numtype(T, S)}
+Base.promote_rule(::Type{BareInterval{T}}, ::Type{Interval{S}}) where {T<:Real,S<:NumTypes} =
+    BareInterval{promote_numtype(T, S)}
+
 # to Interval
 
 Base.convert(::Type{Interval{T}}, x::ExactReal) where {T<:NumTypes} = interval(T, x.value)
@@ -95,29 +104,22 @@ Base.promote_rule(::Type{BigFloat}, ::Type{ExactReal{T}}) where {T<:Real} =
 
 # display
 
-Base.string(x::ExactReal{T}) where {T<:AbstractFloat} =
-    Base.Ryu.writefixed(x.value, 2000, false, false, false, UInt8('.'), true)
-
-Base.string(x::ExactReal) = string(x.value)
+Base.show(io::IO, x::ExactReal{T}) where {T<:AbstractFloat} =
+    print(io, "ExactReal{$T}($(_str_repr(x)))")
 
 Base.show(io::IO, ::MIME"text/plain", x::ExactReal{T}) where {T<:AbstractFloat} =
-    print(io, "ExactReal{$T}($(string(x)))")
+    print(io, "ExactReal{$T}($(_str_repr(x)))")
+
+_str_repr(x::ExactReal) = string(x.value)
+
+_str_repr(x::ExactReal{T}) where {T<:AbstractFloat} =
+    Base.Ryu.writefixed(x.value, 2000, false, false, false, UInt8('.'), true)
 
 # always exact
 
 Base.:-(x::ExactReal) = ExactReal(-x.value)
 
 # by-pass default
-
-# function Base.:+(x::ExactReal, y::Complex{<:ExactReal})
-#     iszero(real(y).value) && return complex(x, imag(y))
-#     return complex(x + real(y), imag(y))
-# end
-
-# function Base.:-(x::ExactReal, y::Complex{<:ExactReal})
-#     iszero(real(y).value) && return complex(x, -imag(y))
-#     return complex(x - real(y), -imag(y))
-# end
 
 Base.:^(x::ExactReal, p::Integer) = ^(promote(x, p)...)
 
@@ -127,7 +129,7 @@ Base.:^(x::ExactReal, p::Integer) = ^(promote(x, p)...)
 Determine if the display of `x` up to 2000 decimals is equal to the bitwise
 value of `x`. This is famously not true for the float displayed as `0.1`.
 """
-has_exact_display(x::Real) = string(x) == string(ExactReal(x))
+has_exact_display(x::Real) = string(x) == _str_repr(ExactReal(x))
 
 #
 
