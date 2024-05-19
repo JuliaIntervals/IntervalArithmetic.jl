@@ -72,7 +72,7 @@ Base.convert(::Type{BareInterval{T}}, x::ExactReal) where {T<:NumTypes} = barein
 
 Base.promote_rule(::Type{BareInterval{T}}, ::Type{ExactReal{S}}) where {T<:NumTypes,S<:Real} =
     BareInterval{promote_numtype(T, S)}
-Base.promote_rule(::Type{BareInterval{T}}, ::Type{Interval{S}}) where {T<:Real,S<:NumTypes} =
+Base.promote_rule(::Type{ExactReal{T}}, ::Type{BareInterval{S}}) where {T<:Real,S<:NumTypes} =
     BareInterval{promote_numtype(T, S)}
 
 # to Interval
