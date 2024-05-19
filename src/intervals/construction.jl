@@ -184,7 +184,7 @@ function bareinterval(::Type{T}, a, b) where {T}
     lo = _inf(a)
     hi = _sup(b)
     is_valid_interval(lo, hi) && return _unsafe_bareinterval(T, lo, hi)
-    @warn "invalid interval, empty interval is returned"
+    @warn "ill-formed bare interval [a, b] with a = $a, b = $b. Empty interval is returned"
     return emptyinterval(BareInterval{T})
 end
 bareinterval(a, b) = bareinterval(promote_numtype(numtype(a), numtype(b)), a, b)
@@ -441,7 +441,7 @@ function _interval_infsup(::Type{T}, a, b, d::Decoration) where {T<:NumTypes}
     lo = _inf(a)
     hi = _sup(b)
     if !is_valid_interval(lo, hi) || d == ill
-        @warn "invalid interval, NaI is returned"
+        @warn "ill-formed interval [a, b] with a = $a, b = $b and decoration d = $d. NaI is returned"
         return nai(T)
     else
         x = _unsafe_bareinterval(T, lo, hi)
