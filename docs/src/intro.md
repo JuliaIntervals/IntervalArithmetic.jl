@@ -65,3 +65,10 @@ Interval arithmetic is the foundation of more powerful and elaborate methods in 
 The interested reader may refer to the following books:
 - R. E. Moore, R. B. Kearfott and M. J. Cloud, [*Introduction to Interval Analysis*](https://doi.org/10.1137/1.9780898717716), Society for Industrial and Applied Mathematics (2009)
 - W. Tucker, [*Validated Numerics: A Short Introduction to Rigorous Computations*](https://press.princeton.edu/books/hardcover/9780691147819/validated-numerics), Princeton University Press (2010)
+
+
+
+## Compliance with the IEEE standard for interval arithmetic
+
+[IntervalArithmetic.jl](https://juliaintervals.github.io/IntervalArithmetic.jl) complies with the specifications described in the [IEEE standard for interval arithmetic](https://ieeexplore.ieee.org/document/7140721).
+However, the reverse-mode of functions are not implemented (see Section 10.5.4).
