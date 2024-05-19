@@ -126,6 +126,13 @@ Base.:-(x::ExactReal) = ExactReal(-x.value)
 
 Base.:^(x::ExactReal, p::Integer) = ^(promote(x, p)...)
 
+# basic operations with `BareInterval` and `ExactReal`
+
+for f ∈ (:+, :-, :*, :/, :\, :^)
+    @eval Base.$f(x::BareInterval, y::ExactReal) = $f(promote(x, y)...)
+    @eval Base.$f(x::ExactReal, y::BareInterval) = $f(promote(x, y)...)
+end
+
 """
     has_exact_display(x::Real)
 
