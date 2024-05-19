@@ -181,8 +181,8 @@ BareInterval{BigFloat}(1.0, 3.14159265358979323846264338327950288419716939937510
 ```
 """
 function bareinterval(::Type{T}, a, b) where {T}
-    lo = _inf(a)
-    hi = _sup(b)
+    lo = _inf(_value(a))
+    hi = _sup(_value(b))
     is_valid_interval(lo, hi) && return _unsafe_bareinterval(T, lo, hi)
     @warn "ill-formed bare interval [a, b] with a = $a, b = $b. Empty interval is returned"
     return emptyinterval(BareInterval{T})
@@ -194,6 +194,8 @@ bareinterval(a) = bareinterval(promote_numtype(numtype(a), numtype(a)), a)
 
 bareinterval(::Type{T}, a::BareInterval) where {T} =
     _unsafe_bareinterval(T, _inf(a), _sup(a)) # assumes valid interval
+
+_value(a) = a # convenient hook, used in exact_literals.jl
 
 # some useful extra constructor
 bareinterval(::Type{T}, a::Tuple) where {T} = bareinterval(T, a...)
@@ -407,15 +409,13 @@ function interval(::Type{T}, a, b, d::Decoration = com; format::Symbol = :infsup
     format === :midpoint && return _interval_midpoint(T, _value(a), _value(b), d)
     return throw(ArgumentError("`format` must be `:infsup` or `:midpoint`"))
 end
-interval(a, b, d::Decoration = com; format::Symbol = :infsup) = interval(promote_numtype(numtype(_value(a)), numtype(_value(b))), _value(a), _value(b), d; format = format)
+interval(a, b, d::Decoration = com; format::Symbol = :infsup) = interval(promote_numtype(numtype(a), numtype(b)), a, b, d; format = format)
 
 function interval(::Type{T}, a, d::Decoration = com; format::Symbol = :infsup) where {T}
     (format === :infsup) | (format === :midpoint) && return _interval_infsup(T, _value(a), _value(a), d)
     return throw(ArgumentError("`format` must be `:infsup` or `:midpoint`"))
 end
-interval(a, d::Decoration = com; format::Symbol = :infsup) = interval(promote_numtype(numtype(_value(a)), numtype(_value(a))), _value(a), d; format = format)
-
-_value(a) = a # convenient hook, used in exact_literals.jl
+interval(a, d::Decoration = com; format::Symbol = :infsup) = interval(promote_numtype(numtype(a), numtype(a)), a, d; format = format)
 
 # some useful extra constructor
 interval(::Type{T}, a::Tuple, d::Decoration = com; format::Symbol = :infsup) where {T} = interval(T, a..., d; format = format)
