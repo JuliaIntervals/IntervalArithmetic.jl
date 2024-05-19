@@ -72,7 +72,7 @@ Base.convert(::Type{BareInterval{T}}, x::ExactReal) where {T<:NumTypes} = barein
 
 Base.promote_rule(::Type{BareInterval{T}}, ::Type{ExactReal{S}}) where {T<:NumTypes,S<:Real} =
     BareInterval{promote_numtype(T, S)}
-Base.promote_rule(::Type{BareInterval{T}}, ::Type{Interval{S}}) where {T<:Real,S<:NumTypes} =
+Base.promote_rule(::Type{ExactReal{T}}, ::Type{BareInterval{S}}) where {T<:Real,S<:NumTypes} =
     BareInterval{promote_numtype(T, S)}
 
 # to Interval
@@ -125,6 +125,13 @@ Base.:-(x::ExactReal) = ExactReal(-x.value)
 # by-pass default
 
 Base.:^(x::ExactReal, p::Integer) = ^(promote(x, p)...)
+
+# basic operations with `BareInterval` and `ExactReal`
+
+for f ∈ (:+, :-, :*, :/, :\, :^)
+    @eval Base.$f(x::BareInterval, y::ExactReal) = $f(promote(x, y)...)
+    @eval Base.$f(x::ExactReal, y::BareInterval) = $f(promote(x, y)...)
+end
 
 """
     has_exact_display(x::Real)
