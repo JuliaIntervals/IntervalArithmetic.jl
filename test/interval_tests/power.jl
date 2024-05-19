@@ -104,6 +104,21 @@ end
     @test isthinone(z ^ interval(0))
     @test isempty_interval(z ^ interval(-1))
     @test isempty_interval(z ^ emptyinterval())
+
+    x = interval(3 + 4im)
+    @test in_interval(-7 + 24im, x^2)
+    @test issubset_interval(sqrt(x), x^0.5)
+
+    a = -3.1
+    @test issubset_interval(x, (x^a)^(1/a))
+
+    z = interval(3 + 4im)
+    sZ = sqrt(z)
+    @test in_interval(2 + im, sZ)
+
+    @test issubset_interval(interval(0, 1)*interval(im), sqrt(interval(-1, 0) + interval(0)*interval(im)))
+    @test issubset_interval(interval(0, 1) + interval(0, 1)*interval(im), sqrt(interval(-1, 1) + interval(0)*interval(im)))
+    @test issubset_interval(interval(0, Inf) + interval(-3//8, Inf)*interval(im), sqrt(interval(-9//32, Inf)*interval(im)))
 end
 
 @testset "Literal powers" begin

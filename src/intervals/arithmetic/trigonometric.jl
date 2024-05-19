@@ -431,6 +431,9 @@ function Base.asin(x::Interval{T}) where {T<:NumTypes}
     return _unsafe_interval(r, d, isguaranteed(x))
 end
 
+Base.asin(x::Complex{Interval{T}}) where {T<:NumTypes} =
+    -interval(T, im)*log(interval(T, im)*x + sqrt(interval(T, 1) - x^2))
+
 """
     acos(::BareInterval)
     acos(::Interval)
@@ -455,6 +458,9 @@ function Base.acos(x::Interval{T}) where {T<:NumTypes}
     return _unsafe_interval(r, d, isguaranteed(x))
 end
 
+Base.acos(x::Complex{Interval{T}}) where {T<:NumTypes} =
+    -interval(T, im)*log(x + interval(T, im)*sqrt(interval(T, 1) - x^2))
+
 """
     atan(::BareInterval)
     atan(::Interval)
@@ -473,6 +479,9 @@ function Base.atan(x::Interval)
     d = min(decoration(x), decoration(r))
     return _unsafe_interval(r, d, isguaranteed(x))
 end
+
+Base.atan(x::Complex{Interval{T}}) where {T<:NumTypes} =
+    -interval(T, im)/interval(T, 2)*log((interval(T, im) - x)/(interval(T, im) + x))
 
 """
     acot(::BareInterval)

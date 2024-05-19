@@ -254,3 +254,5 @@ function Base.sqrt(x::Interval{T}) where {T<:NumTypes}
     d = min(d, ifelse(issubset_interval(bx, domain), d, trv))
     return _unsafe_interval(r, d, isguaranteed(x))
 end
+
+Base.sqrt(x::Complex{Interval{T}}) where {T<:NumTypes} = x ^ interval(1//2)

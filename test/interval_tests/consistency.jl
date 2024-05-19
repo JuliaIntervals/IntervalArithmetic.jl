@@ -415,3 +415,28 @@ end
     @test !isequal_interval(x, y)
     @test hash(x) != hash(y)
 end
+
+@testset "Complex" begin
+    a = interval(1im)
+    b = interval(4im + 3)
+    c = interval(-1, 4) + interval(0, 2)*interval(im)
+
+    @test isinterior(a, c)
+    @test issubset_interval(a, c)
+    @test isinterior(a, c)
+    @test !isinterior(b, c)
+    @test !issubset_interval(b, c)
+
+    @test typeof(a) == Complex{Interval{Float64}}
+    @test isequal_interval(a, interval(0) + interval(1)*interval(im))
+    @test isequal_interval(a * a, interval(-1))
+    @test isequal_interval(a + a, interval(2)*interval(im))
+    @test isthinzero(a - a)
+    @test isthinone(a / a)
+
+    @test in_interval(3+2im, c)
+    @test isequal_interval(hull(a, b), interval(0, 3) + interval(1, 4)*interval(im))
+    @test isequal_interval(intersect_interval(c, hull(a, b)), interval(0, 3) + interval(1, 2)*interval(im))
+    @test isequal_interval(intersect_interval(a, b), emptyinterval() + emptyinterval()*interval(im))
+    @test isdisjoint_interval(a, b)
+end
