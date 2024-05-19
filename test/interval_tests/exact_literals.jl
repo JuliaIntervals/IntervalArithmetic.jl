@@ -29,12 +29,12 @@
     end
 
     @test f(1.0) isa Real
-    @test iszero(f(1.22))
+    @test iszero(f(1.0))
 
     @test f(bareinterval(1)) isa BareInterval
     @test isthinzero(f(bareinterval(1)))
 
-    @test f(bareinterval(1)) isa Interval
+    @test f(interval(1)) isa Interval
     @test isthinzero(f(interval(1)))
     @test isguaranteed(f(interval(1)))
 
