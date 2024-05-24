@@ -4,19 +4,22 @@
 
 # helper functions
 
-function _quadrant(x::AbstractFloat)
-    # NOTE: this algorithm may be flawed as it relies on `rem2pi(x, RoundNearest)`
-    # to yield a very tight result. This is not guaranteed by Julia, see e.g.
-    # https://github.com/JuliaLang/julia/blob/9669eecc99bc4553e28d94d7dd3dc9fd40b3bf3f/base/mpfr.jl#L845-L846
-    PI_LO, PI_HI = bounds(bareinterval(typeof(x), π))
-    r = rem2pi(x, RoundNearest)
-    r2 = 2r # should be exact for floats
-    r2 ≤ -PI_HI && return 2 # [-π, -π/2)
-    r2 < -PI_LO && return throw(ArgumentError("could not determine the quadrant, the remainder $r of the division of $x by 2π is lesser or greater than -π/2"))
-    r2 <  0     && return 3 # [-π/2, 0)
-    r2 ≤  PI_LO && return 0 # [0, π/2)
-    r2 <  PI_HI && return throw(ArgumentError("could not determine the quadrant, the remainder $r of the division of $x by 2π is lesser or greater than π/2"))
-    return 1 # [π/2, π]
+function _quadrant(f, x::T) where {T<:AbstractFloat}
+    PI = bareinterval(T, π)
+    PI_LO, PI_HI = bounds(PI)
+    if abs(x) ≤ PI_LO # (-π, π)
+        r2 = 2x # should be exact for floats
+        r2 ≤ -PI_HI && return 2 # (-π, -π/2)
+        r2 < -PI_LO && return f(2, 3) # (-π, -π/2) or [-π/2, 0)
+        r2 <  0     && return 3 # [-π/2, 0)
+        r2 ≤  PI_LO && return 0 # [0, π/2)
+        r2 <  PI_HI && return f(0, 1) # [0, π/2) or [π/2, π)
+        return 1 # [π/2, π)
+    else
+        k = _unsafe_scale(bareinterval(x) / PI, convert(T, 2))
+        fk = floor(k)
+        return f(mod(inf(fk), 4), mod(sup(fk), 4))
+    end
 end
 
 function _quadrantpi(x::AbstractFloat) # used in `sinpi` and `cospi`
@@ -65,8 +68,8 @@ function Base.sin(x::BareInterval{T}) where {T<:AbstractFloat}
 
     lo, hi = bounds(x)
 
-    lo_quadrant = _quadrant(lo)
-    hi_quadrant = _quadrant(hi)
+    lo_quadrant = _quadrant(min, lo)
+    hi_quadrant = _quadrant(max, hi)
 
     if lo_quadrant == hi_quadrant
         d ≥ PI_HI && return _unsafe_bareinterval(T, -one(T), one(T))
@@ -167,8 +170,8 @@ function Base.cos(x::BareInterval{T}) where {T<:AbstractFloat}
 
     lo, hi = bounds(x)
 
-    lo_quadrant = _quadrant(lo)
-    hi_quadrant = _quadrant(hi)
+    lo_quadrant = _quadrant(min, lo)
+    hi_quadrant = _quadrant(max, hi)
 
     if lo_quadrant == hi_quadrant
         d ≥ PI_HI && return _unsafe_bareinterval(T, -one(T), one(T))
@@ -269,8 +272,8 @@ function Base.tan(x::BareInterval{T}) where {T<:AbstractFloat}
 
     lo, hi = bounds(x)
 
-    lo_quadrant = _quadrant(lo)
-    hi_quadrant = _quadrant(hi)
+    lo_quadrant = _quadrant(min, lo)
+    hi_quadrant = _quadrant(max, hi)
     lo_quadrant_mod = mod(lo_quadrant, 2)
     hi_quadrant_mod = mod(hi_quadrant, 2)
 
@@ -309,8 +312,8 @@ function Base.cot(x::BareInterval{T}) where {T<:AbstractFloat}
 
     lo, hi = bounds(x)
 
-    lo_quadrant = _quadrant(lo)
-    hi_quadrant = _quadrant(hi)
+    lo_quadrant = _quadrant(min, lo)
+    hi_quadrant = _quadrant(max, hi)
 
     if (lo_quadrant == 2 || lo_quadrant == 3) && hi == 0
         return @round(T, typemin(T), cot(lo)) # singularity from the left
@@ -341,8 +344,8 @@ function Base.sec(x::BareInterval{T}) where {T<:AbstractFloat}
 
     lo, hi = bounds(x)
 
-    lo_quadrant = _quadrant(lo)
-    hi_quadrant = _quadrant(hi)
+    lo_quadrant = _quadrant(min, lo)
+    hi_quadrant = _quadrant(max, hi)
 
     if lo_quadrant == hi_quadrant
         (lo_quadrant == 0) | (lo_quadrant == 1) && return @round(T, sec(lo), sec(hi)) # increasing
@@ -379,8 +382,8 @@ function Base.csc(x::BareInterval{T}) where {T<:AbstractFloat}
 
     lo, hi = bounds(x)
 
-    lo_quadrant = _quadrant(lo)
-    hi_quadrant = _quadrant(hi)
+    lo_quadrant = _quadrant(min, lo)
+    hi_quadrant = _quadrant(max, hi)
 
     if (lo_quadrant == 2 || lo_quadrant == 3) && hi == 0
         # singularity from the left
