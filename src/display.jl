@@ -293,9 +293,11 @@ end
 
 function _round_string(x::T, sigdigits::Int, r::RoundingMode) where {T<:AbstractFloat}
     str_x = string(x)
-    str_digits = split(contains(str_x, '.') ? split(string(x), '.'; limit = 2)[2] : str_x, 'e'; limit = 2)[1]
+    str_digits = split(contains(str_x, '.') ? split(str_x, '.'; limit = 2)[2] : str_x, 'e'; limit = 2)[1]
     len = length(str_digits)
-    if (isinteger(x) || ispow2(abs(x))) && sigdigits ≥ len # `x` is exactly representable
+    if isinteger(x) # `x` is exactly representable
+        return replace(_round_string(big(x), length(str_x), RoundNearest), "e-0" => "e-")
+    elseif ispow2(abs(x)) && sigdigits ≥ len # `x` is exactly representable
         return replace(_round_string(big(x), len + 1, RoundNearest), "e-0" => "e-")
     else
         return _round_string(big(x), sigdigits, r)
@@ -309,9 +311,12 @@ function _round_string(x::BigFloat, sigdigits::Int, r::RoundingMode)
     if !isfinite(x)
         return string(Float64(x))
     else
-        str_digits = split(split(string(x), '.'; limit = 2)[2], 'e'; limit = 2)[1]
+        str_x = string(x)
+        str_digits = split(split(str_x, '.'; limit = 2)[2], 'e'; limit = 2)[1]
         len = length(str_digits)
-        if (isinteger(x) || ispow2(abs(x))) && sigdigits ≥ len # `x` is exactly representable
+        if isinteger(x) # `x` is exactly representable
+            return _round_string(big(x), length(str_x), RoundNearest)
+        elseif ispow2(abs(x)) && sigdigits ≥ len # `x` is exactly representable
             return _round_string(big(x), len + 1, RoundNearest)
         else
             # `sigdigits` digits after the decimal
