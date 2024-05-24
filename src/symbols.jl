@@ -93,6 +93,22 @@ Unicode alias of [`isinterior`](@ref).
 ⪽(x, y) = isinterior(x, y)
 
 """
+    ⊔(x, y)
+    x ⊔ y
+
+Unicode alias of [`hull`](@ref).
+"""
+⊔(x, y) = hull(x, y)
+
+"""
+    ⊓(x, y)
+    x ⊓ y
+
+Unicode alias of [`intersect_interval`](@ref).
+"""
+⊓(x, y) = intersect_interval(x, y)
+
+"""
     ∅
 
 Unicode alias of `emptyinterval()` representing an empty interval of default
