@@ -1,7 +1,7 @@
 module Symbols
 
     using IntervalArithmetic
-    export .., ±, ≛, ≺, ⪽, ∅, ℝ
+    export .., ±, ≛, ≺, ⪽, ∅, ℝ, ⊓, ⊔
 
 """
     ..(a, b)
