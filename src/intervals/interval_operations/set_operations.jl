@@ -14,8 +14,14 @@ The result is decorated by at most `trv` (Section 11.7.1).
 Implement the `intersection` function of the IEEE Standard 1788-2015 (Section 9.3).
 """
 function intersect_interval(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
-    isdisjoint_interval(x, y) && return emptyinterval(BareInterval{T})
-    return _unsafe_bareinterval(T, max(inf(x), inf(y)), min(sup(x), sup(y)))
+    lo = max(inf(x), inf(y))
+    hi = min(sup(x), sup(y))
+
+    if lo > hi
+        return emptyinterval(BareInterval{T})
+    else
+        return _unsafe_bareinterval(T, lo, hi)
+    end
 end
 intersect_interval(x::BareInterval, y::BareInterval) = intersect_interval(promote(x, y)...)
 
