@@ -96,4 +96,48 @@ end
             end
         end
     end
+
+    @testset "min" begin
+        @test isequal_interval(ForwardDiff.derivative(x->min(x, 1.5), interval(1, 2)), interval(0, 1))
+        @test isequal_interval(ForwardDiff.derivative(x->min(x, 1.5), interval(1.75, 2)), interval(0))
+        @test isequal_interval(ForwardDiff.derivative(x->min(x, 1.5), interval(0.5, 0.75)), interval(1))
+        @test isequal_interval(ForwardDiff.derivative(x->min(x, 1.5), interval(1, 2)), ForwardDiff.derivative(x->min(1.5, x), interval(1, 2)))
+
+        @test isequal_interval(ForwardDiff.derivative(y->ForwardDiff.derivative(x->min(x, 1.5), y), interval(1, 2)), interval(0))
+        @test isequal_interval(ForwardDiff.derivative(y->ForwardDiff.derivative(x->min(x, 1.5)^2, y), interval(1, 2)), interval(0, 2))
+        @test isequal_interval(ForwardDiff.derivative(y->ForwardDiff.derivative(x->min(x, 1.5)^3, y), interval(1, 2)), interval(0, 9))
+        @test isequal_interval(ForwardDiff.derivative(y->ForwardDiff.derivative(x->min(x, 3.0)^3, y), interval(1, 2)), interval(6, 12))
+        @test isequal_interval(ForwardDiff.derivative(y->ForwardDiff.derivative(x->min(x, 3.0)^3, y), interval(4, 5)), interval(0))
+        @test isequal_interval(ForwardDiff.derivative(y->ForwardDiff.derivative(x->min(x, 1.5)^3, y), interval(1, 2)), ForwardDiff.derivative(y->ForwardDiff.derivative(x->min(1.5, x)^3, y), interval(1, 2)))
+    end
+
+    @testset "max" begin
+        @test isequal_interval(ForwardDiff.derivative(x->max(x, 1.5), interval(1, 2)), interval(0, 1))
+        @test isequal_interval(ForwardDiff.derivative(x->max(x, 1.5), interval(1.75, 2)), interval(1))
+        @test isequal_interval(ForwardDiff.derivative(x->max(x, 1.5), interval(0.5, 0.75)), interval(0))
+        @test isequal_interval(ForwardDiff.derivative(x->max(x, 1.5), interval(1, 2)), ForwardDiff.derivative(x->max(1.5, x), interval(1, 2)))
+
+        @test isequal_interval(ForwardDiff.derivative(y->ForwardDiff.derivative(x->max(x, 1.5), y), interval(1, 2)), interval(0))
+        @test isequal_interval(ForwardDiff.derivative(y->ForwardDiff.derivative(x->max(x, 1.5)^2, y), interval(1, 2)), interval(0, 2))
+        @test isequal_interval(ForwardDiff.derivative(y->ForwardDiff.derivative(x->max(x, 1.5)^3, y), interval(1, 2)), interval(0, 12))
+        @test isequal_interval(ForwardDiff.derivative(y->ForwardDiff.derivative(x->max(x, 3.0)^3, y), interval(1, 2)), interval(0))
+        @test isequal_interval(ForwardDiff.derivative(y->ForwardDiff.derivative(x->max(x, 3.0)^3, y), interval(4, 5)), interval(24, 30))
+        @test isequal_interval(ForwardDiff.derivative(y->ForwardDiff.derivative(x->max(x, 1.5)^3, y), interval(1, 2)), ForwardDiff.derivative(y->ForwardDiff.derivative(x->max(1.5, x)^3, y), interval(1, 2)))
+    end
+
+    @testset "clamp" begin
+        @test isequal_interval(ForwardDiff.derivative(x->clamp(x, 1.5, 2.5), interval(1, 2)), interval(0, 1))
+        @test isequal_interval(ForwardDiff.derivative(x->clamp(x, 1.5, 2.5), interval(2, 3)), interval(0, 1))
+        @test isequal_interval(ForwardDiff.derivative(x->clamp(x, 1.5, 2.5), interval(1.75, 2)), interval(1))
+        @test isequal_interval(ForwardDiff.derivative(x->clamp(x, 1.5, 2.5), interval(2.75, 3)), interval(0))
+        @test isequal_interval(ForwardDiff.derivative(x->clamp(x, 1.5, 2.5), interval(0.75, 1)), interval(0))
+
+        @test isequal_interval(ForwardDiff.derivative(y->ForwardDiff.derivative(x->clamp(x, 1.5, 2.5), y), interval(1, 2)), interval(0))
+        @test isequal_interval(ForwardDiff.derivative(y->ForwardDiff.derivative(x->clamp(x, 1.5, 2.5)^2, y), interval(1, 2)), interval(0, 2))
+        @test isequal_interval(ForwardDiff.derivative(y->ForwardDiff.derivative(x->clamp(x, 1.5, 2.5)^3, y), interval(1, 2)), interval(0, 12))
+        @test isequal_interval(ForwardDiff.derivative(y->ForwardDiff.derivative(x->clamp(x, 1.5, 2.5)^3, y), interval(2, 3)), interval(0, 15))
+        @test isequal_interval(ForwardDiff.derivative(y->ForwardDiff.derivative(x->clamp(x, 1.5, 2.5)^3, y), interval(3, 4)), interval(0))
+        @test isequal_interval(ForwardDiff.derivative(y->ForwardDiff.derivative(x->clamp(x, 1.5, 2.5)^3, y), interval(1.75, 2)), interval(6*1.75, 12))
+        @test isequal_interval(ForwardDiff.derivative(y->ForwardDiff.derivative(x->clamp(x, 1.5, 2.5)^3, y), interval(0, 1)), interval(0))
+    end
 end
