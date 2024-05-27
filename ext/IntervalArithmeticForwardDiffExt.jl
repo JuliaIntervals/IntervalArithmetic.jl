@@ -59,7 +59,7 @@ end
 function Base.:(^)(x::Dual{<:Tx}, y::ExactReal) where Tx
     v = value(x)
     expv = v^y
-    if iszero(y) || all(iszero.(values(partials(x))))
+    if iszero(y.value) || all(iszero.(values(partials(x))))
         new_partials = zero(partials(x))
     else
         new_partials = partials(x) * y * v^(y - 1)
