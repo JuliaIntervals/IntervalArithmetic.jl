@@ -49,8 +49,6 @@ See also: [`@exact`](@ref).
 """
 struct ExactReal{T<:Real} <: Real
     value :: T
-
-    ExactReal(value::T) where {T<:Real} = new{T}(value)
 end
 
 _value(x::ExactReal) = x.value # hook for interval constructor
