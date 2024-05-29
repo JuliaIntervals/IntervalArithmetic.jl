@@ -50,6 +50,7 @@ See also: [`@exact`](@ref).
 struct ExactReal{T<:Real} <: Real
     value :: T
 
+    ExactReal{T}(value::T) where {T<:Real} = new{T}(value)
     ExactReal(value::T) where {T<:Real} = new{T}(value)
 end
 
