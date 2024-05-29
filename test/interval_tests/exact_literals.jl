@@ -8,7 +8,7 @@
     @test (@exact 1.2 + 3.4im) isa Complex{<:ExactReal}
     @test_throws ArgumentError (@exact 1.2 + 3im)
 
-    @test ExactReal{Int64}(3).value == 3
+    @test ExactReal{Int}(3).value == 3
     @test_throws MethodError ExactReal{Float64}(1//3)
 
     #
