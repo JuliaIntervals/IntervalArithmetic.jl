@@ -56,4 +56,22 @@ function Base.:(^)(x::ExactReal, y::Dual{<:Any, I}) where I<:Interval
     return convert(I, x)^y
 end
 
+function Base.:(^)(x::Dual{<:Tx}, y::ExactReal) where Tx
+    v = value(x)
+    expv = v^y
+    if iszero(y.value) || all(iszero.(values(partials(x))))
+        new_partials = zero(partials(x))
+    else
+        new_partials = partials(x) * y * v^(y - 1)
+    end
+    return Dual{Tx}(expv, new_partials)
+end
+
+function Base.:(^)(x::ExactReal, y::Dual{<:Ty}) where Ty
+    v = value(y)
+    expv = x^v
+    deriv = (iszero(x) && inf(v) > 0) ? zero(expv) : expv*log(x)
+    return Dual{Ty}(expv, deriv * partials(y))
+end
+
 end

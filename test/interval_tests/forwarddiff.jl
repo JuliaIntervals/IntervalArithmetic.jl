@@ -96,4 +96,12 @@ end
             end
         end
     end
+
+    @testset "ExactReal" begin
+        @exact f(x) = x^2 - 2
+        @test isguaranteed(ForwardDiff.derivative(f, interval(1)))
+
+        @exact g(x) = 2^x + 6sin(x^3) - 33
+        @test isguaranteed(ForwardDiff.derivative(f, interval(1)))
+    end
 end
