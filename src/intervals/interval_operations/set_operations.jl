@@ -49,15 +49,14 @@ The result is decorated by at most `trv` (Section 11.7.1).
 Implement the `convexHull` function of the IEEE Standard 1788-2015 (Section 9.3).
 """
 function hull(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
-    isempty_interval(x) & isempty_interval(y) && return x
     return _unsafe_bareinterval(T, min(inf(x), inf(y)), max(sup(x), sup(y)))
 end
 hull(x::BareInterval, y::BareInterval) = hull(promote(x, y)...)
 
 function hull(x::Interval, y::Interval)
     r = hull(bareinterval(x), bareinterval(y))
-    d = min(decoration(x), decoration(y), decoration(r), trv)
-    t = isguaranteed(x) & isguaranteed(y)
+    d = min(decoration(x), decoration(y), trv)
+    t = isguaranteed(x) && isguaranteed(y)
     return _unsafe_interval(r, d, t)
 end
 
