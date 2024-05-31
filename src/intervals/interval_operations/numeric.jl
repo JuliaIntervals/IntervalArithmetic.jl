@@ -61,7 +61,7 @@ not normalize the infimum of the interval.
 See also: [`inf`](@ref), [`sup`](@ref), [`mid`](@ref), [`diam`](@ref),
 [`radius`](@ref) and [`midradius`](@ref).
 """
-bounds(x::BareInterval{T}) where {T<:AbstractFloat} = (ifelse(isnan(x.lo), typemax(T), x.lo), x.hi)
+bounds(x::BareInterval{T}) where {T<:AbstractFloat} = (ifelse(isnan(x.lo), typemax(T), x.lo), sup(x))
 bounds(x::BareInterval{<:Rational}) = (inf(x), sup(x))
 
 function bounds(x::Interval{T}) where {T<:AbstractFloat}

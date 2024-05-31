@@ -16,7 +16,6 @@ Implement the `intersection` function of the IEEE Standard 1788-2015 (Section 9.
 function intersect_interval(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
     lo = max(inf(x), inf(y))
     hi = min(sup(x), sup(y))
-
     if lo > hi
         return emptyinterval(BareInterval{T})
     else
@@ -25,9 +24,10 @@ function intersect_interval(x::BareInterval{T}, y::BareInterval{T}) where {T<:Nu
 end
 intersect_interval(x::BareInterval, y::BareInterval) = intersect_interval(promote(x, y)...)
 
-function intersect_interval(x::Interval, y::Interval)
+function intersect_interval(x::Interval{T}, y::Interval{S}) where {T<:NumTypes,S<:NumTypes}
+    isnai(x) | isnai(y) && return nai(promote_type(T, S))
     r = intersect_interval(bareinterval(x), bareinterval(y))
-    d = min(decoration(x), decoration(y), decoration(r), trv)
+    d = min(decoration(x), decoration(y), trv)
     t = isguaranteed(x) & isguaranteed(y)
     return _unsafe_interval(r, d, t)
 end
@@ -54,9 +54,10 @@ function hull(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
 end
 hull(x::BareInterval, y::BareInterval) = hull(promote(x, y)...)
 
-function hull(x::Interval, y::Interval)
+function hull(x::Interval{T}, y::Interval{S}) where {T<:NumTypes,S<:NumTypes}
+    isnai(x) | isnai(y) && return nai(promote_type(T, S))
     r = hull(bareinterval(x), bareinterval(y))
-    d = min(decoration(x), decoration(y), decoration(r), trv)
+    d = min(decoration(x), decoration(y), trv)
     t = isguaranteed(x) & isguaranteed(y)
     return _unsafe_interval(r, d, t)
 end
