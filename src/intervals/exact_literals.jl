@@ -60,6 +60,18 @@ _value(x::ExactReal) = x.value # hook for interval constructor
 
 Base.to_index(i::ExactReal{<:Integer}) = i.value
 
+Base.zero(::Type{ExactReal{T}}) where {T<:Real} = ExactReal(zero(T))
+Base.zero(::ExactReal{T}) where {T<:Real} = zero(ExactReal{T})
+
+Base.zero(::Type{Complex{ExactReal{T}}}) where {T<:Real} = complex(zero(ExactReal{T}), zero(ExactReal{T}))
+Base.zero(::Complex{ExactReal{T}}) where {T<:Real} = zero(Complex{ExactReal{T}})
+
+Base.one(::Type{ExactReal{T}}) where {T<:Real} = ExactReal(one(T))
+Base.one(::ExactReal{T}) where {T<:Real} = one(ExactReal{T})
+
+Base.one(::Type{Complex{ExactReal{T}}}) where {T<:Real} = complex(one(ExactReal{T}), zero(ExactReal{T}))
+Base.one(::Complex{ExactReal{T}}) where {T<:Real} = one(Complex{ExactReal{T}})
+
 # conversion and promotion
 
 Base.convert(::Type{ExactReal{T}}, x::ExactReal{T}) where {T<:Real} = x
