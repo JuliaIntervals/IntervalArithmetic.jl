@@ -235,3 +235,8 @@ macro exact(expr)
 
     return esc(exact_expr)
 end
+
+
+Base.hash(x::ExactReal, h::UInt) = hash(x.value, h)
+
+Base.isfinite(x::ExactReal) = isfinite(x.value)
