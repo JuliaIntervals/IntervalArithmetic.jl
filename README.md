@@ -7,7 +7,7 @@ IntervalArithmetic
 [![coverage](https://codecov.io/gh/JuliaIntervals/IntervalArithmetic.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaIntervals/IntervalArithmetic.jl)
 </h1>
 
-IntervalArithmetic.jl is a Julia package for validated numerics in Julia. All calculations are carried out using [interval arithmetic](https://en.wikipedia.org/wiki/Interval_arithmetic) where quantities are treated as intervals. The final result is a rigorous enclosure of the true value.
+IntervalArithmetic.jl is a Julia package for validated numerics. All calculations are carried out using [interval arithmetic](https://en.wikipedia.org/wiki/Interval_arithmetic) where quantities are treated as intervals. The final result is a rigorous enclosure of the true value.
 
 The IntervalArithmetic library is compliant with the [IEEE 1788-2015 standard for interval arithmetic](https://standards.ieee.org/findstds/standard/1788-2015.html).
 
