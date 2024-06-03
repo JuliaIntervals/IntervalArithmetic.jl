@@ -93,7 +93,7 @@ sin(Y)
 
 ## Comparisons and set operations
 
-All comparisons and set operations for `Real` have been purposely disallowed to prevent silent errors.
+All comparisons and set operations for `Real` have been purposely disallowed to prevent silent errors. For instance, `x == y` does not implies `x - y == 0` for non-singleton intervals.
 
 ```@repl usage
 interval(1) < interval(2)
@@ -103,6 +103,24 @@ issubset_interval(interval(1, 2), interval(2))
 intersect(interval(1, 2), interval(2))
 intersect_interval(interval(1, 2), interval(2))
 ```
+
+In particular, `if ... else ... end` statements used for floating-points will generally break with intervals.
+
+One can refer to the following:
+- `<`: cannot be used with intervals. See instead [`isstrictless`](@ref) or [`strictprecedes`](@ref).
+- `==`: allowed if the arguments are singleton intervals, or if at least one argument is not an interval (equivalent to [`isthin`](@ref)). Otherwise, see [`isequal_interval`](@ref).
+- `iszero`, `isone`: allowed (equivalent to [`isthinzero`](@ref) and [`isthinone`](@ref) respectively).
+- `isinteger`: cannot be used with intervals. See instead [`isthininteger`](ref).
+- `isfinite`: cannot be used with intervals. See instead [`isbounded`](@ref).
+- `isnan`: cannot be used with intervals. See instead [`isnai`](@ref).
+- `in`: allowed if at least one argument is not an interval and the interval argument is a singleton. Otherwise, see [`in_interval`](@ref).
+- `issubset`: cannot be used with intervals. See instead [`issubset_interval`](@ref).
+- `isdisjoint`: cannot be used with intervals. See instead [`isdisjoint_interval`](@ref).
+- `issetequal`: cannot be used with intervals.
+- `isempty`: cannot be used with intervals. See instead [`isempty_interval`](@ref).
+- `union`: cannot be used with intervals. See instead [`hull`](@ref).
+- `intersect`: cannot be used with intervals. See instead [`intersect_interval`](@ref).
+- `setdiff`: cannot be used with intervals. See instead [`interiordiff`](@ref).
 
 
 
