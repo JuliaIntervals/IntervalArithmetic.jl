@@ -2,8 +2,8 @@ x = interval(0.5)
 
 @testset "IntervalRounding{:fast}" begin
     IntervalArithmetic.interval_rounding() = IntervalArithmetic.IntervalRounding{:fast}()
-    @test isequal_interval(sin(x), interval(0.47942553860420295, 0.47942553860420306))
-    @test isequal_interval(x + x, interval(0.9999999999999999, 1.0000000000000002))
+    @test isequal_interval(interval(Float64, 0.5) + interval(Float64, 0.5), interval(0.9999999999999999, 1.0000000000000002))
+    @test isequal_interval(sqrt(interval(Float64, 9)), interval(2.9999999999999996, 3.0000000000000004))
 end
 
 @testset "IntervalRounding{:tight}" begin
