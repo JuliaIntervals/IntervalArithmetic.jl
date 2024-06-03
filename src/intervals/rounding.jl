@@ -4,9 +4,11 @@
 Interval rounding type.
 
 Available rounding types:
-- `:fast` (unsupported): rounding via `prevfloat` and `nextfloat`.
+- `:fast`: rounding via `prevfloat` and `nextfloat`. Currently only the functions
+`+`, `-`, `*`, `/`, `inv` and `sqrt` are supported.
 - `:tight`: rounding via [RoundingEmulator.jl](https://github.com/matsueushi/RoundingEmulator.jl).
-- `:slow`: rounding via `BigFloat`.
+- `:slow`: rounding via `BigFloat`. The other rounding modes default to `:slow`
+whenever a faster algorithm is not available.
 - `:none`: no rounding (non-rigorous numerics).
 """
 struct IntervalRounding{T} end
@@ -26,10 +28,10 @@ for (f, fname) ∈ ((:+, :add), (:-, :sub), (:*, :mul), (:/, :div))
         $g(::IntervalRounding, x::T, y::T, r::RoundingMode) where {T<:AbstractFloat} =
             $g(IntervalRounding{:slow}(), x, y, r)
 
-        # $g(::IntervalRounding{:fast}, x::T, y::T, ::RoundingMode{:Down}) where {T<:AbstractFloat} =
-        #     prevfloat($f(x, y))
-        # $g(::IntervalRounding{:fast}, x::T, y::T, ::RoundingMode{:Up}) where {T<:AbstractFloat} =
-        #     nextfloat($f(x, y))
+        $g(::IntervalRounding{:fast}, x::T, y::T, ::RoundingMode{:Down}) where {T<:AbstractFloat} =
+            prevfloat($f(x, y))
+        $g(::IntervalRounding{:fast}, x::T, y::T, ::RoundingMode{:Up}) where {T<:AbstractFloat} =
+            nextfloat($f(x, y))
 
         $g(::IntervalRounding{:tight}, x::T, y::T, ::RoundingMode{:Down}) where {T<:Union{Float32,Float64}} =
             RoundingEmulator.$(Symbol(fname, :_down))(x, y)
@@ -93,10 +95,10 @@ _inv_round(x::Rational, ::RoundingMode) = inv(x) # exact operation
 _inv_round(::IntervalRounding, x::AbstractFloat, r::RoundingMode) =
     _inv_round(IntervalRounding{:slow}(), x, r)
 
-# _inv_round(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Down}) =
-#     prevfloat(inv(x))
-# _inv_round(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Up}) =
-#     nextfloat(inv(x))
+_inv_round(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Down}) =
+    prevfloat(inv(x))
+_inv_round(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Up}) =
+    nextfloat(inv(x))
 
 _inv_round(::IntervalRounding{:tight}, x::Union{Float32,Float64}, ::RoundingMode{:Down}) =
     RoundingEmulator.div_down(one(x), x)
@@ -125,10 +127,10 @@ _sqrt_round(x::AbstractFloat, r::RoundingMode) = _sqrt_round(interval_rounding()
 _sqrt_round(::IntervalRounding, x::AbstractFloat, r::RoundingMode) =
     _sqrt_round(IntervalRounding{:slow}(), x, r)
 
-# _sqrt_round(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Down}) =
-#     prevfloat(sqrt(x))
-# _sqrt_round(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Up}) =
-#     nextfloat(sqrt(x))
+_sqrt_round(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Down}) =
+    prevfloat(sqrt(x))
+_sqrt_round(::IntervalRounding{:fast}, x::AbstractFloat, ::RoundingMode{:Up}) =
+    nextfloat(sqrt(x))
 
 _sqrt_round(::IntervalRounding{:tight}, x::Union{Float32,Float64}, ::RoundingMode{:Down}) =
     RoundingEmulator.sqrt_down(x)
