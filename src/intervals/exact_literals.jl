@@ -240,3 +240,6 @@ end
 Base.hash(x::ExactReal, h::UInt) = hash(x.value, h)
 
 Base.isfinite(x::ExactReal) = isfinite(x.value)
+
+Base.zero(x::ExactReal{T}) where {T} = ExactReal(zero(T))
+Base.one(x::ExactReal{T}) where {T} = ExactReal(one(T))
