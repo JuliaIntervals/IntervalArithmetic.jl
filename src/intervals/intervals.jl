@@ -43,7 +43,7 @@ include("interval_operations/numeric.jl")
 include("interval_operations/set_operations.jl")
     export intersect_interval, hull, interiordiff
 include("interval_operations/bisect.jl")
-    export bisect, mince
+    export bisect, mince, mince!
 
 
 
