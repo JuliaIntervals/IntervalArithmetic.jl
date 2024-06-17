@@ -75,6 +75,8 @@ Base.one(::Complex{ExactReal{T}}) where {T<:Real} = one(Complex{ExactReal{T}})
 Base.hash(x::ExactReal, h::UInt) = hash(x.value, h)
 
 Base.isfinite(x::ExactReal) = isfinite(x.value)
+Base.isinteger(x::ExactReal) = isinteger(x.value)
+Base.isnan(x::ExactReal) = isnan(x.value) # also ensures that `Base.isinf` works properly
 
 # conversion and promotion
 
