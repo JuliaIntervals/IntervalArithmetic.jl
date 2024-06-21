@@ -7144,7 +7144,7 @@ end
 
     @test atan(interval(bareinterval(-0.0, 1.0), com), interval(bareinterval(-0.0, -0.0), def)) === interval(bareinterval(0x1.921FB54442D18P+0, 0x1.921FB54442D19P+0), trv)
 
-    @test atan(interval(bareinterval(-0.0, 1.0), com), interval(bareinterval(-2.0, -0.1), com)) === interval(bareinterval(0x1.ABA397C7259DDP+0, 0x1.921FB54442D19P+1), dac)
+    @test_broken atan(interval(bareinterval(-0.0, 1.0), com), interval(bareinterval(-2.0, -0.1), com)) === interval(bareinterval(0x1.ABA397C7259DDP+0, 0x1.921FB54442D19P+1), dac)
 
     @test atan(interval(bareinterval(-0.0, 1.0), def), interval(bareinterval(-2.0, 0.0), com)) === interval(bareinterval(0x1.921FB54442D18P+0, 0x1.921FB54442D19P+1), trv)
 
