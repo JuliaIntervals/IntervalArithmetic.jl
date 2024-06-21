@@ -7144,7 +7144,8 @@ end
 
     @test atan(interval(bareinterval(-0.0, 1.0), com), interval(bareinterval(-0.0, -0.0), def)) === interval(bareinterval(0x1.921FB54442D18P+0, 0x1.921FB54442D19P+0), trv)
 
-    @test_broken atan(interval(bareinterval(-0.0, 1.0), com), interval(bareinterval(-2.0, -0.1), com)) === interval(bareinterval(0x1.ABA397C7259DDP+0, 0x1.921FB54442D19P+1), dac)
+    @warn "The original test `atan2 [-0.0, 1.0]_com [-2.0, -0.1]_com = [0X1.ABA397C7259DDP+0, 0X1.921FB54442D19P+1]_dac` is wrong and has been modified. The result should have the decoration `com`"
+    @test atan(interval(bareinterval(-0.0, 1.0), com), interval(bareinterval(-2.0, -0.1), com)) === interval(bareinterval(0x1.ABA397C7259DDP+0, 0x1.921FB54442D19P+1), com)
 
     @test atan(interval(bareinterval(-0.0, 1.0), def), interval(bareinterval(-2.0, 0.0), com)) === interval(bareinterval(0x1.921FB54442D18P+0, 0x1.921FB54442D19P+1), trv)
 
