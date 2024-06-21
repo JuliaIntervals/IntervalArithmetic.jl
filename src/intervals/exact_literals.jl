@@ -124,6 +124,10 @@ Base.promote_rule(::Type{ExactReal{T}}, ::Type{BigFloat}) where {T<:Real} =
 Base.promote_rule(::Type{BigFloat}, ::Type{ExactReal{T}}) where {T<:Real} =
     promote_type(BigFloat, T)
 
+# to complex -- by-pass default from Base which lead to "NG" flag in the (zero) imaginary part
+
+Base.Complex{T}(x::ExactReal) where {T<:Interval} = Complex{T}(x, zero(x))
+
 # display
 
 Base.show(io::IO, x::ExactReal{T}) where {T<:AbstractFloat} =
