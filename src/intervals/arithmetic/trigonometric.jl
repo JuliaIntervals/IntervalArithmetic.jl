@@ -565,9 +565,10 @@ function Base.atan(y::Interval, x::Interval)
     d = min(decoration(y), decoration(x), decoration(r))
     d = min(d,
             ifelse(in_interval(0, by),
-                ifelse(in_interval(0, bx), trv,
-                    ifelse(sup(bx) < 0, ifelse(inf(by) < 0, def, dac), d)),
-            d))
+                   ifelse(in_interval(0, bx),
+                          trv,
+                          ifelse(sup(bx) < 0, ifelse(inf(by) < 0, def, d), d)),
+                   d))
     t = isguaranteed(y) & isguaranteed(x)
     return _unsafe_interval(r, d, t)
 end

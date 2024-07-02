@@ -158,10 +158,18 @@ function parse_command(line)
     rhs = parse_rhs(rhs)
 
     expr = build_expression(lhs, rhs)
+    command = "@test $expr"
 
-    # one known broken test, unrelated to interval airthmetic
-    command = occursin("dot_nearest {0x10000000000001p0, 0x1p104} {0x0fffffffffffffp0, -1.0} = -1.0", line) ?
-        "@test_broken $expr" : "@test $expr"
+    if occursin("dot_nearest {0x10000000000001p0, 0x1p104} {0x0fffffffffffffp0, -1.0} = -1.0", line)
+        # broken test unrelated to interval airthmetic
+        command = "@test_broken $expr"
+    elseif occursin("atan2 [-0.0, 1.0]_com [-2.0, -0.1]_com = [0X1.ABA397C7259DDP+0, 0X1.921FB54442D19P+1]_dac", line)
+        # erroneous test: the decoration of the result should be `com`
+        command =
+            """
+            @warn "The original test `atan2 [-0.0, 1.0]_com [-2.0, -0.1]_com = [0X1.ABA397C7259DDP+0, 0X1.921FB54442D19P+1]_dac` is wrong and has been modified. The result should have the decoration `com`"
+                @test atan(interval(bareinterval(-0.0, 1.0), com), interval(bareinterval(-2.0, -0.1), com)) === interval(bareinterval(0x1.ABA397C7259DDP+0, 0x1.921FB54442D19P+1), com)"""
+    end
 
     command = haswarning ? "@test_logs (:warn,) $command" : command
 
@@ -238,7 +246,7 @@ end
 function parse_interval(ival::AbstractString, dec::Union{Nothing,AbstractString})
     ival == "nai" && return "nai(Interval{Float64})"
     if ival == "entire"
-        ival =  "entireinterval(BareInterval{Float64})"
+        ival = "entireinterval(BareInterval{Float64})"
     elseif ival == "empty"
         ival = "emptyinterval(BareInterval{Float64})"
     else
