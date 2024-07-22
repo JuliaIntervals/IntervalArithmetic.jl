@@ -12,11 +12,11 @@ Power mode type for `^`.
 
 Available mode types:
 - `:fast` (default): `x ^ y` is semantically equivalent to `fastpow(x, y)`,
-unless `isthininteger(y)` is true in which case it is semantically equivalent to
-`fastpown(x, sup(y))`.
+    unless `isthininteger(y)` is true in which case it is semantically
+    equivalent to `fastpown(x, sup(y))`.
 - `:slow`: `x ^ y` is semantically equivalent to `pow(x, y)`, unless
-`isthininteger(y)` is true in which case it is semantically equivalent to
-`pown(x, sup(y))`.
+    `isthininteger(y)` is true in which case it is semantically equivalent to
+    `pown(x, sup(y))`.
 """
 struct PowerMode{T} end
 
