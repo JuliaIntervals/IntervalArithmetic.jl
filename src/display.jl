@@ -134,11 +134,11 @@ function _str_repr(x::Complex{Interval{T}}, format::Symbol) where {T<:NumTypes}
     # `format` is either `:infsup`, `:midpoint` or `:full`
     str_imag = _str_repr(imag(x), format)
     if format === :full
-        if occursin("}(-", str_imag) && occursin(", -", str_imag)
+        if !isthinzero(imag(x)) && sup(imag(x)) ≤ 0 && !isempty_interval(imag(x))
             c1, c2 = split(str_imag, ", "; limit = 2)
             l = findfirst('-', c1)
             ll = ifelse(occursin(',', c2), findfirst(',', c2), findfirst(')', c2))
-            return string(_str_repr(real(x), format), " - im*", view(c1, 1:l-1), view(c2, 2:ll-1), ", ", view(c1, l+1:lastindex(c1)), view(c2, ll:lastindex(c2)))
+            return string(_str_repr(real(x), format), " - im*", view(c1, 1:l-1), view(c2, 1+!iszero(sup(imag(x))):ll-1), ", ", view(c1, l+1:lastindex(c1)), view(c2, ll:lastindex(c2)))
         else
             return string(_str_repr(real(x), format), " + im*", str_imag)
         end
@@ -153,10 +153,10 @@ function _str_repr(x::Complex{Interval{T}}, format::Symbol) where {T<:NumTypes}
         startswith(str_imag, "(-") && return string(str_real, " - im*(", view(str_imag, 3:lastindex(str_imag)))
         return string(str_real, " + im*", str_imag)
     else
-        if str_imag[2] == '-' && occursin(", -", str_imag)
+        if !isthinzero(imag(x)) && sup(imag(x)) ≤ 0 && !isempty_interval(imag(x))
             c1, c2 = split(str_imag, ", ")
             l = findfirst(t -> (t == ']') | (t == ')'), c2)
-            return string(_str_repr(real(x), format), " - im*", _flipl(c2[l]), view(c2, 2:l-1), ", ", view(c1, 3:lastindex(c1)), _flipr(c1[1]), view(c2, l+1:lastindex(c2)))
+            return string(_str_repr(real(x), format), " - im*", _flipl(c2[l]), view(c2, 1+!iszero(sup(imag(x))):l-1), ", ", view(c1, 3:lastindex(c1)), _flipr(c1[1]), view(c2, l+1:lastindex(c2)))
         else
             return string(_str_repr(real(x), format), " + im*", str_imag)
         end
