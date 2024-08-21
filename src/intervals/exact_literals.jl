@@ -29,14 +29,14 @@ producing the "NG" flag.
 julia> setdisplay(:full);
 
 julia> 0.5 * interval(1)
-Interval{Float64}(0.5, 0.5, com, NG)
+Interval{Float64}(0.5, 0.5, com)_NG
 
 julia> ExactReal(0.5) * interval(1)
 Interval{Float64}(0.5, 0.5, com)
 
 julia> [1, interval(2)]
 2-element Vector{Interval{Float64}}:
- Interval{Float64}(1.0, 1.0, com, NG)
+ Interval{Float64}(1.0, 1.0, com)_NG
  Interval{Float64}(2.0, 2.0, com)
 
 julia> [ExactReal(1), interval(2)]
@@ -199,7 +199,7 @@ julia> f(x) = 1.2*x + 0.1
 f (generic function with 1 method)
 
 julia> f(interval(1, 2))
-Interval{Float64}(1.2999999999999998, 2.5, com, NG)
+Interval{Float64}(1.2999999999999998, 2.5, com)_NG
 
 julia> @exact g(x) = 1.2*x + 0.1
 g (generic function with 1 method)
