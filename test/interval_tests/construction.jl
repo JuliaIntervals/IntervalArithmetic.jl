@@ -158,19 +158,24 @@ end
 end
 
 @testset "Interval types conversion" begin
-    import IntervalSets as IS
-
-    i = convert(Interval, IS.Interval(1, 2))
+    i = interval(IS.Interval(1, 2))
     @test isequal_interval(i, interval(1., 2.)) && !isguaranteed(i)
-    i = convert(Interval, IS.Interval(0.1, 2))
+    i = interval(IS.Interval(0.1, 2))
     @test isequal_interval(i, interval(0.1, 2.)) && !isguaranteed(i)
-    @test interval(IS.Interval(0.1, 2)) === i
     @test interval(Float64, IS.Interval(0.1, 2)) === i
+    
+    i = interval(IS.iv"[0.1, Inf)")
+    @test isequal_interval(i, interval(0.1, Inf)) && !isguaranteed(i)
+    @test interval(IS.iv"[0.1, Inf]") === nai(Float64)
+    @test interval(IS.iv"(0.1, Inf]") === nai(Float64)
+    @test interval(IS.iv"(0.1, Inf)") === nai(Float64)
+    @test interval(IS.iv"(0.1, 1)") === nai(Float64)
+    @test interval(IS.iv"(0.1, 1]") === nai(Float64)
 
-    @test convert(IS.Interval, interval(1, 2)) === IS.Interval(1., 2.)
-    @test convert(IS.Interval, interval(0.1, 2)) === IS.Interval(0.1, 2.)
+    @test IS.Interval(interval(1, 2)) === IS.Interval(1., 2.)
     @test IS.Interval(interval(0.1, 2)) === IS.Interval(0.1, 2.)
-    @test IS.ClosedInterval{Float64}(interval(0.1, 2)) === IS.Interval(0.1, 2.)
+    @test IS.Interval(interval(0.1, Inf)) === IS.iv"[0.1, Inf)"
+    @test IS.Interval(interval(-Inf, Inf)) === IS.iv"(-Inf, Inf)"
 end
 
 @testset "Propagation of `isguaranteed`" begin

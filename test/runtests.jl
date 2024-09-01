@@ -3,6 +3,7 @@ using Test
 using ForwardDiff
 using IntervalArithmetic
 using InteractiveUtils
+import IntervalSets as IS
 
 include("generate_ITF1788.jl")
 
