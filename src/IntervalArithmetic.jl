@@ -17,6 +17,7 @@ include("symbols.jl")
 # convenient alias
 const RealOrComplexI{T} = Union{Interval{T},Complex{Interval{T}}}
 const ComplexI{T} = Complex{Interval{T}}
-    export RealOrComplexI, ComplexI
+const RealIntervalType{T} = Union{BareInterval{T},Interval{T}}
+    export RealOrComplexI, ComplexI, RealIntervalType
 
 end
