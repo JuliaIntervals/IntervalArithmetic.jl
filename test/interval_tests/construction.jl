@@ -157,6 +157,27 @@ end
     @test_throws DomainError convert(Interval{Float64}, interval(1+im))
 end
 
+@testset "Interval types conversion" begin
+    i = interval(IS.Interval(1, 2))
+    @test isequal_interval(i, interval(1., 2.)) && !isguaranteed(i)
+    i = interval(IS.Interval(0.1, 2))
+    @test isequal_interval(i, interval(0.1, 2.)) && !isguaranteed(i)
+    @test interval(Float64, IS.Interval(0.1, 2)) === i
+    
+    i = interval(IS.iv"[0.1, Inf)")
+    @test isequal_interval(i, interval(0.1, Inf)) && !isguaranteed(i)
+    @test interval(IS.iv"[0.1, Inf]") === nai(Float64)
+    @test interval(IS.iv"(0.1, Inf]") === nai(Float64)
+    @test interval(IS.iv"(0.1, Inf)") === nai(Float64)
+    @test interval(IS.iv"(0.1, 1)") === nai(Float64)
+    @test interval(IS.iv"(0.1, 1]") === nai(Float64)
+
+    @test IS.Interval(interval(1, 2)) === IS.Interval(1., 2.)
+    @test IS.Interval(interval(0.1, 2)) === IS.Interval(0.1, 2.)
+    @test IS.Interval(interval(0.1, Inf)) === IS.iv"[0.1, Inf)"
+    @test IS.Interval(interval(-Inf, Inf)) === IS.iv"(-Inf, Inf)"
+end
+
 @testset "Propagation of `isguaranteed`" begin
     @test !isguaranteed(interval(convert(Interval{Float64}, 0), interval(convert(Interval{Float64}, 1))))
     @test !isguaranteed(interval(0, convert(Interval{Float64}, 1)))
