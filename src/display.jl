@@ -111,181 +111,201 @@ Base.show(io::IO, ::MIME"text/plain", a::Union{BareInterval,Interval,Complex{<:I
 function _str_repr(a::BareInterval{T}, format::Symbol) where {T<:NumTypes}
     # `format` is either `:infsup`, `:midpoint` or `:full`
     str_interval = _str_basic_repr(a, format)
-    format === :full && return string("BareInterval{", T, "}(", str_interval, ')')
-    return str_interval
-end
-
-function _str_repr(a::BareInterval{BigFloat}, format::Symbol)
-    # `format` is either `:infsup`, `:midpoint` or `:full`
-    str_interval = _str_basic_repr(a, format)
-    format === :full && return string("BareInterval{BigFloat}(", str_interval, ')')
-    if format === :midpoint && str_interval != "∅"
-        str_interval = string('(', str_interval, ')')
-    end
-    return string(str_interval, _str_precision(a))
+    ((format === :full) & (str_interval != "∅")) && return string("BareInterval{", T, "}(", str_interval, ')')
+    return _str_precision(str_interval, a, format)
 end
 
 function _str_repr(a::Interval{T}, format::Symbol) where {T<:NumTypes}
     # `format` is either `:infsup`, `:midpoint` or `:full`
     str_interval = _str_basic_repr(a.bareinterval, format) # use `a.bareinterval` to not print a warning if `a` is an NaI
-    if isguaranteed(a) || !display_options.ng_flag
-        format === :full && return string("Interval{", T, "}(", str_interval, ", ", decoration(a), ')')
-        display_options.decorations || return str_interval
-        if format === :midpoint && str_interval != "∅"
-            str_interval = string('(', str_interval, ')')
-        end
-        return string(str_interval, '_', decoration(a))
+    if format === :full && str_interval != "∅"
+        str_interval = string("Interval{", T, "}(", str_interval, ", ", decoration(a), ')')
     else
-        format === :full && return string("Interval{", T, "}(", str_interval, ", ", decoration(a), ", NG)")
-        if format === :midpoint && str_interval != "∅"
+        str_interval = _str_precision(str_interval, a, format)
+        if format === :midpoint && str_interval != "∅" && T !== BigFloat && (display_options.decorations | (display_options.ng_flag & !isguaranteed(a)))
             str_interval = string('(', str_interval, ')')
         end
-        display_options.decorations || return string(str_interval, "_NG")
-        return string(str_interval, '_', decoration(a), "_NG")
+        str_interval = ifelse(display_options.decorations, string(str_interval, '_', decoration(a)), str_interval)
     end
+    return ifelse(display_options.ng_flag & !isguaranteed(a), string(str_interval, "_NG"), str_interval)
 end
 
-function _str_repr(a::Interval{BigFloat}, format::Symbol)
+function _str_repr(x::Complex{Interval{T}}, format::Symbol) where {T<:NumTypes}
     # `format` is either `:infsup`, `:midpoint` or `:full`
-    str_interval = _str_basic_repr(a.bareinterval, format) # use `a.bareinterval` to not print a warning if `a` is an NaI
-    if isguaranteed(a) || !display_options.ng_flag
-        format === :full && return string("Interval{BigFloat}(", str_interval, ", ", decoration(a), ')')
-        if format === :midpoint && str_interval != "∅"
-            str_interval = string('(', str_interval, ')')
-        end
-        display_options.decorations || return string(str_interval, _str_precision(a))
-        return string(str_interval, _str_precision(a), '_', decoration(a))
-    else
-        format === :full && return string("Interval{", BigFloat, "}(", str_interval, ", ", decoration(a), ", NG)")
-        if format === :midpoint && str_interval != "∅"
-            str_interval = string('(', str_interval, ')')
-        end
-        display_options.decorations || return string(str_interval, _str_precision(a), "_NG")
-        return string(str_interval, _str_precision(a), '_', decoration(a), "_NG")
-    end
-end
-
-function _str_repr(x::Complex{<:Interval}, format::Symbol)
-    # `format` is either `:infsup`, `:midpoint` or `:full`
+    str_imag = _str_repr(imag(x), format)
     if format === :full
-        return string(_str_repr(real(x), format), " + ", _str_repr(imag(x), format), "im")
-    elseif format === :infsup
-        ((!isguaranteed(x) & display_options.ng_flag) | display_options.decorations) && return string(_str_repr(real(x), format), " + (", _str_repr(imag(x), format), ")im")
-        return string(_str_repr(real(x), format), " + ", _str_repr(imag(x), format), "im")
+        if !isthinzero(imag(x)) && sup(imag(x)) ≤ 0 && !isempty_interval(imag(x))
+            c1, c2 = split(str_imag, ", "; limit = 2)
+            l = findfirst('-', c1)
+            ll = ifelse(occursin(',', c2), findfirst(',', c2), findfirst(')', c2))
+            return string(_str_repr(real(x), format), " - im*", view(c1, 1:l-1), view(c2, 1+!iszero(sup(imag(x))):ll-1), ", ", view(c1, l+1:lastindex(c1)), view(c2, ll:lastindex(c2)))
+        else
+            return string(_str_repr(real(x), format), " + im*", str_imag)
+        end
+    elseif format === :midpoint
+        str_real = _str_repr(real(x), format)
+        if !startswith(str_real, '(')
+            str_real = string('(', str_real, ')')
+        end
+        if !startswith(str_imag, '(')
+            str_imag = string('(', str_imag, ')')
+        end
+        startswith(str_imag, "(-") && return string(str_real, " - im*(", view(str_imag, 3:lastindex(str_imag)))
+        return string(str_real, " + im*", str_imag)
     else
-        ((!isguaranteed(x) & display_options.ng_flag) | display_options.decorations) && return string(_str_repr(real(x), format), " + (", _str_repr(imag(x), format), ")im")
-        return string('(', _str_repr(real(x), format), ") + (", _str_repr(imag(x), format), ")im")
+        if !isthinzero(imag(x)) && sup(imag(x)) ≤ 0 && !isempty_interval(imag(x))
+            c1, c2 = split(str_imag, ", ")
+            l = findfirst(t -> (t == ']') | (t == ')'), c2)
+            return string(_str_repr(real(x), format), " - im*", _flipl(c2[l]), view(c2, 1+!iszero(sup(imag(x))):l-1), ", ", view(c1, 3:lastindex(c1)), _flipr(c1[1]), view(c2, l+1:lastindex(c2)))
+        else
+            return string(_str_repr(real(x), format), " + im*", str_imag)
+        end
     end
 end
 
-function _str_repr(x::Complex{Interval{BigFloat}}, format::Symbol)
-    # `format` is either `:infsup`, `:midpoint` or `:full`
-    ((!isguaranteed(x) & display_options.ng_flag) | display_options.decorations) && return string(_str_repr(real(x), format), " + (", _str_repr(imag(x), format), ")im")
-    return string(_str_repr(real(x), format), " + ", _str_repr(imag(x), format), "im")
-end
+_flipl(char) = ifelse(char == ']', '[', '(')
+_flipr(char) = ifelse(char == '[', ']', ')')
 
 #
 
-function _str_precision(x)
+_str_precision(str_interval, x, format) = str_interval
+
+function _str_precision(str_interval, x::Union{BareInterval{BigFloat},Interval{BigFloat}}, format)
     plo = precision(inf(x))
     phi = precision(sup(x))
     pstr = _subscriptify(plo)
-    plo == phi && return pstr
-    return string(pstr, "_", _subscriptify(phi))
+    if format === :midpoint && str_interval != "∅"
+        str_interval = string('(', str_interval, ')')
+    end
+    str_interval = string(str_interval, pstr)
+    return ifelse(plo == phi, str_interval, string(str_interval, '_', _subscriptify(phi)))
 end
 
 #
 
 function _str_basic_repr(a::BareInterval{<:AbstractFloat}, format::Symbol)
     # `format` is either `:infsup`, `:midpoint` or `:full`
-    # do not use `inf(a)` to avoid `-0.0`
     isempty_interval(a) && return "∅"
+    lo, hi = bounds(a) # do not use `inf(a)` to avoid `-0.0`
     sigdigits = display_options.sigdigits
     if format === :full
-        return string(a.lo, ", ", sup(a))
+        str_lo = string(lo)
+        # str_lo = ifelse(lo ≥ 0, string('+', str_lo), str_lo)
+        str_hi = string(hi)
+        # str_hi = ifelse(hi ≥ 0, string('+', str_hi), str_hi)
+        return string(str_lo, ", ", str_hi)
     elseif format === :midpoint
-        m = _round_string(mid(a), sigdigits, RoundNearest)
-        r = _round_string(radius(a), sigdigits, RoundUp)
-        output = string(m, " ± ", r)
+        m = mid(a)
+        str_m = _round_string(m, sigdigits, RoundNearest)
+        # str_m = ifelse(m ≥ 0, string('+', str_m), str_m)
+        output = string(str_m, " ± ", _round_string(radius(a), sigdigits, RoundUp))
         return replace(output, "Inf" => '∞')
     else
-        lo = _round_string(a.lo, sigdigits, RoundDown)
-        hi = _round_string(sup(a), sigdigits, RoundUp)
-        output = string('[', lo, ", ", hi, ']')
+        str_lo = _round_string(lo, sigdigits, RoundDown)
+        # str_lo = ifelse(lo ≥ 0, string('+', str_lo), str_lo)
+        str_hi = _round_string(hi, sigdigits, RoundUp)
+        # str_hi = ifelse(hi ≥ 0, string('+', str_hi), str_hi)
+        output = string('[', str_lo, ", ", str_hi, ']')
         return replace(output, "Inf]" => "∞)", "[-Inf" => "(-∞")
     end
 end
 
 function _str_basic_repr(a::BareInterval{Float32}, format::Symbol)
     # `format` is either `:infsup`, `:midpoint` or `:full`
-    # do not use `inf(a)` to avoid `-0.0`
     isempty_interval(a) && return "∅"
+    lo, hi = bounds(a) # do not use `inf(a)` to avoid `-0.0`
     sigdigits = display_options.sigdigits
     if format === :full
-        lo = replace(string(a.lo, "f0"), "NaNf0" => "NaN32", "Inff0" => "Inf32")
-        if contains(lo, 'e')
-            lo = replace(lo, 'e' => 'f', "f0" => "")
+        str_lo = string(lo)
+        str_lo = replace(string(str_lo, "f0"), "NaNf0" => "NaN32", "Inff0" => "Inf32")
+        if contains(str_lo, 'e')
+            str_lo = replace(str_lo, 'e' => 'f', "f0" => "")
         end
-        hi = replace(string(sup(a), "f0"), "NaNf0" => "NaN32", "Inff0" => "Inf32")
-        if contains(hi, 'e')
-            hi = replace(hi, 'e' => 'f', "f0" => "")
+        # str_lo = ifelse(lo ≥ 0, string('+', str_lo), str_lo)
+        str_hi = string(hi)
+        str_hi = replace(string(str_hi, "f0"), "NaNf0" => "NaN32", "Inff0" => "Inf32")
+        if contains(str_hi, 'e')
+            str_hi = replace(str_hi, 'e' => 'f', "f0" => "")
         end
-        return string(lo, ", ", hi)
+        # str_hi = ifelse(hi ≥ 0, string('+', str_hi), str_hi)
+        return string(str_lo, ", ", str_hi)
     elseif format === :midpoint
-        m = _round_string(mid(a), sigdigits, RoundNearest)
-        m = replace(string(m, "f0"), "NaNf0" => "NaN32", "Inff0" => "Inf32")
-        if contains(m, 'e')
-            m = replace(m, 'e' => 'f', "f0" => "")
+        m = mid(a)
+        str_m = _round_string(m, sigdigits, RoundNearest)
+        str_m = replace(string(str_m, "f0"), "NaNf0" => "NaN32", "Inff0" => "Inf32")
+        if contains(str_m, 'e')
+            str_m = replace(str_m, 'e' => 'f', "f0" => "")
         end
-        r = _round_string(radius(a), sigdigits, RoundUp)
-        r = replace(string(r, "f0"), "NaNf0" => "NaN32", "Inff0" => "Inf32")
-        if contains(r, 'e')
-            r = replace(r, 'e' => 'f', "f0" => "")
+        # str_m = ifelse(m ≥ 0, string('+', str_m), str_m)
+        str_r = _round_string(radius(a), sigdigits, RoundUp)
+        str_r = replace(string(str_r, "f0"), "NaNf0" => "NaN32", "Inff0" => "Inf32")
+        if contains(str_r, 'e')
+            str_r = replace(str_r, 'e' => 'f', "f0" => "")
         end
-        return string(m, " ± ", r)
+        return string(str_m, " ± ", str_r)
     else
-        lo = _round_string(a.lo, sigdigits, RoundDown)
-        lo = replace(string('[', lo, "f0"), "NaNf0" => "NaN32", "[-Inff0" => "(-∞")
-        if contains(lo, 'e')
-            lo = replace(lo, 'e' => 'f', "f0" => "")
+        str_lo = _round_string(lo, sigdigits, RoundDown)
+        str_lo = replace(string('[', str_lo, "f0"), "NaNf0" => "NaN32", "[-Inff0" => "(-∞")
+        if contains(str_lo, 'e')
+            str_lo = replace(str_lo, 'e' => 'f', "f0" => "")
         end
-        hi = _round_string(sup(a), sigdigits, RoundUp)
-        hi = replace(string(hi, "f0]"), "NaNf0" => "NaN32", "Inff0]" => "∞)")
-        if contains(hi, 'e')
-            hi = replace(hi, 'e' => 'f', "f0" => "")
+        # str_lo = ifelse(lo ≥ 0, string('+', str_lo), str_lo)
+        str_hi = _round_string(hi, sigdigits, RoundUp)
+        str_hi = replace(string(str_hi, "f0]"), "NaNf0" => "NaN32", "Inff0]" => "∞)")
+        if contains(str_hi, 'e')
+            str_hi = replace(str_hi, 'e' => 'f', "f0" => "")
         end
-        return string(lo, ", ", hi)
+        # str_hi = ifelse(hi ≥ 0, string('+', str_hi), str_hi)
+        return string(str_lo, ", ", str_hi)
     end
 end
 
 function _str_basic_repr(a::BareInterval{Float16}, format::Symbol)
     # `format` is either `:infsup`, `:midpoint` or `:full`
-    # do not use `inf(a)` to avoid `-0.0`
     isempty_interval(a) && return "∅"
+    lo, hi = bounds(a) # do not use `inf(a)` to avoid `-0.0`
     sigdigits = display_options.sigdigits
     if format === :full
-        output = string("Float16(", a.lo, "), Float16(", sup(a), ')')
+        str_lo = string(lo)
+        # str_lo = ifelse(lo ≥ 0, string('+', str_lo), str_lo)
+        str_hi = string(hi)
+        # str_hi = ifelse(hi ≥ 0, string('+', str_hi), str_hi)
+        output = string("Float16(", str_lo, "), Float16(", str_hi, ')')
         return replace(output, "Float16(NaN)" => "NaN16", "Float16(-Inf)" => "-Inf16", "Float16(Inf)" => "Inf16")
     elseif format === :midpoint
-        m = _round_string(mid(a), sigdigits, RoundNearest)
-        r = _round_string(radius(a), sigdigits, RoundUp)
-        output = string("Float16(", m, ") ± Float16(", r, ')')
+        m = mid(a)
+        str_m = _round_string(mid(a), sigdigits, RoundNearest)
+        # str_m = ifelse(m ≥ 0, string('+', str_m), str_m)
+        output = string("Float16(", str_m, ") ± Float16(", _round_string(radius(a), sigdigits, RoundUp), ')')
         return replace(output, "Float16(NaN)" => "NaN16", "Float16(Inf)" => '∞')
     else
-        lo = _round_string(a.lo, sigdigits, RoundDown)
-        hi = _round_string(sup(a), sigdigits, RoundUp)
-        output = string("[Float16(", lo, "), Float16(", hi, ")]")
+        str_lo = _round_string(lo, sigdigits, RoundDown)
+        # str_lo = ifelse(lo ≥ 0, string('+', str_lo), str_lo)
+        str_hi = _round_string(sup(a), sigdigits, RoundUp)
+        # str_hi = ifelse(hi ≥ 0, string('+', str_hi), str_hi)
+        output = string("[Float16(", str_lo, "), Float16(", str_hi, ")]")
         return replace(output, "Float16(NaN)" => "NaN16", "[Float16(-Inf)" => "(-∞", "Float16(Inf)]" => "∞)")
     end
 end
 
 function _str_basic_repr(a::BareInterval{<:Rational}, format::Symbol)
     # `format` is either `:infsup`, `:midpoint` or `:full`
-    # do not use `inf(a)` to avoid `-0.0`
     isempty_interval(a) && return "∅"
-    format === :full && return string(a.lo, ", ", sup(a))
-    format === :midpoint && return string(mid(a), " ± ", radius(a))
-    return string('[', a.lo, ", ", sup(a), ']')
+    if format === :midpoint
+        m = mid(a)
+        str_m = string(m)
+        # str_m = ifelse(m ≥ 0, string('+', str_m), str_m)
+        return string(str_m, " ± ", radius(a))
+    else
+        lo, hi = bounds(a) # do not use `inf(a)` to avoid `-0.0`
+        str_lo = string(lo)
+        # str_lo = ifelse(lo ≥ 0, string('+', str_lo), str_lo)
+        str_hi = string(hi)
+        # str_hi = ifelse(hi ≥ 0, string('+', str_hi), str_hi)
+        output = string(str_lo, ", ", str_hi)
+        output = ifelse(format === :full, output, string('[', output, ']'))
+        return output
+    end
 end
 
 # round to the prescribed significant digits
