@@ -365,6 +365,8 @@ isguaranteed(x::Interval) = x.isguaranteed
 isguaranteed(::BareInterval) = true
 isguaranteed(x::Complex{<:Interval}) = isguaranteed(real(x)) & isguaranteed(imag(x))
 
+isguaranteed(::Number) = false
+
 Interval{T}(x::Interval) where {T<:NumTypes} = convert(Interval{T}, x) # needed to resolve method ambiguity
 # Interval{T}(x) where {T<:NumTypes} = convert(Interval{T}, x)
 # Interval{T}(x::Interval{T}) where {T<:NumTypes} = convert(Interval{T}, x) # needed to resolve method ambiguity
