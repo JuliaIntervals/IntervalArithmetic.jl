@@ -1,4 +1,4 @@
-module IntervalArithmeticsIntervalSetsExt
+module IntervalArithmeticIntervalSetsExt
 
 import IntervalSets as IS
 import IntervalArithmetic as IA

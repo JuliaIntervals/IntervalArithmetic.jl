@@ -11,14 +11,16 @@ RoundingEmulator = "5eaf0fd0-dfba-4ccb-bf02-d820a40db705"
 [weakdeps]
 DiffRules = "b552c78f-8df3-52c6-915a-8e097449b14b"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
-IntervalSets = "8197267c-284f-5f27-9208-e0e47529a953"
 RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
+IntervalSets = "8197267c-284f-5f27-9208-e0e47529a953"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
 [extensions]
 IntervalArithmeticDiffRulesExt = "DiffRules"
 IntervalArithmeticForwardDiffExt = "ForwardDiff"
-IntervalArithmeticsIntervalSetsExt = "IntervalSets"
 IntervalArithmeticRecipesBaseExt = "RecipesBase"
+IntervalArithmeticIntervalSetsExt = "IntervalSets"
+IntervalArithmeticLinearAlgebraExt = "LinearAlgebra"
 
 [compat]
 CRlibm_jll = "1"
