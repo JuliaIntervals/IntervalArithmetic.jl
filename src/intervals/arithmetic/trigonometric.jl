@@ -9,16 +9,17 @@ function _quadrant(f, x::T) where {T<:AbstractFloat}
     PI_LO, PI_HI = bounds(PI)
     if abs(x) ≤ PI_LO # (-π, π)
         r2 = 2x # should be exact for floats
-        r2 ≤ -PI_HI && return 2 # (-π, -π/2)
+        r2 ≤ -PI_HI && return 2       # (-π, -π/2)
         r2 < -PI_LO && return f(2, 3) # (-π, -π/2) or [-π/2, 0)
-        r2 <  0     && return 3 # [-π/2, 0)
-        r2 ≤  PI_LO && return 0 # [0, π/2)
+        r2 <  0     && return 3       # [-π/2, 0)
+        r2 ≤  PI_LO && return 0       # [0, π/2)
         r2 <  PI_HI && return f(0, 1) # [0, π/2) or [π/2, π)
         return 1 # [π/2, π)
     else
         k = _unsafe_scale(bareinterval(x) / PI, convert(T, 2))
         fk = floor(k)
-        return f(mod(inf(fk), 4), mod(sup(fk), 4))
+        lfk, hfk = bounds(fk)
+        return f(Int(mod(lfk, 4)), Int(mod(hfk, 4)))
     end
 end
 
@@ -72,14 +73,16 @@ function Base.sin(x::BareInterval{T}) where {T<:AbstractFloat}
     hi_quadrant = _quadrant(max, hi)
 
     if lo_quadrant == hi_quadrant
-        d ≥ PI_HI && return _unsafe_bareinterval(T, -one(T), one(T))
+        d ≥ PI_HI && return _unsafe_bareinterval(T, -one(T), one(T)) # diameter ≥ 2π
         (lo_quadrant == 1) | (lo_quadrant == 2) && return @round(T, sin(hi), sin(lo)) # decreasing
         return @round(T, sin(lo), sin(hi))
 
     elseif lo_quadrant == 3 && hi_quadrant == 0
+        d ≥ PI_HI && return _unsafe_bareinterval(T, -one(T), one(T)) # diameter ≥ 3π/2
         return @round(T, sin(lo), sin(hi)) # increasing
 
     elseif lo_quadrant == 1 && hi_quadrant == 2
+        d ≥ PI_HI && return _unsafe_bareinterval(T, -one(T), one(T)) # diameter ≥ 3π/2
         return @round(T, sin(hi), sin(lo)) # decreasing
 
     elseif (lo_quadrant == 0 || lo_quadrant == 3) && (hi_quadrant == 1 || hi_quadrant == 2)
@@ -174,14 +177,16 @@ function Base.cos(x::BareInterval{T}) where {T<:AbstractFloat}
     hi_quadrant = _quadrant(max, hi)
 
     if lo_quadrant == hi_quadrant
-        d ≥ PI_HI && return _unsafe_bareinterval(T, -one(T), one(T))
+        d ≥ PI_HI && return _unsafe_bareinterval(T, -one(T), one(T)) # diameter ≥ 2π
         (lo_quadrant == 2) | (lo_quadrant == 3) && return @round(T, cos(lo), cos(hi)) # increasing
         return @round(T, cos(hi), cos(lo))
 
     elseif lo_quadrant == 2 && hi_quadrant == 3
+        d ≥ PI_HI && return _unsafe_bareinterval(T, -one(T), one(T)) # diameter ≥ 3π/2
         return @round(T, cos(lo), cos(hi))
 
     elseif lo_quadrant == 0 && hi_quadrant == 1
+        d ≥ PI_HI && return _unsafe_bareinterval(T, -one(T), one(T)) # diameter ≥ 3π/2
         return @round(T, cos(hi), cos(lo))
 
     elseif (lo_quadrant == 2 || lo_quadrant == 3) && (hi_quadrant == 0 || hi_quadrant == 1)
