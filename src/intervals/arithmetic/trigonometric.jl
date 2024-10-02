@@ -9,17 +9,17 @@ function _quadrant(f, x::T) where {T<:AbstractFloat}
     PI_LO, PI_HI = bounds(PI)
     if abs(x) ≤ PI_LO # (-π, π)
         r2 = 2x # should be exact for floats
-        r2 ≤ -PI_HI && return 2, 2 # (-π, -π/2)
-        r2 < -PI_LO && return f(2, 3), f(2, 3) # (-π, -π/2) or [-π/2, 0)
-        r2 <  0     && return 3, 3 # [-π/2, 0)
-        r2 ≤  PI_LO && return 0, 0 # [0, π/2)
-        r2 <  PI_HI && return f(0, 1), f(0, 1) # [0, π/2) or [π/2, π)
-        return 1, 1 # [π/2, π)
+        r2 ≤ -PI_HI && return 2, floor(x) # (-π, -π/2)
+        r2 < -PI_LO && return f(2, 3), floor(x) # (-π, -π/2) or [-π/2, 0)
+        r2 <  0     && return 3, floor(x) # [-π/2, 0)
+        r2 ≤  PI_LO && return 0, floor(x) # [0, π/2)
+        r2 <  PI_HI && return f(0, 1), floor(x) # [0, π/2) or [π/2, π)
+        return 1, floor(x) # [π/2, π)
     else
         k = _unsafe_scale(bareinterval(x) / PI, convert(T, 2))
         fk = floor(k)
         lfk, hfk = bounds(fk)
-        return f(mod(lfk, 4), mod(hfk, 4)), f(lfk, hfk)
+        return f(Int(mod(lfk, 4)), Int(mod(hfk, 4))), f(lfk, hfk)
     end
 end
 
