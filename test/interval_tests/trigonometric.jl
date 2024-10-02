@@ -39,6 +39,11 @@ end
     @test issubset_interval(cos(interval(BigFloat, 0.5, 8.5)), cos(interval(0.5, 8.5)))
     @test issubset_interval(cos(interval(BigFloat, -4.5, 0.1)), cos(interval(-4.5, 0.1)))
     @test issubset_interval(cos(interval(BigFloat, 1.3, 6.3)), cos(interval(1.3, 6.3)))
+
+    k = [interval(0.0,0.0625), interval(0.0625,0.125), interval(0.0,0.125)]
+    x = (k[1] * 4 + k[2] * 4 + k[3] * 4)
+    @test isequal_interval(cos(2 * π * x), interval(-1, 1))
+    @test isequal_interval(cospi(2x), interval(-1, 1))
 end
 
 @testset "sinpi" begin
