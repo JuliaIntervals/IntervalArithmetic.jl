@@ -18,7 +18,7 @@ function _quadrant(f, x::T) where {T<:AbstractFloat}
     else
         k = _unsafe_scale(bareinterval(x) / PI, convert(T, 2))
         fk = floor(k)
-        lfk, hfk = Int(inf(fk)), Int(sup(fk))
+        lfk, hfk = bounds(fk)
         return f(mod(lfk, 4), mod(hfk, 4)), f(lfk, hfk)
     end
 end
