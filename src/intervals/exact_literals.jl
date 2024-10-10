@@ -105,9 +105,6 @@ Base.promote_rule(::Type{ExactReal{T}}, ::Type{Interval{S}}) where {T<:Real,S<:N
 
 # to Real
 
-# allows Interval{<:NumTypes}(::ExactReal)
-(::Type{T})(x::ExactReal) where {T<:Real} = convert(T, x)
-
 Base.convert(::Type{T}, x::ExactReal) where {T<:Real} = convert(T, x.value)
 
 Base.promote_rule(::Type{T}, ::Type{ExactReal{S}}) where {T<:Real,S<:Real} =
