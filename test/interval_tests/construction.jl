@@ -43,8 +43,8 @@ end
     @test_throws MethodError BareInterval(1, 2)
     @test_throws MethodError BareInterval{Float64}(1, 2)
 
-    @test_throws MethodError Interval(1)
-    @test_throws MethodError Interval{Float64}(1)
+    @test !isguaranteed(Interval(1))
+    @test !isguaranteed(Interval{Float64}(1))
     @test_throws MethodError Interval(1, 2)
     @test_throws MethodError Interval{Float64}(1, 2)
 
@@ -163,7 +163,7 @@ end
     i = interval(IS.Interval(0.1, 2))
     @test isequal_interval(i, interval(0.1, 2.)) && !isguaranteed(i)
     @test interval(Float64, IS.Interval(0.1, 2)) === i
-    
+
     i = interval(IS.iv"[0.1, Inf)")
     @test isequal_interval(i, interval(0.1, Inf)) && !isguaranteed(i)
     @test interval(IS.iv"[0.1, Inf]") === nai(Float64)
