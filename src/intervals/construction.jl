@@ -369,7 +369,7 @@ isguaranteed(::Number) = false
 
 Interval{T}(x::Interval) where {T<:NumTypes} = convert(Interval{T}, x) # needed to resolve method ambiguity
 Interval{T}(x::Real) where {T<:NumTypes} = convert(Interval{T}, x)
-Interval(x::Real) = convert(Interval{promote_numtype(typeof(x), typeof(x))}, x)
+Interval(x::Real) = Interval{promote_numtype(typeof(x), typeof(x))}(x)
 
 #
 
