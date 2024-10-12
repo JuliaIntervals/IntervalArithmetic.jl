@@ -367,10 +367,6 @@ isguaranteed(x::Complex{<:Interval}) = isguaranteed(real(x)) & isguaranteed(imag
 
 isguaranteed(::Number) = false
 
-Interval{T}(x::Interval) where {T<:NumTypes} = convert(Interval{T}, x) # needed to resolve method ambiguity
-Interval{T}(x::Real) where {T<:NumTypes} = convert(Interval{T}, x)
-Interval(x::Real) = Interval{promote_numtype(typeof(x), typeof(x))}(x)
-
 #
 
 """
@@ -562,6 +558,10 @@ Base.promote_rule(::Type{T}, ::Type{Interval{S}}) where {T<:AbstractIrrational,S
     Interval{promote_numtype(T, S)}
 
 # conversion
+
+Interval{T}(x::Real) where {T<:NumTypes} = convert(Interval{T}, x)
+Interval(x::Real) = Interval{promote_numtype(numtype(x), numtype(x))}(x)
+Interval{T}(x::Interval) where {T<:NumTypes} = convert(Interval{T}, x) # needed to resolve method ambiguity
 
 Base.convert(::Type{Interval{T}}, x::Interval) where {T<:NumTypes} = interval(T, x)
 
