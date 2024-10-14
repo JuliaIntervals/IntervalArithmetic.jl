@@ -130,6 +130,11 @@ for T ∈ (:BareInterval, :Interval)
             throw(ArgumentError("`setdiff!` is purposely not supported for intervals. See instead `interiordiff`"))
     end
 end
+Base.union!(::AbstractVector{S}, ::BareInterval, ::Interval, ::Any...) where {S} =
+    throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
+Base.union!(::AbstractVector{S}, ::Interval, ::BareInterval, ::Any...) where {S} =
+    throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
+
 
 # allow pointwise equality
 
