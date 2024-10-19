@@ -87,6 +87,9 @@ Base.promote_rule(::Type{ExactReal{T}}, ::Type{ExactReal{S}}) where {T<:Real,S<:
 
 # to BareInterval
 
+BareInterval{T}(x::ExactReal) where {T<:NumTypes} = convert(BareInterval{T}, x)
+BareInterval(x::ExactReal) = BareInterval{promote_numtype(numtype(x.value), numtype(x.value))}(x)
+
 Base.convert(::Type{BareInterval{T}}, x::ExactReal) where {T<:NumTypes} = bareinterval(T, x.value)
 
 Base.promote_rule(::Type{BareInterval{T}}, ::Type{ExactReal{S}}) where {T<:NumTypes,S<:Real} =
@@ -105,8 +108,9 @@ Base.promote_rule(::Type{ExactReal{T}}, ::Type{Interval{S}}) where {T<:Real,S<:N
 
 # to Real
 
-# allows Interval{<:NumTypes}(::ExactReal)
 (::Type{T})(x::ExactReal) where {T<:Real} = convert(T, x)
+Interval{T}(x::ExactReal) where {T<:NumTypes} = convert(Interval{T}, x) # needed to resolve ambiguity
+Interval(x::ExactReal) = Interval{promote_numtype(numtype(x.value), numtype(x.value))}(x) # needed to resolve ambiguity
 
 Base.convert(::Type{T}, x::ExactReal) where {T<:Real} = convert(T, x.value)
 

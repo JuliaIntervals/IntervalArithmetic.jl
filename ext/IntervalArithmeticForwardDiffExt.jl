@@ -1,7 +1,7 @@
 module IntervalArithmeticForwardDiffExt
 
 using IntervalArithmetic, ForwardDiff
-using ForwardDiff: Dual, ≺, value, partials
+using ForwardDiff: Dual, Partials, ≺, value, partials
 
 #
 
@@ -69,5 +69,9 @@ function Base.:(^)(x::ExactReal, y::Dual{<:Ty}) where {Ty}
         return Dual{Ty}(expv, expv * log(x) * partials(y))
     end
 end
+
+# resolve ambiguity
+
+Base.convert(::Type{Dual{T,V,N}}, x::ExactReal) where {T,V,N} = Dual{T}(V(x), zero(Partials{N,V}))
 
 end
