@@ -121,16 +121,33 @@ function Base.:*(A::AbstractMatrix, B::AbstractVector{<:RealOrComplexI})
     return LinearAlgebra.mul!(C, A, B, one(T), zero(T))
 end
 
-LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::AbstractVecOrMat{<:RealOrComplexI}, α::Number, β::Number) =
-    _mul!(matmul_mode(), C, A, B, α, β)
+function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::AbstractVecOrMat{<:RealOrComplexI}, α::Number, β::Number)
+    size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
+    return _mul!(matmul_mode(), C, A, B, α, β)
+end
 
-LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix, B::AbstractVecOrMat{<:RealOrComplexI}, α::Number, β::Number) =
-    _mul!(matmul_mode(), C, A, B, α, β)
+function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix, B::AbstractVecOrMat{<:RealOrComplexI}, α::Number, β::Number)
+    size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
+    return _mul!(matmul_mode(), C, A, B, α, β)
+end
 
-LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::AbstractVecOrMat, α::Number, β::Number) =
-    _mul!(matmul_mode(), C, A, B, α, β)
+function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::AbstractVecOrMat, α::Number, β::Number)
+    size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
+    return _mul!(matmul_mode(), C, A, B, α, β)
+end
 
-_mul!(::MatMulMode{:slow}, C, A, B, α, β) = LinearAlgebra._mul!(C, A, B, α, β)
+function _mul!(::MatMulMode{:slow}, C, A::AbstractMatrix, B::AbstractVecOrMat, α, β)
+    for j ∈ axes(B, 2)
+        for i ∈ axes(A, 1)
+            x = zero(eltype(C))
+            for l ∈ axes(A, 2)
+                @inbounds x += A[i,l] * B[l,j]
+            end
+            @inbounds C[i,j] = x * α + C[i,j] * β
+        end
+    end
+    return C
+end
 
 # fast matrix multiplication
 # Note: Rump's algorithm
