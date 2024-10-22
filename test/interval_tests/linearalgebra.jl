@@ -8,6 +8,7 @@ import LinearAlgebra
 end
 
 @testset "Matrix multiplication" begin
+    IntervalArithmetic.matmul_mode() = IntervalArithmetic.MatMulMode{:fast}()
     A = [interval(2, 4) interval(-2, 1) ; interval(-1, 2) interval(2, 4)]
     imA = interval(im) * A
 
@@ -18,4 +19,5 @@ end
     @test all(isequal_interval.(imA * imA, -[interval(-2, 19.5) interval(-16, 10) ; interval(-10, 16) interval(-2, 19.5)]))
     @test all(isequal_interval.(mid.(A) * imA, interval(im)*[interval(5, 12.5) interval(-8, 2) ; interval(-2, 8) interval(5, 12.5)]))
     @test all(isequal_interval.(imA * mid.(A), interval(im)*[interval(5, 12.5) interval(-8, 2) ; interval(-2, 8) interval(5, 12.5)]))
+    IntervalArithmetic.matmul_mode() = IntervalArithmetic.MatMulMode{:slow}()
 end
