@@ -3,10 +3,6 @@
 
 Library for validated numerics using interval arithmetic.
 
-Default settings:
-- power mode is set to `:fast`
-- matrix multiplication mode is set to `:slow`
-
 Learn more: https://github.com/JuliaIntervals/IntervalArithmetic.jl
 """
 module IntervalArithmetic
