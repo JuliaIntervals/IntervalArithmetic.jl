@@ -138,7 +138,7 @@ function isdisjoint_interval(x::AbstractVector, y::AbstractVector)
     return any(t -> isdisjoint_interval(t[1], t[2]), zip(x, y))
 end
 
-isdisjoint_interval(x, y, z, w...) = isdisjoint_interval(x, y) & isdisjoint_interval(y, z, w...)
+isdisjoint_interval(x, y, z, w...) = isdisjoint_interval(x, y) & isdisjoint_interval(x, z) & isdisjoint_interval(y, z, w...)
 
 """
     isweakless(x, y)
