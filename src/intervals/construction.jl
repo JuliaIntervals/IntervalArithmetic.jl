@@ -426,6 +426,7 @@ interval(::Type{T}, A::AbstractArray, d::AbstractArray{Decoration}; format::Symb
 interval(A::AbstractArray, d::AbstractArray{Decoration}; format::Symbol = :infsup) = interval.(A, d; format = format)
 interval(::Type{T}, A::AbstractArray, B::AbstractArray, d::AbstractArray{Decoration}; format::Symbol = :infsup) where {T} = interval.(T, A, B, d; format = format)
 interval(A::AbstractArray, B::AbstractArray, d::AbstractArray{Decoration}; format::Symbol = :infsup) = interval.(A, B, d; format = format)
+interval(T::Type, d::Decoration; format::Symbol = :infsup) = throw(MethodError(interval, (T, d)))
 
 # standard format
 
@@ -487,6 +488,11 @@ function _interval_infsup(::Type{T}, x, y::Union{BareInterval,Interval}, d::Deco
         return _unsafe_interval(z, min(decoration(y), decoration(z), d), isguaranteed(y))
     end
 end
+
+_interval_infsup(::Type{T}, a::Complex, b::Union{BareInterval,Interval}, d::Decoration = com) where {T<:NumTypes} =
+    complex(_interval_infsup(T, real(a), real(b), d), _interval_infsup(T, imag(a), imag(b), d))
+_interval_infsup(::Type{T}, a::Union{BareInterval,Interval}, b::Complex, d::Decoration = com) where {T<:NumTypes} =
+    complex(_interval_infsup(T, real(a), real(b), d), _interval_infsup(T, imag(a), imag(b), d))
 
 _interval_infsup(::Type{T}, a::Complex, b::Complex, d::Decoration = com) where {T<:NumTypes} =
     complex(_interval_infsup(T, real(a), real(b), d), _interval_infsup(T, imag(a), imag(b), d))
