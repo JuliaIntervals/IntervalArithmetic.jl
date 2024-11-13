@@ -46,9 +46,9 @@ end
         dψ(t)   = ForwardDiff.derivative(ψ, t)
         ddψ(t)  = ForwardDiff.derivative(dψ, t)
         dddψ(t) = ForwardDiff.derivative(ddψ, t)
-        @test        ψ′(0)   === dψ(0)   && !isguaranteed(ψ′(0))
-        @test_broken ψ′′(0)  === ddψ(0)  && !isguaranteed(ψ′′(0)) # rely on `Interval{T}(::Real)` being defined
-        @test_broken ψ′′′(0) === dddψ(0) && !isguaranteed(ψ′′′(0)) # rely on `Interval{T}(::Real)` being defined
+        @test ψ′(0)   === dψ(0)   && !isguaranteed(ψ′(0))
+        @test ψ′′(0)  === ddψ(0)  && !isguaranteed(ψ′′(0))
+        @test ψ′′′(0) === dddψ(0) && !isguaranteed(ψ′′′(0))
         t₀ = interval(0)
         @test ψ′(t₀)   === dψ(t₀)   && isguaranteed(ψ′(t₀))
         @test ψ′′(t₀)  === ddψ(t₀)  && isguaranteed(ψ′′(t₀))
@@ -73,14 +73,14 @@ end
                 @test isguaranteed(dfdy)
                 @test isguaranteed(grad[1])
                 @test isguaranteed(grad[2])
-                
+
                 if iszero(x) && y < 0
                     @test decoration(dfdx) == trv
                 else
                     @test in_interval(ForwardDiff.derivative(fx, x), dfdx)
                 end
 
-                if iszero(x) && y <= 0 
+                if iszero(x) && y <= 0
                     @test decoration(dfdy) == trv
                 else
                     @test in_interval(ForwardDiff.derivative(fy, y), dfdy)

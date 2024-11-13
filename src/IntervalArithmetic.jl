@@ -1,3 +1,10 @@
+"""
+    IntervalArithmetic
+
+Library for validated numerics using interval arithmetic.
+
+Learn more: https://github.com/JuliaIntervals/IntervalArithmetic.jl
+"""
 module IntervalArithmetic
 
 import CRlibm_jll
@@ -8,16 +15,23 @@ using MacroTools: MacroTools, prewalk, postwalk, @capture
 #
 
 include("intervals/intervals.jl")
-
-include("display.jl")
-    export setdisplay
-
-include("symbols.jl")
-
 # convenient alias
 const RealOrComplexI{T} = Union{Interval{T},Complex{Interval{T}}}
 const ComplexI{T} = Complex{Interval{T}}
 const RealIntervalType{T} = Union{BareInterval{T},Interval{T}}
     export RealOrComplexI, ComplexI, RealIntervalType
+
+#
+
+include("display.jl")
+    export setdisplay
+
+#
+
+include("symbols.jl")
+
+#
+
+include("matmul.jl")
 
 end
