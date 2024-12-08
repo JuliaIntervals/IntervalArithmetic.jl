@@ -274,7 +274,7 @@ function _str_basic_repr(a::BareInterval{Float16}, format::Symbol)
         return replace(output, "Float16(NaN)" => "NaN16", "Float16(-Inf)" => "-Inf16", "Float16(Inf)" => "Inf16")
     elseif format === :midpoint
         m = mid(a)
-        str_m = _round_string(mid(a), sigdigits, RoundNearest)
+        str_m = _round_string(m, sigdigits, RoundNearest)
         # str_m = ifelse(m ≥ 0, string('+', str_m), str_m)
         output = string("Float16(", str_m, ") ± Float16(", _round_string(radius(a), sigdigits, RoundUp), ')')
         return replace(output, "Float16(NaN)" => "NaN16", "Float16(Inf)" => '∞')
