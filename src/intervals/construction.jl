@@ -465,7 +465,7 @@ function _interval_infsup(::Type{T}, x::Union{BareInterval,Interval}, y::Union{B
         return _unsafe_interval(z, min(decoration(x), decoration(y), decoration(z), d), t)
     end
 end
-function _interval_infsup(::Type{T}, x::Union{BareInterval,Interval}, y, d::Decoration) where {T<:NumTypes}
+function _interval_infsup(::Type{T}, x::Union{BareInterval,Interval}, y::NumTypes, d::Decoration) where {T<:NumTypes}
     lo = _inf(x)
     hi = _sup(y)
     if !is_valid_interval(lo, hi) || d == ill
@@ -476,7 +476,7 @@ function _interval_infsup(::Type{T}, x::Union{BareInterval,Interval}, y, d::Deco
         return _unsafe_interval(z, min(decoration(x), decoration(z), d), isguaranteed(x))
     end
 end
-function _interval_infsup(::Type{T}, x, y::Union{BareInterval,Interval}, d::Decoration) where {T<:NumTypes}
+function _interval_infsup(::Type{T}, x::NumTypes, y::Union{BareInterval,Interval}, d::Decoration) where {T<:NumTypes}
     lo = _inf(x)
     hi = _sup(y)
     if !is_valid_interval(lo, hi) || d == ill
