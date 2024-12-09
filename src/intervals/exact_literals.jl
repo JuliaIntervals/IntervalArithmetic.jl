@@ -54,6 +54,8 @@ struct ExactReal{T<:Real} <: Real
     ExactReal(value::T) where {T<:Real} = new{T}(value)
 end
 
+ExactReal(x::ExactReal) = x
+
 _value(x::ExactReal) = x.value # hook for interval constructor
 
 # utilities

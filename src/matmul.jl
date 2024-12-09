@@ -86,39 +86,14 @@ struct MatMulMode{T} end
 
 matmul_mode() = MatMulMode{:slow}()
 
-#
-
-function Base.:*(A::AbstractMatrix{<:RealOrComplexI}, B::AbstractMatrix{<:RealOrComplexI})
-    T = promote_type(eltype(A), eltype(B))
-    C = zeros(T, size(A, 1), size(B, 2))
-    return LinearAlgebra.mul!(C, A, B, one(T), zero(T))
-end
-function Base.:*(A::AbstractMatrix{<:RealOrComplexI}, B::AbstractVector{<:RealOrComplexI})
-    T = promote_type(eltype(A), eltype(B))
-    C = zeros(T, size(A, 1))
-    return LinearAlgebra.mul!(C, A, B, one(T), zero(T))
-end
-
-function Base.:*(A::AbstractMatrix{<:RealOrComplexI}, B::AbstractMatrix)
-    T = promote_type(eltype(A), eltype(B))
-    C = zeros(T, size(A, 1), size(B, 2))
-    return LinearAlgebra.mul!(C, A, B, one(T), zero(T))
-end
-function Base.:*(A::AbstractMatrix{<:RealOrComplexI}, B::AbstractVector)
-    T = promote_type(eltype(A), eltype(B))
-    C = zeros(T, size(A, 1))
-    return LinearAlgebra.mul!(C, A, B, one(T), zero(T))
-end
-
-function Base.:*(A::AbstractMatrix, B::AbstractMatrix{<:RealOrComplexI})
-    T = promote_type(eltype(A), eltype(B))
-    C = zeros(T, size(A, 1), size(B, 2))
-    return LinearAlgebra.mul!(C, A, B, one(T), zero(T))
-end
-function Base.:*(A::AbstractMatrix, B::AbstractVector{<:RealOrComplexI})
-    T = promote_type(eltype(A), eltype(B))
-    C = zeros(T, size(A, 1))
-    return LinearAlgebra.mul!(C, A, B, one(T), zero(T))
+Base.similar(a::Array{T}) where {T <: RealOrComplexI} = zeros(T, size(a))
+Base.similar(a::Array{T}, S::Type) where {T <: RealOrComplexI} = zeros(S, size(a))
+Base.similar(::Array{T}, m::Int) where {T <: RealOrComplexI} = zeros(T, m)
+Base.similar(::Array{T}, S::Type, dims::Dims{N}) where {N, T <: RealOrComplexI} = zeros(S, dims)
+Base.similar(::Array{T}, dims::Dims{N}) where {T <: RealOrComplexI, N} = zeros(T, dims)
+    
+function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::AbstractVecOrMat{<:RealOrComplexI})
+    return LinearAlgebra.mul!(C, A, B, interval(true), interval(false))
 end
 
 function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::AbstractVecOrMat{<:RealOrComplexI}, α::Number, β::Number)
