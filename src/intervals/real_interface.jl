@@ -113,6 +113,8 @@ for T ∈ (:BareInterval, :Interval)
         Base.intersect(::$T) =
             throw(ArgumentError("`intersect` is purposely not supported for intervals. See instead `intersect_interval`"))
 
+        Base.union!(::BitSet, ::$T) = # needed to resolve ambiguity
+            throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
         Base.union!(::AbstractSet, ::$T) = # also returned when calling `intersect`, `symdiff` with intervals
             throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
         Base.union!(::AbstractVector{S}, ::$T) where {S} =
@@ -154,6 +156,12 @@ result is true if and only if the interval contains only that number.
 """
 Base.:(==)(x::Union{BareInterval,Interval}, y::Number) = isthin(x, y)
 Base.:(==)(x::Number, y::Union{BareInterval,Interval}) = y == x
+# needed to resolve ambiguity from irrationals.jl
+Base.:(==)(x::Interval, y::AbstractIrrational) = isthin(x, y)
+Base.:(==)(x::AbstractIrrational, y::Interval) = y == x
+# needed to resolve ambiguity from complex.jl
+Base.:(==)(x::Interval, y::Complex) = isreal(y) & (real(y) == x)
+Base.:(==)(x::Complex, y::Interval) = y == x
 
 # follows docstring of `Base.iszero`
 Base.iszero(x::Union{BareInterval,Interval}) = isthinzero(x)

@@ -110,6 +110,7 @@ Base.promote_rule(::Type{ExactReal{T}}, ::Type{Interval{S}}) where {T<:Real,S<:N
 
 # to Real
 
+Bool(x::ExactReal) = convert(Bool, x) # needed to resolve ambiguity
 (::Type{T})(x::ExactReal) where {T<:Real} = convert(T, x)
 Interval{T}(x::ExactReal) where {T<:NumTypes} = convert(Interval{T}, x) # needed to resolve ambiguity
 Interval(x::ExactReal) = Interval{promote_numtype(numtype(x.value), numtype(x.value))}(x) # needed to resolve ambiguity
@@ -129,6 +130,10 @@ Base.promote_rule(::Type{ExactReal{T}}, ::Type{BigFloat}) where {T<:Real} =
     promote_type(T, BigFloat)
 Base.promote_rule(::Type{BigFloat}, ::Type{ExactReal{T}}) where {T<:Real} =
     promote_type(BigFloat, T)
+Base.promote_rule(::Type{ExactReal{T}}, ::Type{S}) where {T<:Real,S<:AbstractIrrational} =
+    promote_type(T, S)
+Base.promote_rule(::Type{T}, ::Type{ExactReal{S}}) where {T<:AbstractIrrational,S<:Real} =
+    promote_type(T, S)
 
 # to complex -- by-pass default from Base which lead to "NG" flag in the (zero) imaginary part
 

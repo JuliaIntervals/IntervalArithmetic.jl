@@ -94,19 +94,23 @@ function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMa
     return LinearAlgebra.mul!(C, A, B, interval(true), interval(false))
 end
 
-function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::AbstractVecOrMat{<:RealOrComplexI}, α::Number, β::Number)
-    size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
-    return _mul!(matmul_mode(), C, A, B, α, β)
-end
+for T ∈ (:AbstractVector, :AbstractMatrix) # needed to resolve method ambiguities
+    @eval begin
+        function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::$T{<:RealOrComplexI}, α::Number, β::Number)
+            size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
+            return _mul!(matmul_mode(), C, A, B, α, β)
+        end
 
-function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix, B::AbstractVecOrMat{<:RealOrComplexI}, α::Number, β::Number)
-    size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
-    return _mul!(matmul_mode(), C, A, B, α, β)
-end
+        function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix, B::$T{<:RealOrComplexI}, α::Number, β::Number)
+            size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
+            return _mul!(matmul_mode(), C, A, B, α, β)
+        end
 
-function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::AbstractVecOrMat, α::Number, β::Number)
-    size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
-    return _mul!(matmul_mode(), C, A, B, α, β)
+        function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::$T, α::Number, β::Number)
+            size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
+            return _mul!(matmul_mode(), C, A, B, α, β)
+        end
+    end
 end
 
 function _mul!(::MatMulMode{:slow}, C, A::AbstractMatrix, B::AbstractVecOrMat, α, β)
@@ -139,8 +143,10 @@ _mul!(::MatMulMode{:fast}, C, A::AbstractMatrix{<:Complex{<:Interval{<:Rational}
 _mul!(::MatMulMode{:fast}, C, A::AbstractMatrix{<:Interval{<:Rational}}, B::AbstractVecOrMat{<:Complex{<:Interval{<:Rational}}}, α, β) =
     LinearAlgebra._mul!(C, A, B, α, β)
 
+_mul!(::MatMulMode{:fast}, C, A, B, α, β) = _fastmul!(C, A, B, α, β)
+
 for (T, S) ∈ ((:Interval, :Interval), (:Interval, :Any), (:Any, :Interval))
-    @eval function _mul!(::MatMulMode{:fast}, C, A::AbstractMatrix{<:$T}, B::AbstractVecOrMat{<:$S}, α, β)
+    @eval function _fastmul!(C, A::AbstractMatrix{<:$T}, B::AbstractVecOrMat{<:$S}, α, β)
         CoefType = eltype(C)
         if iszero(α)
             if iszero(β)
@@ -177,7 +183,7 @@ end
 
 for (T, S) ∈ ((:(Complex{<:Interval}), :(Complex{<:Interval})),
         (:(Complex{<:Interval}), :Complex), (:Complex, :(Complex{<:Interval})))
-    @eval function _mul!(::MatMulMode{:fast}, C, A::AbstractMatrix{<:$T}, B::AbstractVecOrMat{<:$S}, α, β)
+    @eval function _fastmul!(C, A::AbstractMatrix{<:$T}, B::AbstractVecOrMat{<:$S}, α, β)
         CoefType = eltype(C)
         if iszero(α)
             if iszero(β)
@@ -225,7 +231,7 @@ end
 
 for (T, S) ∈ ((:(Complex{<:Interval}), :Interval), (:(Complex{<:Interval}), :Any), (:Complex, :Interval))
     @eval begin
-        function _mul!(::MatMulMode{:fast}, C, A::AbstractMatrix{<:$T}, B::AbstractVecOrMat{<:$S}, α, β)
+        function _fastmul!(C, A::AbstractMatrix{<:$T}, B::AbstractVecOrMat{<:$S}, α, β)
             CoefType = eltype(C)
             if iszero(α)
                 if iszero(β)
@@ -261,7 +267,7 @@ for (T, S) ∈ ((:(Complex{<:Interval}), :Interval), (:(Complex{<:Interval}), :A
             return C
         end
 
-        function _mul!(::MatMulMode{:fast}, C, A::AbstractMatrix{<:$S}, B::AbstractVecOrMat{<:$T}, α, β)
+        function _fastmul!(C, A::AbstractMatrix{<:$S}, B::AbstractVecOrMat{<:$T}, α, β)
             CoefType = eltype(C)
             if iszero(α)
                 if iszero(β)

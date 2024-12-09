@@ -131,13 +131,16 @@ julia> pow(interval(-1, 1), interval(-3))
 Interval{Float64}(1.0, Inf, trv)
 ```
 """
-function pow(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
-    isempty_interval(y) && return y
-    domain = _unsafe_bareinterval(T, zero(T), typemax(T))
-    x = intersect_interval(x, domain)
-    isempty_interval(x) && return x
-    isthin(y) && return _thin_pow(x, sup(y))
-    return hull(_thin_pow(x, inf(y)), _thin_pow(x, sup(y)))
+pow(x, y)
+for U ∈ (:AbstractFloat, :Rational) # needed to resolve ambiguity
+    @eval function pow(x::BareInterval{T}, y::BareInterval{T}) where {T<:$U}
+        isempty_interval(y) && return y
+        domain = _unsafe_bareinterval(T, zero(T), typemax(T))
+        x = intersect_interval(x, domain)
+        isempty_interval(x) && return x
+        isthin(y) && return _thin_pow(x, sup(y))
+        return hull(_thin_pow(x, inf(y)), _thin_pow(x, sup(y)))
+    end
 end
 pow(x::BareInterval, y::BareInterval) = pow(promote(x, y)...)
 # specialize on rational to improve exactness
@@ -169,28 +172,30 @@ pow(x::Interval, n::Integer) = pow(x, n//one(n))
 
 # helper function for `pow`
 
-function _thin_pow(x::BareInterval{T}, y::T) where {T<:NumTypes}
-    # assume `inf(x) ≥ 0` and `!isempty_interval(x)`
-    if sup(x) == 0 # isthinzero(x)
-        y > 0 && return x
-        return emptyinterval(BareInterval{T})
-    else
-        isinteger(y) && return pown(x, Integer(y))
-        y == 0.5 && return sqrt(x)
-        lo = @round(T, inf(x)^y, inf(x)^y)
-        hi = @round(T, sup(x)^y, sup(x)^y)
-        return hull(lo, hi)
+for U ∈ (:AbstractFloat, :Rational) # needed to resolve ambiguity
+    @eval function _thin_pow(x::BareInterval{T}, y::T) where {T<:$U}
+        # assume `inf(x) ≥ 0` and `!isempty_interval(x)`
+        if sup(x) == 0 # isthinzero(x)
+            y > 0 && return x
+            return emptyinterval(BareInterval{T})
+        else
+            isinteger(y) && return pown(x, Integer(y))
+            y == 0.5 && return sqrt(x)
+            lo = @round(T, inf(x)^y, inf(x)^y)
+            hi = @round(T, sup(x)^y, sup(x)^y)
+            return hull(lo, hi)
+        end
     end
-end
 
-function _thin_pow(x::BareInterval{T}, y::Rational{S}) where {T<:NumTypes,S<:Integer}
-    # assume `inf(x) ≥ 0` and `!isempty_interval(x)`
-    if sup(x) == 0 # isthinzero(x)
-        y > 0 && return x
-        return emptyinterval(BareInterval{T})
-    else
-        isinteger(y) && return pown(x, S(y))
-        return pown(rootn(x, denominator(y)), numerator(y))
+    @eval function _thin_pow(x::BareInterval{T}, y::Rational{S}) where {T<:$U,S<:Integer}
+        # assume `inf(x) ≥ 0` and `!isempty_interval(x)`
+        if sup(x) == 0 # isthinzero(x)
+            y > 0 && return x
+            return emptyinterval(BareInterval{T})
+        else
+            isinteger(y) && return pown(x, S(y))
+            return pown(rootn(x, denominator(y)), numerator(y))
+        end
     end
 end
 
