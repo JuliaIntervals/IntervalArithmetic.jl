@@ -3,7 +3,19 @@ module IntervalArithmeticForwardDiffExt
 using IntervalArithmetic, ForwardDiff
 using ForwardDiff: Dual, Partials, ≺, value, partials
 
-#
+# Needed to avoid method ambiguities:
+Base.promote_rule(::Type{Dual{T, V, N}}, ::Type{Interval{S}}) where {T, V, N, S<:Union{AbstractFloat, Rational}} =
+    Interval{IntervalArithmetic.promote_numtype(V, S)}
+
+Base.promote_rule(::Type{ExactReal{S}}, ::Type{Dual{T, V, N}}) where {S<:Real, T, V, N} =
+    ExactReal{IntervalArithmetic.promote_numtype(V, S)}
+
+Base.promote_rule(::Type{Dual{T, V, N}}, ::Type{ExactReal{S}}) where {S<:Real, T, V, N} =
+    ExactReal{IntervalArithmetic.promote_numtype(V, S)}
+
+Base.:(==)(x::Union{BareInterval,Interval}, y::Dual) = isthin(x, y)
+Base.:(==)(x::Dual, y::Union{BareInterval,Interval}) = y == x
+
 
 function Base.:(^)(x::Dual{Txy,<:Interval}, y::Dual{Txy,<:Interval}) where {Txy}
     vx, vy = value(x), value(y)
