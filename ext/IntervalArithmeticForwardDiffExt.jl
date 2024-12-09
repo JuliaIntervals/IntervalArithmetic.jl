@@ -10,11 +10,11 @@ Dual{T}(x::ExactReal) where {T} = Dual{T, typeof(x), 0}(x.value)
 Dual{T, V}(x::ExactReal) where {T, V<:Real} = convert(Dual{T, V, 0}, x)
 Dual{T, V, N}(x::ExactReal) where {T, V<:Real, N} = convert(Dual{T, V, N}, x)
 
-Base.convert(::Type{Dual{T, V, N}}, x::ExactReal) where {T, V, N} = promote_rule(Dual{T, V, N}, typeof(x))(x.value)
+Base.convert(::Type{Dual{T,V,N}}, x::ExactReal) where {T,V,N} = Dual{T}(V(x), zero(Partials{N,V}))
 
 Base.promote_rule(::Type{Dual{T, V, N}}, ::Type{Interval{S}}) where {T, V, N, S<:Union{AbstractFloat, Rational}} =
     Dual{T,Interval{IntervalArithmetic.promote_numtype(V, S)},N}
-Base.promote_rule(::Type{Interval{S}}, ::Type{ForwardDiff.Dual{T, V, N}}) where {S<:Union{AbstractFloat, Rational}, T, V, N} =
+Base.promote_rule(::Type{Interval{S}}, ::Type{Dual{T, V, N}}) where {S<:Union{AbstractFloat, Rational}, T, V, N} =
     Dual{T,Interval{IntervalArithmetic.promote_numtype(V, S)},N}
 Base.promote_rule(::Type{ExactReal{S}}, ::Type{Dual{T, V, N}}) where {S<:Real, T, V, N} =
     Dual{T,ExactReal{IntervalArithmetic.promote_numtype(V, S)},N}
@@ -89,9 +89,5 @@ function Base.:(^)(x::ExactReal, y::Dual{<:Ty}) where {Ty}
         return Dual{Ty}(expv, expv * log(x) * partials(y))
     end
 end
-
-# resolve ambiguity
-
-Base.convert(::Type{Dual{T,V,N}}, x::ExactReal) where {T,V,N} = Dual{T}(V(x), zero(Partials{N,V}))
 
 end
