@@ -15,9 +15,12 @@ using Aqua
     pkg_match(pkgname, pkdir::Nothing) = false
     pkg_match(pkgname, pkdir::AbstractString) = occursin(pkgname, pkdir)
     filter!(x -> pkg_match("IntervalArithmetic", pkgdir(last(x).module)), ambs)
+    for method_ambiguity ∈ ambs
+        @show method_ambiguity
+    end
     @test length(ambs) == 0
 end
 
 @testset "Aqua tests (additional)" begin
-    @test Aqua.test_all(IntervalArithmetic)
+    Aqua.test_all(IntervalArithmetic)
 end
