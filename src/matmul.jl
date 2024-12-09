@@ -89,7 +89,7 @@ matmul_mode() = MatMulMode{:slow}()
 Base.similar(a::Array{T}) where {T <: RealOrComplexI} = zeros(T, size(a))
 Base.similar(a::Array{T}, S::Type) where {T <: RealOrComplexI} = zeros(S, size(a))
 Base.similar(::Array{T}, m::Int) where {T <: RealOrComplexI} = zeros(T, m)
-Base.similar(::Array, ::Type{T}, dims::Dims{N}) where {N, T <: RealOrComplexI} = zeros(T, dims)
+Base.similar(::Array{T}, S::Type, dims::Dims{N}) where {N, T <: RealOrComplexI} = zeros(S, dims)
 Base.similar(::Array{T}, dims::Dims{N}) where {T <: RealOrComplexI, N} = zeros(T, dims)
     
 function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::AbstractVecOrMat{<:RealOrComplexI})
