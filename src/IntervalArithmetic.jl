@@ -32,6 +32,8 @@ include("symbols.jl")
 
 #
 
+import LinearAlgebra
+
 include("matmul.jl")
 
 end

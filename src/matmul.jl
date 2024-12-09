@@ -1,9 +1,3 @@
-import LinearAlgebra
-
-
-
-#
-
 interval(::Type{T}, J::LinearAlgebra.UniformScaling, d::Decoration = com; format::Symbol = :infsup) where {T} =
     LinearAlgebra.UniformScaling(interval(T, J.λ, d; format = format))
 interval(J::LinearAlgebra.UniformScaling, d::Decoration = com; format::Symbol = :infsup) =
@@ -52,7 +46,7 @@ end
 
 
 # matrix inversion
-# Note: use the contraction mapping theorem, only works when the entries of A have small radii
+# note: use the contraction mapping theorem, only works when the entries of A have small radii
 
 function Base.inv(A::Matrix{<:RealOrComplexI})
     mid_A = mid.(A)
@@ -86,12 +80,16 @@ struct MatMulMode{T} end
 
 matmul_mode() = MatMulMode{:slow}()
 
-Base.similar(a::Array{T}) where {T <: RealOrComplexI} = zeros(T, size(a))
-Base.similar(a::Array{T}, S::Type) where {T <: RealOrComplexI} = zeros(S, size(a))
-Base.similar(::Array{T}, m::Int) where {T <: RealOrComplexI} = zeros(T, m)
-Base.similar(::Array{T}, S::Type, dims::Dims{N}) where {N, T <: RealOrComplexI} = zeros(S, dims)
-Base.similar(::Array{T}, dims::Dims{N}) where {T <: RealOrComplexI, N} = zeros(T, dims)
-    
+# by-pass `similar` methods defined in array.jl
+Base.similar(a::Array{T,1}) where {T<:RealOrComplexI}                    = zeros(T, size(a, 1))
+Base.similar(a::Array{T,2}) where {T<:RealOrComplexI}                    = zeros(T, size(a, 1), size(a, 2))
+Base.similar(a::Array{T,1}, S::Type) where {T<:RealOrComplexI}           = zeros(S, size(a, 1))
+Base.similar(a::Array{T,2}, S::Type) where {T<:RealOrComplexI}           = zeros(S, size(a, 1), size(a, 2))
+Base.similar(a::Array{T}, m::Int) where {T<:RealOrComplexI}              = zeros(T, m)
+Base.similar(a::Array{T}, S::Type, dims::Dims) where {T<:RealOrComplexI} = zeros(S, dims)
+Base.similar(a::Array{T}, dims::Dims) where {T<:RealOrComplexI}          = zeros(T, dims)
+#
+
 function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::AbstractVecOrMat{<:RealOrComplexI})
     return LinearAlgebra.mul!(C, A, B, interval(true), interval(false))
 end
