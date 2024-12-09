@@ -4,15 +4,15 @@ using IntervalArithmetic, ForwardDiff
 using ForwardDiff: Dual, Partials, ≺, value, partials
 
 # Needed to avoid method ambiguities:
+ForwardDiff.can_dual(::Type{ExactReal}) = true
+Base.convert(::Type{Dual{T, V, N}}, x::ExactReal) where {T, V, N} = promote_rule(Dual{T, V, N}, typeof(x))(x.value)
+
 Base.promote_rule(::Type{Dual{T, V, N}}, ::Type{Interval{S}}) where {T, V, N, S<:Union{AbstractFloat, Rational}} =
     Dual{T,Interval{IntervalArithmetic.promote_numtype(V, S)},N}
-
 Base.promote_rule(::Type{Interval{S}}, ::Type{ForwardDiff.Dual{T, V, N}}) where {S<:Union{AbstractFloat, Rational}, T, V, N} =
     Dual{T,Interval{IntervalArithmetic.promote_numtype(V, S)},N}
-
 Base.promote_rule(::Type{ExactReal{S}}, ::Type{Dual{T, V, N}}) where {S<:Real, T, V, N} =
     Dual{T,ExactReal{IntervalArithmetic.promote_numtype(V, S)},N}
-
 Base.promote_rule(::Type{Dual{T, V, N}}, ::Type{ExactReal{S}}) where {S<:Real, T, V, N} =
     Dual{T,ExactReal{IntervalArithmetic.promote_numtype(V, S)},N}
 
