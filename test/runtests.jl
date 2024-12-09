@@ -26,3 +26,6 @@ for f ∈ readdir("ITF1788_tests"; join = true)
         include(f)
     end
 end
+
+# Aqua tests
+include("aqua.jl")
