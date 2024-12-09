@@ -5,6 +5,7 @@ using ForwardDiff: Dual, Partials, ≺, value, partials
 
 # Needed to avoid method ambiguities:
 ForwardDiff.can_dual(::Type{ExactReal}) = true
+Dual(x::ExactReal) = Dual{Nothing, typeof(x), 0}(x.value)
 Base.convert(::Type{Dual{T, V, N}}, x::ExactReal) where {T, V, N} = promote_rule(Dual{T, V, N}, typeof(x))(x.value)
 
 Base.promote_rule(::Type{Dual{T, V, N}}, ::Type{Interval{S}}) where {T, V, N, S<:Union{AbstractFloat, Rational}} =
