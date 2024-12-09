@@ -3,12 +3,13 @@ module IntervalArithmeticForwardDiffExt
 using IntervalArithmetic, ForwardDiff
 using ForwardDiff: Dual, Partials, ≺, value, partials
 
-# Needed to avoid method ambiguities:
 ForwardDiff.can_dual(::Type{ExactReal}) = true
-Dual(x::ExactReal) = Dual{Nothing, typeof(x), 0}(x.value)
-Dual{T}(x::ExactReal) where {T} = Dual{T, typeof(x), 0}(x.value)
-Dual{T, V}(x::ExactReal) where {T, V<:Real} = convert(Dual{T, V, 0}, x)
-Dual{T, V, N}(x::ExactReal) where {T, V<:Real, N} = convert(Dual{T, V, N}, x)
+
+# needed to resolve method ambiguities
+ForwardDiff.Dual{T}(value::ExactReal) where {T} = Dual{T}(value, ())
+ForwardDiff.Dual(value::ExactReal) = Dual{Nothing}(value)
+ForwardDiff.Dual{T,V,N}(x::ExactReal) where {T,V,N} = convert(Dual{T,V,N}, x)
+ForwardDiff.Dual{T,V}(x::ExactReal) where {T,V} = convert(Dual{T,V}, x)
 
 Base.convert(::Type{Dual{T,V,N}}, x::ExactReal) where {T,V,N} = Dual{T}(V(x), zero(Partials{N,V}))
 
@@ -21,9 +22,8 @@ Base.promote_rule(::Type{ExactReal{S}}, ::Type{Dual{T, V, N}}) where {S<:Real, T
 Base.promote_rule(::Type{Dual{T, V, N}}, ::Type{ExactReal{S}}) where {S<:Real, T, V, N} =
     Dual{T,ExactReal{IntervalArithmetic.promote_numtype(V, S)},N}
 
-Base.:(==)(x::Union{BareInterval,Interval}, y::Dual) = isthin(x, y)
-Base.:(==)(x::Dual, y::Union{BareInterval,Interval}) = y == x
-
+Base.:(==)(x::Union{BareInterval,Interval}, y::Dual) = x == value(y)
+Base.:(==)(x::Dual, y::Union{BareInterval,Interval}) = value(x) == y
 
 function Base.:(^)(x::Dual{Txy,<:Interval}, y::Dual{Txy,<:Interval}) where {Txy}
     vx, vy = value(x), value(y)
