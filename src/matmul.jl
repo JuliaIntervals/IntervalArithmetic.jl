@@ -152,23 +152,23 @@ matmul_mode() = MatMulMode{:slow}()
 Base.similar(a::Array{Interval{T},1})          where {T<:NumTypes} = zeros(Interval{T}, size(a, 1))
 Base.similar(a::Array{Complex{Interval{T}},1}) where {T<:NumTypes} = zeros(Complex{Interval{T}}, size(a, 1))
 
-Base.similar(a::Array{Interval{T},2})          where {T<:NumTypes} = zeros(T, size(a, 1), size(a, 2))
-Base.similar(a::Array{Complex{Interval{T}},2}) where {T<:NumTypes} = zeros(T, size(a, 1), size(a, 2))
-
 Base.similar(a::Array{Interval{T},1},          S::Type) where {T<:NumTypes} = zeros(S, size(a, 1))
 Base.similar(a::Array{Complex{Interval{T}},1}, S::Type) where {T<:NumTypes} = zeros(S, size(a, 1))
+
+Base.similar(a::Array{Interval{T},2})          where {T<:NumTypes} = zeros(Interval{T}, size(a, 1), size(a, 2))
+Base.similar(a::Array{Complex{Interval{T}},2}) where {T<:NumTypes} = zeros(Complex{Interval{T}}, size(a, 1), size(a, 2))
 
 Base.similar(a::Array{Interval{T},2},          S::Type) where {T<:NumTypes} = zeros(S, size(a, 1), size(a, 2))
 Base.similar(a::Array{Complex{Interval{T}},2}, S::Type) where {T<:NumTypes} = zeros(S, size(a, 1), size(a, 2))
 
-Base.similar(::Array{Interval{T}},          m::Int) where {T<:NumTypes} = zeros(T, m)
-Base.similar(::Array{Complex{Interval{T}}}, m::Int) where {T<:NumTypes} = zeros(T, m)
+Base.similar(::Array{Interval{T}},          m::Int) where {T<:NumTypes} = zeros(Interval{T}, m)
+Base.similar(::Array{Complex{Interval{T}}}, m::Int) where {T<:NumTypes} = zeros(Complex{Interval{T}}, m)
+
+Base.similar(::Array{Interval{T}},          dims::Dims) where {T<:NumTypes} = zeros(Interval{T}, dims)
+Base.similar(::Array{Complex{Interval{T}}}, dims::Dims) where {T<:NumTypes} = zeros(Complex{Interval{T}}, dims)
 
 Base.similar(::Array{Interval{T}},          S::Type, dims::Dims) where {T<:NumTypes} = zeros(S, dims)
 Base.similar(::Array{Complex{Interval{T}}}, S::Type, dims::Dims) where {T<:NumTypes} = zeros(S, dims)
-
-Base.similar(::Array{Interval{T}},          dims::Dims) where {T<:NumTypes} = zeros(T, dims)
-Base.similar(::Array{Complex{Interval{T}}}, dims::Dims) where {T<:NumTypes} = zeros(T, dims)
 #
 
 function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::AbstractVecOrMat{<:RealOrComplexI})
