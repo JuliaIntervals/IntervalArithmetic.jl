@@ -1,3 +1,11 @@
+import Intervals
+import Intervals: IntervalSet, less_than_disjoint
+
+const Domain = Intervals.Interval
+
+inf(x::Domain) = first(x)
+sup(x::Domain) = last(x)
+
 struct Constant{T}
     value::T
 end
@@ -5,76 +13,91 @@ end
 (constant::Constant)(::Any) = constant.value
 (constant::Constant)(::Interval) = interval(constant.value)
 
-struct Piece{T}
-    f
-    domain::Interval{T}
-    left_continuity::Int
+struct Piecewise
+    domain::IntervalSet
+    fs
+    discontinuities::Vector
 end
 
-Piece(f, domain::Interval) = Piece(f, domain, -1)
-Piece(x::Real, domain::Interval) = Piece(Constant(x), domain)
+function Piecewise(
+        subdomains::Vector{<:Domain},
+        fs,
+        continuous::Vector{Bool} = fill(false, length(subdomains) - 1))
 
-struct Piecewise{T}
-    pieces::Vector{Piece{T}}
-    holes::Vector{Interval{T}}
-end
-
-function Piecewise(pieces...)
-    pieces = sort(collect(pieces) ; lt = (p1, p2) -> precedes(p1.domain, p2.domain))
-    subdomains = domain.(pieces)
-
-    for (S1, S2) in zip(subdomains[1:end-1], subdomains[2:end])
-        sup(S1) > inf(S2) && throw(ArgumentError("pieces are not disjoint"))
+    if length(subdomains) != length(fs)
+        throw(ArgumentError("the number of domains and the number of functions don't match"))
+    end
+    
+    if length(subdomains) - 1 != length(continuous)
+        n = length(subdomains)
+        throw(ArgumentError("$(length(sub)) junction points but $(n - 1) are expected based on the number of domains ($n)"))
     end
 
-    holes = [entireinterval()]
+    for k in 1:length(subdomains) - 1
+        s1 = subdomains[k]
+        s2 = subdomains[k + 1]
 
-    for S in subdomains
-        holes = mapreduce(vcat, holes) do hole
-            return interval_diff(hole, S)
-        end
+        !less_than_disjoint(s1, s2) && throw(ArgumentError("domains are either not ordered or not disjoint"))
     end
 
-    return Piecewise(pieces, holes)
+    singularities = sup.(subdomains[1:end-1])
+
+    return Piecewise(IntervalSet(subdomains), fs, singularities[.!continuous])
 end
 
-domain(piece::Piece) = piece.domain
-domain(piecewise::Piecewise) = domain.(piecewise.pieces)
-
-intersecting(X::Interval, Y::Interval) = !isempty_interval(intersect_interval(X, Y))
-
-function interior_intersecting(X::Interval, Y::Interval)
-    inter = intersect_interval(X, Y)
-    (inter == inf(X) || inter == sup(X)) && return false
-    return !isempty_interval(inter)
+function Piecewise(pairs::Vararg{<:Pair} ; continuous = fill(false, length(pairs) - 1))
+    pairs = collect(pairs)
+    return Piecewise(first.(pairs), last.(pairs), continuous)
 end
 
-# TODO This is not true for interval bordering a hole.
-function (piecewise::Piecewise)(X::Interval)
-    if any(interior_intersecting.(X, piecewise.holes))
+subdomains(piecewise::Piecewise) = convert(Vector, piecewise.domain)
+domain(piecewise::Piecewise) = piecewise.domain
+pieces(piecewise::Piecewise) = zip(subdomains(piecewise), piecewise.fs)
+discontinuities(piecewise::Piecewise) = piecewise.discontinuities
+
+domain_string(x::Domain) = repr(x ; context = IOContext(stdout, :compact => true))
+
+function domain_string(S::IntervalSet)
+    r = repr("text/plain", S ; context = IOContext(stdout, :compact => true))
+    return join(split(r, "\n")[2:end], " ∪ ")
+end
+
+domain_string(piecewise::Piecewise) = domain_string(domain(piecewise))
+
+function Base.show(io::IO, ::MIME"text/plain", piecewise::Piecewise)
+    n = length(pieces(piecewise))
+    print(io, "Piecewise function with $n pieces:")
+    
+    for (subdomain, f) in pieces(piecewise)
+        println(io)
+        print(io, "  $(domain_string(subdomain)) -> $(repr(f))")
+    end
+end
+
+function (piecewise::Piecewise)(X::Interval{T}) where T
+    set = Domain(inf(X), sup(X), true, true)
+    if !isempty(setdiff(set, domain(piecewise)))
         dec = trv
+    elseif any(in(set), discontinuities(piecewise))
+        dec = def 
     else
         dec = com
-        for piece in piecewise.pieces
-            if in_interval(inf(domain(piece)), X) && piece.left_continuity < 0
-                dec = def
-            end
-        end
     end
 
-    used_pieces = filter(piece -> intersecting(X, domain(piece)), piecewise.pieces)
-    outputs = map(used_pieces) do piece
-        S = IntervalArithmetic.setdecoration(intersect_interval(X, domain(piece)), decoration(X))
-        return piece.f(S)
+    results = Interval{T}[]
+    for (subdomain, f) in pieces(piecewise)
+        subset = intersect(set, subdomain)
+        isempty(subset) && continue
+        push!(results, f(interval(inf(subset), sup(subset), decoration(X))))
     end
 
-    dec = min(dec, minimum(decoration.(outputs)))
-    return IntervalArithmetic.setdecoration(reduce(hull, outputs), dec)
+    dec = min(dec, minimum(decoration.(results)))
+    return IntervalArithmetic.setdecoration(reduce(hull, results), dec)
 end
 
 function (piecewise::Piecewise)(x::Real)
-    for piece in piecewise.pieces
-        in_interval(x, domain(piece)) && return piece.f(x)
+    for (subdomain, f) in pieces(piecewise)
+        (x in subdomain) && return f(x)
     end
-    throw(DomainError("piecewise function was called with $x which is outside of its domain $(domain(piecewise))"))
+    throw(DomainError(x, "piecewise function was called outside of its domain $(domain_string(piecewise))"))
 end
