@@ -77,6 +77,8 @@ end
 
 function (piecewise::Piecewise)(X::Interval{T}) where {T}
     set = Domain(inf(X), sup(X), true, true)
+    isdisjoint(set, domain(piecewise)) && return emptyinterval(T)
+
     if !isempty(setdiff(set, domain(piecewise)))
         dec = trv
     elseif any(in(set), discontinuities(piecewise))
