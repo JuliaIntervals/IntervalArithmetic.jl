@@ -16,19 +16,20 @@ end
 struct Piecewise
     domain::IntervalSet
     fs
-    discontinuities::Vector
+    continuity::Vector{Int}
+    singularities::Vector
 end
 
 function Piecewise(
         subdomains::Vector{<:Domain},
         fs,
-        continuous::Vector{Bool} = fill(false, length(subdomains) - 1))
+        continuity::Vector{Int} = fill(-1, length(subdomains) - 1))
 
     if length(subdomains) != length(fs)
         throw(ArgumentError("the number of domains and the number of functions don't match"))
     end
     
-    if length(subdomains) - 1 != length(continuous)
+    if length(subdomains) - 1 != length(continuity)
         n = length(subdomains)
         throw(ArgumentError("$(length(sub)) junction points but $(n - 1) are expected based on the number of domains ($n)"))
     end
@@ -42,18 +43,18 @@ function Piecewise(
 
     singularities = sup.(subdomains[1:end-1])
 
-    return Piecewise(IntervalSet(subdomains), fs, singularities[.!continuous])
+    return Piecewise(IntervalSet(subdomains), fs, continuity, singularities)
 end
 
-function Piecewise(pairs::Vararg{<:Pair} ; continuous = fill(false, length(pairs) - 1))
+function Piecewise(pairs::Vararg{<:Pair} ; continuity = fill(-1, length(pairs) - 1))
     pairs = collect(pairs)
-    return Piecewise(first.(pairs), last.(pairs), continuous)
+    return Piecewise(first.(pairs), last.(pairs), continuity)
 end
 
 subdomains(piecewise::Piecewise) = convert(Vector, piecewise.domain)
 domain(piecewise::Piecewise) = piecewise.domain
 pieces(piecewise::Piecewise) = zip(subdomains(piecewise), piecewise.fs)
-discontinuities(piecewise::Piecewise) = piecewise.discontinuities
+discontinuities(piecewise::Piecewise) = piecewise.singularities[piecewise.continuity .< 0]
 
 domain_string(x::Domain) = repr(x ; context = IOContext(stdout, :compact => true))
 
@@ -74,7 +75,7 @@ function Base.show(io::IO, ::MIME"text/plain", piecewise::Piecewise)
     end
 end
 
-function (piecewise::Piecewise)(X::Interval{T}) where T
+function (piecewise::Piecewise)(X::Interval{T}) where {T}
     set = Domain(inf(X), sup(X), true, true)
     if !isempty(setdiff(set, domain(piecewise)))
         dec = trv

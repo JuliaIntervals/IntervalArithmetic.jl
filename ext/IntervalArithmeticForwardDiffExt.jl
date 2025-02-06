@@ -90,4 +90,62 @@ function Base.:(^)(x::ExactReal, y::Dual{<:Ty}) where {Ty}
     end
 end
 
+# resolve ambiguity
+
+Base.convert(::Type{Dual{T,V,N}}, x::ExactReal) where {T,V,N} = Dual{T}(V(x), zero(Partials{N,V}))
+
+
+# Piecewise functions
+
+function (constant::Constant)(::Dual{T, Interval{S}}) where {T, S}
+    return Dual{T}(interval(S, constant.value), interval(S, 0.0))
+end
+
+function ForwardDiff.derivative(piecewise::Piecewise)
+    dfs = map(piecewise.fs)  do f
+        x -> ForwardDiff.derivative(f, x)
+    end
+
+    return Piecewise(
+        piecewise.domain,
+        dfs,
+        continuity .- 1,
+        piecewise.singularities
+    )
+end
+
+function (piecewise::Piecewise)(dual::Dual{T, <:Interval}) where {T}
+    X = value(dual)
+    set = Domain(inf(X), sup(X), true, true)
+    if !isempty(setdiff(set, domain(piecewise)))
+        dec = trv
+    elseif any(in(set), discontinuities(piecewise))
+        dec = def 
+    else
+        dec = com
+    end
+
+    dual_results = []
+    for (subdomain, f) in pieces(piecewise)
+        subset = intersect(set, subdomain)
+        isempty(subset) && continue
+        sub_X = interval(inf(subset), sup(subset), decoration(X))
+        sub_dual = Dual{T}(sub_X, partials(dual))
+        push!(dual_results, f(sub_dual))
+    end
+
+    results = value.(dual_results)
+    dec = min(dec, minimum(decoration.(results)))
+    primal = IntervalArithmetic.setdecoration(reduce(hull, results), dec)
+
+    dresults = partials.(dual_results)
+    partial = map(zip(dresults...)) do pp
+        pdec = min(dec, minimum(decoration.(pp)))
+        return IntervalArithmetic.setdecoration(reduce(hull, pp), pdec)
+    end
+
+    return Dual{T}(primal, tuple(partial...))
+end
+
+
 end
