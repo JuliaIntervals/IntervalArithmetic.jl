@@ -1,6 +1,10 @@
-using IntervalArithmetic
+struct Constant{T}
+    value::T
+end
 
-# represents a piecewise 1D function
+(constant::Constant)(::Any) = constant.value
+(constant::Constant)(::Interval) = interval(constant.value)
+
 struct Piecewise{T <: Tuple}
     pieces::T 
     continuous::Bool
@@ -31,8 +35,11 @@ function (piecewise::Piecewise)(X::Interval)
     used_pieces = filter(piece -> intersecting(X, piece[1]), piecewise.pieces)
     outputs = map(used_pieces) do (region, f)
         S = IntervalArithmetic.setdecoration(intersect_interval(X, region), decoration(X))
+        @show S
         return f(S)
     end
+
+    @show outputs
 
     dec = min(dec, minimum(decoration.(outputs)))
     return IntervalArithmetic.setdecoration(reduce(hull, outputs), dec)
@@ -44,11 +51,3 @@ function (piecewise::Piecewise)(x::Real)
     end
     throw(DomainError("piecewise function was called with $x which is outside of its domain $(domain(piecewise))"))
 end
-
-f = Piecewise(
-        0..3 => x -> x + 1,
-        3..6 => identity,
-        6..Inf => x -> x + 2
-)
-
-f(2..5)
