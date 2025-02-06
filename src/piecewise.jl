@@ -1,10 +1,54 @@
-import Intervals
-import Intervals: IntervalSet, less_than_disjoint, Open, Closed
+struct Domain{T <: NumTypes, L, R}
+    lo::T
+    hi::T
+end
 
-const Domain = Intervals.Interval
+Domain(lo, hi) = Domain{:open, :closed}(lo, hi)
+Domain(lo::Tuple, hi::Tuple) = Domain{lo[2], hi[2]}(lo[1], lo[2])
+Domain() = Domain{:open, :open}(Inf, -Inf)
+Domain(X::Interval) = Domain{:closed, :closed}(inf(X), sup(X))
 
-inf(x::Domain) = first(x)
-sup(x::Domain) = last(x)
+lowerbound(x::Domain{L, R}) where {L, R} = (x.lo, L)
+upperbound(x::Domain{L, R}) where {L, R} = (x.hi, R)
+
+inf(x::Domain) = x.lo
+sup(x::Domain) = x.hi
+
+function rightof(x, (val, bound))
+    bound == :closed && return val <= x
+    return val < x
+end
+
+function rightof((val1, bound1), (val2, bound2))
+    if val1 < val2 || (val1 == val2 && bound1 == bound2 == :closed)
+        return false
+    end
+
+    return true
+end
+
+function leftof(x, (val, bound))
+    bound == :closed && return x <= val
+    return x < val
+end
+
+function leftof((val1, bound1), (val2, bound2))
+    if val2 < val1 || (val1 == val2 && bound1 == bound2 == :closed)
+        return false
+    end
+
+    return true
+end
+
+Base.in(x::Real, domain::Domain) = rightof(x, lowerbound(domain)) && leftof(x, upperbound(domain))
+
+function Base.intersect(d1::Domain, d2::Domain)
+    left = max(lowerbound(d1), lowerbound(d2))
+    right = min(upperbound(d1), upperbound(d2))
+
+    left > right && return Domain()
+    return Domain(left, right)
+end
 
 struct Constant{T}
     value::T
@@ -38,7 +82,9 @@ function Piecewise(
         s1 = subdomains[k]
         s2 = subdomains[k + 1]
 
-        !less_than_disjoint(s1, s2) && throw(ArgumentError("domains are either not ordered or not disjoint"))
+        if rightof(upperbound(s1), lowerbound(s2))
+           throw(ArgumentError("domains are either not ordered or not disjoint"))
+        end
     end
 
     singularities = sup.(subdomains[1:end-1])
@@ -76,10 +122,32 @@ function Base.show(io::IO, ::MIME"text/plain", piecewise::Piecewise)
 end
 
 function (piecewise::Piecewise)(X::Interval{T}) where {T}
-    set = Domain(inf(X), sup(X), true, true)
-    isdisjoint(set, domain(piecewise)) && return emptyinterval(T)
+    set = Domain(X)
+    all(isempty, intersect.(Ref(set), subdomains(piecewise))) && return emptyinterval(T)
 
-    if !isempty(setdiff(set, domain(piecewise)))
+    # This logic exploits the fact that subdomains are ordered
+    lo = lowerbound(set)
+    istrivial = false
+    for subdomain in subdomains(piecewise)
+        if leftof(lo, lowerbound(subdomain))
+            istrivial = true
+            break
+        end
+
+        val, bound = lowerbound(subdomain)
+
+        if bound == :closed
+            lo = (val, :open)
+        else
+            lo = (val, :closed)
+        end
+    end
+
+    if rightof(upperbound(set), upperbound(subdomains(piecewise)[end]))
+        istrivial = true
+    end
+
+    if istrivial
         dec = trv
     elseif any(in(set), discontinuities(piecewise))
         dec = def 
