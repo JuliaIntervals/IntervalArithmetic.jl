@@ -110,7 +110,7 @@ function (piecewise::Piecewise)(dual::Dual{T, <:Interval}) where {T}
 
     if !isempty(setdiff(set, domain(piecewise)))
         dec = trv
-    elseif any(in(set), discontinuities(piecewise))
+    elseif any(in(set), discontinuities(piecewise, 1))
         dec = def 
     else
         dec = com

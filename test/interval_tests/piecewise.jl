@@ -1,7 +1,7 @@
 @testset "Step function" begin
     step = Piecewise(
-        Domain(-Inf, 0, false, true) => Constant(0),
-        Domain(0, Inf, false, false) => Constant(1)
+        Domain{Open, Closed}(-Inf, 0) => Constant(0),
+        Domain{Open, Open}(0, Inf) => Constant(1)
     )
 
     @test step(-1) == 0
@@ -16,8 +16,8 @@ end
 
 @testset "abs" begin
     myabs = Piecewise(
-        Domain(-Inf, 0, false, true) => x -> -x,
-        Domain(0, Inf, false, false) => identity ;
+        Domain{Open, Closed}(-Inf, 0) => x -> -x,
+        Domain{Open, Open}(0, Inf) => identity ;
         continuity = [0]
     )
 
@@ -46,9 +46,9 @@ end
 
 @testset "Derivatives" begin
     slide = Piecewise(
-        Domain(-Inf, -1, false, true) => x -> -2x - 1,
-        Domain(-1, 0, false, true) => x -> x^2,
-        Domain(0, Inf, false, false) => Constant(0) ;
+        Domain{Open, Closed}(-Inf, -1) => x -> -2x - 1,
+        Domain{Open, Closed}(-1, 0) => x -> x^2,
+        Domain{Open, Open}(0, Inf) => Constant(0) ;
         continuity = [1, 1]
     )
 
@@ -99,6 +99,27 @@ end
     @test isequal_interval(grad2[2], g2)
 
     grad = ForwardDiff.gradient(xx -> slide(-xx[1]^2 + 0.7xx[2]), [x1, x2])
+    g1 = -2x1 * ForwardDiff.derivative(slide, -x1^2 + 0.7x2)
+    g2 = 0.7 * ForwardDiff.derivative(slide, -x1^2 + 0.7x2)
     @test isequal_interval(grad[1], g1)
     @test isequal_interval(grad[2], g2)
+end
+
+@testset "Singularities" begin
+    f = Piecewise(
+        Domain{Open, Closed}(0, 1) => Constant(0),
+        Domain{Open, Closed}(1, 2) => x -> 0.5x,
+        Domain{Open, Closed}(2, 3) => Constant(1),
+        Domain{Open, Open}(3, 4) => x -> (x-3)^2 + 1 ;
+        continuity = [-1, 0, 1]
+    )
+
+    @test decoration(f(interval(0.5, 1.5))) == def
+    @test decoration(f(interval(1.5, 2.5))) == com
+    @test decoration(f(interval(2.5, 3.5))) == com
+
+    df = x -> ForwardDiff.derivative(f, x)
+    @test decoration(df(interval(0.5, 1.5))) == def
+    @test decoration(df(interval(1.5, 2.5))) == def
+    @test decoration(df(interval(2.5, 3.5))) == com
 end

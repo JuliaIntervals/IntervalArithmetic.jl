@@ -1,5 +1,5 @@
 import Intervals
-import Intervals: IntervalSet, less_than_disjoint
+import Intervals: IntervalSet, less_than_disjoint, Open, Closed
 
 const Domain = Intervals.Interval
 
@@ -54,7 +54,7 @@ end
 subdomains(piecewise::Piecewise) = convert(Vector, piecewise.domain)
 domain(piecewise::Piecewise) = piecewise.domain
 pieces(piecewise::Piecewise) = zip(subdomains(piecewise), piecewise.fs)
-discontinuities(piecewise::Piecewise) = piecewise.singularities[piecewise.continuity .< 0]
+discontinuities(piecewise::Piecewise, order = 0) = piecewise.singularities[piecewise.continuity .< order]
 
 domain_string(x::Domain) = repr(x ; context = IOContext(stdout, :compact => true))
 
