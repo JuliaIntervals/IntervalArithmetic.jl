@@ -114,9 +114,9 @@ end
 isinterior(x, y, z, w...) = isinterior(x, y) & isinterior(y, z, w...)
 
 """
-    isdisjoint_interval(x, y)
+    isdisjoint_interval(x, y, z...)
 
-Test whether `x` and `y` have no common elements.
+Test whether the given intervals have no common elements.
 
 Implement the `disjoint` function of the IEEE Standard 1788-2015 (Table 9.3).
 """
@@ -138,7 +138,11 @@ function isdisjoint_interval(x::AbstractVector, y::AbstractVector)
     return any(t -> isdisjoint_interval(t[1], t[2]), zip(x, y))
 end
 
-isdisjoint_interval(x, y, z, w...) = isdisjoint_interval(x, y) & isdisjoint_interval(x, z) & isdisjoint_interval(y, z, w...)
+isdisjoint_interval(x, y, z, w...) = _isdisjoint_interval(x, y, z, w...)
+
+_isdisjoint_interval(x) = true
+_isdisjoint_interval(x, y) = isdisjoint_interval(x, y)
+_isdisjoint_interval(x, y, z, w...) = _isdisjoint_interval(x, y) && _isdisjoint_interval(x, z) && _isdisjoint_interval(x, w...) && _isdisjoint_interval(y, z, w...)
 
 """
     isweakless(x, y)

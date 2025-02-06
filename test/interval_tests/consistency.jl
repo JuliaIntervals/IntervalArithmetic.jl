@@ -104,6 +104,7 @@
         @test !(isdisjoint_interval(a, b))
         @test isdisjoint_interval(emptyinterval(a), a)
         @test isdisjoint_interval(emptyinterval(), emptyinterval())
+        @test isdisjoint_interval(interval(1, 2), interval(3, 4), interval(5, 6), interval(1, 2))
     end
 
     @testset "Comparison tests" begin
