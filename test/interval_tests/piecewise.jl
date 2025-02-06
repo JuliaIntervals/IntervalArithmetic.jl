@@ -30,3 +30,16 @@ end
     @test isequal_interval(myabs(interval(-22.2, 33.3)), interval(0, 33.3))
     @test decoration(myabs(interval(-11, 11))) == dac
 end
+
+@testset "Out of domain" begin
+    window = Piecewise(
+        interval(-π, π) => x -> 1/2 * (cos(x) + 1)
+    )
+
+    @test_throws DomainError window(123)
+    @test isequal_interval(window(interval(0, π)), interval(0, 1))
+    @test decoration(window(interval(-π, 0))) == com
+    @test isequal_interval(window(interval(-10, 10)), interval(0, 1))
+    @test decoration(window(interval(-10, 10))) == trv
+    @test isempty_interval(window(interval(100, 1000)))
+end
