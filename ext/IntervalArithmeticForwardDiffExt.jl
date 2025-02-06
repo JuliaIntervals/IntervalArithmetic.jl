@@ -101,22 +101,13 @@ function (constant::Constant)(::Dual{T, Interval{S}}) where {T, S}
     return Dual{T}(interval(S, constant.value), interval(S, 0.0))
 end
 
-function ForwardDiff.derivative(piecewise::Piecewise)
-    dfs = map(piecewise.fs)  do f
-        x -> ForwardDiff.derivative(f, x)
-    end
-
-    return Piecewise(
-        piecewise.domain,
-        dfs,
-        continuity .- 1,
-        piecewise.singularities
-    )
-end
-
 function (piecewise::Piecewise)(dual::Dual{T, <:Interval}) where {T}
     X = value(dual)
     set = Domain(inf(X), sup(X), true, true)
+    if isdisjoint(set, domain(piecewise))
+        return Dual{T}(emptyinterval(X), emptyinterval(X) .* partials(dual))
+    end
+
     if !isempty(setdiff(set, domain(piecewise)))
         dec = trv
     elseif any(in(set), discontinuities(piecewise))
