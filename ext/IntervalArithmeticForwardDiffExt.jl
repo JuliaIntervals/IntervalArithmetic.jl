@@ -90,10 +90,6 @@ function Base.:(^)(x::ExactReal, y::Dual{<:Ty}) where {Ty}
     end
 end
 
-# resolve ambiguity
-
-Base.convert(::Type{Dual{T,V,N}}, x::ExactReal) where {T,V,N} = Dual{T}(V(x), zero(Partials{N,V}))
-
 
 # Piecewise functions
 

@@ -1,7 +1,55 @@
+using IntervalArithmetic: leftof
+
+@testset "Domain" begin
+    @testset "leftof" begin
+        d1 = Domain{:open, :closed}(0, 1)
+        d2 = Domain{:open, :open}(0, 1)
+        d3 = Domain{:open, :closed}(1, 2)
+        d4 = Domain{:closed, :closed}(1, 2)
+
+        @test !leftof(d1, d2)
+        @test leftof(d1, d3)
+        @test !leftof(d1, d4)
+
+        @test leftof(d2, d3)
+        @test leftof(d2, d4)
+    end
+
+    @testset "intersect" begin
+        d1 = Domain{:closed, :open}(0, 10)
+        d2 = Domain{:closed, :open}(2, 15)
+        d3 = Domain{:open, :closed}(4, 7)
+        d4 = Domain{:open, :closed}(-20, 3)
+
+        @test intersect(d1, d2) == Domain{:closed, :open}(2, 10)
+        @test intersect(d1, d3) == Domain{:open, :closed}(4, 7)
+        @test intersect(d1, d4) == Domain{:closed, :closed}(0, 3)
+        @test intersect(d2, d3) == Domain{:open, :closed}(4, 7)
+        @test intersect(d2, d4) == Domain{:closed, :closed}(2, 3)
+        @test intersect(d3, d4) == Domain()
+    end
+
+    @testset "isempty" begin
+        @test isempty(Domain{:open, :open}(1, 1))
+        @test !isempty(Domain{:closed, :closed}(1, 1))
+        @test !isempty(Domain{:open, :open}(1, 2))
+        @test isempty(Domain())
+    end
+end
+
+@testset "Piecewise constructor" begin
+    d1 = Domain{:open, :closed}(0, 1)
+    d2 = Domain{:open, :closed}(1, 2)
+    d3 = Domain{:closed, :closed}(1, 2)
+
+    @test_throws ArgumentError Piecewise(d2 => Constant(0), d1 => Constant(1))
+    @test_throws ArgumentError Piecewise(d1 => Constant(0), d3 => Constant(1))
+end
+
 @testset "Step function" begin
     step = Piecewise(
-        Domain{Open, Closed}(-Inf, 0) => Constant(0),
-        Domain{Open, Open}(0, Inf) => Constant(1)
+        Domain{:open, :closed}(-Inf, 0) => Constant(0),
+        Domain{:open, :open}(0, 1000) => Constant(1)
     )
 
     @test step(-1) == 0
@@ -12,12 +60,13 @@
     @test decoration(step(interval(4.44))) == com
     @test isequal_interval(step(interval(-22.2, 33.3)), interval(0, 1))
     @test decoration(step(interval(-11, 11))) == def
+    @test decoration(step(interval(500, 2000))) == trv
 end
 
 @testset "abs" begin
     myabs = Piecewise(
-        Domain{Open, Closed}(-Inf, 0) => x -> -x,
-        Domain{Open, Open}(0, Inf) => identity ;
+        Domain{:open, :closed}(-Inf, 0) => x -> -x,
+        Domain{:open, :open}(0, Inf) => identity ;
         continuity = [0]
     )
 
@@ -46,9 +95,9 @@ end
 
 @testset "Derivatives" begin
     slide = Piecewise(
-        Domain{Open, Closed}(-Inf, -1) => x -> -2x - 1,
-        Domain{Open, Closed}(-1, 0) => x -> x^2,
-        Domain{Open, Open}(0, Inf) => Constant(0) ;
+        Domain{:open, :closed}(-Inf, -1) => x -> -2x - 1,
+        Domain{:open, :closed}(-1, 0) => x -> x^2,
+        Domain{:open, :open}(0, Inf) => Constant(0) ;
         continuity = [1, 1]
     )
 
@@ -107,10 +156,10 @@ end
 
 @testset "Singularities" begin
     f = Piecewise(
-        Domain{Open, Closed}(0, 1) => Constant(0),
-        Domain{Open, Closed}(1, 2) => x -> 0.5x,
-        Domain{Open, Closed}(2, 3) => Constant(1),
-        Domain{Open, Open}(3, 4) => x -> (x-3)^2 + 1 ;
+        Domain{:open, :closed}(0, 1) => Constant(0),
+        Domain{:open, :closed}(1, 2) => x -> 0.5x,
+        Domain{:open, :closed}(2, 3) => Constant(1),
+        Domain{:open, :open}(3, 4) => x -> (x-3)^2 + 1 ;
         continuity = [-1, 0, 1]
     )
 

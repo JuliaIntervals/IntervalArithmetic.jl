@@ -1,12 +1,13 @@
-struct Domain{T <: NumTypes, L, R}
+struct Domain{L, R, T, S}
     lo::T
-    hi::T
+    hi::S
 end
 
+Domain{L, R}(lo::T, hi::S) where {T, S, L, R} = Domain{L, R, T, S}(lo, hi)
 Domain(lo, hi) = Domain{:open, :closed}(lo, hi)
-Domain(lo::Tuple, hi::Tuple) = Domain{lo[2], hi[2]}(lo[1], lo[2])
-Domain() = Domain{:open, :open}(Inf, -Inf)
+Domain(lo::Tuple, hi::Tuple) = Domain{lo[2], hi[2]}(lo[1], hi[1])
 Domain(X::Interval) = Domain{:closed, :closed}(inf(X), sup(X))
+Domain() = Domain{:open, :open}(Inf, -Inf)
 
 lowerbound(x::Domain{L, R}) where {L, R} = (x.lo, L)
 upperbound(x::Domain{L, R}) where {L, R} = (x.hi, R)
@@ -14,7 +15,12 @@ upperbound(x::Domain{L, R}) where {L, R} = (x.hi, R)
 inf(x::Domain) = x.lo
 sup(x::Domain) = x.hi
 
-function rightof(x, (val, bound))
+"""
+    rightof(val, lowerbound)
+
+Determine if a value is on the right of a lower bound.
+"""
+function rightof(x::Real, (val, bound))
     bound == :closed && return val <= x
     return val < x
 end
@@ -27,7 +33,12 @@ function rightof((val1, bound1), (val2, bound2))
     return true
 end
 
-function leftof(x, (val, bound))
+"""
+    leftof(val, upperbound)
+
+Determine if a value is on the left of an upper bound.
+"""
+function leftof(x::Real, (val, bound))
     bound == :closed && return x <= val
     return x < val
 end
@@ -40,6 +51,14 @@ function leftof((val1, bound1), (val2, bound2))
     return true
 end
 
+function leftof(d1::Domain, d2::Domain)
+    val1, bound1 = upperbound(d1)
+    val2, bound2 = lowerbound(d2)
+
+    val1 == val2 && return !(bound1 == bound2 == :closed)
+    return val1 < val2
+end
+
 Base.in(x::Real, domain::Domain) = rightof(x, lowerbound(domain)) && leftof(x, upperbound(domain))
 
 function Base.intersect(d1::Domain, d2::Domain)
@@ -50,6 +69,14 @@ function Base.intersect(d1::Domain, d2::Domain)
     return Domain(left, right)
 end
 
+function Base.isempty(domain::Domain)
+    lo, lobound = lowerbound(domain)
+    hi, hibound = upperbound(domain)
+
+    lo == hi && return !(lobound == hibound == :closed)
+    return lo > hi
+end
+
 struct Constant{T}
     value::T
 end
@@ -57,8 +84,9 @@ end
 (constant::Constant)(::Any) = constant.value
 (constant::Constant)(::Interval) = interval(constant.value)
 
+# TODO Proper type parameters
 struct Piecewise
-    domain::IntervalSet
+    domain::Vector
     fs
     continuity::Vector{Int}
     singularities::Vector
@@ -82,14 +110,14 @@ function Piecewise(
         s1 = subdomains[k]
         s2 = subdomains[k + 1]
 
-        if rightof(upperbound(s1), lowerbound(s2))
+        if !leftof(s1, s2)
            throw(ArgumentError("domains are either not ordered or not disjoint"))
         end
     end
 
     singularities = sup.(subdomains[1:end-1])
 
-    return Piecewise(IntervalSet(subdomains), fs, continuity, singularities)
+    return Piecewise(subdomains, fs, continuity, singularities)
 end
 
 function Piecewise(pairs::Vararg{<:Pair} ; continuity = fill(-1, length(pairs) - 1))
@@ -104,7 +132,7 @@ discontinuities(piecewise::Piecewise, order = 0) = piecewise.singularities[piece
 
 domain_string(x::Domain) = repr(x ; context = IOContext(stdout, :compact => true))
 
-function domain_string(S::IntervalSet)
+function domain_string(S::Vector{<:Domain})
     r = repr("text/plain", S ; context = IOContext(stdout, :compact => true))
     return join(split(r, "\n")[2:end], " ∪ ")
 end
@@ -128,13 +156,17 @@ function (piecewise::Piecewise)(X::Interval{T}) where {T}
     # This logic exploits the fact that subdomains are ordered
     lo = lowerbound(set)
     istrivial = false
+
     for subdomain in subdomains(piecewise)
-        if leftof(lo, lowerbound(subdomain))
+
+        if !rightof(lo, lowerbound(subdomain))
             istrivial = true
             break
         end
 
-        val, bound = lowerbound(subdomain)
+        val, bound = upperbound(subdomain)
+
+        val > upperbound(set)[1] && break
 
         if bound == :closed
             lo = (val, :open)
