@@ -77,6 +77,7 @@ function Base.isempty(domain::Domain)
     return lo > hi
 end
 
+
 struct Constant{T}
     value::T
 end
@@ -120,7 +121,7 @@ function Piecewise(
     return Piecewise(subdomains, fs, continuity, singularities)
 end
 
-function Piecewise(pairs::Vararg{<:Pair} ; continuity = fill(-1, length(pairs) - 1))
+function Piecewise(pairs::Vararg{Pair} ; continuity = fill(-1, length(pairs) - 1))
     pairs = collect(pairs)
     return Piecewise(first.(pairs), last.(pairs), continuity)
 end
@@ -149,24 +150,20 @@ function Base.show(io::IO, ::MIME"text/plain", piecewise::Piecewise)
     end
 end
 
-function (piecewise::Piecewise)(X::Interval{T}) where {T}
-    set = Domain(X)
-    all(isempty, intersect.(Ref(set), subdomains(piecewise))) && return emptyinterval(T)
+function indomain(domain, piecewise)
+    rightof(upperbound(domain), upperbound(subdomains(piecewise)[end])) && return false
 
-    # This logic exploits the fact that subdomains are ordered
-    lo = lowerbound(set)
-    istrivial = false
+    # This relies on the fact that subdomains are ordered
+    lo = lowerbound(domain)
 
     for subdomain in subdomains(piecewise)
-
         if !rightof(lo, lowerbound(subdomain))
-            istrivial = true
-            break
+            return false
         end
 
         val, bound = upperbound(subdomain)
 
-        val > upperbound(set)[1] && break
+        val > upperbound(domain)[1] && break
 
         if bound == :closed
             lo = (val, :open)
@@ -175,11 +172,16 @@ function (piecewise::Piecewise)(X::Interval{T}) where {T}
         end
     end
 
-    if rightof(upperbound(set), upperbound(subdomains(piecewise)[end]))
-        istrivial = true
-    end
+    return true
+end
 
-    if istrivial
+overlapdomain(domain, piecewise) = any(!isempty, intersect.(Ref(domain), subdomains(piecewise)))
+
+function (piecewise::Piecewise)(X::Interval{T}) where {T}
+    set = Domain(X)
+    !overlapdomain(set, piecewise) && return emptyinterval(T)
+
+    if !indomain(set, piecewise)
         dec = trv
     elseif any(in(set), discontinuities(piecewise))
         dec = def 

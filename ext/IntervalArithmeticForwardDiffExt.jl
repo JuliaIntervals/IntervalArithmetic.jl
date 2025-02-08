@@ -99,12 +99,12 @@ end
 
 function (piecewise::Piecewise)(dual::Dual{T, <:Interval}) where {T}
     X = value(dual)
-    set = Domain(inf(X), sup(X), true, true)
-    if isdisjoint(set, domain(piecewise))
+    set = Domain(X)
+    if !IntervalArithmetic.overlapdomain(set, piecewise) 
         return Dual{T}(emptyinterval(X), emptyinterval(X) .* partials(dual))
     end
 
-    if !isempty(setdiff(set, domain(piecewise)))
+    if !IntervalArithmetic.indomain(set, piecewise)
         dec = trv
     elseif any(in(set), discontinuities(piecewise, 1))
         dec = def 
