@@ -41,7 +41,7 @@ include("interval_operations/overlap.jl")
 include("interval_operations/numeric.jl")
     export inf, sup, bounds, mid, diam, radius, midradius, mag, mig, dist
 include("interval_operations/set_operations.jl")
-    export intersect_interval, hull, interiordiff, interval_diff
+    export intersect_interval, hull, interiordiff
 include("interval_operations/bisect.jl")
     export bisect, mince, mince!
 
