@@ -110,7 +110,7 @@ julia> c(22.2)
 1.2
 
 julia> c(interval(0, 1.3))
-[1.19999, 1.20001]_com
+Interval{Float64}(1.2, 1.2, com)
 ```
 
 Note that this is not equivalent to `Returns(value)` from base,
@@ -131,7 +131,7 @@ end
 A function defined by pieces (each associating a domain to a function).
 Support both intervals and standard numbers.
 
-```jldoctest
+```jl
 julia> myabs = Piecewise(
           Domain{:open, :closed}(-Inf, 0) => x -> -x,
           Domain{:open, :open}(0, Inf) => identity
@@ -144,7 +144,7 @@ julia> myabs(-22.3)
 22.3
 
 julia> myabs(interval(-5, 5))
-[0.0, 5.0]_def
+Interval{Float64}(0.0, 5.0, def)
 ```
 
 For constant pieces, it is recommended to use `Constant`
