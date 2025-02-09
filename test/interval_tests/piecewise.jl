@@ -87,7 +87,7 @@ end
 
 @testset "Out of domain" begin
     window = Piecewise(
-        Domain(-π, π) => x -> 1/2 * (cos(x) + 1)
+        Domain{:open, :closed}(-π, π) => x -> 1/2 * (cos(x) + 1)
     )
 
     @test_throws DomainError window(123)

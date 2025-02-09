@@ -11,7 +11,6 @@ struct Domain{L, R, T, S}
 end
 
 Domain{L, R}(lo::T, hi::S) where {T, S, L, R} = Domain{L, R, T, S}(lo, hi)
-Domain(lo, hi) = Domain{:open, :closed}(lo, hi)
 Domain(lo::Tuple, hi::Tuple) = Domain{lo[2], hi[2]}(lo[1], hi[1])
 Domain(X::Interval) = Domain{:closed, :closed}(inf(X), sup(X))
 Domain() = Domain{:open, :open}(Inf, -Inf)
@@ -92,40 +91,51 @@ end
 (constant::Constant)(::Any) = constant.value
 (constant::Constant)(::Interval) = interval(constant.value)
 
-# TODO Proper type parameters
-struct Piecewise
-    domain::Vector
-    fs
-    continuity::Vector{Int}
-    singularities::Vector
+struct Piecewise{N, D<:Tuple, F<:Tuple, S<:Tuple}
+    domains::D
+    fs::F
+    continuity::NTuple{N, Int}
+    singularities::S
+
+    function Piecewise(domains::D, fs::F, continuity::NTuple{N, Int}, singularities::S) where {D, F, N, S}
+        if !(N + 1 == length(domains) == length(fs))
+            throw(ArgumentError(
+                "a Piecewise function must have as many domains as functions, " *
+                "and one less continuity point. " *
+                "Given: $(length(domains)) domains, $(length(fs)) functions, " *
+                "$N continuity points."))
+        end
+
+        return new{N, D, F, S}(domains, fs, continuity, singularities)
+    end
 end
 
 function Piecewise(
-        subdomains::Vector{<:Domain},
+        domains::Vector{<:Domain},
         fs,
-        continuity::Vector{Int} = fill(-1, length(subdomains) - 1))
+        continuity::Vector{Int} = fill(-1, length(domains) - 1))
 
-    if length(subdomains) != length(fs)
+    if length(domains) != length(fs)
         throw(ArgumentError("the number of domains and the number of functions don't match"))
     end
     
-    if length(subdomains) - 1 != length(continuity)
-        n = length(subdomains)
+    if length(domains) - 1 != length(continuity)
+        n = length(domains)
         throw(ArgumentError("$(length(sub)) junction points but $(n - 1) are expected based on the number of domains ($n)"))
     end
 
-    for k in 1:length(subdomains) - 1
-        s1 = subdomains[k]
-        s2 = subdomains[k + 1]
+    for k in 1:length(domains) - 1
+        s1 = domains[k]
+        s2 = domains[k + 1]
 
         if !leftof(s1, s2)
            throw(ArgumentError("domains are either not ordered or not disjoint"))
         end
     end
 
-    singularities = sup.(subdomains[1:end-1])
+    singularities = sup.(domains[1:end-1])
 
-    return Piecewise(subdomains, fs, continuity, singularities)
+    return Piecewise(Tuple(domains), Tuple(fs), Tuple(continuity), Tuple(singularities))
 end
 
 function Piecewise(pairs::Vararg{Pair} ; continuity = fill(-1, length(pairs) - 1))
@@ -133,42 +143,46 @@ function Piecewise(pairs::Vararg{Pair} ; continuity = fill(-1, length(pairs) - 1
     return Piecewise(first.(pairs), last.(pairs), continuity)
 end
 
-subdomains(piecewise::Piecewise) = convert(Vector, piecewise.domain)
-domain(piecewise::Piecewise) = piecewise.domain
-pieces(piecewise::Piecewise) = zip(subdomains(piecewise), piecewise.fs)
-discontinuities(piecewise::Piecewise, order = 0) = piecewise.singularities[piecewise.continuity .< order]
+domains(piecewise::Piecewise) = piecewise.domains
+pieces(piecewise::Piecewise) = zip(domains(piecewise), piecewise.fs)
 
-domain_string(x::Domain) = repr(x ; context = IOContext(stdout, :compact => true))
-
-function domain_string(S::Vector{<:Domain})
-    r = repr("text/plain", S ; context = IOContext(stdout, :compact => true))
-    return join(split(r, "\n")[2:end], " ∪ ")
+function discontinuities(piecewise::Piecewise, order = 0)
+    return [s for (s, C) in zip(piecewise.singularities, piecewise.continuity) if C .< order]
 end
 
-domain_string(piecewise::Piecewise) = domain_string(domain(piecewise))
+function domain_string(domain::Domain{L, R}) where {L, R}
+    left = (L == :closed) ? "[" : "("
+    right = (R == :closed) ? "]" : ")"
+
+    return "$left$(domain.lo), $(domain.hi)$right"
+end
+
+function domain_string(piecewise::Piecewise)
+    join(domain_string.(domains(piecewise)), " ∪ ")
+end
 
 function Base.show(io::IO, ::MIME"text/plain", piecewise::Piecewise)
     n = length(pieces(piecewise))
     print(io, "Piecewise function with $n pieces:")
     
-    for (subdomain, f) in pieces(piecewise)
+    for (domain, f) in pieces(piecewise)
         println(io)
-        print(io, "  $(domain_string(subdomain)) -> $(repr(f))")
+        print(io, "  $(domain_string(domain)) -> $(repr(f))")
     end
 end
 
 function indomain(domain, piecewise)
-    rightof(upperbound(domain), upperbound(subdomains(piecewise)[end])) && return false
+    rightof(upperbound(domain), upperbound(domains(piecewise)[end])) && return false
 
-    # This relies on the fact that subdomains are ordered
+    # This relies on the fact that domains are ordered
     lo = lowerbound(domain)
 
-    for subdomain in subdomains(piecewise)
-        if !rightof(lo, lowerbound(subdomain))
+    for domain in domains(piecewise)
+        if !rightof(lo, lowerbound(domain))
             return false
         end
 
-        val, bound = upperbound(subdomain)
+        val, bound = upperbound(domain)
 
         val > upperbound(domain)[1] && break
 
@@ -182,7 +196,7 @@ function indomain(domain, piecewise)
     return true
 end
 
-overlapdomain(domain, piecewise) = any(!isempty, intersect.(Ref(domain), subdomains(piecewise)))
+overlapdomain(domain, piecewise) = any(!isempty, intersect.(Ref(domain), domains(piecewise)))
 
 function (piecewise::Piecewise)(X::Interval{T}) where {T}
     set = Domain(X)
@@ -197,8 +211,8 @@ function (piecewise::Piecewise)(X::Interval{T}) where {T}
     end
 
     results = Interval{T}[]
-    for (subdomain, f) in pieces(piecewise)
-        subset = intersect(set, subdomain)
+    for (domain, f) in pieces(piecewise)
+        subset = intersect(set, domain)
         isempty(subset) && continue
         push!(results, f(interval(inf(subset), sup(subset), decoration(X))))
     end
@@ -208,8 +222,8 @@ function (piecewise::Piecewise)(X::Interval{T}) where {T}
 end
 
 function (piecewise::Piecewise)(x::Real)
-    for (subdomain, f) in pieces(piecewise)
-        (x in subdomain) && return f(x)
+    for (domain, f) in pieces(piecewise)
+        (x in domain) && return f(x)
     end
     throw(DomainError(x, "piecewise function was called outside of its domain $(domain_string(piecewise))"))
 end
