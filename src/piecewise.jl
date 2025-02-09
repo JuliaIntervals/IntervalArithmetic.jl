@@ -1,6 +1,13 @@
 struct Domain{L, R, T, S}
     lo::T
     hi::S
+
+    function Domain{L, R, T, S}(lo::T, hi::S) where {L, R, T, S}
+        (!(L in (:open, :closed)) || !(R in (:open, :closed))) && throw(ErrorException(
+            "Domain bound must be either :open or :closed, got $L and $R instead"
+        ))
+        return new{L, R, T, S}(lo, hi)
+    end
 end
 
 Domain{L, R}(lo::T, hi::S) where {T, S, L, R} = Domain{L, R, T, S}(lo, hi)

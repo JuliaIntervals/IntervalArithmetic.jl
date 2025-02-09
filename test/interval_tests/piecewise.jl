@@ -1,6 +1,11 @@
 using IntervalArithmetic: leftof
 
 @testset "Domain" begin
+    @testset "Construction" begin
+        @test_throws ErrorException Domain{:oopen, :closed}(0, 1)
+        @test_throws ErrorException Domain{:open, :close}(0, 1)
+    end
+
     @testset "leftof" begin
         d1 = Domain{:open, :closed}(0, 1)
         d2 = Domain{:open, :open}(0, 1)
