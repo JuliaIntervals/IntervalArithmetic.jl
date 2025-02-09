@@ -204,7 +204,7 @@ end
 
 function interval_diff(x::Interval{T}, y::Interval) where {T<:NumTypes}
     isdisjoint_interval(x, y) && return [x]
-    isequal_interval(x, y) && return Interval{T}[]
+    issubset_interval(x, y) && return Interval{T}[]
 
     intersection = intersect_interval(x, y)
     inf(x) == inf(intersection) && return [interval(sup(intersection), sup(x))]
