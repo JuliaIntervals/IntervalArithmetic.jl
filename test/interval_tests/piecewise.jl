@@ -4,6 +4,15 @@ using IntervalArithmetic: leftof
     @testset "Construction" begin
         @test_throws ErrorException Domain{:oopen, :closed}(0, 1)
         @test_throws ErrorException Domain{:open, :close}(0, 1)
+        @test_throws MethodError Piecewise(
+            (Domain{:closed, :closed}(1, 2), Domain{:open, :open}(2, 3)),
+            (sin, cos), (-1,), (2, 3))
+        @test_throws ArgumentError Piecewise(
+            (Domain{:closed, :closed}(1, 2), Domain{:open, :open}(2, 3)),
+            (sin, cos), (-1,-1), (2, 3))
+        @test_throws MethodError Piecewise(
+            (Domain{:closed, :closed}(1, 2), Domain{:open, :open}(2, 3)),
+            (sin, cos, log), (-1,), (2))
     end
 
     @testset "leftof" begin

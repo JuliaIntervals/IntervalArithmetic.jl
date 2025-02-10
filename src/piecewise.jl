@@ -174,29 +174,31 @@ The piecewise function can have a gap between two pieces.
 In this case, the `continuity` optional argument is ignored,
 and interval spanning over the gap always as the `trv` decoration.
 """
-struct Piecewise{N, D<:Tuple, F<:Tuple, S<:Tuple}
+struct Piecewise{N, M, D<:NTuple{N, Domain}, F<:NTuple{N, Any}, S<:NTuple{M, Real}}
     domains::D
     fs::F
-    continuity::NTuple{N, Int}
+    continuity::NTuple{M, Int}
     singularities::S
 
-    function Piecewise(domains::D, fs::F, continuity::NTuple{N, Int}, singularities::S) where {D, F, N, S}
-        if !(N + 1 == length(domains) == length(fs))
-            throw(ArgumentError(
-                "a Piecewise function must have as many domains as functions, " *
-                "and one less continuity point. " *
-                "Given: $(length(domains)) domains, $(length(fs)) functions, " *
-                "$N continuity points."))
-        end
+    function Piecewise(
+            domains::NTuple{N, Domain},
+            fs::NTuple{N, Any},
+            continuity::NTuple{M, Int},
+            singularities::NTuple{M, Real}) where {N, M}
 
-        return new{N, D, F, S}(domains, fs, continuity, singularities)
+        N != M + 1 && throw(ArgumentError(
+                "a Piecewise function with N pieces must have N - 1 singularities. " *
+                "Given: $N pieces and $M singularities."
+        ))
+
+        return new{N, M, typeof(domains), typeof(fs), typeof(singularities)}(domains, fs, continuity, singularities)
     end
 end
 
 function Piecewise(
-        domains::Vector{<:Domain},
-        fs,
-        continuity::Vector{Int} = fill(-1, length(domains) - 1))
+        domains::NTuple{N, Domain},
+        fs::NTuple{N, Any},
+        continuity::NTuple{M, Int} = ntuple(i -> -1, Vla(N-1))) where {N, M}
 
     if length(domains) != length(fs)
         throw(ArgumentError("the number of domains and the number of functions don't match"))
@@ -221,9 +223,11 @@ function Piecewise(
     return Piecewise(Tuple(domains), Tuple(fs), Tuple(continuity), Tuple(singularities))
 end
 
-function Piecewise(pairs::Vararg{Pair} ; continuity = fill(-1, length(pairs) - 1))
-    pairs = collect(pairs)
-    return Piecewise(first.(pairs), last.(pairs), continuity)
+function Piecewise(
+        pairs::Vararg{Pair, N} ;
+        continuity = ntuple(i -> -1, Val(N - 1))) where N
+
+    return Piecewise(first.(pairs), last.(pairs), Tuple(continuity))
 end
 
 domains(piecewise::Piecewise) = piecewise.domains
