@@ -1,3 +1,5 @@
+using IntervalArithmetic: interval_diff
+
 @testset "removed interval" begin
     @test_throws ArgumentError intersect(interval(1))
     @test_throws ArgumentError intersect(interval(1), 2, [1], 4., 5)
@@ -36,4 +38,23 @@ end
     z = interval(0, 5)
     @test interiordiff(x, z) == Interval{Float64}[]
     @test all(isequal_interval.(interiordiff(z, x), [interval(0, 1), interval(3, 5)]))
+end
+
+@testset "interval_diff" begin
+    A, B = interval_diff(interval(1, 10), interval(2, 5))
+    @test isequal_interval(A, interval(1, 2))
+    @test isequal_interval(B, interval(5, 10))
+
+    @test isequal_interval(
+        only(interval_diff(interval(1, 10), interval(1, 5))),
+        interval(5, 10)
+    )
+
+    @test isequal_interval(
+        only(interval_diff(interval(1, 10), interval(7, 12))),
+        interval(1, 7)
+    )
+
+    @test interval_diff(interval(1, 10), interval(-1, 14)) == []
+    @test interval_diff(interval(1, 10), interval(1, 10)) == []
 end

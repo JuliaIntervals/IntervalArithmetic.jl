@@ -201,3 +201,17 @@ function _interiordiff(x::Interval, y::Interval)
     t = isguaranteed(x) & isguaranteed(y)
     return (_unsafe_interval(h₁, d, t), _unsafe_interval(h₂, d, t), _unsafe_interval(inter, d, t))
 end
+
+function interval_diff(x::Interval{T}, y::Interval) where {T<:NumTypes}
+    isdisjoint_interval(x, y) && return [x]
+    issubset_interval(x, y) && return Interval{T}[]
+
+    intersection = intersect_interval(x, y)
+    inf(x) == inf(intersection) && return [interval(sup(intersection), sup(x))]
+    sup(x) == sup(intersection) && return [interval(inf(x), inf(intersection))]
+
+    return [
+        interval(inf(x), inf(intersection)),
+        interval(sup(intersection), sup(x))
+    ]
+end

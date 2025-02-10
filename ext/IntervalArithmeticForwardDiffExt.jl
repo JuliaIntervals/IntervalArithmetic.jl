@@ -1,6 +1,7 @@
 module IntervalArithmeticForwardDiffExt
 
 using IntervalArithmetic, ForwardDiff
+using IntervalArithmetic: isempty_domain, overlap_domain, intersect_domain, in_domain, leftof
 using ForwardDiff: Dual, Partials, ≺, value, partials
 
 ForwardDiff.can_dual(::Type{ExactReal}) = true
@@ -89,5 +90,50 @@ function Base.:(^)(x::ExactReal, y::Dual{<:Ty}) where {Ty}
         return Dual{Ty}(expv, expv * log(x) * partials(y))
     end
 end
+
+
+# Piecewise functions
+
+function (constant::Constant)(::Dual{T, Interval{S}}) where {T, S}
+    return Dual{T}(interval(S, constant.value), interval(S, 0.0))
+end
+
+function (piecewise::Piecewise)(dual::Dual{T, <:Interval}) where {T}
+    X = value(dual)
+    input_domain = Domain(X)
+    if !overlap_domain(input_domain, piecewise) 
+        return Dual{T}(emptyinterval(X), emptyinterval(X) .* partials(dual))
+    end
+
+    if !in_domain(input_domain, piecewise)
+        dec = trv
+    elseif any(x -> in_domain(x, input_domain), discontinuities(piecewise, 1))
+        dec = def 
+    else
+        dec = com
+    end
+
+    dual_piece_outputs = []
+    for (piece_domain, f) in pieces(piecewise)
+        piece_input = intersect_domain(input_domain, piece_domain)
+        isempty_domain(piece_input) && continue
+        sub_X = interval(inf(piece_input), sup(piece_input), decoration(X))
+        sub_dual = Dual{T}(sub_X, partials(dual))
+        push!(dual_piece_outputs, f(sub_dual))
+    end
+
+    piece_outputs = value.(dual_piece_outputs)
+    dec = min(dec, minimum(decoration.(piece_outputs)))
+    primal = IntervalArithmetic.setdecoration(reduce(hull, piece_outputs), dec)
+
+    doutputs = partials.(dual_piece_outputs)
+    partial = map(zip(doutputs...)) do pp
+        pdec = min(dec, minimum(decoration.(pp)))
+        return IntervalArithmetic.setdecoration(reduce(hull, pp), pdec)
+    end
+
+    return Dual{T}(primal, tuple(partial...))
+end
+
 
 end
