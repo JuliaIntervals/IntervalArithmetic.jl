@@ -4,22 +4,28 @@
 
 # helper functions
 
+_big_pi(::T) where {T<:AbstractFloat} =
+    _unsafe_bareinterval(BigFloat, BigFloat(π, RoundDown; precision = 256), BigFloat(π, RoundUp; precision = 256))
+
+_big_pi(x::BigFloat) =
+    _unsafe_bareinterval(BigFloat, BigFloat(π, RoundDown; precision = precision(x)+32), BigFloat(π, RoundUp; precision = precision(x)+32))
+
 function _quadrant(f, x::T) where {T<:AbstractFloat}
     PI = bareinterval(T, π)
     PI_LO, PI_HI = bounds(PI)
+    x2 = 2x # should be exact for floats
     if abs(x) ≤ PI_LO # (-π, π)
-        r2 = 2x # should be exact for floats
-        r2 ≤ -PI_HI && return 2       # (-π, -π/2)
-        r2 < -PI_LO && return f(2, 3) # (-π, -π/2) or [-π/2, 0)
-        r2 <  0     && return 3       # [-π/2, 0)
-        r2 ≤  PI_LO && return 0       # [0, π/2)
-        r2 <  PI_HI && return f(0, 1) # [0, π/2) or [π/2, π)
+        x2 ≤ -PI_HI && return 2       # (-π, -π/2)
+        x2 < -PI_LO && return f(2, 3) # (-π, -π/2) or [-π/2, 0)
+        x2 <  0     && return 3       # [-π/2, 0)
+        x2 ≤  PI_LO && return 0       # [0, π/2)
+        x2 <  PI_HI && return f(0, 1) # [0, π/2) or [π/2, π)
         return 1 # [π/2, π)
     else
-        k = _unsafe_scale(bareinterval(x) / PI, convert(T, 2))
+        k = bareinterval(BigFloat, x2) / _big_pi(x)
         fk = floor(k)
         lfk, hfk = bounds(fk)
-        return f(Int(mod(lfk, 4)), Int(mod(hfk, 4)))
+        return Int(mod(f(lfk, hfk), 4))
     end
 end
 
