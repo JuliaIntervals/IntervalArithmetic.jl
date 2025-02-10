@@ -1,4 +1,4 @@
-using IntervalArithmetic: leftof
+using IntervalArithmetic: leftof, intersect_domain, isempty_domain
 
 @testset "Domain" begin
     @testset "Construction" begin
@@ -29,25 +29,25 @@ using IntervalArithmetic: leftof
         @test leftof(d2, d4)
     end
 
-    @testset "intersect" begin
+    @testset "intersect_domain" begin
         d1 = Domain{:closed, :open}(0, 10)
         d2 = Domain{:closed, :open}(2, 15)
         d3 = Domain{:open, :closed}(4, 7)
         d4 = Domain{:open, :closed}(-20, 3)
 
-        @test intersect(d1, d2) == Domain{:closed, :open}(2, 10)
-        @test intersect(d1, d3) == Domain{:open, :closed}(4, 7)
-        @test intersect(d1, d4) == Domain{:closed, :closed}(0, 3)
-        @test intersect(d2, d3) == Domain{:open, :closed}(4, 7)
-        @test intersect(d2, d4) == Domain{:closed, :closed}(2, 3)
-        @test intersect(d3, d4) == Domain()
+        @test intersect_domain(d1, d2) == Domain{:closed, :open}(2, 10)
+        @test intersect_domain(d1, d3) == Domain{:open, :closed}(4, 7)
+        @test intersect_domain(d1, d4) == Domain{:closed, :closed}(0, 3)
+        @test intersect_domain(d2, d3) == Domain{:open, :closed}(4, 7)
+        @test intersect_domain(d2, d4) == Domain{:closed, :closed}(2, 3)
+        @test intersect_domain(d3, d4) == Domain()
     end
 
-    @testset "isempty" begin
-        @test isempty(Domain{:open, :open}(1, 1))
-        @test !isempty(Domain{:closed, :closed}(1, 1))
-        @test !isempty(Domain{:open, :open}(1, 2))
-        @test isempty(Domain())
+    @testset "isempty_domain" begin
+        @test isempty_domain(Domain{:open, :open}(1, 1))
+        @test !isempty_domain(Domain{:closed, :closed}(1, 1))
+        @test !isempty_domain(Domain{:open, :open}(1, 2))
+        @test isempty_domain(Domain())
     end
 end
 

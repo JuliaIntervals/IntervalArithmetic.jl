@@ -76,9 +76,9 @@ function leftof(d1::Domain, d2::Domain)
     return val1 < val2
 end
 
-Base.in(x::Real, domain::Domain) = rightof(x, lowerbound(domain)) && leftof(x, upperbound(domain))
+in_domain(x::Real, domain::Domain) = rightof(x, lowerbound(domain)) && leftof(x, upperbound(domain))
 
-function Base.intersect(d1::Domain, d2::Domain)
+function intersect_domain(d1::Domain, d2::Domain)
     left = max(lowerbound(d1), lowerbound(d2))
     right = min(upperbound(d1), upperbound(d2))
 
@@ -86,7 +86,7 @@ function Base.intersect(d1::Domain, d2::Domain)
     return Domain(left, right)
 end
 
-function Base.isempty(domain::Domain)
+function isempty_domain(domain::Domain)
     lo, lobound = lowerbound(domain)
     hi, hibound = upperbound(domain)
 
@@ -258,7 +258,7 @@ function Base.show(io::IO, ::MIME"text/plain", piecewise::Piecewise)
     end
 end
 
-function indomain(domain, piecewise)
+function in_domain(domain, piecewise)
     rightof(upperbound(domain), upperbound(domains(piecewise)[end])) && return false
 
     # This relies on the fact that domains are ordered
@@ -283,34 +283,34 @@ function indomain(domain, piecewise)
     return true
 end
 
-overlapdomain(domain, piecewise) = any(!isempty, intersect.(Ref(domain), domains(piecewise)))
+overlap_domain(domain, piecewise) = any(!isempty_domain, intersect_domain.(Ref(domain), domains(piecewise)))
 
 function (piecewise::Piecewise)(X::Interval{T}) where {T}
-    set = Domain(X)
-    !overlapdomain(set, piecewise) && return emptyinterval(T)
+    input_domain = Domain(X)
+    !overlap_domain(input_domain, piecewise) && return emptyinterval(T)
 
-    if !indomain(set, piecewise)
+    if !in_domain(input_domain, piecewise)
         dec = trv
-    elseif any(in(set), discontinuities(piecewise))
+    elseif any(x -> in_domain(x, input_domain), discontinuities(piecewise))
         dec = def 
     else
         dec = com
     end
 
-    results = Interval{T}[]
-    for (domain, f) in pieces(piecewise)
-        subset = intersect(set, domain)
-        isempty(subset) && continue
-        push!(results, f(interval(inf(subset), sup(subset), decoration(X))))
+    piece_outputs = Interval{T}[]
+    for (piece_domain, f) in pieces(piecewise)
+        piece_input = intersect_domain(input_domain, piece_domain)
+        isempty_domain(piece_input) && continue
+        push!(piece_outputs, f(interval(inf(piece_input), sup(piece_input), decoration(X))))
     end
 
-    dec = min(dec, minimum(decoration.(results)))
-    return IntervalArithmetic.setdecoration(reduce(hull, results), dec)
+    dec = min(dec, minimum(decoration.(piece_outputs)))
+    return IntervalArithmetic.setdecoration(reduce(hull, piece_outputs), dec)
 end
 
 function (piecewise::Piecewise)(x::Real)
     for (domain, f) in pieces(piecewise)
-        (x in domain) && return f(x)
+        (in_domain(x, domain)) && return f(x)
     end
     throw(DomainError(x, "piecewise function was called outside of its domain $(domain_string(piecewise))"))
 end

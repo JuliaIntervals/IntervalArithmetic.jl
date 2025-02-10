@@ -1,6 +1,7 @@
 module IntervalArithmeticForwardDiffExt
 
 using IntervalArithmetic, ForwardDiff
+using IntervalArithmetic: isempty_domain, overlap_domain, intersect_domain, in_domain, leftof
 using ForwardDiff: Dual, Partials, ≺, value, partials
 
 ForwardDiff.can_dual(::Type{ExactReal}) = true
@@ -99,34 +100,34 @@ end
 
 function (piecewise::Piecewise)(dual::Dual{T, <:Interval}) where {T}
     X = value(dual)
-    set = Domain(X)
-    if !IntervalArithmetic.overlapdomain(set, piecewise) 
+    input_domain = Domain(X)
+    if !overlap_domain(input_domain, piecewise) 
         return Dual{T}(emptyinterval(X), emptyinterval(X) .* partials(dual))
     end
 
-    if !IntervalArithmetic.indomain(set, piecewise)
+    if !in_domain(input_domain, piecewise)
         dec = trv
-    elseif any(in(set), discontinuities(piecewise, 1))
+    elseif any(x -> in_domain(x, input_domain), discontinuities(piecewise, 1))
         dec = def 
     else
         dec = com
     end
 
-    dual_results = []
-    for (subdomain, f) in pieces(piecewise)
-        subset = intersect(set, subdomain)
-        isempty(subset) && continue
-        sub_X = interval(inf(subset), sup(subset), decoration(X))
+    dual_piece_outputs = []
+    for (piece_domain, f) in pieces(piecewise)
+        piece_input = intersect_domain(input_domain, piece_domain)
+        isempty_domain(piece_input) && continue
+        sub_X = interval(inf(piece_input), sup(piece_input), decoration(X))
         sub_dual = Dual{T}(sub_X, partials(dual))
-        push!(dual_results, f(sub_dual))
+        push!(dual_piece_outputs, f(sub_dual))
     end
 
-    results = value.(dual_results)
-    dec = min(dec, minimum(decoration.(results)))
-    primal = IntervalArithmetic.setdecoration(reduce(hull, results), dec)
+    piece_outputs = value.(dual_piece_outputs)
+    dec = min(dec, minimum(decoration.(piece_outputs)))
+    primal = IntervalArithmetic.setdecoration(reduce(hull, piece_outputs), dec)
 
-    dresults = partials.(dual_results)
-    partial = map(zip(dresults...)) do pp
+    doutputs = partials.(dual_piece_outputs)
+    partial = map(zip(doutputs...)) do pp
         pdec = min(dec, minimum(decoration.(pp)))
         return IntervalArithmetic.setdecoration(reduce(hull, pp), pdec)
     end
