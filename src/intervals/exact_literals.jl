@@ -89,31 +89,31 @@ Base.promote_rule(::Type{ExactReal{T}}, ::Type{ExactReal{S}}) where {T<:Real,S<:
 
 # to BareInterval
 
-BareInterval{T}(x::ExactReal) where {T<:NumTypes} = convert(BareInterval{T}, x)
-BareInterval(x::ExactReal) = BareInterval{promote_numtype(numtype(x.value), numtype(x.value))}(x)
+BareInterval{T}(x::ExactReal) where {T<:BoundTypes} = convert(BareInterval{T}, x)
+BareInterval(x::ExactReal) = BareInterval{promote_boundtype(boundtype(x.value), boundtype(x.value))}(x)
 
-Base.convert(::Type{BareInterval{T}}, x::ExactReal) where {T<:NumTypes} = bareinterval(T, x.value)
+Base.convert(::Type{BareInterval{T}}, x::ExactReal) where {T<:BoundTypes} = bareinterval(T, x.value)
 
-Base.promote_rule(::Type{BareInterval{T}}, ::Type{ExactReal{S}}) where {T<:NumTypes,S<:Real} =
-    BareInterval{promote_numtype(T, S)}
-Base.promote_rule(::Type{ExactReal{T}}, ::Type{BareInterval{S}}) where {T<:Real,S<:NumTypes} =
-    BareInterval{promote_numtype(T, S)}
+Base.promote_rule(::Type{BareInterval{T}}, ::Type{ExactReal{S}}) where {T<:BoundTypes,S<:Real} =
+    BareInterval{promote_boundtype(T, S)}
+Base.promote_rule(::Type{ExactReal{T}}, ::Type{BareInterval{S}}) where {T<:Real,S<:BoundTypes} =
+    BareInterval{promote_boundtype(T, S)}
 
 # to Interval
 
-Base.convert(::Type{Interval{T}}, x::ExactReal) where {T<:NumTypes} = interval(T, x.value)
+Base.convert(::Type{Interval{T}}, x::ExactReal) where {T<:BoundTypes} = interval(T, x.value)
 
-Base.promote_rule(::Type{Interval{T}}, ::Type{ExactReal{S}}) where {T<:NumTypes,S<:Real} =
-    Interval{promote_numtype(T, S)}
-Base.promote_rule(::Type{ExactReal{T}}, ::Type{Interval{S}}) where {T<:Real,S<:NumTypes} =
-    Interval{promote_numtype(T, S)}
+Base.promote_rule(::Type{Interval{T}}, ::Type{ExactReal{S}}) where {T<:BoundTypes,S<:Real} =
+    Interval{promote_boundtype(T, S)}
+Base.promote_rule(::Type{ExactReal{T}}, ::Type{Interval{S}}) where {T<:Real,S<:BoundTypes} =
+    Interval{promote_boundtype(T, S)}
 
 # to Real
 
 Bool(x::ExactReal) = convert(Bool, x) # needed to resolve ambiguity
 (::Type{T})(x::ExactReal) where {T<:Real} = convert(T, x)
-Interval{T}(x::ExactReal) where {T<:NumTypes} = convert(Interval{T}, x) # needed to resolve ambiguity
-Interval(x::ExactReal) = Interval{promote_numtype(numtype(x.value), numtype(x.value))}(x) # needed to resolve ambiguity
+Interval{T}(x::ExactReal) where {T<:BoundTypes} = convert(Interval{T}, x) # needed to resolve ambiguity
+Interval(x::ExactReal) = Interval{promote_boundtype(boundtype(x.value), boundtype(x.value))}(x) # needed to resolve ambiguity
 
 Base.convert(::Type{T}, x::ExactReal) where {T<:Real} = convert(T, x.value)
 

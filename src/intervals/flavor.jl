@@ -57,21 +57,21 @@ Return the default flavor used to handle edge cases.
 default_flavor() = Flavor{:set_based}()
 
 """
-    zero_times_infinity([F::Flavor=default_flavor()], T<:NumTypes)
+    zero_times_infinity([F::Flavor=default_flavor()], T<:BoundTypes)
 
 For the given flavor `F`, return ``0 \\times \\infty`` as an instance of type
 `T`.
 """
-zero_times_infinity(::Flavor{:set_based}, ::Type{T}) where {T<:NumTypes} = zero(T)
+zero_times_infinity(::Flavor{:set_based}, ::Type{T}) where {T<:BoundTypes} = zero(T)
 
-zero_times_infinity(::Type{T}) where {T<:NumTypes} = zero_times_infinity(default_flavor(), T)
+zero_times_infinity(::Type{T}) where {T<:BoundTypes} = zero_times_infinity(default_flavor(), T)
 
 """
     div_by_thin_zero([F::Flavor=default_flavor()], x::BareInterval)
 
 For the given flavor `F`, divide `x` by the interval containing only ``0``.
 """
-div_by_thin_zero(::Flavor{:set_based}, ::BareInterval{T}) where {T<:NumTypes} =
+div_by_thin_zero(::Flavor{:set_based}, ::BareInterval{T}) where {T<:BoundTypes} =
     emptyinterval(BareInterval{T})
 
 div_by_thin_zero(x::BareInterval) = div_by_thin_zero(default_flavor(), x)

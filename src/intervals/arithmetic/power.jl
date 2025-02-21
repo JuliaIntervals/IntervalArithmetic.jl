@@ -144,8 +144,8 @@ for U ∈ (:AbstractFloat, :Rational) # needed to resolve ambiguity
 end
 pow(x::BareInterval, y::BareInterval) = pow(promote(x, y)...)
 # specialize on rational to improve exactness
-function pow(x::BareInterval{T}, y::BareInterval{S}) where {T<:NumTypes,S<:Rational}
-    R = promote_numtype(T, S)
+function pow(x::BareInterval{T}, y::BareInterval{S}) where {T<:BoundTypes,S<:Rational}
+    R = promote_boundtype(T, S)
     isempty_interval(y) && return emptyinterval(BareInterval{R})
     domain = _unsafe_bareinterval(T, zero(T), typemax(T))
     x = intersect_interval(x, domain)
@@ -221,7 +221,7 @@ julia> pown(interval(-1, 1), -3)
 Interval{Float64}(-Inf, Inf, trv)
 ```
 """
-function pown(x::BareInterval{T}, n::Integer) where {T<:NumTypes}
+function pown(x::BareInterval{T}, n::Integer) where {T<:BoundTypes}
     isempty_interval(x) && return x
     n == 0 && return one(BareInterval{T})
     n == 1 && return x
@@ -294,7 +294,7 @@ end
 
 rootn(x::BareInterval{<:Rational}) = rootn(float(x))
 
-function rootn(x::Interval{T}, n::Integer) where {T<:NumTypes}
+function rootn(x::Interval{T}, n::Integer) where {T<:BoundTypes}
     domain = _unsafe_bareinterval(T, ifelse(iseven(n), zero(T), typemin(T)), typemax(T))
     bx = bareinterval(x)
     r = rootn(bx, n)
@@ -322,7 +322,7 @@ interval.
 
 See also: [`pow`](@ref), [`pown`](@ref) and [`fastpown`](@ref).
 """
-function fastpow(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
+function fastpow(x::BareInterval{T}, y::BareInterval{T}) where {T<:BoundTypes}
     isempty_interval(y) && return y
     domain = _unsafe_bareinterval(T, zero(T), typemax(T))
     x = intersect_interval(x, domain)
@@ -362,7 +362,7 @@ interval.
 
 See also: [`pown`](@ref), [`pow`](@ref) and [`fastpow`](@ref).
 """
-function fastpown(x::BareInterval{T}, n::Integer) where {T<:NumTypes}
+function fastpown(x::BareInterval{T}, n::Integer) where {T<:BoundTypes}
     isempty_interval(x) && return x
     n < 0 && return inv(fastpown(x, -n))
     range = _unsafe_bareinterval(T, ifelse(iseven(n), zero(T), typemin(T)), typemax(T))
@@ -421,11 +421,11 @@ end
 
 Base.exp(x::Complex{<:Interval}) = exp(real(x)) * cis(imag(x))
 
-Base.exp2(x::Complex{<:Interval}) = exp2(real(x)) * cis(imag(x) * log(interval(numtype(x), 2)))
+Base.exp2(x::Complex{<:Interval}) = exp2(real(x)) * cis(imag(x) * log(interval(boundtype(x), 2)))
 
-Base.exp10(x::Complex{<:Interval}) = exp10(real(x)) * cis(imag(x) * log(interval(numtype(x), 10)))
+Base.exp10(x::Complex{<:Interval}) = exp10(real(x)) * cis(imag(x) * log(interval(boundtype(x), 10)))
 
-Base.expm1(x::Complex{<:Interval}) = exp(x) - interval(numtype(x), 1)
+Base.expm1(x::Complex{<:Interval}) = exp(x) - interval(boundtype(x), 1)
 
 #
 
@@ -440,7 +440,7 @@ for f ∈ (:log, :log2, :log10)
 
         Base.$f(x::BareInterval{<:Rational}) = $f(float(x))
 
-        function Base.$f(x::Interval{T}) where {T<:NumTypes}
+        function Base.$f(x::Interval{T}) where {T<:BoundTypes}
             domain = _unsafe_bareinterval(T, zero(T), typemax(T))
             bx = bareinterval(x)
             r = $f(bx)
@@ -453,9 +453,9 @@ end
 
 Base.log(x::Complex{<:Interval}) = complex(log(abs(x)), angle(x))
 
-Base.log2(x::Complex{<:Interval}) = complex(log2(abs(x)), angle(x)/log(interval(numtype(x), 2)))
+Base.log2(x::Complex{<:Interval}) = complex(log2(abs(x)), angle(x)/log(interval(boundtype(x), 2)))
 
-Base.log10(x::Complex{<:Interval}) = complex(log10(abs(x)), angle(x)/log(interval(numtype(x), 10)))
+Base.log10(x::Complex{<:Interval}) = complex(log10(abs(x)), angle(x)/log(interval(boundtype(x), 10)))
 
 function Base.log1p(x::BareInterval{T}) where {T<:AbstractFloat}
     domain = _unsafe_bareinterval(T, -one(T), typemax(T))
@@ -466,7 +466,7 @@ end
 
 Base.log1p(x::BareInterval{<:Rational}) = log1p(float(x))
 
-function Base.log1p(x::Interval{T}) where {T<:NumTypes}
+function Base.log1p(x::Interval{T}) where {T<:BoundTypes}
     domain = _unsafe_bareinterval(T, -one(T), typemax(T))
     bx = bareinterval(x)
     r = log1p(bx)
@@ -475,4 +475,4 @@ function Base.log1p(x::Interval{T}) where {T<:NumTypes}
     return _unsafe_interval(r, d, isguaranteed(x))
 end
 
-Base.log1p(x::Complex{<:Interval}) = log(interval(numtype(x), 1) + x)
+Base.log1p(x::Complex{<:Interval}) = log(interval(boundtype(x), 1) + x)

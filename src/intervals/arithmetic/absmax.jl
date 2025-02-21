@@ -8,7 +8,7 @@
 
 Implement the `abs` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function Base.abs(x::BareInterval{T}) where {T<:NumTypes}
+function Base.abs(x::BareInterval{T}) where {T<:BoundTypes}
     isempty_interval(x) && return x
     return _unsafe_bareinterval(T, mig(x), mag(x))
 end
@@ -45,7 +45,7 @@ for f ∈ (:min, :max)
 
         Implement the `$($f)` function of the IEEE Standard 1788-2015 (Table 9.1).
         """
-        function Base.$f(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
+        function Base.$f(x::BareInterval{T}, y::BareInterval{T}) where {T<:BoundTypes}
             isempty_interval(x) && return x
             isempty_interval(y) && return y
             return _unsafe_bareinterval(T, $f(inf(x), inf(y)), $f(sup(x), sup(y)))

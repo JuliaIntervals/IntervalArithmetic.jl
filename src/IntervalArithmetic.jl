@@ -5,7 +5,7 @@ Library for validated numerics using interval arithmetic.
 
 Default settings:
 - interval flavor (cf. the IEEE Standard 1788-2015): `default_flavor() = Flavor{:set_based}()`
-- interval bound type: `default_numtype() = Float64`
+- interval bound type: `default_boundtype() = Float64`
 - interval rounding: `interval_rounding() = IntervalRounding{:tight}()`
 - power mode: `power_mode() = PowerMode{:fast}()`
 - matrix multiplication mode: `matmul_mode() = MatMulMode{:fast}()`

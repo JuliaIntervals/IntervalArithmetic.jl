@@ -108,14 +108,14 @@ Base.show(io::IO, ::MIME"text/plain", a::Union{BareInterval,Interval,Complex{<:I
 
 # `String` representation
 
-function _str_repr(a::BareInterval{T}, format::Symbol) where {T<:NumTypes}
+function _str_repr(a::BareInterval{T}, format::Symbol) where {T<:BoundTypes}
     # `format` is either `:infsup`, `:midpoint` or `:full`
     str_interval = _str_basic_repr(a, format)
     ((format === :full) & (str_interval != "∅")) && return string("BareInterval{", T, "}(", str_interval, ')')
     return _str_precision(str_interval, a, format)
 end
 
-function _str_repr(a::Interval{T}, format::Symbol) where {T<:NumTypes}
+function _str_repr(a::Interval{T}, format::Symbol) where {T<:BoundTypes}
     # `format` is either `:infsup`, `:midpoint` or `:full`
     str_interval = _str_basic_repr(a.bareinterval, format) # use `a.bareinterval` to not print a warning if `a` is an NaI
     if format === :full && str_interval != "∅"
@@ -130,7 +130,7 @@ function _str_repr(a::Interval{T}, format::Symbol) where {T<:NumTypes}
     return ifelse(display_options.ng_flag & !isguaranteed(a), string(str_interval, "_NG"), str_interval)
 end
 
-function _str_repr(x::Complex{Interval{T}}, format::Symbol) where {T<:NumTypes}
+function _str_repr(x::Complex{Interval{T}}, format::Symbol) where {T<:BoundTypes}
     # `format` is either `:infsup`, `:midpoint` or `:full`
     str_imag = _str_repr(imag(x), format)
     if format === :full

@@ -13,7 +13,7 @@ The result is decorated by at most `trv` (Section 11.7.1).
 
 Implement the `intersection` function of the IEEE Standard 1788-2015 (Section 9.3).
 """
-function intersect_interval(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
+function intersect_interval(x::BareInterval{T}, y::BareInterval{T}) where {T<:BoundTypes}
     lo = max(inf(x), inf(y))
     hi = min(sup(x), sup(y))
     if lo > hi
@@ -24,7 +24,7 @@ function intersect_interval(x::BareInterval{T}, y::BareInterval{T}) where {T<:Nu
 end
 intersect_interval(x::BareInterval, y::BareInterval) = intersect_interval(promote(x, y)...)
 
-function intersect_interval(x::Interval{T}, y::Interval{S}) where {T<:NumTypes,S<:NumTypes}
+function intersect_interval(x::Interval{T}, y::Interval{S}) where {T<:BoundTypes,S<:BoundTypes}
     isnai(x) | isnai(y) && return nai(promote_type(T, S))
     r = intersect_interval(bareinterval(x), bareinterval(y))
     d = min(decoration(x), decoration(y), trv)
@@ -48,13 +48,13 @@ The result is decorated by at most `trv` (Section 11.7.1).
 
 Implement the `convexHull` function of the IEEE Standard 1788-2015 (Section 9.3).
 """
-function hull(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
+function hull(x::BareInterval{T}, y::BareInterval{T}) where {T<:BoundTypes}
     isempty_interval(x) & isempty_interval(y) && return x
     return _unsafe_bareinterval(T, min(inf(x), inf(y)), max(sup(x), sup(y)))
 end
 hull(x::BareInterval, y::BareInterval) = hull(promote(x, y)...)
 
-function hull(x::Interval{T}, y::Interval{S}) where {T<:NumTypes,S<:NumTypes}
+function hull(x::Interval{T}, y::Interval{S}) where {T<:BoundTypes,S<:BoundTypes}
     isnai(x) | isnai(y) && return nai(promote_type(T, S))
     r = hull(bareinterval(x), bareinterval(y))
     d = min(decoration(x), decoration(y), trv)
@@ -87,7 +87,7 @@ interiordiff(x::AbstractVector, y::AbstractVector) =
 
 In-place version of [`interiordiff`](@ref).
 """
-function interiordiff!(v::AbstractVector, x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
+function interiordiff!(v::AbstractVector, x::BareInterval{T}, y::BareInterval{T}) where {T<:BoundTypes}
     if isinterior(x, y)
         empty!(v)
     elseif isdisjoint_interval(x, y)
@@ -111,7 +111,7 @@ function interiordiff!(v::AbstractVector, x::BareInterval{T}, y::BareInterval{T}
 end
 interiordiff!(v::AbstractVector, x::BareInterval, y::BareInterval) = interiordiff!(v, promote(x, y)...)
 
-function interiordiff!(v::AbstractVector, x::Interval{T}, y::Interval{T}) where {T<:NumTypes}
+function interiordiff!(v::AbstractVector, x::Interval{T}, y::Interval{T}) where {T<:BoundTypes}
     if isinterior(x, y)
         empty!(v)
     elseif isdisjoint_interval(x, y)
@@ -181,7 +181,7 @@ function interiordiff!(v::AbstractVector{<:AbstractVector}, x::AbstractVector, y
     return v
 end
 
-function _interiordiff(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
+function _interiordiff(x::BareInterval{T}, y::BareInterval{T}) where {T<:BoundTypes}
     isdisjoint_interval(x, y) && return (x, emptyinterval(BareInterval{T}), emptyinterval(BareInterval{T}))
 
     inter = intersect_interval(x, y)
@@ -202,7 +202,7 @@ function _interiordiff(x::Interval, y::Interval)
     return (_unsafe_interval(h₁, d, t), _unsafe_interval(h₂, d, t), _unsafe_interval(inter, d, t))
 end
 
-function interval_diff(x::Interval{T}, y::Interval) where {T<:NumTypes}
+function interval_diff(x::Interval{T}, y::Interval) where {T<:BoundTypes}
     isdisjoint_interval(x, y) && return [x]
     issubset_interval(x, y) && return Interval{T}[]
 

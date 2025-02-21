@@ -1,68 +1,68 @@
 """
-    numtype(T)
+    boundtype(T)
 
 Return the bounds type of the interval.
 
 # Examples
 
 ```jldoctest
-julia> IntervalArithmetic.numtype(interval(1, 2))
+julia> IntervalArithmetic.boundtype(interval(1, 2))
 Float64
 
-julia> IntervalArithmetic.numtype(interval(Float32, 1, 2))
+julia> IntervalArithmetic.boundtype(interval(Float32, 1, 2))
 Float32
 ```
 """
-numtype(::Type{BareInterval{T}}) where {T<:NumTypes} = T
-numtype(::Type{Interval{T}}) where {T<:NumTypes} = T
-numtype(::Type{Complex{T}}) where {T<:Real} = numtype(T)
-numtype(::Type{T}) where {T} = T
-numtype(::T) where {T} = numtype(T)
+boundtype(::Type{BareInterval{T}}) where {T<:BoundTypes} = T
+boundtype(::Type{Interval{T}}) where {T<:BoundTypes} = T
+boundtype(::Type{Complex{T}}) where {T<:Real} = boundtype(T)
+boundtype(::Type{T}) where {T} = T
+boundtype(::T) where {T} = boundtype(T)
 
 # standard `Real` functions
 
 for f ∈ (:float, :big)
     @eval begin
-        Base.$f(x::BareInterval{T}) where {T<:NumTypes} = BareInterval{$f(T)}(x)
-        Base.$f(x::Interval{<:NumTypes}) = _unsafe_interval($f(bareinterval(x)), decoration(x), isguaranteed(x))
+        Base.$f(x::BareInterval{T}) where {T<:BoundTypes} = BareInterval{$f(T)}(x)
+        Base.$f(x::Interval{<:BoundTypes}) = _unsafe_interval($f(bareinterval(x)), decoration(x), isguaranteed(x))
     end
 end
 
 for f ∈ (:zero, :one)
     @eval begin
-        Base.$f(::Type{BareInterval{T}}) where {T<:NumTypes} = _unsafe_bareinterval(T, $f(T), $f(T))
-        Base.$f(::BareInterval{T}) where {T<:NumTypes} = $f(BareInterval{T})
+        Base.$f(::Type{BareInterval{T}}) where {T<:BoundTypes} = _unsafe_bareinterval(T, $f(T), $f(T))
+        Base.$f(::BareInterval{T}) where {T<:BoundTypes} = $f(BareInterval{T})
 
-        Base.$f(::Type{Interval{T}}) where {T<:NumTypes} = _unsafe_interval($f(BareInterval{T}), com, true)
-        Base.$f(x::Interval{T}) where {T<:NumTypes} = _unsafe_interval($f(BareInterval{T}), com, isguaranteed(x))
+        Base.$f(::Type{Interval{T}}) where {T<:BoundTypes} = _unsafe_interval($f(BareInterval{T}), com, true)
+        Base.$f(x::Interval{T}) where {T<:BoundTypes} = _unsafe_interval($f(BareInterval{T}), com, isguaranteed(x))
     end
 end
 
-Base.zero(::Type{Complex{Interval{T}}}) where {T<:NumTypes} = complex(zero(Interval{T}), zero(Interval{T}))
+Base.zero(::Type{Complex{Interval{T}}}) where {T<:BoundTypes} = complex(zero(Interval{T}), zero(Interval{T}))
 Base.zero(x::Complex{<:Interval}) = complex(zero(real(x)), zero(imag(x)))
 
-Base.one(::Type{Complex{Interval{T}}}) where {T<:NumTypes} = complex(one(Interval{T}), zero(Interval{T}))
+Base.one(::Type{Complex{Interval{T}}}) where {T<:BoundTypes} = complex(one(Interval{T}), zero(Interval{T}))
 Base.one(x::Complex{<:Interval}) = complex(one(real(x)), zero(imag(x)))
 
-Base.typemin(::Type{BareInterval{T}}) where {T<:NumTypes} =
+Base.typemin(::Type{BareInterval{T}}) where {T<:BoundTypes} =
     _unsafe_bareinterval(T, typemin(T), nextfloat(typemin(T)))
-Base.typemin(::Type{Interval{T}}) where {T<:NumTypes} =
+Base.typemin(::Type{Interval{T}}) where {T<:BoundTypes} =
     _unsafe_interval(typemin(BareInterval{T}), dac, true)
 
-Base.typemax(::Type{BareInterval{T}}) where {T<:NumTypes} =
+Base.typemax(::Type{BareInterval{T}}) where {T<:BoundTypes} =
     _unsafe_bareinterval(T, prevfloat(typemax(T)), typemax(T))
-Base.typemax(::Type{Interval{T}}) where {T<:NumTypes} =
+Base.typemax(::Type{Interval{T}}) where {T<:BoundTypes} =
     _unsafe_interval(typemax(BareInterval{T}), dac, true)
 
-function Base.eps(::Type{BareInterval{T}}) where {T<:NumTypes}
+function Base.eps(::Type{BareInterval{T}}) where {T<:BoundTypes}
     x = eps(T)
     return _unsafe_bareinterval(T, x, x)
 end
-function Base.eps(x::BareInterval{T}) where {T<:NumTypes}
+function Base.eps(x::BareInterval{T}) where {T<:BoundTypes}
     y = max(eps(inf(x)), eps(sup(x)))
     return _unsafe_bareinterval(T, y, y)
 end
-Base.eps(::Type{Interval{T}}) where {T<:NumTypes} =
+Base.eps(::Type{Interval{T}}) where {T<:BoundTypes} =
     _unsafe_interval(eps(BareInterval{T}), com, true)
 Base.eps(x::Interval) = _unsafe_interval(eps(bareinterval(x)), com, isguaranteed(x))
 
