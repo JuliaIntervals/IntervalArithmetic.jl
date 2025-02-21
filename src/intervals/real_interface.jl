@@ -1,15 +1,15 @@
 """
     boundtype(T)
 
-Return the bounds type of the interval.
+Return the bound type of the interval.
 
 # Examples
 
 ```jldoctest
-julia> IntervalArithmetic.boundtype(interval(1, 2))
+julia> boundtype(interval(1, 2))
 Float64
 
-julia> IntervalArithmetic.boundtype(interval(Float32, 1, 2))
+julia> boundtype(interval(Float32, 1, 2))
 Float32
 ```
 """
