@@ -145,7 +145,7 @@ Available mode types:
 """
 struct MatMulMode{T} end
 
-matmul_mode() = MatMulMode{:slow}()
+matmul_mode() = MatMulMode{:fast}()
 
 # by-pass `similar` methods defined in array.jl
 # note: written in this form to avoid by-passing the default behaviour for `Union{}`

@@ -3,6 +3,12 @@
 
 Library for validated numerics using interval arithmetic.
 
+Default settings:
+- interval flavor (cf. the IEEE Standard 1788-2015): `default_flavor() = Flavor{:set_based}()`
+- power mode: `power_mode() = PowerMode{:fast}()`
+- matrix multiplication mode: matmul_mode() = MatMulMode{:fast}()
+- display of intervals: `setdisplay(:infsup; decorations = true, ng_flag = true, sigdigits = 6)`
+
 Learn more: https://github.com/JuliaIntervals/IntervalArithmetic.jl
 """
 module IntervalArithmetic
