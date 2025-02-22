@@ -21,7 +21,7 @@ end
         @test typeof(interval(Rational{T}, 1, 2)) == Interval{Rational{T}}
     end
     @test eltype(interval(1, 2)) == Interval{Float64}
-    @test IntervalArithmetic.numtype(interval(1, 2)) == Float64
+    @test IntervalArithmetic.boundtype(interval(1, 2)) == Float64
     @test typeof(interval(BigInt(1), 11//10)) == Interval{Rational{BigInt}}
 
     @test inf(interval(1, 2)) == 1 && sup(interval(1, 2)) == 2
