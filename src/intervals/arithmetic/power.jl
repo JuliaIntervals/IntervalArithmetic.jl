@@ -65,7 +65,7 @@ Base.:^(x::Interval, n::Integer) = ^(x, n//one(n))
 Base.:^(x::Interval, y::Rational) = ^(x, convert(Interval{typeof(y)}, y))
 
 function Base.:^(x::Complex{<:Interval}, y::Complex{<:Interval})
-    if isreal(x) && isthininteger(y)
+    if isthinzero(imag(x)) && isthininteger(y)
         r = real(x) ^ real(y)
         d = min(decoration(x), decoration(y), decoration(r))
         t = isguaranteed(x) & isguaranteed(y)

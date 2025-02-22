@@ -70,9 +70,9 @@ end
 function LinearAlgebra.eigvals!(A::AbstractMatrix{<:Interval}; permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby)
     # note: this function does not overwrite `A`
     v = _eigvals(A, permute, scale, sortby)
-    isreal(v) && return v
+    all(t -> isthinzero(imag(t)), v) && return v
     _fold_conjugate!(v)
-    isreal(v) && return real(v)
+    all(t -> isthinzero(imag(t)), v) && return real(v)
     return v
 end
 
