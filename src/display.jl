@@ -69,7 +69,7 @@ Display options:
   - significant digits: 3
 
 julia> x
-[0.0999, 0.301]_com
+[0.1, 0.3]_com
 
 julia> setdisplay(; decorations = false)
 Display options:
@@ -79,7 +79,7 @@ Display options:
   - significant digits: 3
 
 julia> x
-[0.0999, 0.301]
+[0.1, 0.3]
 ```
 """
 function setdisplay(format::Symbol = display_options.format;
