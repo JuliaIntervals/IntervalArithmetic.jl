@@ -15,13 +15,13 @@ ForwardDiff.Dual{T,V}(x::ExactReal) where {T,V} = convert(Dual{T,V}, x)
 Base.convert(::Type{Dual{T,V,N}}, x::ExactReal) where {T,V,N} = Dual{T}(V(x), zero(Partials{N,V}))
 
 Base.promote_rule(::Type{Dual{T, V, N}}, ::Type{Interval{S}}) where {T, V, N, S<:Union{AbstractFloat, Rational}} =
-    Dual{T,Interval{IntervalArithmetic.promote_numtype(V, S)},N}
+    Dual{T,Interval{IntervalArithmetic.promote_boundtype(V, S)},N}
 Base.promote_rule(::Type{Interval{S}}, ::Type{Dual{T, V, N}}) where {S<:Union{AbstractFloat, Rational}, T, V, N} =
-    Dual{T,Interval{IntervalArithmetic.promote_numtype(V, S)},N}
+    Dual{T,Interval{IntervalArithmetic.promote_boundtype(V, S)},N}
 Base.promote_rule(::Type{ExactReal{S}}, ::Type{Dual{T, V, N}}) where {S<:Real, T, V, N} =
-    Dual{T,ExactReal{IntervalArithmetic.promote_numtype(V, S)},N}
+    Dual{T,ExactReal{IntervalArithmetic.promote_boundtype(V, S)},N}
 Base.promote_rule(::Type{Dual{T, V, N}}, ::Type{ExactReal{S}}) where {S<:Real, T, V, N} =
-    Dual{T,ExactReal{IntervalArithmetic.promote_numtype(V, S)},N}
+    Dual{T,ExactReal{IntervalArithmetic.promote_boundtype(V, S)},N}
 
 Base.:(==)(x::Union{BareInterval,Interval}, y::Dual) = x == value(y)
 Base.:(==)(x::Dual, y::Union{BareInterval,Interval}) = value(x) == y
@@ -101,14 +101,14 @@ end
 function (piecewise::Piecewise)(dual::Dual{T, <:Interval}) where {T}
     X = value(dual)
     input_domain = Domain(X)
-    if !overlap_domain(input_domain, piecewise) 
+    if !overlap_domain(input_domain, piecewise)
         return Dual{T}(emptyinterval(X), emptyinterval(X) .* partials(dual))
     end
 
     if !in_domain(input_domain, piecewise)
         dec = trv
     elseif any(x -> in_domain(x, input_domain), discontinuities(piecewise, 1))
-        dec = def 
+        dec = def
     else
         dec = com
     end
