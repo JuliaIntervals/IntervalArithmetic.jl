@@ -164,8 +164,8 @@ Base.:(==)(x::AbstractIrrational, y::Interval) = y == x
 Base.:(==)(x::Interval, y::Complex) = isreal(y) & (real(y) == x)
 Base.:(==)(x::Complex, y::Interval) = y == x
 
-Base.iszero(x::Union{BareInterval,Interval}) = !isthin(x) & in_interval(0, x) ? throw(ArgumentError("`iszero` is purposely not supported when 0 is contained in the interval. See instead `isthin`")) : isthinzero(x)
+Base.iszero(x::Union{BareInterval,Interval}) = !isthin(x) & in_interval(0, x) ? throw(ArgumentError("`iszero` is purposely not supported when 0 is contained in the interval. See instead `isthinzero`")) : isthinzero(x)
 
-Base.isone(x::Union{BareInterval,Interval}) = !isthin(x) & in_interval(1, x) ? throw(ArgumentError("`isone` is purposely not supported when 1 is contained in the interval. See instead `isthin`")) : isthinone(x)
+Base.isone(x::Union{BareInterval,Interval}) = !isthin(x) & in_interval(1, x) ? throw(ArgumentError("`isone` is purposely not supported when 1 is contained in the interval. See instead `isthinone`")) : isthinone(x)
 
-# Base.isinteger(x::Union{BareInterval,Interval}) = isthininteger(x)
+Base.isinteger(x::Union{BareInterval,Interval}) = !isthin(x) & !isdisjoint_interval(x, floor(x), ceil(x)) ? throw(ArgumentError("`isinteger` is purposely not supported for non-thin containing at least one integer. See instead `isthininteger`")) : isthininteger(x)
