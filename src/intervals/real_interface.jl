@@ -83,7 +83,7 @@ for T ∈ (:BareInterval, :Interval)
         function Base.:(==)(x::$T, y::$T) # also returned when calling `≤`, `≥`, `isequal`
             isthin(x) && return sup(x) == y
             isthin(y) && return x == sup(y)
-            return throw(ArgumentError("`==` is purposely not supported for intervals. See instead `isequal_interval`"))
+            return throw(ArgumentError("`==` is purposely not supported when the intervals are overlapping. See instead `isequal_interval`"))
         end
 
         Base.:<(::$T, ::$T) = # also returned when calling `isless`, `>`
@@ -138,7 +138,7 @@ Base.union!(::AbstractVector{S}, ::Interval, ::BareInterval, ::Any...) where {S}
     throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
 
 
-# allow pointwise equality
+# pointwise equality
 
 """
     ==(::BareInterval, ::Number)
@@ -146,28 +146,26 @@ Base.union!(::AbstractVector{S}, ::Interval, ::BareInterval, ::Any...) where {S}
     ==(::Interval, ::Number)
     ==(::Number, ::Interval)
 
-Test whether an interval is the singleton of a given number. In other words, the
-result is true if and only if the interval contains only that number.
+Test whether an interval is the singleton of a given number. Specifically, the
+result is true if and only if the interval contains only that number; an error
+is thrown if the interval contains the number but is not thin.
 
 !!! note
     Comparison between intervals is purposely disallowed. Indeed, equality
     between non-singleton intervals has distinct properties, notably ``x = y``
     does not imply ``x - y = 0``. See instead [`isequal_interval`](@ref).
 """
-Base.:(==)(x::Union{BareInterval,Interval}, y::Number) = isthin(x, y)
+Base.:(==)(x::Union{BareInterval,Interval}, y::Number) = !isthin(x) & in_interval(y, x) ? throw(ArgumentError("`==` is purposely not supported when the number is contained in the interval. See instead `isthin`")) : isthin(x, y)
 Base.:(==)(x::Number, y::Union{BareInterval,Interval}) = y == x
 # needed to resolve ambiguity from irrationals.jl
-Base.:(==)(x::Interval, y::AbstractIrrational) = isthin(x, y)
+Base.:(==)(x::Interval, y::AbstractIrrational) = !isthin(x) & in_interval(y, x) ? throw(ArgumentError("`==` is purposely not supported when the number is contained in the interval. See instead `isthin`")) : isthin(x, y)
 Base.:(==)(x::AbstractIrrational, y::Interval) = y == x
 # needed to resolve ambiguity from complex.jl
 Base.:(==)(x::Interval, y::Complex) = isreal(y) & (real(y) == x)
 Base.:(==)(x::Complex, y::Interval) = y == x
 
-# follows docstring of `Base.iszero`
-Base.iszero(x::Union{BareInterval,Interval}) = isthinzero(x)
+Base.iszero(x::Union{BareInterval,Interval}) = !isthin(x) & in_interval(0, x) ? throw(ArgumentError("`iszero` is purposely not supported when 0 is contained in the interval. See instead `isthin`")) : isthinzero(x)
 
-# follows docstring of `Base.isone`
-Base.isone(x::Union{BareInterval,Interval}) = isthinone(x)
+Base.isone(x::Union{BareInterval,Interval}) = !isthin(x) & in_interval(1, x) ? throw(ArgumentError("`isone` is purposely not supported when 1 is contained in the interval. See instead `isthin`")) : isthinone(x)
 
-# follows docstring of `Base.isinteger`
-Base.isinteger(x::Union{BareInterval,Interval}) = isthininteger(x)
+# Base.isinteger(x::Union{BareInterval,Interval}) = isthininteger(x)
