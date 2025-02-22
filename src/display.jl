@@ -49,7 +49,7 @@ Display options:
   - significant digits: 6
 
 julia> x = interval(0.1, 0.3)
-[0.0999999, 0.300001]_com
+[0.1, 0.3]_com
 
 julia> setdisplay(:full)
 Display options:
