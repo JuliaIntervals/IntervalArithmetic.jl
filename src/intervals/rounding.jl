@@ -43,7 +43,8 @@ end
 
 #
 
-_pow_round(x::AbstractFloat, n::Integer, r::RoundingMode) = _pow_round(promote(x, n)..., r)
+_pow_round(ir::IntervalRounding, x::AbstractFloat, n::Integer, r::RoundingMode) =
+    _pow_round(ir, promote(x, n)..., r)
 
 _pow_round(::IntervalRounding, x::T, y::T, ::RoundingMode) where {T<:Rational} = ^(x, y) # exact operation
 _pow_round(::IntervalRounding, x::Rational, n::Integer, ::RoundingMode) = ^(x, n) # exact operation
