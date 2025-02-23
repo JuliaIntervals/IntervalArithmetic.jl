@@ -7,7 +7,7 @@ x = interval(0.5)
 # end
 
 @testset "IntervalRounding{:correct}" begin
-    IntervalArithmetic.default_rounding() = IntervalArithmetic.IntervalRounding{:correct}()
+    # IntervalArithmetic.default_rounding() = IntervalArithmetic.IntervalRounding{:correct}()
     @test isequal_interval(sin(x), interval(0.47942553860420295, 0.479425538604203))
 
     # https://github.com/JuliaIntervals/IntervalArithmetic.jl/issues/215
@@ -25,8 +25,10 @@ end
 # end
 
 @testset "No rounding" begin
-    IntervalArithmetic.default_rounding() = IntervalArithmetic.IntervalRounding{:none}()
+    # IntervalArithmetic.default_rounding() = IntervalArithmetic.IntervalRounding{:none}()
+    IntervalArithmetic.configure(; rounding = :none)
     @test isequal_interval(sin(x), interval(0.479425538604203, 0.479425538604203))
 end
 
-IntervalArithmetic.default_rounding() = IntervalArithmetic.IntervalRounding{:correct}()
+# IntervalArithmetic.default_rounding() = IntervalArithmetic.IntervalRounding{:correct}()
+IntervalArithmetic.configure(; rounding = :correct)
