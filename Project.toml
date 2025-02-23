@@ -23,7 +23,7 @@ IntervalArithmeticIntervalSetsExt = "IntervalSets"
 IntervalArithmeticRecipesBaseExt = "RecipesBase"
 
 [compat]
-CRlibm = "1"
+CRlibm = "1.0.2"
 DiffRules = "1"
 ForwardDiff = "0.10"
 IntervalSets = "0.7"
