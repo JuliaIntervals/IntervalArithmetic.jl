@@ -10,42 +10,6 @@ and [CRlibm.jl](https://github.com/JuliaInterval/IntervalArithmetic.jl).
 """
 struct IntervalRounding{T} end
 
-function configure_rounding(rounding::Symbol)
-    @assert rounding ∈ (:correct, :none)
-
-    for f ∈ (:add, :sub, :mul, :div)
-        f_round = Symbol(:_, f, :_round)
-        @eval $f_round(x::T, y::T, r::RoundingMode) where {T<:AbstractFloat} = $f_round(IntervalRounding{$(QuoteNode(rounding))}(), x, y, r)
-    end
-
-    @eval _pow_round(x::T, y::T, r::RoundingMode) where {T<:AbstractFloat} = _pow_round(IntervalRounding{$(QuoteNode(rounding))}(), x, y, r)
-
-    @eval _inv_round(x::AbstractFloat, r::RoundingMode) = _inv_round(IntervalRounding{$(QuoteNode(rounding))}(), x, r)
-
-    @eval _sqrt_round(x::AbstractFloat, r::RoundingMode) = _sqrt_round(IntervalRounding{$(QuoteNode(rounding))}(), x, r)
-
-    @eval _rootn_round(x::AbstractFloat, n::Integer, r::RoundingMode) = _rootn_round(IntervalRounding{$(QuoteNode(rounding))}(), x, n, r)
-
-    @eval _atan_round(x::T, y::T, r::RoundingMode) where {T<:AbstractFloat} = _atan_round(IntervalRounding{$(QuoteNode(rounding))}(), x, y, r)
-
-    for f ∈ [:cbrt, :exp2, :exp10, :cot, :sec, :csc, :tanh, :coth, :sech, :csch, :asinh, :acosh, :atanh]
-        f_round = Symbol(:_, f, :_round)
-        @eval $f_round(x::AbstractFloat, r::RoundingMode) = $f_round(IntervalRounding{$(QuoteNode(rounding))}(), x, r)
-    end
-
-    for f ∈ (:acot, :acoth)
-        f_round = Symbol(:_, f, :_round)
-        @eval $f_round(x::AbstractFloat, r::RoundingMode) = $f_round(IntervalRounding{$(QuoteNode(rounding))}(), x, r)
-    end
-
-    for f ∈ CRlibm.functions
-        f_round = Symbol(:_, f, :_round)
-        @eval $f_round(x::AbstractFloat, r::RoundingMode) = $f_round(IntervalRounding{$(QuoteNode(rounding))}(), x, r)
-    end
-
-    return rounding
-end
-
 #
 
 for (f, fname) ∈ ((:+, :add), (:-, :sub), (:*, :mul), (:/, :div))

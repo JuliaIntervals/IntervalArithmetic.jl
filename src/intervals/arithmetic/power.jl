@@ -20,15 +20,7 @@ Available mode types:
 """
 struct PowerMode{T} end
 
-function configure_power(power::Symbol)
-    @assert power ∈ (:slow, :fast)
-
-    for f ∈ (:_select_pow, :_select_pown)
-        @eval $f(x, y) = $f(PowerMode{$(QuoteNode(power))}(), x, y)
-    end
-
-    return power
-end
+#
 
 """
     ^(x::BareInterval, y::BareInterval)

@@ -20,7 +20,7 @@ true
 ```
 """
 macro I_str(str)
-    return parse(Interval{default_boundtype()}, str)
+    return _parse(str)
 end
 
 """

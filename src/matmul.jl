@@ -172,30 +172,7 @@ Available mode types:
 """
 struct MatMulMode{T} end
 
-function configure_matmul(matmul::Symbol)
-    @assert matmul ∈ (:slow, :fast)
-
-    for T ∈ (:AbstractVector, :AbstractMatrix) # needed to resolve method ambiguities
-        @eval begin
-            function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::$T{<:RealOrComplexI}, α::Number, β::Number)
-                size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
-                return _mul!(MatMulMode{$(QuoteNode(matmul))}(), C, A, B, α, β)
-            end
-
-            function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix, B::$T{<:RealOrComplexI}, α::Number, β::Number)
-                size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
-                return _mul!(MatMulMode{$(QuoteNode(matmul))}(), C, A, B, α, β)
-            end
-
-            function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::$T, α::Number, β::Number)
-                size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
-                return _mul!(MatMulMode{$(QuoteNode(matmul))}(), C, A, B, α, β)
-            end
-        end
-    end
-
-    return matmul
-end
+#
 
 function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::AbstractVecOrMat{<:RealOrComplexI})
     return LinearAlgebra.mul!(C, A, B, interval(true), interval(false))

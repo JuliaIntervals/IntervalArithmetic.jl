@@ -9,35 +9,6 @@ Constant for the supported types of interval bounds. This is set to
 const BoundTypes = Union{Rational,AbstractFloat}
 
 """
-    default_boundtype()
-
-Return the default bound type used in [`promote_boundtype`](@ref). By default,
-`default_boundtype()` is set to `Float64`. It can be modified by redefining the
-function, however it should be set to a concrete subtype of [`BoundTypes`](@ref).
-
-# Examples
-
-```jldoctest
-julia> IntervalArithmetic.default_boundtype() = Float32
-
-julia> typeof(interval(1, 2))
-Interval{Float32}
-
-julia> typeof(interval(1, big(2)))
-Interval{BigFloat}
-
-julia> IntervalArithmetic.default_boundtype() = Float64
-
-julia> typeof(interval(1, 2))
-Interval{Float64}
-
-julia> typeof(interval(1, big(2)))
-Interval{BigFloat}
-```
-"""
-default_boundtype() = Float64
-
-"""
     promote_boundtype(T, S)
 
 Return the bound type used to construct intervals. The bound type is given by
@@ -50,7 +21,6 @@ all other cases, the bound type is given by
 promote_boundtype(::Type{T}, ::Type{S}) where {T<:BoundTypes,S<:BoundTypes} = promote_type(T, S)
 promote_boundtype(::Type{T}, ::Type{S}) where {T<:BoundTypes,S} = promote_type(boundtype(T), boundtype(S))
 promote_boundtype(::Type{T}, ::Type{S}) where {T,S<:BoundTypes} = promote_type(boundtype(T), boundtype(S))
-promote_boundtype(::Type{T}, ::Type{S}) where {T,S} = promote_type(default_boundtype(), boundtype(T), boundtype(S))
 
 promote_boundtype(::Type{Rational{T}}, ::Type{<:AbstractIrrational}) where {T<:Integer} = Rational{promote_type(T, Int64)}
 promote_boundtype(::Type{<:AbstractIrrational}, ::Type{Rational{T}}) where {T<:Integer} = Rational{promote_type(T, Int64)}
@@ -652,10 +622,6 @@ julia> @macroexpand @interval Float32 sin(1)
 :(sin(IntervalArithmetic.atomic(Float32, 1)))
 ```
 """
-macro interval(expr)
-    return _wrap_interval(default_boundtype(), expr)
-end
-
 macro interval(T, expr)
     return _wrap_interval(T, expr)
 end

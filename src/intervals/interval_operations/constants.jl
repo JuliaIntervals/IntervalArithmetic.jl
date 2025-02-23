@@ -22,7 +22,7 @@ emptyinterval(x::Interval{T}) where {T} = _unsafe_interval(emptyinterval(BareInt
 emptyinterval(::Type{Complex{T}}) where {T<:Interval} = complex(emptyinterval(T), emptyinterval(T))
 emptyinterval(x::Complex{<:Interval}) = complex(emptyinterval(real(x)), emptyinterval(imag(x)))
 
-emptyinterval(::Type{T} = default_boundtype()) where {T<:BoundTypes} = emptyinterval(Interval{T})
+emptyinterval(::Type{T}) where {T<:BoundTypes} = emptyinterval(Interval{T})
 emptyinterval(::T) where {T<:BoundTypes} = emptyinterval(T)
 
 emptyinterval(::Type{Complex{T}}) where {T<:BoundTypes} = complex(emptyinterval(T), emptyinterval(T))
@@ -49,7 +49,7 @@ entireinterval(x::Interval{T}) where {T} = _unsafe_interval(entireinterval(BareI
 entireinterval(::Type{Complex{T}}) where {T<:Interval} = complex(entireinterval(T), entireinterval(T))
 entireinterval(x::Complex{<:Interval}) = complex(entireinterval(real(x)), entireinterval(imag(x)))
 
-entireinterval(::Type{T} = default_boundtype()) where {T<:BoundTypes} = entireinterval(Interval{T})
+entireinterval(::Type{T}) where {T<:BoundTypes} = entireinterval(Interval{T})
 entireinterval(::T) where {T<:BoundTypes} = entireinterval(T)
 
 entireinterval(::Type{Complex{T}}) where {T<:BoundTypes} = complex(entireinterval(T), entireinterval(T))
@@ -66,7 +66,7 @@ nai(x::Interval{T}) where {T} = _unsafe_interval(emptyinterval(BareInterval{T}),
 nai(::Type{Complex{T}}) where {T<:Interval} = complex(nai(T), nai(T))
 nai(x::Complex{<:Interval}) = complex(nai(real(x)), nai(imag(x)))
 
-nai(::Type{T} = default_boundtype()) where {T<:BoundTypes} = nai(Interval{T})
+nai(::Type{T}) where {T<:BoundTypes} = nai(Interval{T})
 nai(::T) where {T<:BoundTypes} = nai(T)
 
 nai(::Type{Complex{T}}) where {T<:BoundTypes} = complex(nai(T), nai(T))

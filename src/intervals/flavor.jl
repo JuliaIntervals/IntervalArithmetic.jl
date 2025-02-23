@@ -46,19 +46,7 @@ true
 """
 struct Flavor{F} end
 
-function configure_flavor(flavor::Symbol)
-    @assert flavor == :set_based
-
-    @eval zero_times_infinity(::Type{T}) where {T<:BoundTypes} = zero_times_infinity(Flavor{$(QuoteNode(flavor))}(), T)
-
-    @eval div_by_thin_zero(x::BareInterval) = div_by_thin_zero(Flavor{$(QuoteNode(flavor))}(), x)
-
-    @eval contains_infinity(x::BareInterval) = contains_infinity(Flavor{$(QuoteNode(flavor))}(), x)
-
-    @eval is_valid_interval(a::Real, b::Real) = is_valid_interval(Flavor{$(QuoteNode(flavor))}(), a, b)
-
-    return flavor
-end
+#
 
 """
     zero_times_infinity([F::Flavor=default_flavor()], T<:BoundTypes)
