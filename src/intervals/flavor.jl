@@ -28,9 +28,6 @@ Some flavors `F` include:
 # Examples
 
 ```jldoctest
-julia> IntervalArithmetic.default_flavor()
-IntervalArithmetic.Flavor{:set_based}()
-
 julia> IntervalArithmetic.is_valid_interval(Inf, Inf)
 false
 

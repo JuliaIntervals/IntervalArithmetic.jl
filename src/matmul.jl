@@ -164,7 +164,7 @@ Base.similar(::Array, S::Type{Complex{Interval{T}}}, dims::Dims) where {T<:Bound
 """
     MatMulMode
 
-Matrix multiplication type.
+Matrix multiplication mode type.
 
 Available mode types:
 - `:slow` (default): generic algorithm.
