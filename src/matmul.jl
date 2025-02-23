@@ -132,21 +132,7 @@ LinearAlgebra.det(A::AbstractMatrix{<:Complex{<:Interval}}) = reduce(*, LinearAl
 
 
 
-# matrix multiplication
-
-"""
-    MatMulMode
-
-Matrix multiplication type.
-
-Available mode types:
-- `:slow` (default): generic algorithm.
-- `:fast` : Rump's algorithm.
-"""
-struct MatMulMode{T} end
-
-matmul_mode() = MatMulMode{:fast}()
-
+#
 # by-pass `similar` methods defined in array.jl
 # note: written in this form to avoid by-passing the default behaviour for `Union{}`
 Base.similar(a::Array{Interval{T},1})          where {T<:BoundTypes} = zeros(Interval{T}, size(a, 1))
@@ -171,27 +157,48 @@ Base.similar(::Array, S::Type{Interval{T}},          dims::Dims) where {T<:Bound
 Base.similar(::Array, S::Type{Complex{Interval{T}}}, dims::Dims) where {T<:BoundTypes} = zeros(S, dims)
 #
 
-function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::AbstractVecOrMat{<:RealOrComplexI})
-    return LinearAlgebra.mul!(C, A, B, interval(true), interval(false))
-end
 
-for T ∈ (:AbstractVector, :AbstractMatrix) # needed to resolve method ambiguities
-    @eval begin
-        function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::$T{<:RealOrComplexI}, α::Number, β::Number)
-            size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
-            return _mul!(matmul_mode(), C, A, B, α, β)
-        end
 
-        function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix, B::$T{<:RealOrComplexI}, α::Number, β::Number)
-            size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
-            return _mul!(matmul_mode(), C, A, B, α, β)
-        end
+# matrix multiplication
 
-        function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::$T, α::Number, β::Number)
-            size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
-            return _mul!(matmul_mode(), C, A, B, α, β)
+"""
+    MatMulMode
+
+Matrix multiplication type.
+
+Available mode types:
+- `:slow` (default): generic algorithm.
+- `:fast` : Rump's algorithm.
+"""
+struct MatMulMode{T} end
+
+function configure_matmul(matmul::Symbol)
+    @assert matmul ∈ (:slow, :fast)
+
+    for T ∈ (:AbstractVector, :AbstractMatrix) # needed to resolve method ambiguities
+        @eval begin
+            function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::$T{<:RealOrComplexI}, α::Number, β::Number)
+                size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
+                return _mul!(MatMulMode{$(QuoteNode(matmul))}(), C, A, B, α, β)
+            end
+
+            function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix, B::$T{<:RealOrComplexI}, α::Number, β::Number)
+                size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
+                return _mul!(MatMulMode{$(QuoteNode(matmul))}(), C, A, B, α, β)
+            end
+
+            function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::$T, α::Number, β::Number)
+                size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
+                return _mul!(MatMulMode{$(QuoteNode(matmul))}(), C, A, B, α, β)
+            end
         end
     end
+
+    return matmul
+end
+
+function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::AbstractVecOrMat{<:RealOrComplexI})
+    return LinearAlgebra.mul!(C, A, B, interval(true), interval(false))
 end
 
 function _mul!(::MatMulMode{:slow}, C, A::AbstractMatrix, B::AbstractVecOrMat, α, β)
