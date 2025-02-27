@@ -110,7 +110,7 @@ Base.promote_rule(::Type{ExactReal{T}}, ::Type{Interval{S}}) where {T<:Real,S<:N
 
 # to Real
 
-Bool(x::ExactReal) = convert(Bool, x) # needed to resolve ambiguity
+Base.Bool(x::ExactReal) = convert(Bool, x) # needed to resolve ambiguity
 (::Type{T})(x::ExactReal) where {T<:Real} = convert(T, x)
 Interval{T}(x::ExactReal) where {T<:NumTypes} = convert(Interval{T}, x) # needed to resolve ambiguity
 Interval(x::ExactReal) = Interval{promote_numtype(numtype(x.value), numtype(x.value))}(x) # needed to resolve ambiguity
