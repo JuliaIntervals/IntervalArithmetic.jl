@@ -43,20 +43,20 @@ end
 
 # not in the IEEE Standard 1788-2015
 
-Base.rad2deg(x::BareInterval{T}) where {T<:NumTypes} = (x * bareinterval(T, 180)) / bareinterval(T, π)
-Base.rad2deg(x::Interval{T}) where {T<:NumTypes} = (x * interval(T, 180)) / interval(T, π)
+Base.rad2deg(x::BareInterval{T}) where {T<:BoundTypes} = (x * bareinterval(T, 180)) / bareinterval(T, π)
+Base.rad2deg(x::Interval{T}) where {T<:BoundTypes} = (x * interval(T, 180)) / interval(T, π)
 
-Base.deg2rad(x::BareInterval{T}) where {T<:NumTypes} = (x / bareinterval(T, 180)) * bareinterval(T, π)
-Base.deg2rad(x::Interval{T}) where {T<:NumTypes} = (x / interval(T, 180)) * interval(T, π)
+Base.deg2rad(x::BareInterval{T}) where {T<:BoundTypes} = (x / bareinterval(T, 180)) * bareinterval(T, π)
+Base.deg2rad(x::Interval{T}) where {T<:BoundTypes} = (x / interval(T, 180)) * interval(T, π)
 
 Base.sincospi(x::BareInterval) = (sinpi(x), cospi(x))
 Base.sincospi(x::Interval) = (sinpi(x), cospi(x))
 
-Base.sind(x::BareInterval{T}) where {T<:NumTypes} = sinpi(x / bareinterval(T, 180))
-Base.sind(x::Interval{T}) where {T<:NumTypes} = sinpi(x / interval(T, 180))
+Base.sind(x::BareInterval{T}) where {T<:BoundTypes} = sinpi(x / bareinterval(T, 180))
+Base.sind(x::Interval{T}) where {T<:BoundTypes} = sinpi(x / interval(T, 180))
 
-Base.cosd(x::BareInterval{T}) where {T<:NumTypes} = cospi(x / bareinterval(T, 180))
-Base.cosd(x::Interval{T}) where {T<:NumTypes} = cospi(x / interval(T, 180))
+Base.cosd(x::BareInterval{T}) where {T<:BoundTypes} = cospi(x / bareinterval(T, 180))
+Base.cosd(x::Interval{T}) where {T<:BoundTypes} = cospi(x / interval(T, 180))
 
 #
 
@@ -111,7 +111,7 @@ function Base.sin(x::Interval)
     return _unsafe_interval(r, d, isguaranteed(x))
 end
 
-Base.sin(x::Complex{Interval{T}}) where {T<:NumTypes} = complex(sin(real(x)) * cosh(imag(x)), cos(real(x)) * sinh(imag(x)))
+Base.sin(x::Complex{Interval{T}}) where {T<:BoundTypes} = complex(sin(real(x)) * cosh(imag(x)), cos(real(x)) * sinh(imag(x)))
 
 # not in the IEEE Standard 1788-2015
 
@@ -161,7 +161,7 @@ function Base.sinpi(x::Interval)
     return _unsafe_interval(r, d, isguaranteed(x))
 end
 
-Base.sinpi(x::Complex{Interval{T}}) where {T<:NumTypes} =
+Base.sinpi(x::Complex{Interval{T}}) where {T<:BoundTypes} =
     complex(sinpi(real(x)) * cosh(imag(x) * interval(T, π)), cospi(real(x)) * sinh(imag(x) * interval(T, π)))
 
 """
@@ -215,7 +215,7 @@ function Base.cos(x::Interval)
     return _unsafe_interval(r, d, isguaranteed(x))
 end
 
-Base.cos(x::Complex{Interval{T}}) where {T<:NumTypes} = complex(cos(real(x)) * cosh(imag(x)), -sin(real(x)) * sinh(imag(x)))
+Base.cos(x::Complex{Interval{T}}) where {T<:BoundTypes} = complex(cos(real(x)) * cosh(imag(x)), -sin(real(x)) * sinh(imag(x)))
 
 # not in the IEEE Standard 1788-2015
 
@@ -267,7 +267,7 @@ function Base.cospi(x::Interval)
     return _unsafe_interval(r, d, isguaranteed(x))
 end
 
-Base.cospi(x::Complex{Interval{T}}) where {T<:NumTypes} =
+Base.cospi(x::Complex{Interval{T}}) where {T<:BoundTypes} =
     complex(cospi(real(x)) * cosh(imag(x) * interval(T, π)), -sinpi(real(x)) * sinh(imag(x) * interval(T, π)))
 
 """
@@ -436,7 +436,7 @@ end
 
 Base.asin(x::BareInterval{<:Rational}) = asin(float(x))
 
-function Base.asin(x::Interval{T}) where {T<:NumTypes}
+function Base.asin(x::Interval{T}) where {T<:BoundTypes}
     domain = _unsafe_bareinterval(T, -one(T), one(T))
     bx = bareinterval(x)
     r = asin(bx)
@@ -445,7 +445,7 @@ function Base.asin(x::Interval{T}) where {T<:NumTypes}
     return _unsafe_interval(r, d, isguaranteed(x))
 end
 
-Base.asin(x::Complex{Interval{T}}) where {T<:NumTypes} =
+Base.asin(x::Complex{Interval{T}}) where {T<:BoundTypes} =
     -interval(T, im)*log(interval(T, im)*x + sqrt(interval(T, 1) - x^2))
 
 """
@@ -463,7 +463,7 @@ end
 
 Base.acos(x::BareInterval{<:Rational}) = acos(float(x))
 
-function Base.acos(x::Interval{T}) where {T<:NumTypes}
+function Base.acos(x::Interval{T}) where {T<:BoundTypes}
     domain = _unsafe_bareinterval(T, -one(T), one(T))
     bx = bareinterval(x)
     r = acos(bx)
@@ -472,7 +472,7 @@ function Base.acos(x::Interval{T}) where {T<:NumTypes}
     return _unsafe_interval(r, d, isguaranteed(x))
 end
 
-Base.acos(x::Complex{Interval{T}}) where {T<:NumTypes} =
+Base.acos(x::Complex{Interval{T}}) where {T<:BoundTypes} =
     -interval(T, im)*log(x + interval(T, im)*sqrt(interval(T, 1) - x^2))
 
 """
@@ -494,7 +494,7 @@ function Base.atan(x::Interval)
     return _unsafe_interval(r, d, isguaranteed(x))
 end
 
-Base.atan(x::Complex{Interval{T}}) where {T<:NumTypes} =
+Base.atan(x::Complex{Interval{T}}) where {T<:BoundTypes} =
     -interval(T, im)/interval(T, 2)*log((interval(T, im) - x)/(interval(T, im) + x))
 
 """
@@ -586,13 +586,13 @@ end
 
 # helper functions
 
-_unsafe_scale(x::BareInterval{T}, α::T) where {T<:NumTypes} = @round(T, inf(x) * α, sup(x) * α) # assume `α` is postive
+_unsafe_scale(x::BareInterval{T}, α::T) where {T<:BoundTypes} = @round(T, inf(x) * α, sup(x) * α) # assume `α` is postive
 
-_half_pi(::Type{T}) where {T<:NumTypes} = _unsafe_scale(bareinterval(T, π), convert(T, 0.5))
+_half_pi(::Type{T}) where {T<:BoundTypes} = _unsafe_scale(bareinterval(T, π), convert(T, 0.5))
 
-function _range_atan(::Type{T}) where {T<:NumTypes}
+function _range_atan(::Type{T}) where {T<:BoundTypes}
     x = sup(bareinterval(T, π))
     return _unsafe_bareinterval(T, -x, x)
 end
 
-_half_range_atan(::Type{T}) where {T<:NumTypes} = _unsafe_scale(_range_atan(T), convert(T, 0.5))
+_half_range_atan(::Type{T}) where {T<:BoundTypes} = _unsafe_scale(_range_atan(T), convert(T, 0.5))

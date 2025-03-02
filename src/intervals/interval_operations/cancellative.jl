@@ -11,7 +11,7 @@ The result is decorated by at most `trv` (Section 11.7.1).
 
 Implement the `cancelMinus` function of the IEEE Standard 1788-2015 (Section 9.2).
 """
-function cancelminus(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
+function cancelminus(x::BareInterval{T}, y::BareInterval{T}) where {T<:BoundTypes}
     isempty_interval(x) & (isempty_interval(y) | !isunbounded(y)) && return emptyinterval(BareInterval{T})
 
     isunbounded(x) | isunbounded(y) | isempty_interval(y) && return entireinterval(BareInterval{T})

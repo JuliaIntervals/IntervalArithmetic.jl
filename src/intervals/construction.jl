@@ -1,59 +1,29 @@
 # bound type mechanism
 
 """
-    NumTypes
+    BoundTypes
 
 Constant for the supported types of interval bounds. This is set to
 `Union{Rational,AbstractFloat}`.
 """
-const NumTypes = Union{Rational,AbstractFloat}
+const BoundTypes = Union{Rational,AbstractFloat}
 
 """
-    default_numtype()
-
-Return the default bound type used in [`promote_numtype`](@ref). By default,
-`default_numtype()` is set to `Float64`. It can be modified by redefining the
-function, however it should be set to a concrete subtype of [`NumTypes`](@ref).
-
-# Examples
-
-```jldoctest
-julia> IntervalArithmetic.default_numtype() = Float32
-
-julia> typeof(interval(1, 2))
-Interval{Float32}
-
-julia> typeof(interval(1, big(2)))
-Interval{BigFloat}
-
-julia> IntervalArithmetic.default_numtype() = Float64
-
-julia> typeof(interval(1, 2))
-Interval{Float64}
-
-julia> typeof(interval(1, big(2)))
-Interval{BigFloat}
-```
-"""
-default_numtype() = Float64
-
-"""
-    promote_numtype(T, S)
+    promote_boundtype(T, S)
 
 Return the bound type used to construct intervals. The bound type is given by
 `promote_type(T, S)` if `T` or `S` is a `Rational` or an `AbstractFloat`; except
 when `T` is a `Rational{R}` and `S` is an `AbstractIrrational` (or vice-versa),
 in which case the bound type is given by `Rational{promote_type(R, Int64)}`. In
 all other cases, the bound type is given by
-`promote_type(default_numtype(), T, S)`.
+`promote_type([DEFAULT BOUND TYPE], T, S)`.
 """
-promote_numtype(::Type{T}, ::Type{S}) where {T<:NumTypes,S<:NumTypes} = promote_type(T, S)
-promote_numtype(::Type{T}, ::Type{S}) where {T<:NumTypes,S} = promote_type(numtype(T), numtype(S))
-promote_numtype(::Type{T}, ::Type{S}) where {T,S<:NumTypes} = promote_type(numtype(T), numtype(S))
-promote_numtype(::Type{T}, ::Type{S}) where {T,S} = promote_type(default_numtype(), numtype(T), numtype(S))
+promote_boundtype(::Type{T}, ::Type{S}) where {T<:BoundTypes,S<:BoundTypes} = promote_type(T, S)
+promote_boundtype(::Type{T}, ::Type{S}) where {T<:BoundTypes,S} = promote_type(boundtype(T), boundtype(S))
+promote_boundtype(::Type{T}, ::Type{S}) where {T,S<:BoundTypes} = promote_type(boundtype(T), boundtype(S))
 
-promote_numtype(::Type{Rational{T}}, ::Type{<:AbstractIrrational}) where {T<:Integer} = Rational{promote_type(T, Int64)}
-promote_numtype(::Type{<:AbstractIrrational}, ::Type{Rational{T}}) where {T<:Integer} = Rational{promote_type(T, Int64)}
+promote_boundtype(::Type{Rational{T}}, ::Type{<:AbstractIrrational}) where {T<:Integer} = Rational{promote_type(T, Int64)}
+promote_boundtype(::Type{<:AbstractIrrational}, ::Type{Rational{T}}) where {T<:Integer} = Rational{promote_type(T, Int64)}
 
 
 
@@ -62,7 +32,7 @@ promote_numtype(::Type{<:AbstractIrrational}, ::Type{Rational{T}}) where {T<:Int
 # bare interval, i.e. interval with no decoration
 
 """
-    BareInterval{T<:NumTypes}
+    BareInterval{T<:BoundTypes}
 
 Interval type for guaranteed computation with interval arithmetic according to
 the IEEE Standard 1788-2015. Unlike [`Interval`](@ref), this bare interval does
@@ -77,7 +47,7 @@ Constructor compliant with the IEEE Standard 1788-2015: [`bareinterval`](@ref).
 
 See also: [`Interval`](@ref).
 """
-struct BareInterval{T<:NumTypes}
+struct BareInterval{T<:BoundTypes}
     lo :: T
     hi :: T
 
@@ -95,7 +65,7 @@ struct BareInterval{T<:NumTypes}
 end
 
 """
-    _unsafe_bareinterval(T<:NumTypes, lo, hi)
+    _unsafe_bareinterval(T<:BoundTypes, lo, hi)
 
 Internal constructor which assumes that `is_valid_interval(lo, hi) == true`.
 
@@ -104,7 +74,7 @@ Internal constructor which assumes that `is_valid_interval(lo, hi) == true`.
     Since misuse of this function can deeply corrupt code, its usage is
     **strongly discouraged** in favour of [`bareinterval`](@ref).
 """
-_unsafe_bareinterval(::Type{T}, a, b) where {T<:NumTypes} =
+_unsafe_bareinterval(::Type{T}, a, b) where {T<:BoundTypes} =
     _unsafe_bareinterval(T, _round(T, a, RoundDown), _round(T, b, RoundUp))
 
 _normalisezero(a) = ifelse(iszero(a), zero(a), a)
@@ -115,21 +85,21 @@ _inf(x::Real) = x
 _sup(x::Real) = x
 #
 
-_round(::Type{T}, a, r::RoundingMode) where {T<:NumTypes} = __round(T, a, r)
+_round(::Type{T}, a, r::RoundingMode) where {T<:BoundTypes} = __round(T, a, r)
 # irrationals
-_round(::Type{<:NumTypes}, ::AbstractIrrational, ::RoundingMode) = throw(ArgumentError("only irrationals from MathConstants are supported"))
+_round(::Type{<:BoundTypes}, ::AbstractIrrational, ::RoundingMode) = throw(ArgumentError("only irrationals from MathConstants are supported"))
 for irr ∈ (:(:π), :(:γ), :(:catalan)) # irrationals supported by MPFR
-    @eval _round(::Type{T}, a::Irrational{$irr}, r::RoundingMode) where {T<:NumTypes} =
+    @eval _round(::Type{T}, a::Irrational{$irr}, r::RoundingMode) where {T<:BoundTypes} =
         __round(T, BigFloat(a, r), r)
 end
 # irrationals not supported by MPFR, use their exact formula ℯ = exp(1), φ = (1+sqrt(5))/2
-_round(::Type{T}, ::Irrational{:ℯ}, r::RoundingMode{:Down}) where {T<:NumTypes} =
+_round(::Type{T}, ::Irrational{:ℯ}, r::RoundingMode{:Down}) where {T<:BoundTypes} =
     __round(T, inf(exp(bareinterval(BigFloat, 1))), r)
-_round(::Type{T}, ::Irrational{:ℯ}, r::RoundingMode{:Up}) where {T<:NumTypes} =
+_round(::Type{T}, ::Irrational{:ℯ}, r::RoundingMode{:Up}) where {T<:BoundTypes} =
     __round(T, sup(exp(bareinterval(BigFloat, 1))), r)
-_round(::Type{T}, ::Irrational{:φ}, r::RoundingMode{:Down}) where {T<:NumTypes} =
+_round(::Type{T}, ::Irrational{:φ}, r::RoundingMode{:Down}) where {T<:BoundTypes} =
     __round(T, inf((bareinterval(BigFloat, 1) + sqrt(bareinterval(BigFloat, 5))) / bareinterval(BigFloat, 2)), r)
-_round(::Type{T}, ::Irrational{:φ}, r::RoundingMode{:Up}) where {T<:NumTypes} =
+_round(::Type{T}, ::Irrational{:φ}, r::RoundingMode{:Up}) where {T<:BoundTypes} =
     __round(T, sup((bareinterval(BigFloat, 1) + sqrt(bareinterval(BigFloat, 5))) / bareinterval(BigFloat, 2)), r)
 # floats
 __round(::Type{T}, a, r::RoundingMode) where {T<:AbstractFloat} = T(a, r)
@@ -145,7 +115,7 @@ __float(::Type{T}) where {T<:Integer} = float(T)
 __float(::Type{T}) where {T<:Union{Int8,UInt8}} = Float16
 __float(::Type{T}) where {T<:Union{Int16,UInt16}} = Float32
 
-BareInterval{T}(x::BareInterval) where {T<:NumTypes} = convert(BareInterval{T}, x)
+BareInterval{T}(x::BareInterval) where {T<:BoundTypes} = convert(BareInterval{T}, x)
 
 """
     bareinterval(T, a, b)
@@ -187,10 +157,10 @@ function bareinterval(::Type{T}, a, b) where {T}
     @warn "ill-formed bare interval [a, b] with a = $a, b = $b. Empty interval is returned"
     return emptyinterval(BareInterval{T})
 end
-bareinterval(a, b) = bareinterval(promote_numtype(numtype(a), numtype(b)), a, b)
+bareinterval(a, b) = bareinterval(promote_boundtype(boundtype(a), boundtype(b)), a, b)
 
 bareinterval(::Type{T}, a) where {T} = bareinterval(T, a, a)
-bareinterval(a) = bareinterval(promote_numtype(numtype(a), numtype(a)), a)
+bareinterval(a) = bareinterval(promote_boundtype(boundtype(a), boundtype(a)), a)
 
 bareinterval(::Type{T}, a::BareInterval) where {T} =
     _unsafe_bareinterval(T, _inf(a), _sup(a)) # assumes valid interval
@@ -203,12 +173,12 @@ bareinterval(a::Tuple) = bareinterval(a...)
 
 # promotion
 
-Base.promote_rule(::Type{BareInterval{T}}, ::Type{BareInterval{S}}) where {T<:NumTypes,S<:NumTypes} =
-    BareInterval{promote_numtype(T, S)}
+Base.promote_rule(::Type{BareInterval{T}}, ::Type{BareInterval{S}}) where {T<:BoundTypes,S<:BoundTypes} =
+    BareInterval{promote_boundtype(T, S)}
 
 # conversion
 
-Base.convert(::Type{BareInterval{T}}, x::BareInterval) where {T<:NumTypes} =
+Base.convert(::Type{BareInterval{T}}, x::BareInterval) where {T<:BoundTypes} =
     bareinterval(T, x)
 
 
@@ -250,7 +220,7 @@ end
 # decorated intervals
 
 """
-    Interval{T<:NumTypes} <: Real
+    Interval{T<:BoundTypes} <: Real
 
 Interval type for guaranteed computation with interval arithmetic according to
 the IEEE Standard 1788-2015. This structure combines a [`BareInterval`](@ref)
@@ -269,12 +239,12 @@ Constructors compliant with the IEEE Standard 1788-2015:
 
 See also: [`±`](@ref), [`..`](@ref) and [`@I_str`](@ref).
 """
-struct Interval{T<:NumTypes} <: Real
+struct Interval{T<:BoundTypes} <: Real
     bareinterval :: BareInterval{T}
     decoration   :: Decoration
     isguaranteed :: Bool
 
-    global _unsafe_interval(bareinterval::BareInterval{T}, decoration::Decoration, isguaranteed::Bool) where {T<:NumTypes} =
+    global _unsafe_interval(bareinterval::BareInterval{T}, decoration::Decoration, isguaranteed::Bool) where {T<:BoundTypes} =
         new{T}(bareinterval, decoration, isguaranteed)
 end
 
@@ -321,7 +291,7 @@ decoration `dac`
 
 Implement the `setDec` function of the IEEE Standard 1788-2015 (Section 11.5.2).
 """
-function setdecoration(x::Interval{T}, d::Decoration) where {T<:NumTypes}
+function setdecoration(x::Interval{T}, d::Decoration) where {T<:BoundTypes}
     d == ill && return nai(T)
     bx = bareinterval(x)
     isempty_interval(bx) && return _unsafe_interval(bx, trv, isguaranteed(x))
@@ -407,13 +377,13 @@ function interval(::Type{T}, a, b, d::Decoration = com; format::Symbol = :infsup
     format === :midpoint && return _interval_midpoint(T, _value(a), _value(b), d)
     return throw(ArgumentError("`format` must be `:infsup` or `:midpoint`"))
 end
-interval(a, b, d::Decoration = com; format::Symbol = :infsup) = interval(promote_numtype(numtype(a), numtype(b)), a, b, d; format = format)
+interval(a, b, d::Decoration = com; format::Symbol = :infsup) = interval(promote_boundtype(boundtype(a), boundtype(b)), a, b, d; format = format)
 
 function interval(::Type{T}, a, d::Decoration = com; format::Symbol = :infsup) where {T}
     (format === :infsup) | (format === :midpoint) && return _interval_infsup(T, _value(a), _value(a), d)
     return throw(ArgumentError("`format` must be `:infsup` or `:midpoint`"))
 end
-interval(a, d::Decoration = com; format::Symbol = :infsup) = interval(promote_numtype(numtype(a), numtype(a)), a, d; format = format)
+interval(a, d::Decoration = com; format::Symbol = :infsup) = interval(promote_boundtype(boundtype(a), boundtype(a)), a, d; format = format)
 
 # some useful extra constructor
 interval(::Type{T}, a::Tuple, d::Decoration = com; format::Symbol = :infsup) where {T} = interval(T, a..., d; format = format)
@@ -431,12 +401,12 @@ interval(T::Type, d::Decoration; format::Symbol = :infsup) = throw(MethodError(i
 # standard format
 
 """
-    _interval_infsup(T<:NumTypes, a, b, [d::Decoration])
+    _interval_infsup(T<:BoundTypes, a, b, [d::Decoration])
 
 Internal constructor for intervals described by their lower and upper bounds,
 i.e. of the form ``[a, b]``.
 """
-function _interval_infsup(::Type{T}, a, b, d::Decoration) where {T<:NumTypes}
+function _interval_infsup(::Type{T}, a, b, d::Decoration) where {T<:BoundTypes}
     lo = _inf(a)
     hi = _sup(b)
     if !is_valid_interval(lo, hi) || d == ill
@@ -449,7 +419,7 @@ function _interval_infsup(::Type{T}, a, b, d::Decoration) where {T<:NumTypes}
 end
 
 # needed for special warnings and propagation of `isguaranteed`
-function _interval_infsup(::Type{T}, x::Union{BareInterval,Interval}, y::Union{BareInterval,Interval}, d::Decoration) where {T<:NumTypes}
+function _interval_infsup(::Type{T}, x::Union{BareInterval,Interval}, y::Union{BareInterval,Interval}, d::Decoration) where {T<:BoundTypes}
     lo = _inf(x)
     hi = _sup(y)
     t = isguaranteed(x) & isguaranteed(y)
@@ -466,7 +436,7 @@ function _interval_infsup(::Type{T}, x::Union{BareInterval,Interval}, y::Union{B
         return _unsafe_interval(z, min(decoration(x), decoration(y), decoration(z), d), t)
     end
 end
-function _interval_infsup(::Type{T}, x::Union{BareInterval,Interval}, y, d::Decoration) where {T<:NumTypes}
+function _interval_infsup(::Type{T}, x::Union{BareInterval,Interval}, y, d::Decoration) where {T<:BoundTypes}
     lo = _inf(x)
     hi = _sup(y)
     if !is_valid_interval(lo, hi) || d == ill
@@ -477,7 +447,7 @@ function _interval_infsup(::Type{T}, x::Union{BareInterval,Interval}, y, d::Deco
         return _unsafe_interval(z, min(decoration(x), decoration(z), d), isguaranteed(x))
     end
 end
-function _interval_infsup(::Type{T}, x, y::Union{BareInterval,Interval}, d::Decoration) where {T<:NumTypes}
+function _interval_infsup(::Type{T}, x, y::Union{BareInterval,Interval}, d::Decoration) where {T<:BoundTypes}
     lo = _inf(x)
     hi = _sup(y)
     if !is_valid_interval(lo, hi) || d == ill
@@ -489,108 +459,108 @@ function _interval_infsup(::Type{T}, x, y::Union{BareInterval,Interval}, d::Deco
     end
 end
 
-_interval_infsup(::Type{T}, a::Complex, b::Union{BareInterval,Interval}, d::Decoration = com) where {T<:NumTypes} =
+_interval_infsup(::Type{T}, a::Complex, b::Union{BareInterval,Interval}, d::Decoration = com) where {T<:BoundTypes} =
     complex(_interval_infsup(T, real(a), real(b), d), _interval_infsup(T, imag(a), imag(b), d))
-_interval_infsup(::Type{T}, a::Union{BareInterval,Interval}, b::Complex, d::Decoration = com) where {T<:NumTypes} =
+_interval_infsup(::Type{T}, a::Union{BareInterval,Interval}, b::Complex, d::Decoration = com) where {T<:BoundTypes} =
     complex(_interval_infsup(T, real(a), real(b), d), _interval_infsup(T, imag(a), imag(b), d))
 
-_interval_infsup(::Type{T}, a::Complex, b::Complex, d::Decoration = com) where {T<:NumTypes} =
+_interval_infsup(::Type{T}, a::Complex, b::Complex, d::Decoration = com) where {T<:BoundTypes} =
     complex(_interval_infsup(T, real(a), real(b), d), _interval_infsup(T, imag(a), imag(b), d))
-_interval_infsup(::Type{T}, a::Complex, b, d::Decoration = com) where {T<:NumTypes} =
+_interval_infsup(::Type{T}, a::Complex, b, d::Decoration = com) where {T<:BoundTypes} =
     complex(_interval_infsup(T, real(a), real(b), d), _interval_infsup(T, imag(a), imag(b), d))
-_interval_infsup(::Type{T}, a, b::Complex, d::Decoration = com) where {T<:NumTypes} =
+_interval_infsup(::Type{T}, a, b::Complex, d::Decoration = com) where {T<:BoundTypes} =
     complex(_interval_infsup(T, real(a), real(b), d), _interval_infsup(T, imag(a), imag(b), d))
 
 # midpoint constructors
 
 """
-    _interval_midpoint(T<:NumTypes, m, r, d = com)
+    _interval_midpoint(T<:BoundTypes, m, r, d = com)
 
 Internal constructor for intervals described by their midpoint and radius, i.e.
 of the form ``m \\pm r``.
 """
-function _interval_midpoint(::Type{T}, m, r, d::Decoration = com) where {T<:NumTypes}
+function _interval_midpoint(::Type{T}, m, r, d::Decoration = com) where {T<:BoundTypes}
     x = _interval_infsup(T, m, m, d)
     r = _interval_infsup(T, r, r, d)
     return _interval_infsup(T, x - r, x + r, d)
 end
 
-_interval_midpoint(::Type{T}, m::Complex, r, d::Decoration = com) where {T<:NumTypes} =
+_interval_midpoint(::Type{T}, m::Complex, r, d::Decoration = com) where {T<:BoundTypes} =
     complex(_interval_midpoint(T, real(m), r, d), _interval_midpoint(T, imag(m), r, d))
 
-function _interval_midpoint(::Type{T}, m, r::Complex{<:Interval}, d::Decoration = com) where {T<:NumTypes}
+function _interval_midpoint(::Type{T}, m, r::Complex{<:Interval}, d::Decoration = com) where {T<:BoundTypes}
     isthinzero(imag(r)) || return throw(DomainError(r, "imaginary part must be zero"))
     return _interval_midpoint(T, m, real(r), d)
 end
 
-function _interval_midpoint(::Type{T}, m, r::Complex, d::Decoration = com) where {T<:NumTypes}
+function _interval_midpoint(::Type{T}, m, r::Complex, d::Decoration = com) where {T<:BoundTypes}
     iszero(imag(r)) || return throw(DomainError(r, "imaginary part must be zero"))
     return _interval_midpoint(T, m, real(r), d)
 end
 
-function _interval_midpoint(::Type{T}, m::Complex, r::Complex{<:Interval}, d::Decoration = com) where {T<:NumTypes}
+function _interval_midpoint(::Type{T}, m::Complex, r::Complex{<:Interval}, d::Decoration = com) where {T<:BoundTypes}
     isthinzero(imag(r)) || return throw(DomainError(r, "imaginary part must be zero"))
     return _interval_midpoint(T, m, real(r), d)
 end
 
-function _interval_midpoint(::Type{T}, m::Complex, r::Complex, d::Decoration = com) where {T<:NumTypes}
+function _interval_midpoint(::Type{T}, m::Complex, r::Complex, d::Decoration = com) where {T<:BoundTypes}
     iszero(imag(r)) || return throw(DomainError(r, "imaginary part must be zero"))
     return _interval_midpoint(T, m, real(r), d)
 end
 
 # promotion
 
-Base.promote_rule(::Type{Interval{T}}, ::Type{Interval{S}}) where {T<:NumTypes,S<:NumTypes} =
-    Interval{promote_numtype(T, S)}
+Base.promote_rule(::Type{Interval{T}}, ::Type{Interval{S}}) where {T<:BoundTypes,S<:BoundTypes} =
+    Interval{promote_boundtype(T, S)}
 
-Base.promote_rule(::Type{Interval{T}}, ::Type{S}) where {T<:NumTypes,S<:Real} =
-    Interval{promote_numtype(T, S)}
+Base.promote_rule(::Type{Interval{T}}, ::Type{S}) where {T<:BoundTypes,S<:Real} =
+    Interval{promote_boundtype(T, S)}
 
-Base.promote_rule(::Type{T}, ::Type{Interval{S}}) where {T<:Real,S<:NumTypes} =
-    Interval{promote_numtype(T, S)}
+Base.promote_rule(::Type{T}, ::Type{Interval{S}}) where {T<:Real,S<:BoundTypes} =
+    Interval{promote_boundtype(T, S)}
 
 # need explicit signatures to avoid method ambiguities
 for S ∈ (:Bool, :BigFloat)
     @eval begin
-        Base.promote_rule(::Type{Interval{T}}, ::Type{$S}) where {T<:NumTypes} =
-            Interval{promote_numtype(T, $S)}
-        Base.promote_rule(::Type{$S}, ::Type{Interval{T}}) where {T<:NumTypes} =
-            Interval{promote_numtype($S, T)}
+        Base.promote_rule(::Type{Interval{T}}, ::Type{$S}) where {T<:BoundTypes} =
+            Interval{promote_boundtype(T, $S)}
+        Base.promote_rule(::Type{$S}, ::Type{Interval{T}}) where {T<:BoundTypes} =
+            Interval{promote_boundtype($S, T)}
     end
 end
-Base.promote_rule(::Type{Interval{T}}, ::Type{S}) where {T<:NumTypes,S<:AbstractIrrational} =
-    Interval{promote_numtype(T, S)}
-Base.promote_rule(::Type{T}, ::Type{Interval{S}}) where {T<:AbstractIrrational,S<:NumTypes} =
-    Interval{promote_numtype(T, S)}
+Base.promote_rule(::Type{Interval{T}}, ::Type{S}) where {T<:BoundTypes,S<:AbstractIrrational} =
+    Interval{promote_boundtype(T, S)}
+Base.promote_rule(::Type{T}, ::Type{Interval{S}}) where {T<:AbstractIrrational,S<:BoundTypes} =
+    Interval{promote_boundtype(T, S)}
 
 # conversion
 
-Interval{T}(x::Real) where {T<:NumTypes} = convert(Interval{T}, x)
-Interval(x::Real) = Interval{promote_numtype(numtype(x), numtype(x))}(x)
-Interval{T}(x::Interval) where {T<:NumTypes} = convert(Interval{T}, x) # needed to resolve method ambiguity
+Interval{T}(x::Real) where {T<:BoundTypes} = convert(Interval{T}, x)
+Interval(x::Real) = Interval{promote_boundtype(boundtype(x), boundtype(x))}(x)
+Interval{T}(x::Interval) where {T<:BoundTypes} = convert(Interval{T}, x) # needed to resolve method ambiguity
 
-Base.convert(::Type{Interval{T}}, x::Interval) where {T<:NumTypes} = interval(T, x)
+Base.convert(::Type{Interval{T}}, x::Interval) where {T<:BoundTypes} = interval(T, x)
 
-function Base.convert(::Type{Interval{T}}, x::Complex{<:Interval}) where {T<:NumTypes}
+function Base.convert(::Type{Interval{T}}, x::Complex{<:Interval}) where {T<:BoundTypes}
     isthinzero(imag(x)) || return throw(DomainError(x, "imaginary part must be zero"))
     return convert(Interval{T}, real(x))
 end
 
-Base.convert(::Type{Complex{Interval{T}}}, x::Interval) where {T<:NumTypes} =
+Base.convert(::Type{Complex{Interval{T}}}, x::Interval) where {T<:BoundTypes} =
     complex(interval(T, x))
 
 # always guaranteed since an `AbstractIrrational` is a defined fixed constant
-Base.convert(::Type{Interval{T}}, x::AbstractIrrational) where {T<:NumTypes} =
+Base.convert(::Type{Interval{T}}, x::AbstractIrrational) where {T<:BoundTypes} =
     interval(T, x)
-Base.convert(::Type{Complex{Interval{T}}}, x::AbstractIrrational) where {T<:NumTypes} =
+Base.convert(::Type{Complex{Interval{T}}}, x::AbstractIrrational) where {T<:BoundTypes} =
     complex(interval(T, x))
 
-function Base.convert(::Type{Interval{T}}, x::Real) where {T<:NumTypes}
+function Base.convert(::Type{Interval{T}}, x::Real) where {T<:BoundTypes}
     y = interval(T, x)
     return _unsafe_interval(bareinterval(y), decoration(y), false)
 end
 
-function Base.convert(::Type{Interval{T}}, x::Complex) where {T<:NumTypes}
+function Base.convert(::Type{Interval{T}}, x::Complex) where {T<:BoundTypes}
     iszero(imag(x)) || return throw(DomainError(x, "imaginary part must be zero"))
     return convert(Interval{T}, real(x))
 end
@@ -620,11 +590,11 @@ julia> in_interval(3//10, IntervalArithmetic.atomic(Float64, 0.3))
 true
 ```
 """
-atomic(::Type{T}, x::AbstractString) where {T<:NumTypes} = parse(Interval{T}, x)
-atomic(::Type{T}, x::Interval) where {T<:NumTypes} = interval(T, x)
-atomic(::Type{T}, x::Integer) where {T<:NumTypes} = interval(T, x)
-atomic(::Type{T}, x::AbstractIrrational) where {T<:NumTypes} = interval(T, x)
-function atomic(::Type{T}, x::Number) where {T<:NumTypes}
+atomic(::Type{T}, x::AbstractString) where {T<:BoundTypes} = parse(Interval{T}, x)
+atomic(::Type{T}, x::Interval) where {T<:BoundTypes} = interval(T, x)
+atomic(::Type{T}, x::Integer) where {T<:BoundTypes} = interval(T, x)
+atomic(::Type{T}, x::AbstractIrrational) where {T<:BoundTypes} = interval(T, x)
+function atomic(::Type{T}, x::Number) where {T<:BoundTypes}
     str = string(x)
     return interval(T, _parse_num(T, str, RoundDown), _parse_num(T, str, RoundUp))
 end
@@ -638,7 +608,6 @@ end
 """
     @interval(expr)
     @interval(T, expr)
-    @interval(T, expr1, expr2)
 
 Walk through an expression and wrap each argument of functions with the internal
 constructor [`atomic`](@ref).
@@ -646,30 +615,15 @@ constructor [`atomic`](@ref).
 # Examples
 
 ```jldoctest
-julia> setdisplay(:full);
-
 julia> @macroexpand @interval sin(1) # Float64 is the default bound type
 :(sin(IntervalArithmetic.atomic(Float64, 1)))
 
 julia> @macroexpand @interval Float32 sin(1)
 :(sin(IntervalArithmetic.atomic(Float32, 1)))
-
-julia> @interval Float64 sin(1) exp(1)
-Interval{Float64}(0.8414709848078965, 2.7182818284590455, com)
 ```
 """
-macro interval(expr)
-    return _wrap_interval(default_numtype(), expr)
-end
-
 macro interval(T, expr)
     return _wrap_interval(T, expr)
-end
-
-macro interval(T, expr1, expr2)
-    x = _wrap_interval(T, expr1)
-    y = _wrap_interval(T, expr2)
-    return :(interval($(esc(T)), $x, $y))
 end
 
 _wrap_interval(T, x) = :(atomic($(esc(T)), $x))

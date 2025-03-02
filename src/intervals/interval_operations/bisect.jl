@@ -8,7 +8,7 @@ to the midpoint.
 Split the `i`-th component of a vector `x` at a relative position `α`, where
 `α = 0.5` corresponds to the midpoint.
 """
-function bisect(x::BareInterval{T}, α::Real = 0.5) where {T<:NumTypes}
+function bisect(x::BareInterval{T}, α::Real = 0.5) where {T<:BoundTypes}
     0 ≤ α ≤ 1 || return throw(DomainError(α, "`bisect` only accepts a relative position between 0 and 1"))
     isatomic(x) && return (x, emptyinterval(BareInterval{T}))
     m = mid(x, α)
@@ -38,9 +38,9 @@ Split the `i`-th component of a vector `x` in `n[i]` intervals of the
 same diameter; `n` can be a tuple of integers, or a single integer in which case
 the same `n` is used for all the components of `x`.
 """
-mince(x::BareInterval{T}, n::Integer) where {T<:NumTypes} = mince!(Vector{BareInterval{T}}(undef, n), x, n)
+mince(x::BareInterval{T}, n::Integer) where {T<:BoundTypes} = mince!(Vector{BareInterval{T}}(undef, n), x, n)
 
-mince(x::Interval{T}, n::Integer) where {T<:NumTypes} = mince!(Vector{Interval{T}}(undef, n), x, n)
+mince(x::Interval{T}, n::Integer) where {T<:BoundTypes} = mince!(Vector{Interval{T}}(undef, n), x, n)
 
 mince(x::AbstractVector, n::NTuple{N,Integer}) where {N} = mince!(Vector{typeof(x)}(undef, prod(n)), x, n)
 
@@ -51,7 +51,7 @@ mince(x::AbstractVector, n::Integer) = mince(x, ntuple(_ -> n, length(x)))
 
 In-place version of [`mince`](@ref).
 """
-function mince!(v::AbstractVector{<:BareInterval}, x::BareInterval{T}, n::Integer) where {T<:NumTypes}
+function mince!(v::AbstractVector{<:BareInterval}, x::BareInterval{T}, n::Integer) where {T<:BoundTypes}
     nodes = LinRange(inf(x), sup(x), n+1)
     @inbounds for i ∈ 1:n
         v[i] = _unsafe_bareinterval(T, nodes[i], nodes[i+1])
@@ -59,7 +59,7 @@ function mince!(v::AbstractVector{<:BareInterval}, x::BareInterval{T}, n::Intege
     return v
 end
 
-function mince!(v::AbstractVector{<:Interval}, x::Interval{T}, n::Integer) where {T<:NumTypes}
+function mince!(v::AbstractVector{<:Interval}, x::Interval{T}, n::Integer) where {T<:BoundTypes}
     nodes = LinRange(inf(x), sup(x), n+1)
     d = decoration(x)
     t = isguaranteed(x)
