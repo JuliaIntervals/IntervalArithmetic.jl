@@ -2,7 +2,7 @@
     I"str"
 
 Create an interval by parsing the string `"str"`; this is semantically
-equivalent to `parse(Interval{default_boundtype()}, "str")`.
+equivalent to `parse(Interval{[DEFAULT BOUND TYPE]}, "str")`.
 
 # Examples
 

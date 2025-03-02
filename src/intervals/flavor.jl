@@ -49,7 +49,7 @@ struct Flavor{F} end
 #
 
 """
-    zero_times_infinity([F::Flavor=default_flavor()], T<:BoundTypes)
+    zero_times_infinity([F::Flavor,] T<:BoundTypes)
 
 For the given flavor `F`, return ``0 \\times \\infty`` as an instance of type
 `T`.
@@ -57,7 +57,7 @@ For the given flavor `F`, return ``0 \\times \\infty`` as an instance of type
 zero_times_infinity(::Flavor{:set_based}, ::Type{T}) where {T<:BoundTypes} = zero(T)
 
 """
-    div_by_thin_zero([F::Flavor=default_flavor()], x::BareInterval)
+    div_by_thin_zero([F::Flavor,] x::BareInterval)
 
 For the given flavor `F`, divide `x` by the interval containing only ``0``.
 """
@@ -65,14 +65,14 @@ div_by_thin_zero(::Flavor{:set_based}, ::BareInterval{T}) where {T<:BoundTypes} 
     emptyinterval(BareInterval{T})
 
 """
-    contains_infinity([F::Flavor=default_flavor()], x::BareInterval)
+    contains_infinity([F::Flavor,] x::BareInterval)
 
 For the given flavor `F`, test whether `x` contains infinity.
 """
 contains_infinity(::Flavor{:set_based}, ::BareInterval) = false
 
 """
-    is_valid_interval([F::Flavor=default_flavor()], a::Real, b::Real)
+    is_valid_interval([F::Flavor,] a::Real, b::Real)
 
 For the given flavor `F`, test whether ``[a, b]`` is a valid interval.
 """

@@ -16,7 +16,7 @@ Return the bound type used to construct intervals. The bound type is given by
 when `T` is a `Rational{R}` and `S` is an `AbstractIrrational` (or vice-versa),
 in which case the bound type is given by `Rational{promote_type(R, Int64)}`. In
 all other cases, the bound type is given by
-`promote_type(default_boundtype(), T, S)`.
+`promote_type([DEFAULT BOUND TYPE], T, S)`.
 """
 promote_boundtype(::Type{T}, ::Type{S}) where {T<:BoundTypes,S<:BoundTypes} = promote_type(T, S)
 promote_boundtype(::Type{T}, ::Type{S}) where {T<:BoundTypes,S} = promote_type(boundtype(T), boundtype(S))

@@ -317,12 +317,14 @@ function _round_string(x::T, sigdigits::Int, r::RoundingMode) where {T<:Abstract
     ndigits = ceil(Int, precision(x) * log10(T(2)))
     sci_str = Printf.@sprintf("%.*e", ndigits, x)
 
-    ndigits_ = ndigits - 1
-    sci_str_ = Printf.@sprintf("%.*e", ndigits_, x)
+    if abs(x) < floatmax(T)
+        ndigits_ = ndigits - 1
+        sci_str_ = Printf.@sprintf("%.*e", ndigits_, x)
 
-    if parse(T, sci_str) == parse(T, sci_str_)
-        ndigits = ndigits_
-        sci_str = sci_str_
+        if parse(T, sci_str) == parse(T, sci_str_)
+            ndigits = ndigits_
+            sci_str = sci_str_
+        end
     end
 
     mantissa = split(sci_str, 'e')[1]

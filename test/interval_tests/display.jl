@@ -13,8 +13,7 @@ setprecision(BigFloat, 256) do
                 @test sprint(show, MIME("text/plain"), emptyinterval(BareInterval{Float64})) == "∅"
 
                 @test sprint(show, MIME("text/plain"), a) == "[-2.22508e-308, 1.3]"
-                @test sprint(show, MIME("text/plain"), large_expo) ==
-                    "[0.0, 1.0e+123456789]₂₅₆"
+                @test sprint(show, MIME("text/plain"), large_expo) == "[0.0, 1.0e+123456789]₂₅₆"
             end
 
             @testset "20 significant digits" begin
@@ -22,8 +21,7 @@ setprecision(BigFloat, 256) do
                 setdisplay(; sigdigits = 20, decorations = true)
 
                 @test sprint(show, MIME("text/plain"), a) == "[-2.2250738585072014e-308, 1.3]"
-                @test sprint(show, MIME("text/plain"), large_expo) ==
-                    "[0.0, 1.0e+123456789]₂₅₆"
+                @test sprint(show, MIME("text/plain"), large_expo) == "[0.0, 1.0e+123456789]₂₅₆"
             end
         end
 
@@ -46,8 +44,7 @@ setprecision(BigFloat, 256) do
             @test sprint(show, MIME("text/plain"), emptyinterval(BareInterval{Float64})) == "∅"
 
             @test sprint(show, MIME("text/plain"), a) == "0.65 ± 0.65"
-            @test sprint(show, MIME("text/plain"), large_expo) ==
-                "(5.0e+123456788 ± 5.00001e+123456788)₂₅₆"
+            @test sprint(show, MIME("text/plain"), large_expo) == "(5.0e+123456788 ± 5.00001e+123456788)₂₅₆"
         end
     end
 
@@ -80,8 +77,7 @@ setprecision(BigFloat, 256) do
                     @test_broken sprint(show, MIME("text/plain"), b16)  == "[Float16(-6.104e-5), Float16(1.3)]_com"
                     @test sprint(show, MIME("text/plain"), br)   == "[-11//10, 13//10]_com"
                     @test sprint(show, MIME("text/plain"), c)    == "[-1.0, ∞)_dac"
-                    @test sprint(show, MIME("text/plain"), large_expo) ==
-                        "[0.0, 1.0e+123456789]₂₅₆_com"
+                    @test sprint(show, MIME("text/plain"), large_expo) == "[0.0, 1.0e+123456789]₂₅₆_com"
                 end
 
                 @testset "No decorations" begin
@@ -97,8 +93,7 @@ setprecision(BigFloat, 256) do
                     @test_broken sprint(show, MIME("text/plain"), b16)  == "[Float16(-6.104e-5), Float16(1.3)]"
                     @test sprint(show, MIME("text/plain"), br)   == "[-11//10, 13//10]"
                     @test sprint(show, MIME("text/plain"), c)    == "[-1.0, ∞)"
-                    @test sprint(show, MIME("text/plain"), large_expo) ==
-                        "[0.0, 1.0e+123456789]₂₅₆"
+                    @test sprint(show, MIME("text/plain"), large_expo) == "[0.0, 1.0e+123456789]₂₅₆"
                 end
             end
 
@@ -112,8 +107,7 @@ setprecision(BigFloat, 256) do
                 @test_broken sprint(show, MIME("text/plain"), b16)  == "[Float16(-6.104e-5), Float16(1.3)]_com"
                 @test sprint(show, MIME("text/plain"), br)   == "[-11//10, 13//10]_com"
                 @test sprint(show, MIME("text/plain"), c)    == "[-1.0, ∞)_dac"
-                @test sprint(show, MIME("text/plain"), large_expo) ==
-                    "[0.0, 1.0e+123456789]₂₅₆_com"
+                @test sprint(show, MIME("text/plain"), large_expo) == "[0.0, 1.0e+123456789]₂₅₆_com"
             end
         end
 
@@ -151,8 +145,7 @@ setprecision(BigFloat, 256) do
                 @test_broken sprint(show, MIME("text/plain"), b16)  == "(Float16(0.649902) ± Float16(0.65))_com"
                 @test sprint(show, MIME("text/plain"), br)   == "(1//10 ± 6//5)_com"
                 @test sprint(show, MIME("text/plain"), c)    == "(1.79769e+308 ± ∞)_dac"
-                @test_broken sprint(show, MIME("text/plain"), large_expo) ==
-                    "(5.0e+123456788 ± 5.0e+123456788)₂₅₆_com"
+                @test sprint(show, MIME("text/plain"), large_expo) == "(5.0e+123456788 ± 5.00001e+123456788)₂₅₆_com"
             end
 
             @testset "No decorations" begin
@@ -168,8 +161,7 @@ setprecision(BigFloat, 256) do
                 @test_broken sprint(show, MIME("text/plain"), b16)  == "Float16(0.649902) ± Float16(0.65)"
                 @test sprint(show, MIME("text/plain"), br)   == "1//10 ± 6//5"
                 @test sprint(show, MIME("text/plain"), c)    == "1.79769e+308 ± ∞"
-                @test sprint(show, MIME("text/plain"), large_expo) ==
-                    "(5.0e+123456788 ± 5.00001e+123456788)₂₅₆"
+                @test sprint(show, MIME("text/plain"), large_expo) == "(5.0e+123456788 ± 5.00001e+123456788)₂₅₆"
             end
         end
     end
