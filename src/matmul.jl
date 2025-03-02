@@ -174,9 +174,11 @@ struct MatMulMode{T} end
 
 #
 
-function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::AbstractVecOrMat{<:RealOrComplexI})
-    return LinearAlgebra.mul!(C, A, B, interval(true), interval(false))
-end
+LinearAlgebra.mul!(C::AbstractVector{<:RealOrComplexI}, A::AbstractVecOrMat, B::AbstractVector) =
+    LinearAlgebra.mul!(C, A, B, interval(true), interval(false))
+
+LinearAlgebra.mul!(C::AbstractMatrix{<:RealOrComplexI}, A::AbstractVecOrMat, B::AbstractVecOrMat) =
+    LinearAlgebra.mul!(C, A, B, interval(true), interval(false))
 
 function _mul!(::MatMulMode{:slow}, C, A::AbstractMatrix, B::AbstractVecOrMat, α, β)
     for j ∈ axes(B, 2)

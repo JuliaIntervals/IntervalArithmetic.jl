@@ -159,22 +159,15 @@ end
 function configure_matmul(matmul::Symbol)
     matmul ∈ (:slow, :fast) || return throw(ArgumentError("only the matrix multiplication mode `:slow` and `:fast` are available"))
 
-    for T ∈ (:AbstractVector, :AbstractMatrix) # needed to resolve method ambiguities
-        @eval begin
-            function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::$T{<:RealOrComplexI}, α::Number, β::Number)
-                size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
-                return _mul!(MatMulMode{$(QuoteNode(matmul))}(), C, A, B, α, β)
-            end
+    @eval begin
+        function LinearAlgebra.mul!(C::$AbstractVector{<:RealOrComplexI}, A::AbstractVecOrMat, B::AbstractVector, α::Number, β::Number)
+            size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
+            return _mul!(MatMulMode{$(QuoteNode(matmul))}(), C, A, B, α, β)
+        end
 
-            function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix, B::$T{<:RealOrComplexI}, α::Number, β::Number)
-                size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
-                return _mul!(MatMulMode{$(QuoteNode(matmul))}(), C, A, B, α, β)
-            end
-
-            function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::$T, α::Number, β::Number)
-                size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
-                return _mul!(MatMulMode{$(QuoteNode(matmul))}(), C, A, B, α, β)
-            end
+        function LinearAlgebra.mul!(C::$AbstractMatrix{<:RealOrComplexI}, A::AbstractVecOrMat, B::AbstractVecOrMat, α::Number, β::Number)
+            size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
+            return _mul!(MatMulMode{$(QuoteNode(matmul))}(), C, A, B, α, β)
         end
     end
 
