@@ -26,5 +26,5 @@ using Aqua
 end
 
 @testset "Aqua tests (additional)" begin
-    Aqua.test_all(IntervalArithmetic)
+    Aqua.test_all(IntervalArithmetic; ambiguities = VERSION ≥ v"1.11")
 end
