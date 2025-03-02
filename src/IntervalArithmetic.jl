@@ -43,14 +43,14 @@ with decorations and up to 6 significant digits. Learn more:
 
 # Usage
 
-```jldoctest
-julia> using IntervalArithmetic
+```julia
+using IntervalArithmetic
 
-julia> x = interval(1.0, 2.0) # create an interval
-[1.0, 2.0]_com
+# Create an interval
+x = interval(1.0, 2.0)
 
-julia> x + exp(interval(π)) # perform a rigorous computation
-[24.1406, 25.1407]_com
+# Perform a rigorous computation
+x + exp(interval(π))
 ```
 
 Learn more: https://github.com/JuliaIntervals/IntervalArithmetic.jl
