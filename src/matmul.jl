@@ -534,14 +534,18 @@ end
 # convenient function to propagate NG flag
 
 function _ensure_ng_flag!(C::AbstractVecOrMat{<:Interval}, ng_flag::Bool)
-    C .= _unsafe_interval.(getfield.(C, :bareinterval), decoration.(C), ng_flag)
+    for i ∈ eachindex(C)
+        C[i] = _unsafe_interval(C[i].bareinterval, C[i].decoration, ng_flag)
+    end
     return C
 end
 
 function _ensure_ng_flag!(C::AbstractVecOrMat{<:Complex{<:Interval}}, ng_flag::Bool)
-    C .= complex.(
-        _unsafe_interval.(getfield.(real.(C), :bareinterval), decoration.(C), ng_flag),
-        _unsafe_interval.(getfield.(imag.(C), :bareinterval), decoration.(C), ng_flag)
-        )
+    for i ∈ eachindex(C)
+        C[i] = complex(
+            _unsafe_interval(real(C[i]).bareinterval, C[i].decoration, ng_flag),
+            _unsafe_interval(imag(C[i]).bareinterval, C[i].decoration, ng_flag)
+            )
+    end
     return C
 end
