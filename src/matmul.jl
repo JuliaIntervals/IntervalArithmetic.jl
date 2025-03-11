@@ -543,8 +543,8 @@ end
 function _ensure_ng_flag!(C::AbstractVecOrMat{<:Complex{<:Interval}}, ng_flag::Bool)
     for i ∈ eachindex(C)
         C[i] = complex(
-            _unsafe_interval(real(C[i]).bareinterval, C[i].decoration, ng_flag),
-            _unsafe_interval(imag(C[i]).bareinterval, C[i].decoration, ng_flag)
+            _unsafe_interval(real(C[i]).bareinterval, real(C[i]).decoration, ng_flag),
+            _unsafe_interval(imag(C[i]).bareinterval, imag(C[i]).decoration, ng_flag)
             )
     end
     return C
