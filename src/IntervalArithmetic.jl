@@ -39,7 +39,7 @@ include("symbols.jl")
 
 import LinearAlgebra
 
-if Sys.ARCH ∈ (:x86_64, :aarch64)
+if Int != Int32 # 32-bit systems are not supported
     import OpenBLASConsistentFPCSR_jll
 end
 
