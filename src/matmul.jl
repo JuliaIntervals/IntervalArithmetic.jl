@@ -419,11 +419,31 @@ function _vec_or_mat_midradius(A::AbstractVecOrMat{Interval{T}}) where {T<:Abstr
     return mA, rA
 end
 
-function _call_gem_openblas_upward!(C::AbstractMatrix{Float64}, A::AbstractMatrix{Float64}, B::AbstractMatrix{Float64})
-    prev_rounding = ccall(:fegetround, Cint, ()) # save current rounding mode
-    ccall(:fesetround, Cint, (Cint,), 2) # set rounding mode to upward
+#-
 
-    #
+let fenv_consts = Vector{Cint}(undef, 9)
+    ccall(:jl_get_fenv_consts, Cvoid, (Ptr{Cint},), fenv_consts)
+    global const JL_FE_INEXACT = fenv_consts[1]
+    global const JL_FE_UNDERFLOW = fenv_consts[2]
+    global const JL_FE_OVERFLOW = fenv_consts[3]
+    global const JL_FE_DIVBYZERO = fenv_consts[4]
+    global const JL_FE_INVALID = fenv_consts[5]
+
+    global const JL_FE_TONEAREST = fenv_consts[6]
+    global const JL_FE_UPWARD = fenv_consts[7]
+    global const JL_FE_DOWNWARD = fenv_consts[8]
+    global const JL_FE_TOWARDZERO = fenv_consts[9]
+end
+
+_setrounding(i::Integer) = ccall((:fesetround, Base.libm_name), Cint, (Cint,), i)
+
+_getrounding() = ccall((:fegetround, Base.libm_name), Cint, ())
+
+#-
+
+function _call_gem_openblas_upward!(C::AbstractMatrix{Float64}, A::AbstractMatrix{Float64}, B::AbstractMatrix{Float64})
+    prev_rounding = _getrounding() # save current rounding mode
+    _setrounding(JL_FE_UPWARD) # set rounding mode to upward
 
     m, k = size(A)
     n = size(B, 2)
@@ -434,28 +454,26 @@ function _call_gem_openblas_upward!(C::AbstractMatrix{Float64}, A::AbstractMatri
     transA = 'N'
     transB = 'N'
 
-    ccall((:dgemm_64_, OpenBLASConsistentFPCSR_jll.libopenblas), Cvoid,
-        (Ref{UInt8}, Ref{UInt8}, Ref{LinearAlgebra.BLAS.BlasInt}, Ref{LinearAlgebra.BLAS.BlasInt}, Ref{LinearAlgebra.BLAS.BlasInt},
-            Ref{Float64}, Ptr{Float64}, Ref{LinearAlgebra.BLAS.BlasInt},
-            Ptr{Float64}, Ref{LinearAlgebra.BLAS.BlasInt},
-            Ref{Float64}, Ptr{Float64}, Ref{LinearAlgebra.BLAS.BlasInt}),
-        transA, transB, m, n, k,
-        α, A, max(1, stride(A, 2)),
-        B, max(1, stride(B, 2)),
-        β, C, max(1, stride(C, 2))
-    )
-
-    #
-
-    ccall(:fesetround, Cint, (Cint,), prev_rounding) # restore previous rounding mode
-    return C
+    try
+        ccall((:dgemm_64_, OpenBLASConsistentFPCSR_jll.libopenblas), Cvoid,
+            (Ref{UInt8}, Ref{UInt8}, Ref{LinearAlgebra.BLAS.BlasInt}, Ref{LinearAlgebra.BLAS.BlasInt}, Ref{LinearAlgebra.BLAS.BlasInt},
+                Ref{Float64}, Ptr{Float64}, Ref{LinearAlgebra.BLAS.BlasInt},
+                Ptr{Float64}, Ref{LinearAlgebra.BLAS.BlasInt},
+                Ref{Float64}, Ptr{Float64}, Ref{LinearAlgebra.BLAS.BlasInt}),
+            transA, transB, m, n, k,
+            α, A, max(1, stride(A, 2)),
+            B, max(1, stride(B, 2)),
+            β, C, max(1, stride(C, 2))
+            )
+        return C
+    finally
+        _setrounding(prev_rounding) # restore previous rounding mode
+    end
 end
 
 function _call_gem_openblas_upward!(C::AbstractVector{Float64}, A::AbstractMatrix{Float64}, B::AbstractVector{Float64})
-    prev_rounding = ccall(:fegetround, Cint, ()) # save current rounding mode
-    ccall(:fesetround, Cint, (Cint,), 2) # set rounding mode to upward
-
-    #
+    prev_rounding = _getrounding() # save current rounding mode
+    _setrounding(JL_FE_UPWARD) # set rounding mode to upward
 
     m, k = size(A)
 
@@ -464,21 +482,21 @@ function _call_gem_openblas_upward!(C::AbstractVector{Float64}, A::AbstractMatri
 
     transA = 'N'
 
-    ccall((:dgemv_64_, OpenBLASConsistentFPCSR_jll.libopenblas), Cvoid,
-        (Ref{UInt8}, Ref{LinearAlgebra.BLAS.BlasInt}, Ref{LinearAlgebra.BLAS.BlasInt},
-            Ref{Float64}, Ptr{Float64}, Ref{LinearAlgebra.BLAS.BlasInt},
-            Ptr{Float64}, Ref{LinearAlgebra.BLAS.BlasInt},
-            Ref{Float64}, Ptr{Float64}, Ref{LinearAlgebra.BLAS.BlasInt}),
-        transA, m, k,
-        α, A, max(1, stride(A, 2)),
-        B, max(1, stride(B, 1)),
-        β, C, max(1, stride(C, 1))
-    )
-
-    #
-
-    ccall(:fesetround, Cint, (Cint,), prev_rounding) # restore previous rounding mode
-    return C
+    try
+        ccall((:dgemv_64_, OpenBLASConsistentFPCSR_jll.libopenblas), Cvoid,
+            (Ref{UInt8}, Ref{LinearAlgebra.BLAS.BlasInt}, Ref{LinearAlgebra.BLAS.BlasInt},
+                Ref{Float64}, Ptr{Float64}, Ref{LinearAlgebra.BLAS.BlasInt},
+                Ptr{Float64}, Ref{LinearAlgebra.BLAS.BlasInt},
+                Ref{Float64}, Ptr{Float64}, Ref{LinearAlgebra.BLAS.BlasInt}),
+            transA, m, k,
+            α, A, max(1, stride(A, 2)),
+            B, max(1, stride(B, 1)),
+            β, C, max(1, stride(C, 1))
+            )
+        return C
+    finally
+        _setrounding(prev_rounding) # restore previous rounding mode
+    end
 end
 
 function __mul5frn(mA, rA, mB::AbstractMatrix{T}, rB) where {T<:AbstractFloat}
