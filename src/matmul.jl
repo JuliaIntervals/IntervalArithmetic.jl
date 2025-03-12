@@ -195,14 +195,41 @@ for T ∈ (:AbstractVector, :AbstractMatrix) # needed to resolve method ambiguit
 end
 
 function _mul!(::MatMulMode{:slow}, C, A::AbstractMatrix, B::AbstractVecOrMat, α, β)
-    Threads.@threads for i ∈ axes(A, 1)
-        for l ∈ axes(A, 2)
-            x = zero(eltype(C))
-            for j ∈ axes(B, 2)
-                @inbounds x += A[i,l] * B[l,j]
+    AB = Matrix{eltype(C)}(undef, size(A, 1), size(B, 2))
+    AB = _matmul_rec!(C, A, B)
+    C .= AB .* α .+ C .* β
+    return C
+end
+
+function _matmul_rec!(C, A, B)
+    m, n = size(A)
+    n, p = size(B)
+    fill!(C, zero(eltype(C)))
+    return _add_matmul_rec!(m, n, p, 0, 0, 0, C, A, B)
+end
+
+function _add_matmul_rec!(m, n, p, i0, j0, k0, C, A, B)
+    if m+n+p <= 256 # base case: naive matmult for sufficiently large matrices
+        for i ∈ 1:m, k ∈ 1:p
+            c = zero(eltype(C))
+            for j ∈ 1:n
+                @inbounds c += A[i0+i,j0+j] * B[j0+j,k0+k]
             end
-            @inbounds C[i,j] = x * α + C[i,j] * β
+            @inbounds C[i0+i,k0+k] += c
         end
+    else
+        m2 = m ÷ 2; n2 = n ÷ 2; p2 = p ÷ 2
+        _add_matmul_rec!(m2, n2, p2, i0, j0, k0, C, A, B)
+
+        _add_matmul_rec!(m-m2, n2, p2, i0+m2, j0, k0, C, A, B)
+        _add_matmul_rec!(m2, n-n2, p2, i0, j0+n2, k0, C, A, B)
+        _add_matmul_rec!(m2, n2, p-p2, i0, j0, k0+p2, C, A, B)
+
+        _add_matmul_rec!(m-m2, n-n2, p2, i0+m2, j0+n2, k0, C, A, B)
+        _add_matmul_rec!(m2, n-n2, p-p2, i0, j0+n2, k0+p2, C, A, B)
+        _add_matmul_rec!(m-m2, n2, p-p2, i0+m2, j0, k0+p2, C, A, B)
+
+        _add_matmul_rec!(m-m2, n-n2, p-p2, i0+m2, j0+n2, k0+p2, C, A, B)
     end
     return C
 end
@@ -403,7 +430,13 @@ function __mul(A::AbstractMatrix{Interval{T}}, B::AbstractVecOrMat{Interval{T}})
     mA, rA = _vec_or_mat_midradius(A)
     mB, rB = _vec_or_mat_midradius(B)
 
-    mC, μ = __mul5frn(mA, rA, mB, rB)
+    cache_1 = Matrix{T}(undef, size(A, 1), size(B, 2))
+    cache_2 = Matrix{T}(undef, size(A, 1), size(B, 2))
+
+    ρA = sign.(mA) .* min.(abs.(mA), rA)
+    ρB = sign.(mB) .* min.(abs.(mB), rB)
+    mC = _matmul_rec!(cache_1, mA, mB) + _matmul_rec!(cache_2, ρA, ρB)
+    μ = _matmul_rec!(cache_1, abs.(mA), abs.(mB)) + _matmul_rec!(cache_2, abs.(ρA), abs.(ρB))
 
     γ = _add_round.(_mul_round.(convert(T, k + 1), eps.(μ), RoundUp), IntervalArithmetic._mul_round(IntervalArithmetic._inv_round(u2, RoundUp), floatmin(T), RoundUp), RoundUp)
 
@@ -446,8 +479,6 @@ else
     _setrounding(i::Integer) = ccall(:fesetround, Cint, (Cint,), i)
     _getrounding() = ccall(:fegetround, Cint, ())
 end
-
-#-
 
 function _call_gem_openblas_upward!(C::AbstractMatrix{Float64}, A::AbstractMatrix{Float64}, B::AbstractMatrix{Float64})
     prev_rounding = _getrounding() # save current rounding mode
@@ -505,50 +536,6 @@ function _call_gem_openblas_upward!(C::AbstractVector{Float64}, A::AbstractMatri
     finally
         _setrounding(prev_rounding) # restore previous rounding mode
     end
-end
-
-function __mul5frn(mA, rA, mB::AbstractMatrix{T}, rB) where {T<:AbstractFloat}
-    mC = zeros(T, size(mA, 1), size(mB, 2))
-    μ  = zeros(T, size(mA, 1), size(mB, 2))
-
-    Threads.@threads for i ∈ axes(mA, 1)
-        for l ∈ axes(mA, 2)
-            for j ∈ axes(mB, 2)
-                a, c = mA[i,l], rA[i,l]
-                b, d = mB[l,j], rB[l,j]
-
-                e = sign(a) * min(abs(a), c)
-                f = sign(b) * min(abs(b), d)
-                p = a*b + e*f
-
-                mC[i,j] += p
-                μ[i,j]  += abs(p)
-            end
-        end
-    end
-
-    return mC, μ
-end
-
-function __mul5frn(mA, rA, mB::AbstractVector{T}, rB) where {T<:AbstractFloat}
-    mC = zeros(T, size(mA, 1))
-    μ  = zeros(T, size(mA, 1))
-
-    Threads.@threads for i ∈ axes(mA, 1)
-        for l ∈ axes(mA, 2)
-            a, c = mA[i,l], rA[i,l]
-            b, d = mB[l], rB[l]
-
-            e = sign(a) * min(abs(a), c)
-            f = sign(b) * min(abs(b), d)
-            p = a*b + e*f
-
-            mC[i] += p
-            μ[i]  += abs(p)
-        end
-    end
-
-    return mC, μ
 end
 
 # convenient function to propagate NG flag
