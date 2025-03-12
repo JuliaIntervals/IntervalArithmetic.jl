@@ -512,7 +512,8 @@ of the form ``m \\pm r``.
 function _interval_midpoint(::Type{T}, m, r, d::Decoration = com) where {T<:NumTypes}
     x = _interval_infsup(T, m, m, d)
     r = _interval_infsup(T, r, r, d)
-    return _interval_infsup(T, x - r, x + r, d)
+    precedes(zero(r), r) && return _interval_infsup(T, x - r, x + r, d)
+    return throw(DomainError(r, "must be positive"))
 end
 
 _interval_midpoint(::Type{T}, m::Complex, r, d::Decoration = com) where {T<:NumTypes} =
