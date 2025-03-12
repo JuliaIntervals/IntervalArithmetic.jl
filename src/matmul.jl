@@ -195,10 +195,10 @@ for T ∈ (:AbstractVector, :AbstractMatrix) # needed to resolve method ambiguit
 end
 
 function _mul!(::MatMulMode{:slow}, C, A::AbstractMatrix, B::AbstractVecOrMat, α, β)
-    for j ∈ axes(B, 2)
-        for i ∈ axes(A, 1)
+    Threads.@threads for i ∈ axes(mA, 1)
+        for l ∈ axes(mA, 2)
             x = zero(eltype(C))
-            for l ∈ axes(A, 2)
+            for j ∈ axes(mB, 2)
                 @inbounds x += A[i,l] * B[l,j]
             end
             @inbounds C[i,j] = x * α + C[i,j] * β
@@ -511,9 +511,9 @@ function __mul5frn(mA, rA, mB::AbstractMatrix{T}, rB) where {T<:AbstractFloat}
     mC = zeros(T, size(mA, 1), size(mB, 2))
     μ  = zeros(T, size(mA, 1), size(mB, 2))
 
-    Threads.@threads for j ∈ axes(mB, 2)
+    Threads.@threads for i ∈ axes(mA, 1)
         for l ∈ axes(mA, 2)
-            for i ∈ axes(mA, 1)
+            for j ∈ axes(mB, 2)
                 a, c = mA[i,l], rA[i,l]
                 b, d = mB[l,j], rB[l,j]
 
