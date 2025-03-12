@@ -38,6 +38,7 @@ include("symbols.jl")
 #
 
 import LinearAlgebra
+import OpenBLASConsistentFPCSR_jll # 32-bit systems are not supported
 
 include("matmul.jl")
 

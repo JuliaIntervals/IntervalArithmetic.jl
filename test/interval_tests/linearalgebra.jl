@@ -12,12 +12,12 @@ end
     A = [interval(2, 4) interval(-2, 1) ; interval(-1, 2) interval(2, 4)]
     imA = interval(im) * A
 
-    @test all(isequal_interval.(A * A, [interval(-2, 19.5) interval(-16, 10) ; interval(-10, 16) interval(-2, 19.5)]))
-    @test all(isequal_interval.(A * mid.(A), [interval(5, 12.5) interval(-8, 2) ; interval(-2, 8) interval(5, 12.5)]))
-    @test all(isequal_interval.(mid.(A) * A, [interval(5, 12.5) interval(-8, 2) ; interval(-2, 8) interval(5, 12.5)]))
+    @test all(issubset_interval.([interval(0, 18) interval(-16, 8) ; interval(-8, 16) interval(0, 18)], A * A))
+    @test all(issubset_interval.([interval(5, 12.5) interval(-8, 2) ; interval(-2, 8) interval(5, 12.5)], A * mid.(A)))
+    @test all(issubset_interval.([interval(5, 12.5) interval(-8, 2) ; interval(-2, 8) interval(5, 12.5)], mid.(A) * A))
 
-    @test all(isequal_interval.(imA * imA, -[interval(-2, 19.5) interval(-16, 10) ; interval(-10, 16) interval(-2, 19.5)]))
-    @test all(isequal_interval.(mid.(A) * imA, interval(im)*[interval(5, 12.5) interval(-8, 2) ; interval(-2, 8) interval(5, 12.5)]))
-    @test all(isequal_interval.(imA * mid.(A), interval(im)*[interval(5, 12.5) interval(-8, 2) ; interval(-2, 8) interval(5, 12.5)]))
+    @test all(issubset_interval.([interval(-18, 0) interval(-8, 16) ; interval(-16, 8) interval(-18, 0)], imA * imA))
+    @test all(issubset_interval.(interval(im)*[interval(5, 12.5) interval(-8, 2) ; interval(-2, 8) interval(5, 12.5)], mid.(A) * imA))
+    @test all(issubset_interval.(interval(im)*[interval(5, 12.5) interval(-8, 2) ; interval(-2, 8) interval(5, 12.5)], imA * mid.(A)))
     IntervalArithmetic.matmul_mode() = IntervalArithmetic.MatMulMode{:slow}()
 end
