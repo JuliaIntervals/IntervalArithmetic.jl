@@ -1,68 +1,68 @@
 """
-    numtype(T)
+    boundtype(T)
 
-Return the bounds type of the interval.
+Return the bound type of the interval.
 
 # Examples
 
 ```jldoctest
-julia> IntervalArithmetic.numtype(interval(1, 2))
+julia> boundtype(interval(1, 2))
 Float64
 
-julia> IntervalArithmetic.numtype(interval(Float32, 1, 2))
+julia> boundtype(interval(Float32, 1, 2))
 Float32
 ```
 """
-numtype(::Type{BareInterval{T}}) where {T<:NumTypes} = T
-numtype(::Type{Interval{T}}) where {T<:NumTypes} = T
-numtype(::Type{Complex{T}}) where {T<:Real} = numtype(T)
-numtype(::Type{T}) where {T} = T
-numtype(::T) where {T} = numtype(T)
+boundtype(::Type{BareInterval{T}}) where {T<:BoundTypes} = T
+boundtype(::Type{Interval{T}}) where {T<:BoundTypes} = T
+boundtype(::Type{Complex{T}}) where {T<:Real} = boundtype(T)
+boundtype(::Type{T}) where {T} = T
+boundtype(::T) where {T} = boundtype(T)
 
 # standard `Real` functions
 
 for f ∈ (:float, :big)
     @eval begin
-        Base.$f(x::BareInterval{T}) where {T<:NumTypes} = BareInterval{$f(T)}(x)
-        Base.$f(x::Interval{<:NumTypes}) = _unsafe_interval($f(bareinterval(x)), decoration(x), isguaranteed(x))
+        Base.$f(x::BareInterval{T}) where {T<:BoundTypes} = BareInterval{$f(T)}(x)
+        Base.$f(x::Interval{<:BoundTypes}) = _unsafe_interval($f(bareinterval(x)), decoration(x), isguaranteed(x))
     end
 end
 
 for f ∈ (:zero, :one)
     @eval begin
-        Base.$f(::Type{BareInterval{T}}) where {T<:NumTypes} = _unsafe_bareinterval(T, $f(T), $f(T))
-        Base.$f(::BareInterval{T}) where {T<:NumTypes} = $f(BareInterval{T})
+        Base.$f(::Type{BareInterval{T}}) where {T<:BoundTypes} = _unsafe_bareinterval(T, $f(T), $f(T))
+        Base.$f(::BareInterval{T}) where {T<:BoundTypes} = $f(BareInterval{T})
 
-        Base.$f(::Type{Interval{T}}) where {T<:NumTypes} = _unsafe_interval($f(BareInterval{T}), com, true)
-        Base.$f(x::Interval{T}) where {T<:NumTypes} = _unsafe_interval($f(BareInterval{T}), com, isguaranteed(x))
+        Base.$f(::Type{Interval{T}}) where {T<:BoundTypes} = _unsafe_interval($f(BareInterval{T}), com, true)
+        Base.$f(x::Interval{T}) where {T<:BoundTypes} = _unsafe_interval($f(BareInterval{T}), com, isguaranteed(x))
     end
 end
 
-Base.zero(::Type{Complex{Interval{T}}}) where {T<:NumTypes} = complex(zero(Interval{T}), zero(Interval{T}))
+Base.zero(::Type{Complex{Interval{T}}}) where {T<:BoundTypes} = complex(zero(Interval{T}), zero(Interval{T}))
 Base.zero(x::Complex{<:Interval}) = complex(zero(real(x)), zero(imag(x)))
 
-Base.one(::Type{Complex{Interval{T}}}) where {T<:NumTypes} = complex(one(Interval{T}), zero(Interval{T}))
+Base.one(::Type{Complex{Interval{T}}}) where {T<:BoundTypes} = complex(one(Interval{T}), zero(Interval{T}))
 Base.one(x::Complex{<:Interval}) = complex(one(real(x)), zero(imag(x)))
 
-Base.typemin(::Type{BareInterval{T}}) where {T<:NumTypes} =
+Base.typemin(::Type{BareInterval{T}}) where {T<:BoundTypes} =
     _unsafe_bareinterval(T, typemin(T), nextfloat(typemin(T)))
-Base.typemin(::Type{Interval{T}}) where {T<:NumTypes} =
+Base.typemin(::Type{Interval{T}}) where {T<:BoundTypes} =
     _unsafe_interval(typemin(BareInterval{T}), dac, true)
 
-Base.typemax(::Type{BareInterval{T}}) where {T<:NumTypes} =
+Base.typemax(::Type{BareInterval{T}}) where {T<:BoundTypes} =
     _unsafe_bareinterval(T, prevfloat(typemax(T)), typemax(T))
-Base.typemax(::Type{Interval{T}}) where {T<:NumTypes} =
+Base.typemax(::Type{Interval{T}}) where {T<:BoundTypes} =
     _unsafe_interval(typemax(BareInterval{T}), dac, true)
 
-function Base.eps(::Type{BareInterval{T}}) where {T<:NumTypes}
+function Base.eps(::Type{BareInterval{T}}) where {T<:BoundTypes}
     x = eps(T)
     return _unsafe_bareinterval(T, x, x)
 end
-function Base.eps(x::BareInterval{T}) where {T<:NumTypes}
+function Base.eps(x::BareInterval{T}) where {T<:BoundTypes}
     y = max(eps(inf(x)), eps(sup(x)))
     return _unsafe_bareinterval(T, y, y)
 end
-Base.eps(::Type{Interval{T}}) where {T<:NumTypes} =
+Base.eps(::Type{Interval{T}}) where {T<:BoundTypes} =
     _unsafe_interval(eps(BareInterval{T}), com, true)
 Base.eps(x::Interval) = _unsafe_interval(eps(bareinterval(x)), com, isguaranteed(x))
 
@@ -83,7 +83,7 @@ for T ∈ (:BareInterval, :Interval)
         function Base.:(==)(x::$T, y::$T) # also returned when calling `≤`, `≥`, `isequal`
             isthin(x) && return sup(x) == y
             isthin(y) && return x == sup(y)
-            return throw(ArgumentError("`==` is purposely not supported for intervals. See instead `isequal_interval`"))
+            return throw(ArgumentError("`==` is purposely not supported when the intervals are overlapping. See instead `isequal_interval`"))
         end
 
         Base.:<(::$T, ::$T) = # also returned when calling `isless`, `>`
@@ -138,7 +138,7 @@ Base.union!(::AbstractVector{S}, ::Interval, ::BareInterval, ::Any...) where {S}
     throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
 
 
-# allow pointwise equality
+# pointwise equality
 
 """
     ==(::BareInterval, ::Number)
@@ -146,28 +146,26 @@ Base.union!(::AbstractVector{S}, ::Interval, ::BareInterval, ::Any...) where {S}
     ==(::Interval, ::Number)
     ==(::Number, ::Interval)
 
-Test whether an interval is the singleton of a given number. In other words, the
-result is true if and only if the interval contains only that number.
+Test whether an interval is the singleton of a given number. Specifically, the
+result is true if and only if the interval contains only that number; an error
+is thrown if the interval contains the number but is not thin.
 
 !!! note
     Comparison between intervals is purposely disallowed. Indeed, equality
     between non-singleton intervals has distinct properties, notably ``x = y``
     does not imply ``x - y = 0``. See instead [`isequal_interval`](@ref).
 """
-Base.:(==)(x::Union{BareInterval,Interval}, y::Number) = isthin(x, y)
+Base.:(==)(x::Union{BareInterval,Interval}, y::Number) = !isthin(x) & in_interval(y, x) ? throw(ArgumentError("`==` is purposely not supported when the number is contained in the interval. See instead `isthin`")) : isthin(x, y)
 Base.:(==)(x::Number, y::Union{BareInterval,Interval}) = y == x
 # needed to resolve ambiguity from irrationals.jl
-Base.:(==)(x::Interval, y::AbstractIrrational) = isthin(x, y)
+Base.:(==)(x::Interval, y::AbstractIrrational) = !isthin(x) & in_interval(y, x) ? throw(ArgumentError("`==` is purposely not supported when the number is contained in the interval. See instead `isthin`")) : isthin(x, y)
 Base.:(==)(x::AbstractIrrational, y::Interval) = y == x
 # needed to resolve ambiguity from complex.jl
 Base.:(==)(x::Interval, y::Complex) = isreal(y) & (real(y) == x)
 Base.:(==)(x::Complex, y::Interval) = y == x
 
-# follows docstring of `Base.iszero`
-Base.iszero(x::Union{BareInterval,Interval}) = isthinzero(x)
+Base.iszero(x::Union{BareInterval,Interval}) = !isthin(x) & in_interval(0, x) ? throw(ArgumentError("`iszero` is purposely not supported when 0 is contained in the interval. See instead `isthinzero`")) : isthinzero(x)
 
-# follows docstring of `Base.isone`
-Base.isone(x::Union{BareInterval,Interval}) = isthinone(x)
+Base.isone(x::Union{BareInterval,Interval}) = !isthin(x) & in_interval(1, x) ? throw(ArgumentError("`isone` is purposely not supported when 1 is contained in the interval. See instead `isthinone`")) : isthinone(x)
 
-# follows docstring of `Base.isinteger`
-Base.isinteger(x::Union{BareInterval,Interval}) = isthininteger(x)
+Base.isinteger(x::Union{BareInterval,Interval}) = !isthin(x) & !isdisjoint_interval(x, floor(x), ceil(x)) ? throw(ArgumentError("`isinteger` is purposely not supported for non-thin containing at least one integer. See instead `isthininteger`")) : isthininteger(x)

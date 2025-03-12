@@ -70,9 +70,9 @@ end
 function LinearAlgebra.eigvals!(A::AbstractMatrix{<:Interval}; permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby)
     # note: this function does not overwrite `A`
     v = _eigvals(A, permute, scale, sortby)
-    isreal(v) && return v
+    all(t -> isthinzero(imag(t)), v) && return v
     _fold_conjugate!(v)
-    isreal(v) && return real(v)
+    all(t -> isthinzero(imag(t)), v) && return real(v)
     return v
 end
 
@@ -132,12 +132,39 @@ LinearAlgebra.det(A::AbstractMatrix{<:Complex{<:Interval}}) = reduce(*, LinearAl
 
 
 
+#
+# by-pass `similar` methods defined in array.jl
+# note: written in this form to avoid by-passing the default behaviour for `Union{}`
+Base.similar(a::Array{Interval{T},1})          where {T<:BoundTypes} = zeros(Interval{T}, size(a, 1))
+Base.similar(a::Array{Complex{Interval{T}},1}) where {T<:BoundTypes} = zeros(Complex{Interval{T}}, size(a, 1))
+
+Base.similar(a::Array{<:Any,1}, S::Type{Interval{T}})          where {T<:BoundTypes} = zeros(S, size(a, 1))
+Base.similar(a::Array{<:Any,1}, S::Type{Complex{Interval{T}}}) where {T<:BoundTypes} = zeros(S, size(a, 1))
+
+Base.similar(a::Array{Interval{T},2})          where {T<:BoundTypes} = zeros(Interval{T}, size(a, 1), size(a, 2))
+Base.similar(a::Array{Complex{Interval{T}},2}) where {T<:BoundTypes} = zeros(Complex{Interval{T}}, size(a, 1), size(a, 2))
+
+Base.similar(a::Array{<:Any,2}, S::Type{Interval{T}})          where {T<:BoundTypes} = zeros(S, size(a, 1), size(a, 2))
+Base.similar(a::Array{<:Any,2}, S::Type{Complex{Interval{T}}}) where {T<:BoundTypes} = zeros(S, size(a, 1), size(a, 2))
+
+Base.similar(::Array{Interval{T}},          m::Int) where {T<:BoundTypes} = zeros(Interval{T}, m)
+Base.similar(::Array{Complex{Interval{T}}}, m::Int) where {T<:BoundTypes} = zeros(Complex{Interval{T}}, m)
+
+Base.similar(::Array{Interval{T}},          dims::Dims) where {T<:BoundTypes} = zeros(Interval{T}, dims)
+Base.similar(::Array{Complex{Interval{T}}}, dims::Dims) where {T<:BoundTypes} = zeros(Complex{Interval{T}}, dims)
+
+Base.similar(::Array, S::Type{Interval{T}},          dims::Dims) where {T<:BoundTypes} = zeros(S, dims)
+Base.similar(::Array, S::Type{Complex{Interval{T}}}, dims::Dims) where {T<:BoundTypes} = zeros(S, dims)
+#
+
+
+
 # matrix multiplication
 
 """
     MatMulMode
 
-Matrix multiplication type.
+Matrix multiplication mode type.
 
 Available mode types:
 - `:slow` (default): generic algorithm.
@@ -145,54 +172,13 @@ Available mode types:
 """
 struct MatMulMode{T} end
 
-matmul_mode() = MatMulMode{:slow}()
-
-# by-pass `similar` methods defined in array.jl
-# note: written in this form to avoid by-passing the default behaviour for `Union{}`
-Base.similar(a::Array{Interval{T},1})          where {T<:NumTypes} = zeros(Interval{T}, size(a, 1))
-Base.similar(a::Array{Complex{Interval{T}},1}) where {T<:NumTypes} = zeros(Complex{Interval{T}}, size(a, 1))
-
-Base.similar(a::Array{<:Any,1}, S::Type{Interval{T}})          where {T<:NumTypes} = zeros(S, size(a, 1))
-Base.similar(a::Array{<:Any,1}, S::Type{Complex{Interval{T}}}) where {T<:NumTypes} = zeros(S, size(a, 1))
-
-Base.similar(a::Array{Interval{T},2})          where {T<:NumTypes} = zeros(Interval{T}, size(a, 1), size(a, 2))
-Base.similar(a::Array{Complex{Interval{T}},2}) where {T<:NumTypes} = zeros(Complex{Interval{T}}, size(a, 1), size(a, 2))
-
-Base.similar(a::Array{<:Any,2}, S::Type{Interval{T}})          where {T<:NumTypes} = zeros(S, size(a, 1), size(a, 2))
-Base.similar(a::Array{<:Any,2}, S::Type{Complex{Interval{T}}}) where {T<:NumTypes} = zeros(S, size(a, 1), size(a, 2))
-
-Base.similar(::Array{Interval{T}},          m::Int) where {T<:NumTypes} = zeros(Interval{T}, m)
-Base.similar(::Array{Complex{Interval{T}}}, m::Int) where {T<:NumTypes} = zeros(Complex{Interval{T}}, m)
-
-Base.similar(::Array{Interval{T}},          dims::Dims) where {T<:NumTypes} = zeros(Interval{T}, dims)
-Base.similar(::Array{Complex{Interval{T}}}, dims::Dims) where {T<:NumTypes} = zeros(Complex{Interval{T}}, dims)
-
-Base.similar(::Array, S::Type{Interval{T}},          dims::Dims) where {T<:NumTypes} = zeros(S, dims)
-Base.similar(::Array, S::Type{Complex{Interval{T}}}, dims::Dims) where {T<:NumTypes} = zeros(S, dims)
 #
 
-function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::AbstractVecOrMat{<:RealOrComplexI})
-    return LinearAlgebra.mul!(C, A, B, interval(true), interval(false))
-end
+LinearAlgebra.mul!(C::AbstractVector{<:RealOrComplexI}, A::AbstractVecOrMat, B::AbstractVector) =
+    LinearAlgebra.mul!(C, A, B, interval(true), interval(false))
 
-for T ∈ (:AbstractVector, :AbstractMatrix) # needed to resolve method ambiguities
-    @eval begin
-        function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::$T{<:RealOrComplexI}, α::Number, β::Number)
-            size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
-            return _mul!(matmul_mode(), C, A, B, α, β)
-        end
-
-        function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix, B::$T{<:RealOrComplexI}, α::Number, β::Number)
-            size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
-            return _mul!(matmul_mode(), C, A, B, α, β)
-        end
-
-        function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::$T, α::Number, β::Number)
-            size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
-            return _mul!(matmul_mode(), C, A, B, α, β)
-        end
-    end
-end
+LinearAlgebra.mul!(C::AbstractMatrix{<:RealOrComplexI}, A::AbstractVecOrMat, B::AbstractVecOrMat) =
+    LinearAlgebra.mul!(C, A, B, interval(true), interval(false))
 
 function _mul!(::MatMulMode{:slow}, C, A::AbstractMatrix, B::AbstractVecOrMat, α, β)
     for j ∈ axes(B, 2)
@@ -236,7 +222,7 @@ for (T, S) ∈ ((:Interval, :Interval), (:Interval, :Any), (:Any, :Interval))
                 C .*= β
             end
         else
-            BoundType = numtype(CoefType)
+            BoundType = boundtype(CoefType)
             ABinf, ABsup = __mul(A, B)
             if isone(α)
                 if iszero(β)
@@ -273,7 +259,7 @@ for (T, S) ∈ ((:(Complex{<:Interval}), :(Complex{<:Interval})),
                 C .*= β
             end
         else
-            BoundType = numtype(CoefType)
+            BoundType = boundtype(CoefType)
             A_real, A_imag = reim(A)
             B_real, B_imag = reim(B)
             ABinf_1, ABsup_1 = __mul(A_real, B_real)
@@ -321,7 +307,7 @@ for (T, S) ∈ ((:(Complex{<:Interval}), :Interval), (:(Complex{<:Interval}), :A
                     C .*= β
                 end
             else
-                BoundType = numtype(CoefType)
+                BoundType = boundtype(CoefType)
                 A_real, A_imag = reim(A)
                 ABinf_real, ABsup_real = __mul(A_real, B)
                 ABinf_imag, ABsup_imag = __mul(A_imag, B)
@@ -357,7 +343,7 @@ for (T, S) ∈ ((:(Complex{<:Interval}), :Interval), (:(Complex{<:Interval}), :A
                     C .*= β
                 end
             else
-                BoundType = numtype(CoefType)
+                BoundType = boundtype(CoefType)
                 B_real, B_imag = reim(B)
                 ABinf_real, ABsup_real = __mul(A, B_real)
                 ABinf_imag, ABsup_imag = __mul(A, B_imag)
@@ -387,7 +373,7 @@ for (T, S) ∈ ((:(Complex{<:Interval}), :Interval), (:(Complex{<:Interval}), :A
 end
 
 function __mul(A::AbstractMatrix{T}, B::AbstractVecOrMat{S}) where {T,S}
-    NewType = promote_numtype(T, S)
+    NewType = promote_boundtype(T, S)
     return __mul(interval.(NewType, A), interval.(NewType, B))
 end
 
