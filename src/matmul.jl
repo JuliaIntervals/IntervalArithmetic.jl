@@ -203,13 +203,13 @@ end
 
 function _matmul_rec!(C, A, B)
     m, n = size(A)
-    n, p = size(B)
+    p = size(B, 2)
     fill!(C, zero(eltype(C)))
     return _add_matmul_rec!(m, n, p, 0, 0, 0, C, A, B)
 end
 
 function _add_matmul_rec!(m, n, p, i0, j0, k0, C, A, B)
-    if m+n+p <= 256 # base case: naive matmult for sufficiently large matrices
+    if m + n + p ≤ 256 # base case: naive matmult for sufficiently large matrices
         for i ∈ 1:m, k ∈ 1:p
             c = zero(eltype(C))
             for j ∈ 1:n
