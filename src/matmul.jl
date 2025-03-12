@@ -54,7 +54,7 @@ function Base.inv(A::Matrix{<:RealOrComplexI})
     F = A * approx_A⁻¹ - interval(LinearAlgebra.I)
     Y = LinearAlgebra.opnorm(approx_A⁻¹ * F, Inf)
     Z₁ = LinearAlgebra.opnorm(F, Inf)
-    if isbounded(Y) & strictprecedes(Z₁, one(one(Z₁)))
+    if isbounded(Y) & strictprecedes(Z₁, one(Z₁))
         A⁻¹ = interval.(approx_A⁻¹, inf(interval(mag(Y)) / (one(Z₁) - interval(mag(Z₁)))); format = :midpoint)
     else
         A⁻¹ = fill(nai(eltype(approx_A⁻¹)), size(A))
@@ -195,9 +195,23 @@ for T ∈ (:AbstractVector, :AbstractMatrix) # needed to resolve method ambiguit
 end
 
 function _mul!(::MatMulMode{:slow}, C, A::AbstractMatrix, B::AbstractVecOrMat, α, β)
-    AB = Matrix{eltype(C)}(undef, size(A, 1), size(B, 2))
-    _matmul_rec!(AB, A, B)
-    C .= AB .* α .+ C .* β
+    if iszero(α)
+        if iszero(β)
+            C .= zero(eltype(C))
+        elseif !isone(β)
+            C .*= β
+        end
+    else
+        if iszero(β)
+            _matmul_rec!(C, A, B)
+            C .*= α
+        else
+            AB = Matrix{eltype(C)}(undef, size(A, 1), size(B, 2))
+            C .= AB .* α .+ C .* β
+        end
+    end
+    t = all(isguaranteed, A) & all(isguaranteed, B) & isguaranteed(α) & isguaranteed(β)
+    _ensure_ng_flag!(C, t)
     return C
 end
 
