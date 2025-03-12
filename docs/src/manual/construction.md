@@ -145,13 +145,12 @@ interval(1) # considered "guaranteed" as the user explicitly constructed the int
 
 In contrast, a [`BareInterval`](@ref) can only be constructed via [`bareinterval`](@ref), it is not a subtype of `Real`, and there are no allowed conversion with `Number`. Thus, this interval type is always guaranteed.
 
-
 !!! danger
-    A user interested in validated numerics should **always** have a resulting interval for which [`isguaranteed`](@ref) is `true`.
+    A user interested in validated numerics should **always** track down the source of an "NG" label.
 
 
 
-## More constructors
+### More constructors
 
 The submodule `IntervalArithmetic.Symbols` exports the infix operator `..` and `±` as an alias for `interval`; this submodule must be explicitly imported.
 
