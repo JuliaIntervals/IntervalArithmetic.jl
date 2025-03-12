@@ -196,7 +196,7 @@ end
 
 function _mul!(::MatMulMode{:slow}, C, A::AbstractMatrix, B::AbstractVecOrMat, α, β)
     AB = Matrix{eltype(C)}(undef, size(A, 1), size(B, 2))
-    AB = _matmul_rec!(C, A, B)
+    _matmul_rec!(AB, A, B)
     C .= AB .* α .+ C .* β
     return C
 end
