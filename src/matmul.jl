@@ -195,10 +195,10 @@ for T ∈ (:AbstractVector, :AbstractMatrix) # needed to resolve method ambiguit
 end
 
 function _mul!(::MatMulMode{:slow}, C, A::AbstractMatrix, B::AbstractVecOrMat, α, β)
-    Threads.@threads for i ∈ axes(mA, 1)
-        for l ∈ axes(mA, 2)
+    Threads.@threads for i ∈ axes(A, 1)
+        for l ∈ axes(A, 2)
             x = zero(eltype(C))
-            for j ∈ axes(mB, 2)
+            for j ∈ axes(B, 2)
                 @inbounds x += A[i,l] * B[l,j]
             end
             @inbounds C[i,j] = x * α + C[i,j] * β
