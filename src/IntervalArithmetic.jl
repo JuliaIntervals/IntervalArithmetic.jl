@@ -39,6 +39,10 @@ include("symbols.jl")
 
 import LinearAlgebra
 
+if Sys.ARCH ∈ (:x86_64, :aarch64)
+    import OpenBLASConsistentFPCSR_jll
+end
+
 include("matmul.jl")
 
 end

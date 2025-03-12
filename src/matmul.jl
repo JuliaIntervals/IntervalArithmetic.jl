@@ -240,19 +240,19 @@ for (T, S) ∈ ((:Interval, :Interval), (:Interval, :Any), (:Any, :Interval))
             ABinf, ABsup = __mul(A, B)
             if isone(α)
                 if iszero(β)
-                    C .= interval.(BoundType, ABinf, ABsup)
+                    C .= interval.(BoundType, ABinf, ABsup; format = :midpoint)
                 elseif isone(β)
-                    C .+= interval.(BoundType, ABinf, ABsup)
+                    C .+= interval.(BoundType, ABinf, ABsup; format = :midpoint)
                 else
-                    C .= interval.(BoundType, ABinf, ABsup) .+ C .* β
+                    C .= interval.(BoundType, ABinf, ABsup; format = :midpoint) .+ C .* β
                 end
             else
                 if iszero(β)
-                    C .= interval.(BoundType, ABinf, ABsup) .* α
+                    C .= interval.(BoundType, ABinf, ABsup; format = :midpoint) .* α
                 elseif isone(β)
-                    C .+= interval.(BoundType, ABinf, ABsup) .* α
+                    C .+= interval.(BoundType, ABinf, ABsup; format = :midpoint) .* α
                 else
-                    C .= interval.(BoundType, ABinf, ABsup) .* α .+ C .* β
+                    C .= interval.(BoundType, ABinf, ABsup; format = :midpoint) .* α .+ C .* β
                 end
             end
         end
@@ -391,157 +391,151 @@ function __mul(A::AbstractMatrix{T}, B::AbstractVecOrMat{S}) where {T,S}
     return __mul(interval.(NewType, A), interval.(NewType, B))
 end
 
-function __mul(A::AbstractMatrix{Interval{T}}, B::AbstractMatrix{Interval{T}}) where {T<:AbstractFloat}
-    mA = _div_round.(_add_round.(inf.(A), sup.(A), RoundUp), convert(T, 2), RoundUp) # (inf.(A) .+ sup.(A)) ./ 2
+function __mul(A::AbstractMatrix{Interval{T}}, B::AbstractVecOrMat{Interval{T}}) where {T<:AbstractFloat}
+    k = size(A, 2)
+    u2 = eps(T) # twice the unit roundoff
+    @assert (2k + 2) * u2 ≤ 1
+
+    mA, rA = _vec_or_mat_midradius(A)
+    mB, rB = _vec_or_mat_midradius(B)
+
+    mC, μ = __mul5frn(mA, rA, mB, rB)
+
+    γ = _add_round.(_mul_round.(convert(T, k + 1), eps.(μ), RoundUp), IntervalArithmetic._mul_round(IntervalArithmetic._inv_round(u2, RoundUp), floatmin(T), RoundUp), RoundUp)
+
+    U = mA; U .= _add_round.(abs.(mA), rA, RoundUp)
+    V = mB; V .= _add_round.(abs.(mB), rB, RoundUp)
+
+    rC = _call_gem_openblas_upward!(rB, U, V)
+
+    rC .+= .- μ .+ 2 .* γ
+
+    return mC, rC
+end
+
+function _vec_or_mat_midradius(A::AbstractVecOrMat{Interval{T}}) where {T<:AbstractFloat}
+    mA = _div_round.(_add_round.(inf.(A), sup.(A), RoundUp), convert(T, 2), RoundUp)
     rA = _sub_round.(mA, inf.(A), RoundUp)
-    mB = _div_round.(_add_round.(inf.(B), sup.(B), RoundUp), convert(T, 2), RoundUp) # (inf.(B) .+ sup.(B)) ./ 2
-    rB = _sub_round.(mB, inf.(B), RoundUp)
+    return mA, rA
+end
 
-    Cinf = zeros(T, size(A, 1), size(B, 2))
-    Csup = zeros(T, size(A, 1), size(B, 2))
+function _call_gem_openblas_upward!(C::AbstractMatrix{Float64}, A::AbstractMatrix{Float64}, B::AbstractMatrix{Float64})
+    prev_rounding = ccall(:fegetround, Cint, ()) # save current rounding mode
+    ccall(:fesetround, Cint, (Cint,), 2) # set rounding mode to upward
 
-    Threads.@threads for j ∈ axes(B, 2)
-        for l ∈ axes(A, 2)
-            @inbounds for i ∈ axes(A, 1)
-                U_ij         = _mul_round(abs(mA[i,l]), rB[l,j], RoundUp)
-                V_ij         = _mul_round(rA[i,l], _add_round(abs(mB[l,j]), rB[l,j], RoundUp), RoundUp)
-                rC_ij        = _add_round(U_ij, V_ij, RoundUp)
-                mAmB_up_ij   = _mul_round(mA[i,l], mB[l,j], RoundUp)
-                mAmB_down_ij = _mul_round(mA[i,l], mB[l,j], RoundDown)
+    #
 
-                Cinf[i,j] = _add_round(_sub_round(mAmB_down_ij, rC_ij, RoundDown), Cinf[i,j], RoundDown)
-                Csup[i,j] = _add_round(_add_round(mAmB_up_ij,   rC_ij, RoundUp),   Csup[i,j], RoundUp)
+    m, k = size(A)
+    n = size(B, 2)
+
+    α = 1.0
+    β = 0.0
+
+    transA = 'N'
+    transB = 'N'
+
+    ccall((:dgemm_64_, OpenBLASConsistentFPCSR_jll.libopenblas), Cvoid,
+        (Ref{UInt8}, Ref{UInt8}, Ref{LinearAlgebra.BLAS.BlasInt}, Ref{LinearAlgebra.BLAS.BlasInt}, Ref{LinearAlgebra.BLAS.BlasInt},
+            Ref{Float64}, Ptr{Float64}, Ref{LinearAlgebra.BLAS.BlasInt},
+            Ptr{Float64}, Ref{LinearAlgebra.BLAS.BlasInt},
+            Ref{Float64}, Ptr{Float64}, Ref{LinearAlgebra.BLAS.BlasInt}),
+        transA, transB, m, n, k,
+        α, A, max(1, stride(A, 2)),
+        B, max(1, stride(B, 2)),
+        β, C, max(1, stride(C, 2))
+    )
+
+    #
+
+    ccall(:fesetround, Cint, (Cint,), prev_rounding) # restore previous rounding mode
+    return C
+end
+
+function _call_gem_openblas_upward!(C::AbstractVector{Float64}, A::AbstractMatrix{Float64}, B::AbstractVector{Float64})
+    prev_rounding = ccall(:fegetround, Cint, ()) # save current rounding mode
+    ccall(:fesetround, Cint, (Cint,), 2) # set rounding mode to upward
+
+    #
+
+    m, k = size(A)
+
+    α = 1.0
+    β = 0.0
+
+    transA = 'N'
+
+    ccall((:dgemv_64_, OpenBLASConsistentFPCSR_jll.libopenblas), Cvoid,
+        (Ref{UInt8}, Ref{LinearAlgebra.BLAS.BlasInt}, Ref{LinearAlgebra.BLAS.BlasInt},
+            Ref{Float64}, Ptr{Float64}, Ref{LinearAlgebra.BLAS.BlasInt},
+            Ptr{Float64}, Ref{LinearAlgebra.BLAS.BlasInt},
+            Ref{Float64}, Ptr{Float64}, Ref{LinearAlgebra.BLAS.BlasInt}),
+        transA, m, k,
+        α, A, max(1, stride(A, 2)),
+        B, max(1, stride(B, 1)),
+        β, C, max(1, stride(C, 1))
+    )
+
+    #
+
+    ccall(:fesetround, Cint, (Cint,), prev_rounding) # restore previous rounding mode
+    return C
+end
+
+function __mul5frn(mA, rA, mB::AbstractMatrix{T}, rB) where {T<:AbstractFloat}
+    mC = zeros(T, size(mA, 1), size(mB, 2))
+    μ  = zeros(T, size(mA, 1), size(mB, 2))
+
+    Threads.@threads for j ∈ axes(mB, 2)
+        for l ∈ axes(mA, 2)
+            for i ∈ axes(mA, 1)
+                a, c = mA[i,l], rA[i,l]
+                b, d = mB[l,j], rB[l,j]
+
+                e = sign(a) * min(abs(a), c)
+                f = sign(b) * min(abs(b), d)
+                p = a*b + e*f
+
+                mC[i,j] += p
+                μ[i,j]  += abs(p)
             end
         end
     end
 
-    return Cinf, Csup
+    return mC, μ
 end
 
-function __mul(A::AbstractMatrix{Interval{T}}, B::AbstractMatrix{T}) where {T<:AbstractFloat}
-    mA = _div_round.(_add_round.(inf.(A), sup.(A), RoundUp), convert(T, 2), RoundUp) # (inf.(A) .+ sup.(A)) ./ 2
-    rA = _sub_round.(mA, inf.(A), RoundUp)
+function __mul5frn(mA, rA, mB::AbstractVector{T}, rB) where {T<:AbstractFloat}
+    mC = zeros(T, size(mA, 1))
+    μ  = zeros(T, size(mA, 1))
 
-    Cinf = zeros(T, size(A, 1), size(B, 2))
-    Csup = zeros(T, size(A, 1), size(B, 2))
+    Threads.@threads for i ∈ axes(mA, 1)
+        for l ∈ axes(mA, 2)
+            a, c = mA[i,l], rA[i,l]
+            b, d = mB[l], rB[l]
 
-    Threads.@threads for j ∈ axes(B, 2)
-        for l ∈ axes(A, 2)
-            @inbounds for i ∈ axes(A, 1)
-                rC_ij        = _mul_round(rA[i,l], abs(B[l,j]), RoundUp)
-                mAmB_up_ij   = _mul_round(mA[i,l], B[l,j], RoundUp)
-                mAmB_down_ij = _mul_round(mA[i,l], B[l,j], RoundDown)
+            e = sign(a) * min(abs(a), c)
+            f = sign(b) * min(abs(b), d)
+            p = a*b + e*f
 
-                Cinf[i,j] = _add_round(_sub_round(mAmB_down_ij, rC_ij, RoundDown), Cinf[i,j], RoundDown)
-                Csup[i,j] = _add_round(_add_round(mAmB_up_ij,   rC_ij, RoundUp),   Csup[i,j], RoundUp)
-            end
+            mC[i] += p
+            μ[i]  += abs(p)
         end
     end
 
-    return Cinf, Csup
-end
-
-function __mul(A::AbstractMatrix{T}, B::AbstractMatrix{Interval{T}}) where {T<:AbstractFloat}
-    mB = _div_round.(_add_round.(inf.(B), sup.(B), RoundUp), convert(T, 2), RoundUp) # (inf.(B) .+ sup.(B)) ./ 2
-    rB = _sub_round.(mB, inf.(B), RoundUp)
-
-    Cinf = zeros(T, size(A, 1), size(B, 2))
-    Csup = zeros(T, size(A, 1), size(B, 2))
-
-    Threads.@threads for j ∈ axes(B, 2)
-        for l ∈ axes(A, 2)
-            @inbounds for i ∈ axes(A, 1)
-                rC_ij        = _mul_round(abs(A[i,l]), rB[l,j], RoundUp)
-                mAmB_up_ij   = _mul_round(A[i,l], mB[l,j], RoundUp)
-                mAmB_down_ij = _mul_round(A[i,l], mB[l,j], RoundDown)
-
-                Cinf[i,j] = _add_round(_sub_round(mAmB_down_ij, rC_ij, RoundDown), Cinf[i,j], RoundDown)
-                Csup[i,j] = _add_round(_add_round(mAmB_up_ij,   rC_ij, RoundUp),   Csup[i,j], RoundUp)
-            end
-        end
-    end
-
-    return Cinf, Csup
-end
-
-function __mul(A::AbstractMatrix{Interval{T}}, B::AbstractVector{Interval{T}}) where {T<:AbstractFloat}
-    mA = _div_round.(_add_round.(inf.(A), sup.(A), RoundUp), convert(T, 2), RoundUp) # (inf.(A) .+ sup.(A)) ./ 2
-    rA = _sub_round.(mA, inf.(A), RoundUp)
-    mB = _div_round.(_add_round.(inf.(B), sup.(B), RoundUp), convert(T, 2), RoundUp) # (inf.(B) .+ sup.(B)) ./ 2
-    rB = _sub_round.(mB, inf.(B), RoundUp)
-
-    Cinf = zeros(T, size(A, 1))
-    Csup = zeros(T, size(A, 1))
-
-    Threads.@threads for i ∈ axes(A, 1)
-        @inbounds for l ∈ axes(A, 2)
-            U_il         = _mul_round(abs(mA[i,l]), rB[l], RoundUp)
-            V_il         = _mul_round(rA[i,l], _add_round(abs(mB[l]), rB[l], RoundUp), RoundUp)
-            rC_il        = _add_round(U_il, V_il, RoundUp)
-            mAmB_up_il   = _mul_round(mA[i,l], mB[l], RoundUp)
-            mAmB_down_il = _mul_round(mA[i,l], mB[l], RoundDown)
-
-            Cinf[i] = _add_round(_sub_round(mAmB_down_il, rC_il, RoundDown), Cinf[i], RoundDown)
-            Csup[i] = _add_round(_add_round(mAmB_up_il,   rC_il, RoundUp),   Csup[i], RoundUp)
-        end
-    end
-
-    return Cinf, Csup
-end
-
-function __mul(A::AbstractMatrix{Interval{T}}, B::AbstractVector{T}) where {T<:AbstractFloat}
-    mA = _div_round.(_add_round.(inf.(A), sup.(A), RoundUp), convert(T, 2), RoundUp) # (inf.(A) .+ sup.(A)) ./ 2
-    rA = _sub_round.(mA, inf.(A), RoundUp)
-
-    Cinf = zeros(T, size(A, 1))
-    Csup = zeros(T, size(A, 1))
-
-    Threads.@threads for i ∈ axes(A, 1)
-        @inbounds for l ∈ axes(A, 2)
-            rC_il       = _mul_round(rA[i,l], abs(B[l]), RoundUp)
-            mAB_up_il   = _mul_round(mA[i,l], B[l], RoundUp)
-            mAB_down_il = _mul_round(mA[i,l], B[l], RoundDown)
-
-            Cinf[i] = _add_round(_sub_round(mAB_down_il, rC_il, RoundDown), Cinf[i], RoundDown)
-            Csup[i] = _add_round(_add_round(mAB_up_il,   rC_il, RoundUp),   Csup[i], RoundUp)
-        end
-    end
-
-    return Cinf, Csup
-end
-
-function __mul(A::AbstractMatrix{T}, B::AbstractVector{Interval{T}}) where {T<:AbstractFloat}
-    mB = _div_round.(_add_round.(inf.(B), sup.(B), RoundUp), convert(T, 2), RoundUp) # (inf.(B) .+ sup.(B)) ./ 2
-    rB = _sub_round.(mB, inf.(B), RoundUp)
-
-    Cinf = zeros(T, size(A, 1))
-    Csup = zeros(T, size(A, 1))
-
-    Threads.@threads for i ∈ axes(A, 1)
-        @inbounds for l ∈ axes(A, 2)
-            rC_il       = _mul_round(abs(A[i,l]), rB[l], RoundUp)
-            AmB_up_il   = _mul_round(A[i,l], mB[l], RoundUp)
-            AmB_down_il = _mul_round(A[i,l], mB[l], RoundDown)
-
-            Cinf[i] = _add_round(_sub_round(AmB_down_il, rC_il, RoundDown), Cinf[i], RoundDown)
-            Csup[i] = _add_round(_add_round(AmB_up_il,   rC_il, RoundUp),   Csup[i], RoundUp)
-        end
-    end
-
-    return Cinf, Csup
+    return mC, μ
 end
 
 # convenient function to propagate NG flag
 
 function _ensure_ng_flag!(C::AbstractVecOrMat{<:Interval}, ng_flag::Bool)
-    for i ∈ eachindex(C)
+    @inbounds @simd for i ∈ eachindex(C)
         C[i] = _unsafe_interval(C[i].bareinterval, C[i].decoration, ng_flag)
     end
     return C
 end
 
 function _ensure_ng_flag!(C::AbstractVecOrMat{<:Complex{<:Interval}}, ng_flag::Bool)
-    for i ∈ eachindex(C)
+    @inbounds @simd for i ∈ eachindex(C)
         C[i] = complex(
             _unsafe_interval(real(C[i]).bareinterval, real(C[i]).decoration, ng_flag),
             _unsafe_interval(imag(C[i]).bareinterval, imag(C[i]).decoration, ng_flag)
