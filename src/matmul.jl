@@ -435,9 +435,13 @@ let fenv_consts = Vector{Cint}(undef, 9)
     global const JL_FE_TOWARDZERO = fenv_consts[9]
 end
 
-_setrounding(i::Integer) = ccall((:fesetround, Base.libm_name), Cint, (Cint,), i)
-
-_getrounding() = ccall((:fegetround, Base.libm_name), Cint, ())
+if iswindows()
+    _setrounding(i::Integer) = ccall((:fesetround, Base.libm_name), Cint, (Cint,), i)
+    _getrounding() = ccall((:fegetround, Base.libm_name), Cint, ())
+else
+    _setrounding(i::Integer) = ccall(:fesetround, Cint, (Cint,), i)
+    _getrounding() = ccall(:fegetround, Cint, ())
+end
 
 #-
 
