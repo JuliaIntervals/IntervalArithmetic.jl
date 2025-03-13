@@ -457,8 +457,7 @@ function __mul(A::AbstractMatrix{Interval{T}}, B::AbstractVecOrMat{Interval{T}})
     U = mA; U .= _add_round.(abs.(mA), rA, RoundUp)
     V = mB; V .= _add_round.(abs.(mB), rB, RoundUp)
 
-    rC = _call_gem_openblas_upward!(rB, U, V)
-
+    rC = _call_gem_openblas_upward!(cache_1, U, V)
     rC .+= .- μ .+ 2 .* γ
 
     return mC, rC
@@ -494,7 +493,7 @@ else
     _getrounding() = ccall(:fegetround, Cint, ())
 end
 
-function _call_gem_openblas_upward!(C::AbstractMatrix{Float64}, A::AbstractMatrix{Float64}, B::AbstractMatrix{Float64})
+function _call_gem_openblas_upward!(C, A::AbstractMatrix{Float64}, B::AbstractMatrix{Float64})
     prev_rounding = _getrounding() # save current rounding mode
     _setrounding(JL_FE_UPWARD) # set rounding mode to upward
 
@@ -524,7 +523,7 @@ function _call_gem_openblas_upward!(C::AbstractMatrix{Float64}, A::AbstractMatri
     end
 end
 
-function _call_gem_openblas_upward!(C::AbstractVector{Float64}, A::AbstractMatrix{Float64}, B::AbstractVector{Float64})
+function _call_gem_openblas_upward!(C, A::AbstractMatrix{Float64}, B::AbstractVector{Float64})
     prev_rounding = _getrounding() # save current rounding mode
     _setrounding(JL_FE_UPWARD) # set rounding mode to upward
 
