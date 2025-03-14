@@ -453,10 +453,11 @@ function __mul(A::AbstractMatrix{Interval{T}}, B::AbstractVecOrMat{Interval{T}})
     U = mA; U .= _add_round.(abs.(mA), rA, RoundUp)
     V = mB; V .= _add_round.(abs.(mB), rB, RoundUp)
 
-    rC = _call_gem_openblas_upward!(cache_1, U, V)
-    rC .+= .- μ .+ 2 .* γ
+    cache_3 = zeros(T, size(A, 1), size(B, 2))
+    rC = _call_gem_openblas_upward!(cache_3, U, V)
+    rC .= _add_round.(_sub_round.(rC, μ, RoundUp), 2 .* γ, RoundUp)
 
-    return mC, rC
+    return @show mC, rC
 end
 
 function _vec_or_mat_midradius(A::AbstractVecOrMat{Interval{T}}) where {T<:AbstractFloat}
@@ -536,9 +537,6 @@ function _call_gem_openblas_upward!(C, A::AbstractMatrix{Float64}, B::AbstractMa
 end
 
 function _call_gem_openblas_upward!(C, A::AbstractMatrix{Float64}, B::AbstractVector{Float64})
-    prev_rounding = _getrounding() # save current rounding mode
-    _setrounding(JL_FE_UPWARD) # set rounding mode to upward
-
     m, k = size(A)
 
     α = 1.0
@@ -546,6 +544,8 @@ function _call_gem_openblas_upward!(C, A::AbstractMatrix{Float64}, B::AbstractVe
 
     transA = 'N'
 
+    prev_rounding = _getrounding() # save current rounding mode
+    _setrounding(JL_FE_UPWARD) # set rounding mode to upward
     try
         ccall((:dgemv_64_, OpenBLASConsistentFPCSR_jll.libopenblas), Cvoid,
             (Ref{UInt8}, Ref{LinearAlgebra.BLAS.BlasInt}, Ref{LinearAlgebra.BLAS.BlasInt},
