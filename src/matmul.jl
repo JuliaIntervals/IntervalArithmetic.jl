@@ -457,7 +457,7 @@ function __mul(A::AbstractMatrix{Interval{T}}, B::AbstractVecOrMat{Interval{T}})
     rC = _call_gem_openblas_upward!(cache_3, U, V)
     rC .= _add_round.(_sub_round.(rC, μ, RoundUp), 2 .* γ, RoundUp)
 
-    return @show mC, rC
+    return mC, rC
 end
 
 function _vec_or_mat_midradius(A::AbstractVecOrMat{Interval{T}}) where {T<:AbstractFloat}
