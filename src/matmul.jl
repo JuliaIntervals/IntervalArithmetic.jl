@@ -207,7 +207,7 @@ function _mul!(::MatMulMode{:slow}, C, A::AbstractMatrix, B::AbstractVecOrMat, �
             C .*= α
         else
             AB = Matrix{eltype(C)}(undef, size(A, 1), size(B, 2))
-            C .= AB .* α .+ C .* β
+            C .= _matmul_rec!(AB, A, B) .* α .+ C .* β
         end
     end
     t = all(isguaranteed, A) & all(isguaranteed, B) & isguaranteed(α) & isguaranteed(β)
@@ -444,13 +444,9 @@ function __mul(A::AbstractMatrix{Interval{T}}, B::AbstractVecOrMat{Interval{T}})
     mA, rA = _vec_or_mat_midradius(A)
     mB, rB = _vec_or_mat_midradius(B)
 
-    cache_1 = Matrix{T}(undef, size(A, 1), size(B, 2))
-    cache_2 = Matrix{T}(undef, size(A, 1), size(B, 2))
-
-    ρA = sign.(mA) .* min.(abs.(mA), rA)
-    ρB = sign.(mB) .* min.(abs.(mB), rB)
-    mC = _matmul_rec!(cache_1, mA, mB) + _matmul_rec!(cache_2, ρA, ρB)
-    μ = _matmul_rec!(cache_1, abs.(mA), abs.(mB)) + _matmul_rec!(cache_2, abs.(ρA), abs.(ρB))
+    cache_1 = zeros(T, size(A, 1), size(B, 2))
+    cache_2 = zeros(T, size(A, 1), size(B, 2))
+    mC, μ = _fused_matmul!(cache_1, cache_2, mA, rA, mB, rB)
 
     γ = _add_round.(_mul_round.(convert(T, k + 1), eps.(μ), RoundUp), IntervalArithmetic._mul_round(IntervalArithmetic._inv_round(u2, RoundUp), floatmin(T), RoundUp), RoundUp)
 
@@ -467,6 +463,23 @@ function _vec_or_mat_midradius(A::AbstractVecOrMat{Interval{T}}) where {T<:Abstr
     mA = _div_round.(_add_round.(inf.(A), sup.(A), RoundUp), convert(T, 2), RoundUp)
     rA = _sub_round.(mA, inf.(A), RoundUp)
     return mA, rA
+end
+
+function _fused_matmul!(mC, μ, mA, rA, mB, rB)
+    Threads.@threads for j ∈ axes(mB, 2)
+        for l ∈ axes(mA, 2)
+            @inbounds for i ∈ axes(mA, 1)
+                a, c = mA[i,l], rA[i,l]
+                b, d = mB[l,j], rB[l,j]
+                e = sign(a) * min(abs(a), c)
+                f = sign(b) * min(abs(b), d)
+                p = a*b + e*f
+                mC[i,j] += p
+                μ[i,j] += abs(p)
+            end
+        end
+    end
+    return mC, μ
 end
 
 #-
@@ -494,9 +507,6 @@ else
 end
 
 function _call_gem_openblas_upward!(C, A::AbstractMatrix{Float64}, B::AbstractMatrix{Float64})
-    prev_rounding = _getrounding() # save current rounding mode
-    _setrounding(JL_FE_UPWARD) # set rounding mode to upward
-
     m, k = size(A)
     n = size(B, 2)
 
@@ -506,6 +516,8 @@ function _call_gem_openblas_upward!(C, A::AbstractMatrix{Float64}, B::AbstractMa
     transA = 'N'
     transB = 'N'
 
+    prev_rounding = _getrounding() # save current rounding mode
+    _setrounding(JL_FE_UPWARD) # set rounding mode to upward
     try
         ccall((:dgemm_64_, OpenBLASConsistentFPCSR_jll.libopenblas), Cvoid,
             (Ref{UInt8}, Ref{UInt8}, Ref{LinearAlgebra.BLAS.BlasInt}, Ref{LinearAlgebra.BLAS.BlasInt}, Ref{LinearAlgebra.BLAS.BlasInt},
