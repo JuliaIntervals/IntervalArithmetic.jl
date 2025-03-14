@@ -40,6 +40,11 @@ include("symbols.jl")
 import LinearAlgebra
 import OpenBLASConsistentFPCSR_jll # 32-bit systems are not supported
 
+# use the same number of threads as the default BLAS library
+ccall((:openblas_set_num_threads64_, OpenBLASConsistentFPCSR_jll.libopenblas),
+    Cint, (Cint,),
+    LinearAlgebra.BLAS.get_num_threads())
+
 include("matmul.jl")
 
 end
