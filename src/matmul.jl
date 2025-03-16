@@ -1,50 +1,3 @@
-interval(::Type{T}, J::LinearAlgebra.UniformScaling, d::Decoration = com; format::Symbol = :infsup) where {T} =
-    LinearAlgebra.UniformScaling(interval(T, J.λ, d; format = format))
-interval(J::LinearAlgebra.UniformScaling, d::Decoration = com; format::Symbol = :infsup) =
-    LinearAlgebra.UniformScaling(interval(J.λ, d; format = format))
-
-
-
-# by-pass generic `opnorm` from LinearAlgebra to prevent NG flag
-
-function LinearAlgebra.opnorm1(A::AbstractMatrix{T}) where {T<:RealOrComplexI}
-    LinearAlgebra.require_one_based_indexing(A)
-    m, n = size(A)
-    Tnorm = typeof(float(real(zero(T))))
-    Tsum = promote_type(Float64, Tnorm)
-    nrm = zero(Tsum)
-    @inbounds begin
-        for j = 1:n
-            nrmj = zero(Tsum)
-            for i = 1:m
-                nrmj += LinearAlgebra.norm(A[i,j])
-            end
-            nrm = max(nrm, nrmj)
-        end
-    end
-    return convert(Tnorm, nrm)
-end
-
-function LinearAlgebra.opnormInf(A::AbstractMatrix{T}) where {T<:RealOrComplexI}
-    LinearAlgebra.require_one_based_indexing(A)
-    m, n = size(A)
-    Tnorm = typeof(float(real(zero(T))))
-    Tsum = promote_type(Float64, Tnorm)
-    nrm = zero(Tsum)
-    @inbounds begin
-        for i = 1:m
-            nrmi = zero(Tsum)
-            for j = 1:n
-                nrmi += LinearAlgebra.norm(A[i,j])
-            end
-            nrm = max(nrm, nrmi)
-        end
-    end
-    return convert(Tnorm, nrm)
-end
-
-
-
 # matrix inversion
 # note: use the contraction mapping theorem, only works when the entries of A have small radii
 
@@ -62,75 +15,6 @@ function Base.inv(A::Matrix{<:RealOrComplexI})
     _ensure_ng_flag!(A⁻¹, all(isguaranteed, A))
     return A⁻¹
 end
-
-
-
-# matrix eigenvalues
-
-function LinearAlgebra.eigvals!(A::AbstractMatrix{<:Interval}; permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby)
-    # note: this function does not overwrite `A`
-    v = _eigvals(A, permute, scale, sortby)
-    all(t -> isthinzero(imag(t)), v) && return v
-    _fold_conjugate!(v)
-    all(t -> isthinzero(imag(t)), v) && return real(v)
-    return v
-end
-
-LinearAlgebra.eigvals!(A::AbstractMatrix{<:Complex{<:Interval}}; permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby) =
-    # note: this function does not overwrite `A`
-    _eigvals(A, permute, scale, sortby)
-
-function _eigvals(A, permute, scale, sortby)
-    # Gershgorin circle theorem
-    B = _similarity_transform(A, permute, scale, sortby)
-    v = LinearAlgebra.diag(B)
-    T = eltype(v)
-    for j ∈ axes(B, 1)
-        r = zero(T)
-        for i ∈ axes(B, 2)
-            if i ≠ j
-                r += abs(B[i,j])
-            end
-        end
-        v[j] = interval(v[j], r; format = :midpoint)
-    end
-    return v
-end
-
-function _similarity_transform(A, permute, scale, sortby)
-    mA = mid.(A)
-    mλ, mV = LinearAlgebra.eigen(mA; permute = permute, scale = scale, sortby = sortby)
-    mλ .+= LinearAlgebra.diag(mV \ (mA * mV - mV * LinearAlgebra.Diagonal(mλ)))
-    Λ = LinearAlgebra.Diagonal(interval(mλ))
-    V = interval(mV)
-    V .= Λ .+ inv(V) * (A * V - V * Λ)
-    return V
-end
-
-function _fold_conjugate!(v)
-    for i ∈ eachindex(v)
-        vᵢ = v[i]
-        idxs = findall(j -> (j ≠ i) & !isdisjoint_interval(conj(vᵢ), v[j]), eachindex(v))
-        if isempty(idxs)
-            v[i] = real(vᵢ)
-        else
-            w = view(v, idxs)
-            z = conj(intersect_interval(conj(vᵢ), reduce(intersect_interval, w)))
-            z = complex(setdecoration(real(z), min(decoration(real(vᵢ)), minimum(decoration ∘ real, w))), setdecoration(imag(z), min(decoration(imag(vᵢ)), minimum(decoration ∘ imag, w))))
-            v[i] = z
-        end
-    end
-    return v
-end
-
-
-
-# matrix determinant
-
-LinearAlgebra.det(A::AbstractMatrix{<:Interval}) = real(reduce(*, LinearAlgebra.eigvals(A)))
-LinearAlgebra.det(A::AbstractMatrix{<:Complex{<:Interval}}) = reduce(*, LinearAlgebra.eigvals(A))
-
-
 
 #
 # by-pass `similar` methods defined in array.jl
@@ -157,8 +41,6 @@ Base.similar(::Array, S::Type{Interval{T}},          dims::Dims) where {T<:Bound
 Base.similar(::Array, S::Type{Complex{Interval{T}}}, dims::Dims) where {T<:BoundTypes} = zeros(S, dims)
 #
 
-
-
 # matrix multiplication
 
 """
@@ -180,15 +62,58 @@ LinearAlgebra.mul!(C::AbstractVector{<:RealOrComplexI}, A::AbstractVecOrMat, B::
 LinearAlgebra.mul!(C::AbstractMatrix{<:RealOrComplexI}, A::AbstractVecOrMat, B::AbstractVecOrMat) =
     LinearAlgebra.mul!(C, A, B, interval(true), interval(false))
 
+# slow matrix multiplication
+
 function _mul!(::MatMulMode{:slow}, C, A::AbstractMatrix, B::AbstractVecOrMat, α, β)
-    for j ∈ axes(B, 2)
-        for i ∈ axes(A, 1)
-            x = zero(eltype(C))
-            for l ∈ axes(A, 2)
-                @inbounds x += A[i,l] * B[l,j]
-            end
-            @inbounds C[i,j] = x * α + C[i,j] * β
+    if iszero(α)
+        if iszero(β)
+            C .= zero(eltype(C))
+        elseif !isone(β)
+            C .*= β
         end
+    else
+        if iszero(β)
+            _matmul_rec!(C, A, B)
+            C .*= α
+        else
+            AB = Matrix{eltype(C)}(undef, size(A, 1), size(B, 2))
+            C .= _matmul_rec!(AB, A, B) .* α .+ C .* β
+        end
+    end
+    t = all(isguaranteed, A) & all(isguaranteed, B) & isguaranteed(α) & isguaranteed(β)
+    _ensure_ng_flag!(C, t)
+    return C
+end
+
+function _matmul_rec!(C, A, B)
+    m, n = size(A)
+    p = size(B, 2)
+    fill!(C, zero(eltype(C)))
+    return _add_matmul_rec!(m, n, p, 0, 0, 0, C, A, B)
+end
+
+function _add_matmul_rec!(m, n, p, i0, j0, k0, C, A, B)
+    if m + n + p ≤ 256 # base case: naive matmult for sufficiently large matrices
+        for i ∈ 1:m, k ∈ 1:p
+            c = zero(eltype(C))
+            for j ∈ 1:n
+                @inbounds c += A[i0+i,j0+j] * B[j0+j,k0+k]
+            end
+            @inbounds C[i0+i,k0+k] += c
+        end
+    else
+        m2 = m ÷ 2; n2 = n ÷ 2; p2 = p ÷ 2
+        _add_matmul_rec!(m2, n2, p2, i0, j0, k0, C, A, B)
+
+        _add_matmul_rec!(m-m2, n2, p2, i0+m2, j0, k0, C, A, B)
+        _add_matmul_rec!(m2, n-n2, p2, i0, j0+n2, k0, C, A, B)
+        _add_matmul_rec!(m2, n2, p-p2, i0, j0, k0+p2, C, A, B)
+
+        _add_matmul_rec!(m-m2, n-n2, p2, i0+m2, j0+n2, k0, C, A, B)
+        _add_matmul_rec!(m2, n-n2, p-p2, i0, j0+n2, k0+p2, C, A, B)
+        _add_matmul_rec!(m-m2, n2, p-p2, i0+m2, j0, k0+p2, C, A, B)
+
+        _add_matmul_rec!(m-m2, n-n2, p-p2, i0+m2, j0+n2, k0+p2, C, A, B)
     end
     return C
 end
@@ -210,7 +135,11 @@ _mul!(::MatMulMode{:fast}, C, A::AbstractMatrix{<:Complex{<:Interval{<:Rational}
 _mul!(::MatMulMode{:fast}, C, A::AbstractMatrix{<:Interval{<:Rational}}, B::AbstractVecOrMat{<:Complex{<:Interval{<:Rational}}}, α, β) =
     LinearAlgebra._mul!(C, A, B, α, β)
 
-_mul!(::MatMulMode{:fast}, C, A, B, α, β) = _fastmul!(C, A, B, α, β)
+function _mul!(::MatMulMode{:fast}, C, A, B, α, β)
+    Int == Int32 || return _fastmul!(C, A, B, α, β)
+    @info "Fast multiplication is not supported on 32-bit systems, using the slow version"
+    return _mul!(MatMulMode{:slow}(), C, A, B, α, β)
+end
 
 for (T, S) ∈ ((:Interval, :Interval), (:Interval, :Any), (:Any, :Interval))
     @eval function _fastmul!(C, A::AbstractMatrix{<:$T}, B::AbstractVecOrMat{<:$S}, α, β)
@@ -223,22 +152,22 @@ for (T, S) ∈ ((:Interval, :Interval), (:Interval, :Any), (:Any, :Interval))
             end
         else
             BoundType = boundtype(CoefType)
-            ABinf, ABsup = __mul(A, B)
+            mC, rC = __mul(A, B)
             if isone(α)
                 if iszero(β)
-                    C .= interval.(BoundType, ABinf, ABsup)
+                    C .=  interval.(BoundType, mC, rC; format = :midpoint)
                 elseif isone(β)
-                    C .+= interval.(BoundType, ABinf, ABsup)
+                    C .+= interval.(BoundType, mC, rC; format = :midpoint)
                 else
-                    C .= interval.(BoundType, ABinf, ABsup) .+ C .* β
+                    C .=  interval.(BoundType, mC, rC; format = :midpoint) .+ C .* β
                 end
             else
                 if iszero(β)
-                    C .= interval.(BoundType, ABinf, ABsup) .* α
+                    C .=  interval.(BoundType, mC, rC; format = :midpoint) .* α
                 elseif isone(β)
-                    C .+= interval.(BoundType, ABinf, ABsup) .* α
+                    C .+= interval.(BoundType, mC, rC; format = :midpoint) .* α
                 else
-                    C .= interval.(BoundType, ABinf, ABsup) .* α .+ C .* β
+                    C .=  interval.(BoundType, mC, rC; format = :midpoint) .* α .+ C .* β
                 end
             end
         end
@@ -262,31 +191,31 @@ for (T, S) ∈ ((:(Complex{<:Interval}), :(Complex{<:Interval})),
             BoundType = boundtype(CoefType)
             A_real, A_imag = reim(A)
             B_real, B_imag = reim(B)
-            ABinf_1, ABsup_1 = __mul(A_real, B_real)
-            ABinf_2, ABsup_2 = __mul(A_imag, B_imag)
-            ABinf_3, ABsup_3 = __mul(A_real, B_imag)
-            ABinf_4, ABsup_4 = __mul(A_imag, B_real)
+            mC_1, rC_1 = __mul(A_real, B_real)
+            mC_2, rC_2 = __mul(A_imag, B_imag)
+            mC_3, rC_3 = __mul(A_real, B_imag)
+            mC_4, rC_4 = __mul(A_imag, B_real)
             if isone(α)
                 if iszero(β)
-                    C .= complex.(interval.(BoundType, ABinf_1, ABsup_1) .- interval.(BoundType, ABinf_2, ABsup_2),
-                                  interval.(BoundType, ABinf_3, ABsup_3) .+ interval.(BoundType, ABinf_4, ABsup_4))
+                    C .=  complex.(interval.(BoundType, mC_1, rC_1; format = :midpoint) .- interval.(BoundType, mC_2, rC_2; format = :midpoint),
+                                   interval.(BoundType, mC_3, rC_3; format = :midpoint) .+ interval.(BoundType, mC_4, rC_4; format = :midpoint))
                 elseif isone(β)
-                    C .+= complex.(interval.(BoundType, ABinf_1, ABsup_1) .- interval.(BoundType, ABinf_2, ABsup_2),
-                                   interval.(BoundType, ABinf_3, ABsup_3) .+ interval.(BoundType, ABinf_4, ABsup_4))
+                    C .+= complex.(interval.(BoundType, mC_1, rC_1; format = :midpoint) .- interval.(BoundType, mC_2, rC_2; format = :midpoint),
+                                   interval.(BoundType, mC_3, rC_3; format = :midpoint) .+ interval.(BoundType, mC_4, rC_4; format = :midpoint))
                 else
-                    C .= complex.(interval.(BoundType, ABinf_1, ABsup_1) .- interval.(BoundType, ABinf_2, ABsup_2),
-                                  interval.(BoundType, ABinf_3, ABsup_3) .+ interval.(BoundType, ABinf_4, ABsup_4)) .+ C .* β
+                    C .=  complex.(interval.(BoundType, mC_1, rC_1; format = :midpoint) .- interval.(BoundType, mC_2, rC_2; format = :midpoint),
+                                   interval.(BoundType, mC_3, rC_3; format = :midpoint) .+ interval.(BoundType, mC_4, rC_4; format = :midpoint)) .+ C .* β
                 end
             else
                 if iszero(β)
-                    C .= complex.(interval.(BoundType, ABinf_1, ABsup_1) .- interval.(BoundType, ABinf_2, ABsup_2),
-                                  interval.(BoundType, ABinf_3, ABsup_3) .+ interval.(BoundType, ABinf_4, ABsup_4)) .* α
+                    C .=  complex.(interval.(BoundType, mC_1, rC_1; format = :midpoint) .- interval.(BoundType, mC_2, rC_2; format = :midpoint),
+                                   interval.(BoundType, mC_3, rC_3; format = :midpoint) .+ interval.(BoundType, mC_4, rC_4; format = :midpoint)) .* α
                 elseif isone(β)
-                    C .+= complex.(interval.(BoundType, ABinf_1, ABsup_1) .- interval.(BoundType, ABinf_2, ABsup_2),
-                                   interval.(BoundType, ABinf_3, ABsup_3) .+ interval.(BoundType, ABinf_4, ABsup_4)) .* α
+                    C .+= complex.(interval.(BoundType, mC_1, rC_1; format = :midpoint) .- interval.(BoundType, mC_2, rC_2; format = :midpoint),
+                                   interval.(BoundType, mC_3, rC_3; format = :midpoint) .+ interval.(BoundType, mC_4, rC_4; format = :midpoint)) .* α
                 else
-                    C .= complex.(interval.(BoundType, ABinf_1, ABsup_1) .- interval.(BoundType, ABinf_2, ABsup_2),
-                                  interval.(BoundType, ABinf_3, ABsup_3) .+ interval.(BoundType, ABinf_4, ABsup_4)) .* α .+ C .* β
+                    C .=  complex.(interval.(BoundType, mC_1, rC_1; format = :midpoint) .- interval.(BoundType, mC_2, rC_2; format = :midpoint),
+                                   interval.(BoundType, mC_3, rC_3; format = :midpoint) .+ interval.(BoundType, mC_4, rC_4; format = :midpoint)) .* α .+ C .* β
                 end
             end
         end
@@ -309,23 +238,23 @@ for (T, S) ∈ ((:(Complex{<:Interval}), :Interval), (:(Complex{<:Interval}), :A
             else
                 BoundType = boundtype(CoefType)
                 A_real, A_imag = reim(A)
-                ABinf_real, ABsup_real = __mul(A_real, B)
-                ABinf_imag, ABsup_imag = __mul(A_imag, B)
+                mC_real, rC_real = __mul(A_real, B)
+                mC_imag, rC_imag = __mul(A_imag, B)
                 if isone(α)
                     if iszero(β)
-                        C .= complex.(interval.(BoundType, ABinf_real, ABsup_real), interval.(BoundType, ABinf_imag, ABsup_imag))
+                        C .=  complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint))
                     elseif isone(β)
-                        C .+= complex.(interval.(BoundType, ABinf_real, ABsup_real), interval.(BoundType, ABinf_imag, ABsup_imag))
+                        C .+= complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint))
                     else
-                        C .= complex.(interval.(BoundType, ABinf_real, ABsup_real), interval.(BoundType, ABinf_imag, ABsup_imag)) .+ C .* β
+                        C .=  complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint)) .+ C .* β
                     end
                 else
                     if iszero(β)
-                        C .= complex.(interval.(BoundType, ABinf_real, ABsup_real), interval.(BoundType, ABinf_imag, ABsup_imag)) .* α
+                        C .=  complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint)) .* α
                     elseif isone(β)
-                        C .+= complex.(interval.(BoundType, ABinf_real, ABsup_real), interval.(BoundType, ABinf_imag, ABsup_imag)) .* α
+                        C .+= complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint)) .* α
                     else
-                        C .= complex.(interval.(BoundType, ABinf_real, ABsup_real), interval.(BoundType, ABinf_imag, ABsup_imag)) .* α .+ C .* β
+                        C .=  complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint)) .* α .+ C .* β
                     end
                 end
             end
@@ -345,23 +274,23 @@ for (T, S) ∈ ((:(Complex{<:Interval}), :Interval), (:(Complex{<:Interval}), :A
             else
                 BoundType = boundtype(CoefType)
                 B_real, B_imag = reim(B)
-                ABinf_real, ABsup_real = __mul(A, B_real)
-                ABinf_imag, ABsup_imag = __mul(A, B_imag)
+                mC_real, rC_real = __mul(A, B_real)
+                mC_imag, rC_imag = __mul(A, B_imag)
                 if isone(α)
                     if iszero(β)
-                        C .= complex.(interval.(BoundType, ABinf_real, ABsup_real), interval.(BoundType, ABinf_imag, ABsup_imag))
+                        C .=  complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint))
                     elseif isone(β)
-                        C .+= complex.(interval.(BoundType, ABinf_real, ABsup_real), interval.(BoundType, ABinf_imag, ABsup_imag))
+                        C .+= complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint))
                     else
-                        C .= complex.(interval.(BoundType, ABinf_real, ABsup_real), interval.(BoundType, ABinf_imag, ABsup_imag)) .+ C .* β
+                        C .=  complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint)) .+ C .* β
                     end
                 else
                     if iszero(β)
-                        C .= complex.(interval.(BoundType, ABinf_real, ABsup_real), interval.(BoundType, ABinf_imag, ABsup_imag)) .* α
+                        C .=  complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint)) .* α
                     elseif isone(β)
-                        C .+= complex.(interval.(BoundType, ABinf_real, ABsup_real), interval.(BoundType, ABinf_imag, ABsup_imag)) .* α
+                        C .+= complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint)) .* α
                     else
-                        C .= complex.(interval.(BoundType, ABinf_real, ABsup_real), interval.(BoundType, ABinf_imag, ABsup_imag)) .* α .+ C .* β
+                        C .=  complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint)) .* α .+ C .* β
                     end
                 end
             end
@@ -377,157 +306,155 @@ function __mul(A::AbstractMatrix{T}, B::AbstractVecOrMat{S}) where {T,S}
     return __mul(interval.(NewType, A), interval.(NewType, B))
 end
 
-function __mul(A::AbstractMatrix{Interval{T}}, B::AbstractMatrix{Interval{T}}) where {T<:AbstractFloat}
-    mA = _div_round.(_add_round.(inf.(A), sup.(A), RoundUp), convert(T, 2), RoundUp) # (inf.(A) .+ sup.(A)) ./ 2
+function __mul(A::AbstractMatrix{Interval{T}}, B::AbstractVecOrMat{Interval{T}}) where {T<:AbstractFloat}
+    k = size(A, 2)
+    u2 = eps(T) # twice the unit roundoff
+    @assert (2k + 2) * u2 ≤ 1
+
+    mA, rA = _vec_or_mat_midradius(A)
+    mB, rB = _vec_or_mat_midradius(B)
+
+    cache_1 = zeros(T, size(A, 1), size(B, 2))
+    cache_2 = zeros(T, size(A, 1), size(B, 2))
+    mC, μ = _fused_matmul!(cache_1, cache_2, mA, rA, mB, rB)
+
+    γ = _add_round.(_mul_round.(convert(T, k + 1), eps.(μ), RoundUp), IntervalArithmetic._mul_round(IntervalArithmetic._inv_round(u2, RoundUp), floatmin(T), RoundUp), RoundUp)
+
+    U = mA; U .= _add_round.(abs.(mA), rA, RoundUp)
+    V = mB; V .= _add_round.(abs.(mB), rB, RoundUp)
+
+    cache_3 = zeros(T, size(A, 1), size(B, 2))
+    rC = _call_gem_openblas_upward!(cache_3, U, V)
+    rC .= _add_round.(_sub_round.(rC, μ, RoundUp), 2 .* γ, RoundUp)
+
+    return mC, rC
+end
+
+function _vec_or_mat_midradius(A::AbstractVecOrMat{Interval{T}}) where {T<:AbstractFloat}
+    mA = _div_round.(_add_round.(inf.(A), sup.(A), RoundUp), convert(T, 2), RoundUp)
     rA = _sub_round.(mA, inf.(A), RoundUp)
-    mB = _div_round.(_add_round.(inf.(B), sup.(B), RoundUp), convert(T, 2), RoundUp) # (inf.(B) .+ sup.(B)) ./ 2
-    rB = _sub_round.(mB, inf.(B), RoundUp)
+    return mA, rA
+end
 
-    Cinf = zeros(T, size(A, 1), size(B, 2))
-    Csup = zeros(T, size(A, 1), size(B, 2))
-
-    Threads.@threads for j ∈ axes(B, 2)
-        for l ∈ axes(A, 2)
-            @inbounds for i ∈ axes(A, 1)
-                U_ij         = _mul_round(abs(mA[i,l]), rB[l,j], RoundUp)
-                V_ij         = _mul_round(rA[i,l], _add_round(abs(mB[l,j]), rB[l,j], RoundUp), RoundUp)
-                rC_ij        = _add_round(U_ij, V_ij, RoundUp)
-                mAmB_up_ij   = _mul_round(mA[i,l], mB[l,j], RoundUp)
-                mAmB_down_ij = _mul_round(mA[i,l], mB[l,j], RoundDown)
-
-                Cinf[i,j] = _add_round(_sub_round(mAmB_down_ij, rC_ij, RoundDown), Cinf[i,j], RoundDown)
-                Csup[i,j] = _add_round(_add_round(mAmB_up_ij,   rC_ij, RoundUp),   Csup[i,j], RoundUp)
+function _fused_matmul!(mC, μ, mA, rA, mB, rB)
+    Threads.@threads for j ∈ axes(mB, 2)
+        for l ∈ axes(mA, 2)
+            @inbounds for i ∈ axes(mA, 1)
+                a, c = mA[i,l], rA[i,l]
+                b, d = mB[l,j], rB[l,j]
+                e = sign(a) * min(abs(a), c)
+                f = sign(b) * min(abs(b), d)
+                p = a*b + e*f
+                mC[i,j] += p
+                μ[i,j] += abs(p)
             end
         end
     end
-
-    return Cinf, Csup
+    return mC, μ
 end
 
-function __mul(A::AbstractMatrix{Interval{T}}, B::AbstractMatrix{T}) where {T<:AbstractFloat}
-    mA = _div_round.(_add_round.(inf.(A), sup.(A), RoundUp), convert(T, 2), RoundUp) # (inf.(A) .+ sup.(A)) ./ 2
-    rA = _sub_round.(mA, inf.(A), RoundUp)
+#-
 
-    Cinf = zeros(T, size(A, 1), size(B, 2))
-    Csup = zeros(T, size(A, 1), size(B, 2))
+let fenv_consts = Vector{Cint}(undef, 9)
+    ccall(:jl_get_fenv_consts, Cvoid, (Ptr{Cint},), fenv_consts)
+    global const JL_FE_INEXACT   = fenv_consts[1]
+    global const JL_FE_UNDERFLOW = fenv_consts[2]
+    global const JL_FE_OVERFLOW  = fenv_consts[3]
+    global const JL_FE_DIVBYZERO = fenv_consts[4]
+    global const JL_FE_INVALID   = fenv_consts[5]
 
-    Threads.@threads for j ∈ axes(B, 2)
-        for l ∈ axes(A, 2)
-            @inbounds for i ∈ axes(A, 1)
-                rC_ij        = _mul_round(rA[i,l], abs(B[l,j]), RoundUp)
-                mAmB_up_ij   = _mul_round(mA[i,l], B[l,j], RoundUp)
-                mAmB_down_ij = _mul_round(mA[i,l], B[l,j], RoundDown)
-
-                Cinf[i,j] = _add_round(_sub_round(mAmB_down_ij, rC_ij, RoundDown), Cinf[i,j], RoundDown)
-                Csup[i,j] = _add_round(_add_round(mAmB_up_ij,   rC_ij, RoundUp),   Csup[i,j], RoundUp)
-            end
-        end
-    end
-
-    return Cinf, Csup
+    global const JL_FE_TONEAREST  = fenv_consts[6]
+    global const JL_FE_UPWARD     = fenv_consts[7]
+    global const JL_FE_DOWNWARD   = fenv_consts[8]
+    global const JL_FE_TOWARDZERO = fenv_consts[9]
 end
 
-function __mul(A::AbstractMatrix{T}, B::AbstractMatrix{Interval{T}}) where {T<:AbstractFloat}
-    mB = _div_round.(_add_round.(inf.(B), sup.(B), RoundUp), convert(T, 2), RoundUp) # (inf.(B) .+ sup.(B)) ./ 2
-    rB = _sub_round.(mB, inf.(B), RoundUp)
-
-    Cinf = zeros(T, size(A, 1), size(B, 2))
-    Csup = zeros(T, size(A, 1), size(B, 2))
-
-    Threads.@threads for j ∈ axes(B, 2)
-        for l ∈ axes(A, 2)
-            @inbounds for i ∈ axes(A, 1)
-                rC_ij        = _mul_round(abs(A[i,l]), rB[l,j], RoundUp)
-                mAmB_up_ij   = _mul_round(A[i,l], mB[l,j], RoundUp)
-                mAmB_down_ij = _mul_round(A[i,l], mB[l,j], RoundDown)
-
-                Cinf[i,j] = _add_round(_sub_round(mAmB_down_ij, rC_ij, RoundDown), Cinf[i,j], RoundDown)
-                Csup[i,j] = _add_round(_add_round(mAmB_up_ij,   rC_ij, RoundUp),   Csup[i,j], RoundUp)
-            end
-        end
-    end
-
-    return Cinf, Csup
+if Sys.iswindows()
+    _setrounding(i::Integer) = ccall((:fesetround, Base.libm_name), Cint, (Cint,), i)
+    _getrounding() = ccall((:fegetround, Base.libm_name), Cint, ())
+else
+    _setrounding(i::Integer) = ccall(:fesetround, Cint, (Cint,), i)
+    _getrounding() = ccall(:fegetround, Cint, ())
 end
 
-function __mul(A::AbstractMatrix{Interval{T}}, B::AbstractVector{Interval{T}}) where {T<:AbstractFloat}
-    mA = _div_round.(_add_round.(inf.(A), sup.(A), RoundUp), convert(T, 2), RoundUp) # (inf.(A) .+ sup.(A)) ./ 2
-    rA = _sub_round.(mA, inf.(A), RoundUp)
-    mB = _div_round.(_add_round.(inf.(B), sup.(B), RoundUp), convert(T, 2), RoundUp) # (inf.(B) .+ sup.(B)) ./ 2
-    rB = _sub_round.(mB, inf.(B), RoundUp)
+_2mat(A::LinearAlgebra.Diagonal) = Matrix(A)
+_2mat(A) = A
 
-    Cinf = zeros(T, size(A, 1))
-    Csup = zeros(T, size(A, 1))
+function _call_gem_openblas_upward!(C, A_::AbstractMatrix{Float64}, B_::AbstractMatrix{Float64})
+    A = _2mat(A_)
+    B = _2mat(B_)
+    m, k = size(A)
+    n = size(B, 2)
 
-    Threads.@threads for i ∈ axes(A, 1)
-        @inbounds for l ∈ axes(A, 2)
-            U_il         = _mul_round(abs(mA[i,l]), rB[l], RoundUp)
-            V_il         = _mul_round(rA[i,l], _add_round(abs(mB[l]), rB[l], RoundUp), RoundUp)
-            rC_il        = _add_round(U_il, V_il, RoundUp)
-            mAmB_up_il   = _mul_round(mA[i,l], mB[l], RoundUp)
-            mAmB_down_il = _mul_round(mA[i,l], mB[l], RoundDown)
+    α = 1.0
+    β = 0.0
 
-            Cinf[i] = _add_round(_sub_round(mAmB_down_il, rC_il, RoundDown), Cinf[i], RoundDown)
-            Csup[i] = _add_round(_add_round(mAmB_up_il,   rC_il, RoundUp),   Csup[i], RoundUp)
-        end
+    transA = 'N'
+    transB = 'N'
+
+    prev_rounding = _getrounding() # save current rounding mode
+    _setrounding(JL_FE_UPWARD) # set rounding mode to upward
+    try
+        ccall((:dgemm_64_, OpenBLASConsistentFPCSR_jll.libopenblas), Cvoid,
+            (Ref{UInt8}, Ref{UInt8}, Ref{LinearAlgebra.BLAS.BlasInt}, Ref{LinearAlgebra.BLAS.BlasInt}, Ref{LinearAlgebra.BLAS.BlasInt},
+                Ref{Float64}, Ptr{Float64}, Ref{LinearAlgebra.BLAS.BlasInt},
+                Ptr{Float64}, Ref{LinearAlgebra.BLAS.BlasInt},
+                Ref{Float64}, Ptr{Float64}, Ref{LinearAlgebra.BLAS.BlasInt}),
+            transA, transB, m, n, k,
+            α, A, max(1, stride(A, 2)),
+            B, max(1, stride(B, 2)),
+            β, C, max(1, stride(C, 2))
+            )
+        return C
+    finally
+        _setrounding(prev_rounding) # restore previous rounding mode
     end
-
-    return Cinf, Csup
 end
 
-function __mul(A::AbstractMatrix{Interval{T}}, B::AbstractVector{T}) where {T<:AbstractFloat}
-    mA = _div_round.(_add_round.(inf.(A), sup.(A), RoundUp), convert(T, 2), RoundUp) # (inf.(A) .+ sup.(A)) ./ 2
-    rA = _sub_round.(mA, inf.(A), RoundUp)
+function _call_gem_openblas_upward!(C, A_::AbstractMatrix{Float64}, B_::AbstractVector{Float64})
+    A = _2mat(A_)
+    B = _2mat(B_)
+    m, k = size(A)
 
-    Cinf = zeros(T, size(A, 1))
-    Csup = zeros(T, size(A, 1))
+    α = 1.0
+    β = 0.0
 
-    Threads.@threads for i ∈ axes(A, 1)
-        @inbounds for l ∈ axes(A, 2)
-            rC_il       = _mul_round(rA[i,l], abs(B[l]), RoundUp)
-            mAB_up_il   = _mul_round(mA[i,l], B[l], RoundUp)
-            mAB_down_il = _mul_round(mA[i,l], B[l], RoundDown)
+    transA = 'N'
 
-            Cinf[i] = _add_round(_sub_round(mAB_down_il, rC_il, RoundDown), Cinf[i], RoundDown)
-            Csup[i] = _add_round(_add_round(mAB_up_il,   rC_il, RoundUp),   Csup[i], RoundUp)
-        end
+    prev_rounding = _getrounding() # save current rounding mode
+    _setrounding(JL_FE_UPWARD) # set rounding mode to upward
+    try
+        ccall((:dgemv_64_, OpenBLASConsistentFPCSR_jll.libopenblas), Cvoid,
+            (Ref{UInt8}, Ref{LinearAlgebra.BLAS.BlasInt}, Ref{LinearAlgebra.BLAS.BlasInt},
+                Ref{Float64}, Ptr{Float64}, Ref{LinearAlgebra.BLAS.BlasInt},
+                Ptr{Float64}, Ref{LinearAlgebra.BLAS.BlasInt},
+                Ref{Float64}, Ptr{Float64}, Ref{LinearAlgebra.BLAS.BlasInt}),
+            transA, m, k,
+            α, A, max(1, stride(A, 2)),
+            B, max(1, stride(B, 1)),
+            β, C, max(1, stride(C, 1))
+            )
+        return C
+    finally
+        _setrounding(prev_rounding) # restore previous rounding mode
     end
-
-    return Cinf, Csup
-end
-
-function __mul(A::AbstractMatrix{T}, B::AbstractVector{Interval{T}}) where {T<:AbstractFloat}
-    mB = _div_round.(_add_round.(inf.(B), sup.(B), RoundUp), convert(T, 2), RoundUp) # (inf.(B) .+ sup.(B)) ./ 2
-    rB = _sub_round.(mB, inf.(B), RoundUp)
-
-    Cinf = zeros(T, size(A, 1))
-    Csup = zeros(T, size(A, 1))
-
-    Threads.@threads for i ∈ axes(A, 1)
-        @inbounds for l ∈ axes(A, 2)
-            rC_il       = _mul_round(abs(A[i,l]), rB[l], RoundUp)
-            AmB_up_il   = _mul_round(A[i,l], mB[l], RoundUp)
-            AmB_down_il = _mul_round(A[i,l], mB[l], RoundDown)
-
-            Cinf[i] = _add_round(_sub_round(AmB_down_il, rC_il, RoundDown), Cinf[i], RoundDown)
-            Csup[i] = _add_round(_add_round(AmB_up_il,   rC_il, RoundUp),   Csup[i], RoundUp)
-        end
-    end
-
-    return Cinf, Csup
 end
 
 # convenient function to propagate NG flag
 
 function _ensure_ng_flag!(C::AbstractVecOrMat{<:Interval}, ng_flag::Bool)
-    C .= _unsafe_interval.(getfield.(C, :bareinterval), decoration.(C), ng_flag)
+    @inbounds @simd for i ∈ eachindex(C)
+        C[i] = _unsafe_interval(C[i].bareinterval, C[i].decoration, ng_flag)
+    end
     return C
 end
 
 function _ensure_ng_flag!(C::AbstractVecOrMat{<:Complex{<:Interval}}, ng_flag::Bool)
-    C .= complex.(
-        _unsafe_interval.(getfield.(real.(C), :bareinterval), decoration.(C), ng_flag),
-        _unsafe_interval.(getfield.(imag.(C), :bareinterval), decoration.(C), ng_flag)
-        )
+    @inbounds @simd for i ∈ eachindex(C)
+        C[i] = complex(
+            _unsafe_interval(real(C[i]).bareinterval, real(C[i]).decoration, ng_flag),
+            _unsafe_interval(imag(C[i]).bareinterval, imag(C[i]).decoration, ng_flag)
+            )
+    end
     return C
 end
