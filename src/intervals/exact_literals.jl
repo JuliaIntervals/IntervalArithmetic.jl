@@ -58,6 +58,8 @@ ExactReal(x::ExactReal) = x
 
 _value(x::ExactReal) = x.value # hook for interval constructor
 
+isguaranteed(::ExactReal) = true
+
 # utilities
 
 Base.to_index(i::ExactReal{<:Integer}) = i.value # allow to index with ExactReal

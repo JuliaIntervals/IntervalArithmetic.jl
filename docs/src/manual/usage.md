@@ -123,9 +123,10 @@ One can refer to the following:
 - `setdiff`: cannot be used with intervals. See instead [`interiordiff`](@ref).
 
 
+
 ## Piecewise functions
 
-Since intervals don't play well with `if .. else .. end` statement,
+Since intervals don't play well with `if ... else ... end` statement,
 we provide a utility to define function by pieces:
 
 ```@repl usage
@@ -139,6 +140,7 @@ myabs(interval(-1, 23))
 
 The resulting function work with both standard numbers and intervals,
 and deal properly with the decorations of intervals.
+
 
 
 ## Custom interval bounds type

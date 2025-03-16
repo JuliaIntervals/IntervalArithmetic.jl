@@ -7,7 +7,7 @@ function Base.inv(A::Matrix{<:RealOrComplexI})
     F = A * approx_A⁻¹ - interval(LinearAlgebra.I)
     Y = LinearAlgebra.opnorm(approx_A⁻¹ * F, Inf)
     Z₁ = LinearAlgebra.opnorm(F, Inf)
-    if isbounded(Y) & strictprecedes(Z₁, one(one(Z₁)))
+    if isbounded(Y) & strictprecedes(Z₁, one(Z₁))
         A⁻¹ = interval.(approx_A⁻¹, inf(interval(mag(Y)) / (one(Z₁) - interval(mag(Z₁)))); format = :midpoint)
     else
         A⁻¹ = fill(nai(eltype(approx_A⁻¹)), size(A))
@@ -383,6 +383,7 @@ _2mat(A) = A
 function _call_gem_openblas_upward!(C, A_::AbstractMatrix{Float64}, B_::AbstractMatrix{Float64})
     A = _2mat(A_)
     B = _2mat(B_)
+
     m, k = size(A)
     n = size(B, 2)
 
@@ -414,6 +415,7 @@ end
 function _call_gem_openblas_upward!(C, A_::AbstractMatrix{Float64}, B_::AbstractVector{Float64})
     A = _2mat(A_)
     B = _2mat(B_)
+
     m, k = size(A)
 
     α = 1.0
