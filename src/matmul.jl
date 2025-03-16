@@ -50,7 +50,7 @@ Matrix multiplication mode type.
 
 Available mode types:
 - `:slow` (default): generic algorithm.
-- `:fast` : Rump's algorithm.
+- `:fast`: Rump's algorithm.
 """
 struct MatMulMode{T} end
 
@@ -122,18 +122,18 @@ end
 # Note: Rump's algorithm
 
 _mul!(::MatMulMode{:fast}, C, A::AbstractMatrix{<:Interval{<:Rational}}, B::AbstractVecOrMat{<:Interval{<:Rational}}, α, β) =
-    LinearAlgebra._mul!(C, A, B, α, β)
+    _mul!(MatMulMode{:slow}(), C, A, B, α, β)
 _mul!(::MatMulMode{:fast}, C, A::AbstractMatrix{<:Interval{<:Rational}}, B::AbstractVecOrMat, α, β) =
-    LinearAlgebra._mul!(C, A, B, α, β)
+    _mul!(MatMulMode{:slow}(), C, A, B, α, β)
 _mul!(::MatMulMode{:fast}, C, A::AbstractMatrix, B::AbstractVecOrMat{<:Interval{<:Rational}}, α, β) =
-    LinearAlgebra._mul!(C, A, B, α, β)
+    _mul!(MatMulMode{:slow}(), C, A, B, α, β)
 
 _mul!(::MatMulMode{:fast}, C, A::AbstractMatrix{<:Complex{<:Interval{<:Rational}}}, B::AbstractVecOrMat{<:Complex{<:Interval{<:Rational}}}, α, β) =
-    LinearAlgebra._mul!(C, A, B, α, β)
+    _mul!(MatMulMode{:slow}(), C, A, B, α, β)
 _mul!(::MatMulMode{:fast}, C, A::AbstractMatrix{<:Complex{<:Interval{<:Rational}}}, B::AbstractVecOrMat{<:Interval{<:Rational}}, α, β) =
-    LinearAlgebra._mul!(C, A, B, α, β)
+    _mul!(MatMulMode{:slow}(), C, A, B, α, β)
 _mul!(::MatMulMode{:fast}, C, A::AbstractMatrix{<:Interval{<:Rational}}, B::AbstractVecOrMat{<:Complex{<:Interval{<:Rational}}}, α, β) =
-    LinearAlgebra._mul!(C, A, B, α, β)
+    _mul!(MatMulMode{:slow}(), C, A, B, α, β)
 
 function _mul!(::MatMulMode{:fast}, C, A, B, α, β)
     Int == Int32 || return _fastmul!(C, A, B, α, β)
