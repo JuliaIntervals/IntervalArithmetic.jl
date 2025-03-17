@@ -98,7 +98,7 @@ function (constant::Constant)(::Dual{T, Interval{S}}) where {T, S}
     return Dual{T}(interval(S, constant.value), interval(S, 0.0))
 end
 
-function (piecewise::Piecewise)(dual::Dual{T, <:Interval}) where {T}
+function (piecewise::Piecewise)(dual::Dual{T,<:Interval}) where {T}
     X = value(dual)
     input_domain = Domain(X)
     if !overlap_domain(input_domain, piecewise)
@@ -134,6 +134,5 @@ function (piecewise::Piecewise)(dual::Dual{T, <:Interval}) where {T}
 
     return Dual{T}(primal, tuple(partial...))
 end
-
 
 end
