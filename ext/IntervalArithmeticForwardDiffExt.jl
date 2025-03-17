@@ -135,4 +135,9 @@ function (piecewise::Piecewise)(dual::Dual{T,<:Interval}) where {T}
     return Dual{T}(primal, tuple(partial...))
 end
 
+#
+
+ForwardDiff.DiffRules._abs_deriv(x::Dual{T,<:Interval}) where {T} =
+    Dual{T}(ForwardDiff.DiffRules._abs_deriv(value(x)), zero(partials(x)))
+
 end
