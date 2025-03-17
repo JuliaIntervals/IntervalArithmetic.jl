@@ -8,7 +8,7 @@
 
 Implement the `abs` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function Base.abs(x::BareInterval{T}) where {T<:NumTypes}
+function Base.abs(x::BareInterval{T}) where {T<:BoundTypes}
     isempty_interval(x) && return x
     return _unsafe_bareinterval(T, mig(x), mag(x))
 end
@@ -27,7 +27,7 @@ Implement the square absolute value.
     This function calls `^` internally, hence it depends on
     `IntervalArithmetic.power_mode()`.
 """
-Base.abs2(x::BareInterval) = _select_pown(power_mode(), x, 2) # not in the IEEE Standard 1788-2015
+Base.abs2(x::BareInterval) = _select_pown(x, 2) # not in the IEEE Standard 1788-2015
 
 function Base.abs2(x::Interval)
     r = abs2(bareinterval(x))
@@ -45,7 +45,7 @@ for f ∈ (:min, :max)
 
         Implement the `$($f)` function of the IEEE Standard 1788-2015 (Table 9.1).
         """
-        function Base.$f(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
+        function Base.$f(x::BareInterval{T}, y::BareInterval{T}) where {T<:BoundTypes}
             isempty_interval(x) && return x
             isempty_interval(y) && return y
             return _unsafe_bareinterval(T, $f(inf(x), inf(y)), $f(sup(x), sup(y)))

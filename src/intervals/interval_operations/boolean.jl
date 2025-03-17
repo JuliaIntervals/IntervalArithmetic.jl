@@ -237,7 +237,7 @@ Test whether `x` contains no elements.
 
 Implement the `isEmpty` function of the IEEE Standard 1788-2015 (Section 10.6.3).
 """
-isempty_interval(x::BareInterval{T}) where {T<:NumTypes} = (inf(x) == typemax(T)) & (sup(x) == typemin(T))
+isempty_interval(x::BareInterval{T}) where {T<:BoundTypes} = (inf(x) == typemax(T)) & (sup(x) == typemin(T))
 
 function isempty_interval(x::Interval)
     isnai(x) && return false
@@ -254,7 +254,7 @@ Test whether `x` is the entire real line.
 
 Implement the `isEntire` function of the IEEE Standard 1788-2015 (Section 10.6.3).
 """
-isentire_interval(x::BareInterval{T}) where {T<:NumTypes} = (inf(x) == typemin(T)) & (sup(x) == typemax(T))
+isentire_interval(x::BareInterval{T}) where {T<:BoundTypes} = (inf(x) == typemin(T)) & (sup(x) == typemax(T))
 
 function isentire_interval(x::Interval)
     isnai(x) && return false

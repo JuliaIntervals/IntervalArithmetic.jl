@@ -1,6 +1,7 @@
 module IntervalArithmeticDiffRulesExt
 
-using IntervalArithmetic, DiffRules
+using IntervalArithmetic
+import DiffRules
 
 function DiffRules._abs_deriv(x::Interval)
     r = sign(bareinterval(x))
