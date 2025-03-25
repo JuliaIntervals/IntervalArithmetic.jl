@@ -507,7 +507,14 @@ else
     _getrounding() = ccall(:fegetround, Cint, ())
 end
 
-function _call_gem_openblas_upward!(C, A::AbstractMatrix{Float64}, B::AbstractMatrix{Float64})
+_2mat(A::LinearAlgebra.Diagonal) = Matrix(A)
+
+_2mat(A) = A
+
+function _call_gem_openblas_upward!(C, A_::AbstractMatrix{Float64}, B_::AbstractMatrix{Float64})
+    A = _2mat(A_)
+    B = _2mat(B_)
+
     m, k = size(A)
     n = size(B, 2)
 
@@ -536,7 +543,10 @@ function _call_gem_openblas_upward!(C, A::AbstractMatrix{Float64}, B::AbstractMa
     end
 end
 
-function _call_gem_openblas_upward!(C, A::AbstractMatrix{Float64}, B::AbstractVector{Float64})
+function _call_gem_openblas_upward!(C, A_::AbstractMatrix{Float64}, B_::AbstractVector{Float64})
+    A = _2mat(A_)
+    B = _2mat(B_)
+
     m, k = size(A)
 
     α = 1.0
