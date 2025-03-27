@@ -25,7 +25,7 @@ IntervalArithmeticRecipesBaseExt = "RecipesBase"
 [compat]
 CRlibm_jll = "1"
 DiffRules = "1"
-ForwardDiff = "0.10"
+ForwardDiff = "0.10, 1"
 IntervalSets = "0.7"
 LinearAlgebra = "1.9"
 MacroTools = "0.5"
