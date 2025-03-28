@@ -151,23 +151,23 @@ for (T, S) ∈ ((:Interval, :Interval), (:Interval, :Any), (:Any, :Interval))
                 C .*= β
             end
         else
-            numtype = numtype(CoefType)
+            T = numtype(CoefType)
             mC, rC = __mul(A, B)
             if isone(α)
                 if iszero(β)
-                    C .=  interval.(numtype, mC, rC; format = :midpoint)
+                    C .=  interval.(T, mC, rC; format = :midpoint)
                 elseif isone(β)
-                    C .+= interval.(numtype, mC, rC; format = :midpoint)
+                    C .+= interval.(T, mC, rC; format = :midpoint)
                 else
-                    C .=  interval.(numtype, mC, rC; format = :midpoint) .+ C .* β
+                    C .=  interval.(T, mC, rC; format = :midpoint) .+ C .* β
                 end
             else
                 if iszero(β)
-                    C .=  interval.(numtype, mC, rC; format = :midpoint) .* α
+                    C .=  interval.(T, mC, rC; format = :midpoint) .* α
                 elseif isone(β)
-                    C .+= interval.(numtype, mC, rC; format = :midpoint) .* α
+                    C .+= interval.(T, mC, rC; format = :midpoint) .* α
                 else
-                    C .=  interval.(numtype, mC, rC; format = :midpoint) .* α .+ C .* β
+                    C .=  interval.(T, mC, rC; format = :midpoint) .* α .+ C .* β
                 end
             end
         end
@@ -188,7 +188,7 @@ for (T, S) ∈ ((:(Complex{<:Interval}), :(Complex{<:Interval})),
                 C .*= β
             end
         else
-            numtype = numtype(CoefType)
+            T = numtype(CoefType)
             A_real, A_imag = reim(A)
             B_real, B_imag = reim(B)
             mC_1, rC_1 = __mul(A_real, B_real)
@@ -197,25 +197,25 @@ for (T, S) ∈ ((:(Complex{<:Interval}), :(Complex{<:Interval})),
             mC_4, rC_4 = __mul(A_imag, B_real)
             if isone(α)
                 if iszero(β)
-                    C .=  complex.(interval.(numtype, mC_1, rC_1; format = :midpoint) .- interval.(numtype, mC_2, rC_2; format = :midpoint),
-                                   interval.(numtype, mC_3, rC_3; format = :midpoint) .+ interval.(numtype, mC_4, rC_4; format = :midpoint))
+                    C .=  complex.(interval.(T, mC_1, rC_1; format = :midpoint) .- interval.(T, mC_2, rC_2; format = :midpoint),
+                                   interval.(T, mC_3, rC_3; format = :midpoint) .+ interval.(T, mC_4, rC_4; format = :midpoint))
                 elseif isone(β)
-                    C .+= complex.(interval.(numtype, mC_1, rC_1; format = :midpoint) .- interval.(numtype, mC_2, rC_2; format = :midpoint),
-                                   interval.(numtype, mC_3, rC_3; format = :midpoint) .+ interval.(numtype, mC_4, rC_4; format = :midpoint))
+                    C .+= complex.(interval.(T, mC_1, rC_1; format = :midpoint) .- interval.(T, mC_2, rC_2; format = :midpoint),
+                                   interval.(T, mC_3, rC_3; format = :midpoint) .+ interval.(T, mC_4, rC_4; format = :midpoint))
                 else
-                    C .=  complex.(interval.(numtype, mC_1, rC_1; format = :midpoint) .- interval.(numtype, mC_2, rC_2; format = :midpoint),
-                                   interval.(numtype, mC_3, rC_3; format = :midpoint) .+ interval.(numtype, mC_4, rC_4; format = :midpoint)) .+ C .* β
+                    C .=  complex.(interval.(T, mC_1, rC_1; format = :midpoint) .- interval.(T, mC_2, rC_2; format = :midpoint),
+                                   interval.(T, mC_3, rC_3; format = :midpoint) .+ interval.(T, mC_4, rC_4; format = :midpoint)) .+ C .* β
                 end
             else
                 if iszero(β)
-                    C .=  complex.(interval.(numtype, mC_1, rC_1; format = :midpoint) .- interval.(numtype, mC_2, rC_2; format = :midpoint),
-                                   interval.(numtype, mC_3, rC_3; format = :midpoint) .+ interval.(numtype, mC_4, rC_4; format = :midpoint)) .* α
+                    C .=  complex.(interval.(T, mC_1, rC_1; format = :midpoint) .- interval.(T, mC_2, rC_2; format = :midpoint),
+                                   interval.(T, mC_3, rC_3; format = :midpoint) .+ interval.(T, mC_4, rC_4; format = :midpoint)) .* α
                 elseif isone(β)
-                    C .+= complex.(interval.(numtype, mC_1, rC_1; format = :midpoint) .- interval.(numtype, mC_2, rC_2; format = :midpoint),
-                                   interval.(numtype, mC_3, rC_3; format = :midpoint) .+ interval.(numtype, mC_4, rC_4; format = :midpoint)) .* α
+                    C .+= complex.(interval.(T, mC_1, rC_1; format = :midpoint) .- interval.(T, mC_2, rC_2; format = :midpoint),
+                                   interval.(T, mC_3, rC_3; format = :midpoint) .+ interval.(T, mC_4, rC_4; format = :midpoint)) .* α
                 else
-                    C .=  complex.(interval.(numtype, mC_1, rC_1; format = :midpoint) .- interval.(numtype, mC_2, rC_2; format = :midpoint),
-                                   interval.(numtype, mC_3, rC_3; format = :midpoint) .+ interval.(numtype, mC_4, rC_4; format = :midpoint)) .* α .+ C .* β
+                    C .=  complex.(interval.(T, mC_1, rC_1; format = :midpoint) .- interval.(T, mC_2, rC_2; format = :midpoint),
+                                   interval.(T, mC_3, rC_3; format = :midpoint) .+ interval.(T, mC_4, rC_4; format = :midpoint)) .* α .+ C .* β
                 end
             end
         end
@@ -236,25 +236,25 @@ for (T, S) ∈ ((:(Complex{<:Interval}), :Interval), (:(Complex{<:Interval}), :A
                     C .*= β
                 end
             else
-                numtype = numtype(CoefType)
+                T = numtype(CoefType)
                 A_real, A_imag = reim(A)
                 mC_real, rC_real = __mul(A_real, B)
                 mC_imag, rC_imag = __mul(A_imag, B)
                 if isone(α)
                     if iszero(β)
-                        C .=  complex.(interval.(numtype, mC_real, rC_real; format = :midpoint), interval.(numtype, mC_imag, rC_imag; format = :midpoint))
+                        C .=  complex.(interval.(T, mC_real, rC_real; format = :midpoint), interval.(T, mC_imag, rC_imag; format = :midpoint))
                     elseif isone(β)
-                        C .+= complex.(interval.(numtype, mC_real, rC_real; format = :midpoint), interval.(numtype, mC_imag, rC_imag; format = :midpoint))
+                        C .+= complex.(interval.(T, mC_real, rC_real; format = :midpoint), interval.(T, mC_imag, rC_imag; format = :midpoint))
                     else
-                        C .=  complex.(interval.(numtype, mC_real, rC_real; format = :midpoint), interval.(numtype, mC_imag, rC_imag; format = :midpoint)) .+ C .* β
+                        C .=  complex.(interval.(T, mC_real, rC_real; format = :midpoint), interval.(T, mC_imag, rC_imag; format = :midpoint)) .+ C .* β
                     end
                 else
                     if iszero(β)
-                        C .=  complex.(interval.(numtype, mC_real, rC_real; format = :midpoint), interval.(numtype, mC_imag, rC_imag; format = :midpoint)) .* α
+                        C .=  complex.(interval.(T, mC_real, rC_real; format = :midpoint), interval.(T, mC_imag, rC_imag; format = :midpoint)) .* α
                     elseif isone(β)
-                        C .+= complex.(interval.(numtype, mC_real, rC_real; format = :midpoint), interval.(numtype, mC_imag, rC_imag; format = :midpoint)) .* α
+                        C .+= complex.(interval.(T, mC_real, rC_real; format = :midpoint), interval.(T, mC_imag, rC_imag; format = :midpoint)) .* α
                     else
-                        C .=  complex.(interval.(numtype, mC_real, rC_real; format = :midpoint), interval.(numtype, mC_imag, rC_imag; format = :midpoint)) .* α .+ C .* β
+                        C .=  complex.(interval.(T, mC_real, rC_real; format = :midpoint), interval.(T, mC_imag, rC_imag; format = :midpoint)) .* α .+ C .* β
                     end
                 end
             end
@@ -272,25 +272,25 @@ for (T, S) ∈ ((:(Complex{<:Interval}), :Interval), (:(Complex{<:Interval}), :A
                     C .*= β
                 end
             else
-                numtype = numtype(CoefType)
+                T = numtype(CoefType)
                 B_real, B_imag = reim(B)
                 mC_real, rC_real = __mul(A, B_real)
                 mC_imag, rC_imag = __mul(A, B_imag)
                 if isone(α)
                     if iszero(β)
-                        C .=  complex.(interval.(numtype, mC_real, rC_real; format = :midpoint), interval.(numtype, mC_imag, rC_imag; format = :midpoint))
+                        C .=  complex.(interval.(T, mC_real, rC_real; format = :midpoint), interval.(T, mC_imag, rC_imag; format = :midpoint))
                     elseif isone(β)
-                        C .+= complex.(interval.(numtype, mC_real, rC_real; format = :midpoint), interval.(numtype, mC_imag, rC_imag; format = :midpoint))
+                        C .+= complex.(interval.(T, mC_real, rC_real; format = :midpoint), interval.(T, mC_imag, rC_imag; format = :midpoint))
                     else
-                        C .=  complex.(interval.(numtype, mC_real, rC_real; format = :midpoint), interval.(numtype, mC_imag, rC_imag; format = :midpoint)) .+ C .* β
+                        C .=  complex.(interval.(T, mC_real, rC_real; format = :midpoint), interval.(T, mC_imag, rC_imag; format = :midpoint)) .+ C .* β
                     end
                 else
                     if iszero(β)
-                        C .=  complex.(interval.(numtype, mC_real, rC_real; format = :midpoint), interval.(numtype, mC_imag, rC_imag; format = :midpoint)) .* α
+                        C .=  complex.(interval.(T, mC_real, rC_real; format = :midpoint), interval.(T, mC_imag, rC_imag; format = :midpoint)) .* α
                     elseif isone(β)
-                        C .+= complex.(interval.(numtype, mC_real, rC_real; format = :midpoint), interval.(numtype, mC_imag, rC_imag; format = :midpoint)) .* α
+                        C .+= complex.(interval.(T, mC_real, rC_real; format = :midpoint), interval.(T, mC_imag, rC_imag; format = :midpoint)) .* α
                     else
-                        C .=  complex.(interval.(numtype, mC_real, rC_real; format = :midpoint), interval.(numtype, mC_imag, rC_imag; format = :midpoint)) .* α .+ C .* β
+                        C .=  complex.(interval.(T, mC_real, rC_real; format = :midpoint), interval.(T, mC_imag, rC_imag; format = :midpoint)) .* α .+ C .* β
                     end
                 end
             end
