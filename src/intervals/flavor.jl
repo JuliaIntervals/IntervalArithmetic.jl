@@ -28,9 +28,6 @@ Some flavors `F` include:
 # Examples
 
 ```jldoctest
-julia> IntervalArithmetic.default_flavor()
-IntervalArithmetic.Flavor{:set_based}()
-
 julia> IntervalArithmetic.is_valid_interval(Inf, Inf)
 false
 
@@ -49,44 +46,33 @@ true
 """
 struct Flavor{F} end
 
-"""
-    default_flavor()
-
-Return the default flavor used to handle edge cases.
-"""
-default_flavor() = Flavor{:set_based}()
+#
 
 """
-    zero_times_infinity([F::Flavor=default_flavor()], T<:NumTypes)
+    zero_times_infinity([F::Flavor,] T<:NumTypes)
 
 For the given flavor `F`, return ``0 \\times \\infty`` as an instance of type
 `T`.
 """
 zero_times_infinity(::Flavor{:set_based}, ::Type{T}) where {T<:NumTypes} = zero(T)
 
-zero_times_infinity(::Type{T}) where {T<:NumTypes} = zero_times_infinity(default_flavor(), T)
-
 """
-    div_by_thin_zero([F::Flavor=default_flavor()], x::BareInterval)
+    div_by_thin_zero([F::Flavor,] x::BareInterval)
 
 For the given flavor `F`, divide `x` by the interval containing only ``0``.
 """
 div_by_thin_zero(::Flavor{:set_based}, ::BareInterval{T}) where {T<:NumTypes} =
     emptyinterval(BareInterval{T})
 
-div_by_thin_zero(x::BareInterval) = div_by_thin_zero(default_flavor(), x)
-
 """
-    contains_infinity([F::Flavor=default_flavor()], x::BareInterval)
+    contains_infinity([F::Flavor,] x::BareInterval)
 
 For the given flavor `F`, test whether `x` contains infinity.
 """
 contains_infinity(::Flavor{:set_based}, ::BareInterval) = false
 
-contains_infinity(x::BareInterval) = contains_infinity(default_flavor(), x)
-
 """
-    is_valid_interval([F::Flavor=default_flavor()], a::Real, b::Real)
+    is_valid_interval([F::Flavor,] a::Real, b::Real)
 
 For the given flavor `F`, test whether ``[a, b]`` is a valid interval.
 """
@@ -94,5 +80,3 @@ is_valid_interval(::Flavor{:set_based}, a::Real, b::Real) = b - a ≥ 0
 # to prevent issues with division by zero, e.g. `is_valid_interval(1//0, 1//0)`
 is_valid_interval(::Flavor{:set_based}, a::Rational, b::Rational) =
     !((a > b) | (a == typemax(typeof(a))) | (b == typemin(typeof(b))))
-
-is_valid_interval(a::Real, b::Real) = is_valid_interval(default_flavor(), a, b)
