@@ -19,10 +19,10 @@ end
         @test ForwardDiff.derivative(f, interval(-1, 1)) === interval(-2,  2, trv)
 
         g(x) = abs(x)^2
-        @test     ForwardDiff.derivative(g,             interval(-1, 1))   ===  interval(-2, 2, trv)
-        @test all(ForwardDiff.gradient(  v -> g(v[1]), [interval(-1, 1)]) .=== [interval(-2, 2, trv)])
-        @test all(ForwardDiff.hessian(   v -> g(v[1]), [interval(  0  )]) .=== [interval(-2, 2, trv)])
-        @test all(ForwardDiff.hessian(   v -> g(v[1]), [interval(-1, 1)]) .=== [interval(-2, 2, trv)])
+        @test     ForwardDiff.derivative(g,             interval(-1, 1) )  ===  interval(convert(Interval{Float64}, -2), convert(Interval{Float64}, 2), trv)
+        @test all(ForwardDiff.gradient(  v -> g(v[1]), [interval(-1, 1)]) .=== [interval(convert(Interval{Float64}, -2), convert(Interval{Float64}, 2), trv)])
+        @test all(ForwardDiff.hessian(   v -> g(v[1]), [interval(  0  )]) .=== [interval(convert(Interval{Float64}, -2), convert(Interval{Float64}, 2), trv)])
+        @test all(ForwardDiff.hessian(   v -> g(v[1]), [interval(-1, 1)]) .=== [interval(convert(Interval{Float64}, -2), convert(Interval{Float64}, 2), trv)])
     end
 
     @testset "sin" begin
