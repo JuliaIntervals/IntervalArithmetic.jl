@@ -101,14 +101,14 @@ end
 function (piecewise::Piecewise)(dual::Dual{T, <:Interval}) where {T}
     X = value(dual)
     input_domain = Domain(X)
-    if !overlap_domain(input_domain, piecewise) 
+    if !overlap_domain(input_domain, piecewise)
         return Dual{T}(emptyinterval(X), emptyinterval(X) .* partials(dual))
     end
 
     if !in_domain(input_domain, piecewise)
         dec = trv
     elseif any(x -> in_domain(x, input_domain), discontinuities(piecewise, 1))
-        dec = def 
+        dec = def
     else
         dec = com
     end
@@ -135,5 +135,7 @@ function (piecewise::Piecewise)(dual::Dual{T, <:Interval}) where {T}
     return Dual{T}(primal, tuple(partial...))
 end
 
+ForwardDiff.DiffRules._abs_deriv(x::Dual{T,<:Interval}) where {T} =
+    Dual{T}(ForwardDiff.DiffRules._abs_deriv(value(x)), zero(partials(x)))
 
 end
