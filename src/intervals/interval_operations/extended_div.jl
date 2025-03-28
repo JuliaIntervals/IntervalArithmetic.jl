@@ -8,7 +8,7 @@ Two-output division.
 
 Implement the `mulRevToPair` function of the IEEE Standard 1788-2015 (Section 10.5.5).
 """
-function extended_div(x::BareInterval{T}, y::BareInterval{T}) where {T<:BoundTypes}
+function extended_div(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
     ylo, yhi = bounds(y)
     if ylo < 0 < yhi && !in_interval(0, x)
         sup(x) < 0 && return (x / _unsafe_bareinterval(T, zero(T), yhi), x / _unsafe_bareinterval(T, ylo, zero(T)))

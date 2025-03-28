@@ -11,7 +11,7 @@ Key features:
 
 - **Bound Type**: The default numerical type used to represent the bounds of the
   intervals. The default is `Float64`, but other subtypes of
-  [`IntervalArithmetic.BoundTypes`](@ref) can be used to adjust precision.
+  [`IntervalArithmetic.NumTypes`](@ref) can be used to adjust precision.
 
 - **Flavor**: The interval representation that adhere to the IEEE Standard
   1788-2015. By default, it uses the set-based flavor, which excludes infinity
@@ -97,21 +97,21 @@ include("matmul.jl")
 
 #
 
-function configure_boundtype(boundtype::Type{<:BoundTypes})
-    @eval promote_boundtype(::Type{T}, ::Type{S}) where {T,S} = promote_type($boundtype, boundtype(T), boundtype(S))
+function configure_numtype(numtype::Type{<:NumTypes})
+    @eval promote_numtype(::Type{T}, ::Type{S}) where {T,S} = promote_type($numtype, numtype(T), numtype(S))
     @eval macro interval(expr)
-        return _wrap_interval($boundtype, expr)
+        return _wrap_interval($numtype, expr)
     end
-    @eval _parse(str::AbstractString) = parse(Interval{$boundtype}, str)
-    @eval emptyinterval() = emptyinterval(Interval{$boundtype})
-    @eval entireinterval() = entireinterval(Interval{$boundtype})
-    @eval nai() = nai(Interval{$boundtype})
-    return boundtype
+    @eval _parse(str::AbstractString) = parse(Interval{$numtype}, str)
+    @eval emptyinterval() = emptyinterval(Interval{$numtype})
+    @eval entireinterval() = entireinterval(Interval{$numtype})
+    @eval nai() = nai(Interval{$numtype})
+    return numtype
 end
 
 function configure_flavor(flavor::Symbol)
     flavor == :set_based || return throw(ArgumentError("only the interval flavor `:set_based` is supported and implemented"))
-    @eval zero_times_infinity(::Type{T}) where {T<:BoundTypes} = zero_times_infinity(Flavor{$(QuoteNode(flavor))}(), T)
+    @eval zero_times_infinity(::Type{T}) where {T<:NumTypes} = zero_times_infinity(Flavor{$(QuoteNode(flavor))}(), T)
     @eval div_by_thin_zero(x::BareInterval) = div_by_thin_zero(Flavor{$(QuoteNode(flavor))}(), x)
     @eval contains_infinity(x::BareInterval) = contains_infinity(Flavor{$(QuoteNode(flavor))}(), x)
     @eval is_valid_interval(a::Real, b::Real) = is_valid_interval(Flavor{$(QuoteNode(flavor))}(), a, b)
@@ -183,13 +183,13 @@ function configure_matmul(matmul::Symbol)
 end
 
 """
-    configure(; boundtype=Float64, flavor=:set_based, rounding=:correct, power=:fast, matmul=:fast)
+    configure(; numtype=Float64, flavor=:set_based, rounding=:correct, power=:fast, matmul=:fast)
 
 Configure the default behavior for:
 
 - **Bound Type**: The default numerical type used to represent the bounds of the
   intervals. The default is `Float64`, but other subtypes of
-  [`IntervalArithmetic.BoundTypes`](@ref) can be used to adjust precision.
+  [`IntervalArithmetic.NumTypes`](@ref) can be used to adjust precision.
 
 - **Flavor**: The interval representation that adhere to the IEEE Standard
   1788-2015. By default, it uses the set-based flavor, which excludes infinity
@@ -211,13 +211,13 @@ Configure the default behavior for:
   definition of matrix multiplication. Learn more:
   [`IntervalArithmetic.MatMulMode`](@ref).
 """
-function configure(; boundtype::Type{<:BoundTypes}=Float64, flavor::Symbol=:set_based, rounding::Symbol=:correct, power::Symbol=:fast, matmul::Symbol=:fast)
-    configure_boundtype(boundtype)
+function configure(; numtype::Type{<:NumTypes}=Float64, flavor::Symbol=:set_based, rounding::Symbol=:correct, power::Symbol=:fast, matmul::Symbol=:fast)
+    configure_numtype(numtype)
     configure_flavor(flavor)
     configure_rounding(rounding)
     configure_power(power)
     configure_matmul(matmul)
-    return boundtype, flavor, rounding, power, matmul
+    return numtype, flavor, rounding, power, matmul
 end
 
 configure()
@@ -227,7 +227,7 @@ configure()
 bareinterval(::Type{BigFloat}, a::AbstractIrrational) = _unsafe_bareinterval(BigFloat, a, a)
 
 # Note: generated functions must be defined after all the methods they use
-@generated function bareinterval(::Type{T}, a::AbstractIrrational) where {T<:BoundTypes}
+@generated function bareinterval(::Type{T}, a::AbstractIrrational) where {T<:NumTypes}
     x = _unsafe_bareinterval(T, a(), a()) # precompute the interval
     return :($x) # set body of the function to return the precomputed result
 end

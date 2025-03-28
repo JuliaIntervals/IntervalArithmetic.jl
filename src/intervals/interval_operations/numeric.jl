@@ -264,7 +264,7 @@ Implement the `mig` function of the IEEE Standard 1788-2015 (Table 9.2).
 
 See also: [`mag`](@ref).
 """
-function mig(x::BareInterval{T}) where {T<:BoundTypes}
+function mig(x::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(x) && return convert(T, NaN)
     in_interval(0, x) && return zero(T)
     return min(abs(inf(x)), abs(sup(x)))

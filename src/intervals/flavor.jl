@@ -49,19 +49,19 @@ struct Flavor{F} end
 #
 
 """
-    zero_times_infinity([F::Flavor,] T<:BoundTypes)
+    zero_times_infinity([F::Flavor,] T<:NumTypes)
 
 For the given flavor `F`, return ``0 \\times \\infty`` as an instance of type
 `T`.
 """
-zero_times_infinity(::Flavor{:set_based}, ::Type{T}) where {T<:BoundTypes} = zero(T)
+zero_times_infinity(::Flavor{:set_based}, ::Type{T}) where {T<:NumTypes} = zero(T)
 
 """
     div_by_thin_zero([F::Flavor,] x::BareInterval)
 
 For the given flavor `F`, divide `x` by the interval containing only ``0``.
 """
-div_by_thin_zero(::Flavor{:set_based}, ::BareInterval{T}) where {T<:BoundTypes} =
+div_by_thin_zero(::Flavor{:set_based}, ::BareInterval{T}) where {T<:NumTypes} =
     emptyinterval(BareInterval{T})
 
 """

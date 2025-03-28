@@ -3,8 +3,8 @@ module IntervalArithmeticIntervalSetsExt
 import IntervalSets as IS
 import IntervalArithmetic as IA
 
-IA.interval(i::IS.Interval{L,R,T}) where {L,R,T} = IA.interval(IA.promote_boundtype(T, T), i)
-function IA.interval(::Type{T}, i::IS.Interval{L,R}) where {T<:IA.BoundTypes,L,R}
+IA.interval(i::IS.Interval{L,R,T}) where {L,R,T} = IA.interval(IA.promote_numtype(T, T), i)
+function IA.interval(::Type{T}, i::IS.Interval{L,R}) where {T<:IA.NumTypes,L,R}
     # infinite endpoints are always open in IA, finite always closed:
     isinf(IS.leftendpoint(i)) != IS.isleftopen(i) && return IA.nai(T)
     isinf(IS.rightendpoint(i)) != IS.isrightopen(i) && return IA.nai(T)

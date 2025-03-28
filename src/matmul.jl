@@ -19,26 +19,26 @@ end
 #
 # by-pass `similar` methods defined in array.jl
 # note: written in this form to avoid by-passing the default behaviour for `Union{}`
-Base.similar(a::Array{Interval{T},1})          where {T<:BoundTypes} = zeros(Interval{T}, size(a, 1))
-Base.similar(a::Array{Complex{Interval{T}},1}) where {T<:BoundTypes} = zeros(Complex{Interval{T}}, size(a, 1))
+Base.similar(a::Array{Interval{T},1})          where {T<:NumTypes} = zeros(Interval{T}, size(a, 1))
+Base.similar(a::Array{Complex{Interval{T}},1}) where {T<:NumTypes} = zeros(Complex{Interval{T}}, size(a, 1))
 
-Base.similar(a::Array{<:Any,1}, S::Type{Interval{T}})          where {T<:BoundTypes} = zeros(S, size(a, 1))
-Base.similar(a::Array{<:Any,1}, S::Type{Complex{Interval{T}}}) where {T<:BoundTypes} = zeros(S, size(a, 1))
+Base.similar(a::Array{<:Any,1}, S::Type{Interval{T}})          where {T<:NumTypes} = zeros(S, size(a, 1))
+Base.similar(a::Array{<:Any,1}, S::Type{Complex{Interval{T}}}) where {T<:NumTypes} = zeros(S, size(a, 1))
 
-Base.similar(a::Array{Interval{T},2})          where {T<:BoundTypes} = zeros(Interval{T}, size(a, 1), size(a, 2))
-Base.similar(a::Array{Complex{Interval{T}},2}) where {T<:BoundTypes} = zeros(Complex{Interval{T}}, size(a, 1), size(a, 2))
+Base.similar(a::Array{Interval{T},2})          where {T<:NumTypes} = zeros(Interval{T}, size(a, 1), size(a, 2))
+Base.similar(a::Array{Complex{Interval{T}},2}) where {T<:NumTypes} = zeros(Complex{Interval{T}}, size(a, 1), size(a, 2))
 
-Base.similar(a::Array{<:Any,2}, S::Type{Interval{T}})          where {T<:BoundTypes} = zeros(S, size(a, 1), size(a, 2))
-Base.similar(a::Array{<:Any,2}, S::Type{Complex{Interval{T}}}) where {T<:BoundTypes} = zeros(S, size(a, 1), size(a, 2))
+Base.similar(a::Array{<:Any,2}, S::Type{Interval{T}})          where {T<:NumTypes} = zeros(S, size(a, 1), size(a, 2))
+Base.similar(a::Array{<:Any,2}, S::Type{Complex{Interval{T}}}) where {T<:NumTypes} = zeros(S, size(a, 1), size(a, 2))
 
-Base.similar(::Array{Interval{T}},          m::Int) where {T<:BoundTypes} = zeros(Interval{T}, m)
-Base.similar(::Array{Complex{Interval{T}}}, m::Int) where {T<:BoundTypes} = zeros(Complex{Interval{T}}, m)
+Base.similar(::Array{Interval{T}},          m::Int) where {T<:NumTypes} = zeros(Interval{T}, m)
+Base.similar(::Array{Complex{Interval{T}}}, m::Int) where {T<:NumTypes} = zeros(Complex{Interval{T}}, m)
 
-Base.similar(::Array{Interval{T}},          dims::Dims) where {T<:BoundTypes} = zeros(Interval{T}, dims)
-Base.similar(::Array{Complex{Interval{T}}}, dims::Dims) where {T<:BoundTypes} = zeros(Complex{Interval{T}}, dims)
+Base.similar(::Array{Interval{T}},          dims::Dims) where {T<:NumTypes} = zeros(Interval{T}, dims)
+Base.similar(::Array{Complex{Interval{T}}}, dims::Dims) where {T<:NumTypes} = zeros(Complex{Interval{T}}, dims)
 
-Base.similar(::Array, S::Type{Interval{T}},          dims::Dims) where {T<:BoundTypes} = zeros(S, dims)
-Base.similar(::Array, S::Type{Complex{Interval{T}}}, dims::Dims) where {T<:BoundTypes} = zeros(S, dims)
+Base.similar(::Array, S::Type{Interval{T}},          dims::Dims) where {T<:NumTypes} = zeros(S, dims)
+Base.similar(::Array, S::Type{Complex{Interval{T}}}, dims::Dims) where {T<:NumTypes} = zeros(S, dims)
 #
 
 # matrix multiplication
@@ -151,23 +151,23 @@ for (T, S) ∈ ((:Interval, :Interval), (:Interval, :Any), (:Any, :Interval))
                 C .*= β
             end
         else
-            BoundType = boundtype(CoefType)
+            numtype = numtype(CoefType)
             mC, rC = __mul(A, B)
             if isone(α)
                 if iszero(β)
-                    C .=  interval.(BoundType, mC, rC; format = :midpoint)
+                    C .=  interval.(numtype, mC, rC; format = :midpoint)
                 elseif isone(β)
-                    C .+= interval.(BoundType, mC, rC; format = :midpoint)
+                    C .+= interval.(numtype, mC, rC; format = :midpoint)
                 else
-                    C .=  interval.(BoundType, mC, rC; format = :midpoint) .+ C .* β
+                    C .=  interval.(numtype, mC, rC; format = :midpoint) .+ C .* β
                 end
             else
                 if iszero(β)
-                    C .=  interval.(BoundType, mC, rC; format = :midpoint) .* α
+                    C .=  interval.(numtype, mC, rC; format = :midpoint) .* α
                 elseif isone(β)
-                    C .+= interval.(BoundType, mC, rC; format = :midpoint) .* α
+                    C .+= interval.(numtype, mC, rC; format = :midpoint) .* α
                 else
-                    C .=  interval.(BoundType, mC, rC; format = :midpoint) .* α .+ C .* β
+                    C .=  interval.(numtype, mC, rC; format = :midpoint) .* α .+ C .* β
                 end
             end
         end
@@ -188,7 +188,7 @@ for (T, S) ∈ ((:(Complex{<:Interval}), :(Complex{<:Interval})),
                 C .*= β
             end
         else
-            BoundType = boundtype(CoefType)
+            numtype = numtype(CoefType)
             A_real, A_imag = reim(A)
             B_real, B_imag = reim(B)
             mC_1, rC_1 = __mul(A_real, B_real)
@@ -197,25 +197,25 @@ for (T, S) ∈ ((:(Complex{<:Interval}), :(Complex{<:Interval})),
             mC_4, rC_4 = __mul(A_imag, B_real)
             if isone(α)
                 if iszero(β)
-                    C .=  complex.(interval.(BoundType, mC_1, rC_1; format = :midpoint) .- interval.(BoundType, mC_2, rC_2; format = :midpoint),
-                                   interval.(BoundType, mC_3, rC_3; format = :midpoint) .+ interval.(BoundType, mC_4, rC_4; format = :midpoint))
+                    C .=  complex.(interval.(numtype, mC_1, rC_1; format = :midpoint) .- interval.(numtype, mC_2, rC_2; format = :midpoint),
+                                   interval.(numtype, mC_3, rC_3; format = :midpoint) .+ interval.(numtype, mC_4, rC_4; format = :midpoint))
                 elseif isone(β)
-                    C .+= complex.(interval.(BoundType, mC_1, rC_1; format = :midpoint) .- interval.(BoundType, mC_2, rC_2; format = :midpoint),
-                                   interval.(BoundType, mC_3, rC_3; format = :midpoint) .+ interval.(BoundType, mC_4, rC_4; format = :midpoint))
+                    C .+= complex.(interval.(numtype, mC_1, rC_1; format = :midpoint) .- interval.(numtype, mC_2, rC_2; format = :midpoint),
+                                   interval.(numtype, mC_3, rC_3; format = :midpoint) .+ interval.(numtype, mC_4, rC_4; format = :midpoint))
                 else
-                    C .=  complex.(interval.(BoundType, mC_1, rC_1; format = :midpoint) .- interval.(BoundType, mC_2, rC_2; format = :midpoint),
-                                   interval.(BoundType, mC_3, rC_3; format = :midpoint) .+ interval.(BoundType, mC_4, rC_4; format = :midpoint)) .+ C .* β
+                    C .=  complex.(interval.(numtype, mC_1, rC_1; format = :midpoint) .- interval.(numtype, mC_2, rC_2; format = :midpoint),
+                                   interval.(numtype, mC_3, rC_3; format = :midpoint) .+ interval.(numtype, mC_4, rC_4; format = :midpoint)) .+ C .* β
                 end
             else
                 if iszero(β)
-                    C .=  complex.(interval.(BoundType, mC_1, rC_1; format = :midpoint) .- interval.(BoundType, mC_2, rC_2; format = :midpoint),
-                                   interval.(BoundType, mC_3, rC_3; format = :midpoint) .+ interval.(BoundType, mC_4, rC_4; format = :midpoint)) .* α
+                    C .=  complex.(interval.(numtype, mC_1, rC_1; format = :midpoint) .- interval.(numtype, mC_2, rC_2; format = :midpoint),
+                                   interval.(numtype, mC_3, rC_3; format = :midpoint) .+ interval.(numtype, mC_4, rC_4; format = :midpoint)) .* α
                 elseif isone(β)
-                    C .+= complex.(interval.(BoundType, mC_1, rC_1; format = :midpoint) .- interval.(BoundType, mC_2, rC_2; format = :midpoint),
-                                   interval.(BoundType, mC_3, rC_3; format = :midpoint) .+ interval.(BoundType, mC_4, rC_4; format = :midpoint)) .* α
+                    C .+= complex.(interval.(numtype, mC_1, rC_1; format = :midpoint) .- interval.(numtype, mC_2, rC_2; format = :midpoint),
+                                   interval.(numtype, mC_3, rC_3; format = :midpoint) .+ interval.(numtype, mC_4, rC_4; format = :midpoint)) .* α
                 else
-                    C .=  complex.(interval.(BoundType, mC_1, rC_1; format = :midpoint) .- interval.(BoundType, mC_2, rC_2; format = :midpoint),
-                                   interval.(BoundType, mC_3, rC_3; format = :midpoint) .+ interval.(BoundType, mC_4, rC_4; format = :midpoint)) .* α .+ C .* β
+                    C .=  complex.(interval.(numtype, mC_1, rC_1; format = :midpoint) .- interval.(numtype, mC_2, rC_2; format = :midpoint),
+                                   interval.(numtype, mC_3, rC_3; format = :midpoint) .+ interval.(numtype, mC_4, rC_4; format = :midpoint)) .* α .+ C .* β
                 end
             end
         end
@@ -236,25 +236,25 @@ for (T, S) ∈ ((:(Complex{<:Interval}), :Interval), (:(Complex{<:Interval}), :A
                     C .*= β
                 end
             else
-                BoundType = boundtype(CoefType)
+                numtype = numtype(CoefType)
                 A_real, A_imag = reim(A)
                 mC_real, rC_real = __mul(A_real, B)
                 mC_imag, rC_imag = __mul(A_imag, B)
                 if isone(α)
                     if iszero(β)
-                        C .=  complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint))
+                        C .=  complex.(interval.(numtype, mC_real, rC_real; format = :midpoint), interval.(numtype, mC_imag, rC_imag; format = :midpoint))
                     elseif isone(β)
-                        C .+= complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint))
+                        C .+= complex.(interval.(numtype, mC_real, rC_real; format = :midpoint), interval.(numtype, mC_imag, rC_imag; format = :midpoint))
                     else
-                        C .=  complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint)) .+ C .* β
+                        C .=  complex.(interval.(numtype, mC_real, rC_real; format = :midpoint), interval.(numtype, mC_imag, rC_imag; format = :midpoint)) .+ C .* β
                     end
                 else
                     if iszero(β)
-                        C .=  complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint)) .* α
+                        C .=  complex.(interval.(numtype, mC_real, rC_real; format = :midpoint), interval.(numtype, mC_imag, rC_imag; format = :midpoint)) .* α
                     elseif isone(β)
-                        C .+= complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint)) .* α
+                        C .+= complex.(interval.(numtype, mC_real, rC_real; format = :midpoint), interval.(numtype, mC_imag, rC_imag; format = :midpoint)) .* α
                     else
-                        C .=  complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint)) .* α .+ C .* β
+                        C .=  complex.(interval.(numtype, mC_real, rC_real; format = :midpoint), interval.(numtype, mC_imag, rC_imag; format = :midpoint)) .* α .+ C .* β
                     end
                 end
             end
@@ -272,25 +272,25 @@ for (T, S) ∈ ((:(Complex{<:Interval}), :Interval), (:(Complex{<:Interval}), :A
                     C .*= β
                 end
             else
-                BoundType = boundtype(CoefType)
+                numtype = numtype(CoefType)
                 B_real, B_imag = reim(B)
                 mC_real, rC_real = __mul(A, B_real)
                 mC_imag, rC_imag = __mul(A, B_imag)
                 if isone(α)
                     if iszero(β)
-                        C .=  complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint))
+                        C .=  complex.(interval.(numtype, mC_real, rC_real; format = :midpoint), interval.(numtype, mC_imag, rC_imag; format = :midpoint))
                     elseif isone(β)
-                        C .+= complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint))
+                        C .+= complex.(interval.(numtype, mC_real, rC_real; format = :midpoint), interval.(numtype, mC_imag, rC_imag; format = :midpoint))
                     else
-                        C .=  complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint)) .+ C .* β
+                        C .=  complex.(interval.(numtype, mC_real, rC_real; format = :midpoint), interval.(numtype, mC_imag, rC_imag; format = :midpoint)) .+ C .* β
                     end
                 else
                     if iszero(β)
-                        C .=  complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint)) .* α
+                        C .=  complex.(interval.(numtype, mC_real, rC_real; format = :midpoint), interval.(numtype, mC_imag, rC_imag; format = :midpoint)) .* α
                     elseif isone(β)
-                        C .+= complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint)) .* α
+                        C .+= complex.(interval.(numtype, mC_real, rC_real; format = :midpoint), interval.(numtype, mC_imag, rC_imag; format = :midpoint)) .* α
                     else
-                        C .=  complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint)) .* α .+ C .* β
+                        C .=  complex.(interval.(numtype, mC_real, rC_real; format = :midpoint), interval.(numtype, mC_imag, rC_imag; format = :midpoint)) .* α .+ C .* β
                     end
                 end
             end
@@ -302,7 +302,7 @@ for (T, S) ∈ ((:(Complex{<:Interval}), :Interval), (:(Complex{<:Interval}), :A
 end
 
 function __mul(A::AbstractMatrix{T}, B::AbstractVecOrMat{S}) where {T,S}
-    NewType = promote_boundtype(T, S)
+    NewType = promote_numtype(T, S)
     return __mul(interval.(NewType, A), interval.(NewType, B))
 end
 

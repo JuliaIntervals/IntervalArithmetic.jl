@@ -8,7 +8,7 @@
 
 Implement the `sign` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function Base.sign(x::BareInterval{T}) where {T<:BoundTypes}
+function Base.sign(x::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(x) && return x
     lo, hi = bounds(x)
     return _unsafe_bareinterval(T, sign(lo), sign(hi))
@@ -27,7 +27,7 @@ end
 
 Implement the `ceil` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function Base.ceil(x::BareInterval{T}) where {T<:BoundTypes}
+function Base.ceil(x::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(x) && return x
     lo, hi = bounds(x)
     return _unsafe_bareinterval(T, ceil(lo), ceil(hi))
@@ -47,7 +47,7 @@ end
 
 Implement the `floor` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function Base.floor(x::BareInterval{T}) where {T<:BoundTypes}
+function Base.floor(x::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(x) && return x
     lo, hi = bounds(x)
     return _unsafe_bareinterval(T, floor(lo), floor(hi))
@@ -67,7 +67,7 @@ end
 
 Implement the `trunc` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function Base.trunc(x::BareInterval{T}) where {T<:BoundTypes}
+function Base.trunc(x::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(x) && return x
     lo, hi = bounds(x)
     return _unsafe_bareinterval(T, trunc(lo), trunc(hi))
@@ -96,7 +96,7 @@ Base.round(x::Union{BareInterval,Interval}, ::RoundingMode{:Down}) = floor(x)
 
 for (S, R) ∈ ((:(:Nearest), :RoundNearest), (:(:NearestTiesAway), :RoundNearestTiesAway))
     @eval begin
-        function Base.round(x::BareInterval{T}, ::RoundingMode{$S}) where {T<:BoundTypes}
+        function Base.round(x::BareInterval{T}, ::RoundingMode{$S}) where {T<:NumTypes}
             isempty_interval(x) && return x
             lo, hi = bounds(x)
             return _unsafe_bareinterval(T, round(lo, $R), round(hi, $R))

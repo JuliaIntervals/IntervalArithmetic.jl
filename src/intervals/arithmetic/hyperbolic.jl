@@ -25,7 +25,7 @@ for f ∈ (:sinh, :tanh, :asinh)
     end
 end
 
-Base.sinh(x::Complex{Interval{T}}) where {T<:BoundTypes} = (exp(x) - exp(-x)) / interval(T, 2)
+Base.sinh(x::Complex{Interval{T}}) where {T<:NumTypes} = (exp(x) - exp(-x)) / interval(T, 2)
 
 Base.tanh(x::Complex{<:Interval}) = sinh(x) / cosh(x)
 
@@ -48,7 +48,7 @@ function Base.cosh(x::Interval)
     return _unsafe_interval(r, d, isguaranteed(x))
 end
 
-Base.cosh(x::Complex{Interval{T}}) where {T<:BoundTypes} = (exp(x) + exp(-x)) / interval(T, 2)
+Base.cosh(x::Complex{Interval{T}}) where {T<:NumTypes} = (exp(x) + exp(-x)) / interval(T, 2)
 
 """
     coth(::BareInterval)
@@ -153,7 +153,7 @@ end
 
 Base.acosh(x::BareInterval{<:Rational}) = acosh(float(x))
 
-function Base.acosh(x::Interval{T}) where {T<:BoundTypes}
+function Base.acosh(x::Interval{T}) where {T<:NumTypes}
     domain = _unsafe_bareinterval(T, one(T), typemax(T))
     bx = bareinterval(x)
     r = acosh(bx)
@@ -179,7 +179,7 @@ end
 
 Base.atanh(x::BareInterval{<:Rational}) = atanh(float(x))
 
-function Base.atanh(x::Interval{T}) where {T<:BoundTypes}
+function Base.atanh(x::Interval{T}) where {T<:NumTypes}
     domain = _unsafe_bareinterval(T, -one(T), one(T))
     bx = bareinterval(x)
     r = atanh(bx)
@@ -214,7 +214,7 @@ end
 
 Base.acoth(x::BareInterval{<:Rational}) = acoth(float(x))
 
-function Base.acoth(x::Interval{T}) where {T<:BoundTypes}
+function Base.acoth(x::Interval{T}) where {T<:NumTypes}
     singular_domain = _unsafe_bareinterval(T, -one(T), one(T))
     bx = bareinterval(x)
     r = acoth(bx)

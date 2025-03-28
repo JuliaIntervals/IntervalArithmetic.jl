@@ -81,7 +81,7 @@ julia> parse(Interval{Float64}, "[1, 1e400]_com")
 Interval{Float64}(1.0, Inf, dac)
 ```
 """
-function Base.parse(::Type{BareInterval{T}}, str::AbstractString) where {T<:BoundTypes}
+function Base.parse(::Type{BareInterval{T}}, str::AbstractString) where {T<:NumTypes}
     if '_' ∈ str
         @warn "failed to parse a decorated interval as a `BareInterval`, empty interval is returned"
         return emptyinterval(BareInterval{T})
@@ -94,7 +94,7 @@ function Base.parse(::Type{BareInterval{T}}, str::AbstractString) where {T<:Boun
     end
 end
 
-function Base.parse(::Type{Interval{T}}, str::AbstractString) where {T<:BoundTypes}
+function Base.parse(::Type{Interval{T}}, str::AbstractString) where {T<:NumTypes}
     str = lowercase(strip(str))
     if '_' ∉ str
         x, _, _, iserror = _parse(T, str)
@@ -125,7 +125,7 @@ function Base.parse(::Type{Interval{T}}, str::AbstractString) where {T<:BoundTyp
     end
 end
 
-function _parse(::Type{T}, str::AbstractString) where {T<:BoundTypes}
+function _parse(::Type{T}, str::AbstractString) where {T<:NumTypes}
     if startswith(str, '[') && endswith(str, ']')
         s = strip(view(str, 2:length(str)-1))
         if ',' ∈ s # inf-sup interval

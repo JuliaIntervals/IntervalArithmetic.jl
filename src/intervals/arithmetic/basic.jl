@@ -12,7 +12,7 @@ Base.:+(x::Interval) = x
 
 Implement the `add` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function Base.:+(x::BareInterval{T}, y::BareInterval{T}) where {T<:BoundTypes}
+function Base.:+(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(x) && return x
     isempty_interval(y) && return y
     return @round(T, inf(x) + inf(y), sup(x) + sup(y))
@@ -32,7 +32,7 @@ end
 
 Implement the `neg` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function Base.:-(x::BareInterval{T}) where {T<:BoundTypes}
+function Base.:-(x::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(x) && return x
     return _unsafe_bareinterval(T, -sup(x), -inf(x))
 end
@@ -45,7 +45,7 @@ Base.:-(x::Interval) = _unsafe_interval(-bareinterval(x), decoration(x), isguara
 
 Implement the `sub` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-function Base.:-(x::BareInterval{T}, y::BareInterval{T}) where {T<:BoundTypes}
+function Base.:-(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(x) && return x
     isempty_interval(y) && return y
     return @round(T, inf(x) - sup(y), sup(x) - inf(y))
@@ -68,7 +68,7 @@ Implement the `mul` function of the IEEE Standard 1788-2015 (Table 9.1).
 !!! note
     The behavior of `*` is flavor dependent for some edge cases.
 """
-function Base.:*(x::BareInterval{T}, y::BareInterval{T}) where {T<:BoundTypes}
+function Base.:*(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(x) && return x
     isempty_interval(y) && return y
     isthinzero(x) && return x
@@ -87,14 +87,14 @@ end
 
 # helper functions for multiplication
 
-function _unbounded_mul(x::T, y::T, r::RoundingMode) where {T<:BoundTypes}
+function _unbounded_mul(x::T, y::T, r::RoundingMode) where {T<:NumTypes}
     iszero(x) && return sign(y) * zero_times_infinity(T)
     iszero(y) && return sign(x) * zero_times_infinity(T)
     return _mul_round(x, y, r)
 end
 
 for f ∈ (:_unbounded_mul, :*)
-    @eval function _mult(::typeof($f), x::BareInterval{T}, y::BareInterval{T}) where {T<:BoundTypes}
+    @eval function _mult(::typeof($f), x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
         if inf(y) ≥ 0
             inf(x) ≥ 0 && return @round(T, $f(inf(x), inf(y)), $f(sup(x), sup(y)))
             sup(x) ≤ 0 && return @round(T, $f(inf(x), sup(y)), $f(sup(x), inf(y)))
@@ -121,7 +121,7 @@ Implement the `recip` function of the IEEE Standard 1788-2015 (Table 9.1).
 !!! note
     The behavior of `inv` is flavor dependent for some edge cases.
 """
-function Base.inv(x::BareInterval{T}) where {T<:BoundTypes}
+function Base.inv(x::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(x) && return x
     if in_interval(0, x)
         inf(x) < 0 == sup(x) && return @round(T, typemin(T), inv(inf(x)))
@@ -155,7 +155,7 @@ Implement the `div` function of the IEEE Standard 1788-2015 (Table 9.1).
 !!! note
     The behavior of `/` is flavor dependent for some edge cases.
 """
-function Base.:/(x::BareInterval{T}, y::BareInterval{T}) where {T<:BoundTypes}
+function Base.:/(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(x) && return x
     isempty_interval(y) && return y
     isthinzero(y) && return div_by_thin_zero(x)
@@ -205,7 +205,7 @@ Base.:\(x::BareInterval, y::BareInterval) = /(y, x)
 
 Implement the combined multiply-add; this is semantically equivalent to `x * y + z`.
 """
-Base.muladd(x::BareInterval{T}, y::BareInterval{T}, z::BareInterval{T}) where {T<:BoundTypes} = x * y + z # not in the IEEE Standard 1788-2015
+Base.muladd(x::BareInterval{T}, y::BareInterval{T}, z::BareInterval{T}) where {T<:NumTypes} = x * y + z # not in the IEEE Standard 1788-2015
 Base.muladd(x::BareInterval, y::BareInterval, z::BareInterval) = muladd(promote(x, y, z)...)
 
 function Base.muladd(x::Interval, y::Interval, z::Interval)
@@ -221,7 +221,7 @@ end
 
 Implement the `fma` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
-Base.fma(x::BareInterval{T}, y::BareInterval{T}, z::BareInterval{T}) where {T<:BoundTypes} = x * y + z
+Base.fma(x::BareInterval{T}, y::BareInterval{T}, z::BareInterval{T}) where {T<:NumTypes} = x * y + z
 Base.fma(x::BareInterval, y::BareInterval, z::BareInterval) = fma(promote(x, y, z)...)
 
 function Base.fma(x::Interval, y::Interval, z::Interval)
@@ -246,7 +246,7 @@ end
 
 Base.sqrt(x::BareInterval{<:Rational}) = sqrt(float(x))
 
-function Base.sqrt(x::Interval{T}) where {T<:BoundTypes}
+function Base.sqrt(x::Interval{T}) where {T<:NumTypes}
     domain = _unsafe_bareinterval(T, zero(T), typemax(T))
     bx = bareinterval(x)
     r = sqrt(bx)
@@ -255,4 +255,4 @@ function Base.sqrt(x::Interval{T}) where {T<:BoundTypes}
     return _unsafe_interval(r, d, isguaranteed(x))
 end
 
-Base.sqrt(x::Complex{Interval{T}}) where {T<:BoundTypes} = x ^ interval(1//2)
+Base.sqrt(x::Complex{Interval{T}}) where {T<:NumTypes} = x ^ interval(1//2)
