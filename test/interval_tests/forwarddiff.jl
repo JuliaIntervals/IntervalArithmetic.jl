@@ -10,7 +10,7 @@ end
     @testset "abs" begin
         @test ForwardDiff.derivative(abs, interval(-2, -1)) === interval(-1, -1, com)
         @test ForwardDiff.derivative(abs, interval( 1,  2)) === interval( 1,  1, com)
-        @test ForwardDiff.derivative(abs, interval(   0  )) === interval(   0  , trv)
+        @test ForwardDiff.derivative(abs, interval(   0  )) === interval(-1,  1, trv)
         @test ForwardDiff.derivative(abs, interval(-1,  0)) === interval(-1,  0, trv)
         @test ForwardDiff.derivative(abs, interval( 0,  1)) === interval( 0,  1, trv)
         @test ForwardDiff.derivative(abs, interval(-2,  2)) === interval(-1,  1, trv)
