@@ -1,7 +1,7 @@
 module Symbols
 
     using IntervalArithmetic
-    export .., ±, ≛, ≺, ⪽, ∅, ℝ, ⊓, ⊔
+    export .., ±, ≛, ⊑, ⋤, ⪽, ⪯, ≺, ⊓, ⊔, ∅, ℝ
 
 """
     ..(a, b)
@@ -74,15 +74,23 @@ Interval{Rational{Int64}}(-85563208//27235615, 85563208//27235615, com)
 
 Unicode alias of [`isequal_interval`](@ref).
 """
-≛(x, y) = isequal_interval(x, y)
+const ≛ = isequal_interval
 
 """
-    ≺(x, y)
-    x ≺ y
+    ⊑(x, y)
+    x ⊑ y
 
-Unicode alias of [`strictprecedes`](@ref).
+Unicode alias of [`issubset_interval`](@ref).
 """
-≺(x, y) = strictprecedes(x, y)
+const ⊑ = issubset_interval
+
+"""
+    ⋤(x, y)
+    x ⋤ y
+
+Unicode alias of [`isstrictsubset`](@ref).
+"""
+const ⋤ = isstrictsubset
 
 """
     ⪽(x, y)
@@ -90,7 +98,23 @@ Unicode alias of [`strictprecedes`](@ref).
 
 Unicode alias of [`isinterior`](@ref).
 """
-⪽(x, y) = isinterior(x, y)
+const ⪽ = isinterior
+
+"""
+    ⪯(x, y)
+    x ⪯ y
+
+Unicode alias of [`precedes`](@ref).
+"""
+const ⪯ = precedes
+
+"""
+    ≺(x, y)
+    x ≺ y
+
+Unicode alias of [`strictprecedes`](@ref).
+"""
+const ≺ = strictprecedes
 
 """
     ⊔(x, y)
@@ -98,7 +122,7 @@ Unicode alias of [`isinterior`](@ref).
 
 Unicode alias of [`hull`](@ref).
 """
-⊔(x, y) = hull(x, y)
+const ⊔ = hull
 
 """
     ⊓(x, y)
@@ -106,7 +130,7 @@ Unicode alias of [`hull`](@ref).
 
 Unicode alias of [`intersect_interval`](@ref).
 """
-⊓(x, y) = intersect_interval(x, y)
+const ⊓ = intersect_interval
 
 """
     ∅
