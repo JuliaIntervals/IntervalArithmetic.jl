@@ -20,7 +20,7 @@ Available mode types:
 """
 struct PowerMode{T} end
 
-power_mode() = PowerMode{:fast}()
+#
 
 """
     ^(x::BareInterval, y::BareInterval)
@@ -49,13 +49,13 @@ Interval{Float64}(-Inf, Inf, trv)
 ```
 """
 function Base.:^(x::BareInterval, y::BareInterval)
-    isthininteger(y) || return _select_pow(power_mode(), x, y)
-    return _select_pown(power_mode(), x, Integer(sup(y)))
+    isthininteger(y) || return _select_pow(x, y)
+    return _select_pown(x, Integer(sup(y)))
 end
 
 function Base.:^(x::Interval, y::Interval)
-    isthininteger(y) || return _select_pow(power_mode(), x, y)
-    r = _select_pown(power_mode(), x, Integer(sup(y)))
+    isthininteger(y) || return _select_pow(x, y)
+    r = _select_pown(x, Integer(sup(y)))
     d = min(decoration(r), decoration(y))
     t = isguaranteed(r) & isguaranteed(y)
     return _unsafe_interval(bareinterval(r), d, t)
@@ -65,7 +65,7 @@ Base.:^(x::Interval, n::Integer) = ^(x, n//one(n))
 Base.:^(x::Interval, y::Rational) = ^(x, convert(Interval{typeof(y)}, y))
 
 function Base.:^(x::Complex{<:Interval}, y::Complex{<:Interval})
-    if isreal(x) && isthininteger(y)
+    if isthinzero(imag(x)) && isthininteger(y)
         r = real(x) ^ real(y)
         d = min(decoration(x), decoration(y), decoration(r))
         t = isguaranteed(x) & isguaranteed(y)
@@ -96,7 +96,7 @@ Base.:^(x::Complex{<:Interval}, y::Interval) = ^(promote(x, y)...)
 Base.:^(x::Interval, y::Complex{<:Interval}) = ^(promote(x, y)...)
 
 # overwrite behaviour for small integer powers from https://github.com/JuliaLang/julia/pull/24240
-Base.literal_pow(::typeof(^), x::Interval, ::Val{n}) where {n} = _select_pown(power_mode(), x, n)
+Base.literal_pow(::typeof(^), x::Interval, ::Val{n}) where {n} = _select_pown(x, n)
 Base.literal_pow(::typeof(^), x::Complex{<:Interval}, ::Val{n}) where {n} = ^(x, interval(n))
 
 # helper functions for power
@@ -310,9 +310,9 @@ Compute the hypotenuse.
 
 Implement the `hypot` function of the IEEE Standard 1788-2015 (Table 10.5).
 """
-Base.hypot(x::BareInterval, y::BareInterval) = sqrt(_select_pown(power_mode(), x, 2) + _select_pown(power_mode(), y, 2))
+Base.hypot(x::BareInterval, y::BareInterval) = sqrt(_select_pown(x, 2) + _select_pown(y, 2))
 
-Base.hypot(x::Interval, y::Interval) = sqrt(_select_pown(power_mode(), x, 2) + _select_pown(power_mode(), y, 2))
+Base.hypot(x::Interval, y::Interval) = sqrt(_select_pown(x, 2) + _select_pown(y, 2))
 
 """
     fastpow(x, y)
