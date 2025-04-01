@@ -41,6 +41,8 @@ isequal_interval(x) = Base.Fix2(isequal_interval, x)
 Test whether `x` is contained in `y`.
 
 Implement the `subset` function of the IEEE Standard 1788-2015 (Table 9.3).
+
+See also: [`isstrictsubset`](@ref) and [`isinterior`](@ref).
 """
 issubset_interval(x::BareInterval, y::BareInterval) = (inf(y) ≤ inf(x)) & (sup(x) ≤ sup(y))
 
@@ -64,16 +66,15 @@ issubset_interval(x, y, z, w...) = issubset_interval(x, y) & issubset_interval(y
 """
     isstrictsubset(x, y)
 
-Test whether `x` is a strict subset of `y`. If `x` and `y` are intervals, this
-is semantically equivalent to `isinterior(x, y)`. If `x` and `y` are vectors,
-`x` must be a subset of `y` with at least one of their component being a strict
-subset.
+Test whether `x` is a subset of, but not equal to, `y`. If `x` and `y` are
+vectors, `x` must be a subset of `y` with at least one of their component being
+a strict subset.
 
-See also: [`isinterior`](@ref).
+See also: [`issubset_interval`](@ref) and [`isinterior`](@ref).
 """
-isstrictsubset(x::BareInterval, y::BareInterval) = isinterior(x, y)
+isstrictsubset(x::BareInterval, y::BareInterval) = issubset_interval(x, y) & !isequal_interval(x, y)
 
-isstrictsubset(x::Interval, y::Interval) = isinterior(x, y)
+isstrictsubset(x::Interval, y::Interval) = issubset_interval(x, y) & !isequal_interval(x, y)
 isstrictsubset(x::Complex{<:Interval}, y::Complex{<:Interval}) =
     (isstrictsubset(real(x), real(y)) & issubset_interval(imag(x), imag(y))) | (issubset_interval(real(x), real(y)) & isstrictsubset(imag(x), imag(y)))
 isstrictsubset(x::Complex{<:Interval}, y::Interval) = isstrictsubset(real(x), y) & isthinzero(imag(x))
@@ -83,15 +84,16 @@ isstrictsubset(x::AbstractVector, y::AbstractVector) = issubset_interval(x, y) &
 
 isstrictsubset(x, y, z, w...) = isstrictsubset(x, y) & isstrictsubset(y, z, w...)
 
+isstrictsubset(x) = Base.Fix2(isstrictsubset, x)
+
 """
     isinterior(x, y)
 
-Test whether `x` is in the interior of `y`. If `x` and `y` are intervals, this
-is semantically equivalent to `isstrictsubset(x, y)`.
+Test whether `x` is in the interior of `y`.
 
 Implement the `interior` function of the IEEE Standard 1788-2015 (Table 9.3).
 
-See also: [`isstrictsubset`](@ref).
+See also: [`issubset_interval`](@ref) and [`isstrictsubset`](@ref).
 """
 isinterior(x::BareInterval, y::BareInterval) =
     _strictlessprime(inf(y), inf(x)) & _strictlessprime(sup(x), sup(y))
