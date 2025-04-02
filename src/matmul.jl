@@ -171,9 +171,8 @@ Base.similar(::Array, S::Type{Interval{T}},          dims::Dims) where {T<:NumTy
 Base.similar(::Array, S::Type{Complex{Interval{T}}}, dims::Dims) where {T<:NumTypes} = zeros(S, dims)
 #
 
-function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::AbstractVecOrMat{<:RealOrComplexI})
-    return LinearAlgebra.mul!(C, A, B, interval(true), interval(false))
-end
+LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::AbstractVecOrMat{<:RealOrComplexI}) =
+    LinearAlgebra.mul!(C, A, B, interval(true), interval(false))
 
 for T ∈ (:AbstractVector, :AbstractMatrix) # needed to resolve method ambiguities
     @eval begin
@@ -250,20 +249,6 @@ end
 
 # fast matrix multiplication
 # Note: Rump's algorithm
-
-_mul!(::MatMulMode{:fast}, C, A::AbstractMatrix{<:Interval{<:Rational}}, B::AbstractVecOrMat{<:Interval{<:Rational}}, α, β) =
-    LinearAlgebra._mul!(C, A, B, α, β)
-_mul!(::MatMulMode{:fast}, C, A::AbstractMatrix{<:Interval{<:Rational}}, B::AbstractVecOrMat, α, β) =
-    LinearAlgebra._mul!(C, A, B, α, β)
-_mul!(::MatMulMode{:fast}, C, A::AbstractMatrix, B::AbstractVecOrMat{<:Interval{<:Rational}}, α, β) =
-    LinearAlgebra._mul!(C, A, B, α, β)
-
-_mul!(::MatMulMode{:fast}, C, A::AbstractMatrix{<:Complex{<:Interval{<:Rational}}}, B::AbstractVecOrMat{<:Complex{<:Interval{<:Rational}}}, α, β) =
-    LinearAlgebra._mul!(C, A, B, α, β)
-_mul!(::MatMulMode{:fast}, C, A::AbstractMatrix{<:Complex{<:Interval{<:Rational}}}, B::AbstractVecOrMat{<:Interval{<:Rational}}, α, β) =
-    LinearAlgebra._mul!(C, A, B, α, β)
-_mul!(::MatMulMode{:fast}, C, A::AbstractMatrix{<:Interval{<:Rational}}, B::AbstractVecOrMat{<:Complex{<:Interval{<:Rational}}}, α, β) =
-    LinearAlgebra._mul!(C, A, B, α, β)
 
 function _mul!(::MatMulMode{:fast}, C, A, B, α, β)
     Int != Int32 && return _fastmul!(C, A, B, α, β)
@@ -432,7 +417,7 @@ for (T, S) ∈ ((:(Complex{<:Interval}), :Interval), (:(Complex{<:Interval}), :A
 end
 
 function __mul(A::AbstractMatrix{T}, B::AbstractVecOrMat{S}) where {T,S}
-    NewType = promote_numtype(T, S)
+    NewType = float(promote_numtype(T, S))
     return __mul(interval.(NewType, A), interval.(NewType, B))
 end
 
@@ -507,13 +492,13 @@ else
     _getrounding() = ccall(:fegetround, Cint, ())
 end
 
-_2mat(A::LinearAlgebra.Diagonal) = Matrix(A)
-
-_2mat(A) = A
+_2stride(A::StridedArray) = A
+_2stride(A::AbstractVector) = Vector(A)
+_2stride(A::AbstractMatrix) = Matrix(A)
 
 function _call_gem_openblas_upward!(C, A_::AbstractMatrix{Float64}, B_::AbstractMatrix{Float64})
-    A = _2mat(A_)
-    B = _2mat(B_)
+    A = _2stride(A_)
+    B = _2stride(B_)
 
     m, k = size(A)
     n = size(B, 2)
@@ -544,8 +529,8 @@ function _call_gem_openblas_upward!(C, A_::AbstractMatrix{Float64}, B_::Abstract
 end
 
 function _call_gem_openblas_upward!(C, A_::AbstractMatrix{Float64}, B_::AbstractVector{Float64})
-    A = _2mat(A_)
-    B = _2mat(B_)
+    A = _2stride(A_)
+    B = _2stride(B_)
 
     m, k = size(A)
 
