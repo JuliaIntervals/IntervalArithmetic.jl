@@ -438,12 +438,17 @@ function __mul(A::AbstractMatrix{Interval{T}}, B::AbstractVecOrMat{Interval{T}})
     U = mA; U .= _add_round.(abs.(mA), rA, RoundUp)
     V = mB; V .= _add_round.(abs.(mB), rB, RoundUp)
 
-    cache_3 = zeros(T, size(A, 1), size(B, 2))
-    rC = _call_gem_openblas_upward!(cache_3, U, V)
+    cache_3 = zeros(Float64, size(A, 1), size(B, 2))
+    rC = T.(_call_gem_openblas_upward!(cache_3, _to_stride_64(U), _to_stride_64(V)), RoundUp)
     rC .= _add_round.(_sub_round.(rC, μ, RoundUp), 2 .* γ, RoundUp)
 
     return mC, rC
 end
+
+_to_stride_64(A::StridedArray{Float64}) = A
+_to_stride_64(A::StridedArray{<:AbstractFloat}) = Float64.(A, RoundUp)
+_to_stride_64(A::AbstractVector) = _to_stride_64(Vector(A))
+_to_stride_64(A::AbstractMatrix) = _to_stride_64(Matrix(A))
 
 function _vec_or_mat_midradius(A::AbstractVecOrMat{Interval{T}}) where {T<:AbstractFloat}
     mA = _div_round.(_add_round.(inf.(A), sup.(A), RoundUp), convert(T, 2), RoundUp)
@@ -492,14 +497,7 @@ else
     _getrounding() = ccall(:fegetround, Cint, ())
 end
 
-_2stride(A::StridedArray) = A
-_2stride(A::AbstractVector) = Vector(A)
-_2stride(A::AbstractMatrix) = Matrix(A)
-
-function _call_gem_openblas_upward!(C, A_::AbstractMatrix{Float64}, B_::AbstractMatrix{Float64})
-    A = _2stride(A_)
-    B = _2stride(B_)
-
+function _call_gem_openblas_upward!(C, A::AbstractMatrix, B::AbstractMatrix)
     m, k = size(A)
     n = size(B, 2)
 
@@ -528,10 +526,7 @@ function _call_gem_openblas_upward!(C, A_::AbstractMatrix{Float64}, B_::Abstract
     end
 end
 
-function _call_gem_openblas_upward!(C, A_::AbstractMatrix{Float64}, B_::AbstractVector{Float64})
-    A = _2stride(A_)
-    B = _2stride(B_)
-
+function _call_gem_openblas_upward!(C, A::AbstractMatrix, B::AbstractVector)
     m, k = size(A)
 
     α = 1.0
