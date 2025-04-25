@@ -4,7 +4,7 @@ repo = "https://github.com/JuliaIntervals/IntervalArithmetic.jl.git"
 version = "0.22.29"
 
 [deps]
-CRlibm_jll = "4e9b3aee-d8a1-5a3d-ad8b-7d824db253f0"
+CRlibm = "96374032-68de-5a5b-8d9e-752f78720389"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
 OpenBLASConsistentFPCSR_jll = "6cdc7f73-28fd-5e50-80fb-958a8875b1af"
@@ -23,7 +23,7 @@ IntervalArithmeticIntervalSetsExt = "IntervalSets"
 IntervalArithmeticRecipesBaseExt = "RecipesBase"
 
 [compat]
-CRlibm_jll = "1"
+CRlibm = "1.0.2"
 DiffRules = "1"
 ForwardDiff = "0.10, 1"
 IntervalSets = "0.7"
