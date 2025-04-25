@@ -401,7 +401,7 @@ for (T, S) ∈ ((:(Complex{<:Interval}), :Interval), (:(Complex{<:Interval}), :A
 end
 
 function __mul(A::AbstractMatrix{T}, B::AbstractVecOrMat{S}) where {T,S}
-    NewType = float(promote_numtype(T, S))
+    NewType = float(IntervalArithmetic.promote_numtype(T, S))
     return __mul(interval.(NewType, A), interval.(NewType, B))
 end
 
