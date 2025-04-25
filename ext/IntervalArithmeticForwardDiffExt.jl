@@ -14,9 +14,9 @@ ForwardDiff.Dual{T,V}(x::ExactReal) where {T,V} = convert(Dual{T,V}, x)
 
 Base.convert(::Type{Dual{T,V,N}}, x::ExactReal) where {T,V,N} = Dual{T}(V(x), zero(Partials{N,V}))
 
-Base.promote_rule(::Type{Dual{T, V, N}}, ::Type{Interval{S}}) where {T, V, N, S<:Union{AbstractFloat, Rational}} =
+Base.promote_rule(::Type{Dual{T, V, N}}, ::Type{Interval{S}}) where {T, V, N, S<:IntervalArithmetic.NumTypes} =
     Dual{T,Interval{IntervalArithmetic.promote_numtype(V, S)},N}
-Base.promote_rule(::Type{Interval{S}}, ::Type{Dual{T, V, N}}) where {S<:Union{AbstractFloat, Rational}, T, V, N} =
+Base.promote_rule(::Type{Interval{S}}, ::Type{Dual{T, V, N}}) where {S<:IntervalArithmetic.NumTypes, T, V, N} =
     Dual{T,Interval{IntervalArithmetic.promote_numtype(V, S)},N}
 Base.promote_rule(::Type{ExactReal{S}}, ::Type{Dual{T, V, N}}) where {S<:Real, T, V, N} =
     Dual{T,ExactReal{IntervalArithmetic.promote_numtype(V, S)},N}
@@ -98,7 +98,7 @@ function (constant::Constant)(::Dual{T, Interval{S}}) where {T, S}
     return Dual{T}(interval(S, constant.value), interval(S, 0.0))
 end
 
-function (piecewise::Piecewise)(dual::Dual{T, <:Interval}) where {T}
+function (piecewise::Piecewise)(dual::Dual{T,<:Interval}) where {T}
     X = value(dual)
     input_domain = Domain(X)
     if !overlap_domain(input_domain, piecewise)
@@ -134,6 +134,8 @@ function (piecewise::Piecewise)(dual::Dual{T, <:Interval}) where {T}
 
     return Dual{T}(primal, tuple(partial...))
 end
+
+#
 
 ForwardDiff.DiffRules._abs_deriv(x::Dual{T,<:Interval}) where {T} =
     Dual{T}(ForwardDiff.DiffRules._abs_deriv(value(x)), zero(partials(x)))
