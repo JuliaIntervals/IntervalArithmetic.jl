@@ -2,7 +2,7 @@
     I"str"
 
 Create an interval by parsing the string `"str"`; this is semantically
-equivalent to `parse(Interval{default_numtype()}, "str")`.
+equivalent to `parse(Interval{[DEFAULT BOUND TYPE]}, "str")`.
 
 # Examples
 
@@ -20,7 +20,7 @@ true
 ```
 """
 macro I_str(str)
-    return parse(Interval{default_numtype()}, str)
+    return _parse(str)
 end
 
 """

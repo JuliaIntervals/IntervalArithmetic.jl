@@ -145,8 +145,6 @@ Available mode types:
 """
 struct MatMulMode{T} end
 
-matmul_mode() = MatMulMode{:slow}()
-
 # by-pass `similar` methods defined in array.jl
 # note: written in this form to avoid by-passing the default behaviour for `Union{}`
 Base.similar(a::Array{Interval{T},1})          where {T<:NumTypes} = zeros(Interval{T}, size(a, 1))
@@ -173,25 +171,6 @@ Base.similar(::Array, S::Type{Complex{Interval{T}}}, dims::Dims) where {T<:NumTy
 
 LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::AbstractVecOrMat{<:RealOrComplexI}) =
     LinearAlgebra.mul!(C, A, B, interval(true), interval(false))
-
-for T ∈ (:AbstractVector, :AbstractMatrix) # needed to resolve method ambiguities
-    @eval begin
-        function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::$T{<:RealOrComplexI}, α::Number, β::Number)
-            size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
-            return _mul!(matmul_mode(), C, A, B, α, β)
-        end
-
-        function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix, B::$T{<:RealOrComplexI}, α::Number, β::Number)
-            size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
-            return _mul!(matmul_mode(), C, A, B, α, β)
-        end
-
-        function LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::$T, α::Number, β::Number)
-            size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
-            return _mul!(matmul_mode(), C, A, B, α, β)
-        end
-    end
-end
 
 function _mul!(::MatMulMode{:slow}, C, A::AbstractMatrix, B::AbstractVecOrMat, α, β)
     if iszero(α)

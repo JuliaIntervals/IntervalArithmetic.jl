@@ -1,6 +1,7 @@
 using IntervalArithmetic.Symbols
 
 @testset "Linear algebra" begin
+    IntervalArithmetic.configure(; matmul = :slow)
     A = [interval(2, 4)  interval(-2, 1)
          interval(-1, 2) interval(2, 4)]
 
@@ -11,6 +12,7 @@ using IntervalArithmetic.Symbols
     @test_throws ArgumentError A \ b
 
     @test all(isequal_interval.(interval.([1 2; 3 4]) * interval(-1, 1), [interval(-1, 1) interval(-2, 2) ; interval(-3, 3) interval(-4, 4)]))
+    IntervalArithmetic.configure(; matmul = :fast)
 end
 
 

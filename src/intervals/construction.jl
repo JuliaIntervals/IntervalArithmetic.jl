@@ -9,35 +9,6 @@ Constant for the supported types of interval bounds. This is set to
 const NumTypes = Union{Rational,AbstractFloat}
 
 """
-    default_numtype()
-
-Return the default bound type used in [`promote_numtype`](@ref). By default,
-`default_numtype()` is set to `Float64`. It can be modified by redefining the
-function, however it should be set to a concrete subtype of [`NumTypes`](@ref).
-
-# Examples
-
-```jldoctest
-julia> IntervalArithmetic.default_numtype() = Float32
-
-julia> typeof(interval(1, 2))
-Interval{Float32}
-
-julia> typeof(interval(1, big(2)))
-Interval{BigFloat}
-
-julia> IntervalArithmetic.default_numtype() = Float64
-
-julia> typeof(interval(1, 2))
-Interval{Float64}
-
-julia> typeof(interval(1, big(2)))
-Interval{BigFloat}
-```
-"""
-default_numtype() = Float64
-
-"""
     promote_numtype(T, S)
 
 Return the bound type used to construct intervals. The bound type is given by
@@ -45,12 +16,11 @@ Return the bound type used to construct intervals. The bound type is given by
 when `T` is a `Rational{R}` and `S` is an `AbstractIrrational` (or vice-versa),
 in which case the bound type is given by `Rational{promote_type(R, Int64)}`. In
 all other cases, the bound type is given by
-`promote_type(default_numtype(), T, S)`.
+`promote_type([DEFAULT BOUND TYPE], T, S)`.
 """
 promote_numtype(::Type{T}, ::Type{S}) where {T<:NumTypes,S<:NumTypes} = promote_type(T, S)
 promote_numtype(::Type{T}, ::Type{S}) where {T<:NumTypes,S} = promote_type(numtype(T), numtype(S))
 promote_numtype(::Type{T}, ::Type{S}) where {T,S<:NumTypes} = promote_type(numtype(T), numtype(S))
-promote_numtype(::Type{T}, ::Type{S}) where {T,S} = promote_type(default_numtype(), numtype(T), numtype(S))
 
 promote_numtype(::Type{Rational{T}}, ::Type{<:AbstractIrrational}) where {T<:Integer} = Rational{promote_type(T, Int64)}
 promote_numtype(::Type{<:AbstractIrrational}, ::Type{Rational{T}}) where {T<:Integer} = Rational{promote_type(T, Int64)}
@@ -659,10 +629,6 @@ julia> @interval Float64 sin(1) exp(1)
 Interval{Float64}(0.8414709848078965, 2.7182818284590455, com)
 ```
 """
-macro interval(expr)
-    return _wrap_interval(default_numtype(), expr)
-end
-
 macro interval(T, expr)
     return _wrap_interval(T, expr)
 end
