@@ -44,13 +44,3 @@ include("interval_operations/set_operations.jl")
     export intersect_interval, hull, interiordiff
 include("interval_operations/bisect.jl")
     export bisect, mince, mince!
-
-#
-
-bareinterval(::Type{BigFloat}, a::AbstractIrrational) = _unsafe_bareinterval(BigFloat, a, a)
-
-# Note: generated functions must be defined after all the methods they use
-@generated function bareinterval(::Type{T}, a::AbstractIrrational) where {T<:NumTypes}
-    x = _unsafe_bareinterval(T, a(), a()) # precompute the interval
-    return :($x) # set body of the function to return the precomputed result
-end
