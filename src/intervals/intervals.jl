@@ -4,6 +4,7 @@ include("construction.jl")
         Interval, interval, isguaranteed, @interval, @I_str
 include("parsing.jl")
 include("real_interface.jl")
+    export numtype
 include("exact_literals.jl")
     export ExactReal, @exact, has_exact_display
 
