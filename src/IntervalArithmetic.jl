@@ -77,6 +77,8 @@ include("piecewise.jl")
 
 #
 
+import Printf
+
 include("display.jl")
     export setdisplay
 
