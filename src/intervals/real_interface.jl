@@ -1,15 +1,15 @@
 """
     numtype(T)
 
-Return the bounds type of the interval.
+Return the bound type of the interval.
 
 # Examples
 
 ```jldoctest
-julia> IntervalArithmetic.numtype(interval(1, 2))
+julia> numtype(interval(1, 2))
 Float64
 
-julia> IntervalArithmetic.numtype(interval(Float32, 1, 2))
+julia> numtype(interval(Float32, 1, 2))
 Float32
 ```
 """
@@ -83,7 +83,7 @@ for T ∈ (:BareInterval, :Interval)
         function Base.:(==)(x::$T, y::$T) # also returned when calling `≤`, `≥`, `isequal`
             isthin(x) && return sup(x) == y
             isthin(y) && return x == sup(y)
-            return throw(ArgumentError("`==` is purposely not supported for intervals. See instead `isequal_interval`"))
+            return throw(ArgumentError("`==` is purposely not supported when the intervals are overlapping. See instead `isequal_interval`"))
         end
 
         Base.:<(::$T, ::$T) = # also returned when calling `isless`, `>`
@@ -138,7 +138,7 @@ Base.union!(::AbstractVector{S}, ::Interval, ::BareInterval, ::Any...) where {S}
     throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
 
 
-# allow pointwise equality
+# pointwise equality
 
 """
     ==(::BareInterval, ::Number)
