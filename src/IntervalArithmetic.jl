@@ -211,13 +211,7 @@ function configure(; numtype::Type{<:NumTypes}=Float64, flavor::Symbol=:set_base
     configure_rounding(rounding)
     configure_power(power)
     configure_matmul(matmul)
-    #
-    @info """Configuration:
-      - bound type: $numtype
-      - flavor: $flavor
-      - interval rounding: $rounding
-      - power mode: $power
-      - matmul mode: $matmul"""
+    return numtype, flavor, rounding, power, matmul
 end
 
 configure()
