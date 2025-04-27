@@ -25,6 +25,8 @@ Base.promote_rule(::Type{Dual{T, V, N}}, ::Type{ExactReal{S}}) where {S<:Real, T
 
 Base.:(==)(x::Interval, y::Dual) = x == value(y)
 Base.:(==)(x::Dual, y::Interval) = value(x) == y
+Base.:<(x::Interval, y::Dual) = x < value(y)
+Base.:<(x::Dual, y::Interval) = value(x) < y
 
 function Base.:(^)(x::Dual{Txy,<:Interval}, y::Dual{Txy,<:Interval}) where {Txy}
     vx, vy = value(x), value(y)

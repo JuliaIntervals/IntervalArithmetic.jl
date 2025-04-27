@@ -108,32 +108,32 @@ end
 Base.isempty(::Interval) =
     throw(ArgumentError("`isempty` is purposely not supported for intervals. See instead `isempty_interval`"))
 
-# Base.isfinite(::Interval) = # also returned when calling `isinf`
-#     throw(ArgumentError("`isfinite` is purposely not supported for intervals. See instead `isbounded`"))
+Base.isfinite(::Interval) = # also returned when calling `isinf`
+    throw(ArgumentError("`isfinite` is purposely not supported for intervals. See instead `isbounded`"))
 
 Base.isnan(::Interval) =
     throw(ArgumentError("`isnan` is purposely not supported for intervals. See instead `isnai`"))
 
-# Base.intersect(::Interval) =
-#     throw(ArgumentError("`intersect` is purposely not supported for intervals. See instead `intersect_interval`"))
+Base.intersect(::Interval) =
+    throw(ArgumentError("`intersect` is purposely not supported for intervals. See instead `intersect_interval`"))
 
-# Base.union!(::BitSet, ::Interval) = # needed to resolve ambiguity
-#     throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
-# Base.union!(::AbstractSet, ::Interval) = # also returned when calling `intersect`, `symdiff` with intervals
-#     throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
-# Base.union!(::AbstractVector{S}, ::Interval) where {S} =
-#     throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
-# Base.union!(::AbstractVector{S}, ::Interval, ::Any, ::Any...) where {S} =
-#     throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
-# Base.union!(::AbstractVector{S}, ::Interval, ::Interval, ::Any...) where {S} =
-#     throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
-# Base.union!(::AbstractVector{S}, ::Any, ::Interval, ::Any...) where {S} =
-#     throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
+Base.union!(::BitSet, ::Interval) = # needed to resolve ambiguity
+    throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
+Base.union!(::AbstractSet, ::Interval) = # also returned when calling `intersect`, `symdiff` with intervals
+    throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
+Base.union!(::AbstractVector{S}, ::Interval) where {S} =
+    throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
+Base.union!(::AbstractVector{S}, ::Interval, ::Any, ::Any...) where {S} =
+    throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
+Base.union!(::AbstractVector{S}, ::Interval, ::Interval, ::Any...) where {S} =
+    throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
+Base.union!(::AbstractVector{S}, ::Any, ::Interval, ::Any...) where {S} =
+    throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
 
-# Base.setdiff(::Interval) =
-#     throw(ArgumentError("`setdiff` is purposely not supported for intervals. See instead `interiordiff`"))
-# Base.setdiff!(::AbstractSet, ::Interval) =
-#     throw(ArgumentError("`setdiff!` is purposely not supported for intervals. See instead `interiordiff`"))
+Base.setdiff(::Interval) =
+    throw(ArgumentError("`setdiff` is purposely not supported for intervals. See instead `interiordiff`"))
+Base.setdiff!(::AbstractSet, ::Interval) =
+    throw(ArgumentError("`setdiff!` is purposely not supported for intervals. See instead `interiordiff`"))
 
 # pointwise equality
 
