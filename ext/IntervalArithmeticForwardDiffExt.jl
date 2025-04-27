@@ -23,8 +23,8 @@ Base.promote_rule(::Type{ExactReal{S}}, ::Type{Dual{T, V, N}}) where {S<:Real, T
 Base.promote_rule(::Type{Dual{T, V, N}}, ::Type{ExactReal{S}}) where {S<:Real, T, V, N} =
     Dual{T,ExactReal{IntervalArithmetic.promote_numtype(V, S)},N}
 
-Base.:(==)(x::Union{BareInterval,Interval}, y::Dual) = x == value(y)
-Base.:(==)(x::Dual, y::Union{BareInterval,Interval}) = value(x) == y
+Base.:(==)(x::Interval, y::Dual) = x == value(y)
+Base.:(==)(x::Dual, y::Interval) = value(x) == y
 
 function Base.:(^)(x::Dual{Txy,<:Interval}, y::Dual{Txy,<:Interval}) where {Txy}
     vx, vy = value(x), value(y)
@@ -91,10 +91,9 @@ function Base.:(^)(x::ExactReal, y::Dual{<:Ty}) where {Ty}
     end
 end
 
-
 # Piecewise functions
 
-function (constant::Constant)(::Dual{T, Interval{S}}) where {T, S}
+function (constant::Constant)(::Dual{T,Interval{S}}) where {T, S}
     return Dual{T}(interval(S, constant.value), interval(S, 0.0))
 end
 
