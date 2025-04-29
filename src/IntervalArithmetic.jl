@@ -174,10 +174,25 @@ function configure_power(power::Symbol)
     return power
 end
 
+# define the functions for matmul here to be able to access them
+
 function configure_matmul(matmul)
     matmul ∈ (:slow, :fast) || return throw(ArgumentError("only the matrix multiplication mode `:slow` and `:fast` are available"))
     return matmul
 end
+
+"""
+    MatMulMode
+
+Matrix multiplication mode type.
+
+Available mode types:
+- `:slow` (default): generic algorithm.
+- `:fast` : Rump's algorithm.
+"""
+struct MatMulMode{T} end
+
+_mul!() = error("This function requires LinearAlgebra to be loaded")
 
 """
     configure(; numtype=Float64, flavor=:set_based, rounding=:correct, power=:fast, matmul=:fast)

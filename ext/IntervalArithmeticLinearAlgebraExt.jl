@@ -139,31 +139,18 @@ end
 
 # matrix multiplication
 
-"""
-    MatMulMode
-
-Matrix multiplication mode type.
-
-Available mode types:
-- `:slow` (default): generic algorithm.
-- `:fast` : Rump's algorithm.
-"""
-struct MatMulMode{T} end
-
-#
-
 function IntervalArithmetic.configure_matmul(matmul::Symbol)
     matmul ∈ (:slow, :fast) || return throw(ArgumentError("only the matrix multiplication mode `:slow` and `:fast` are available"))
 
     @eval begin
         function LinearAlgebra.mul!(C::AbstractVector{<:RealOrComplexI}, A::AbstractVecOrMat, B::AbstractVector, α::Number, β::Number)
             size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
-            return _mul!(MatMulMode{$(QuoteNode(matmul))}(), C, A, B, α, β)
+            return IntervalArithmetic._mul!(IntervalArithmetic.MatMulMode{$(QuoteNode(matmul))}(), C, A, B, α, β)
         end
 
         function LinearAlgebra.mul!(C::AbstractMatrix{<:RealOrComplexI}, A::AbstractVecOrMat, B::AbstractVecOrMat, α::Number, β::Number)
             size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
-            return _mul!(MatMulMode{$(QuoteNode(matmul))}(), C, A, B, α, β)
+            return IntervalArithmetic._mul!(IntervalArithmetic.MatMulMode{$(QuoteNode(matmul))}(), C, A, B, α, β)
         end
     end
 
@@ -177,7 +164,7 @@ IntervalArithmetic.configure_matmul(:slow)
 LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::AbstractVecOrMat{<:RealOrComplexI}) =
     LinearAlgebra.mul!(C, A, B, interval(true), interval(false))
 
-function _mul!(::MatMulMode{:slow}, C, A::AbstractMatrix, B::AbstractVecOrMat, α, β)
+function IntervalArithmetic._mul!(::IntervalArithmetic.MatMulMode{:slow}, C, A::AbstractMatrix, B::AbstractVecOrMat, α, β)
     if iszero(α)
         if iszero(β)
             C .= zero(eltype(C))
@@ -234,10 +221,10 @@ end
 # fast matrix multiplication
 # Note: Rump's algorithm
 
-function _mul!(::MatMulMode{:fast}, C, A, B, α, β)
+function IntervalArithmetic._mul!(::IntervalArithmetic.MatMulMode{:fast}, C, A, B, α, β)
     Int != Int32 && return _fastmul!(C, A, B, α, β)
     @info "Fast multiplication is not supported on 32-bit systems, using the slow version"
-    return _mul!(MatMulMode{:slow}(), C, A, B, α, β)
+    return IntervalArithmetic._mul!(IntervalArithmetic.MatMulMode{:slow}(), C, A, B, α, β)
 end
 
 for (T, S) ∈ ((:Interval, :Interval), (:Interval, :Any), (:Any, :Interval))
