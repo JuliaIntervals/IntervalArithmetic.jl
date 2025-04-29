@@ -174,7 +174,10 @@ function configure_power(power::Symbol)
     return power
 end
 
-configure_matmul(matmul) = nothing
+function configure_matmul(matmul)
+    matmul ∈ (:slow, :fast) || return throw(ArgumentError("only the matrix multiplication mode `:slow` and `:fast` are available"))
+    return matmul
+end
 
 """
     configure(; numtype=Float64, flavor=:set_based, rounding=:correct, power=:fast, matmul=:fast)
