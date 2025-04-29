@@ -251,22 +251,22 @@ for (T, S) ∈ ((:Interval, :Interval), (:Interval, :Any), (:Any, :Interval))
             end
         else
             BoundType = numtype(CoefType)
-            mC, rC = __mul(A, B)
+            C_inf, C_sup = __mul(A, B)
             if isone(α)
                 if iszero(β)
-                    C .=  interval.(BoundType, mC, rC; format = :midpoint)
+                    C .=  interval.(BoundType, C_inf, C_sup)
                 elseif isone(β)
-                    C .+= interval.(BoundType, mC, rC; format = :midpoint)
+                    C .+= interval.(BoundType, C_inf, C_sup)
                 else
-                    C .=  interval.(BoundType, mC, rC; format = :midpoint) .+ C .* β
+                    C .=  interval.(BoundType, C_inf, C_sup) .+ C .* β
                 end
             else
                 if iszero(β)
-                    C .=  interval.(BoundType, mC, rC; format = :midpoint) .* α
+                    C .=  interval.(BoundType, C_inf, C_sup) .* α
                 elseif isone(β)
-                    C .+= interval.(BoundType, mC, rC; format = :midpoint) .* α
+                    C .+= interval.(BoundType, C_inf, C_sup) .* α
                 else
-                    C .=  interval.(BoundType, mC, rC; format = :midpoint) .* α .+ C .* β
+                    C .=  interval.(BoundType, C_inf, C_sup) .* α .+ C .* β
                 end
             end
         end
@@ -290,31 +290,31 @@ for (T, S) ∈ ((:(Complex{<:Interval}), :(Complex{<:Interval})),
             BoundType = numtype(CoefType)
             A_real, A_imag = reim(A)
             B_real, B_imag = reim(B)
-            mC_1, rC_1 = __mul(A_real, B_real)
-            mC_2, rC_2 = __mul(A_imag, B_imag)
-            mC_3, rC_3 = __mul(A_real, B_imag)
-            mC_4, rC_4 = __mul(A_imag, B_real)
+            C₁_inf, C₁_sup = __mul(A_real, B_real)
+            C₂_inf, C₂_sup = __mul(A_imag, B_imag)
+            C₃_inf, C₃_sup = __mul(A_real, B_imag)
+            C₄_inf, C₄_sup = __mul(A_imag, B_real)
             if isone(α)
                 if iszero(β)
-                    C .=  complex.(interval.(BoundType, mC_1, rC_1; format = :midpoint) .- interval.(BoundType, mC_2, rC_2; format = :midpoint),
-                                   interval.(BoundType, mC_3, rC_3; format = :midpoint) .+ interval.(BoundType, mC_4, rC_4; format = :midpoint))
+                    C .=  complex.(interval.(BoundType, C₁_inf, C₁_sup) .- interval.(BoundType, C₂_inf, C₂_sup),
+                                   interval.(BoundType, C₃_inf, C₃_sup) .+ interval.(BoundType, C₄_inf, C₄_sup))
                 elseif isone(β)
-                    C .+= complex.(interval.(BoundType, mC_1, rC_1; format = :midpoint) .- interval.(BoundType, mC_2, rC_2; format = :midpoint),
-                                   interval.(BoundType, mC_3, rC_3; format = :midpoint) .+ interval.(BoundType, mC_4, rC_4; format = :midpoint))
+                    C .+= complex.(interval.(BoundType, C₁_inf, C₁_sup) .- interval.(BoundType, C₂_inf, C₂_sup),
+                                   interval.(BoundType, C₃_inf, C₃_sup) .+ interval.(BoundType, C₄_inf, C₄_sup))
                 else
-                    C .=  complex.(interval.(BoundType, mC_1, rC_1; format = :midpoint) .- interval.(BoundType, mC_2, rC_2; format = :midpoint),
-                                   interval.(BoundType, mC_3, rC_3; format = :midpoint) .+ interval.(BoundType, mC_4, rC_4; format = :midpoint)) .+ C .* β
+                    C .=  complex.(interval.(BoundType, C₁_inf, C₁_sup) .- interval.(BoundType, C₂_inf, C₂_sup),
+                                   interval.(BoundType, C₃_inf, C₃_sup) .+ interval.(BoundType, C₄_inf, C₄_sup)) .+ C .* β
                 end
             else
                 if iszero(β)
-                    C .=  complex.(interval.(BoundType, mC_1, rC_1; format = :midpoint) .- interval.(BoundType, mC_2, rC_2; format = :midpoint),
-                                   interval.(BoundType, mC_3, rC_3; format = :midpoint) .+ interval.(BoundType, mC_4, rC_4; format = :midpoint)) .* α
+                    C .=  complex.(interval.(BoundType, C₁_inf, C₁_sup) .- interval.(BoundType, C₂_inf, C₂_sup),
+                                   interval.(BoundType, C₃_inf, C₃_sup) .+ interval.(BoundType, C₄_inf, C₄_sup)) .* α
                 elseif isone(β)
-                    C .+= complex.(interval.(BoundType, mC_1, rC_1; format = :midpoint) .- interval.(BoundType, mC_2, rC_2; format = :midpoint),
-                                   interval.(BoundType, mC_3, rC_3; format = :midpoint) .+ interval.(BoundType, mC_4, rC_4; format = :midpoint)) .* α
+                    C .+= complex.(interval.(BoundType, C₁_inf, C₁_sup) .- interval.(BoundType, C₂_inf, C₂_sup),
+                                   interval.(BoundType, C₃_inf, C₃_sup) .+ interval.(BoundType, C₄_inf, C₄_sup)) .* α
                 else
-                    C .=  complex.(interval.(BoundType, mC_1, rC_1; format = :midpoint) .- interval.(BoundType, mC_2, rC_2; format = :midpoint),
-                                   interval.(BoundType, mC_3, rC_3; format = :midpoint) .+ interval.(BoundType, mC_4, rC_4; format = :midpoint)) .* α .+ C .* β
+                    C .=  complex.(interval.(BoundType, C₁_inf, C₁_sup) .- interval.(BoundType, C₂_inf, C₂_sup),
+                                   interval.(BoundType, C₃_inf, C₃_sup) .+ interval.(BoundType, C₄_inf, C₄_sup)) .* α .+ C .* β
                 end
             end
         end
@@ -337,23 +337,23 @@ for (T, S) ∈ ((:(Complex{<:Interval}), :Interval), (:(Complex{<:Interval}), :A
             else
                 BoundType = numtype(CoefType)
                 A_real, A_imag = reim(A)
-                mC_real, rC_real = __mul(A_real, B)
-                mC_imag, rC_imag = __mul(A_imag, B)
+                C₁_inf, C₁_sup = __mul(A_real, B)
+                C₂_inf, C₂_sup = __mul(A_imag, B)
                 if isone(α)
                     if iszero(β)
-                        C .=  complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint))
+                        C .=  complex.(interval.(BoundType, C₁_inf, C₁_sup), interval.(BoundType, C₂_inf, C₂_sup))
                     elseif isone(β)
-                        C .+= complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint))
+                        C .+= complex.(interval.(BoundType, C₁_inf, C₁_sup), interval.(BoundType, C₂_inf, C₂_sup))
                     else
-                        C .=  complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint)) .+ C .* β
+                        C .=  complex.(interval.(BoundType, C₁_inf, C₁_sup), interval.(BoundType, C₂_inf, C₂_sup)) .+ C .* β
                     end
                 else
                     if iszero(β)
-                        C .=  complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint)) .* α
+                        C .=  complex.(interval.(BoundType, C₁_inf, C₁_sup), interval.(BoundType, C₂_inf, C₂_sup)) .* α
                     elseif isone(β)
-                        C .+= complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint)) .* α
+                        C .+= complex.(interval.(BoundType, C₁_inf, C₁_sup), interval.(BoundType, C₂_inf, C₂_sup)) .* α
                     else
-                        C .=  complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint)) .* α .+ C .* β
+                        C .=  complex.(interval.(BoundType, C₁_inf, C₁_sup), interval.(BoundType, C₂_inf, C₂_sup)) .* α .+ C .* β
                     end
                 end
             end
@@ -373,23 +373,23 @@ for (T, S) ∈ ((:(Complex{<:Interval}), :Interval), (:(Complex{<:Interval}), :A
             else
                 BoundType = numtype(CoefType)
                 B_real, B_imag = reim(B)
-                mC_real, rC_real = __mul(A, B_real)
-                mC_imag, rC_imag = __mul(A, B_imag)
+                C₁_inf, C₁_sup = __mul(A, B_real)
+                C₂_inf, C₂_sup = __mul(A, B_imag)
                 if isone(α)
                     if iszero(β)
-                        C .=  complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint))
+                        C .=  complex.(interval.(BoundType, C₁_inf, C₁_sup), interval.(BoundType, C₂_inf, C₂_sup))
                     elseif isone(β)
-                        C .+= complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint))
+                        C .+= complex.(interval.(BoundType, C₁_inf, C₁_sup), interval.(BoundType, C₂_inf, C₂_sup))
                     else
-                        C .=  complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint)) .+ C .* β
+                        C .=  complex.(interval.(BoundType, C₁_inf, C₁_sup), interval.(BoundType, C₂_inf, C₂_sup)) .+ C .* β
                     end
                 else
                     if iszero(β)
-                        C .=  complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint)) .* α
+                        C .=  complex.(interval.(BoundType, C₁_inf, C₁_sup), interval.(BoundType, C₂_inf, C₂_sup)) .* α
                     elseif isone(β)
-                        C .+= complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint)) .* α
+                        C .+= complex.(interval.(BoundType, C₁_inf, C₁_sup), interval.(BoundType, C₂_inf, C₂_sup)) .* α
                     else
-                        C .=  complex.(interval.(BoundType, mC_real, rC_real; format = :midpoint), interval.(BoundType, mC_imag, rC_imag; format = :midpoint)) .* α .+ C .* β
+                        C .=  complex.(interval.(BoundType, C₁_inf, C₁_sup), interval.(BoundType, C₂_inf, C₂_sup)) .* α .+ C .* β
                     end
                 end
             end
@@ -406,28 +406,124 @@ function __mul(A::AbstractMatrix{T}, B::AbstractVecOrMat{S}) where {T,S}
 end
 
 function __mul(A::AbstractMatrix{Interval{T}}, B::AbstractVecOrMat{Interval{T}}) where {T<:AbstractFloat}
-    k = size(A, 2)
-    u2 = eps(T) # twice the unit roundoff
-    @assert (2k + 2) * u2 ≤ 1
+    all(x -> iszero(radius(x)), A) && return ___mul(sup.(A), B)
+    all(x -> iszero(radius(x)), B) && return ___mul(A, sup.(B))
+    return ___mul(A, B)
+end
 
+function ___mul(A::AbstractMatrix{T}, B::AbstractVecOrMat{Interval{T}}) where {T<:AbstractFloat}
+    mB, rB = _vec_or_mat_midradius(B)
+
+    cache_1 = zeros(Float64, size(A, 1), size(B, 2))
+    cache_2 = zeros(Float64, size(A, 1), size(B, 2))
+
+    rC = _call_gem_openblas!(cache_1, _to_stride_64(abs.(A)), _to_stride_64(rB), RoundUp)
+
+    stride_A  = _to_stride_64(A)
+    stride_mB = _to_stride_64(mB)
+    C₁ = IntervalArithmetic._sub_round.(
+        T.(_call_gem_openblas!(cache_2, stride_A, stride_mB, RoundDown), RoundDown),
+        T.(rC, RoundUp),
+        RoundDown)
+    C₂ = cache_2; C₂ .= IntervalArithmetic._add_round.(
+        T.(_call_gem_openblas!(cache_2, stride_A, stride_mB, RoundUp), RoundUp),
+        T.(rC, RoundUp),
+        RoundUp)
+
+    return C₁, C₂
+end
+
+function ___mul(A::AbstractMatrix{Interval{T}}, B::AbstractVecOrMat{T}) where {T<:AbstractFloat}
+    mA, rA = _vec_or_mat_midradius(A)
+
+    cache_1 = zeros(Float64, size(A, 1), size(B, 2))
+    cache_2 = zeros(Float64, size(A, 1), size(B, 2))
+
+    rC = _call_gem_openblas!(cache_1, _to_stride_64(rA), _to_stride_64(abs.(B)), RoundUp)
+
+    stride_mA = _to_stride_64(mA)
+    stride_B  = _to_stride_64(B)
+    C₁ = IntervalArithmetic._sub_round.(
+        T.(_call_gem_openblas!(cache_2, stride_mA, stride_B, RoundDown), RoundDown),
+        T.(rC, RoundUp),
+        RoundDown)
+    C₂ = cache_2; C₂ .= IntervalArithmetic._add_round.(
+        T.(_call_gem_openblas!(cache_2, stride_mA, stride_B, RoundUp), RoundUp),
+        T.(rC, RoundUp),
+        RoundUp)
+
+    return C₁, C₂
+end
+
+function ___mul(A::AbstractMatrix{Interval{T}}, B::AbstractVecOrMat{Interval{T}}) where {T<:AbstractFloat}
     mA, rA = _vec_or_mat_midradius(A)
     mB, rB = _vec_or_mat_midradius(B)
 
-    cache_1 = zeros(T, size(A, 1), size(B, 2))
-    cache_2 = zeros(T, size(A, 1), size(B, 2))
-    mC, μ = _fused_matmul!(cache_1, cache_2, mA, rA, mB, rB)
+    cache_1 = zeros(Float64, size(A, 1), size(B, 2))
+    cache_2 = zeros(Float64, size(A, 1), size(B, 2))
 
-    γ = IntervalArithmetic._add_round.(IntervalArithmetic._mul_round.(convert(T, k + 1), eps.(μ), RoundUp), IntervalArithmetic._mul_round(IntervalArithmetic._inv_round(u2, RoundUp), floatmin(T), RoundUp), RoundUp)
-
-    U = mA; U .= IntervalArithmetic._add_round.(abs.(mA), rA, RoundUp)
-    V = mB; V .= IntervalArithmetic._add_round.(abs.(mB), rB, RoundUp)
+    absmA_rB = _call_gem_openblas!(cache_1, _to_stride_64(abs.(mA)), _to_stride_64(rB), RoundUp)
+    U = rB; U .= IntervalArithmetic._add_round.(abs.(mB), rB, RoundUp)
+    rA_U = _call_gem_openblas!(cache_2, _to_stride_64(rA), _to_stride_64(U), RoundUp)
 
     cache_3 = zeros(Float64, size(A, 1), size(B, 2))
-    rC = T.(_call_gem_openblas_upward!(cache_3, _to_stride_64(U), _to_stride_64(V)), RoundUp)
-    rC .= IntervalArithmetic._add_round.(IntervalArithmetic._sub_round.(rC, μ, RoundUp), 2 .* γ, RoundUp)
 
-    return mC, rC
+    stride_mA = _to_stride_64(mA)
+    stride_mB = _to_stride_64(mB)
+    C₁ = IntervalArithmetic._sub_round.(
+        T.(_call_gem_openblas!(cache_3, stride_mA, stride_mB, RoundDown), RoundDown),
+        IntervalArithmetic._add_round.(T.(absmA_rB, RoundUp), T.(rA_U, RoundUp), RoundUp),
+        RoundDown)
+    C₂ = cache_3; C₂ .= IntervalArithmetic._add_round.(
+        T.(_call_gem_openblas!(cache_3, stride_mA, stride_mB, RoundUp), RoundUp),
+        IntervalArithmetic._add_round.(T.(absmA_rB, RoundUp), T.(rA_U, RoundUp), RoundUp),
+        RoundUp)
+
+    return C₁, C₂
 end
+
+# function ___mul(A::AbstractMatrix{Interval{T}}, B::AbstractVecOrMat{Interval{T}}) where {T<:AbstractFloat}
+#     k = size(A, 2)
+#     u2 = eps(T) # twice the unit roundoff
+#     @assert (2k + 2) * u2 ≤ 1
+
+#     mA, rA = _vec_or_mat_midradius(A)
+#     mB, rB = _vec_or_mat_midradius(B)
+
+#     cache_1 = zeros(T, size(A, 1), size(B, 2))
+#     cache_2 = zeros(T, size(A, 1), size(B, 2))
+#     mC, μ = _fused_matmul!(cache_1, cache_2, mA, rA, mB, rB)
+
+#     γ = IntervalArithmetic._add_round.(IntervalArithmetic._mul_round.(convert(T, k + 1), eps.(μ), RoundUp), IntervalArithmetic._mul_round(IntervalArithmetic._inv_round(u2, RoundUp), floatmin(T), RoundUp), RoundUp)
+
+#     U = mA; U .= IntervalArithmetic._add_round.(abs.(mA), rA, RoundUp)
+#     V = mB; V .= IntervalArithmetic._add_round.(abs.(mB), rB, RoundUp)
+
+#     cache_3 = zeros(Float64, size(A, 1), size(B, 2))
+#     rC = IntervalArithmetic._add_round.(IntervalArithmetic._sub_round.(T.(_call_gem_openblas!(cache_3, _to_stride_64(U), _to_stride_64(V), RoundUp), RoundUp), μ, RoundUp), 2 .* γ, RoundUp)
+
+#     C₁ = μ; C₁ .= IntervalArithmetic._sub_round.(mC, rC, RoundDown)
+#     C₂ = γ; C₂ .= IntervalArithmetic._add_round.(mC, rC, RoundUp)
+
+#     return C₁, C₂
+# end
+
+# function _fused_matmul!(mC, μ, mA, rA, mB, rB)
+#     Threads.@threads for j ∈ axes(mB, 2)
+#         for l ∈ axes(mA, 2)
+#             @inbounds for i ∈ axes(mA, 1)
+#                 a, c = mA[i,l], rA[i,l]
+#                 b, d = mB[l,j], rB[l,j]
+#                 e = sign(a) * min(abs(a), c)
+#                 f = sign(b) * min(abs(b), d)
+#                 p = a*b + e*f
+#                 mC[i,j] += p
+#                 μ[i,j] += abs(p)
+#             end
+#         end
+#     end
+#     return mC, μ
+# end
 
 _to_stride_64(A::StridedArray{Float64}) = A
 _to_stride_64(A::StridedArray{<:AbstractFloat}) = Float64.(A, RoundUp)
@@ -438,23 +534,6 @@ function _vec_or_mat_midradius(A::AbstractVecOrMat{Interval{T}}) where {T<:Abstr
     mA = IntervalArithmetic._div_round.(IntervalArithmetic._add_round.(inf.(A), sup.(A), RoundUp), convert(T, 2), RoundUp)
     rA = IntervalArithmetic._sub_round.(mA, inf.(A), RoundUp)
     return mA, rA
-end
-
-function _fused_matmul!(mC, μ, mA, rA, mB, rB)
-    Threads.@threads for j ∈ axes(mB, 2)
-        for l ∈ axes(mA, 2)
-            @inbounds for i ∈ axes(mA, 1)
-                a, c = mA[i,l], rA[i,l]
-                b, d = mB[l,j], rB[l,j]
-                e = sign(a) * min(abs(a), c)
-                f = sign(b) * min(abs(b), d)
-                p = a*b + e*f
-                mC[i,j] += p
-                μ[i,j] += abs(p)
-            end
-        end
-    end
-    return mC, μ
 end
 
 #-
@@ -481,7 +560,10 @@ else
     _getrounding() = ccall(:fegetround, Cint, ())
 end
 
-function _call_gem_openblas_upward!(C, A::AbstractMatrix, B::AbstractMatrix)
+_to_rounding_mode(::RoundingMode{:Down}) = JL_FE_DOWNWARD
+_to_rounding_mode(::RoundingMode{:Up})   = JL_FE_UPWARD
+
+function _call_gem_openblas!(C, A::AbstractMatrix, B::AbstractMatrix, r::RoundingMode)
     m, k = size(A)
     n = size(B, 2)
 
@@ -492,7 +574,7 @@ function _call_gem_openblas_upward!(C, A::AbstractMatrix, B::AbstractMatrix)
     transB = 'N'
 
     prev_rounding = _getrounding() # save current rounding mode
-    _setrounding(JL_FE_UPWARD) # set rounding mode to upward
+    _setrounding(_to_rounding_mode(r)) # set rounding mode to upward
     try
         ccall((:dgemm_64_, OpenBLASConsistentFPCSR_jll.libopenblas), Cvoid,
             (Ref{UInt8}, Ref{UInt8}, Ref{LinearAlgebra.BLAS.BlasInt}, Ref{LinearAlgebra.BLAS.BlasInt}, Ref{LinearAlgebra.BLAS.BlasInt},
@@ -510,7 +592,7 @@ function _call_gem_openblas_upward!(C, A::AbstractMatrix, B::AbstractMatrix)
     end
 end
 
-function _call_gem_openblas_upward!(C, A::AbstractMatrix, B::AbstractVector)
+function _call_gem_openblas!(C, A::AbstractMatrix, B::AbstractVector, r::RoundingMode)
     m, k = size(A)
 
     α = 1.0
@@ -519,7 +601,7 @@ function _call_gem_openblas_upward!(C, A::AbstractMatrix, B::AbstractVector)
     transA = 'N'
 
     prev_rounding = _getrounding() # save current rounding mode
-    _setrounding(JL_FE_UPWARD) # set rounding mode to upward
+    _setrounding(_to_rounding_mode(r)) # set rounding mode to upward
     try
         ccall((:dgemv_64_, OpenBLASConsistentFPCSR_jll.libopenblas), Cvoid,
             (Ref{UInt8}, Ref{LinearAlgebra.BLAS.BlasInt}, Ref{LinearAlgebra.BLAS.BlasInt},
