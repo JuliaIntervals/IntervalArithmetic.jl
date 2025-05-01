@@ -118,11 +118,7 @@ function mid(x::BareInterval{T}, α = 1//2) where {T<:Rational}
         lo == typemin(T) && return nextfloat(lo) # cf. Section 12.12.8
         hi == typemax(T) && return prevfloat(hi) # cf. Section 12.12.8
         β = convert(T, α)
-        midpoint = β * (hi - lo) + lo
-        midpoint = ifelse(isfinite(midpoint), midpoint, (1 - β) * lo + β * hi)
-        midpoint = ifelse(midpoint < lo, lo, midpoint)
-        midpoint = ifelse(midpoint > hi, hi, midpoint)
-        return _normalisezero(midpoint)
+        return _normalisezero((1 - β) * lo + β * hi)
     end
 end
 
