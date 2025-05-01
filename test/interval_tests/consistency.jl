@@ -181,6 +181,7 @@
 
     @testset "mid" begin
         @test mid(interval(Rational{Int}, 1//2)) == 1//2
+        @test mid(interval(2), 0.4969816845401611) == 2
         @test mid(interval(1, 2)) == 1.5
         @test mid(interval(0.1, 0.3)) == 0.2
         @test mid(interval(-10, 5)) == -2.5
