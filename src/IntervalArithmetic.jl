@@ -238,6 +238,24 @@ configure()
 
 include("symbols.jl")
 
+# in 1.10, having two standard libraries as package extensions yields circular
+# dependencies. We keep LinearAlgebra as a weak dependcy and add Random as a
+# dependency (cf. https://github.com/JuliaLang/julia/issues/52511)
+
+import Random
+
+Random.rand(rng::Random.AbstractRNG, ::Random.SamplerType{Interval{T}}) where {T<:IntervalArithmetic.NumTypes} =
+    interval(rand(rng, T))
+
+function Random.rand(rng::Random.AbstractRNG, x::Random.SamplerTrivial{Interval{T}}) where {T<:AbstractFloat}
+    lo, hi = bounds(x[])
+    val = max(lo, floatmin(T)) + rand(rng, T) * (min(hi, floatmax(T)) - max(lo, floatmin(T)))
+    val = ifelse(val < lo, lo, val)
+    val = ifelse(val > hi, hi, val)
+    return val
+end
+
+
 #
 
 bareinterval(::Type{BigFloat}, a::AbstractIrrational) = _unsafe_bareinterval(BigFloat, a, a)
