@@ -247,14 +247,26 @@ import Random
 Random.rand(rng::Random.AbstractRNG, ::Random.SamplerType{Interval{T}}) where {T<:IntervalArithmetic.NumTypes} =
     interval(rand(rng, T))
 
-function Random.rand(rng::Random.AbstractRNG, x::Random.SamplerTrivial{Interval{T}}) where {T<:AbstractFloat}
-    lo, hi = bounds(x[])
-    val = max(lo, floatmin(T)) + rand(rng, T) * (min(hi, floatmax(T)) - max(lo, floatmin(T)))
+sample(x::Interval) = sample(Random.default_rng(), x)
+
+function sample(rng::Random.AbstractRNG, x::Interval{T}) where {T<:NumTypes}
+    lo, hi = bounds(x)
+    β = rand(rng, float(T))
+    lo = ifelse(lo == typemin(T), _value_min(T), lo)
+    hi = ifelse(hi == typemax(T), _value_max(T), hi)
+    val = convert(T, (1 - β) * lo + β * hi)
     val = ifelse(val < lo, lo, val)
     val = ifelse(val > hi, hi, val)
     return val
 end
 
+_value_min(::Type{T}) where {T<:AbstractFloat} = floatmin(T)
+_value_max(::Type{T}) where {T<:AbstractFloat} = floatmax(T)
+
+_value_min(::Type{Rational{T}}) where {T<:Integer} = convert(Rational{T}, typemin(T))
+_value_max(::Type{Rational{T}}) where {T<:Integer} = convert(Rational{T}, typemax(T))
+
+    export sample
 
 #
 

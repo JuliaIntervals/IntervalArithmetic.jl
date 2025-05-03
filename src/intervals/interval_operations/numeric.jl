@@ -106,18 +106,18 @@ function mid(x::BareInterval{T}, α = 0.5) where {T<:AbstractFloat}
         return _normalisezero(midpoint)
     end
 end
-function mid(x::BareInterval{T}, α = 1//2) where {T<:Rational}
+function mid(x::BareInterval{Rational{T}}, α = 1//2) where {T<:Integer}
     0 ≤ α ≤ 1 || return throw(DomainError(α, "α must be between 0 and 1"))
     isempty_interval(x) && return throw(ArgumentError("cannot compute the midpoint of empty intervals; cannot return a `Rational` NaN"))
     if isentire_interval(x)
-        α == 0.5 && return zero(T)
-        α > 0.5 && return prevfloat(typemax(T))
-        return nextfloat(typemin(T))
+        α == 0.5 && return zero(Rational{T})
+        α > 0.5 && return convert(Rational{T}, typemax(T))
+        return convert(Rational{T}, typemin(T))
     else
         lo, hi = bounds(x)
-        lo == typemin(T) && return nextfloat(lo) # cf. Section 12.12.8
-        hi == typemax(T) && return prevfloat(hi) # cf. Section 12.12.8
-        β = convert(T, α)
+        lo == typemin(Rational{T}) && return convert(Rational{T}, typemin(T)) # cf. Section 12.12.8
+        hi == typemax(Rational{T}) && return convert(Rational{T}, typemax(T)) # cf. Section 12.12.8
+        β = convert(Rational{T}, α)
         return _normalisezero((1 - β) * lo + β * hi)
     end
 end
