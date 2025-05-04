@@ -7,6 +7,7 @@ version = "0.22.33"
 CRlibm = "96374032-68de-5a5b-8d9e-752f78720389"
 MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
 OpenBLASConsistentFPCSR_jll = "6cdc7f73-28fd-5e50-80fb-958a8875b1af"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 RoundingEmulator = "5eaf0fd0-dfba-4ccb-bf02-d820a40db705"
 
 [weakdeps]
@@ -14,7 +15,6 @@ DiffRules = "b552c78f-8df3-52c6-915a-8e097449b14b"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 IntervalSets = "8197267c-284f-5f27-9208-e0e47529a953"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
-Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
@@ -23,7 +23,6 @@ IntervalArithmeticDiffRulesExt = "DiffRules"
 IntervalArithmeticForwardDiffExt = "ForwardDiff"
 IntervalArithmeticIntervalSetsExt = "IntervalSets"
 IntervalArithmeticLinearAlgebraExt = "LinearAlgebra"
-IntervalArithmeticRandomExt = "Random"
 IntervalArithmeticRecipesBaseExt = "RecipesBase"
 IntervalArithmeticSparseArraysExt = "SparseArrays"
 
