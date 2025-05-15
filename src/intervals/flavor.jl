@@ -76,7 +76,7 @@ contains_infinity(::Flavor{:set_based}, ::BareInterval) = false
 
 For the given flavor `F`, test whether ``[a, b]`` is a valid interval.
 """
-is_valid_interval(::Flavor{:set_based}, a::Real, b::Real) = b - a ≥ 0
+is_valid_interval(::Flavor{:set_based}, a::Real, b::Real) = ifelse(a == b, !isinf(a), b > a)
 # to prevent issues with division by zero, e.g. `is_valid_interval(1//0, 1//0)`
 is_valid_interval(::Flavor{:set_based}, a::Rational, b::Rational) =
     !((a > b) | (a == typemax(typeof(a))) | (b == typemin(typeof(b))))
