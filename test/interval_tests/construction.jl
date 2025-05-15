@@ -70,6 +70,9 @@ end
     @test isnai(interval(1, NaN))
     @test isnai(interval(NaN))
 
+    # check no issue with `Integer` modular arithmetic
+    @test bounds(interval(typemin(Int64), typemax(Int64))) == (typemin(Int64), typemax(Int64))
+
     # 1//10 < 0.1, 2//10 < 0.2
     @test !in_interval(1//10, interval(0.1, 0.2)) && in_interval(2//10, interval(0.1, 0.2))
 
