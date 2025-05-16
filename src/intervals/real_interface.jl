@@ -100,6 +100,10 @@ for T ∈ (:BareInterval, :Interval)
 
         Base.in(::$T, ::$T) =
             throw(ArgumentError("`in` is purposely not supported for intervals. See instead `in_interval`"))
+        Base.in(::Real, ::$T) =
+            throw(ArgumentError("`in` is purposely not supported for intervals. See instead `in_interval`"))
+        Base.in(::$T, ::Real) =
+            throw(ArgumentError("`in` is purposely not supported for intervals. See instead `in_interval`"))
 
         Base.isempty(::$T) =
             throw(ArgumentError("`isempty` is purposely not supported for intervals. See instead `isempty_interval`"))
