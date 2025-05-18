@@ -1,0 +1,127 @@
+# Philosophy
+
+The goal of the `Interval` type is to be directly used to replace floating point
+number in arbitrary julia code, such that in any calculation,
+the resulting intervals are guaranteed to bound the true image of the starting
+intervals.
+
+Due to the way that the julia ecosystem has evolved,
+this means that `Interval` **must** be a subtype of `Real`,
+as it is the default supertype used to describe
+"numbers that are not complex".
+Then, for any function `f(x::Real)`,
+we want the following to hold for all real `x` in the interval `X`
+(note that it holds for **all** real numbers in `X`,
+even those that can not be represented as floating point numbers):
+```julia
+f(x) ∈ f(X)
+```
+
+At first glance, this is reasonable:
+all arithmetic operations are well-defined for both real numbers and intervals,
+therefore we can use multiple dispatch to define the interval behavior of
+operations such has `+`, `/`, `sin` or `log`.
+Then a code written for `Real`s can be used as is with `Interval`s.
+
+However, being a `Real` means way more than just being compatible with
+arithmetic operations.
+`Real`s are also expected to
+
+1. Be compatible with any other `Number` through promotion.
+2. Support comparison operations, such as `==` or `<`.
+3. Act as a container of a single element,
+   e.g. `collect(x)` returns a 0-dimensional array containing `x`.
+
+Each of those points lead to specific design choice for `IntervalArithmetic.jl`,
+choices that we detail below.
+
+
+## Compatibility with other `Number`s
+
+In julia it is expected that `1 + 2.2` silently promoted the integer `1`
+to a `Float64` to be able to perform the addition.
+Following this logic, it means that `0.1 + interval(2.2, 2.3)` should 
+silently promote `0.1` to an interval.
+
+However, in this case we can not guarantee that `0.1` is known exactly,
+because we do not know how it was produced in the first place.
+Following the julia convention is thus in contradiction with providing
+guaranteed result.
+
+In this case, we choose to be mostly silent,
+the information that a non-interval of unknown origin is recorded in the `NG` flag,
+but the calculation is not interrupted and no warning is printed.
+
+
+## Comparison operators
+
+We can extend our above definition of the desired behavior for two real numbers
+`x` and `y`, and their respective intervals `X` and `Y`.
+With this, we want to have, for any function`f`,
+for all `x` in `X` and all `y` in `Y`,
+```julia
+f(x, y) ∈ f(X, Y)
+```
+
+With this in mind, an operation such as `==` can easily be defined for intervals
+
+1. If the intervals are disjoints (`X ∩ Y === ∅`), then `X == Y` is `[false]`.
+2. If the intervals both contain a single element,
+   and that element is the same for both,
+   `X == Y` is `[true]`.
+3. Otherwise, we can not conclude anything, and `X == Y` must be `[false, true]`.
+
+Not that we use intervals in all case, because, according to our definition,
+the true result must be contained in the returned interval.
+However, this is not convenient, as any `if` statement would error when used
+with an interval.
+Instead, we have opted to return respectively `false` and `true`
+for cases 1 and 2, and to immediately error otherwise.
+
+In this way, we can return a more informative error,
+but we only do it when the result is ambiguous.
+
+This has a clear cost, however, in that some expected behaviors do not hold.
+For example, an `Interval` is not equal to itself.
+
+```julia> X = interval(1, 2)
+[1.0, 2.0]_com
+
+julia> X == X
+ERROR: ArgumentError: `==` is purposely not supported when the intervals are overlapping. See instead `isequal_interval`
+Stacktrace:
+ [1] ==(x::Interval{Float64}, y::Interval{Float64})
+   @ IntervalArithmetic C:\Users\Kolaru\.julia\packages\IntervalArithmetic\XjBhk\src\intervals\real_interface.jl:86
+ [2] top-level scope
+   @ REPL[6]:1.
+```
+
+
+## Intervals as sets
+
+We have taken the perspective to always let `Interval`s act as if they were numbers.
+
+But they are also sets of numbers,
+and it would be nice to use all set operations defined in julia on them.
+
+However, `Real` are also sets. For example, the following is valid
+
+```julia
+julia> 3 in 3
+true
+```
+
+Then what should `3 in interval(2, 6)` do?
+
+For interval as a set, it is clearly `true`.
+But for intervals as a subtype of `Real` this is equivalent to
+```julia
+3 == interval(2, 6)
+```
+which must either be false (they are not the same things),
+or error as the result can not be established.
+
+To be safe, we decided to go one step further and disable
+**all** set operations from julia `Base` on intervals.
+These operations can instead be performed with the specific `interval_*` function,
+for example `in_interval`.
