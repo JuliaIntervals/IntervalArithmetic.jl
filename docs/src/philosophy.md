@@ -5,17 +5,19 @@ number in arbitrary julia code, such that in any calculation,
 the resulting intervals are guaranteed to bound the true image of the starting
 intervals.
 
-Due to the way that the julia ecosystem has evolved,
-this means that `Interval` **must** be a subtype of `Real`,
-as it is the default supertype used to describe
-"numbers that are not complex".
+So, essentially, we would like `Interval` to act as numbers and
+the julia ecosystem has evolved to use `Real` as the default supertype
+for numerical types that are not complex.
+Therefore, to ensure the widest compatiblity,
+our `Interval` type must be a subtype of `Real`.
+
 Then, for any function `f(x::Real)`,
 we want the following to hold for all real `x` in the interval `X`
 (note that it holds for **all** real numbers in `X`,
 even those that can not be represented as floating point numbers):
-```julia
-f(x) ∈ f(X)
-```
+$$
+f(x) \in f(X), \qquad \forall x \in X.
+$$
 
 At first glance, this is reasonable:
 all arithmetic operations are well-defined for both real numbers and intervals,
@@ -59,9 +61,9 @@ We can extend our above definition of the desired behavior for two real numbers
 `x` and `y`, and their respective intervals `X` and `Y`.
 With this, we want to have, for any function`f`,
 for all `x` in `X` and all `y` in `Y`,
-```julia
-f(x, y) ∈ f(X, Y)
-```
+$$
+f(x, y) \in f(X, Y), \qquad \forall x \in X, y \in Y.
+$$
 
 With this in mind, an operation such as `==` can easily be defined for intervals
 
