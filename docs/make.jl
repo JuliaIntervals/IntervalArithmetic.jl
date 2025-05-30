@@ -19,6 +19,7 @@ makedocs(;
     pages = [
         "Home" => "index.md",
         "Overview" => "intro.md",
+        "Philosophy" => "philosophy.md",
         "Manual" => [
             "Constructing intervals" => "manual/construction.md",
             "Usage" => "manual/usage.md",
