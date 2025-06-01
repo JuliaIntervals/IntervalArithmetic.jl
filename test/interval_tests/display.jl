@@ -157,7 +157,7 @@ setprecision(BigFloat, 256) do
                 @test sprint(show, MIME("text/plain"), b32)  == "(0.65f0 ± 0.650001f0)_com"
                 @test sprint(show, MIME("text/plain"), b16)  == "(Float16(0.649902) ± Float16(0.649903))_com"
                 @test sprint(show, MIME("text/plain"), br)   == "(1//10 ± 6//5)_com"
-                @test sprint(show, MIME("text/plain"), c)    == "(1.79769e+308 ± ∞)_dac"
+                @test sprint(show, MIME("text/plain"), c)    == "(1.79769e$(BIGFLOAT_SIGN_STR)308 ± ∞)_dac"
                 @test sprint(show, MIME("text/plain"), large_expo) ==
                     "(5.0e$(BIGFLOAT_SIGN_STR)123456788 ± 5.00001e$(BIGFLOAT_SIGN_STR)123456788)₂₅₆_com"
             end
@@ -174,7 +174,7 @@ setprecision(BigFloat, 256) do
                 @test sprint(show, MIME("text/plain"), b32)  == "0.65f0 ± 0.650001f0"
                 @test sprint(show, MIME("text/plain"), b16)  == "Float16(0.649902) ± Float16(0.649903)"
                 @test sprint(show, MIME("text/plain"), br)   == "1//10 ± 6//5"
-                @test sprint(show, MIME("text/plain"), c)    == "1.79769e+308 ± ∞"
+                @test sprint(show, MIME("text/plain"), c)    == "1.79769e$(BIGFLOAT_SIGN_STR)308 ± ∞"
                 @test sprint(show, MIME("text/plain"), large_expo) ==
                     "(5.0e$(BIGFLOAT_SIGN_STR)123456788 ± 5.00001e$(BIGFLOAT_SIGN_STR)123456788)₂₅₆"
             end
