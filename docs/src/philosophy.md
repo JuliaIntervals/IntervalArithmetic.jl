@@ -52,7 +52,11 @@ guaranteed result.
 
 In this case, we choose to be mostly silent,
 the information that a non-interval of unknown origin is recorded in the `NG` flag,
-but the calculation is not interrupted and no warning is printed.
+but the calculation is not interrupted, and no warning is printed.
+
+For convenience, we provide the [`ExactReal`](@ref) and [`@exact`](@ref) macro
+to allow to explicitly mark a number as being exact,
+and not produce the `NG` flag when mixed with intervals.
 
 
 ## Comparison operators
@@ -125,5 +129,15 @@ or error as the result can not be established.
 
 To be safe, we decided to go one step further and disable
 **all** set operations from julia `Base` on intervals.
-These operations can instead be performed with the specific `interval_*` function,
-for example `in_interval`.
+These operations can instead be performed with the specific `*_interval` function,
+for example `in_interval` as a replacement for `in`.
+
+
+# Summary
+
+| | Functions | Behavior | Note |
+| -- | -- | -- | -- |
+| Arithmetic operations | `+`, `-`, `*`, `/`, `^` | Interval extension | Produce the `NG` flag when mixed with non-interval |
+| Other numeric function | `sin`, `exp`, `sqrt`, etc. | Interval extension |  |
+| Boolean operations | `==`, `≈`, `<`, `<=`, `iszero`, `isnan`, `isinteger`, `isfinite` | Error if the result can not be guaranteed to be either `true` or `false` | See [`isequal_interval`](@ref) to test equality of intervals, and [`isbounded`](@ref) to test the finiteness of the elements |
+| Set operations | `in`, `issubset`, `isdisjoint`, `issetequal`, `isempty`, `union`, `intersect`, `setdiff` | Always error | Use the `*_interval` function instead (e.g. [`in_interval`](@ref))

@@ -91,37 +91,40 @@ sin(Y)
 
 
 
-## Comparisons and set operations
+## Comparisons
 
-All comparisons and set operations for `Real` have been purposely disallowed to prevent silent errors. For instance, `x == y` does not implies `x - y == 0` for non-singleton intervals.
+If the result of a comparison can be established with guarantee,
+it will be return, otherwise, an error is thrown.
 
 ```@repl usage
 interval(1) < interval(2)
-precedes(interval(1), interval(2))
+interval(1, 5) < interval(7, 9)
+interval(1, 5) < interval(4.99, 9)
+interval(1.23) == interval(1.23)
+interval(1.23) == interval(4.99, 9)
+interval(1.23) == interval(1.2, 1.3)
+```
+
+In particular, `if ... else ... end` statements used for floating-points will often break with intervals.
+
+See [philosophy.md](@ref) for more details and why this choice was made.
+
+
+## Set operations
+
+Set operations are all disallowed and error on intervals to avoid ambiguities.
+To perform set operations on intervals, use the `*_interval` equivalent explicitely,
+e.g. `issubset_interval` instead of `issubset`.
+
+
+```@repl usage
 issubset(interval(1, 2), interval(2))
 issubset_interval(interval(1, 2), interval(2))
 intersect(interval(1, 2), interval(2))
 intersect_interval(interval(1, 2), interval(2))
 ```
 
-In particular, `if ... else ... end` statements used for floating-points will generally break with intervals.
-
-One can refer to the following:
-- `<`: cannot be used with intervals. See instead [`isstrictless`](@ref) or [`strictprecedes`](@ref).
-- `==`: allowed if the arguments are singleton intervals, or if at least one argument is not an interval (equivalent to [`isthin`](@ref)). Otherwise, see [`isequal_interval`](@ref).
-- `iszero`, `isone`: allowed (equivalent to [`isthinzero`](@ref) and [`isthinone`](@ref) respectively).
-- `isinteger`: cannot be used with intervals. See instead [`isthininteger`](ref).
-- `isfinite`: cannot be used with intervals. See instead [`isbounded`](@ref).
-- `isnan`: cannot be used with intervals. See instead [`isnai`](@ref).
-- `in`: allowed if at least one argument is not an interval and the interval argument is a singleton. Otherwise, see [`in_interval`](@ref).
-- `issubset`: cannot be used with intervals. See instead [`issubset_interval`](@ref).
-- `isdisjoint`: cannot be used with intervals. See instead [`isdisjoint_interval`](@ref).
-- `issetequal`: cannot be used with intervals.
-- `isempty`: cannot be used with intervals. See instead [`isempty_interval`](@ref).
-- `union`: cannot be used with intervals. See instead [`hull`](@ref).
-- `intersect`: cannot be used with intervals. See instead [`intersect_interval`](@ref).
-- `setdiff`: cannot be used with intervals. See instead [`interiordiff`](@ref).
-
+See [philosophy.md](@ref) for more details and why this choice was made.
 
 
 ## Piecewise functions
