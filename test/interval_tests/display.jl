@@ -1,7 +1,14 @@
+if VERSION < v"1.13"
+    const BIGFLOAT_SIGN_STR = "+"
+else
+    const BIGFLOAT_SIGN_STR = ""
+end
+
 setprecision(BigFloat, 256) do
     @testset "BareInterval" begin
         a = bareinterval(-floatmin(Float64), 1.3)
         large_expo = bareinterval(0, big"1e123456789") # use "small" exponent, cf. JuliaLang/julia#48678
+
 
         @testset "Standard format" begin
             setdisplay(:infsup)
@@ -14,7 +21,7 @@ setprecision(BigFloat, 256) do
 
                 @test sprint(show, MIME("text/plain"), a) == "[-2.22508e-308, 1.30001]"
                 @test sprint(show, MIME("text/plain"), large_expo) ==
-                    "[0.0, 1.00001e+123456789]₂₅₆"
+                    "[0.0, 1.00001e$(BIGFLOAT_SIGN_STR)123456789]₂₅₆"
             end
 
             @testset "20 significant digits" begin
@@ -23,7 +30,7 @@ setprecision(BigFloat, 256) do
 
                 @test sprint(show, MIME("text/plain"), a) == "[-2.2250738585072014e-308, 1.3000000000000000445]"
                 @test sprint(show, MIME("text/plain"), large_expo) ==
-                    "[0.0, 1.0000000000000000001e+123456789]₂₅₆"
+                    "[0.0, 1.0000000000000000001e$(BIGFLOAT_SIGN_STR)123456789]₂₅₆"
             end
         end
 
@@ -36,7 +43,7 @@ setprecision(BigFloat, 256) do
 
             @test sprint(show, MIME("text/plain"), a) == "BareInterval{Float64}(-2.2250738585072014e-308, 1.3)"
             @test sprint(show, MIME("text/plain"), large_expo) ==
-                "BareInterval{BigFloat}(0.0, 1.000000000000000000000000000000000000000000000000000000000000000000000000000004e+123456789)"
+                "BareInterval{BigFloat}(0.0, 1.000000000000000000000000000000000000000000000000000000000000000000000000000004e$(BIGFLOAT_SIGN_STR)123456789)"
         end
 
         @testset "Midpoint format" begin
@@ -47,7 +54,7 @@ setprecision(BigFloat, 256) do
 
             @test sprint(show, MIME("text/plain"), a) == "0.65 ± 0.650001"
             @test sprint(show, MIME("text/plain"), large_expo) ==
-                "(5.0e+123456788 ± 5.00001e+123456788)₂₅₆"
+                "(5.0e$(BIGFLOAT_SIGN_STR)123456788 ± 5.00001e$(BIGFLOAT_SIGN_STR)123456788)₂₅₆"
         end
     end
 
@@ -81,7 +88,7 @@ setprecision(BigFloat, 256) do
                     @test sprint(show, MIME("text/plain"), br)   == "[-11//10, 13//10]_com"
                     @test sprint(show, MIME("text/plain"), c)    == "[-1.0, ∞)_dac"
                     @test sprint(show, MIME("text/plain"), large_expo) ==
-                        "[0.0, 1.00001e+123456789]₂₅₆_com"
+                        "[0.0, 1.00001e$(BIGFLOAT_SIGN_STR)123456789]₂₅₆_com"
                 end
 
                 @testset "No decorations" begin
@@ -98,7 +105,7 @@ setprecision(BigFloat, 256) do
                     @test sprint(show, MIME("text/plain"), br)   == "[-11//10, 13//10]"
                     @test sprint(show, MIME("text/plain"), c)    == "[-1.0, ∞)"
                     @test sprint(show, MIME("text/plain"), large_expo) ==
-                        "[0.0, 1.00001e+123456789]₂₅₆"
+                        "[0.0, 1.00001e$(BIGFLOAT_SIGN_STR)123456789]₂₅₆"
                 end
             end
 
@@ -113,7 +120,7 @@ setprecision(BigFloat, 256) do
                 @test sprint(show, MIME("text/plain"), br)   == "[-11//10, 13//10]_com"
                 @test sprint(show, MIME("text/plain"), c)    == "[-1.0, ∞)_dac"
                 @test sprint(show, MIME("text/plain"), large_expo) ==
-                    "[0.0, 1.0000000000000000001e+123456789]₂₅₆_com"
+                    "[0.0, 1.0000000000000000001e$(BIGFLOAT_SIGN_STR)123456789]₂₅₆_com"
             end
         end
 
@@ -132,7 +139,7 @@ setprecision(BigFloat, 256) do
             @test sprint(show, MIME("text/plain"), br)   == "Interval{Rational{Int64}}(-11//10, 13//10, com)"
             @test sprint(show, MIME("text/plain"), c)    == "Interval{Float64}(-1.0, Inf, dac)"
             @test sprint(show, MIME("text/plain"), large_expo) ==
-                "Interval{BigFloat}(0.0, 1.000000000000000000000000000000000000000000000000000000000000000000000000000004e+123456789, com)"
+                "Interval{BigFloat}(0.0, 1.000000000000000000000000000000000000000000000000000000000000000000000000000004e$(BIGFLOAT_SIGN_STR)123456789, com)"
         end
 
         @testset "Midpoint format" begin
@@ -152,7 +159,7 @@ setprecision(BigFloat, 256) do
                 @test sprint(show, MIME("text/plain"), br)   == "(1//10 ± 6//5)_com"
                 @test sprint(show, MIME("text/plain"), c)    == "(1.79769e+308 ± ∞)_dac"
                 @test sprint(show, MIME("text/plain"), large_expo) ==
-                    "(5.0e+123456788 ± 5.00001e+123456788)₂₅₆_com"
+                    "(5.0e$(BIGFLOAT_SIGN_STR)123456788 ± 5.00001e$(BIGFLOAT_SIGN_STR)123456788)₂₅₆_com"
             end
 
             @testset "No decorations" begin
@@ -169,7 +176,7 @@ setprecision(BigFloat, 256) do
                 @test sprint(show, MIME("text/plain"), br)   == "1//10 ± 6//5"
                 @test sprint(show, MIME("text/plain"), c)    == "1.79769e+308 ± ∞"
                 @test sprint(show, MIME("text/plain"), large_expo) ==
-                    "(5.0e+123456788 ± 5.00001e+123456788)₂₅₆"
+                    "(5.0e$(BIGFLOAT_SIGN_STR)123456788 ± 5.00001e$(BIGFLOAT_SIGN_STR)123456788)₂₅₆"
             end
         end
     end
