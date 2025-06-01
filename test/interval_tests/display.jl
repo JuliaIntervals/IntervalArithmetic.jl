@@ -1,4 +1,4 @@
-if VERSION < v"1.13"
+if VERSION < v"1.13.0-DEV"
     const BIGFLOAT_SIGN_STR = "+"
 else
     const BIGFLOAT_SIGN_STR = ""
