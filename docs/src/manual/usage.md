@@ -107,7 +107,7 @@ interval(1.23) == interval(1.2, 1.3)
 
 In particular, `if ... else ... end` statements used for floating-points will often break with intervals.
 
-See [philosophy.md](@ref) for more details and why this choice was made.
+See [Philosophy](@ref) for more details and why this choice was made.
 
 
 ## Set operations
@@ -124,7 +124,7 @@ intersect(interval(1, 2), interval(2))
 intersect_interval(interval(1, 2), interval(2))
 ```
 
-See [philosophy.md](@ref) for more details and why this choice was made.
+See [Philosophy](@ref) for more details and why this choice was made.
 
 
 ## Piecewise functions

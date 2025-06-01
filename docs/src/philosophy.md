@@ -15,9 +15,9 @@ Then, for any function `f(x::Real)`,
 we want the following to hold for all real `x` in the interval `X`
 (note that it holds for **all** real numbers in `X`,
 even those that can not be represented as floating point numbers):
-$$
+```math
 f(x) \in f(X), \qquad \forall x \in X.
-$$
+```
 
 At first glance, this is reasonable:
 all arithmetic operations are well-defined for both real numbers and intervals,
@@ -65,9 +65,9 @@ We can extend our above definition of the desired behavior for two real numbers
 `x` and `y`, and their respective intervals `X` and `Y`.
 With this, we want to have, for any function`f`,
 for all `x` in `X` and all `y` in `Y`,
-$$
+``math
 f(x, y) \in f(X, Y), \qquad \forall x \in X, y \in Y.
-$$
+``
 
 With this in mind, an operation such as `==` can easily be defined for intervals
 
@@ -136,7 +136,7 @@ for example `in_interval` as a replacement for `in`.
 # Summary
 
 | | Functions | Behavior | Note |
-| -- | -- | -- | -- |
+| :---- | :---- | :---- | :---- |
 | Arithmetic operations | `+`, `-`, `*`, `/`, `^` | Interval extension | Produce the `NG` flag when mixed with non-interval |
 | Other numeric function | `sin`, `exp`, `sqrt`, etc. | Interval extension |  |
 | Boolean operations | `==`, `≈`, `<`, `<=`, `iszero`, `isnan`, `isinteger`, `isfinite` | Error if the result can not be guaranteed to be either `true` or `false` | See [`isequal_interval`](@ref) to test equality of intervals, and [`isbounded`](@ref) to test the finiteness of the elements |
