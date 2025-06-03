@@ -66,7 +66,7 @@ end
 
 @testset "real functions" begin
     x = complex(interval(0, 3), interval(0, 4))
-    @test mag(x) == 4
+    @test mag(x) == 5
     @test mig(x) == 0
     @test mid(x) == 1.5 + 2im
 end

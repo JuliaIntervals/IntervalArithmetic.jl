@@ -303,7 +303,7 @@
         @test inf(abs(y)) == 0
         @test inf(abs2(y)) == 0
 
-        @test mag(x) == 4
+        @test mag(x) == 5
         @test mig(x) == 0
         @test mid(x) == 1.5 + 2im
     end
