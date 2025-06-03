@@ -253,7 +253,7 @@ function mag(x::Interval{<:Rational})
 end
 
 mag(x::Real) = mag(interval(x))
-mag(x::Complex) = max(mag(real(x)), mag(imag(x)))
+mag(x::Complex) = sup(abs(interval(x)))
 
 """
     mig(x)
@@ -285,7 +285,7 @@ function mig(x::Interval{<:Rational})
 end
 
 mig(x::Real) = mig(interval(x))
-mig(x::Complex) = min(mig(real(x)), mig(imag(x)))
+mig(x::Complex) = inf(abs(interval(x)))
 
 """
     dist(x, y)
