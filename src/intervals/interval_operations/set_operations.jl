@@ -68,6 +68,15 @@ hull(x::Real, y::Complex) = complex(hull(x, real(y)), hull(zero(x), imag(y)))
 hull(x::Complex, y::Real) = complex(hull(real(x), y), hull(imag(x), zero(y)))
 
 """
+    union_interval(x, y, z...)
+
+Return the union of the intervals.
+
+Alias of the [`hull`](@ref) function.
+"""
+union_interval(args...) = hull(args...)
+
+"""
     interiordiff(x, y)
 
 Remove the interior of `y` from `x`. If `x` and `y` are vectors, then they are
@@ -83,7 +92,16 @@ interiordiff(x::AbstractVector, y::AbstractVector) =
     interiordiff!(Vector{promote_type(typeof(x), typeof(y))}(undef, 0), x, y)
 
 """
-    interiordiff(x, y)
+    setdiff_interval(x, y)
+
+Set difference of the intervals `x` and `y`.
+
+Alias the [`interiordiff`](@ref) function.
+"""
+setdiff_interval(x::Interval, y::Interval) = interiordiff(x, y)
+
+"""
+    interiordiff!(x, y)
 
 In-place version of [`interiordiff`](@ref).
 """
