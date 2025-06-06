@@ -41,7 +41,8 @@ Interval{Float64}(0.1, 0.3, com)
 
 Create the interval ``[m - r, m + r]`` according to the IEEE Standard 1788-2015.
 Despite using the midpoint-radius notation, the returned interval is still an
-[`Interval`](@ref) represented by its bounds.
+[`Interval`](@ref) represented by its bounds. The unicode caracter ± is obtained
+using `\\pm`.
 
 !!! danger
     Nothing is done to compensate for the fact that floating point literals are
@@ -72,7 +73,8 @@ Interval{Rational{Int64}}(-85563208//27235615, 85563208//27235615, com)
     ≛(x, y)
     x ≛ y
 
-Unicode alias of [`isequal_interval`](@ref).
+Unicode alias of [`isequal_interval`](@ref); the unicode caracter ≛ is obtained
+using `\\starequal`.
 """
 const ≛ = isequal_interval
 
@@ -80,7 +82,8 @@ const ≛ = isequal_interval
     ⊑(x, y)
     x ⊑ y
 
-Unicode alias of [`issubset_interval`](@ref).
+Unicode alias of [`issubset_interval`](@ref); the unicode caracter ⊑ is obtained
+using `\\sqsubseteq`.
 """
 const ⊑ = issubset_interval
 
@@ -88,7 +91,8 @@ const ⊑ = issubset_interval
     ⋤(x, y)
     x ⋤ y
 
-Unicode alias of [`isstrictsubset`](@ref).
+Unicode alias of [`isstrictsubset`](@ref); the unicode caracter for ⋤ is obtained
+using `\\sqsubsetneq`.
 """
 const ⋤ = isstrictsubset
 
@@ -96,7 +100,8 @@ const ⋤ = isstrictsubset
     ⪽(x, y)
     x ⪽ y
 
-Unicode alias of [`isinterior`](@ref).
+Unicode alias of [`isinterior`](@ref); the unicode caracter for ⪽ is obtained
+using `\\subsetdot`.
 """
 const ⪽ = isinterior
 
@@ -104,7 +109,8 @@ const ⪽ = isinterior
     ⪯(x, y)
     x ⪯ y
 
-Unicode alias of [`precedes`](@ref).
+Unicode alias of [`precedes`](@ref); the unicode caracter for ⪯ is obtained
+using `\\preceq`.
 """
 const ⪯ = precedes
 
@@ -112,7 +118,8 @@ const ⪯ = precedes
     ≺(x, y)
     x ≺ y
 
-Unicode alias of [`strictprecedes`](@ref).
+Unicode alias of [`strictprecedes`](@ref); the unicode caracter for ≺ is obtained
+using `\\prec`.
 """
 const ≺ = strictprecedes
 
@@ -120,7 +127,8 @@ const ≺ = strictprecedes
     ⊔(x, y)
     x ⊔ y
 
-Unicode alias of [`hull`](@ref).
+Unicode alias of [`hull`](@ref); the unicode caracter for ⊔ is obtained
+using `\\sqcup`.
 """
 const ⊔ = hull
 
@@ -128,7 +136,8 @@ const ⊔ = hull
     ⊓(x, y)
     x ⊓ y
 
-Unicode alias of [`intersect_interval`](@ref).
+Unicode alias of [`intersect_interval`](@ref); the unicode caracter for ⊓ is obtained
+using `\\sqcap`.
 """
 const ⊓ = intersect_interval
 
@@ -136,7 +145,8 @@ const ⊓ = intersect_interval
     ∅
 
 Unicode alias of `emptyinterval()` representing an empty interval of default
-flavor and default bound type.
+flavor and default bound type. The unicode caracter for ∅ is obtained
+using `\\emptyset`.
 
 See also: [`emptyinterval`](@ref).
 """
@@ -148,7 +158,8 @@ const ∅ = emptyinterval()
 Unicode alias of `entireinterval()` representing an entire interval of default
 flavor and default bound type.
 
-See also: [`entireinterval`](@ref).
+See also: [`entireinterval`](@ref). The unicode caracter for ℝ is obtained
+using `\\bbR`.
 """
 const ℝ = entireinterval()
 
