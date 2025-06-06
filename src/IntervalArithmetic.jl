@@ -239,7 +239,7 @@ configure()
 include("symbols.jl")
 
 # in 1.10, having two standard libraries as package extensions yields circular
-# dependencies. We keep LinearAlgebra as a weak dependcy and add Random as a
+# dependencies. We keep LinearAlgebra as a weak dependency and add Random as a
 # dependency (cf. https://github.com/JuliaLang/julia/issues/52511)
 
 import Random
