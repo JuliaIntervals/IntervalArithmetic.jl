@@ -130,7 +130,11 @@ or error as the result can not be established.
 To be safe, we decided to go one step further and disable
 **all** set operations from julia `Base` on intervals.
 These operations can instead be performed with the specific `*_interval` function,
-for example `in_interval` as a replacement for `in`.
+for example `in_interval` as a replacement for `in`,
+except for `setdiff`.
+We can not meaningfully define the set difference of two intervals,
+because our intervals are always closed,
+while the result of `setdiff` can be open.
 
 
 # Summary
@@ -139,5 +143,6 @@ for example `in_interval` as a replacement for `in`.
 | :---- | :---- | :---- | :---- |
 | Arithmetic operations | `+`, `-`, `*`, `/`, `^` | Interval extension | Produce the `NG` flag when mixed with non-interval |
 | Other numeric function | `sin`, `exp`, `sqrt`, etc. | Interval extension |  |
-| Boolean operations | `==`, `≈`, `<`, `<=`, `iszero`, `isnan`, `isinteger`, `isfinite` | Error if the result can not be guaranteed to be either `true` or `false` | See [`isequal_interval`](@ref) to test equality of intervals, and [`isbounded`](@ref) to test the finiteness of the elements |
-| Set operations | `in`, `issubset`, `isdisjoint`, `issetequal`, `isempty`, `union`, `intersect`, `setdiff` | Always error | Use the `*_interval` function instead (e.g. [`in_interval`](@ref))
+| Boolean operations | `==`, `<`, `<=`, `iszero`, `isnan`, `isinteger`, `isfinite` | Error if the result can not be guaranteed to be either `true` or `false` | See [`isequal_interval`](@ref) to test equality of intervals, and [`isbounded`](@ref) to test the finiteness of the elements |
+| Set operations | `in`, `issubset`, `isdisjoint`, `issetequal`, `isempty`, `union`, `intersect` | Always error | Use the `*_interval` function instead (e.g. [`in_interval`](@ref))
+| Exceptions | `≈`, `setdiff` | Always error | No meaningful interval extension |

@@ -113,7 +113,7 @@ See [Philosophy](@ref) for more details and why this choice was made.
 ## Set operations
 
 Set operations are all disallowed and error on intervals to avoid ambiguities.
-To perform set operations on intervals, use the `*_interval` equivalent explicitely,
+To perform set operations on intervals, use the `*_interval` equivalent explicitly,
 e.g. `issubset_interval` instead of `issubset`.
 
 

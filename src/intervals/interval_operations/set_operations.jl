@@ -74,7 +74,7 @@ Return the union of the intervals.
 
 Alias of the [`hull`](@ref) function.
 """
-union_interval(args...) = hull(args...)
+const union_interval = hull
 
 """
     interiordiff(x, y)
@@ -90,15 +90,6 @@ interiordiff(x::Interval, y::Interval) =
 
 interiordiff(x::AbstractVector, y::AbstractVector) =
     interiordiff!(Vector{promote_type(typeof(x), typeof(y))}(undef, 0), x, y)
-
-"""
-    setdiff_interval(x, y)
-
-Set difference of the intervals `x` and `y`.
-
-Alias the [`interiordiff`](@ref) function.
-"""
-setdiff_interval(x::Interval, y::Interval) = interiordiff(x, y)
 
 """
     interiordiff!(x, y)
