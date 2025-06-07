@@ -31,7 +31,7 @@ include("interval_operations/constants.jl")
 include("interval_operations/extended_div.jl")
     export extended_div
 include("interval_operations/boolean.jl")
-    export isequal_interval, issubset_interval, isstrictsubset, isinterior,
+    export isequal_interval, issetequal_interval, issubset_interval, isstrictsubset, isinterior,
         isdisjoint_interval, isweakless, isstrictless, precedes, strictprecedes,
         in_interval, isempty_interval, isentire_interval, isnai, isbounded,
         isunbounded, iscommon, isatomic, isthin, isthinzero, isthinone,
@@ -42,6 +42,6 @@ include("interval_operations/overlap.jl")
 include("interval_operations/numeric.jl")
     export inf, sup, bounds, mid, diam, radius, midradius, mag, mig, dist
 include("interval_operations/set_operations.jl")
-    export intersect_interval, hull, interiordiff
+    export intersect_interval, hull, interiordiff, union_interval
 include("interval_operations/bisect.jl")
     export bisect, mince, mince!
