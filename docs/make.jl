@@ -22,6 +22,9 @@ makedocs(;
         "Manual" => [
             "Constructing intervals" => "manual/construction.md",
             "Usage" => "manual/usage.md",
+            "Interfaces" => [
+              "Arblib.jl" => "manual/interfaces/Arblib.md"
+            ],
             "API" => "manual/api.md"
         ],
         "Examples" => ["Rigorous computation of ``\\pi``" => "examples/pi.md"],
