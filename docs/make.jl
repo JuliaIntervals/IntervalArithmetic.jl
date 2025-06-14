@@ -22,6 +22,7 @@ makedocs(;
         "Manual" => [
             "Constructing intervals" => "manual/construction.md",
             "Usage" => "manual/usage.md",
+            "Symbols" => "manual/symbols.jl",
             "Interfaces" => [
               "Arblib.jl" => "manual/interfaces/Arblib.md"
             ],
