@@ -77,6 +77,8 @@ include("piecewise.jl")
 
 #
 
+import Printf
+
 include("display.jl")
     export setdisplay
 
@@ -228,7 +230,7 @@ Configure the default behavior for:
   [`IntervalArithmetic.MatMulMode`](@ref).
   Keyword: `matmul`. Available options: `:fast` (default), `:slow`.
 """
-function configure(; numtype::Type{<:NumTypes}=Float64, flavor::Symbol=:set_based, rounding::Symbol=:correct, power::Symbol=:fast, matmul::Symbol=:slow)
+function configure(; numtype::Type{<:NumTypes}=Float64, flavor::Symbol=:set_based, rounding::Symbol=:correct, power::Symbol=:fast, matmul::Symbol=:fast)
     configure_numtype(numtype)
     configure_flavor(flavor)
     configure_rounding(rounding)
