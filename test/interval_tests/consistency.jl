@@ -370,10 +370,10 @@
         @test x < y
         @test isdisjoint(x, y)
         @test !issubset(x, y)
-        @test !issetequal(x, y)
+        @test_throws ArgumentError !issetequal(x, y)
         @test x ∉ y
         @test_throws ArgumentError isempty(x)
-        @test_throws MethodError isfinite(x)
+        @test_throws ArgumentError isfinite(x)
         @test_throws ArgumentError isnan(x)
         @test isinteger(x)
         @test !isinteger(interval(1.2, 1.9))
