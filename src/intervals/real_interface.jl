@@ -79,42 +79,45 @@ Base.hash(x::Interval, h::UInt) = hash(sup(x), hash(inf(x), hash(Interval, h)))
 #
 
 function Base.:(==)(x::Interval, y::Interval) # also returned when calling `≤`, `≥`, `isequal`
-    isthin(x) && return sup(x) == y
-    isthin(y) && return x == sup(y)
+    isthin(x) & isthin(y) && return isequal_interval(x, y)
     isdisjoint_interval(x, y) && return false
-    return throw(ArgumentError("`==` is purposely not supported when the intervals are overlapping. See instead `isequal_interval`"))
+    return throw(ArgumentError("`==` is purposely not supported for overlapping non-thin intervals. See instead `isequal_interval`"))
 end
 
 function Base.:<(x::Interval, y::Interval)
-    isthin(x) && return sup(x) < y
-    isthin(y) && return x < sup(y)
     strictprecedes(x, y) && return true
     strictprecedes(y, x) && return false
-    return throw(ArgumentError("`<` is purposely not supported when the intervals are overlapping. See instead `strictprecedes`"))
+    isthin(x) & isthin(y) && return !isequal_interval(x, y)
+    return throw(ArgumentError("`<` is purposely not supported for overlapping intervals. See instead `strictprecedes`"))
 end
 
-# Base.isdisjoint(::Interval, ::Interval) =
-#     throw(ArgumentError("`isdisjoint` is purposely not supported for intervals. See instead `isdisjoint_interval`"))
+function Base.isfinite(x::Interval) # also returned when calling `isinf`
+    isbounded(x) && return true
+    return throw(ArgumentError("`isfinite` is purposely not supported for intervals containing infinite bounds. See instead `isbounded`"))
+end
 
-# Base.issubset(::Interval, ::Interval) =
-#     throw(ArgumentError("`issubset` is purposely not supported for intervals. See instead `issubset_interval`"))
+Base.isnan(x::Interval) = isnai(x)
 
-# Base.issetequal(::Interval, ::Interval) =
-#     throw(ArgumentError("`issetequal` is purposely not supported for intervals. See instead `isequal_interval`"))
+Base.isinteger(x::Interval) = !isthin(x) & !isdisjoint_interval(x, floor(x), ceil(x)) ? throw(ArgumentError("`isinteger` is purposely not supported for a non-thin interval containing at least one integer. See instead `isthininteger`")) : isthininteger(x)
 
-# Base.in(::Interval, ::Interval) =
-#     throw(ArgumentError("`in` is purposely not supported for intervals. See instead `in_interval`"))
+# disallowed
+
+Base.in(::Interval, ::Interval) =
+    throw(ArgumentError("`in` is purposely not supported for intervals. See instead `in_interval`"))
 
 Base.isempty(::Interval) =
     throw(ArgumentError("`isempty` is purposely not supported for intervals. See instead `isempty_interval`"))
 
-Base.isfinite(::Interval) = # also returned when calling `isinf`
-    throw(ArgumentError("`isfinite` is purposely not supported for intervals. See instead `isbounded`"))
+Base.isapprox(::Interval, ::Interval) =
+    throw(ArgumentError("`isapprox` is purposely not supported for intervals"))
 
-Base.isnan(::Interval) =
-    throw(ArgumentError("`isnan` is purposely not supported for intervals. See instead `isnai`"))
-
-Base.intersect(::Interval) =
+Base.isdisjoint(::Interval, ::Interval) =
+    throw(ArgumentError("`isdisjoint` is purposely not supported for intervals. See instead `isdisjoint_interval`"))
+Base.issubset(::Interval, ::Interval) =
+    throw(ArgumentError("`issubset` is purposely not supported for intervals. See instead `issubset_interval`"))
+Base.issetequal(::Interval, ::Interval) =
+    throw(ArgumentError("`issetequal` is purposely not supported for intervals. See instead `isequal_interval`"))
+Base.intersect(::Interval, ::Interval...) =
     throw(ArgumentError("`intersect` is purposely not supported for intervals. See instead `intersect_interval`"))
 
 Base.union!(::BitSet, ::Interval) = # needed to resolve ambiguity
@@ -134,21 +137,3 @@ Base.setdiff(::Interval) =
     throw(ArgumentError("`setdiff` is purposely not supported for intervals. See instead `interiordiff`"))
 Base.setdiff!(::AbstractSet, ::Interval) =
     throw(ArgumentError("`setdiff!` is purposely not supported for intervals. See instead `interiordiff`"))
-
-# pointwise equality
-
-Base.:(==)(x::Interval, y::Number) = !isthin(x) & in_interval(y, x) ? throw(ArgumentError("`==` is purposely not supported when the number is contained in the interval. See instead `isthin`")) : isthin(x, y)
-Base.:(==)(x::Number, y::Interval) = y == x
-# needed to resolve ambiguity from irrationals.jl
-Base.:(==)(x::Interval, y::AbstractIrrational) = !isthin(x) & in_interval(y, x) ? throw(ArgumentError("`==` is purposely not supported when the number is contained in the interval. See instead `isthin`")) : isthin(x, y)
-Base.:(==)(x::AbstractIrrational, y::Interval) = y == x
-# needed to resolve ambiguity from complex.jl
-Base.:(==)(x::Interval, y::Complex) = isreal(y) & (real(y) == x)
-Base.:(==)(x::Complex, y::Interval) = y == x
-
-
-Base.:<(x::Interval, y::Real) = (!isthin(x) & in_interval(y, x)) | isempty_interval(x) ? throw(ArgumentError("`<` is purposely not supported when the number is contained in the interval, or if the interval is empty")) : sup(x) < y
-Base.:<(x::Real, y::Interval) = (!isthin(y) & in_interval(x, y)) | isempty_interval(y) ? throw(ArgumentError("`<` is purposely not supported when the number is contained in the interval, or if the interval is empty")) : x < inf(y)
-
-
-Base.isinteger(x::Interval) = !isthin(x) & !isdisjoint_interval(x, floor(x), ceil(x)) ? throw(ArgumentError("`isinteger` is purposely not supported for non-thin containing at least one integer. See instead `isthininteger`")) : isthininteger(x)
