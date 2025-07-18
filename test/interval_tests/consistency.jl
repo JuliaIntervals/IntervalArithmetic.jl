@@ -364,17 +364,20 @@
     @testset "Disallowed `Real` functionalities" begin
         x, y = interval(1), interval(2)
         @test x != y
-        @test (interval(1, 2) != y) & (y != interval(1, 2))
+        @test_throws ArgumentError interval(1, 2) != y
+        @test_throws ArgumentError y != interval(1, 2)
         @test_throws ArgumentError interval(1, 2) == interval(1, 2)
-        @test_throws ArgumentError x < y
-        @test_throws ArgumentError isdisjoint(x, y)
-        @test_throws ArgumentError issubset(x, y)
-        @test_throws ArgumentError issetequal(x, y)
-        @test_throws ArgumentError x ∈ y
+        @test x < y
+        @test isdisjoint(x, y)
+        @test !issubset(x, y)
+        @test !issetequal(x, y)
+        @test x ∉ y
         @test_throws ArgumentError isempty(x)
-        @test_throws ArgumentError isfinite(x)
+        @test_throws MethodError isfinite(x)
         @test_throws ArgumentError isnan(x)
         @test isinteger(x)
+        @test !isinteger(interval(1.2, 1.9))
+        @test_throws ArgumentError isinteger(interval(1.5, 2.5))
         @test x == 1
         @test isone(x)
         @test !iszero(x)
