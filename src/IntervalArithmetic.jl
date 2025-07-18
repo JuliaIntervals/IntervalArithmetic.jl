@@ -202,26 +202,31 @@ Configure the default behavior for:
 - **Bound Type**: The default numerical type used to represent the bounds of the
   intervals. The default is `Float64`, but other subtypes of
   [`IntervalArithmetic.NumTypes`](@ref) can be used to adjust precision.
+  Keyword: `numtype`. Available options: subtypes of `IntervalArithmetic.NumTypes`.
 
 - **Flavor**: The interval representation that adhere to the IEEE Standard
   1788-2015. By default, it uses the set-based flavor, which excludes infinity
   to be part of an interval. Learn more: [`IntervalArithmetic.Flavor`](@ref).
+  Keyword: `flavor`. Available options: `:set_based` (default).
 
 - **Interval Rounding**: Controls the rounding behavior for interval arithmetic
   operations. By default, the library employs correct rounding to ensure that
   bounds are computed as tightly as possible. Learn more:
   [`IntervalArithmetic.IntervalRounding`](@ref).
+  Keyword: `rounding`. Available options: `:correct` (default), `:none`.
 
 - **Power mode**: A performance setting for power operations. The default mode
   uses an efficient algorithm prioritizing fast computation, but it can be
   adjusted for more precise, slower calculations if needed. Learn more:
   [`IntervalArithmetic.PowerMode`](@ref).
+  Keyword: `power`. Available options: `:fast` (default), `:slow`.
 
 - **Matrix Multiplication mode**: A performance setting for matrix
   multiplication operations. The default mode uses an efficient algorithm
   prioritizing fast computation, but it can be changed to use the standard
   definition of matrix multiplication. Learn more:
   [`IntervalArithmetic.MatMulMode`](@ref).
+  Keyword: `matmul`. Available options: `:fast` (default), `:slow`.
 """
 function configure(; numtype::Type{<:NumTypes}=Float64, flavor::Symbol=:set_based, rounding::Symbol=:correct, power::Symbol=:fast, matmul::Symbol=:slow)
     configure_numtype(numtype)

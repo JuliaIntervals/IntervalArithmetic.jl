@@ -340,7 +340,7 @@ isguaranteed(::Number) = false
 #
 
 """
-    interval(T, a, b, d = com)
+    interval([T,] a, b, d = com; format = :infsup)
 
 Create the interval ``[a, b]`` according to the IEEE Standard 1788-2015. The
 validity of the interval is checked by [`is_valid_interval`](@ref): if `true`
@@ -386,8 +386,6 @@ end
 interval(a, d::Decoration = com; format::Symbol = :infsup) = interval(promote_numtype(numtype(a), numtype(a)), a, d; format = format)
 
 # some useful extra constructor
-interval(::Type{T}, a::Tuple, d::Decoration = com; format::Symbol = :infsup) where {T} = interval(T, a..., d; format = format)
-interval(a::Tuple, d::Decoration = com; format::Symbol = :infsup) = interval(a..., d; format = format)
 interval(::Type{T}, A::AbstractArray, d::Decoration = com; format::Symbol = :infsup) where {T} = interval.(T, A, d; format = format)
 interval(A::AbstractArray, d::Decoration = com; format::Symbol = :infsup) = interval.(A, d; format = format)
 interval(::Type{T}, A::AbstractArray, B::AbstractArray, d::Decoration = com; format::Symbol = :infsup) where {T} = interval.(T, A, B, d; format = format)
@@ -401,7 +399,7 @@ interval(T::Type, d::Decoration; format::Symbol = :infsup) = throw(MethodError(i
 # standard format
 
 """
-    _interval_infsup(T<:NumTypes, a, b, [d::Decoration])
+    _interval_infsup(T<:NumTypes, a, b, d::Decoration)
 
 Internal constructor for intervals described by their lower and upper bounds,
 i.e. of the form ``[a, b]``.
@@ -459,52 +457,52 @@ function _interval_infsup(::Type{T}, x, y::Union{BareInterval,Interval}, d::Deco
     end
 end
 
-_interval_infsup(::Type{T}, a::Complex, b::Union{BareInterval,Interval}, d::Decoration = com) where {T<:NumTypes} =
+_interval_infsup(::Type{T}, a::Complex, b::Union{BareInterval,Interval}, d::Decoration) where {T<:NumTypes} =
     complex(_interval_infsup(T, real(a), real(b), d), _interval_infsup(T, imag(a), imag(b), d))
-_interval_infsup(::Type{T}, a::Union{BareInterval,Interval}, b::Complex, d::Decoration = com) where {T<:NumTypes} =
+_interval_infsup(::Type{T}, a::Union{BareInterval,Interval}, b::Complex, d::Decoration) where {T<:NumTypes} =
     complex(_interval_infsup(T, real(a), real(b), d), _interval_infsup(T, imag(a), imag(b), d))
 
-_interval_infsup(::Type{T}, a::Complex, b::Complex, d::Decoration = com) where {T<:NumTypes} =
+_interval_infsup(::Type{T}, a::Complex, b::Complex, d::Decoration) where {T<:NumTypes} =
     complex(_interval_infsup(T, real(a), real(b), d), _interval_infsup(T, imag(a), imag(b), d))
-_interval_infsup(::Type{T}, a::Complex, b, d::Decoration = com) where {T<:NumTypes} =
+_interval_infsup(::Type{T}, a::Complex, b, d::Decoration) where {T<:NumTypes} =
     complex(_interval_infsup(T, real(a), real(b), d), _interval_infsup(T, imag(a), imag(b), d))
-_interval_infsup(::Type{T}, a, b::Complex, d::Decoration = com) where {T<:NumTypes} =
+_interval_infsup(::Type{T}, a, b::Complex, d::Decoration) where {T<:NumTypes} =
     complex(_interval_infsup(T, real(a), real(b), d), _interval_infsup(T, imag(a), imag(b), d))
 
 # midpoint constructors
 
 """
-    _interval_midpoint(T<:NumTypes, m, r, d = com)
+    _interval_midpoint(T<:NumTypes, m, r, d::Decoration)
 
 Internal constructor for intervals described by their midpoint and radius, i.e.
 of the form ``m \\pm r``.
 """
-function _interval_midpoint(::Type{T}, m, r, d::Decoration = com) where {T<:NumTypes}
+function _interval_midpoint(::Type{T}, m, r, d::Decoration) where {T<:NumTypes}
     x = _interval_infsup(T, m, m, d)
     r = _interval_infsup(T, r, r, d)
     precedes(zero(r), r) && return _interval_infsup(T, x - r, x + r, d)
     return throw(DomainError(r, "must be positive"))
 end
 
-_interval_midpoint(::Type{T}, m::Complex, r, d::Decoration = com) where {T<:NumTypes} =
+_interval_midpoint(::Type{T}, m::Complex, r, d::Decoration) where {T<:NumTypes} =
     complex(_interval_midpoint(T, real(m), r, d), _interval_midpoint(T, imag(m), r, d))
 
-function _interval_midpoint(::Type{T}, m, r::Complex{<:Interval}, d::Decoration = com) where {T<:NumTypes}
+function _interval_midpoint(::Type{T}, m, r::Complex{<:Interval}, d::Decoration) where {T<:NumTypes}
     isthinzero(imag(r)) || return throw(DomainError(r, "imaginary part must be zero"))
     return _interval_midpoint(T, m, real(r), d)
 end
 
-function _interval_midpoint(::Type{T}, m, r::Complex, d::Decoration = com) where {T<:NumTypes}
+function _interval_midpoint(::Type{T}, m, r::Complex, d::Decoration) where {T<:NumTypes}
     iszero(imag(r)) || return throw(DomainError(r, "imaginary part must be zero"))
     return _interval_midpoint(T, m, real(r), d)
 end
 
-function _interval_midpoint(::Type{T}, m::Complex, r::Complex{<:Interval}, d::Decoration = com) where {T<:NumTypes}
+function _interval_midpoint(::Type{T}, m::Complex, r::Complex{<:Interval}, d::Decoration) where {T<:NumTypes}
     isthinzero(imag(r)) || return throw(DomainError(r, "imaginary part must be zero"))
     return _interval_midpoint(T, m, real(r), d)
 end
 
-function _interval_midpoint(::Type{T}, m::Complex, r::Complex, d::Decoration = com) where {T<:NumTypes}
+function _interval_midpoint(::Type{T}, m::Complex, r::Complex, d::Decoration) where {T<:NumTypes}
     iszero(imag(r)) || return throw(DomainError(r, "imaginary part must be zero"))
     return _interval_midpoint(T, m, real(r), d)
 end
