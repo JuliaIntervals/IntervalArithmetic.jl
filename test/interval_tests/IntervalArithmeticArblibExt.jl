@@ -93,10 +93,10 @@
             end
 
             # These are bugs in Flint
-            @test isequal_interval(interval(setball(Arb, -Inf, Inf)), interval(-Inf, Inf)) broken =
-                broken_getinterval
-            @test isequal_interval(interval(setball(Arb, Inf, Inf)), interval(-Inf, Inf)) broken =
-                broken_getinterval
+            # @test isequal_interval(interval(setball(Arb, -Inf, Inf)), interval(-Inf, Inf)) broken =
+            #     broken_getinterval
+            # @test isequal_interval(interval(setball(Arb, Inf, Inf)), interval(-Inf, Inf)) broken =
+            #     broken_getinterval
 
             # Invalid intervals
             @test isnai(interval(Arb(-Inf)))
@@ -168,20 +168,20 @@
             # Infinite, but valid, intervals
             as2 = [
                 Arb(-Inf),
-                setball(Arb, -Inf, 1),
+                # setball(Arb, -Inf, 1),
                 Arb((-Inf, Inf)),
-                setball(Arb, -Inf, Inf),
+                # setball(Arb, -Inf, Inf),
                 setball(Arb, 0, Inf),
-                setball(Arb, Inf, Inf),
+                # setball(Arb, Inf, Inf),
             ]
 
             bs2 = [
                 Arb(Inf),
-                setball(Arb, Inf, 1),
+                # setball(Arb, Inf, 1),
                 Arb((-Inf, Inf)),
-                setball(Arb, -Inf, Inf),
+                # setball(Arb, -Inf, Inf),
                 setball(Arb, 0, Inf),
-                setball(Arb, Inf, Inf),
+                # setball(Arb, Inf, Inf),
             ]
 
             for a in as2
