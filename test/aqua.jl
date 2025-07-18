@@ -18,11 +18,7 @@ using Aqua
     for method_ambiguity ∈ ambs
         @show method_ambiguity
     end
-    if VERSION ≥ v"1.11"
-        @test length(ambs) == 0
-    else # version 1.10
-        @test_broken length(ambs) == 0
-    end
+    @test length(ambs) == 0
 end
 
 @testset "Aqua tests (additional)" begin
