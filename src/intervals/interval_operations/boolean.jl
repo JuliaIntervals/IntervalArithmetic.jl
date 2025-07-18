@@ -36,6 +36,15 @@ isequal_interval(x, y, z, w...) = isequal_interval(x, y) & isequal_interval(y, z
 isequal_interval(x) = Base.Fix2(isequal_interval, x)
 
 """
+    issetequal_interval(x, y)
+
+Return whether the two interval are identical when considered as sets.
+
+Alias of the [`isequal_interval`](@ref) function.
+"""
+const issetequal_interval = isequal_interval
+
+"""
     issubset_interval(x, y)
 
 Test whether `x` is contained in `y`.

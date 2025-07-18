@@ -3,11 +3,16 @@
 # IEEE Standard 1788-2015 and required for set-based flavor in Section 10.5.6
 
 """
-    cancelminus(x, y)
+    cancelminus(x, y ; dec = :default)
 
 Compute the unique interval `z` such that `y + z == x`.
 
-The result is decorated by at most `trv` (Section 11.7.1).
+The keywork `dec` argument controls the decoration of the result,
+it `dec` can be either the decoration of the output,
+or a symbol:
+    - `:default`: if at least one of the input intervals is `ill`,
+        then the result is `ill`, otherwise it is `trv` (Section 11.7.1).
+    - `:auto`: the ouptut has the minimal decoration of the inputs.
 
 Implement the `cancelMinus` function of the IEEE Standard 1788-2015 (Section 9.2).
 """
@@ -36,23 +41,27 @@ function cancelminus(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
 end
 cancelminus(x::BareInterval, y::BareInterval) = cancelminus(promote(x, y)...)
 
-function cancelminus(x::Interval, y::Interval)
+function cancelminus(x::Interval, y::Interval ; dec = :default)
     r = cancelminus(bareinterval(x), bareinterval(y))
-    d = min(decoration(x), decoration(y), decoration(r), trv)
     t = isguaranteed(x) & isguaranteed(y)
-    return _unsafe_interval(r, d, t)
+    return _unsafe_interval(r, set_decoration(dec, x, y, r), t)
 end
 
 """
-    cancelplus(x, y)
+    cancelplus(x, y ; dec = :default)
 
 Compute the unique interval `z` such that `y - z == x`; this is semantically
 equivalent to `cancelminus(x, -y)`.
 
-The result is decorated by at most `trv` (Section 11.7.1).
+The keywork `dec` argument controls the decoration of the result,
+it `dec` can be either the decoration of the output,
+or a symbol:
+    - `:default`: if at least one of the input intervals is `ill`,
+        then the result is `ill`, otherwise it is `trv` (Section 11.7.1).
+    - `:auto`: the ouptut has the minimal decoration of the inputs.
 
 Implement the `cancelPlus` function of the IEEE Standard 1788-2015 (Section 9.2).
 """
 cancelplus(x::BareInterval, y::BareInterval) = cancelminus(x, -y)
 
-cancelplus(x::Interval, y::Interval) = cancelminus(x, -y)
+cancelplus(x::Interval, y::Interval ; dec = :default) = cancelminus(x, -y ; dec)
