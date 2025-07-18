@@ -30,13 +30,13 @@ end
         interval(Float64, 1, 1), interval(Float64, 1), interval(1),
         interval(Float64, interval(1)), interval(interval(1)),
         interval(BigFloat, 1, 1), interval(BigFloat, 1), interval(big(1)),
-        interval( (Float64, 1, 1) ), interval( (1, 1) ), interval( (Float64, 1) ), interval( (1,) ))
+        interval(Float64, 1, 1), interval(1, 1), interval(Float64, 1), interval(1))
 
     @test isequal_interval(
         interval(Rational{Int}, 1//10, 1//10), interval(1//10, 1//10), interval(Rational{Int}, 1//10), interval(1//10),
         interval(Rational{Int}, interval(1//10)), interval(interval(1//10)),
         interval(Rational{BigInt}, 1//10, 1//10), interval(Rational{BigInt}, 1//10), interval(big(1//10)),
-        interval( (Rational{Int}, 1//10, 1//10) ), interval( (1//10, 1//10) ), interval( (Rational{Int}, 1//10) ), interval( (1//10,) ))
+        interval(Rational{Int}, 1//10, 1//10), interval(1//10, 1//10), interval(Rational{Int}, 1//10), interval(1//10))
 
     @test_throws MethodError BareInterval(1)
     @test_throws MethodError BareInterval{Float64}(1)
