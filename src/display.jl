@@ -196,14 +196,14 @@ function _str_basic_repr(a::BareInterval{<:AbstractFloat}, format::Symbol)
         return string(str_lo, ", ", str_hi)
     elseif format === :midpoint
         m = mid(a)
-        str_m = _round_string(m, sigdigits, RoundNearest)
+        str_m = _round_string(m, sigdigits)
         # str_m = ifelse(m ≥ 0, string('+', str_m), str_m)
-        output = string(str_m, " ± ", _round_string(radius(a), sigdigits, RoundUp))
+        output = string(str_m, " ± ", _round_string(radius(a), sigdigits))
         return replace(output, "Inf" => '∞')
     else
-        str_lo = _round_string(lo, sigdigits, RoundDown)
+        str_lo = _round_string(lo, sigdigits)
         # str_lo = ifelse(lo ≥ 0, string('+', str_lo), str_lo)
-        str_hi = _round_string(hi, sigdigits, RoundUp)
+        str_hi = _round_string(hi, sigdigits)
         # str_hi = ifelse(hi ≥ 0, string('+', str_hi), str_hi)
         output = string('[', str_lo, ", ", str_hi, ']')
         return replace(output, "Inf]" => "∞)", "[-Inf" => "(-∞")
@@ -231,26 +231,26 @@ function _str_basic_repr(a::BareInterval{Float32}, format::Symbol)
         return string(str_lo, ", ", str_hi)
     elseif format === :midpoint
         m = mid(a)
-        str_m = _round_string(m, sigdigits, RoundNearest)
+        str_m = _round_string(m, sigdigits)
         str_m = replace(string(str_m, "f0"), "NaNf0" => "NaN32", "Inff0" => "Inf32")
         if contains(str_m, 'e')
             str_m = replace(str_m, 'e' => 'f', "f0" => "")
         end
         # str_m = ifelse(m ≥ 0, string('+', str_m), str_m)
-        str_r = _round_string(radius(a), sigdigits, RoundUp)
+        str_r = _round_string(radius(a), sigdigits)
         str_r = replace(string(str_r, "f0"), "NaNf0" => "NaN32", "Inff0" => "Inf32")
         if contains(str_r, 'e')
             str_r = replace(str_r, 'e' => 'f', "f0" => "")
         end
         return string(str_m, " ± ", str_r)
     else
-        str_lo = _round_string(lo, sigdigits, RoundDown)
+        str_lo = _round_string(lo, sigdigits)
         str_lo = replace(string('[', str_lo, "f0"), "NaNf0" => "NaN32", "[-Inff0" => "(-∞")
         if contains(str_lo, 'e')
             str_lo = replace(str_lo, 'e' => 'f', "f0" => "")
         end
         # str_lo = ifelse(lo ≥ 0, string('+', str_lo), str_lo)
-        str_hi = _round_string(hi, sigdigits, RoundUp)
+        str_hi = _round_string(hi, sigdigits)
         str_hi = replace(string(str_hi, "f0]"), "NaNf0" => "NaN32", "Inff0]" => "∞)")
         if contains(str_hi, 'e')
             str_hi = replace(str_hi, 'e' => 'f', "f0" => "")
@@ -274,14 +274,14 @@ function _str_basic_repr(a::BareInterval{Float16}, format::Symbol)
         return replace(output, "Float16(NaN)" => "NaN16", "Float16(-Inf)" => "-Inf16", "Float16(Inf)" => "Inf16")
     elseif format === :midpoint
         m = mid(a)
-        str_m = _round_string(m, sigdigits, RoundNearest)
+        str_m = _round_string(m, sigdigits)
         # str_m = ifelse(m ≥ 0, string('+', str_m), str_m)
-        output = string("Float16(", str_m, ") ± Float16(", _round_string(radius(a), sigdigits, RoundUp), ')')
+        output = string("Float16(", str_m, ") ± Float16(", _round_string(radius(a), sigdigits), ')')
         return replace(output, "Float16(NaN)" => "NaN16", "Float16(Inf)" => '∞')
     else
-        str_lo = _round_string(lo, sigdigits, RoundDown)
+        str_lo = _round_string(lo, sigdigits)
         # str_lo = ifelse(lo ≥ 0, string('+', str_lo), str_lo)
-        str_hi = _round_string(sup(a), sigdigits, RoundUp)
+        str_hi = _round_string(sup(a), sigdigits)
         # str_hi = ifelse(hi ≥ 0, string('+', str_hi), str_hi)
         output = string("[Float16(", str_lo, "), Float16(", str_hi, ")]")
         return replace(output, "Float16(NaN)" => "NaN16", "[Float16(-Inf)" => "(-∞", "Float16(Inf)]" => "∞)")
@@ -308,102 +308,19 @@ function _str_basic_repr(a::BareInterval{<:Rational}, format::Symbol)
     end
 end
 
-# round to the prescribed significant digits
-# code inspired by `_string(x::BigFloat, k::Integer)` in base/mpfr.jl
+# truncate to the prescribed significant digits
 
-function _round_string(x::T, sigdigits::Int, r::RoundingMode) where {T<:AbstractFloat}
+function _round_string(x::AbstractFloat, sigdigits::Int)
     !isfinite(x) && return string(x)
-
-    ndigits = ceil(Int, precision(x) * log10(T(2)))
-    sci_str = Printf.@sprintf("%.*e", ndigits, x)
-
-    if abs(x) < floatmax(T)
-        ndigits_ = ndigits - 1
-        sci_str_ = Printf.@sprintf("%.*e", ndigits_, x)
-
-        if parse(T, sci_str) == parse(T, sci_str_)
-            ndigits = ndigits_
-            sci_str = sci_str_
-        end
-    end
-
-    mantissa = split(sci_str, 'e')[1]
-
-    mantissa_digits = replace(mantissa, "." => "")
-
-    significant_digits = length(rstrip(mantissa_digits, '0'))
-
-    is_representable = significant_digits ≤ sigdigits
-
-    # `min(sigdigits-1, ndigits)` ensure we do not exceed the precision of `x`
-    str = is_representable ? Printf.@sprintf("%.*e", min(sigdigits-1, ndigits), x) : _round_string(Printf.@sprintf("%.*e", sigdigits, x), r)
-
-    return Base.MPFR._prettify_bigfloat(str)
+    max_sig_digits = _count_sigdigits(string(x))
+    ndigits = min(sigdigits, max_sig_digits)
+    str = Printf.@sprintf("%.*g", ndigits, x)
+    occursin(r"[eE]", str) && return replace(str, r"^([+-]?\d+)(?=[eE])" => s"\1.0", r"([eE][+-])0+(\d+)" => s"\1\2")
+    !occursin(r"\.", str) && return str * ".0"
+    return str
 end
 
-_round_string(x::AbstractFloat, sigdigits::Int, r::RoundingMode{:Nearest}) =
-    _round_string(big(x), sigdigits, r)
-
-_round_string(x::BigFloat, sigdigits::Int, ::RoundingMode{:Nearest}) =
-    Base.MPFR._string(x, sigdigits-1) # `sigdigits-1` digits after the decimal
-
-_round_string(s::String, ::RoundingMode{:Up}) =
-    startswith(s, '-') ? string('-', _round_string_down(s[2:end])) : _round_string_up(s)
-
-_round_string(s::String, ::RoundingMode{:Down}) =
-    startswith(s, '-') ? string('-', _round_string_up(s[2:end])) : _round_string_down(s)
-
-function _round_string_up(s::String)
-    # `s` has one extra significant digit to control the rounding
-    mantissa, exponent = eachsplit(s, 'e')
-    mantissa = mantissa[1:end-1]
-    len = length(mantissa)
-    idx = findlast(d -> (d !== '9') & (d !== '.'), mantissa)
-    if idx == len # last significant digit is not `9`
-        d = parse(Int, mantissa[len]) + 1 # increase the last significant digit
-        return string(view(mantissa, 1:len-1), d, 'e', exponent)
-    else
-        if isnothing(idx) # all significant digits are `9`
-            expo = parse(Int, exponent) + 1 # increase the exponent by `1`
-            expo_str = string(expo; pad = 2)
-            exponent = expo < 0 ? expo_str : string('+', expo_str)
-            return string("1.", '0'^(len - 2), 'e', exponent)
-        else
-            new_mantissa = string(
-                view(mantissa, 1:idx-1),
-                parse(Int, mantissa[idx]) + 1,
-                # add `"."` if the last significant digit not equal to `9` is before the decimal point
-                idx == 1 ? "." : "",
-                '0'^(len - idx))
-            return string(new_mantissa, 'e', exponent)
-        end
-    end
-end
-
-function _round_string_down(s::String)
-    # `s` has one extra significant digit to control the rounding
-    mantissa, exponent = eachsplit(s, 'e')
-    len = length(mantissa)
-    idx = findlast(d -> (d !== '0') & (d !== '.'), mantissa)
-    if idx == len # last significant digit is not `0`
-        return string(view(mantissa, 1:len-1), 'e', exponent) # truncate
-    else
-        if isnothing(idx) # all significant digits are `0`
-            expo = parse(Int, exponent) - 1 # decrease the exponent by `1`
-            expo_str = string(expo; pad = 2)
-            exponent = expo < 0 ? expo_str : string('+', expo_str)
-            return string("9.", '9'^(len - 3), 'e', exponent)
-        else
-            new_mantissa = string(
-                    view(mantissa, 1:idx-1),
-                    parse(Int, mantissa[idx]) - 1,
-                    # add `"."` if the last significant digit not equal to `0` is before the decimal point
-                    idx == 1 ? "." : "",
-                    '9'^(len - (idx + 1)))
-            return string(new_mantissa, 'e', exponent)
-        end
-    end
-end
+_count_sigdigits(s::AbstractString) = length(replace(split(s, r"[eE]")[1], '-' => "", '.' => "", r"^0+" => ""))
 
 #
 
