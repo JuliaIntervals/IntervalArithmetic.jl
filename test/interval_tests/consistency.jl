@@ -361,23 +361,46 @@
         end
     end
 
-    @testset "Disallowed `Real` functionalities" begin
+    @testset "`Real` functionalities" begin
         x, y = interval(1), interval(2)
-        @test x != y
-        @test (interval(1, 2) != y) & (y != interval(1, 2))
-        @test_throws ArgumentError interval(1, 2) == interval(1, 2)
-        @test_throws ArgumentError x < y
-        @test_throws ArgumentError isdisjoint(x, y)
-        @test_throws ArgumentError issubset(x, y)
-        @test_throws ArgumentError issetequal(x, y)
-        @test_throws ArgumentError x ∈ y
-        @test_throws ArgumentError isempty(x)
-        @test_throws ArgumentError isfinite(x)
-        @test_throws ArgumentError isnan(x)
-        @test isinteger(x)
-        @test x == 1
+
+        @test !isnan(x)
+
         @test isone(x)
         @test !iszero(x)
+        @test_throws ArgumentError iszero(interval(0, 1))
+        @test x != y
+        @test x == 1
+        @test_throws ArgumentError interval(1, 2) != 2
+        @test_throws ArgumentError interval(1, 2) != y
+        @test_throws ArgumentError y != interval(1, 2)
+        @test_throws ArgumentError interval(1, 2) == interval(1, 2)
+
+        @test x < y
+        @test x < 2
+        @test !(x > y)
+        @test !(x < x)
+        @test !(x < 1)
+        @test_throws ArgumentError x < interval(1, 2)
+
+        @test isfinite(x)
+        @test_throws ArgumentError isfinite(interval(1, Inf))
+
+        @test isinteger(x)
+        @test !isinteger(interval(1.2, 1.9))
+        @test_throws ArgumentError isinteger(interval(1.5, 2.5))
+
+        #
+
+        @test_throws ArgumentError intersect(x, x)
+        @test_throws ArgumentError isapprox(x, x)
+        @test_throws ArgumentError isdisjoint(x, x)
+        @test_throws ArgumentError issubset(x, x)
+        @test_throws ArgumentError issetequal(x, x)
+        @test_throws ArgumentError x ∈ x
+        @test_throws ArgumentError isempty(x)
+        @test_throws ArgumentError union(x, x)
+        @test_throws ArgumentError setdiff(x, x)
     end
 
 end

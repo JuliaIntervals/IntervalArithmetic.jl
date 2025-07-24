@@ -78,100 +78,62 @@ Base.hash(x::Interval, h::UInt) = hash(sup(x), hash(inf(x), hash(Interval, h)))
 
 #
 
-for T ∈ (:BareInterval, :Interval)
-    @eval begin
-        function Base.:(==)(x::$T, y::$T) # also returned when calling `≤`, `≥`, `isequal`
-            isthin(x) && return sup(x) == y
-            isthin(y) && return x == sup(y)
-            return throw(ArgumentError("`==` is purposely not supported when the intervals are overlapping. See instead `isequal_interval`"))
-        end
-
-        Base.:<(::$T, ::$T) = # also returned when calling `isless`, `>`
-            throw(ArgumentError("`<` is purposely not supported for intervals. See instead `isstrictless`, `strictprecedes`"))
-
-        Base.isdisjoint(::$T, ::$T) =
-            throw(ArgumentError("`isdisjoint` is purposely not supported for intervals. See instead `isdisjoint_interval`"))
-
-        Base.issubset(::$T, ::$T) =
-            throw(ArgumentError("`issubset` is purposely not supported for intervals. See instead `issubset_interval`"))
-
-        Base.issetequal(::$T, ::$T) =
-            throw(ArgumentError("`issetequal` is purposely not supported for intervals. See instead `isequal_interval`"))
-
-        Base.in(::$T, ::$T) =
-            throw(ArgumentError("`in` is purposely not supported for intervals. See instead `in_interval`"))
-        Base.in(::Real, ::$T) =
-            throw(ArgumentError("`in` is purposely not supported for intervals. See instead `in_interval`"))
-        Base.in(::$T, ::Real) =
-            throw(ArgumentError("`in` is purposely not supported for intervals. See instead `in_interval`"))
-
-        Base.isempty(::$T) =
-            throw(ArgumentError("`isempty` is purposely not supported for intervals. See instead `isempty_interval`"))
-
-        Base.isfinite(::$T) = # also returned when calling `isinf`
-            throw(ArgumentError("`isfinite` is purposely not supported for intervals. See instead `isbounded`"))
-
-        Base.isnan(::$T) =
-            throw(ArgumentError("`isnan` is purposely not supported for intervals. See instead `isnai`"))
-
-        Base.intersect(::$T) =
-            throw(ArgumentError("`intersect` is purposely not supported for intervals. See instead `intersect_interval`"))
-
-        Base.union!(::BitSet, ::$T) = # needed to resolve ambiguity
-            throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
-        Base.union!(::AbstractSet, ::$T) = # also returned when calling `intersect`, `symdiff` with intervals
-            throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
-        Base.union!(::AbstractVector{S}, ::$T) where {S} =
-            throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
-        Base.union!(::AbstractVector{S}, ::$T, ::Any, ::Any...) where {S} =
-            throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
-        Base.union!(::AbstractVector{S}, ::$T, ::$T, ::Any...) where {S} =
-            throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
-        Base.union!(::AbstractVector{S}, ::Any, ::$T, ::Any...) where {S} =
-            throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
-
-        Base.setdiff(::$T) =
-            throw(ArgumentError("`setdiff` is purposely not supported for intervals. See instead `interiordiff`"))
-        Base.setdiff!(::AbstractSet, ::$T) =
-            throw(ArgumentError("`setdiff!` is purposely not supported for intervals. See instead `interiordiff`"))
-    end
+function Base.:(==)(x::Interval, y::Interval) # also returned when calling `≤`, `≥`, `isequal`
+    isthin(x) & isthin(y) && return isequal_interval(x, y)
+    isdisjoint_interval(x, y) && return false
+    return throw(ArgumentError("`==` is purposely not supported for overlapping non-thin intervals. See instead `isequal_interval`"))
 end
-Base.union!(::AbstractVector{S}, ::BareInterval, ::Interval, ::Any...) where {S} =
+
+function Base.:<(x::Interval, y::Interval)
+    strictprecedes(x, y) && return true
+    strictprecedes(y, x) && return false
+    isthin(x) & isthin(y) && return !isequal_interval(x, y)
+    return throw(ArgumentError("`<` is purposely not supported for overlapping intervals. See instead `strictprecedes`"))
+end
+
+function Base.isfinite(x::Interval) # also returned when calling `isinf`
+    isbounded(x) && return true
+    return throw(ArgumentError("`isfinite` is purposely not supported for intervals containing infinite bounds. See instead `isbounded`"))
+end
+
+Base.isnan(x::Interval) = isnai(x)
+
+Base.isinteger(x::Interval) = !isthin(x) & !isdisjoint_interval(x, floor(x), ceil(x)) ? throw(ArgumentError("`isinteger` is purposely not supported for a non-thin interval containing at least one integer. See instead `isthininteger`")) : isthininteger(x)
+
+# disallowed
+
+Base.in(::Interval, ::Interval) =
+    throw(ArgumentError("`in` is purposely not supported for intervals. See instead `in_interval`"))
+
+Base.isempty(::Interval) =
+    throw(ArgumentError("`isempty` is purposely not supported for intervals. See instead `isempty_interval`"))
+
+Base.isapprox(::Interval, ::Interval) =
+    throw(ArgumentError("`isapprox` is purposely not supported for intervals"))
+
+Base.isdisjoint(::Interval, ::Interval) =
+    throw(ArgumentError("`isdisjoint` is purposely not supported for intervals. See instead `isdisjoint_interval`"))
+Base.issubset(::Interval, ::Interval) =
+    throw(ArgumentError("`issubset` is purposely not supported for intervals. See instead `issubset_interval`"))
+Base.issetequal(::Interval, ::Interval) =
+    throw(ArgumentError("`issetequal` is purposely not supported for intervals. See instead `isequal_interval`"))
+Base.intersect(::Interval, ::Interval...) =
+    throw(ArgumentError("`intersect` is purposely not supported for intervals. See instead `intersect_interval`"))
+
+Base.union!(::BitSet, ::Interval) = # needed to resolve ambiguity
     throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
-Base.union!(::AbstractVector{S}, ::Interval, ::BareInterval, ::Any...) where {S} =
+Base.union!(::AbstractSet, ::Interval) = # also returned when calling `intersect`, `symdiff` with intervals
+    throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
+Base.union!(::AbstractVector{S}, ::Interval) where {S} =
+    throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
+Base.union!(::AbstractVector{S}, ::Interval, ::Any, ::Any...) where {S} =
+    throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
+Base.union!(::AbstractVector{S}, ::Interval, ::Interval, ::Any...) where {S} =
+    throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
+Base.union!(::AbstractVector{S}, ::Any, ::Interval, ::Any...) where {S} =
     throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
 
-
-# pointwise equality
-
-"""
-    ==(::BareInterval, ::Number)
-    ==(::Number, ::BareInterval)
-    ==(::Interval, ::Number)
-    ==(::Number, ::Interval)
-
-Test whether an interval is the singleton of a given number. In other words, the
-result is true if and only if the interval contains only that number.
-
-!!! note
-    Comparison between intervals is purposely disallowed. Indeed, equality
-    between non-singleton intervals has distinct properties, notably ``x = y``
-    does not imply ``x - y = 0``. See instead [`isequal_interval`](@ref).
-"""
-Base.:(==)(x::Union{BareInterval,Interval}, y::Number) = isthin(x, y)
-Base.:(==)(x::Number, y::Union{BareInterval,Interval}) = y == x
-# needed to resolve ambiguity from irrationals.jl
-Base.:(==)(x::Interval, y::AbstractIrrational) = isthin(x, y)
-Base.:(==)(x::AbstractIrrational, y::Interval) = y == x
-# needed to resolve ambiguity from complex.jl
-Base.:(==)(x::Interval, y::Complex) = isreal(y) & (real(y) == x)
-Base.:(==)(x::Complex, y::Interval) = y == x
-
-# follows docstring of `Base.iszero`
-Base.iszero(x::Union{BareInterval,Interval}) = isthinzero(x)
-
-# follows docstring of `Base.isone`
-Base.isone(x::Union{BareInterval,Interval}) = isthinone(x)
-
-# follows docstring of `Base.isinteger`
-Base.isinteger(x::Union{BareInterval,Interval}) = isthininteger(x)
+Base.setdiff(::Interval) =
+    throw(ArgumentError("`setdiff` is purposely not supported for intervals. See instead `interiordiff`"))
+Base.setdiff!(::AbstractSet, ::Interval) =
+    throw(ArgumentError("`setdiff!` is purposely not supported for intervals. See instead `interiordiff`"))
