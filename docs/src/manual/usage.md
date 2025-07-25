@@ -14,7 +14,7 @@ There are several useful output representations for intervals. The display is co
 
     - `:midpoint`: output in the midpoint-radius form, e.g. `1.2 ± 0.100001`.
 
-- `sigfigs :: Int` keyword argument: number of significant figures to show in standard mode.
+- `sigdigits :: Int` keyword argument: number of significant figures to show in standard mode.
 
 - `decorations :: Bool` keyword argument: whether to show [decorations](decorations.md) or not.
 

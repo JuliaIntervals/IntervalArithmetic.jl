@@ -12,9 +12,9 @@ For instance, consider the following examples:
 
 ```@repl guarantee
 using IntervalArithmetic
+setdisplay(; sigdigits = 6)
 convert(Interval{Float64}, 1.) # considered "not guaranteed" as this call can be done implicitly
 interval(1) # considered "guaranteed" as the user explicitly constructed the interval
-interval(1)
 ```
 
 In contrast, a [`BareInterval`](@ref) can only be constructed via [`bareinterval`](@ref), it is not a subtype of `Real`, and there are no allowed conversion with `Number`. Thus, this interval type is always guaranteed.
