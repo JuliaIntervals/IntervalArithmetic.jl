@@ -119,16 +119,18 @@ See also: [`fastpow`](@ref), [`pown`](@ref) and [`fastpown`](@ref).
 # Examples
 
 ```jldoctest
+julia> using IntervalArithmetic
+
 julia> setdisplay(:full);
 
 julia> pow(bareinterval(2, 3), bareinterval(2))
 BareInterval{Float64}(4.0, 9.0)
 
 julia> pow(interval(-1, 1), interval(3))
-Interval{Float64}(0.0, 1.0, trv)
+Interval{Float64}(0.0, 1.0, trv, true)
 
 julia> pow(interval(-1, 1), interval(-3))
-Interval{Float64}(1.0, Inf, trv)
+Interval{Float64}(1.0, Inf, trv, true)
 ```
 """
 pow(x, y)
@@ -209,16 +211,18 @@ See also: [`fastpown`](@ref), [`pow`](@ref) and [`fastpow`](@ref).
 # Examples
 
 ```jldoctest
+julia> using IntervalArithmetic
+
 julia> setdisplay(:full);
 
 julia> pown(bareinterval(2, 3), 2)
 BareInterval{Float64}(4.0, 9.0)
 
 julia> pown(interval(-1, 1), 3)
-Interval{Float64}(-1.0, 1.0, com)
+Interval{Float64}(-1.0, 1.0, com, true)
 
 julia> pown(interval(-1, 1), -3)
-Interval{Float64}(-Inf, Inf, trv)
+Interval{Float64}(-Inf, Inf, trv, true)
 ```
 """
 function pown(x::BareInterval{T}, n::Integer) where {T<:NumTypes}
