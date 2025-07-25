@@ -13,7 +13,7 @@ Some of the things that Arblib excels at are:
 Some of the things that IntervalArithmetic excels at are:
 1. Fast computations at `Float32` and `Float64` precision.
 2. Computations with wide intervals (FLINT is in general not optimized for this, though the situation is improving).
-3. Built-in safety features, such as decorations (see [Decorations](@ref)) and the "NG" flag (see [Guarantee](@ref)).
+3. Built-in safety features, such as decorations (see [Decorations](@ref)) and the "NG" flag (see ["NG" label](@ref)).
 
 
 
