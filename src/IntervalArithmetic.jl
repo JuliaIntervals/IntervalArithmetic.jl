@@ -1,59 +1,58 @@
 """
     IntervalArithmetic
 
-Library for validated numerics using interval arithmetic, offering tools to
-rigorously bound errors in numerical computations by representing values as
-intervals and ensuring that computed results contain the true value. It provides
-accurate, and efficient methods, ideal for scientific computing,
-computer-assisted proofs, and any domain requiring certified numerical results.
+Library for validated numerics using interval arithmetic. It provides tools for
+performing numerical calculations with guaranteed bounds by representing values
+as intervals: computed results enclose the true value. It is well-suited for
+computer-assisted proofs, and any context requiring certified numerics.
 
-Key features:
+## Configuration options
 
-- **Bound Type**: The default numerical type used to represent the bounds of the
-  intervals. The default is `Float64`, but other subtypes of
-  [`IntervalArithmetic.NumTypes`](@ref) can be used to adjust precision.
+The behavior and performance of the library can be customized through the
+following parameters. All defaults can be modified using
+[`IntervalArithmetic.configure`](@ref).
 
-- **Flavor**: The interval representation that adhere to the IEEE Standard
-  1788-2015. By default, it uses the set-based flavor, which excludes infinity
-  to be part of an interval. Learn more: [`IntervalArithmetic.Flavor`](@ref).
+- **Bound Type**: The default numerical type used for interval endpoints. The
+  default is `Float64`, but any subtype of [`IntervalArithmetic.NumTypes`](@ref)
+  may be used to adjust precision, or specific numerical requirements.
 
-- **Interval Rounding**: Controls the rounding behavior for interval arithmetic
-  operations. By default, the library employs correct rounding to ensure that
+- **Flavor**: The interval interpretation according to the IEEE Standard
+  1788-2015. The default is the *set-based flavor*, which excludes infinity
+  from intervals. Learn more: [`IntervalArithmetic.Flavor`](@ref).
+
+- **Interval Rounding**: The rounding behavior for interval arithmetic
+  operations. By default, the library employs *correct rounding* to ensure that
   bounds are computed as tightly as possible. Learn more:
   [`IntervalArithmetic.IntervalRounding`](@ref).
 
-- **Power mode**: A performance setting for power operations. The default mode
-  uses an efficient algorithm prioritizing fast computation, but it can be
-  adjusted for more precise, slower calculations if needed. Learn more:
+- **Power mode**: The performance setting for computing powers. The default is
+  an efficient algorithm prioritizing performance over precision. Learn more:
   [`IntervalArithmetic.PowerMode`](@ref).
 
-- **Matrix Multiplication mode**: A performance setting for matrix
-  multiplication operations. The default mode uses an efficient algorithm
-  prioritizing fast computation, but it can be changed to use the standard
-  definition of matrix multiplication. Learn more:
+- **Matrix Multiplication mode**: The performance setting for computing matrix
+  multiplications. The default is an efficient algorithm prioritizing
+  performance over precision. Learn more:
   [`IntervalArithmetic.MatMulMode`](@ref).
 
-The default behaviors described above can be configured via
-[`IntervalArithmetic.configure`](@ref).
+## Display settings
 
-**Display Settings**: controls how intervals are displayed. By default,
+The display of intervals is controlled by [`setdisplay`](@ref). By default, the
 intervals are shown using the standard mathematical notation ``[a, b]``, along
-with decorations and up to 6 significant digits. Learn more:
-[`setdisplay`](@ref).
+with decorations and up to 6 significant digits.
 
 # Usage
 
-```julia
-using IntervalArithmetic
+```jldoctest
+julia> using IntervalArithmetic
 
-# Create an interval
-x = interval(1.0, 2.0)
+julia> x = interval(1.0, 2.0) # create an interval
+[1.0, 2.0]
 
-# Perform a rigorous computation
-x + exp(interval(π))
+julia> x + exp(interval(π)) # perform a rigorous computation
+[24.1407, 25.1407]
 ```
 
-Learn more: https://github.com/JuliaIntervals/IntervalArithmetic.jl
+Learn more: https://github.com/JuliaIntervals/IntervalArithmetic.jl.
 """
 module IntervalArithmetic
 
@@ -201,34 +200,27 @@ _mul!() = error("This function requires LinearAlgebra to be loaded")
 
 Configure the default behavior for:
 
-- **Bound Type**: The default numerical type used to represent the bounds of the
-  intervals. The default is `Float64`, but other subtypes of
-  [`IntervalArithmetic.NumTypes`](@ref) can be used to adjust precision.
-  Keyword: `numtype`. Available options: subtypes of `IntervalArithmetic.NumTypes`.
+- **Bound Type**: The default numerical type used for interval endpoints. The
+  default is `Float64`, but any subtype of [`IntervalArithmetic.NumTypes`](@ref)
+  may be used to adjust precision, or specific numerical requirements.
 
-- **Flavor**: The interval representation that adhere to the IEEE Standard
-  1788-2015. By default, it uses the set-based flavor, which excludes infinity
-  to be part of an interval. Learn more: [`IntervalArithmetic.Flavor`](@ref).
-  Keyword: `flavor`. Available options: `:set_based` (default).
+- **Flavor**: The interval interpretation according to the IEEE Standard
+  1788-2015. The default is the *set-based flavor*, which excludes infinity
+  from intervals. Learn more: [`IntervalArithmetic.Flavor`](@ref).
 
-- **Interval Rounding**: Controls the rounding behavior for interval arithmetic
-  operations. By default, the library employs correct rounding to ensure that
+- **Interval Rounding**: The rounding behavior for interval arithmetic
+  operations. By default, the library employs *correct rounding* to ensure that
   bounds are computed as tightly as possible. Learn more:
   [`IntervalArithmetic.IntervalRounding`](@ref).
-  Keyword: `rounding`. Available options: `:correct` (default), `:none`.
 
-- **Power mode**: A performance setting for power operations. The default mode
-  uses an efficient algorithm prioritizing fast computation, but it can be
-  adjusted for more precise, slower calculations if needed. Learn more:
+- **Power mode**: The performance setting for computing powers. The default is
+  an efficient algorithm prioritizing performance over precision. Learn more:
   [`IntervalArithmetic.PowerMode`](@ref).
-  Keyword: `power`. Available options: `:fast` (default), `:slow`.
 
-- **Matrix Multiplication mode**: A performance setting for matrix
-  multiplication operations. The default mode uses an efficient algorithm
-  prioritizing fast computation, but it can be changed to use the standard
-  definition of matrix multiplication. Learn more:
+- **Matrix Multiplication mode**: The performance setting for computing matrix
+  multiplications. The default is an efficient algorithm prioritizing
+  performance over precision. Learn more:
   [`IntervalArithmetic.MatMulMode`](@ref).
-  Keyword: `matmul`. Available options: `:fast` (default), `:slow`.
 """
 function configure(; numtype::Type{<:NumTypes}=Float64, flavor::Symbol=:set_based, rounding::Symbol=:correct, power::Symbol=:fast, matmul::Symbol=:fast)
     configure_numtype(numtype)

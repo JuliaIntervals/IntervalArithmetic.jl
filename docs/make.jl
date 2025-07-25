@@ -22,6 +22,7 @@ makedocs(;
         "Philosophy" => "philosophy.md",
         "Manual" => [
             "Constructing intervals" => "manual/construction.md",
+            "Guarantee and `ExactReal`" => "manual/guarantee.md",
             "Usage" => "manual/usage.md",
             "Configuration" => "manual/configuration.md",
             "Symbols" => "manual/symbols.md",

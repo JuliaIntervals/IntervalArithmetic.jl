@@ -38,11 +38,12 @@ Each of those points lead to specific design choice for `IntervalArithmetic.jl`,
 choices that we detail below.
 
 
+
 ## Compatibility with other `Number`s
 
 In julia it is expected that `1 + 2.2` silently promoted the integer `1`
 to a `Float64` to be able to perform the addition.
-Following this logic, it means that `0.1 + interval(2.2, 2.3)` should 
+Following this logic, it means that `0.1 + interval(2.2, 2.3)` should
 silently promote `0.1` to an interval.
 
 However, in this case we can not guarantee that `0.1` is known exactly,
@@ -57,6 +58,7 @@ but the calculation is not interrupted, and no warning is printed.
 For convenience, we provide the [`ExactReal`](@ref) and [`@exact`](@ref) macro
 to allow to explicitly mark a number as being exact,
 and not produce the `NG` flag when mixed with intervals.
+
 
 
 ## Comparison operators
@@ -103,6 +105,7 @@ Stacktrace:
 ```
 
 
+
 ## Intervals as sets
 
 We have taken the perspective to always let `Interval`s act as if they were numbers.
@@ -135,6 +138,7 @@ except for `setdiff`.
 We can not meaningfully define the set difference of two intervals,
 because our intervals are always closed,
 while the result of `setdiff` can be open.
+
 
 
 # Summary

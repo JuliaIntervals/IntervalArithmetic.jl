@@ -1,3 +1,5 @@
+# Constructing intervals
+
 The library provides two interval types. The first one is [`BareInterval`](@ref), corresponding to a basic implementation of intervals, stored by their infimum and supremum. The second type is [`Interval`](@ref) and builds on top of bare intervals, with the additional fields `decoration` and `isguaranteed`. See the sections below.
 
 ```@repl construction
@@ -128,25 +130,6 @@ These are all examples of ill-formed intervals, resulting in the decoration `ill
 
 !!! danger
     The decoration `ill` is an indicator that an error has occured. Therefore, any interval marked by this decoration cannot be trusted and the code needs to be debugged.
-
-
-
-### Guarantee
-
-A *guarantee* is yet another label, independent of decorations, and not described by the IEEE Standard 1788-2015 specifications. Its purpose is to accomodate for Julia's extensive conversion and promotion system, while retaining reliability in computations. Specifically, an interval `x` constructed via [`interval`](@ref) satisfies `isguaranteed(x) == true`. However, if a call to `convert(::Type{<:Interval}, ::Real)` occurs, then the resulting interval `x` satisfies `isguaranteed(x) == false`, receiving the "NG" (not guaranteed) label. For instance, consider the following examples:
-
-```@repl construction
- convert(Interval{Float64}, 1.) # considered "not guaranteed" as this call can be done implicitly
-```
-
-```@repl construction
-interval(1) # considered "guaranteed" as the user explicitly constructed the interval
-```
-
-In contrast, a [`BareInterval`](@ref) can only be constructed via [`bareinterval`](@ref), it is not a subtype of `Real`, and there are no allowed conversion with `Number`. Thus, this interval type is always guaranteed.
-
-!!! danger
-    A user interested in validated numerics should **always** track down the source of an "NG" label.
 
 
 

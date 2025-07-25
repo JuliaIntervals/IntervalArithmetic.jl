@@ -1,4 +1,8 @@
-## Display modes
+# Manipulating intervals
+
+
+
+### Display modes
 
 There are several useful output representations for intervals. The display is controlled globally by the [`setdisplay`](@ref) function, which has the following options:
 
@@ -31,7 +35,7 @@ a
 
 
 
-## Arithmetic operations
+### Arithmetic operations
 
 Basic arithmetic operations (`+`, `-`, `*`, `/`, `^`) are defined for pairs of intervals in a standard way: the result is the smallest interval containing the result of operating with each element of each interval. More precisely, for two intervals ``X`` and ``Y`` and an operation ``\bigcirc``, we define the operation on the two intervals by
 
@@ -57,7 +61,7 @@ X - X
 
 
 
-## Elementary functions
+### Elementary functions
 
 The main elementary functions are implemented. The functions for `Interval{Float64}` internally use routines from the correctly-rounded [CRlibm library](https://github.com/dpsanders/CRlibm.jl) where possible, i.e. for the following functions defined in that library:
 - `exp`, `expm1`
@@ -91,7 +95,7 @@ sin(Y)
 
 
 
-## Comparisons
+### Comparisons
 
 If the result of a comparison can be established with guarantee,
 it will be return, otherwise, an error is thrown.
@@ -110,7 +114,8 @@ In particular, `if ... else ... end` statements used for floating-points will of
 See [Philosophy](@ref) for more details and why this choice was made.
 
 
-## Set operations
+
+### Set operations
 
 Set operations are all disallowed and error on intervals to avoid ambiguities.
 To perform set operations on intervals, use the `*_interval` equivalent explicitly,
@@ -127,7 +132,8 @@ intersect_interval(interval(1, 2), interval(2))
 See [Philosophy](@ref) for more details and why this choice was made.
 
 
-## Piecewise functions
+
+### Piecewise functions
 
 Since intervals don't play well with `if ... else ... end` statement,
 we provide a utility to define function by pieces:
@@ -146,6 +152,6 @@ and deal properly with the decorations of intervals.
 
 
 
-## Custom interval bounds type
+### Custom interval bounds type
 
 A `BareInterval{T}` or `Interval{T}` have the restriction `T <: Union{Rational,AbstractFloat}` which is the parametric type for the bounds of the interval. Supposing one wishes to use their own numeric type `MyNumType <: Union{Rational,AbstractFloat}`, they must provide their own arithmetic operations (with correct rounding!).
