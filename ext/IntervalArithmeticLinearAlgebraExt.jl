@@ -222,9 +222,14 @@ end
 # Note: Rump's algorithm
 
 function IntervalArithmetic._mul!(::IntervalArithmetic.MatMulMode{:fast}, C, A, B, α, β)
-    Int != Int32 && return _fastmul!(C, A, B, α, β)
-    @info "Fast multiplication is not supported on 32-bit systems, using the slow version"
-    return IntervalArithmetic._mul!(IntervalArithmetic.MatMulMode{:slow}(), C, A, B, α, β)
+    if Int == Int32
+        @info "Fast multiplication is not supported on 32-bit systems, using the slow version"
+        return IntervalArithmetic._mul!(IntervalArithmetic.MatMulMode{:slow}(), C, A, B, α, β)
+    else
+        numtype(eltype(C)) <: Union{Float16,Float32,Float64} && return _fastmul!(C, A, B, α, β)
+        @info "Fast multiplication is only supported for `Union{Float16,Float32,Float64}`, using the slow version"
+        return IntervalArithmetic._mul!(IntervalArithmetic.MatMulMode{:slow}(), C, A, B, α, β)
+    end
 end
 
 for (T, S) ∈ ((:Interval, :Interval), (:Interval, :Any), (:Any, :Interval))
