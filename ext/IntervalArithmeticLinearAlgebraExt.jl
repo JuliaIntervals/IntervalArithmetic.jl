@@ -157,7 +157,7 @@ function IntervalArithmetic.configure_matmul(matmul::Symbol)
     return matmul
 end
 
-IntervalArithmetic.configure_matmul(:slow)
+IntervalArithmetic.configure_matmul(:fast)
 
 #
 
