@@ -6,6 +6,8 @@ performing numerical calculations with guaranteed bounds by representing values
 as intervals: computed results enclose the true value. It is well-suited for
 computer-assisted proofs, and any context requiring certified numerics.
 
+Learn more: https://github.com/JuliaIntervals/IntervalArithmetic.jl.
+
 ## Configuration options
 
 The behavior and performance of the library can be customized through the
@@ -39,20 +41,6 @@ following parameters. All defaults can be modified using
 The display of intervals is controlled by [`setdisplay`](@ref). By default, the
 intervals are shown using the standard mathematical notation ``[a, b]``, along
 with decorations and up to 6 significant digits.
-
-# Usage
-
-```jldoctest
-julia> using IntervalArithmetic
-
-julia> x = interval(1.0, 2.0) # create an interval
-[1.0, 2.0]
-
-julia> x + exp(interval(π)) # perform a rigorous computation
-[24.1407, 25.1407]
-```
-
-Learn more: https://github.com/JuliaIntervals/IntervalArithmetic.jl.
 """
 module IntervalArithmetic
 
