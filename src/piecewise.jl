@@ -143,10 +143,7 @@ julia> setdisplay(:full);
 julia> myabs = Piecewise(
           Domain{:open, :closed}(-Inf, 0) => x -> -x,
           Domain{:open, :open}(0, Inf) => identity
-       )
-Piecewise function with 2 pieces:
-  (-Inf, 0] -> var"#119#120"()
-  (0, Inf) -> identity
+       );
 
 julia> myabs(-22.3)
 22.3

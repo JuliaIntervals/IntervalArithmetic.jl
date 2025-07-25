@@ -36,16 +36,18 @@ See also: [`pow`](@ref), [`pown`](@ref), [`fastpow`](@ref) and
 # Examples
 
 ```jldoctest
+julia> using IntervalArithmetic
+
 julia> setdisplay(:full);
 
 julia> bareinterval(2, 3) ^ bareinterval(2)
 BareInterval{Float64}(4.0, 9.0)
 
 julia> interval(-1, 1) ^ interval(3)
-Interval{Float64}(-1.0, 1.0, com)
+Interval{Float64}(-1.0, 1.0, com, true)
 
 julia> interval(-1, 1) ^ interval(-3)
-Interval{Float64}(-Inf, Inf, trv)
+Interval{Float64}(-Inf, Inf, trv, true)
 ```
 """
 function Base.:^(x::BareInterval, y::BareInterval)

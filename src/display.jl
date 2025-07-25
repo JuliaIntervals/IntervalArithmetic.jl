@@ -43,15 +43,7 @@ value is left unchanged.
 # Examples
 
 ```jldoctest
-julia> setdisplay(:infsup; decorations = true, sigdigits = 6) # default display options
-Display options:
-  - format: infsup
-  - decorations: true
-  - NG flag: true
-  - significant digits: 6
-
-julia> x = interval(0.1, 0.3)
-[0.1, 0.3]_com
+julia> using IntervalArithmetic
 
 julia> setdisplay(:full)
 Display options:
@@ -60,7 +52,7 @@ Display options:
   - NG flag: true (ignored)
   - significant digits: 6 (ignored)
 
-julia> x
+julia> x = interval(0.1, 0.3)
 Interval{Float64}(0.1, 0.3, com, true)
 
 julia> setdisplay(:infsup; sigdigits = 3)
@@ -82,6 +74,16 @@ Display options:
 
 julia> x
 [0.1, 0.3]
+
+julia> setdisplay(:infsup; decorations = true, ng_flag = true, sigdigits = 6) # default display options
+Display options:
+  - format: infsup
+  - decorations: true
+  - NG flag: true
+  - significant digits: 6
+
+julia> x
+[0.1, 0.3]_com
 ```
 """
 function setdisplay(format::Symbol = display_options.format;
