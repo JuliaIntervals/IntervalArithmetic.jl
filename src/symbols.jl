@@ -27,10 +27,10 @@ julia> using IntervalArithmetic.Symbols
 julia> setdisplay(:full);
 
 julia> (1//1)..π
-Interval{Rational{Int64}}(1//1, 85563208//27235615, com)
+Interval{Rational{Int64}}(1//1, 85563208//27235615, com, true)
 
 julia> 0.1..0.3
-Interval{Float64}(0.1, 0.3, com)
+Interval{Float64}(0.1, 0.3, com, true)
 ```
 """
 ..(a, b) = interval(a, b; format = :infsup)
@@ -60,10 +60,10 @@ julia> using IntervalArithmetic.Symbols
 julia> setdisplay(:full);
 
 julia> 0 ± π
-Interval{Float64}(-3.1415926535897936, 3.1415926535897936, com)
+Interval{Float64}(-3.1415926535897936, 3.1415926535897936, com, true)
 
 julia> 0//1 ± π
-Interval{Rational{Int64}}(-85563208//27235615, 85563208//27235615, com)
+Interval{Rational{Int64}}(-85563208//27235615, 85563208//27235615, com, true)
 ```
 """
 ±(m, r) = interval(m, r; format = :midpoint)

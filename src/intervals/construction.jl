@@ -135,6 +135,8 @@ See also: [`interval`](@ref), [`±`](@ref), [`..`](@ref) and [`@I_str`](@ref).
 # Examples
 
 ```jldoctest
+julia> using IntervalArithmetic
+
 julia> setdisplay(:full);
 
 julia> bareinterval(1//1, π)
@@ -318,6 +320,8 @@ In the case of a complex interval `x`, this is semantically equivalent to
 # Examples
 
 ```jldoctest
+julia> using IntervalArithmetic
+
 julia> isguaranteed(bareinterval(1))
 true
 
@@ -357,19 +361,21 @@ See also: [`±`](@ref), [`..`](@ref) and [`@I_str`](@ref).
 # Examples
 
 ```jldoctest
+julia> using IntervalArithmetic
+
 julia> setdisplay(:full);
 
 julia> interval(1//1, π)
-Interval{Rational{Int64}}(1//1, 85563208//27235615, com)
+Interval{Rational{Int64}}(1//1, 85563208//27235615, com, true)
 
 julia> interval(Rational{Int32}, 1//1, π)
-Interval{Rational{Int32}}(1//1, 85563208//27235615, com)
+Interval{Rational{Int32}}(1//1, 85563208//27235615, com, true)
 
 julia> interval(1, π)
-Interval{Float64}(1.0, 3.1415926535897936, com)
+Interval{Float64}(1.0, 3.1415926535897936, com, true)
 
 julia> interval(BigFloat, 1, π)
-Interval{BigFloat}(1.0, 3.141592653589793238462643383279502884197169399375105820974944592307816406286233, com)
+Interval{BigFloat}(1.0, 3.141592653589793238462643383279502884197169399375105820974944592307816406286233, com, true)
 ```
 """
 function interval(::Type{T}, a, b, d::Decoration = com; format::Symbol = :infsup) where {T}
@@ -574,16 +580,18 @@ to `parse(Interval{T}, string(x))` if `x` is a `Number`.
 # Examples
 
 ```jldoctest
+julia> using IntervalArithmetic
+
 julia> setdisplay(:full);
 
 julia> x = IntervalArithmetic.atomic(Float64, 0.1)
-Interval{Float64}(0.09999999999999999, 0.1, com)
+Interval{Float64}(0.09999999999999999, 0.1, com, true)
 
 julia> in_interval(1//10, IntervalArithmetic.atomic(Float64, 0.1))
 true
 
 julia> IntervalArithmetic.atomic(Float64, 0.3)
-Interval{Float64}(0.3, 0.30000000000000004, com)
+Interval{Float64}(0.3, 0.30000000000000004, com, true)
 
 julia> in_interval(3//10, IntervalArithmetic.atomic(Float64, 0.3))
 true
@@ -615,6 +623,8 @@ constructor [`atomic`](@ref).
 # Examples
 
 ```jldoctest
+julia> using IntervalArithmetic
+
 julia> setdisplay(:full);
 
 julia> @macroexpand @interval sin(1) # Float64 is the default bound type
@@ -624,7 +634,7 @@ julia> @macroexpand @interval Float32 sin(1)
 :(sin(IntervalArithmetic.atomic(Float32, 1)))
 
 julia> @interval Float64 sin(1) exp(1)
-Interval{Float64}(0.8414709848078965, 2.7182818284590455, com)
+Interval{Float64}(0.8414709848078965, 2.7182818284590455, com, true)
 ```
 """
 macro interval(T, expr)

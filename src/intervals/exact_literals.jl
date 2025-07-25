@@ -26,23 +26,27 @@ producing the "NG" flag.
 # Examples
 
 ```jldoctest
+julia> using IntervalArithmetic
+
 julia> setdisplay(:full);
 
 julia> 0.5 * interval(1)
-Interval{Float64}(0.5, 0.5, com)_NG
+Interval{Float64}(0.5, 0.5, com, false)
 
 julia> ExactReal(0.5) * interval(1)
-Interval{Float64}(0.5, 0.5, com)
+Interval{Float64}(0.5, 0.5, com, false)
+
+julia> setdisplay(:infsup);
 
 julia> [1, interval(2)]
 2-element Vector{Interval{Float64}}:
- Interval{Float64}(1.0, 1.0, com)_NG
- Interval{Float64}(2.0, 2.0, com)
+ [1.0, 1.0]_com_NG
+ [2.0, 2.0]_com
 
 julia> [ExactReal(1), interval(2)]
 2-element Vector{Interval{Float64}}:
- Interval{Float64}(1.0, 1.0, com)
- Interval{Float64}(2.0, 2.0, com)
+ [1.0, 1.0]_com
+ [2.0, 2.0]_com
 ```
 
 See also: [`@exact`](@ref).
@@ -206,19 +210,21 @@ macro allows defining generic functions, seamlessly accepting both `Number` and
 # Examples
 
 ```jldoctest
-julia> setdisplay(:full);
+julia> using IntervalArithmetic
 
-julia> f(x) = 1.2*x + 0.1
+julia> setdisplay(:infsup);
+
+julia> f(x) = 1.2 * x + 0.1
 f (generic function with 1 method)
 
 julia> f(interval(1, 2))
-Interval{Float64}(1.2999999999999998, 2.5, com)_NG
+[1.29999, 2.5]_com_NG
 
-julia> @exact g(x) = 1.2*x + 0.1
+julia> @exact g(x) = 1.2 * x + 0.1
 g (generic function with 1 method)
 
 julia> g(interval(1, 2))
-Interval{Float64}(1.2999999999999998, 2.5, com)
+[1.29999, 2.5]_com
 
 julia> g(1.4)
 1.78

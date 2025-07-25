@@ -103,6 +103,10 @@ Return an interval containing only the value for an interval input,
 and the value directly otherwise.
 
 ```jldoctest
+julia> using IntervalArithmetic
+
+julia> setdisplay(:full);
+
 julia> c = Constant(1.2)
 Constant{Float64}(1.2)
 
@@ -110,7 +114,7 @@ julia> c(22.2)
 1.2
 
 julia> c(interval(0, 1.3))
-Interval{Float64}(1.2, 1.2, com)
+Interval{Float64}(1.2, 1.2, com, true)
 ```
 
 Note that this is not equivalent to `Returns(value)` from base,
@@ -131,7 +135,11 @@ end
 A function defined by pieces (each associating a domain to a function).
 Support both intervals and standard numbers.
 
-```jl
+```jldoctest
+julia> using IntervalArithmetic
+
+julia> setdisplay(:full);
+
 julia> myabs = Piecewise(
           Domain{:open, :closed}(-Inf, 0) => x -> -x,
           Domain{:open, :open}(0, Inf) => identity
@@ -144,7 +152,7 @@ julia> myabs(-22.3)
 22.3
 
 julia> myabs(interval(-5, 5))
-Interval{Float64}(0.0, 5.0, def)
+Interval{Float64}(0.0, 5.0, def, true)
 ```
 
 For constant pieces, it is recommended to use `Constant`
@@ -203,7 +211,7 @@ function Piecewise(
     if length(domains) != length(fs)
         throw(ArgumentError("the number of domains and the number of functions don't match"))
     end
-    
+
     if length(domains) - 1 != length(continuity)
         n = length(domains)
         throw(ArgumentError("$(length(sub)) junction points but $(n - 1) are expected based on the number of domains ($n)"))
@@ -251,7 +259,7 @@ end
 function Base.show(io::IO, ::MIME"text/plain", piecewise::Piecewise)
     n = length(pieces(piecewise))
     print(io, "Piecewise function with $n pieces:")
-    
+
     for (domain, f) in pieces(piecewise)
         println(io)
         print(io, "  $(domain_string(domain)) -> $(repr(f))")
@@ -292,7 +300,7 @@ function (piecewise::Piecewise)(X::Interval{T}) where {T}
     if !in_domain(input_domain, piecewise)
         dec = trv
     elseif any(x -> in_domain(x, input_domain), discontinuities(piecewise))
-        dec = def 
+        dec = def
     else
         dec = com
     end

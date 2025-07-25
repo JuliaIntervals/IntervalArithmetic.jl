@@ -7,13 +7,15 @@ equivalent to `parse(Interval{[DEFAULT BOUND TYPE]}, "str")`.
 # Examples
 
 ```jldoctest
+julia> using IntervalArithmetic
+
 julia> setdisplay(:full);
 
 julia> I"[3, 4]"
-Interval{Float64}(3.0, 4.0, com)
+Interval{Float64}(3.0, 4.0, com, true)
 
 julia> I"0.1"
-Interval{Float64}(0.09999999999999999, 0.1, com)
+Interval{Float64}(0.09999999999999999, 0.1, com, true)
 
 julia> in_interval(1//10, I"0.1")
 true
@@ -57,6 +59,8 @@ For more details, see sections 9.7 and 12.11 of the IEEE Standard 1788-2015.
 # Examples
 
 ```jldoctest
+julia> using IntervalArithmetic
+
 julia> setdisplay(:full);
 
 julia> parse(BareInterval{Float64}, "[1, 2]")
@@ -72,13 +76,13 @@ julia> parse(BareInterval{Float64}, "6.42?2e2")
 BareInterval{Float64}(640.0, 644.0)
 
 julia> parse(Interval{Float64}, "[1, 2]")
-Interval{Float64}(1.0, 2.0, com)
+Interval{Float64}(1.0, 2.0, com, true)
 
 julia> parse(Interval{Float64}, "[1, 2]_def")
-Interval{Float64}(1.0, 2.0, def)
+Interval{Float64}(1.0, 2.0, def, true)
 
 julia> parse(Interval{Float64}, "[1, 1e400]_com")
-Interval{Float64}(1.0, Inf, dac)
+Interval{Float64}(1.0, Inf, dac, true)
 ```
 """
 function Base.parse(::Type{BareInterval{T}}, str::AbstractString) where {T<:NumTypes}

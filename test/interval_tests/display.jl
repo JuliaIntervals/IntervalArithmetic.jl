@@ -125,15 +125,15 @@ setprecision(BigFloat, 256) do
             @test sprint(show, MIME("text/plain"), emptyinterval()) == "∅"
             @test sprint(show, MIME("text/plain"), emptyinterval()/1) == "∅_NG"
 
-            @test sprint(show, MIME("text/plain"), a)    == "Interval{Float64}(1.0, 2.0, com)"
-            @test sprint(show, MIME("text/plain"), a_NG) == "Interval{Float64}(1.0, 2.0, com)_NG"
-            @test sprint(show, MIME("text/plain"), b)    == "Interval{Float64}(-2.2250738585072014e-308, 1.3, com)"
-            @test sprint(show, MIME("text/plain"), b32)  == "Interval{Float32}(-1.1754944f-38, 1.3f0, com)"
-            @test sprint(show, MIME("text/plain"), b16)  == "Interval{Float16}(Float16(-6.104e-5), Float16(1.3), com)"
-            @test sprint(show, MIME("text/plain"), br)   == "Interval{Rational{Int64}}(-11//10, 13//10, com)"
-            @test sprint(show, MIME("text/plain"), c)    == "Interval{Float64}(-1.0, Inf, dac)"
+            @test sprint(show, MIME("text/plain"), a)    == "Interval{Float64}(1.0, 2.0, com, true)"
+            @test sprint(show, MIME("text/plain"), a_NG) == "Interval{Float64}(1.0, 2.0, com, false)"
+            @test sprint(show, MIME("text/plain"), b)    == "Interval{Float64}(-2.2250738585072014e-308, 1.3, com, true)"
+            @test sprint(show, MIME("text/plain"), b32)  == "Interval{Float32}(-1.1754944f-38, 1.3f0, com, true)"
+            @test sprint(show, MIME("text/plain"), b16)  == "Interval{Float16}(Float16(-6.104e-5), Float16(1.3), com, true)"
+            @test sprint(show, MIME("text/plain"), br)   == "Interval{Rational{Int64}}(-11//10, 13//10, com, true)"
+            @test sprint(show, MIME("text/plain"), c)    == "Interval{Float64}(-1.0, Inf, dac, true)"
             @test sprint(show, MIME("text/plain"), large_expo) ==
-                "Interval{BigFloat}(0.0, $(sup(large_expo)), com)"
+                "Interval{BigFloat}(0.0, $(sup(large_expo)), com, true)"
         end
 
         @testset "Midpoint format" begin
@@ -208,9 +208,9 @@ setprecision(BigFloat, 256) do
             # `sigdigits` and `decorations` keywords are not taken into account for format `:full`
             setdisplay(:full; sigdigits = 100, decorations = false)
 
-            @test sprint(show, MIME("text/plain"), a) == "Interval{Float64}(0.0, 2.0, com) + im*Interval{Float64}(1.0, 1.0, com)"
-            @test sprint(show, MIME("text/plain"), b) == "Interval{Float64}(0.0, 2.0, com) - im*Interval{Float64}(1.0, 1.0, com)"
-            @test sprint(show, MIME("text/plain"), c) == "Interval{Float64}(0.0, 1.0e-70, com) - im*Interval{Float64}(1.0e-70, 1.0e-70, com)"
+            @test sprint(show, MIME("text/plain"), a) == "Interval{Float64}(0.0, 2.0, com, true) + im*Interval{Float64}(1.0, 1.0, com, true)"
+            @test sprint(show, MIME("text/plain"), b) == "Interval{Float64}(0.0, 2.0, com, true) - im*Interval{Float64}(1.0, 1.0, com, true)"
+            @test sprint(show, MIME("text/plain"), c) == "Interval{Float64}(0.0, 1.0e-70, com, true) - im*Interval{Float64}(1.0e-70, 1.0e-70, com, true)"
         end
 
         @testset "Midpoint format" begin

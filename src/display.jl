@@ -8,11 +8,13 @@ end
 function Base.show(io::IO, ::MIME"text/plain", params::DisplayOptions)
     println(io, "Display options:")
     println(io, "  - format: ", params.format)
-    println(io, "  - decorations: ", params.decorations)
-    println(io, "  - NG flag: ", params.ng_flag)
     if params.format === :full
+        println(io, "  - decorations: ", params.decorations, " (ignored)")
+        println(io, "  - NG flag: ", params.ng_flag, " (ignored)")
         print(io, "  - significant digits: ", params.sigdigits, " (ignored)")
     else
+        println(io, "  - decorations: ", params.decorations)
+        println(io, "  - NG flag: ", params.ng_flag)
         print(io, "  - significant digits: ", params.sigdigits)
     end
 end
@@ -54,12 +56,12 @@ julia> x = interval(0.1, 0.3)
 julia> setdisplay(:full)
 Display options:
   - format: full
-  - decorations: true
-  - NG flag: true
+  - decorations: true (ignored)
+  - NG flag: true (ignored)
   - significant digits: 6 (ignored)
 
 julia> x
-Interval{Float64}(0.1, 0.3, com)
+Interval{Float64}(0.1, 0.3, com, true)
 
 julia> setdisplay(:infsup; sigdigits = 3)
 Display options:
@@ -119,15 +121,15 @@ function _str_repr(a::Interval{T}, format::Symbol) where {T<:NumTypes}
     # `format` is either `:infsup`, `:midpoint` or `:full`
     str_interval = _str_basic_repr(a.bareinterval, format) # use `a.bareinterval` to not print a warning if `a` is an NaI
     if format === :full && str_interval != "∅"
-        str_interval = string("Interval{", T, "}(", str_interval, ", ", decoration(a), ')')
+        return string("Interval{", T, "}(", str_interval, ", ", decoration(a), ", ", isguaranteed(a), ')')
     else
         str_interval = _str_precision(str_interval, a, format)
         if format === :midpoint && str_interval != "∅" && T !== BigFloat && (display_options.decorations | (display_options.ng_flag & !isguaranteed(a)))
             str_interval = string('(', str_interval, ')')
         end
         str_interval = ifelse(display_options.decorations, string(str_interval, '_', decoration(a)), str_interval)
+        return ifelse(display_options.ng_flag & !isguaranteed(a), string(str_interval, "_NG"), str_interval)
     end
-    return ifelse(display_options.ng_flag & !isguaranteed(a), string(str_interval, "_NG"), str_interval)
 end
 
 function _str_repr(x::Complex{Interval{T}}, format::Symbol) where {T<:NumTypes}
