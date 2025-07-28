@@ -1,23 +1,25 @@
 # Philosophy
 
 The goal of the `Interval` type is to be directly used to replace floating point
-number in arbitrary julia code, such that in any calculation,
-the resulting intervals are guaranteed to bound the true image of the starting
+numbers in arbitrary julia code, such that, in any calculation,
+the resulting interval is guaranteed to bound the true image of the starting
 intervals.
 
-So, essentially, we would like `Interval` to act as numbers and
-the julia ecosystem has evolved to use `Real` as the default supertype
+So, essentially, we would like `Interval` to act as numbers.
+And the julia ecosystem has evolved to use `Real` as the default supertype
 for numerical types that are not complex.
 Therefore, to ensure the widest compatiblity,
 our `Interval` type must be a subtype of `Real`.
 
-Then, for any function `f(x::Real)`,
-we want the following to hold for all real `x` in the interval `X`
+Mathematically, for any function `f(x::Real)`,
+we want the following to hold
 (note that it holds for **all** real numbers in `X`,
-even those that can not be represented as floating point numbers):
+even those that cannot be represented as floating point numbers):
 ```math
 f(x) \in f(X), \qquad \forall x \in X.
 ```
+The interval-valued function `f(X)` is called
+the _pointwise extension_ of `f(x)` (which is defined on real numbers).
 
 At first glance, this is reasonable:
 all arithmetic operations are well-defined for both real numbers and intervals,
@@ -34,7 +36,7 @@ arithmetic operations.
 3. Act as a container of a single element,
    e.g. `collect(x)` returns a 0-dimensional array containing `x`.
 
-Each of those points lead to specific design choice for `IntervalArithmetic.jl`,
+Each of those points lead to specific design choices for `IntervalArithmetic.jl`,
 choices that we detail below.
 
 
@@ -46,40 +48,51 @@ to a `Float64` to be able to perform the addition.
 Following this logic, it means that `0.1 + interval(2.2, 2.3)` should
 silently promote `0.1` to an interval.
 
-However, in this case we can not guarantee that `0.1` is known exactly,
-because we do not know how it was produced in the first place.
+However, in this case we cannot guarantee that `0.1` is known exactly,
+because we do not know how it was produced in the first place
+(it could be contain numerical inaccuracy from another computation from example).
 Following the julia convention is thus in contradiction with providing
 guaranteed result.
 
 In this case, we choose to be mostly silent,
 the information that a non-interval of unknown origin is recorded in the `NG` flag,
 but the calculation is not interrupted, and no warning is printed.
+If an interval is flagged with `NG` it means that it was produced through
+promotion of real numbers from unknown origin, for example
+```julia
+julia> X = interval(1, 2)
+[1.0, 2.0]_com  # The interval is guaranteed because it was explicitly created
+
+julia> X + 0.1
+[1.1, 2.1]_com_NG  # The NG flag appears, because 0.1 is not provably exact
+```
 
 For convenience, we provide the [`ExactReal`](@ref) and [`@exact`](@ref) macro
-to allow to explicitly mark a number as being exact,
+to allow explicitly marking a number as being exact,
 and not produce the `NG` flag when mixed with intervals.
 
+Note that this still assume that all interval inputs are correct.
+Please see the [contructors page](@ref "Constructing intervals") for more information
+about potential caveats.
 
 
 ## Comparison operators
 
-We can extend our above definition of the desired behavior for two real numbers
-`x` and `y`, and their respective intervals `X` and `Y`.
-With this, we want to have, for any function`f`,
-for all `x` in `X` and all `y` in `Y`,
-``math
+We can extend the definition of the pointwise extension of a function `f` for two real numbers
+`x` and `y`, and their respective intervals `X` and `Y`, as
+```math
 f(x, y) \in f(X, Y), \qquad \forall x \in X, y \in Y.
-``
+```
 
 With this in mind, an operation such as `==` can easily be defined for intervals
 
 1. If the intervals are disjoints (`X ∩ Y === ∅`), then `X == Y` is `[false]`.
-2. If the intervals both contain a single element,
+2. If the intervals both contain a single floating point number,
    and that element is the same for both,
    `X == Y` is `[true]`.
 3. Otherwise, we can not conclude anything, and `X == Y` must be `[false, true]`.
 
-Not that we use intervals in all case, because, according to our definition,
+Not that we use intervals for all outputs, because, according to our definition,
 the true result must be contained in the returned interval.
 However, this is not convenient, as any `if` statement would error when used
 with an interval.
@@ -87,12 +100,13 @@ Instead, we have opted to return respectively `false` and `true`
 for cases 1 and 2, and to immediately error otherwise.
 
 In this way, we can return a more informative error,
-but we only do it when the result is ambiguous.
+but we only error when the result is ambiguous.
 
 This has a clear cost, however, in that some expected behaviors do not hold.
 For example, an `Interval` is not equal to itself.
 
-```julia> X = interval(1, 2)
+```julia
+julia> X = interval(1, 2)
 [1.0, 2.0]_com
 
 julia> X == X
@@ -133,9 +147,10 @@ or error as the result can not be established.
 To be safe, we decided to go one step further and disable
 **all** set operations from julia `Base` on intervals.
 These operations can instead be performed with the specific `*_interval` function,
-for example `in_interval` as a replacement for `in`,
-except for `setdiff`.
-We can not meaningfully define the set difference of two intervals,
+for example `in_interval` as a replacement for `in`.
+
+`setdiff` is an exception,
+as we can not meaningfully define the set difference of two intervals,
 because our intervals are always closed,
 while the result of `setdiff` can be open.
 
