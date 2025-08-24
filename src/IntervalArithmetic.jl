@@ -176,8 +176,8 @@ end
 Matrix multiplication mode type.
 
 Available mode types:
-- `:slow` (default): generic algorithm.
-- `:fast` : Rump's algorithm.
+- `:fast` (default): Rump's algorithm.
+- `:slow` (always used for high-precision number types, e.g., `BigFloat`): generic algorithm.
 """
 struct MatMulMode{T} end
 
