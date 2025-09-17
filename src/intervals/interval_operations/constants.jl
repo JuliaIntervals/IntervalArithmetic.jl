@@ -2,7 +2,7 @@
 # IEEE Standard 1788-2015
 
 """
-    emptyinterval(T=[DEFAULT BOUND TYPE])
+    emptyinterval(T=[default_numtype()])
 
 Create an empty interval. This interval is an exception to the fact that the
 lower bound is larger than the upper one.
@@ -31,7 +31,7 @@ emptyinterval(::Complex{T}) where {T<:NumTypes} = emptyinterval(Complex{T})
 emptyinterval() = emptyinterval(Interval{default_numtype()})
 
 """
-    entireinterval(T=[DEFAULT BOUND TYPE])
+    entireinterval(T=[default_numtype()])
 
 Create an interval representing the entire real line, or the entire complex
 plane if `T` is complex.
@@ -60,7 +60,7 @@ entireinterval(::Complex{T}) where {T<:NumTypes} = entireinterval(Complex{T})
 entireinterval() = entireinterval(Interval{default_numtype()})
 
 """
-    nai(T=[DEFAULT BOUND TYPE])
+    nai(T=[default_numtype()])
 
 Create an NaI (Not an Interval).
 """

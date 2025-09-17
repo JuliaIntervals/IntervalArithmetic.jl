@@ -16,7 +16,7 @@ Return the bound type used to construct intervals. The bound type is given by
 when `T` is a `Rational{R}` and `S` is an `AbstractIrrational` (or vice-versa),
 in which case the bound type is given by `Rational{promote_type(R, Int64)}`. In
 all other cases, the bound type is given by
-`promote_type([DEFAULT BOUND TYPE], T, S)`.
+`promote_type(default_numtype(), T, S)`.
 """
 promote_numtype(::Type{T}, ::Type{S}) where {T<:NumTypes,S<:NumTypes} = promote_type(T, S)
 promote_numtype(::Type{T}, ::Type{S}) where {T<:NumTypes,S} = promote_type(numtype(T), numtype(S))
@@ -628,11 +628,11 @@ julia> using IntervalArithmetic
 
 julia> setdisplay(:full);
 
-julia> @macroexpand @interval sin(1) # Float64 is the default bound type
-:(sin(IntervalArithmetic.atomic(Float64, 1)))
+julia> @interval sin(1) # Float64 is the default bound type
+Interval{Float64}(0.8414709848078965, 0.8414709848078966, com, true)
 
-julia> @macroexpand @interval Float32 sin(1)
-:(sin(IntervalArithmetic.atomic(Float32, 1)))
+julia> @interval Float32 sin(1)
+Interval{Float32}(0.84147096f0, 0.841471f0, com, true)
 
 julia> @interval Float64 sin(1) exp(1)
 Interval{Float64}(0.8414709848078965, 2.7182818284590455, com, true)
@@ -645,8 +645,6 @@ end
 macro interval(expr1, expr2)
     x = _wrap_interval(expr1)
     y = _wrap_interval(expr1, expr2)
-    # note: if expr1 is not a type, then x will be a correct enclosure,
-    # y will be an interval with wrong lower bound, but this will be fixed by the last line
     return :(interval($x, $y))
 end
 
