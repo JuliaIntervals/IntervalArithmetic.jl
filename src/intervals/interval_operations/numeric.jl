@@ -212,6 +212,11 @@ function midradius(x::BareInterval)
     m = mid(x)
     return m, max(m - inf(x), sup(x) - m)
 end
+function midradius(x::BareInterval{<:Rational}) # needed to avoid integer overflow error
+    m = mid(x)
+    isbounded(x) && return m, max(m - inf(x), sup(x) - m)
+    return m, typemax(numtype(x))
+end
 
 function midradius(x::Interval{T}) where {T<:AbstractFloat}
     isnai(x) && return (convert(T, NaN), convert(T, NaN))
