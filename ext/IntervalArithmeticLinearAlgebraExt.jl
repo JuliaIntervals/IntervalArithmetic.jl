@@ -139,23 +139,15 @@ end
 
 # matrix multiplication
 
-function IntervalArithmetic.configure_matmul(matmul::Symbol)
-    matmul ∈ (:slow, :fast) || return throw(ArgumentError("only the matrix multiplication mode `:slow` and `:fast` are available"))
-    @eval begin
-        function LinearAlgebra.mul!(C::AbstractVector{<:RealOrComplexI}, A::AbstractVecOrMat, B::AbstractVector, α::Number, β::Number)
-            size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
-            return _mul!(IntervalArithmetic.MatMulMode{$(QuoteNode(matmul))}(), C, A, B, α, β)
-        end
-
-        function LinearAlgebra.mul!(C::AbstractMatrix{<:RealOrComplexI}, A::AbstractVecOrMat, B::AbstractVecOrMat, α::Number, β::Number)
-            size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
-            return _mul!(IntervalArithmetic.MatMulMode{$(QuoteNode(matmul))}(), C, A, B, α, β)
-        end
-    end
-    return matmul
+function LinearAlgebra.mul!(C::AbstractVector{<:RealOrComplexI}, A::AbstractVecOrMat, B::AbstractVector, α::Number, β::Number)
+    size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
+    return _mul!(IntervalArithmetic.default_matmul(), C, A, B, α, β)
 end
 
-IntervalArithmetic.configure_matmul(:fast)
+function LinearAlgebra.mul!(C::AbstractMatrix{<:RealOrComplexI}, A::AbstractVecOrMat, B::AbstractVecOrMat, α::Number, β::Number)
+    size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
+    return _mul!(IntervalArithmetic.default_matmul(), C, A, B, α, β)
+end
 
 #
 

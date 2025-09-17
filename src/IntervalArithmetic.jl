@@ -91,54 +91,29 @@ end
 const configuration_options = ConfigurationOptions(Float64, :set_based, :correct, :fast, :fast) # default
 
 function configure_numtype(numtype::Type{<:NumTypes})
-    @eval begin
-        promote_numtype(::Type{T}, ::Type{S}) where {T,S} = promote_type($numtype, numtype(T), numtype(S))
-        macro interval(expr)
-            return _wrap_interval($numtype, expr)
-        end
-        _parse(str::AbstractString) = parse(Interval{$numtype}, str)
-        emptyinterval() = emptyinterval(Interval{$numtype})
-        entireinterval() = entireinterval(Interval{$numtype})
-        nai() = nai(Interval{$numtype})
-    end
+    @eval default_numtype() = $numtype
     return numtype
 end
 
 function configure_flavor(flavor::Symbol)
     flavor == :set_based || return throw(ArgumentError("only the interval flavor `:set_based` is supported and implemented"))
-    @eval begin
-        zero_times_infinity(::Type{T}) where {T<:NumTypes} = zero_times_infinity(Flavor{$(QuoteNode(flavor))}(), T)
-        div_by_thin_zero(x::BareInterval) = div_by_thin_zero(Flavor{$(QuoteNode(flavor))}(), x)
-        contains_infinity(x::BareInterval) = contains_infinity(Flavor{$(QuoteNode(flavor))}(), x)
-        is_valid_interval(a::Real, b::Real) = is_valid_interval(Flavor{$(QuoteNode(flavor))}(), a, b)
-    end
+    @eval default_flavor() = Flavor{$(QuoteNode(flavor))}()
     return flavor
 end
 
 function configure_rounding(rounding::Symbol)
     rounding ∈ (:correct, :none) || return throw(ArgumentError("only the rounding mode `:correct` and `:none` are available"))
-    @eval begin
-        _fround(f::Function, x, y, r) = _fround(f, IntervalRounding{$(QuoteNode(rounding))}(), x, y, r)
-        _fround(f::Function, x, r)    = _fround(f, IntervalRounding{$(QuoteNode(rounding))}(), x, r)
-    end
+    @eval default_rounding() = IntervalRounding{$(QuoteNode(rounding))}()
     return rounding
 end
 
 function configure_power(power::Symbol)
     power ∈ (:slow, :fast) || return throw(ArgumentError("only the power mode `:slow` and `:fast` are available"))
-    @eval begin
-        @eval _select_pow(x, y) = _select_pow(PowerMode{$(QuoteNode(power))}(), x, y)
-        @eval _select_pown(x, y) = _select_pown(PowerMode{$(QuoteNode(power))}(), x, y)
-    end
+    @eval default_power() = PowerMode{$(QuoteNode(power))}()
     return power
 end
 
-# define the functions for matmul here to be able to access them
-
-function configure_matmul(matmul) # overloaded in the package extension for LinearAlgebra
-    matmul ∈ (:slow, :fast) || return throw(ArgumentError("only the matrix multiplication mode `:slow` and `:fast` are available"))
-    return matmul
-end
+# algorithms are defined in the package extension for LinearAlgebra
 
 """
     MatMulMode{T}
@@ -150,6 +125,12 @@ Available mode types:
 - `:slow` (always used for high-precision number types, e.g., `BigFloat`): generic algorithm.
 """
 struct MatMulMode{T} end
+
+function configure_matmul(matmul)
+    matmul ∈ (:slow, :fast) || return throw(ArgumentError("only the matrix multiplication mode `:slow` and `:fast` are available"))
+    @eval default_matmul() = MatMulMode{$(QuoteNode(matmul))}()
+    return matmul
+end
 
 """
     configure(; numtype=Float64, flavor=:set_based, rounding=:correct, power=:fast, matmul=:fast)
@@ -211,7 +192,7 @@ configure_numtype(configuration_options.numtype)
 configure_flavor(configuration_options.flavor)
 configure_rounding(configuration_options.rounding)
 configure_power(configuration_options.power)
-# configure_matmul(configuration_options.matmul)
+configure_matmul(configuration_options.matmul)
 
 #
 

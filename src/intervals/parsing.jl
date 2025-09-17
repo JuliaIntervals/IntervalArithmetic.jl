@@ -129,6 +129,8 @@ function Base.parse(::Type{Interval{T}}, str::AbstractString) where {T<:NumTypes
     end
 end
 
+_parse(str::AbstractString) = parse(Interval{default_numtype()}, str)
+
 function _parse(::Type{T}, str::AbstractString) where {T<:NumTypes}
     if startswith(str, '[') && endswith(str, ']')
         s = strip(view(str, 2:length(str)-1))

@@ -21,6 +21,7 @@ all other cases, the bound type is given by
 promote_numtype(::Type{T}, ::Type{S}) where {T<:NumTypes,S<:NumTypes} = promote_type(T, S)
 promote_numtype(::Type{T}, ::Type{S}) where {T<:NumTypes,S} = promote_type(numtype(T), numtype(S))
 promote_numtype(::Type{T}, ::Type{S}) where {T,S<:NumTypes} = promote_type(numtype(T), numtype(S))
+promote_numtype(::Type{T}, ::Type{S}) where {T,S} = promote_type(default_numtype(), numtype(T), numtype(S))
 
 promote_numtype(::Type{Rational{T}}, ::Type{<:AbstractIrrational}) where {T<:Integer} = Rational{promote_type(T, Int64)}
 promote_numtype(::Type{<:AbstractIrrational}, ::Type{Rational{T}}) where {T<:Integer} = Rational{promote_type(T, Int64)}
@@ -605,6 +606,7 @@ function atomic(::Type{T}, x::Number) where {T<:NumTypes}
     str = string(x)
     return interval(T, _parse_num(T, str, RoundDown), _parse_num(T, str, RoundUp))
 end
+atomic(x) = atomic(default_numtype(), x)
 
 
 
@@ -613,9 +615,8 @@ end
 # macro
 
 """
-    @interval(expr)
-    @interval(T, expr)
-    @interval(T, expr1, expr2)
+    @interval([T], expr)
+    @interval([T], expr1, expr2)
 
 Walk through an expression and wrap each argument of functions with the internal
 constructor [`atomic`](@ref).
@@ -637,23 +638,37 @@ julia> @interval Float64 sin(1) exp(1)
 Interval{Float64}(0.8414709848078965, 2.7182818284590455, com, true)
 ```
 """
-macro interval(T, expr)
-    return _wrap_interval(T, expr)
+macro interval(expr)
+    return _wrap_interval(expr)
+end
+
+macro interval(expr1, expr2)
+    x = _wrap_interval(expr1)
+    y = _wrap_interval(expr1, expr2)
+    # note: if expr1 is not a type, then x will be a correct enclosure,
+    # y will be an interval with wrong lower bound, but this will be fixed by the last line
+    return :(interval($x, $y))
 end
 
 macro interval(T, expr1, expr2)
     x = _wrap_interval(T, expr1)
     y = _wrap_interval(T, expr2)
-    return :(interval($(esc(T)), $x, $y))
+    return :(interval($x, $y))
 end
 
-_wrap_interval(T, x) = :(atomic($(esc(T)), $x))
+_atomic(x, y) = interval(atomic(x), atomic(y))
+_atomic(T::Type, x) = atomic(T, x)
+_atomic(::Type, T::Type) = T
 
-_wrap_interval(T, x::Symbol) = :(atomic($(esc(T)), $(esc(x))))
+_wrap_interval(x) = _wrap_interval(default_numtype(), x)
+
+_wrap_interval(T, x) = :(_atomic($(esc(T)), $x))
+
+_wrap_interval(T, x::Symbol) = :(_atomic($(esc(T)), $(esc(x))))
 
 function _wrap_interval(T, expr::Expr)
     if expr.head ∈ (:(.), :ref, :macrocall) # a.i, or a[i], or BigInt
-        return :(interval($(esc(T)), $(esc(expr)), $(esc(expr))))
+        return :(_atomic($(esc(T)), $(esc(expr))))
     end
 
     new_expr = copy(expr)

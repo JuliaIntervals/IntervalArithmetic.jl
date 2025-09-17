@@ -12,6 +12,11 @@ struct IntervalRounding{T} end
 
 #
 
+_fround(f::Function, x, y, r) = _fround(f, default_rounding(), x, y, r)
+_fround(f::Function, x, r)    = _fround(f, default_rounding(), x, r)
+
+#
+
 for (f, fname) ∈ ((:+, :add), (:-, :sub), (:*, :mul), (:/, :div))
     @eval begin
         _fround(::typeof($f), ::IntervalRounding, x::T, y::T, ::RoundingMode) where {T<:Rational} = $f(x, y) # exact operation

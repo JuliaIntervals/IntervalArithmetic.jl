@@ -28,6 +28,8 @@ emptyinterval(::T) where {T<:NumTypes} = emptyinterval(T)
 emptyinterval(::Type{Complex{T}}) where {T<:NumTypes} = complex(emptyinterval(T), emptyinterval(T))
 emptyinterval(::Complex{T}) where {T<:NumTypes} = emptyinterval(Complex{T})
 
+emptyinterval() = emptyinterval(Interval{default_numtype()})
+
 """
     entireinterval(T=[DEFAULT BOUND TYPE])
 
@@ -55,6 +57,8 @@ entireinterval(::T) where {T<:NumTypes} = entireinterval(T)
 entireinterval(::Type{Complex{T}}) where {T<:NumTypes} = complex(entireinterval(T), entireinterval(T))
 entireinterval(::Complex{T}) where {T<:NumTypes} = entireinterval(Complex{T})
 
+entireinterval() = entireinterval(Interval{default_numtype()})
+
 """
     nai(T=[DEFAULT BOUND TYPE])
 
@@ -71,3 +75,5 @@ nai(::T) where {T<:NumTypes} = nai(T)
 
 nai(::Type{Complex{T}}) where {T<:NumTypes} = complex(nai(T), nai(T))
 nai(::Complex{T}) where {T<:NumTypes} = nai(Complex{T})
+
+nai() = nai(Interval{default_numtype()})
