@@ -149,11 +149,11 @@ See also: [`inf`](@ref), [`sup`](@ref), [`bounds`](@ref), [`mid`](@ref),
 """
 function diam(x::BareInterval{T}) where {T<:AbstractFloat}
     isempty_interval(x) && return convert(T, NaN)
-    return _sub_round(sup(x), inf(x), RoundUp) # cf. Section 12.12.8
+    return _fround(-, sup(x), inf(x), RoundUp) # cf. Section 12.12.8
 end
 function diam(x::BareInterval{<:Rational})
     isempty_interval(x) && return throw(ArgumentError("cannot compute the diameter of empty intervals; cannot return a `Rational` NaN"))
-    return _sub_round(sup(x), inf(x), RoundUp) # cf. Section 12.12.8
+    return _fround(-, sup(x), inf(x), RoundUp) # cf. Section 12.12.8
 end
 
 function diam(x::Interval{T}) where {T<:AbstractFloat}

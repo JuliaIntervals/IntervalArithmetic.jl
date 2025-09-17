@@ -141,19 +141,17 @@ end
 
 function IntervalArithmetic.configure_matmul(matmul::Symbol)
     matmul ∈ (:slow, :fast) || return throw(ArgumentError("only the matrix multiplication mode `:slow` and `:fast` are available"))
-
     @eval begin
         function LinearAlgebra.mul!(C::AbstractVector{<:RealOrComplexI}, A::AbstractVecOrMat, B::AbstractVector, α::Number, β::Number)
             size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
-            return IntervalArithmetic._mul!(IntervalArithmetic.MatMulMode{$(QuoteNode(matmul))}(), C, A, B, α, β)
+            return _mul!(IntervalArithmetic.MatMulMode{$(QuoteNode(matmul))}(), C, A, B, α, β)
         end
 
         function LinearAlgebra.mul!(C::AbstractMatrix{<:RealOrComplexI}, A::AbstractVecOrMat, B::AbstractVecOrMat, α::Number, β::Number)
             size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
-            return IntervalArithmetic._mul!(IntervalArithmetic.MatMulMode{$(QuoteNode(matmul))}(), C, A, B, α, β)
+            return _mul!(IntervalArithmetic.MatMulMode{$(QuoteNode(matmul))}(), C, A, B, α, β)
         end
     end
-
     return matmul
 end
 
@@ -164,7 +162,7 @@ IntervalArithmetic.configure_matmul(:fast)
 LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::AbstractVecOrMat{<:RealOrComplexI}) =
     LinearAlgebra.mul!(C, A, B, interval(true), interval(false))
 
-function IntervalArithmetic._mul!(::IntervalArithmetic.MatMulMode{:slow}, C, A::AbstractMatrix, B::AbstractVecOrMat, α, β)
+function _mul!(::IntervalArithmetic.MatMulMode{:slow}, C, A::AbstractMatrix, B::AbstractVecOrMat, α, β)
     if iszero(α)
         if iszero(β)
             C .= zero(eltype(C))
@@ -221,14 +219,14 @@ end
 # fast matrix multiplication
 # Note: Rump's algorithm
 
-function IntervalArithmetic._mul!(::IntervalArithmetic.MatMulMode{:fast}, C, A, B, α, β)
+function _mul!(::IntervalArithmetic.MatMulMode{:fast}, C, A, B, α, β)
     if Int == Int32
         @info "Fast multiplication is not supported on 32-bit systems, using the slow version"
-        return IntervalArithmetic._mul!(IntervalArithmetic.MatMulMode{:slow}(), C, A, B, α, β)
+        return _mul!(IntervalArithmetic.MatMulMode{:slow}(), C, A, B, α, β)
     else
         numtype(eltype(C)) <: Union{Float16,Float32,Float64} && return _fastmul!(C, A, B, α, β)
         @info "Fast multiplication is only supported for `Union{Float16,Float32,Float64}`, using the slow version"
-        return IntervalArithmetic._mul!(IntervalArithmetic.MatMulMode{:slow}(), C, A, B, α, β)
+        return _mul!(IntervalArithmetic.MatMulMode{:slow}(), C, A, B, α, β)
     end
 end
 
@@ -413,11 +411,11 @@ function ___mul(A::AbstractMatrix{T}, B::AbstractVecOrMat{Interval{T}}) where {T
 
     stride_A  = _to_stride_64(A)
     stride_mB = _to_stride_64(mB)
-    C₁ = IntervalArithmetic._sub_round.(
+    C₁ = IntervalArithmetic._fround.(-,
         T.(_call_gem_openblas!(cache_2, stride_A, stride_mB, RoundDown), RoundDown),
         T.(rC, RoundUp),
         RoundDown)
-    C₂ = cache_2; C₂ .= IntervalArithmetic._add_round.(
+    C₂ = cache_2; C₂ .= IntervalArithmetic._fround.(+,
         T.(_call_gem_openblas!(cache_2, stride_A, stride_mB, RoundUp), RoundUp),
         T.(rC, RoundUp),
         RoundUp)
@@ -435,11 +433,11 @@ function ___mul(A::AbstractMatrix{Interval{T}}, B::AbstractVecOrMat{T}) where {T
 
     stride_mA = _to_stride_64(mA)
     stride_B  = _to_stride_64(B)
-    C₁ = IntervalArithmetic._sub_round.(
+    C₁ = IntervalArithmetic._fround.(-,
         T.(_call_gem_openblas!(cache_2, stride_mA, stride_B, RoundDown), RoundDown),
         T.(rC, RoundUp),
         RoundDown)
-    C₂ = cache_2; C₂ .= IntervalArithmetic._add_round.(
+    C₂ = cache_2; C₂ .= IntervalArithmetic._fround.(+,
         T.(_call_gem_openblas!(cache_2, stride_mA, stride_B, RoundUp), RoundUp),
         T.(rC, RoundUp),
         RoundUp)
@@ -455,67 +453,24 @@ function ___mul(A::AbstractMatrix{Interval{T}}, B::AbstractVecOrMat{Interval{T}}
     cache_2 = zeros(Float64, size(A, 1), size(B, 2))
 
     absmA_rB = _call_gem_openblas!(cache_1, _to_stride_64(abs.(mA)), _to_stride_64(rB), RoundUp)
-    U = rB; U .= IntervalArithmetic._add_round.(abs.(mB), rB, RoundUp)
+    U = rB; U .= IntervalArithmetic._fround.(+, abs.(mB), rB, RoundUp)
     rA_U = _call_gem_openblas!(cache_2, _to_stride_64(rA), _to_stride_64(U), RoundUp)
 
     cache_3 = zeros(Float64, size(A, 1), size(B, 2))
 
     stride_mA = _to_stride_64(mA)
     stride_mB = _to_stride_64(mB)
-    C₁ = IntervalArithmetic._sub_round.(
+    C₁ = IntervalArithmetic._fround.(-,
         T.(_call_gem_openblas!(cache_3, stride_mA, stride_mB, RoundDown), RoundDown),
-        IntervalArithmetic._add_round.(T.(absmA_rB, RoundUp), T.(rA_U, RoundUp), RoundUp),
+        IntervalArithmetic._fround.(+, T.(absmA_rB, RoundUp), T.(rA_U, RoundUp), RoundUp),
         RoundDown)
-    C₂ = cache_3; C₂ .= IntervalArithmetic._add_round.(
+    C₂ = cache_3; C₂ .= IntervalArithmetic._fround.(+,
         T.(_call_gem_openblas!(cache_3, stride_mA, stride_mB, RoundUp), RoundUp),
-        IntervalArithmetic._add_round.(T.(absmA_rB, RoundUp), T.(rA_U, RoundUp), RoundUp),
+        IntervalArithmetic._fround.(+, T.(absmA_rB, RoundUp), T.(rA_U, RoundUp), RoundUp),
         RoundUp)
 
     return C₁, C₂
 end
-
-# function ___mul(A::AbstractMatrix{Interval{T}}, B::AbstractVecOrMat{Interval{T}}) where {T<:AbstractFloat}
-#     k = size(A, 2)
-#     u2 = eps(T) # twice the unit roundoff
-#     @assert (2k + 2) * u2 ≤ 1
-
-#     mA, rA = _vec_or_mat_midradius(A)
-#     mB, rB = _vec_or_mat_midradius(B)
-
-#     cache_1 = zeros(T, size(A, 1), size(B, 2))
-#     cache_2 = zeros(T, size(A, 1), size(B, 2))
-#     mC, μ = _fused_matmul!(cache_1, cache_2, mA, rA, mB, rB)
-
-#     γ = IntervalArithmetic._add_round.(IntervalArithmetic._mul_round.(convert(T, k + 1), eps.(μ), RoundUp), IntervalArithmetic._mul_round(IntervalArithmetic._inv_round(u2, RoundUp), floatmin(T), RoundUp), RoundUp)
-
-#     U = mA; U .= IntervalArithmetic._add_round.(abs.(mA), rA, RoundUp)
-#     V = mB; V .= IntervalArithmetic._add_round.(abs.(mB), rB, RoundUp)
-
-#     cache_3 = zeros(Float64, size(A, 1), size(B, 2))
-#     rC = IntervalArithmetic._add_round.(IntervalArithmetic._sub_round.(T.(_call_gem_openblas!(cache_3, _to_stride_64(U), _to_stride_64(V), RoundUp), RoundUp), μ, RoundUp), 2 .* γ, RoundUp)
-
-#     C₁ = μ; C₁ .= IntervalArithmetic._sub_round.(mC, rC, RoundDown)
-#     C₂ = γ; C₂ .= IntervalArithmetic._add_round.(mC, rC, RoundUp)
-
-#     return C₁, C₂
-# end
-
-# function _fused_matmul!(mC, μ, mA, rA, mB, rB)
-#     Threads.@threads for j ∈ axes(mB, 2)
-#         for l ∈ axes(mA, 2)
-#             @inbounds for i ∈ axes(mA, 1)
-#                 a, c = mA[i,l], rA[i,l]
-#                 b, d = mB[l,j], rB[l,j]
-#                 e = sign(a) * min(abs(a), c)
-#                 f = sign(b) * min(abs(b), d)
-#                 p = a*b + e*f
-#                 mC[i,j] += p
-#                 μ[i,j] += abs(p)
-#             end
-#         end
-#     end
-#     return mC, μ
-# end
 
 _to_stride_64(A::StridedArray{Float64}) = A
 _to_stride_64(A::StridedArray{<:AbstractFloat}) = Float64.(A, RoundUp)
@@ -523,8 +478,8 @@ _to_stride_64(A::AbstractVector) = _to_stride_64(Vector(A))
 _to_stride_64(A::AbstractMatrix) = _to_stride_64(Matrix(A))
 
 function _vec_or_mat_midradius(A::AbstractVecOrMat{Interval{T}}) where {T<:AbstractFloat}
-    mA = IntervalArithmetic._div_round.(IntervalArithmetic._add_round.(inf.(A), sup.(A), RoundUp), convert(T, 2), RoundUp)
-    rA = IntervalArithmetic._sub_round.(mA, inf.(A), RoundUp)
+    mA = IntervalArithmetic._fround.(/, IntervalArithmetic._fround.(+, inf.(A), sup.(A), RoundUp), convert(T, 2), RoundUp)
+    rA = IntervalArithmetic._fround.(-, mA, inf.(A), RoundUp)
     return mA, rA
 end
 
