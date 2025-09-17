@@ -60,7 +60,7 @@ setprecision(BigFloat, 256) do
         b16 = interval(-floatmin(Float16), parse(Float16, "1.3"))
         br = interval(Rational{Int64}, -11//10, 13//10)
         c = interval(-1, Inf)
-        cr = interval(-1//1, 1//0)
+        cr = interval(Rational{Int64}, -1//1, 1//0)
         large_expo = interval(0, big"1e123456789") # use "small" exponent, cf. JuliaLang/julia#48678
 
         @testset "Standard format" begin
