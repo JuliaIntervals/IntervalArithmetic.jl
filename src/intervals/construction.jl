@@ -384,24 +384,17 @@ function interval(::Type{T}, a, b, d::Decoration = com; format::Symbol = :infsup
     format === :midpoint && return _interval_midpoint(T, _value(a), _value(b), d)
     return throw(ArgumentError("`format` must be `:infsup` or `:midpoint`"))
 end
-interval(a, b, d::Decoration = com; format::Symbol = :infsup) = interval(promote_numtype(numtype(a), numtype(b)), a, b, d; format = format)
+interval(a, b, d::Decoration = com; format::Symbol = :infsup) = interval(promote_numtype(_infer_numtype(a), _infer_numtype(b)), a, b, d; format = format)
 
 function interval(::Type{T}, a, d::Decoration = com; format::Symbol = :infsup) where {T}
     (format === :infsup) | (format === :midpoint) && return _interval_infsup(T, _value(a), _value(a), d)
     return throw(ArgumentError("`format` must be `:infsup` or `:midpoint`"))
 end
-interval(a, d::Decoration = com; format::Symbol = :infsup) = interval(promote_numtype(numtype(a), numtype(a)), a, d; format = format)
+interval(a, d::Decoration = com; format::Symbol = :infsup) = interval(promote_numtype(_infer_numtype(a), _infer_numtype(a)), a, d; format = format)
 
-# some useful extra constructor
-interval(::Type{T}, A::AbstractArray, d::Decoration = com; format::Symbol = :infsup) where {T} = interval.(T, A, d; format = format)
-interval(A::AbstractArray, d::Decoration = com; format::Symbol = :infsup) = interval.(A, d; format = format)
-interval(::Type{T}, A::AbstractArray, B::AbstractArray, d::Decoration = com; format::Symbol = :infsup) where {T} = interval.(T, A, B, d; format = format)
-interval(A::AbstractArray, B::AbstractArray, d::Decoration = com; format::Symbol = :infsup) = interval.(A, B, d; format = format)
-interval(::Type{T}, A::AbstractArray, d::AbstractArray{Decoration}; format::Symbol = :infsup) where {T} = interval.(T, A, d; format = format)
-interval(A::AbstractArray, d::AbstractArray{Decoration}; format::Symbol = :infsup) = interval.(A, d; format = format)
-interval(::Type{T}, A::AbstractArray, B::AbstractArray, d::AbstractArray{Decoration}; format::Symbol = :infsup) where {T} = interval.(T, A, B, d; format = format)
-interval(A::AbstractArray, B::AbstractArray, d::AbstractArray{Decoration}; format::Symbol = :infsup) = interval.(A, B, d; format = format)
-interval(T::Type, d::Decoration; format::Symbol = :infsup) = throw(MethodError(interval, (T, d)))
+interval(T::Type, d::Decoration; format::Symbol = :infsup) = throw(MethodError(interval, (T, d))) # needed to resolve ambiguity
+
+_infer_numtype(a) = numtype(a)
 
 # standard format
 
@@ -475,6 +468,12 @@ _interval_infsup(::Type{T}, a::Complex, b, d::Decoration) where {T<:NumTypes} =
     complex(_interval_infsup(T, real(a), real(b), d), _interval_infsup(T, imag(a), imag(b), d))
 _interval_infsup(::Type{T}, a, b::Complex, d::Decoration) where {T<:NumTypes} =
     complex(_interval_infsup(T, real(a), real(b), d), _interval_infsup(T, imag(a), imag(b), d))
+
+# some useful extra constructor
+
+_infer_numtype(A::AbstractArray) = numtype(eltype(A))
+
+_interval_infsup(::Type{T}, A::AbstractArray, B::AbstractArray, d::Decoration) where {T<:NumTypes} = _interval_infsup.(T, A, B, d)
 
 # midpoint constructors
 

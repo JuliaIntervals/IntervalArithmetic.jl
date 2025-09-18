@@ -13,10 +13,12 @@ end
 
 # contructor for `UniformScaling`
 
-IntervalArithmetic.interval(::Type{T}, J::LinearAlgebra.UniformScaling, d::IntervalArithmetic.Decoration = com; format::Symbol = :infsup) where {T} =
-    LinearAlgebra.UniformScaling(interval(T, J.λ, d; format = format))
-IntervalArithmetic.interval(J::LinearAlgebra.UniformScaling, d::IntervalArithmetic.Decoration = com; format::Symbol = :infsup) =
-    LinearAlgebra.UniformScaling(interval(J.λ, d; format = format))
+IntervalArithmetic._interval_infsup(::Type{T}, J::LinearAlgebra.UniformScaling, H::LinearAlgebra.UniformScaling, d::IntervalArithmetic.Decoration) where {T<:IntervalArithmetic.NumTypes} =
+    LinearAlgebra.UniformScaling(IntervalArithmetic._interval_infsup(T, J.λ, H.λ, d))
+
+IntervalArithmetic._infer_numtype(J::LinearAlgebra.UniformScaling) = numtype(eltype(J))
+
+IntervalArithmetic.exact(J::LinearAlgebra.UniformScaling) = LinearAlgebra.UniformScaling(exact(J.λ))
 
 # by-pass generic `opnorm` from LinearAlgebra to prevent NG flag
 

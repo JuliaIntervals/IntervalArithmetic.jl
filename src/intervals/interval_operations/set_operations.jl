@@ -7,7 +7,7 @@ _set_decoration(x::Interval, d::Decoration) = setdecoration(x, d)
 function _set_decoration(x::Interval, d::Symbol)
     d === :auto    && return x
     d === :default && return setdecoration(x, min(trv, decoration(x)))
-    return throw(ArgumentError("unknown decoration option $dec. Valid options are :default, :auto, or a specific decoration."))
+    return throw(ArgumentError("decoration option must be `:default`, `:auto` or a specific decoration"))
 end
 
 """

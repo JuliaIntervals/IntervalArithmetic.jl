@@ -6,7 +6,7 @@ include("parsing.jl")
 include("real_interface.jl")
     export numtype
 include("exact_literals.jl")
-    export ExactReal, @exact, has_exact_display
+    export ExactReal, exact, @exact, has_exact_display
 
 # Rounding
 include("rounding.jl")
