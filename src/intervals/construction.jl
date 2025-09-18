@@ -654,7 +654,7 @@ macro interval(T, expr1, expr2)
     return :(interval($x, $y))
 end
 
-_atomic(x, y) = interval(atomic(x), atomic(y))
+_atomic(x, y) = hull(atomic(x), atomic(y); dec = :auto) # use `hull` in case `atomic(x)` is larger than `atomic(y)`
 _atomic(T::Type, x) = atomic(T, x)
 _atomic(::Type, T::Type) = T
 
