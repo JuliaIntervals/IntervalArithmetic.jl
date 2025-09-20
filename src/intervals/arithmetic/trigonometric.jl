@@ -546,14 +546,14 @@ function Base.atan(y::BareInterval{T}, x::BareInterval{T}) where {T<:AbstractFlo
     else
         if iszero(xlo)
             isthinzero(y) && return y
-            ylo ≥ 0 && return _unsafe_bareinterval(T, _atan_round(ylo, xhi, RoundDown), sup(_half_range_atan(T)))
-            yhi ≤ 0 && return _unsafe_bareinterval(T, inf(_half_range_atan(T)), _atan_round(yhi, xhi, RoundUp))
+            ylo ≥ 0 && return _unsafe_bareinterval(T, _fround(atan, ylo, xhi, RoundDown), sup(_half_range_atan(T)))
+            yhi ≤ 0 && return _unsafe_bareinterval(T, inf(_half_range_atan(T)), _fround(atan, yhi, xhi, RoundUp))
             return _half_range_atan(T)
 
         elseif iszero(xhi)
             isthinzero(y) && return bareinterval(T, π)
-            ylo ≥ 0 && return _unsafe_bareinterval(T, inf(_half_pi(T)), _atan_round(ylo, xlo, RoundUp))
-            yhi < 0 && return _unsafe_bareinterval(T, _atan_round(yhi, xlo, RoundDown), sup(-_half_pi(T)))
+            ylo ≥ 0 && return _unsafe_bareinterval(T, inf(_half_pi(T)), _fround(atan, ylo, xlo, RoundUp))
+            yhi < 0 && return _unsafe_bareinterval(T, _fround(atan, yhi, xlo, RoundDown), sup(-_half_pi(T)))
             return _range_atan(T)
 
         else

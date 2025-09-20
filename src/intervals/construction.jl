@@ -16,11 +16,12 @@ Return the bound type used to construct intervals. The bound type is given by
 when `T` is a `Rational{R}` and `S` is an `AbstractIrrational` (or vice-versa),
 in which case the bound type is given by `Rational{promote_type(R, Int64)}`. In
 all other cases, the bound type is given by
-`promote_type([DEFAULT BOUND TYPE], T, S)`.
+`promote_type(default_numtype(), T, S)`.
 """
 promote_numtype(::Type{T}, ::Type{S}) where {T<:NumTypes,S<:NumTypes} = promote_type(T, S)
 promote_numtype(::Type{T}, ::Type{S}) where {T<:NumTypes,S} = promote_type(numtype(T), numtype(S))
 promote_numtype(::Type{T}, ::Type{S}) where {T,S<:NumTypes} = promote_type(numtype(T), numtype(S))
+promote_numtype(::Type{T}, ::Type{S}) where {T,S} = promote_type(default_numtype(), numtype(T), numtype(S))
 
 promote_numtype(::Type{Rational{T}}, ::Type{<:AbstractIrrational}) where {T<:Integer} = Rational{promote_type(T, Int64)}
 promote_numtype(::Type{<:AbstractIrrational}, ::Type{Rational{T}}) where {T<:Integer} = Rational{promote_type(T, Int64)}
@@ -383,24 +384,17 @@ function interval(::Type{T}, a, b, d::Decoration = com; format::Symbol = :infsup
     format === :midpoint && return _interval_midpoint(T, _value(a), _value(b), d)
     return throw(ArgumentError("`format` must be `:infsup` or `:midpoint`"))
 end
-interval(a, b, d::Decoration = com; format::Symbol = :infsup) = interval(promote_numtype(numtype(a), numtype(b)), a, b, d; format = format)
+interval(a, b, d::Decoration = com; format::Symbol = :infsup) = interval(promote_numtype(_infer_numtype(a), _infer_numtype(b)), a, b, d; format = format)
 
 function interval(::Type{T}, a, d::Decoration = com; format::Symbol = :infsup) where {T}
     (format === :infsup) | (format === :midpoint) && return _interval_infsup(T, _value(a), _value(a), d)
     return throw(ArgumentError("`format` must be `:infsup` or `:midpoint`"))
 end
-interval(a, d::Decoration = com; format::Symbol = :infsup) = interval(promote_numtype(numtype(a), numtype(a)), a, d; format = format)
+interval(a, d::Decoration = com; format::Symbol = :infsup) = interval(promote_numtype(_infer_numtype(a), _infer_numtype(a)), a, d; format = format)
 
-# some useful extra constructor
-interval(::Type{T}, A::AbstractArray, d::Decoration = com; format::Symbol = :infsup) where {T} = interval.(T, A, d; format = format)
-interval(A::AbstractArray, d::Decoration = com; format::Symbol = :infsup) = interval.(A, d; format = format)
-interval(::Type{T}, A::AbstractArray, B::AbstractArray, d::Decoration = com; format::Symbol = :infsup) where {T} = interval.(T, A, B, d; format = format)
-interval(A::AbstractArray, B::AbstractArray, d::Decoration = com; format::Symbol = :infsup) = interval.(A, B, d; format = format)
-interval(::Type{T}, A::AbstractArray, d::AbstractArray{Decoration}; format::Symbol = :infsup) where {T} = interval.(T, A, d; format = format)
-interval(A::AbstractArray, d::AbstractArray{Decoration}; format::Symbol = :infsup) = interval.(A, d; format = format)
-interval(::Type{T}, A::AbstractArray, B::AbstractArray, d::AbstractArray{Decoration}; format::Symbol = :infsup) where {T} = interval.(T, A, B, d; format = format)
-interval(A::AbstractArray, B::AbstractArray, d::AbstractArray{Decoration}; format::Symbol = :infsup) = interval.(A, B, d; format = format)
-interval(T::Type, d::Decoration; format::Symbol = :infsup) = throw(MethodError(interval, (T, d)))
+interval(T::Type, d::Decoration; format::Symbol = :infsup) = throw(MethodError(interval, (T, d))) # needed to resolve ambiguity
+
+_infer_numtype(a) = numtype(a)
 
 # standard format
 
@@ -474,6 +468,12 @@ _interval_infsup(::Type{T}, a::Complex, b, d::Decoration) where {T<:NumTypes} =
     complex(_interval_infsup(T, real(a), real(b), d), _interval_infsup(T, imag(a), imag(b), d))
 _interval_infsup(::Type{T}, a, b::Complex, d::Decoration) where {T<:NumTypes} =
     complex(_interval_infsup(T, real(a), real(b), d), _interval_infsup(T, imag(a), imag(b), d))
+
+# some useful extra constructor
+
+_infer_numtype(A::AbstractArray) = numtype(eltype(A))
+
+_interval_infsup(::Type{T}, A::AbstractArray, B::AbstractArray, d::Decoration) where {T<:NumTypes} = _interval_infsup.(T, A, B, d)
 
 # midpoint constructors
 
@@ -605,6 +605,7 @@ function atomic(::Type{T}, x::Number) where {T<:NumTypes}
     str = string(x)
     return interval(T, _parse_num(T, str, RoundDown), _parse_num(T, str, RoundUp))
 end
+atomic(x) = atomic(default_numtype(), x)
 
 
 
@@ -613,9 +614,8 @@ end
 # macro
 
 """
-    @interval(expr)
-    @interval(T, expr)
-    @interval(T, expr1, expr2)
+    @interval([T], expr)
+    @interval([T], expr1, expr2)
 
 Walk through an expression and wrap each argument of functions with the internal
 constructor [`atomic`](@ref).
@@ -627,33 +627,45 @@ julia> using IntervalArithmetic
 
 julia> setdisplay(:full);
 
-julia> @macroexpand @interval sin(1) # Float64 is the default bound type
-:(sin(IntervalArithmetic.atomic(Float64, 1)))
+julia> @interval sin(1) # Float64 is the default bound type
+Interval{Float64}(0.8414709848078965, 0.8414709848078966, com, true)
 
-julia> @macroexpand @interval Float32 sin(1)
-:(sin(IntervalArithmetic.atomic(Float32, 1)))
+julia> @interval Float32 sin(1)
+Interval{Float32}(0.84147096f0, 0.841471f0, com, true)
 
 julia> @interval Float64 sin(1) exp(1)
 Interval{Float64}(0.8414709848078965, 2.7182818284590455, com, true)
 ```
 """
-macro interval(T, expr)
-    return _wrap_interval(T, expr)
+macro interval(expr)
+    return _wrap_interval(expr)
+end
+
+macro interval(expr1, expr2)
+    x = _wrap_interval(expr1)
+    y = _wrap_interval(expr1, expr2)
+    return :(interval($x, $y))
 end
 
 macro interval(T, expr1, expr2)
     x = _wrap_interval(T, expr1)
     y = _wrap_interval(T, expr2)
-    return :(interval($(esc(T)), $x, $y))
+    return :(interval($x, $y))
 end
 
-_wrap_interval(T, x) = :(atomic($(esc(T)), $x))
+_atomic(x, y) = hull(atomic(x), atomic(y); dec = :auto) # use `hull` in case `atomic(x)` is larger than `atomic(y)`
+_atomic(T::Type, x) = atomic(T, x)
+_atomic(::Type, T::Type) = T
 
-_wrap_interval(T, x::Symbol) = :(atomic($(esc(T)), $(esc(x))))
+_wrap_interval(x) = _wrap_interval(default_numtype(), x)
+
+_wrap_interval(T, x) = :(_atomic($(esc(T)), $x))
+
+_wrap_interval(T, x::Symbol) = :(_atomic($(esc(T)), $(esc(x))))
 
 function _wrap_interval(T, expr::Expr)
     if expr.head ∈ (:(.), :ref, :macrocall) # a.i, or a[i], or BigInt
-        return :(interval($(esc(T)), $(esc(expr)), $(esc(expr))))
+        return :(_atomic($(esc(T)), $(esc(expr))))
     end
 
     new_expr = copy(expr)

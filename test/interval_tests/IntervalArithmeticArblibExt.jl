@@ -327,9 +327,9 @@
 
     # Check that the ambiguity related changes actually work
     @testset "ExactReal" begin
-        @test Arblib.Mag(ExactReal(5)) == Arblib.Mag(5)
-        @test Arf(ExactReal(5)) == Arf(5)
-        @test Arb(ExactReal(5)) == Arb(5)
+        @test Arblib.Mag(exact(5)) == Arblib.Mag(5)
+        @test Arf(exact(5)) == Arf(5)
+        @test Arb(exact(5)) == Arb(5)
 
         @test promote_type(Arf, ExactReal{Float64}) == Arf
         @test promote_type(ArfRef, ExactReal{Float64}) == Arf

@@ -299,7 +299,8 @@ function _str_basic_repr(a::BareInterval{<:Rational}, format::Symbol)
         m = mid(a)
         str_m = string(m)
         # str_m = ifelse(m ≥ 0, string('+', str_m), str_m)
-        return string(str_m, " ± ", radius(a))
+        output = string(str_m, " ± ", radius(a))
+        return replace(output, "1//0" => '∞')
     else
         lo, hi = bounds(a) # do not use `inf(a)` to avoid `-0.0`
         str_lo = string(lo)
@@ -307,8 +308,9 @@ function _str_basic_repr(a::BareInterval{<:Rational}, format::Symbol)
         str_hi = string(hi)
         # str_hi = ifelse(hi ≥ 0, string('+', str_hi), str_hi)
         output = string(str_lo, ", ", str_hi)
-        output = ifelse(format === :full, output, string('[', output, ']'))
-        return output
+        format === :full && return output
+        output = string('[', output, ']')
+        return replace(output, "1//0]" => "∞)", "[-1//0" => "(-∞")
     end
 end
 

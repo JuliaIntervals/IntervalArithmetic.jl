@@ -103,6 +103,9 @@ Base.literal_pow(::typeof(^), x::Complex{<:Interval}, ::Val{n}) where {n} = ^(x,
 
 # helper functions for power
 
+_select_pow(x, y) = _select_pow(default_power(), x, y)
+_select_pown(x, y) = _select_pown(default_power(), x, y)
+
 _select_pow(::PowerMode{:fast}, x, y) = fastpow(x, y)
 _select_pown(::PowerMode{:fast}, x, y) = fastpown(x, y)
 _select_pow(::PowerMode{:slow}, x, y) = pow(x, y)

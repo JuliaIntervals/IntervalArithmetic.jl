@@ -12,23 +12,25 @@ struct IntervalRounding{T} end
 
 #
 
+_fround(f::Function, x, y, r) = _fround(f, default_rounding(), x, y, r)
+_fround(f::Function, x, r)    = _fround(f, default_rounding(), x, r)
+
+#
+
 for (f, fname) ∈ ((:+, :add), (:-, :sub), (:*, :mul), (:/, :div))
-    g = Symbol(:_, fname, :_round)
-    mpfr_f = Symbol(:mpfr_, fname)
-
     @eval begin
-        $g(::IntervalRounding, x::T, y::T, ::RoundingMode) where {T<:Rational} = $f(x, y) # exact operation
+        _fround(::typeof($f), ::IntervalRounding, x::T, y::T, ::RoundingMode) where {T<:Rational} = $f(x, y) # exact operation
 
-        $g(::IntervalRounding{:correct}, x::T, y::T, ::RoundingMode{:Down}) where {T<:Union{Float32,Float64}} =
+        _fround(::typeof($f), ::IntervalRounding{:correct}, x::T, y::T, ::RoundingMode{:Down}) where {T<:Union{Float32,Float64}} =
             RoundingEmulator.$(Symbol(fname, :_down))(x, y)
-        $g(::IntervalRounding{:correct}, x::T, y::T, ::RoundingMode{:Up}) where {T<:Union{Float32,Float64}} =
+        _fround(::typeof($f), ::IntervalRounding{:correct}, x::T, y::T, ::RoundingMode{:Up}) where {T<:Union{Float32,Float64}} =
             RoundingEmulator.$(Symbol(fname, :_up))(x, y)
-        function $g(::IntervalRounding{:correct}, x::T, y::T, r::RoundingMode) where {T<:AbstractFloat}
+        function _fround(::typeof($f), ::IntervalRounding{:correct}, x::T, y::T, r::RoundingMode) where {T<:AbstractFloat}
             prec = max(precision(x), precision(y))
             bigx = BigFloat(x; precision = prec)
             bigy = BigFloat(y; precision = prec)
             bigz = BigFloat(; precision = prec)
-            @ccall Base.MPFR.libmpfr.$mpfr_f(
+            @ccall Base.MPFR.libmpfr.$(Symbol(:mpfr_, fname))(
                 bigz::Ref{BigFloat},
                 bigx::Ref{BigFloat},
                 bigy::Ref{BigFloat},
@@ -37,19 +39,19 @@ for (f, fname) ∈ ((:+, :add), (:-, :sub), (:*, :mul), (:/, :div))
             return bigz
         end
 
-        $g(::IntervalRounding{:none}, x::T, y::T, ::RoundingMode) where {T<:AbstractFloat} = $f(x, y)
+        _fround(::typeof($f), ::IntervalRounding{:none}, x::T, y::T, ::RoundingMode) where {T<:AbstractFloat} = $f(x, y)
     end
 end
 
 #
 
-_pow_round(ir::IntervalRounding, x::AbstractFloat, n::Integer, r::RoundingMode) =
-    _pow_round(ir, promote(x, n)..., r)
+_fround(::typeof(^), ::IntervalRounding, x::T, y::T, ::RoundingMode) where {T<:Rational} = ^(x, y) # exact operation
+_fround(::typeof(^), ::IntervalRounding, x::Rational, n::Integer, ::RoundingMode) = ^(x, n) # exact operation
 
-_pow_round(::IntervalRounding, x::T, y::T, ::RoundingMode) where {T<:Rational} = ^(x, y) # exact operation
-_pow_round(::IntervalRounding, x::Rational, n::Integer, ::RoundingMode) = ^(x, n) # exact operation
+_fround(::typeof(^), ir::IntervalRounding, x::AbstractFloat, n::Integer, r::RoundingMode) =
+    _fround(^, ir, promote(x, n)..., r)
 
-function _pow_round(::IntervalRounding{:correct}, x::T, y::T, r::RoundingMode) where {T<:AbstractFloat}
+function _fround(::typeof(^), ::IntervalRounding{:correct}, x::T, y::T, r::RoundingMode) where {T<:AbstractFloat}
     prec = max(precision(x), precision(y))
     bigx = BigFloat(x; precision = prec)
     bigy = BigFloat(y; precision = prec)
@@ -63,17 +65,17 @@ function _pow_round(::IntervalRounding{:correct}, x::T, y::T, r::RoundingMode) w
     return bigz
 end
 
-_pow_round(::IntervalRounding{:none}, x::T, y::T, ::RoundingMode) where {T<:AbstractFloat} = ^(x, y)
+_fround(::typeof(^), ::IntervalRounding{:none}, x::T, y::T, ::RoundingMode) where {T<:AbstractFloat} = ^(x, y)
 
 #
 
-_inv_round(::IntervalRounding, x::Rational, ::RoundingMode) = inv(x) # exact operation
+_fround(::typeof(inv), ::IntervalRounding, x::Rational, ::RoundingMode) = inv(x) # exact operation
 
-_inv_round(::IntervalRounding{:correct}, x::Union{Float32,Float64}, ::RoundingMode{:Down}) =
+_fround(::typeof(inv), ::IntervalRounding{:correct}, x::Union{Float32,Float64}, ::RoundingMode{:Down}) =
     RoundingEmulator.div_down(one(x), x)
-_inv_round(::IntervalRounding{:correct}, x::Union{Float32,Float64}, ::RoundingMode{:Up}) =
+_fround(::typeof(inv), ::IntervalRounding{:correct}, x::Union{Float32,Float64}, ::RoundingMode{:Up}) =
     RoundingEmulator.div_up(one(x), x)
-function _inv_round(::IntervalRounding{:correct}, x::AbstractFloat, r::RoundingMode)
+function _fround(::typeof(inv), ::IntervalRounding{:correct}, x::AbstractFloat, r::RoundingMode)
     prec = precision(x)
     bigx = BigFloat(x; precision = prec)
     bigz = BigFloat(; precision = prec)
@@ -86,15 +88,15 @@ function _inv_round(::IntervalRounding{:correct}, x::AbstractFloat, r::RoundingM
     return bigz
 end
 
-_inv_round(::IntervalRounding{:none}, x::AbstractFloat, ::RoundingMode) = inv(x)
+_fround(::typeof(inv), ::IntervalRounding{:none}, x::AbstractFloat, ::RoundingMode) = inv(x)
 
 #
 
-_sqrt_round(::IntervalRounding{:correct}, x::Union{Float32,Float64}, ::RoundingMode{:Down}) =
+_fround(::typeof(sqrt), ::IntervalRounding{:correct}, x::Union{Float32,Float64}, ::RoundingMode{:Down}) =
     RoundingEmulator.sqrt_down(x)
-_sqrt_round(::IntervalRounding{:correct}, x::Union{Float32,Float64}, ::RoundingMode{:Up}) =
+_fround(::typeof(sqrt), ::IntervalRounding{:correct}, x::Union{Float32,Float64}, ::RoundingMode{:Up}) =
     RoundingEmulator.sqrt_up(x)
-function _sqrt_round(::IntervalRounding{:correct}, x::AbstractFloat, r::RoundingMode)
+function _fround(::typeof(sqrt), ::IntervalRounding{:correct}, x::AbstractFloat, r::RoundingMode)
     prec = precision(x)
     bigx = BigFloat(x; precision = prec)
     bigz = BigFloat(; precision = prec)
@@ -106,11 +108,13 @@ function _sqrt_round(::IntervalRounding{:correct}, x::AbstractFloat, r::Rounding
     return bigz
 end
 
-_sqrt_round(::IntervalRounding{:none}, x::AbstractFloat, ::RoundingMode) = sqrt(x)
+_fround(::typeof(sqrt), ::IntervalRounding{:none}, x::AbstractFloat, ::RoundingMode) = sqrt(x)
 
 #
 
-function _rootn_round(::IntervalRounding{:correct}, x::AbstractFloat, n::Integer, r::RoundingMode)
+function rootn end # defined in arithmetic/power.jl
+
+function _fround(::typeof(rootn), ::IntervalRounding{:correct}, x::AbstractFloat, n::Integer, r::RoundingMode)
     prec = precision(x)
     bigx = BigFloat(x; precision = prec)
     bigz = BigFloat(; precision = prec)
@@ -123,11 +127,11 @@ function _rootn_round(::IntervalRounding{:correct}, x::AbstractFloat, n::Integer
     return bigz
 end
 
-_rootn_round(::IntervalRounding{:none}, x::AbstractFloat, n::Integer, ::RoundingMode) = x^(1//n)
+_fround(::typeof(rootn), ::IntervalRounding{:none}, x::AbstractFloat, n::Integer, ::RoundingMode) = x^(1//n)
 
 #
 
-function _atan_round(::IntervalRounding{:correct}, x::T, y::T, r::RoundingMode) where {T<:AbstractFloat}
+function _fround(::typeof(atan), ::IntervalRounding{:correct}, x::T, y::T, r::RoundingMode) where {T<:AbstractFloat}
     prec = max(precision(x), precision(y))
     bigx = BigFloat(x; precision = prec)
     bigy = BigFloat(y; precision = prec)
@@ -141,20 +145,17 @@ function _atan_round(::IntervalRounding{:correct}, x::T, y::T, r::RoundingMode) 
     return bigz
 end
 
-_atan_round(::IntervalRounding{:none}, x::T, y::T, ::RoundingMode) where {T<:AbstractFloat} = atan(x, y)
+_fround(::typeof(atan), ::IntervalRounding{:none}, x::T, y::T, ::RoundingMode) where {T<:AbstractFloat} = atan(x, y)
 
 #
 
-for f ∈ [:cbrt, :exp2, :exp10, :cot, :sec, :csc, :tanh, :coth, :sech, :csch, :asinh, :acosh, :atanh]
-    f_round = Symbol(:_, f, :_round)
-    mpfr_f = Symbol(:mpfr_, f)
-
+for f ∈ (:cbrt, :exp2, :exp10, :cot, :sec, :csc, :tanh, :coth, :sech, :csch, :asinh, :acosh, :atanh)
     @eval begin
-        function $f_round(::IntervalRounding{:correct}, x::AbstractFloat, r::RoundingMode)
+        function _fround(::typeof($f), ::IntervalRounding{:correct}, x::AbstractFloat, r::RoundingMode)
             prec = precision(x)
             bigx = BigFloat(x; precision = prec)
             bigz = BigFloat(; precision = prec)
-            @ccall Base.MPFR.libmpfr.$mpfr_f(
+            @ccall Base.MPFR.libmpfr.$(Symbol(:mpfr_, f))(
                 bigz::Ref{BigFloat},
                 bigx::Ref{BigFloat},
                 r::Base.MPFR.MPFRRoundingMode
@@ -162,16 +163,13 @@ for f ∈ [:cbrt, :exp2, :exp10, :cot, :sec, :csc, :tanh, :coth, :sech, :csch, :
             return bigz
         end
 
-        $f_round(::IntervalRounding{:none}, x::AbstractFloat, ::RoundingMode) = $f(x)
+        _fround(::typeof($f), ::IntervalRounding{:none}, x::AbstractFloat, ::RoundingMode) = $f(x)
     end
 end
 
-for (f, g) ∈ [(:acot, :atan), (:acoth, :atanh)]
-    f_round = Symbol(:_, f, :_round)
-    g_round = Symbol(:_, g, :_round)
-
+for (f, g) ∈ ((:acot, :atan), (:acoth, :atanh))
     @eval begin
-        function $f_round(ir::IntervalRounding{:correct}, x::AbstractFloat, r::RoundingMode{:Down})
+        function _fround(::typeof($f), ir::IntervalRounding{:correct}, x::AbstractFloat, r::RoundingMode{:Down})
             prec = precision(x)
             bigx = BigFloat(x; precision = prec + 10)
             bigz = BigFloat(; precision = prec + 10)
@@ -181,10 +179,10 @@ for (f, g) ∈ [(:acot, :atan), (:acoth, :atanh)]
                 bigx::Ref{BigFloat},
                 RoundUp::Base.MPFR.MPFRRoundingMode
             )::Int32
-            bigw = $g_round(ir, bigz, r)
+            bigw = _fround($g, ir, bigz, r)
             return BigFloat(bigw, r; precision = prec)
         end
-        function $f_round(ir::IntervalRounding{:correct}, x::AbstractFloat, r::RoundingMode{:Up})
+        function _fround(::typeof($f), ir::IntervalRounding{:correct}, x::AbstractFloat, r::RoundingMode{:Up})
             prec = precision(x)
             bigx = BigFloat(x; precision = prec + 32)
             bigz = BigFloat(; precision = prec + 32)
@@ -194,23 +192,23 @@ for (f, g) ∈ [(:acot, :atan), (:acoth, :atanh)]
                 bigx::Ref{BigFloat},
                 RoundDown::Base.MPFR.MPFRRoundingMode
             )::Int32
-            bigw = $g_round(ir, bigz, r)
+            bigw = _fround($g, ir, bigz, r)
             return BigFloat(bigw, r; precision = prec)
         end
 
-        $f_round(::IntervalRounding{:none}, x::AbstractFloat, ::RoundingMode) = $f(x)
+        _fround(::typeof($f), ::IntervalRounding{:none}, x::AbstractFloat, ::RoundingMode) = $f(x)
     end
 end
 
 # CRlibm functions
 
 for f ∈ CRlibm.functions
-    f_round = Symbol(:_, f, :_round)
+    if f !== :atanpi # currently not defined in IntervalArithmetic
+        @eval begin
+            _fround(::typeof($f), ::IntervalRounding{:correct}, x::AbstractFloat, r::RoundingMode) = CRlibm.$f(x, r)
 
-    @eval begin
-        $f_round(::IntervalRounding{:correct}, x::AbstractFloat, r::RoundingMode) = CRlibm.$f(x, r)
-
-        $f_round(::IntervalRounding{:none}, x::AbstractFloat, r::RoundingMode) = $f(x)
+            _fround(::typeof($f), ::IntervalRounding{:none}, x::AbstractFloat, r::RoundingMode) = $f(x)
+        end
     end
 end
 
@@ -250,27 +248,15 @@ function _round_expr(ex::Expr, r::RoundingMode)
         elseif op ∈ (:typemin, :typemax, :one, :zero)
             return :( $(esc(ex)) )
         elseif length(ex.args) == 3 # binary operator
-            if op == :+
-                return :( _add_round($(esc(ex.args[2])), $(esc(ex.args[3])), $r) )
-            elseif op == :-
-                return :( _sub_round($(esc(ex.args[2])), $(esc(ex.args[3])), $r) )
-            elseif op == :*
-                return :( _mul_round($(esc(ex.args[2])), $(esc(ex.args[3])), $r) )
-            elseif op == :/
-                return :( _div_round($(esc(ex.args[2])), $(esc(ex.args[3])), $r) )
-            elseif op == :^
-                return :( _pow_round($(esc(ex.args[2])), $(esc(ex.args[3])), $r) )
-            elseif op == :_unbounded_mul
+            if op == :_unbounded_mul
                 return :( _unbounded_mul($(esc(ex.args[2])), $(esc(ex.args[3])), $r) )
             else
-                op2 = Symbol(:_, op, :_round)
-                return :( $op2($(esc(ex.args[2])), $(esc(ex.args[3])), $r) )
+                return :( _fround($op, $(esc(ex.args[2])), $(esc(ex.args[3])), $r) )
             end
         elseif op ∈ (:+, :-) # unary operator that does not need rounding
             return :( $(esc(ex)) )
         else # unary operator
-            op2 = Symbol(:_, op, :_round)
-            return :( $op2($(esc(ex.args[2])), $r) )
+            return :( _fround($op, $(esc(ex.args[2])), $r) )
         end
     else
         return :( $(esc(ex)) )

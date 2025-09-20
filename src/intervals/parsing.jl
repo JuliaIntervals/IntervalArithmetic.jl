@@ -2,7 +2,7 @@
     I"str"
 
 Create an interval by parsing the string `"str"`; this is semantically
-equivalent to `parse(Interval{[DEFAULT BOUND TYPE]}, "str")`.
+equivalent to `parse(Interval{default_numtype()}, "str")`.
 
 # Examples
 
@@ -128,6 +128,8 @@ function Base.parse(::Type{Interval{T}}, str::AbstractString) where {T<:NumTypes
         end
     end
 end
+
+_parse(str::AbstractString) = parse(Interval{default_numtype()}, str)
 
 function _parse(::Type{T}, str::AbstractString) where {T<:NumTypes}
     if startswith(str, '[') && endswith(str, ']')

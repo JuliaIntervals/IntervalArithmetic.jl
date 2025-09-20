@@ -6,22 +6,27 @@ described by their binary form. The purpose is to guarantee that a non interval
 number is exact, so that `ExactReal` can be used with `Interval` without
 producing the "NG" flag.
 
+An `ExactReal` is constructed by wrapping the value with `exact`.
+
+See also: [`@exact`](@ref)
+
 !!! danger
     By using `ExactReal`, users acknowledge the responsibility of ensuring that
     the number they input corresponds to their intended value.
-    For example, `ExactReal(0.1)` implies that the user knows that ``0.1`` can
+    For example, `exact(0.1)` implies that the user knows that ``0.1`` can
     not be represented exactly as a binary number, and that they are using a
     slightly different number than ``0.1``.
     To help identify the binary number, `ExactReal` is displayed without any
-    rounding.
+    rounding up to 2000 decimals.
 
     ```julia
-    julia> ExactReal(0.1)
+    julia> exact(0.1)
     ExactReal{Float64}(0.1000000000000000055511151231257827021181583404541015625)
     ```
 
     In case of doubt, [`has_exact_display`](@ref) can be use to check if the
-    string representation of a `Real` is equal to its binary value.
+    string representation of a `Real` is equal to its binary value (up to 2000
+    decimals).
 
 # Examples
 
@@ -33,7 +38,7 @@ julia> setdisplay(:full);
 julia> 0.5 * interval(1)
 Interval{Float64}(0.5, 0.5, com, false)
 
-julia> ExactReal(0.5) * interval(1)
+julia> exact(0.5) * interval(1)
 Interval{Float64}(0.5, 0.5, com, true)
 
 julia> setdisplay(:infsup);
@@ -43,7 +48,7 @@ julia> [1, interval(2)]
  [1.0, 1.0]_com_NG
  [2.0, 2.0]_com
 
-julia> [ExactReal(1), interval(2)]
+julia> [exact(1), interval(2)]
 2-element Vector{Interval{Float64}}:
  [1.0, 1.0]_com
  [2.0, 2.0]_com
@@ -54,11 +59,12 @@ See also: [`@exact`](@ref).
 struct ExactReal{T<:Real} <: Real
     value :: T
 
-    ExactReal{T}(value::T) where {T<:Real} = new{T}(value)
-    ExactReal(value::T) where {T<:Real} = new{T}(value)
+    global exact(value::T) where {T<:Real} = new{T}(value)
 end
 
-ExactReal(x::ExactReal) = x
+exact(x::Complex) = complex(exact(real(x)), exact(imag(x)))
+
+exact(x::AbstractArray) = exact.(x)
 
 _value(x::ExactReal) = x.value # hook for interval constructor
 
@@ -68,13 +74,13 @@ isguaranteed(::ExactReal) = true
 
 Base.to_index(i::ExactReal{<:Integer}) = i.value # allow to index with ExactReal
 
-Base.zero(::Type{ExactReal{T}}) where {T<:Real} = ExactReal(zero(T))
+Base.zero(::Type{ExactReal{T}}) where {T<:Real} = exact(zero(T))
 Base.zero(::ExactReal{T}) where {T<:Real} = zero(ExactReal{T})
 
 Base.zero(::Type{Complex{ExactReal{T}}}) where {T<:Real} = complex(zero(ExactReal{T}), zero(ExactReal{T}))
 Base.zero(::Complex{ExactReal{T}}) where {T<:Real} = zero(Complex{ExactReal{T}})
 
-Base.one(::Type{ExactReal{T}}) where {T<:Real} = ExactReal(one(T))
+Base.one(::Type{ExactReal{T}}) where {T<:Real} = exact(one(T))
 Base.one(::ExactReal{T}) where {T<:Real} = one(ExactReal{T})
 
 Base.one(::Type{Complex{ExactReal{T}}}) where {T<:Real} = complex(one(ExactReal{T}), zero(ExactReal{T}))
@@ -160,7 +166,7 @@ _str_repr(x::ExactReal{T}) where {T<:AbstractFloat} =
 
 # always exact
 
-Base.:-(x::ExactReal) = ExactReal(-x.value)
+Base.:-(x::ExactReal) = exact(-x.value)
 
 # by-pass default
 
@@ -179,7 +185,7 @@ end
 Determine if the display of `x` up to 2000 decimals is equal to the bitwise
 value of `x`. This is famously not true for the float displayed as `0.1`.
 """
-has_exact_display(x::Real) = string(x) == _str_repr(ExactReal(x))
+has_exact_display(x::Real) = string(x) == _str_repr(exact(x))
 
 #
 
@@ -193,19 +199,20 @@ macro allows defining generic functions, seamlessly accepting both `Number` and
 !!! danger
     By using [`ExactReal`](@ref), users acknowledge the responsibility of
     ensuring that the number they input corresponds to their intended value.
-    For example, `ExactReal(0.1)` implies that the user knows that ``0.1`` can
+    For example, `exact(0.1)` implies that the user knows that ``0.1`` can
     not be represented exactly as a binary number, and that they are using a
     slightly different number than ``0.1``.
     To help identify the binary number, `ExactReal` is displayed without any
-    rounding.
+    rounding up to 2000 decimals.
 
     ```julia
-    julia> ExactReal(0.1)
+    julia> exact(0.1)
     ExactReal{Float64}(0.1000000000000000055511151231257827021181583404541015625)
     ```
 
     In case of doubt, [`has_exact_display`](@ref) can be use to check if the
-    string representation of a `Real` is equal to its binary value.
+    string representation of a `Real` is equal to its binary value (up to 2000
+    decimals).
 
 # Examples
 
@@ -234,29 +241,29 @@ See also: [`ExactReal`](@ref).
 """
 macro exact(expr)
     exact_expr = postwalk(expr) do x
-        x isa Real && return ExactReal(x)
+        x isa Real && return exact(x)
         return x
     end
 
     exact_expr = prewalk(exact_expr) do x
         if @capture(x, im)
-            return :(complex(ExactReal(false), ExactReal(true)))
+            return exact(im)
         end
 
         if @capture(x, a_ + im) || @capture(x, im + a_)
             if a isa ExactReal
-                return :(complex($a, ExactReal(one($a.value))))
+                return :(complex($a, exact(one($a.value))))
             end
         end
         if @capture(x, a_ - im) || @capture(x, -im + a_)
             if a isa ExactReal
-                return :(complex($a, ExactReal(-one($a.value))))
+                return :(complex($a, exact(-one($a.value))))
             end
         end
 
         if @capture(x, b_ * im) || @capture(x, im * b_)
             if b isa ExactReal
-                return :(complex(ExactReal(zero($b.value)), $b))
+                return :(complex(exact(zero($b.value)), $b))
             end
         end
 

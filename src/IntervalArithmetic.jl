@@ -71,107 +71,52 @@ include("display.jl")
 
 #
 
-# by-pass `similar` methods defined in array.jl
-# note: written in this form to avoid by-passing the default behaviour for `Union{}`
-# Base.similar(a::Array{Interval{T},1})          where {T<:NumTypes} = zeros(Interval{T}, size(a, 1))
-# Base.similar(a::Array{Complex{Interval{T}},1}) where {T<:NumTypes} = zeros(Complex{Interval{T}}, size(a, 1))
+mutable struct ConfigurationOptions
+    numtype  :: Type{<:NumTypes}
+    flavor   :: Symbol
+    rounding :: Symbol
+    power    :: Symbol
+    matmul   :: Symbol
+end
 
-# Base.similar(a::Array{<:Any,1}, S::Type{Interval{T}})          where {T<:NumTypes} = zeros(S, size(a, 1))
-# Base.similar(a::Array{<:Any,1}, S::Type{Complex{Interval{T}}}) where {T<:NumTypes} = zeros(S, size(a, 1))
+function Base.show(io::IO, ::MIME"text/plain", params::ConfigurationOptions)
+    println(io, "Configuration options:")
+    println(io, "  - bound type: ", params.numtype)
+    println(io, "  - flavor: ", params.flavor)
+    println(io, "  - interval rounding: ", params.rounding)
+    println(io, "  - power mode: ", params.power)
+    print(io, "  - matrix multiplication mode: ", params.matmul)
+end
 
-# Base.similar(a::Array{Interval{T},2})          where {T<:NumTypes} = zeros(Interval{T}, size(a, 1), size(a, 2))
-# Base.similar(a::Array{Complex{Interval{T}},2}) where {T<:NumTypes} = zeros(Complex{Interval{T}}, size(a, 1), size(a, 2))
-
-# Base.similar(a::Array{<:Any,2}, S::Type{Interval{T}})          where {T<:NumTypes} = zeros(S, size(a, 1), size(a, 2))
-# Base.similar(a::Array{<:Any,2}, S::Type{Complex{Interval{T}}}) where {T<:NumTypes} = zeros(S, size(a, 1), size(a, 2))
-
-# Base.similar(::Array{Interval{T}},          m::Int) where {T<:NumTypes} = zeros(Interval{T}, m)
-# Base.similar(::Array{Complex{Interval{T}}}, m::Int) where {T<:NumTypes} = zeros(Complex{Interval{T}}, m)
-
-# Base.similar(::Array{Interval{T}},          dims::Dims) where {T<:NumTypes} = zeros(Interval{T}, dims)
-# Base.similar(::Array{Complex{Interval{T}}}, dims::Dims) where {T<:NumTypes} = zeros(Complex{Interval{T}}, dims)
-
-# Base.similar(::Array, S::Type{Interval{T}},          dims::Dims) where {T<:NumTypes} = zeros(S, dims)
-# Base.similar(::Array, S::Type{Complex{Interval{T}}}, dims::Dims) where {T<:NumTypes} = zeros(S, dims)
-
-#
+const configuration_options = ConfigurationOptions(Float64, :set_based, :correct, :fast, :fast) # default
 
 function configure_numtype(numtype::Type{<:NumTypes})
-    @eval promote_numtype(::Type{T}, ::Type{S}) where {T,S} = promote_type($numtype, numtype(T), numtype(S))
-    @eval macro interval(expr)
-        return _wrap_interval($numtype, expr)
-    end
-    @eval _parse(str::AbstractString) = parse(Interval{$numtype}, str)
-    @eval emptyinterval() = emptyinterval(Interval{$numtype})
-    @eval entireinterval() = entireinterval(Interval{$numtype})
-    @eval nai() = nai(Interval{$numtype})
+    @eval default_numtype() = $numtype
     return numtype
 end
 
 function configure_flavor(flavor::Symbol)
     flavor == :set_based || return throw(ArgumentError("only the interval flavor `:set_based` is supported and implemented"))
-    @eval zero_times_infinity(::Type{T}) where {T<:NumTypes} = zero_times_infinity(Flavor{$(QuoteNode(flavor))}(), T)
-    @eval div_by_thin_zero(x::BareInterval) = div_by_thin_zero(Flavor{$(QuoteNode(flavor))}(), x)
-    @eval contains_infinity(x::BareInterval) = contains_infinity(Flavor{$(QuoteNode(flavor))}(), x)
-    @eval is_valid_interval(a::Real, b::Real) = is_valid_interval(Flavor{$(QuoteNode(flavor))}(), a, b)
+    @eval default_flavor() = Flavor{$(QuoteNode(flavor))}()
     return flavor
 end
 
 function configure_rounding(rounding::Symbol)
     rounding ∈ (:correct, :none) || return throw(ArgumentError("only the rounding mode `:correct` and `:none` are available"))
-
-    for f ∈ (:add, :sub, :mul, :div)
-        f_round = Symbol(:_, f, :_round)
-        @eval $f_round(x, y, r) = $f_round(IntervalRounding{$(QuoteNode(rounding))}(), x, y, r)
-    end
-
-    @eval _pow_round(x, y, r) = _pow_round(IntervalRounding{$(QuoteNode(rounding))}(), x, y, r)
-
-    @eval _inv_round(x, r) = _inv_round(IntervalRounding{$(QuoteNode(rounding))}(), x, r)
-
-    @eval _sqrt_round(x, r) = _sqrt_round(IntervalRounding{$(QuoteNode(rounding))}(), x, r)
-
-    @eval _rootn_round(x, n, r) = _rootn_round(IntervalRounding{$(QuoteNode(rounding))}(), x, n, r)
-
-    @eval _atan_round(x, y, r) = _atan_round(IntervalRounding{$(QuoteNode(rounding))}(), x, y, r)
-
-    for f ∈ [:cbrt, :exp2, :exp10, :cot, :sec, :csc, :tanh, :coth, :sech, :csch, :asinh, :acosh, :atanh]
-        f_round = Symbol(:_, f, :_round)
-        @eval $f_round(x, r) = $f_round(IntervalRounding{$(QuoteNode(rounding))}(), x, r)
-    end
-
-    for f ∈ (:acot, :acoth)
-        f_round = Symbol(:_, f, :_round)
-        @eval $f_round(x, r) = $f_round(IntervalRounding{$(QuoteNode(rounding))}(), x, r)
-    end
-
-    for f ∈ CRlibm.functions
-        f_round = Symbol(:_, f, :_round)
-        @eval $f_round(x, r) = $f_round(IntervalRounding{$(QuoteNode(rounding))}(), x, r)
-    end
-
+    @eval default_rounding() = IntervalRounding{$(QuoteNode(rounding))}()
     return rounding
 end
 
 function configure_power(power::Symbol)
     power ∈ (:slow, :fast) || return throw(ArgumentError("only the power mode `:slow` and `:fast` are available"))
-
-    for f ∈ (:_select_pow, :_select_pown)
-        @eval $f(x, y) = $f(PowerMode{$(QuoteNode(power))}(), x, y)
-    end
-
+    @eval default_power() = PowerMode{$(QuoteNode(power))}()
     return power
 end
 
-# define the functions for matmul here to be able to access them
-
-function configure_matmul(matmul)
-    matmul ∈ (:slow, :fast) || return throw(ArgumentError("only the matrix multiplication mode `:slow` and `:fast` are available"))
-    return matmul
-end
+# algorithms are defined in the package extension for LinearAlgebra
 
 """
-    MatMulMode
+    MatMulMode{T}
 
 Matrix multiplication mode type.
 
@@ -181,7 +126,11 @@ Available mode types:
 """
 struct MatMulMode{T} end
 
-_mul!() = error("This function requires LinearAlgebra to be loaded")
+function configure_matmul(matmul)
+    matmul ∈ (:slow, :fast) || return throw(ArgumentError("only the matrix multiplication mode `:slow` and `:fast` are available"))
+    @eval default_matmul() = MatMulMode{$(QuoteNode(matmul))}()
+    return matmul
+end
 
 """
     configure(; numtype=Float64, flavor=:set_based, rounding=:correct, power=:fast, matmul=:fast)
@@ -210,16 +159,40 @@ Configure the default behavior for:
   performance over precision. Learn more:
   [`IntervalArithmetic.MatMulMode`](@ref).
 """
-function configure(; numtype::Type{<:NumTypes}=Float64, flavor::Symbol=:set_based, rounding::Symbol=:correct, power::Symbol=:fast, matmul::Symbol=:fast)
-    configure_numtype(numtype)
-    configure_flavor(flavor)
-    configure_rounding(rounding)
-    configure_power(power)
-    configure_matmul(matmul)
-    return numtype, flavor, rounding, power, matmul
+function configure(; numtype::Type{<:NumTypes}=configuration_options.numtype,
+        flavor::Symbol=configuration_options.flavor,
+        rounding::Symbol=configuration_options.rounding,
+        power::Symbol=configuration_options.power,
+        matmul::Symbol=configuration_options.matmul)
+
+    if configuration_options.numtype !== numtype
+        configure_numtype(numtype)
+        configuration_options.numtype = numtype
+    end
+    if configuration_options.flavor !== flavor
+        configure_flavor(flavor)
+        configuration_options.flavor = flavor
+    end
+    if configuration_options.rounding !== rounding
+        configure_rounding(rounding)
+        configuration_options.rounding = rounding
+    end
+    if configuration_options.power !== power
+        configure_power(power)
+        configuration_options.power = power
+    end
+    if configuration_options.matmul !== matmul
+        configure_matmul(matmul)
+        configuration_options.matmul = matmul
+    end
+    return configuration_options
 end
 
-configure()
+configure_numtype(configuration_options.numtype)
+configure_flavor(configuration_options.flavor)
+configure_rounding(configuration_options.rounding)
+configure_power(configuration_options.power)
+configure_matmul(configuration_options.matmul)
 
 #
 

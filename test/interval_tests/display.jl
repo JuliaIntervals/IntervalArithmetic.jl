@@ -60,6 +60,7 @@ setprecision(BigFloat, 256) do
         b16 = interval(-floatmin(Float16), parse(Float16, "1.3"))
         br = interval(Rational{Int64}, -11//10, 13//10)
         c = interval(-1, Inf)
+        cr = interval(Rational{Int64}, -1//1, 1//0)
         large_expo = interval(0, big"1e123456789") # use "small" exponent, cf. JuliaLang/julia#48678
 
         @testset "Standard format" begin
@@ -81,6 +82,7 @@ setprecision(BigFloat, 256) do
                     @test sprint(show, MIME("text/plain"), b16)  == "[Float16(-6.104e-5), Float16(1.3)]_com"
                     @test sprint(show, MIME("text/plain"), br)   == "[-11//10, 13//10]_com"
                     @test sprint(show, MIME("text/plain"), c)    == "[-1.0, ∞)_dac"
+                    @test sprint(show, MIME("text/plain"), cr)    == "[-1//1, ∞)_dac"
                     @test sprint(show, MIME("text/plain"), large_expo) ==
                         "[0.0, 1.0e+123456789]₂₅₆_com"
                 end
@@ -98,6 +100,7 @@ setprecision(BigFloat, 256) do
                     @test sprint(show, MIME("text/plain"), b16)  == "[Float16(-6.104e-5), Float16(1.3)]"
                     @test sprint(show, MIME("text/plain"), br)   == "[-11//10, 13//10]"
                     @test sprint(show, MIME("text/plain"), c)    == "[-1.0, ∞)"
+                    @test sprint(show, MIME("text/plain"), cr)   == "[-1//1, ∞)"
                     @test sprint(show, MIME("text/plain"), large_expo) ==
                         "[0.0, 1.0e+123456789]₂₅₆"
                 end
@@ -113,6 +116,7 @@ setprecision(BigFloat, 256) do
                 @test sprint(show, MIME("text/plain"), b16)  == "[Float16(-6.104e-5), Float16(1.3)]_com"
                 @test sprint(show, MIME("text/plain"), br)   == "[-11//10, 13//10]_com"
                 @test sprint(show, MIME("text/plain"), c)    == "[-1.0, ∞)_dac"
+                @test sprint(show, MIME("text/plain"), cr)   == "[-1//1, ∞)_dac"
                 @test sprint(show, MIME("text/plain"), large_expo) ==
                     "[0.0, 1.0e+123456789]₂₅₆_com"
             end
@@ -132,6 +136,7 @@ setprecision(BigFloat, 256) do
             @test sprint(show, MIME("text/plain"), b16)  == "Interval{Float16}(Float16(-6.104e-5), Float16(1.3), com, true)"
             @test sprint(show, MIME("text/plain"), br)   == "Interval{Rational{Int64}}(-11//10, 13//10, com, true)"
             @test sprint(show, MIME("text/plain"), c)    == "Interval{Float64}(-1.0, Inf, dac, true)"
+            @test sprint(show, MIME("text/plain"), cr)   == "Interval{Rational{Int64}}(-1//1, 1//0, dac, true)"
             @test sprint(show, MIME("text/plain"), large_expo) ==
                 "Interval{BigFloat}(0.0, $(sup(large_expo)), com, true)"
         end
@@ -152,6 +157,7 @@ setprecision(BigFloat, 256) do
                 @test sprint(show, MIME("text/plain"), b16)  == "(Float16(0.65) ± Float16(0.65))_com"
                 @test sprint(show, MIME("text/plain"), br)   == "(1//10 ± 6//5)_com"
                 @test sprint(show, MIME("text/plain"), c)    == "(1.79769e+308 ± ∞)_dac"
+                @test sprint(show, MIME("text/plain"), cr)   == "(9223372036854775807//1 ± ∞)_dac"
                 @test sprint(show, MIME("text/plain"), large_expo) ==
                     "(5.0e+123456788 ± 5.0e+123456788)₂₅₆_com"
             end
@@ -169,6 +175,7 @@ setprecision(BigFloat, 256) do
                 @test sprint(show, MIME("text/plain"), b16)  == "Float16(0.65) ± Float16(0.65)"
                 @test sprint(show, MIME("text/plain"), br)   == "1//10 ± 6//5"
                 @test sprint(show, MIME("text/plain"), c)    == "1.79769e+308 ± ∞"
+                @test sprint(show, MIME("text/plain"), cr)   == "9223372036854775807//1 ± ∞"
                 @test sprint(show, MIME("text/plain"), large_expo) ==
                     "(5.0e+123456788 ± 5.0e+123456788)₂₅₆"
             end

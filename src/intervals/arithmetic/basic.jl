@@ -90,7 +90,7 @@ end
 function _unbounded_mul(x::T, y::T, r::RoundingMode) where {T<:NumTypes}
     iszero(x) && return sign(y) * zero_times_infinity(T)
     iszero(y) && return sign(x) * zero_times_infinity(T)
-    return _mul_round(x, y, r)
+    return _fround(*, x, y, r)
 end
 
 for f ∈ (:_unbounded_mul, :*)

@@ -149,11 +149,11 @@ See also: [`inf`](@ref), [`sup`](@ref), [`bounds`](@ref), [`mid`](@ref),
 """
 function diam(x::BareInterval{T}) where {T<:AbstractFloat}
     isempty_interval(x) && return convert(T, NaN)
-    return _sub_round(sup(x), inf(x), RoundUp) # cf. Section 12.12.8
+    return _fround(-, sup(x), inf(x), RoundUp) # cf. Section 12.12.8
 end
 function diam(x::BareInterval{<:Rational})
     isempty_interval(x) && return throw(ArgumentError("cannot compute the diameter of empty intervals; cannot return a `Rational` NaN"))
-    return _sub_round(sup(x), inf(x), RoundUp) # cf. Section 12.12.8
+    return _fround(-, sup(x), inf(x), RoundUp) # cf. Section 12.12.8
 end
 
 function diam(x::Interval{T}) where {T<:AbstractFloat}
@@ -211,6 +211,11 @@ See also: [`inf`](@ref), [`sup`](@ref), [`bounds`](@ref), [`mid`](@ref),
 function midradius(x::BareInterval)
     m = mid(x)
     return m, max(m - inf(x), sup(x) - m)
+end
+function midradius(x::BareInterval{<:Rational}) # needed to avoid integer overflow error
+    m = mid(x)
+    isbounded(x) && return m, max(m - inf(x), sup(x) - m)
+    return m, typemax(numtype(x))
 end
 
 function midradius(x::Interval{T}) where {T<:AbstractFloat}
