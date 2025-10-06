@@ -126,11 +126,16 @@ interval(2, 1)
 interval(NaN)
 ```
 
-These are all examples of ill-formed intervals, resulting in the decoration `ill`.
+These are all examples of ill-formed intervals,
+also known as `NaI`, resulting in the decoration `ill`.
+
+Similarly to the floating point `NaN`,
+all boolean operations on an ill-formed interval return `false`.
 
 !!! danger
-    The decoration `ill` is an indicator that an error has occured. Therefore, any interval marked by this decoration cannot be trusted and the code needs to be debugged.
-
+    The decoration `ill` is an indicator that an error has occured.
+    Therefore, when an ill-formed interval is created, a warning is raised.
+    Any interval marked by this decoration cannot be trusted and the code needs to be debugged.
 
 
 ### More constructors
