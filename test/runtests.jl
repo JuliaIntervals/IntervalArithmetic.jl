@@ -9,7 +9,14 @@ import IntervalSets as IS
 include("generate_ITF1788.jl")
 
 # interval tests
-for f ∈ readdir("interval_tests"; join = true)
+for f ∈ filter(isfile, readdir("interval_tests"; join = true))
+    @testset "$f" begin
+        include(f)
+    end
+end
+
+# interval tests using Supposition
+for f ∈ filter(isfile, readdir("interval_tests/supposition"; join = true))
     @testset "$f" begin
         include(f)
     end
