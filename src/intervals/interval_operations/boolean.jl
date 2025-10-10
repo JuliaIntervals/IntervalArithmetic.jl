@@ -333,7 +333,7 @@ Implement the `isCommonInterval` function of the IEEE Standard 1788-2015
 (Sections 10.6.3 and 12.13.3).
 
 !!! note
-    This is does not take into consideration the decoration of the interval.
+    This does not take into consideration the decoration of the interval.
 """
 iscommon(x::BareInterval) = !(isentire_interval(x) | isempty_interval(x) | isunbounded(x))
 
