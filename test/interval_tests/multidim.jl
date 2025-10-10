@@ -104,25 +104,43 @@ end
           [(-1 .. -0.5), (0.5 .. 1)], [(-0.5 .. 0), (0.5 .. 1)],
           [(0 .. 0.5), (0.5 .. 1)], [(0.5 .. 1), (0.5 .. 1)]]
     @test mapreduce((x, y) -> all(isequal_interval.(x, y)), &, vb2, vv)
-    @test all(isequal_interval.(hull.(vb2...), ib2))
+    @test all(enumerate(ib2)) do (i, Ib)
+        hulled = reduce(hull, [vb2[k][i] for k in eachindex(vb2)])
+        isequal_interval(hulled, Ib)
+    end
     @test mapreduce((x, y) -> all(isequal_interval.(x, y)), &, mince(ib2, (4, 4)), vb2)
     @test mapreduce((x, y) -> all(isequal_interval.(x, y)), &, mince(ib2, (1,4)),
         [[(-1 .. 1), (-1 .. -0.5)], [(-1 .. 1), (-0.5 .. 0)], [(-1 .. 1), (0 .. 0.5)], [(-1 .. 1), (0.5 .. 1)]])
-    @test all(isequal_interval.(hull.(mince(ib2, (1,4))...), ib2))
+
+    vb2bis = mince(ib2, (1,4))
+    @test all(enumerate(ib2)) do (i, Ib)
+        hulled = reduce(hull, [vb2bis[k][i] for k in eachindex(vb2bis)])
+        isequal_interval(hulled, Ib)
+    end
 
     ib3 = fill(-1..1, 3)
     vb3 = mince(ib3, 4)
     @test length(vb3) == 4^3
-    @test all(isequal_interval.(hull.(vb3...), ib3))
+    @test all(enumerate(ib3)) do (i, Ib)
+        hulled = reduce(hull, [vb3[k][i] for k in eachindex(vb3)])
+        isequal_interval(hulled, Ib)
+    end
     @test mapreduce((x, y) -> all(isequal_interval.(x, y)), &, mince(ib3, (4,4,4)), vb3)
     @test mapreduce((x, y) -> all(isequal_interval.(x, y)), &, mince(ib3, (2,1,1)),
         [[(-1 .. 0), (-1 .. 1), (-1 .. 1)], [(0 .. 1), (-1 .. 1), (-1 .. 1)]])
-    @test all(isequal_interval.(hull.(mince(ib3, (2,1,1))...), ib3))
+    vb3bis = mince(ib3, (2,1,1))
+    @test all(enumerate(ib3)) do (i, Ib)
+        hulled = reduce(hull, [vb3bis[k][i] for k in eachindex(vb3bis)])
+        isequal_interval(hulled, Ib)
+    end
 
     ib4 = fill(-1..1, 4)
     vb4 = mince(ib4, 4)
     @test length(vb4) == 4^4
-    @test all(isequal_interval.(hull.(vb4...), ib4))
+    @test all(enumerate(ib4)) do (i, Ib)
+        hulled = reduce(hull, [vb4[k][i] for k in eachindex(vb4)])
+        isequal_interval(hulled, Ib)
+    end
     @test mapreduce((x, y) -> all(isequal_interval.(x, y)), &, mince(ib4, (4,4,4,4)), vb4)
     @test mapreduce((x, y) -> all(isequal_interval.(x, y)), &, mince(ib4, (1,1,1,1)), (ib4,))
 end
