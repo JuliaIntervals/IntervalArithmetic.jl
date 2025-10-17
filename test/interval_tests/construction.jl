@@ -9,6 +9,9 @@
     @test sup(IntervalArithmetic._unsafe_bareinterval(Float64, Inf, Inf)) == Inf
     @test isempty_interval(bareinterval(Inf, Inf))
     @test isnai(interval(Inf, Inf))
+    @test isnai(interval(1//0, 1//0))
+    @test isnai(interval(-1//0, -1//0))
+    @test isnai(interval(1//0, -1//0))
 end
 
 @testset "Basics" begin
@@ -69,6 +72,9 @@ end
     @test isnai(interval(-Inf))
     @test isnai(interval(1, NaN))
     @test isnai(interval(NaN))
+
+    @test isnai(interval(1//0))
+    @test isnai(interval(-1//0))
 
     # check no issue with `Integer` modular arithmetic
     @test bounds(interval(typemin(Int64), typemax(Int64))) == (float(typemin(Int64)), float(typemax(Int64)))
