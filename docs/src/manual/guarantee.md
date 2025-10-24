@@ -32,7 +32,7 @@ For instance, consider the following examples:
 
 ```@repl guarantee
 interval(1)
-interval(1) + ExactReal(1)
+interval(1) + exact(1)
 @exact 2interval(1) + 1 + exp(im * interval(1))
 @exact foo(x) = 2x + 1 + exp(im * x)
 foo(1.)
