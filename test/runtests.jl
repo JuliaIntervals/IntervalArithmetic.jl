@@ -16,13 +16,9 @@ for f ∈ filter(isfile, readdir("interval_tests"; join = true))
 end
 
 # interval tests using Supposition
-if Int == Int32
-    @warn "Suppositions.jl currently does not support 32 bit execution"
-else
-    for f ∈ filter(isfile, readdir("interval_tests/supposition"; join = true))
-        @testset "$f" begin
-            include(f)
-        end
+for f ∈ filter(isfile, readdir("interval_tests/supposition"; join = true))
+    @testset "$f" begin
+        include(f)
     end
 end
 
