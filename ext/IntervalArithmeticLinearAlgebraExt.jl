@@ -131,7 +131,8 @@ function Base.inv(A::Matrix{<:RealOrComplexI})
     Y = LinearAlgebra.norm(approx_A⁻¹ * F, Inf)
     Z₁ = LinearAlgebra.opnorm(F, Inf)
     if isbounded(Y) & strictprecedes(Z₁, one(Z₁))
-        A⁻¹ = interval.(approx_A⁻¹, inf(interval(mag(Y)) / (one(Z₁) - interval(mag(Z₁)))); format = :midpoint)
+        r = sup(interval(mag(Y)) / (one(Z₁) - interval(mag(Z₁))))
+        A⁻¹ = interval.(approx_A⁻¹, r; format = :midpoint)
     else
         A⁻¹ = fill(nai(eltype(approx_A⁻¹)), size(A))
     end
