@@ -121,6 +121,43 @@ end
 LinearAlgebra.det(A::AbstractMatrix{<:Interval}) = real(reduce(*, LinearAlgebra.eigvals(A)))
 LinearAlgebra.det(A::AbstractMatrix{<:Complex{<:Interval}}) = reduce(*, LinearAlgebra.eigvals(A))
 
+# matrix eigendecomposition
+# note: use the contraction mapping theorem, only works when the entries of A have small radii, and A has simple eigenvalues
+
+function LinearAlgebra.eigen!(A::AbstractMatrix{<:RealOrComplexI}; permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby)
+    # note: this function does not overwrite `A`
+    true_vls = _eigvals(A, permute, scale, sortby)
+    vcs = LinearAlgebra.eigvecs(mid.(A); permute, scale, sortby)
+    n = length(true_vls)
+    inds = [argmax(i -> abs(vcs[i,j]), 1:n) for j ∈ 1:n]
+    ref_scale = [vcs[inds[j],j] for j ∈ 1:n]
+    foreach(j -> vcs[:,j] ./= ref_scale[j], 1:n)
+    vcs_ = interval(vcs)
+
+    F = [[vcs_[inds[j],j] - interval(1) for j ∈ 1:n] ; vec(A * vcs_ - vcs_ * LinearAlgebra.Diagonal(true_vls))]
+    DF = zeros(eltype(F), n+n^2, n+n^2)
+    for j ∈ 1:n
+        DF[j,n+inds[j]+(j-1)*n] = interval(1)
+        DF[n+(j-1)*n+1:n+j*n,j] .= .- vcs_[:,j]
+        DF[n+(j-1)*n+1:n+j*n,n+(j-1)*n+1:n+j*n] .= A - LinearAlgebra.UniformScaling(true_vls[j])
+    end
+
+    approx_DF⁻¹ = interval(inv(mid.(DF)))
+    Y = LinearAlgebra.norm(approx_DF⁻¹ * F, Inf)
+    Z₁ = LinearAlgebra.opnorm(approx_DF⁻¹ * DF - interval(LinearAlgebra.I), Inf)
+
+    true_vcs = Matrix{eltype(vcs_)}(undef, size(vcs))
+    if isbounded(Y) & strictprecedes(Z₁, one(Z₁))
+        r = sup(Y / (one(Z₁) - Z₁))
+        true_vcs .= interval.(vcs, r; format = :midpoint)
+        foreach(j -> true_vcs[:,j] .*= interval(ref_scale[j]), 1:n)
+    else
+        true_vcs .= nai(eltype(vcs))
+    end
+    _ensure_ng_flag!(true_vcs, all(isguaranteed, A))
+    return LinearAlgebra.Eigen(true_vls, true_vcs)
+end
+
 # matrix inversion
 # note: use the contraction mapping theorem, only works when the entries of A have small radii
 
@@ -130,14 +167,39 @@ function Base.inv(A::Matrix{<:RealOrComplexI})
     F = A * approx_A⁻¹ - interval(LinearAlgebra.I)
     Y = LinearAlgebra.norm(approx_A⁻¹ * F, Inf)
     Z₁ = LinearAlgebra.opnorm(F, Inf)
+    A⁻¹ = Matrix{eltype(A)}(undef, size(A))
     if isbounded(Y) & strictprecedes(Z₁, one(Z₁))
-        r = sup(interval(mag(Y)) / (one(Z₁) - interval(mag(Z₁))))
-        A⁻¹ = interval.(approx_A⁻¹, r; format = :midpoint)
+        r = sup(Y / (one(Z₁) - Z₁))
+        A⁻¹ .= interval.(approx_A⁻¹, r; format = :midpoint)
     else
-        A⁻¹ = fill(nai(eltype(approx_A⁻¹)), size(A))
+        A⁻¹ .= nai(eltype(approx_A⁻¹))
     end
     _ensure_ng_flag!(A⁻¹, all(isguaranteed, A))
     return A⁻¹
+end
+
+# matrix exponential and logarithm
+
+function LinearAlgebra.exp!(A::AbstractMatrix{<:RealOrComplexI})
+    # note: this function does not overwrite `A`
+    Λ, V = LinearAlgebra.eigen(A)
+    V⁻¹ = inv(V)
+    return V * LinearAlgebra.Diagonal(exp.(Λ)) * V⁻¹
+end
+
+function LinearAlgebra.log(A::AbstractMatrix{<:Interval})
+    Λ, V = LinearAlgebra.eigen(A)
+    any(x -> in_interval(0, x), Λ) && return fill(nai(eltype(A)), size(A))
+    V⁻¹ = inv(V)
+    any(x -> isreal(x) & precedes(real(x), interval(0)), Λ) && return V * LinearAlgebra.Diagonal(log.(complex.(Λ))) * V⁻¹
+    return real(V * LinearAlgebra.Diagonal(log.(Λ)) * V⁻¹)
+end
+
+function LinearAlgebra.log(A::AbstractMatrix{<:ComplexI})
+    Λ, V = LinearAlgebra.eigen(A)
+    any(x -> in_interval(0, x), Λ) && return fill(nai(eltype(A)), size(A))
+    V⁻¹ = inv(V)
+    return V * LinearAlgebra.Diagonal(log.(Λ)) * V⁻¹
 end
 
 # matrix multiplication
