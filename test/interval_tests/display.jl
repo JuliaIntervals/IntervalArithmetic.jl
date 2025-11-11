@@ -1,4 +1,8 @@
 setprecision(BigFloat, 256) do
+    @testset "Ill-formed interval" begin
+       @test sprint(show, MIME("text/plain"), interval(1, -1)) == "NaI"
+    end
+
     @testset "BareInterval" begin
         a = bareinterval(-floatmin(Float64), 1.3)
         large_expo = bareinterval(0, big"1e123456789") # use "small" exponent, cf. JuliaLang/julia#48678

@@ -120,6 +120,8 @@ function _str_repr(a::BareInterval{T}, format::Symbol) where {T<:NumTypes}
 end
 
 function _str_repr(a::Interval{T}, format::Symbol) where {T<:NumTypes}
+    isnai(a) && return "NaI"
+
     # `format` is either `:infsup`, `:midpoint` or `:full`
     str_interval = _str_basic_repr(a.bareinterval, format) # use `a.bareinterval` to not print a warning if `a` is an NaI
     if format === :full && str_interval != "∅"

@@ -3,6 +3,8 @@
 # flavor in Section 10.5.9
 # Some other (non required) related functions are also present, as well as some
 # of the "Recommended operations" (Section 10.6.3)
+# The requirement for decorated intervals are described in Chapter 12,
+# mostly sections 12.12.9 and 12.13.3.
 
 # used internally, equivalent to `<` but with `(Inf < Inf) == true`
 _strictlessprime(x::Real, y::Real) = (x < y) | ((isinf(x) | isinf(y)) & (x == y))
@@ -12,7 +14,8 @@ _strictlessprime(x::Real, y::Real) = (x < y) | ((isinf(x) | isinf(y)) & (x == y)
 
 Test whether `x` and `y` are identical.
 
-Implement the `equal` function of the IEEE Standard 1788-2015 (Table 9.3).
+Implement the `equal` function of the IEEE Standard 1788-2015
+(Tables 9.3 and 10.3, and Sections 9.5, 10.5.10 and 12.12.9).
 """
 isequal_interval(x::BareInterval, y::BareInterval) = (inf(x) == inf(y)) & (sup(x) == sup(y))
 
@@ -49,7 +52,8 @@ const issetequal_interval = isequal_interval
 
 Test whether `x` is contained in `y`.
 
-Implement the `subset` function of the IEEE Standard 1788-2015 (Table 9.3).
+Implement the `subset` function of the IEEE Standard 1788-2015
+(Tables 9.3 and 10.3, and Sections 9.5, 10.5.10 and 12.12.9).
 
 See also: [`isstrictsubset`](@ref) and [`isinterior`](@ref).
 """
@@ -100,7 +104,8 @@ isstrictsubset(x) = Base.Fix2(isstrictsubset, x)
 
 Test whether `x` is in the interior of `y`.
 
-Implement the `interior` function of the IEEE Standard 1788-2015 (Table 9.3).
+Implement the `interior` function of the IEEE Standard 1788-2015
+(Tables 9.3 and 10.3, and Sections 9.5, 10.5.10 and 12.12.9).
 
 See also: [`issubset_interval`](@ref) and [`isstrictsubset`](@ref).
 """
@@ -129,7 +134,8 @@ isinterior(x, y, z, w...) = isinterior(x, y) & isinterior(y, z, w...)
 
 Test whether the given intervals have no common elements.
 
-Implement the `disjoint` function of the IEEE Standard 1788-2015 (Table 9.3).
+Implement the `disjoint` function of the IEEE Standard 1788-2015.
+(Tables 9.3 and 10.3, and Sections 9.5, 10.5.10 and 12.12.9).
 """
 isdisjoint_interval(x::BareInterval, y::BareInterval) =
     isempty_interval(x) | isempty_interval(y) | _strictlessprime(sup(y), inf(x)) | _strictlessprime(sup(x), inf(y))
@@ -161,7 +167,8 @@ _isdisjoint_interval(x, y, z, w...) = _isdisjoint_interval(x, y) && _isdisjoint_
 Test whether `inf(x) ≤ inf(y)` and `sup(x) ≤ sup(y)`, where `<` is replaced by
 `≤` for infinite values.
 
-Implement the `less` function of the IEEE Standard 1788-2015 (Table 10.3).
+Implement the `less` function of the IEEE Standard 1788-2015
+(Table 10.3, and Sections 10.5.10 and 12.12.9).
 """
 isweakless(x::BareInterval, y::BareInterval) = (inf(x) ≤ inf(y)) & (sup(x) ≤ sup(y))
 
@@ -176,7 +183,8 @@ end
 Test whether `inf(x) < inf(y)` and `sup(x) < sup(y)`, where `<` is replaced by
 `≤` for infinite values.
 
-Implement the `strictLess` function of the IEEE Standard 1788-2015 (Table 10.3).
+Implement the `strictLess` function of the IEEE Standard 1788-2015
+(Table 10.3, and Sections 10.5.10 and 12.12.9).
 """
 isstrictless(x::BareInterval, y::BareInterval) = # this may be flavor dependent? Should _strictlessprime be < for cset flavor?
     _strictlessprime(inf(x), inf(y)) & _strictlessprime(sup(x), sup(y))
@@ -191,7 +199,8 @@ end
 
 Test whether any element of `x` is lesser or equal to every elements of `y`.
 
-Implement the `precedes` function of the IEEE Standard 1788-2015 (Table 10.3).
+Implement the `precedes` function of the IEEE Standard 1788-2015
+(Table 10.3, and Sections 10.5.10 and 12.12.9).
 """
 precedes(x::BareInterval, y::BareInterval) = sup(x) ≤ inf(y)
 
@@ -205,7 +214,8 @@ end
 
 Test whether any element of `x` is strictly lesser than every elements of `y`.
 
-Implement the `strictPrecedes` function of the IEEE Standard 1788-2015 (Table 10.3).
+Implement the `strictPrecedes` function of the IEEE Standard 1788-2015
+(Table 10.3, and Sections 10.5.10 and 12.12.9).
 """
 strictprecedes(x::BareInterval, y::BareInterval) = isempty_interval(x) | isempty_interval(y) | (sup(x) < inf(y))
 
@@ -219,7 +229,8 @@ end
 
 Test whether `x` is an element of `y`.
 
-Implement the `isMember` function of the IEEE Standard 1788-2015 (Section 10.6.3).
+Implement the `isMember` function of the IEEE Standard 1788-2015
+(Sections 10.6.3 and 12.13.3).
 """
 function in_interval(x::Number, y::BareInterval)
     isinf(x) && return contains_infinity(y)
@@ -246,7 +257,8 @@ in_interval(x) = Base.Fix2(in_interval, x)
 
 Test whether `x` contains no elements.
 
-Implement the `isEmpty` function of the IEEE Standard 1788-2015 (Section 10.6.3).
+Implement the `isEmpty` function of the IEEE Standard 1788-2015
+(Sections 10.5.10 and 12.12.9).
 """
 isempty_interval(x::BareInterval{T}) where {T<:NumTypes} = (inf(x) == typemax(T)) & (sup(x) == typemin(T))
 
@@ -263,7 +275,8 @@ isempty_interval(x::AbstractVector) = any(isempty_interval, x)
 
 Test whether `x` is the entire real line.
 
-Implement the `isEntire` function of the IEEE Standard 1788-2015 (Section 10.6.3).
+Implement the `isEntire` function of the IEEE Standard 1788-2015
+(Sections 10.5.10 and 12.12.9).
 """
 isentire_interval(x::BareInterval{T}) where {T<:NumTypes} = (inf(x) == typemin(T)) & (sup(x) == typemax(T))
 
@@ -277,6 +290,8 @@ isentire_interval(x::Complex{<:Interval}) = isentire_interval(real(x)) & isentir
     isnai(x)
 
 Test whether `x` is an NaI (Not an Interval).
+
+Implement the `isNaI` function of the IEEE Standard 1788-2015 (Section 12.12.9).
 """
 isnai(::BareInterval) = false
 
@@ -314,8 +329,11 @@ isunbounded(x::Complex{<:Interval}) = isunbounded(real(x)) | isunbounded(imag(x)
 
 Test whether `x` is not empty and bounded.
 
+Implement the `isCommonInterval` function of the IEEE Standard 1788-2015
+(Sections 10.6.3 and 12.13.3).
+
 !!! note
-    This is does not take into consideration the decoration of the interval.
+    This does not take into consideration the decoration of the interval.
 """
 iscommon(x::BareInterval) = !(isentire_interval(x) | isempty_interval(x) | isunbounded(x))
 
@@ -346,7 +364,8 @@ isatomic(x::Complex{<:Interval}) = isatomic(real(x)) & isatomic(imag(x))
 
 Test whether `x` contains only a real.
 
-Implement the `isSingleton` function of the IEEE Standard 1788-2015 (Table 9.3).
+Implement the `isSingleton` function of the IEEE Standard 1788-2015
+(Sections 10.6.3 and 12.13.3).
 """
 isthin(x::BareInterval) = inf(x) == sup(x)
 
