@@ -21,11 +21,7 @@ Base.abs(x::Complex{<:Interval}) = hypot(real(x), imag(x))
     abs2(x::BareInterval)
     abs2(x::Interval)
 
-Implement the square absolute value.
-
-!!! note
-    This function calls `^` internally, hence it depends on
-    `IntervalArithmetic.power_mode()`.
+Implement the square absolute value. Its behaviour depends on the current [`PowerMode`](@ref).
 """
 Base.abs2(x::BareInterval) = _select_pown(x, 2) # not in the IEEE Standard 1788-2015
 
