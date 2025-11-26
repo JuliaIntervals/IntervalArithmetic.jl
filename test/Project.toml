@@ -6,8 +6,4 @@ InteractiveUtils = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 IntervalArithmetic = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
 IntervalSets = "8197267c-284f-5f27-9208-e0e47529a953"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
-Supposition = "5a0628fe-1738-4658-9b6d-0b7605a9755b"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-
-[sources]
-Supposition = {url = "https://github.com/Seelengrab/Supposition.jl.git", rev = "feat/support_x86"}

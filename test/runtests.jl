@@ -16,11 +16,17 @@ for f ∈ filter(isfile, readdir("interval_tests"; join = true))
 end
 
 # interval tests using Supposition
+# We use Pkg.add to add a specific version of Supposition
+using Pkg
+Pkg.add(url = "https://github.com/Seelengrab/Supposition.jl.git", rev = "feat/support_x86")
+using Supposition, Supposition.Data
+
 for f ∈ filter(isfile, readdir("interval_tests/supposition"; join = true))
     @testset "$f" begin
         include(f)
     end
 end
+Pkg.rm("Supposition")
 
 # ITF1788 tests
 # these tests were generated using:

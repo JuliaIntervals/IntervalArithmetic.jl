@@ -1,6 +1,5 @@
 using Test
 using IntervalArithmetic
-using Supposition, Supposition.Data
 
 # Define properties to be checked
 function degenerate_interval(a)
