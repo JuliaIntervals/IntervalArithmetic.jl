@@ -40,6 +40,8 @@ function LinearAlgebra.opnorm1(A::AbstractMatrix{T}) where {T<:RealOrComplexI}
     return convert(Tnorm, nrm)
 end
 
+LinearAlgebra.opnorm2(A::AbstractMatrix{T}) where {T<:RealOrComplexI} = sqrt(maximum(eigvals(adjoint(A)*A)))
+
 function LinearAlgebra.opnormInf(A::AbstractMatrix{T}) where {T<:RealOrComplexI}
     LinearAlgebra.require_one_based_indexing(A)
     m, n = size(A)
