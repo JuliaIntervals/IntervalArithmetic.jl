@@ -5,6 +5,7 @@ import MPFI
 import Random
 
 MPFI.BigInterval(x::ExactReal) = MPFI.BigInterval(x.value)
+Base.:(^)(x::MPFI.BigInterval, y::ExactReal) = x^y.value
 
 Random.seed!(0)
 
@@ -21,7 +22,6 @@ dr8(x) = atan(cos(tan(x)))
 dr9(x) = asin(cos(acos(sin(x))))
 
 dr_functions = [dr1, dr2, dr3, dr4, dr5, dr6, dr7, dr8, dr9]
-dr_functions = [dr8, dr9]  # MPFI doesn't support ^
 
 basic_arithmetic = [+, *, -, /]
 basic_functions = [exp, cosh, sinh, tanh, inv, sqrt, abs, log, sin, cos, tan, acos, asin, atan]
@@ -34,6 +34,8 @@ interval_constructors = Dict(
     "BigFloat MPFI" => MPFI.BigInterval
 )
 
+suites = ["basics", "Dietmar-Ratz"]
+
 bounds = map(1:100) do i
     x = randn()
     y = randn()
@@ -42,25 +44,24 @@ bounds = map(1:100) do i
 end
 
 SUITE = BenchmarkGroup()
-SUITE["basics"] = BenchmarkGroup(["arithmetic"])
-SUITE["Dietmar-Ratz"] = BenchmarkGroup(["arithmetic"])
 
 for (name, T) in interval_constructors
     xx = [T(x, y) for (x, y) in bounds]
     yy = reverse(xx)
 
-    SUITE["basics"][name] = BenchmarkGroup(split(name))
+    SUITE[name] = BenchmarkGroup(split(name))
+    SUITE[name]["basics"] = BenchmarkGroup(["arithmetic"])
+    SUITE[name]["Dietmar-Ratz"] = BenchmarkGroup(["arithmetic"])
 
     for f in basic_functions
-        SUITE["basics"][name][string(f)] = @benchmarkable ($f).($xx)
+        SUITE[name]["basics"][string(f)] = @benchmarkable ($f).($xx)
     end
 
     for op in basic_arithmetic
-        SUITE["basics"][name][string(op)] = @benchmarkable ($op).($xx, $yy)
+        SUITE[name]["basics"][string(op)] = @benchmarkable ($op).($xx, $yy)
     end
 
-    SUITE["Dietmar-Ratz"][name] = BenchmarkGroup(split(name))
     for dr in dr_functions
-        SUITE["Dietmar-Ratz"][name][string(dr)] = @benchmarkable ($dr).($xx)
+        SUITE[name]["Dietmar-Ratz"][string(dr)] = @benchmarkable ($dr).($xx)
     end
 end
