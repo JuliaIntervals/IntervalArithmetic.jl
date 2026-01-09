@@ -128,36 +128,38 @@ LinearAlgebra.det(A::AbstractMatrix{<:Complex{<:Interval}}) = reduce(*, LinearAl
 
 function LinearAlgebra.eigen!(A::AbstractMatrix{<:RealOrComplexI}; permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby)
     # note: this function does not overwrite `A`
-    true_vls = _eigvals(A, permute, scale, sortby)
-    vcs = LinearAlgebra.eigvecs(mid.(A); permute, scale, sortby)
-    n = length(true_vls)
-    inds = [argmax(i -> abs(vcs[i,j]), 1:n) for j ∈ 1:n]
-    ref_scale = [vcs[inds[j],j] for j ∈ 1:n]
-    foreach(j -> vcs[:,j] ./= ref_scale[j], 1:n)
-    vcs_ = interval(vcs)
+    λ, v = eigen!(mid.(A); permute, scale, sortby)
+    n = length(λ)
+    inds = [argmax(i -> abs(v[i,j]), 1:n) for j ∈ 1:n]
+    ref_scale = [v[inds[j],j] for j ∈ 1:n]
+    foreach(j -> v[:,j] ./= ref_scale[j], 1:n)
+    λ_bar, v_bar = interval(λ), interval(v)
 
-    F = [[vcs_[inds[j],j] - interval(1) for j ∈ 1:n] ; vec(A * vcs_ - vcs_ * LinearAlgebra.Diagonal(true_vls))]
+    F = [[v_bar[inds[j],j] - interval(1) for j ∈ 1:n] ; vec(A * v_bar - v_bar * LinearAlgebra.Diagonal(λ_bar))]
     DF = zeros(eltype(F), n+n^2, n+n^2)
     for j ∈ 1:n
         DF[j,n+inds[j]+(j-1)*n] = interval(1)
-        DF[n+(j-1)*n+1:n+j*n,j] .= .- vcs_[:,j]
-        DF[n+(j-1)*n+1:n+j*n,n+(j-1)*n+1:n+j*n] .= A - LinearAlgebra.UniformScaling(true_vls[j])
+        DF[n+(j-1)*n+1:n+j*n,j] .= .- v_bar[:,j]
+        DF[n+(j-1)*n+1:n+j*n,n+(j-1)*n+1:n+j*n] .= A - LinearAlgebra.UniformScaling(λ_bar[j])
     end
 
     approx_DF⁻¹ = interval(inv(mid.(DF)))
     Y = LinearAlgebra.norm(approx_DF⁻¹ * F, Inf)
     Z₁ = LinearAlgebra.opnorm(approx_DF⁻¹ * DF - interval(LinearAlgebra.I), Inf)
+    Z₂ = interval(2) * LinearAlgebra.opnorm(approx_DF⁻¹, Inf)
 
-    true_vcs = Matrix{eltype(vcs_)}(undef, size(vcs))
-    if isbounded(Y) & strictprecedes(Z₁, one(Z₁))
-        r = sup(Y / (one(Z₁) - Z₁))
-        true_vcs .= interval.(vcs, r; format = :midpoint)
-        foreach(j -> true_vcs[:,j] .*= interval(ref_scale[j]), 1:n)
+    if strictprecedes(Z₁, one(Z₁)) & precedes(interval(2) * Y * Z₂, (interval(1) - Z₁)^2)
+        r = sup(( interval(1) - Z₁ - sqrt( (interval(1) - Z₁)^2 - interval(2) * Y * Z₂ ) ) / Z₂)
+        true_λ = interval.(λ, r; format = :midpoint)
+        _fold_conjugate!(true_λ)
+        true_v = interval.(v, r; format = :midpoint)
+        foreach(j -> true_v[:,j] .*= interval(ref_scale[j]), 1:n)
     else
-        true_vcs .= nai(eltype(vcs))
+        true_λ = fill(nai(eltype(λ_bar)), n)
+        true_v = fill(nai(eltype(v_bar)), n, n)
     end
-    _ensure_ng_flag!(true_vcs, all(isguaranteed, A))
-    return LinearAlgebra.Eigen(true_vls, true_vcs)
+    _ensure_ng_flag!(true_v, all(isguaranteed, A))
+    return LinearAlgebra.Eigen(true_λ, true_v)
 end
 
 # matrix inversion
