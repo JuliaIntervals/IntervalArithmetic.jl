@@ -9,7 +9,9 @@ results = run(SUITE ; verbose = true)
 df = DataFrame(; constructor = String[], suite = String[], f = String[], trial = BenchmarkTools.Trial[])
 
 for (name, T) in interval_constructors
-    for suite in suites
+    # for suite in suites
+    begin
+        suite = "basics"
         suite_df = DataFrame(results[name][suite], [:f, :trial])
         suite_df[:, :constructor] .= name
         suite_df[:, :suite] .= suite
@@ -26,7 +28,7 @@ transform!(df,
 df[:, :relative] .= 0.0
 
 for group in groupby(df, :f)
-    group[:, :relative] .= group[:, :minimum] ./ only(group[group.constructor .== "bareinterval", :minimum])
+    group[:, :relative] .= group[:, :median] ./ only(group[group.constructor .== "bareinterval", :median])
 end
 
 begin

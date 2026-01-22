@@ -61,7 +61,7 @@ for (name, T) in interval_constructors
         SUITE[name]["basics"][string(op)] = @benchmarkable ($op).($xx, $yy)
     end
 
-    for dr in dr_functions
-        SUITE[name]["Dietmar-Ratz"][string(dr)] = @benchmarkable ($dr).($xx)
-    end
+    # for dr in dr_functions
+    #     SUITE[name]["Dietmar-Ratz"][string(dr)] = @benchmarkable ($dr).($xx)
+    # end
 end
