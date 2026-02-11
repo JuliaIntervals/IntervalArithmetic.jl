@@ -1,16 +1,16 @@
 using IntervalArithmetic: interval_diff
 
 @testset "removed interval" begin
-    @test_throws ArgumentError intersect(interval(1))
-    @test_throws ArgumentError intersect(interval(1), 2, [1], 4., 5)
-    @test_throws ArgumentError intersect(interval(1), interval(2.), interval(3.))
-    @test_throws ArgumentError union(interval(1))
-    @test_throws ArgumentError union(interval(1), 2, [1], 4., 5)
-    @test_throws ArgumentError union(interval(1), interval(2.), interval(3.))
-    @test_throws ArgumentError setdiff(interval(1))
-    @test_throws ArgumentError setdiff(interval(1), 2, [1], 4., 5)
-    @test_throws ArgumentError setdiff(interval(1), interval(2.), interval(3.))
-    @test_throws ArgumentError symdiff(interval(1), interval(2.), interval(3.))
+    @test_throws IntervalArithmetic.InconclusiveBooleanOperation intersect(interval(1))
+    @test_throws IntervalArithmetic.InconclusiveBooleanOperation intersect(interval(1), 2, [1], 4., 5)
+    @test_throws IntervalArithmetic.InconclusiveBooleanOperation intersect(interval(1), interval(2.), interval(3.))
+    @test_throws IntervalArithmetic.InconclusiveBooleanOperation union(interval(1))
+    @test_throws IntervalArithmetic.InconclusiveBooleanOperation union(interval(1), 2, [1], 4., 5)
+    @test_throws IntervalArithmetic.InconclusiveBooleanOperation union(interval(1), interval(2.), interval(3.))
+    @test_throws IntervalArithmetic.InconclusiveBooleanOperation setdiff(interval(1))
+    @test_throws IntervalArithmetic.InconclusiveBooleanOperation setdiff(interval(1), 2, [1], 4., 5)
+    @test_throws IntervalArithmetic.InconclusiveBooleanOperation setdiff(interval(1), interval(2.), interval(3.))
+    @test_throws IntervalArithmetic.InconclusiveBooleanOperation symdiff(interval(1), interval(2.), interval(3.))
 end
 
 @testset "interiordiff" begin

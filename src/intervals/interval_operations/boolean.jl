@@ -6,6 +6,17 @@
 # The requirement for decorated intervals are described in Chapter 12,
 # mostly sections 12.12.9 and 12.13.3.
 
+#
+
+struct InconclusiveBooleanOperation <: Exception
+    message :: String
+end
+
+function Base.showerror(io::IO, e::InconclusiveBooleanOperation)
+    print(io, "InconclusiveBooleanOperation: ")
+    print(io, e.message)
+end
+
 # used internally, equivalent to `<` but with `(Inf < Inf) == true`
 _strictlessprime(x::Real, y::Real) = (x < y) | ((isinf(x) | isinf(y)) & (x == y))
 
@@ -239,7 +250,7 @@ end
 in_interval(x::Complex, y::BareInterval) = in_interval(real(x), y) & iszero(imag(x))
 in_interval(x::Interval, y::BareInterval) = throw(MethodError(in_interval, (x, y)))
 in_interval(::BareInterval, ::BareInterval) =
-    throw(ArgumentError("`in_interval` is purposely not supported for two interval arguments. See instead `issubset_interval`"))
+    throw(InconclusiveBooleanOperation("`in_interval` is purposely not supported for two interval arguments. See instead `issubset_interval`"))
 
 function in_interval(x::Number, y::Interval)
     isnai(y) && return false
@@ -248,7 +259,7 @@ end
 in_interval(x::Number, y::Complex{<:Interval}) = in_interval(x, real(y)) & in_interval(0, imag(y))
 in_interval(x::Complex, y::Complex{<:Interval}) = in_interval(real(x), real(y)) & in_interval(imag(x), imag(y))
 in_interval(::Interval, ::Interval) =
-    throw(ArgumentError("`in_interval` is purposely not supported for two interval arguments. See instead `issubset_interval`"))
+    throw(InconclusiveBooleanOperation("`in_interval` is purposely not supported for two interval arguments. See instead `issubset_interval`"))
 
 in_interval(x) = Base.Fix2(in_interval, x)
 
@@ -383,7 +394,7 @@ Test whether `x` contains only `y`.
 isthin(x::BareInterval, y::Number) = inf(x) == sup(x) == y
 isthin(x::BareInterval, y::Complex) = isthin(x, real(y)) & iszero(imag(y))
 isthin(::BareInterval, ::Interval) =
-    throw(ArgumentError("`isthin` is purposely not supported for intervals. See instead `isequal_interval`"))
+    throw(InconclusiveBooleanOperation("`isthin` is purposely not supported for intervals. See instead `isequal_interval`"))
 
 function isthin(x::Interval, y::Number)
     isnai(x) && return false

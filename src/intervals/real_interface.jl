@@ -81,59 +81,62 @@ Base.hash(x::Interval, h::UInt) = hash(sup(x), hash(inf(x), hash(Interval, h)))
 function Base.:(==)(x::Interval, y::Interval) # also returned when calling `≤`, `≥`, `isequal`
     isthin(x) & isthin(y) && return isequal_interval(x, y)
     isdisjoint_interval(x, y) && return false
-    return throw(ArgumentError("`==` is purposely not supported for overlapping non-thin intervals. See instead `isequal_interval`"))
+    return throw(InconclusiveBooleanOperation("`==` is purposely not supported for overlapping non-thin intervals. See instead `isequal_interval`"))
 end
 
 function Base.:<(x::Interval, y::Interval)
     strictprecedes(x, y) && return true
     strictprecedes(y, x) && return false
     isthin(x) & isthin(y) && return !isequal_interval(x, y)
-    return throw(ArgumentError("`<` is purposely not supported for overlapping intervals. See instead `strictprecedes`"))
+    return throw(InconclusiveBooleanOperation("`<` is purposely not supported for overlapping intervals. See instead `strictprecedes`"))
 end
 
 function Base.isfinite(x::Interval) # also returned when calling `isinf`
     isbounded(x) && return true
-    return throw(ArgumentError("`isfinite` is purposely not supported for intervals containing infinite bounds. See instead `isbounded`"))
+    return throw(InconclusiveBooleanOperation("`isfinite` is purposely not supported for intervals containing infinite bounds. See instead `isbounded`"))
 end
 
 Base.isnan(x::Interval) = isnai(x)
 
-Base.isinteger(x::Interval) = !isthin(x) & !isdisjoint_interval(x, floor(x), ceil(x)) ? throw(ArgumentError("`isinteger` is purposely not supported for a non-thin interval containing at least one integer. See instead `isthininteger`")) : isthininteger(x)
+function Base.isinteger(x::Interval)
+    isthin(x) | isdisjoint_interval(x, floor(x), ceil(x)) && return isthininteger(x)
+    return throw(InconclusiveBooleanOperation("`isinteger` is purposely not supported for a non-thin interval containing at least one integer. See instead `isthininteger`"))
+end
 
 # disallowed
 
 Base.in(::Interval, ::Interval) =
-    throw(ArgumentError("`in` is purposely not supported for intervals. See instead `in_interval`"))
+    throw(InconclusiveBooleanOperation("`in` is purposely not supported for intervals. See instead `in_interval`"))
 
 Base.isempty(::Interval) =
-    throw(ArgumentError("`isempty` is purposely not supported for intervals. See instead `isempty_interval`"))
+    throw(InconclusiveBooleanOperation("`isempty` is purposely not supported for intervals. See instead `isempty_interval`"))
 
 Base.isapprox(::Interval, ::Interval) =
-    throw(ArgumentError("`isapprox` is purposely not supported for intervals"))
+    throw(InconclusiveBooleanOperation("`isapprox` is purposely not supported for intervals"))
 
 Base.isdisjoint(::Interval, ::Interval) =
-    throw(ArgumentError("`isdisjoint` is purposely not supported for intervals. See instead `isdisjoint_interval`"))
+    throw(InconclusiveBooleanOperation("`isdisjoint` is purposely not supported for intervals. See instead `isdisjoint_interval`"))
 Base.issubset(::Interval, ::Interval) =
-    throw(ArgumentError("`issubset` is purposely not supported for intervals. See instead `issubset_interval`"))
+    throw(InconclusiveBooleanOperation("`issubset` is purposely not supported for intervals. See instead `issubset_interval`"))
 Base.issetequal(::Interval, ::Interval) =
-    throw(ArgumentError("`issetequal` is purposely not supported for intervals. See instead `isequal_interval`"))
+    throw(InconclusiveBooleanOperation("`issetequal` is purposely not supported for intervals. See instead `isequal_interval`"))
 Base.intersect(::Interval, ::Interval...) =
-    throw(ArgumentError("`intersect` is purposely not supported for intervals. See instead `intersect_interval`"))
+    throw(InconclusiveBooleanOperation("`intersect` is purposely not supported for intervals. See instead `intersect_interval`"))
 
 Base.union!(::BitSet, ::Interval) = # needed to resolve ambiguity
-    throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
+    throw(InconclusiveBooleanOperation("`union!` is purposely not supported for intervals. See instead `hull`"))
 Base.union!(::AbstractSet, ::Interval) = # also returned when calling `intersect`, `symdiff` with intervals
-    throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
+    throw(InconclusiveBooleanOperation("`union!` is purposely not supported for intervals. See instead `hull`"))
 Base.union!(::AbstractVector{S}, ::Interval) where {S} =
-    throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
+    throw(InconclusiveBooleanOperation("`union!` is purposely not supported for intervals. See instead `hull`"))
 Base.union!(::AbstractVector{S}, ::Interval, ::Any, ::Any...) where {S} =
-    throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
+    throw(InconclusiveBooleanOperation("`union!` is purposely not supported for intervals. See instead `hull`"))
 Base.union!(::AbstractVector{S}, ::Interval, ::Interval, ::Any...) where {S} =
-    throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
+    throw(InconclusiveBooleanOperation("`union!` is purposely not supported for intervals. See instead `hull`"))
 Base.union!(::AbstractVector{S}, ::Any, ::Interval, ::Any...) where {S} =
-    throw(ArgumentError("`union!` is purposely not supported for intervals. See instead `hull`"))
+    throw(InconclusiveBooleanOperation("`union!` is purposely not supported for intervals. See instead `hull`"))
 
 Base.setdiff(::Interval) =
-    throw(ArgumentError("`setdiff` is purposely not supported for intervals. See instead `interiordiff`"))
+    throw(InconclusiveBooleanOperation("`setdiff` is purposely not supported for intervals. See instead `interiordiff`"))
 Base.setdiff!(::AbstractSet, ::Interval) =
-    throw(ArgumentError("`setdiff!` is purposely not supported for intervals. See instead `interiordiff`"))
+    throw(InconclusiveBooleanOperation("`setdiff!` is purposely not supported for intervals. See instead `interiordiff`"))
