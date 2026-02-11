@@ -85,7 +85,7 @@
         @test !in_interval(-Inf, entireinterval())
         @test !in_interval(Inf, entireinterval())
 
-        @test_throws IntervalArithmetic.InconclusiveBooleanOperation in_interval(interval(3, 4), interval(3, 4))
+        @test_throws ArgumentError in_interval(interval(3, 4), interval(3, 4))
     end
 
     @testset "Inclusion tests" begin
@@ -392,15 +392,15 @@
 
         #
 
-        @test_throws IntervalArithmetic.InconclusiveBooleanOperation intersect(x, x)
-        @test_throws IntervalArithmetic.InconclusiveBooleanOperation isapprox(x, x)
-        @test_throws IntervalArithmetic.InconclusiveBooleanOperation isdisjoint(x, x)
-        @test_throws IntervalArithmetic.InconclusiveBooleanOperation issubset(x, x)
-        @test_throws IntervalArithmetic.InconclusiveBooleanOperation issetequal(x, x)
-        @test_throws IntervalArithmetic.InconclusiveBooleanOperation x ∈ x
-        @test_throws IntervalArithmetic.InconclusiveBooleanOperation isempty(x)
-        @test_throws IntervalArithmetic.InconclusiveBooleanOperation union(x, x)
-        @test_throws IntervalArithmetic.InconclusiveBooleanOperation setdiff(x, x)
+        @test_throws ArgumentError intersect(x, x)
+        @test_throws ArgumentError isapprox(x, x)
+        @test_throws ArgumentError isdisjoint(x, x)
+        @test_throws ArgumentError issubset(x, x)
+        @test_throws ArgumentError issetequal(x, x)
+        @test_throws ArgumentError x ∈ x
+        @test_throws ArgumentError isempty(x)
+        @test_throws ArgumentError union(x, x)
+        @test_throws ArgumentError setdiff(x, x)
     end
 
 end
