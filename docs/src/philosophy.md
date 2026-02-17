@@ -110,12 +110,9 @@ julia> X = interval(1, 2)
 [1.0, 2.0]_com
 
 julia> X == X
-ERROR: ArgumentError: `==` is purposely not supported when the intervals are overlapping. See instead `isequal_interval`
+ERROR: InconclusiveBooleanOperation: `==` is purposely not supported when the intervals are overlapping. See instead `isequal_interval`
 Stacktrace:
  [1] ==(x::Interval{Float64}, y::Interval{Float64})
-   @ IntervalArithmetic C:\Users\Kolaru\.julia\packages\IntervalArithmetic\XjBhk\src\intervals\real_interface.jl:86
- [2] top-level scope
-   @ REPL[6]:1.
 ```
 
 

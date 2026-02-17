@@ -1,4 +1,3 @@
-if Sys.ARCH != :i686
 @testset "IntervalArithmeticArblibExt" begin
     Arf = Arblib.Arf
     ArfRef = Arblib.ArfRef
@@ -342,5 +341,4 @@ if Sys.ARCH != :i686
         @test promote_type(ExactReal{Float64}, Arb) == Arb
         @test promote_type(ExactReal{Float64}, ArbRef) == Arb
     end
-end
 end

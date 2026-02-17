@@ -9,7 +9,7 @@ using IntervalArithmetic.Symbols
          interval(-2, 2)]
 
     @test all(isequal_interval.(A * b, [interval(-12, 12), interval(-12, 12)]))
-    @test_throws ArgumentError A \ b
+    @test_throws IntervalArithmetic.InconclusiveBooleanOperation A \ b
 
     @test all(isequal_interval.(interval.([1 2; 3 4]) * interval(-1, 1), [interval(-1, 1) interval(-2, 2) ; interval(-3, 3) interval(-4, 4)]))
     IntervalArithmetic.configure(; matmul = :fast)

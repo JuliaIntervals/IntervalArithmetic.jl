@@ -368,27 +368,27 @@
 
         @test isone(x)
         @test !iszero(x)
-        @test_throws ArgumentError iszero(interval(0, 1))
+        @test_throws IntervalArithmetic.InconclusiveBooleanOperation iszero(interval(0, 1))
         @test x != y
         @test x == 1
-        @test_throws ArgumentError interval(1, 2) != 2
-        @test_throws ArgumentError interval(1, 2) != y
-        @test_throws ArgumentError y != interval(1, 2)
-        @test_throws ArgumentError interval(1, 2) == interval(1, 2)
+        @test_throws IntervalArithmetic.InconclusiveBooleanOperation interval(1, 2) != 2
+        @test_throws IntervalArithmetic.InconclusiveBooleanOperation interval(1, 2) != y
+        @test_throws IntervalArithmetic.InconclusiveBooleanOperation y != interval(1, 2)
+        @test_throws IntervalArithmetic.InconclusiveBooleanOperation interval(1, 2) == interval(1, 2)
 
         @test x < y
         @test x < 2
         @test !(x > y)
         @test !(x < x)
         @test !(x < 1)
-        @test_throws ArgumentError x < interval(1, 2)
+        @test_throws IntervalArithmetic.InconclusiveBooleanOperation x < interval(1, 2)
 
         @test isfinite(x)
-        @test_throws ArgumentError isfinite(interval(1, Inf))
+        @test_throws IntervalArithmetic.InconclusiveBooleanOperation isfinite(interval(1, Inf))
 
         @test isinteger(x)
         @test !isinteger(interval(1.2, 1.9))
-        @test_throws ArgumentError isinteger(interval(1.5, 2.5))
+        @test_throws IntervalArithmetic.InconclusiveBooleanOperation isinteger(interval(1.5, 2.5))
 
         #
 

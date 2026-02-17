@@ -78,27 +78,40 @@ Base.hash(x::Interval, h::UInt) = hash(sup(x), hash(inf(x), hash(Interval, h)))
 
 #
 
+struct InconclusiveBooleanOperation <: Exception
+    operation   :: String
+    alternative :: String
+end
+
+Base.showerror(io::IO, e::InconclusiveBooleanOperation) =
+    print(io, "InconclusiveBooleanOperation: The operation `$(e.operation)` cannot be determined unambiguously. See the documentation for more information. See also `$(e.alternative)`.")
+
+#
+
 function Base.:(==)(x::Interval, y::Interval) # also returned when calling `≤`, `≥`, `isequal`
     isthin(x) & isthin(y) && return isequal_interval(x, y)
     isdisjoint_interval(x, y) && return false
-    return throw(ArgumentError("`==` is purposely not supported for overlapping non-thin intervals. See instead `isequal_interval`"))
+    return throw(InconclusiveBooleanOperation("$x == $y", "isequal_interval"))
 end
 
 function Base.:<(x::Interval, y::Interval)
     strictprecedes(x, y) && return true
     strictprecedes(y, x) && return false
     isthin(x) & isthin(y) && return !isequal_interval(x, y)
-    return throw(ArgumentError("`<` is purposely not supported for overlapping intervals. See instead `strictprecedes`"))
+    return throw(InconclusiveBooleanOperation("$x < $y", "strictprecedes"))
 end
 
 function Base.isfinite(x::Interval) # also returned when calling `isinf`
     isbounded(x) && return true
-    return throw(ArgumentError("`isfinite` is purposely not supported for intervals containing infinite bounds. See instead `isbounded`"))
+    return throw(InconclusiveBooleanOperation("isfinite($x)", "isbounded"))
 end
 
 Base.isnan(x::Interval) = isnai(x)
 
-Base.isinteger(x::Interval) = !isthin(x) & !isdisjoint_interval(x, floor(x), ceil(x)) ? throw(ArgumentError("`isinteger` is purposely not supported for a non-thin interval containing at least one integer. See instead `isthininteger`")) : isthininteger(x)
+function Base.isinteger(x::Interval)
+    isthin(x) | isdisjoint_interval(x, floor(x), ceil(x)) && return isthininteger(x)
+    return throw(InconclusiveBooleanOperation("isinteger($x)", "isthininteger"))
+end
 
 # disallowed
 
