@@ -96,16 +96,46 @@ for f ∈ (:cbrt, :exp, :exp2, :exp10, :expm1, # exponential
     mpfr_f = Symbol(:mpfr_, f)
     coremath_f = Symbol(:cr_, f)
 
-    @eval function _fround(::typeof($f), ::Union{IntervalRounding{:correct},IntervalRounding{:ulp}}, x::AbstractFloat, r::RoundingMode)
-        prec = precision(x)
-        bigx = BigFloat(x; precision = prec)
-        bigz = BigFloat(; precision = prec)
-        @ccall Base.MPFR.libmpfr.$mpfr_f(
-            bigz::Ref{BigFloat},
-            bigx::Ref{BigFloat},
-            r::Base.MPFR.MPFRRoundingMode
-        )::Int32
-        return bigz
+    if f ∈ (:acot, :acoth)
+        g = f === :acot ? :atan : :atanh
+        @eval function _fround(::typeof($f), ir::Union{IntervalRounding{:correct},IntervalRounding{:ulp}}, x::AbstractFloat, r::RoundingMode{:Down})
+            prec = precision(x)
+            bigx = BigFloat(x; precision = prec + 10)
+            bigz = BigFloat(; precision = prec + 10)
+            @ccall Base.MPFR.libmpfr.mpfr_div(
+                bigz::Ref{BigFloat},
+                one(bigx)::Ref{BigFloat},
+                bigx::Ref{BigFloat},
+                RoundUp::Base.MPFR.MPFRRoundingMode
+            )::Int32
+            bigw = _fround($g, ir, bigz, r)
+            return BigFloat(bigw, r; precision = prec)
+        end
+        @eval function _fround(::typeof($f), ir::Union{IntervalRounding{:correct},IntervalRounding{:ulp}}, x::AbstractFloat, r::RoundingMode{:Up})
+            prec = precision(x)
+            bigx = BigFloat(x; precision = prec + 32)
+            bigz = BigFloat(; precision = prec + 32)
+            @ccall Base.MPFR.libmpfr.mpfr_div(
+                bigz::Ref{BigFloat},
+                one(bigx)::Ref{BigFloat},
+                bigx::Ref{BigFloat},
+                RoundDown::Base.MPFR.MPFRRoundingMode
+            )::Int32
+            bigw = _fround($g, ir, bigz, r)
+            return BigFloat(bigw, r; precision = prec)
+        end
+    else
+        @eval function _fround(::typeof($f), ::Union{IntervalRounding{:correct},IntervalRounding{:ulp}}, x::AbstractFloat, r::RoundingMode)
+            prec = precision(x)
+            bigx = BigFloat(x; precision = prec)
+            bigz = BigFloat(; precision = prec)
+            @ccall Base.MPFR.libmpfr.$mpfr_f(
+                bigz::Ref{BigFloat},
+                bigx::Ref{BigFloat},
+                r::Base.MPFR.MPFRRoundingMode
+            )::Int32
+            return bigz
+        end
     end
 
     if f ∈ CRlibm.functions
