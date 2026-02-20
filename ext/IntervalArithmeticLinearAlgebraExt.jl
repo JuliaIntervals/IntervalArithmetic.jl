@@ -64,11 +64,11 @@ end
 
 function LinearAlgebra.eigvals!(A::AbstractMatrix{<:Interval}; permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby)
     # note: this function does not overwrite `A`
-    v = _eigvals(A, permute, scale, sortby)
-    isreal(v) && return v
-    _fold_conjugate!(v)
-    isreal(v) && return real(v)
-    return v
+    λ = _eigvals(A, permute, scale, sortby)
+    isreal(λ) && return real(λ)
+    _fold_conjugate!(λ)
+    isreal(λ) && return real(λ)
+    return λ
 end
 
 LinearAlgebra.eigvals!(A::AbstractMatrix{<:Complex{<:Interval}}; permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby) =
@@ -102,20 +102,20 @@ function _similarity_transform(A, permute, scale, sortby)
     return V
 end
 
-function _fold_conjugate!(v)
-    for i ∈ eachindex(v)
-        vᵢ = v[i]
-        idxs = findall(j -> (j ≠ i) & !isdisjoint_interval(conj(vᵢ), v[j]), eachindex(v))
+function _fold_conjugate!(λ)
+    for i ∈ eachindex(λ)
+        λᵢ = λ[i]
+        idxs = findall(j -> (j ≠ i) & !isdisjoint_interval(conj(λᵢ), λ[j]), eachindex(λ))
         if isempty(idxs)
-            v[i] = real(vᵢ)
+            λ[i] = real(λᵢ)
         else
-            w = view(v, idxs)
-            z = conj(intersect_interval(conj(vᵢ), reduce(intersect_interval, w)))
-            z = complex(IntervalArithmetic.setdecoration(real(z), min(decoration(real(vᵢ)), minimum(decoration ∘ real, w))), IntervalArithmetic.setdecoration(imag(z), min(decoration(imag(vᵢ)), minimum(decoration ∘ imag, w))))
-            v[i] = z
+            w = view(λ, idxs)
+            z = conj(intersect_interval(conj(λᵢ), reduce(intersect_interval, w)))
+            z = complex(IntervalArithmetic.setdecoration(real(z), min(decoration(real(λᵢ)), minimum(decoration ∘ real, w))), IntervalArithmetic.setdecoration(imag(z), min(decoration(imag(λᵢ)), minimum(decoration ∘ imag, w))))
+            λ[i] = z
         end
     end
-    return v
+    return λ
 end
 
 # matrix determinant
@@ -128,7 +128,7 @@ LinearAlgebra.det(A::AbstractMatrix{<:Complex{<:Interval}}) = reduce(*, LinearAl
 
 function LinearAlgebra.eigen!(A::AbstractMatrix{<:RealOrComplexI}; permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby)
     # note: this function does not overwrite `A`
-    λ, v = eigen!(mid.(A); permute, scale, sortby)
+    λ, v = LinearAlgebra.eigen!(mid.(A); permute, scale, sortby)
     n = length(λ)
     inds = [argmax(i -> abs(v[i,j]), 1:n) for j ∈ 1:n]
     ref_scale = [v[inds[j],j] for j ∈ 1:n]
@@ -151,8 +151,8 @@ function LinearAlgebra.eigen!(A::AbstractMatrix{<:RealOrComplexI}; permute::Bool
     if strictprecedes(Z₁, one(Z₁)) & precedes(interval(2) * Y * Z₂, (interval(1) - Z₁)^2)
         r = sup(( interval(1) - Z₁ - sqrt( (interval(1) - Z₁)^2 - interval(2) * Y * Z₂ ) ) / Z₂)
         true_λ = interval.(λ, r; format = :midpoint)
-        _fold_conjugate!(true_λ)
         true_v = interval.(v, r; format = :midpoint)
+        _fold_conjugate!(eltype(A), true_λ, true_v)
         foreach(j -> true_v[:,j] .*= interval(ref_scale[j]), 1:n)
     else
         true_λ = fill(nai(eltype(λ_bar)), n)
@@ -160,6 +160,25 @@ function LinearAlgebra.eigen!(A::AbstractMatrix{<:RealOrComplexI}; permute::Bool
     end
     _ensure_ng_flag!(true_v, all(isguaranteed, A))
     return LinearAlgebra.Eigen(true_λ, true_v)
+end
+
+_fold_conjugate!(::Type{<:ComplexI}, λ, v) = (λ, v)
+
+function _fold_conjugate!(::Type{<:Interval}, λ, v)
+    for i ∈ eachindex(λ)
+        λᵢ = λ[i]
+        idxs = findall(j -> (j ≠ i) & !isdisjoint_interval(conj(λᵢ), λ[j]), eachindex(λ))
+        if isempty(idxs)
+            λ[i] = real(λᵢ)
+            v[:,i] .= real.(view(v, :, i))
+        else
+            w = view(λ, idxs)
+            z = conj(intersect_interval(conj(λᵢ), reduce(intersect_interval, w)))
+            z = complex(IntervalArithmetic.setdecoration(real(z), min(decoration(real(λᵢ)), minimum(decoration ∘ real, w))), IntervalArithmetic.setdecoration(imag(z), min(decoration(imag(λᵢ)), minimum(decoration ∘ imag, w))))
+            λ[i] = z
+        end
+    end
+    return λ, v
 end
 
 # matrix inversion
