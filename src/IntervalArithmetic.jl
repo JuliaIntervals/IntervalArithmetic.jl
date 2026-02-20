@@ -44,7 +44,7 @@ with decorations and up to 6 significant digits.
 """
 module IntervalArithmetic
 
-import RoundingEmulator, CRlibm, Base.MPFR
+import RoundingEmulator, CRlibm, CoreMath, Base.MPFR
 
 using MacroTools: MacroTools, prewalk, postwalk, @capture
 
@@ -102,7 +102,7 @@ function configure_flavor(flavor::Symbol)
 end
 
 function configure_rounding(rounding::Symbol)
-    rounding ∈ (:correct, :none) || return throw(ArgumentError("only the rounding mode `:correct` and `:none` are available"))
+    rounding ∈ (:correct, :ulp, :none) || return throw(ArgumentError("only the rounding mode `:correct`, `:ulp` and `:none` are available"))
     @eval default_rounding() = IntervalRounding{$(QuoteNode(rounding))}()
     return rounding
 end
