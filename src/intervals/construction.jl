@@ -78,7 +78,8 @@ Internal constructor which assumes that `is_valid_interval(lo, hi) == true`.
 _unsafe_bareinterval(::Type{T}, a, b) where {T<:NumTypes} =
     _unsafe_bareinterval(T, _round(T, a, RoundDown), _round(T, b, RoundUp))
 
-_normalisezero(a) = ifelse(iszero(a), zero(a), a)
+_normalisezero(a) = ifelse(iszero(a), zero(a), a)  # Avoid branch in general
+_normalisezero(a::BigFloat) = iszero(a) ? zero(a) : a  # For BigFloat we avoid the allocation as much as possible
 # used only to construct intervals; needed to avoid `inf` and `sup` normalization
 _inf(x::BareInterval) = x.lo
 _sup(x::BareInterval) = x.hi
