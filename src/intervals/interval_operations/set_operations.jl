@@ -62,9 +62,9 @@ sets of real numbers, i.e. the smallest interval that contains all of `x` and
 
 The keywork `dec` argument controls the decoration of the result. It can be
 either a specific decoration, or one of two following options:
-    - `:default`: if at least one of the input intervals is `ill`,
-        then the result is `ill`, otherwise it is `trv` (Section 11.7.1).
-    - `:auto`: the ouptut has the minimal decoration of the inputs.
+- `:default`: if at least one of the input intervals is `ill`,
+  then the result is `ill`, otherwise it is `trv` (Section 11.7.1).
+- `:auto`: the ouptut has the minimal decoration of the inputs.
 
 Implement the `convexHull` function of the IEEE Standard 1788-2015 (Section 9.3).
 """
