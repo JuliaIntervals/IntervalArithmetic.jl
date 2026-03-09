@@ -66,31 +66,42 @@ end
 Base.:^(x::Interval, n::Integer) = ^(x, n//one(n))
 Base.:^(x::Interval, y::Rational) = ^(x, convert(Interval{typeof(y)}, y))
 
-function Base.:^(x::Complex{<:Interval}, y::Complex{<:Interval})
-    if isthinzero(imag(x)) && isthininteger(y)
-        r = real(x) ^ real(y)
-        d = min(decoration(x), decoration(y), decoration(r))
-        t = isguaranteed(x) & isguaranteed(y)
-        return complex(_unsafe_interval(bareinterval(real(r)), d, t), _unsafe_interval(bareinterval(imag(r)), d, t))
-    else
-        isthininteger(y) && return exp(y * _log_no_branch_cut(x))
-        return exp(y * log(x))
+# power for complex intervals
+
+Base.:^(x::Complex{<:Interval}, y::Complex{<:Interval}) = ^(promote(x, y)...)
+
+function Base.:^(x::Complex{Interval{T}}, y::Complex{Interval{T}}) where {T<:NumTypes}
+    (isempty_interval(x) | isempty_interval(y)) && return emptyinterval(Complex{Interval{T}})
+    if isbounded(y) & isreal(y)
+        p = real(y)
+        logx = log(x)
+        a, b = bounds(p)
+        kmin = ceil(Integer, a)
+        kmax = floor(Integer, b)
+        if kmax - kmin < 1 # only one integer in the interval
+            n = round(Integer, mid(p)) # pick nearest integer
+            u = p - exact(n)
+            res = _pow(x, n, u, logx)
+            return res
+        end
+        # kmin slice
+        u = interval(T, a - kmin, 0.5)
+        res = _pow(x, kmin, u, logx)
+        u = interval(T, -0.5, 0.5)
+        for k ∈ kmin+1:kmax-1
+            res = union_interval(res, _pow(x, k, u, logx); dec = :auto)
+        end
+        # kmax slice
+        u = interval(T, -0.5, b - kmax)
+        res = union_interval(res, _pow(x, kmax, u, logx); dec = :auto)
+        return res
     end
+    return exp(y * log(x))
 end
 
-function _log_no_branch_cut(z::Complex{<:Interval})
-    x, y = reim(z)
-    by = bareinterval(y)
-    bx = bareinterval(x)
-    r = atan(by, bx)
-    d = min(decoration(y), decoration(x), decoration(r))
-    d = min(d,
-            ifelse(in_interval(0, by),
-                   ifelse(in_interval(0, bx), trv, d),
-                   d))
-    t = isguaranteed(y) & isguaranteed(x)
-    angle = _unsafe_interval(r, d, t)
-    return complex(log(abs(z)), angle)
+function _pow(x, n, u, logx) # performs x^(n+u) as x^n * exp(u * log(x))
+    xn = fastpown(x, n)
+    return isthinzero(u) ? xn : xn * exp(u * logx)
 end
 
 # needed to avoid method errors
@@ -99,7 +110,7 @@ Base.:^(x::Interval, y::Complex{<:Interval}) = ^(promote(x, y)...)
 
 # overwrite behaviour for small integer powers from https://github.com/JuliaLang/julia/pull/24240
 Base.literal_pow(::typeof(^), x::Interval, ::Val{n}) where {n} = _select_pown(x, n)
-Base.literal_pow(::typeof(^), x::Complex{<:Interval}, ::Val{n}) where {n} = ^(x, interval(n))
+Base.literal_pow(::typeof(^), x::Complex{<:Interval}, ::Val{n}) where {n} = fastpown(x, n)
 
 # helper functions for power
 
@@ -383,6 +394,23 @@ function fastpown(x::Interval, n::Integer)
     d = min(decoration(x), decoration(r))
     d = min(d, ifelse((n < 0) & in_interval(0, x), trv, d))
     return _unsafe_interval(r, d, isguaranteed(x))
+end
+
+function fastpown(x::Complex{<:Interval}, n::Integer)
+    if isthinzero(imag(x))
+        return complex(fastpown(real(x), n))
+    elseif isthinzero(real(x)) # (im * y)^n = im^n * y^n
+        yn = fastpown(imag(x), n)
+        rem4 = n % 4
+        imn = ifelse(rem4 == 0, 1+0im,
+              ifelse(rem4 == 1, 1im,
+              ifelse(rem4 == 2, -1+0im, -1im)))
+        return exact(imn) * yn
+    else
+        isempty_interval(x) && return x
+        n < 0 && return inv(fastpown(x, -n))
+        return _positive_power_by_squaring(x, n)
+    end
 end
 
 # helper function for `fastpow` and `fastpown`
