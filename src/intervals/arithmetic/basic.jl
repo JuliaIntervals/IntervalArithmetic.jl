@@ -239,9 +239,11 @@ Implement the `sqrt` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function Base.sqrt(x::BareInterval{T}) where {T<:AbstractFloat}
     sup(x) < 0 && return emptyinterval(BareInterval{T})
-    lo = inf(x) < 0 ? zero(T) : inf(x)
+    lo = _cut_negative_domain(x)
     return @round(T, sqrt(lo), sqrt(sup(x)))
 end
+_cut_negative_domain(x::BareInterval{T}) where {T<:AbstractFloat} = ifelse(inf(x) < 0, zero(T), inf(x))
+_cut_negative_domain(x::BareInterval{T}) where {T<:BigFloat} = inf(x) < 0 ? zero(T) : inf(x)
 
 Base.sqrt(x::BareInterval{<:Rational}) = sqrt(float(x))
 

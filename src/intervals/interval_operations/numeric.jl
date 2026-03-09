@@ -14,8 +14,9 @@ Implement the `inf` function of the IEEE Standard 1788-2015 (Table 9.2).
 See also: [`sup`](@ref), [`bounds`](@ref), [`mid`](@ref), [`diam`](@ref),
 [`radius`](@ref) and [`midradius`](@ref).
 """
-function inf(x::BareInterval{T}) where {T<:AbstractFloat}
-    isnan(x.lo) && return typemax(T)
+inf(x::BareInterval{T}) where {T<:AbstractFloat} = ifelse(isnan(x.lo), typemax(T), ifelse(iszero(x.lo), copysign(x.lo, -1), x.lo))
+function inf(x::BareInterval{T}) where {T<:BigFloat}
+    isnan(x.lo) && return typemax(T) # typemax(x.lo)
     iszero(x.lo) && return copysign(x.lo, -1)
     return x.lo
 end
@@ -43,8 +44,9 @@ Implement the `sup` function of the IEEE Standard 1788-2015 (Table 9.2).
 See also: [`inf`](@ref), [`bounds`](@ref), [`mid`](@ref), [`diam`](@ref),
 [`radius`](@ref) and [`midradius`](@ref).
 """
-function sup(x::BareInterval{T}) where {T<:AbstractFloat}
-    isnan(x.hi) && return typemin(T)
+sup(x::BareInterval{T}) where {T<:AbstractFloat} = ifelse(isnan(x.hi), typemin(T), x.hi)
+function sup(x::BareInterval{T}) where {T<:BigFloat}
+    isnan(x.hi) && return typemin(T) # typemin(x.hi)
     return x.hi
 end
 
