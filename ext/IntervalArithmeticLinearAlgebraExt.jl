@@ -203,11 +203,15 @@ end
 
 # matrix exponential and logarithm
 
-function LinearAlgebra.exp!(A::AbstractMatrix{<:RealOrComplexI})
+function LinearAlgebra.exp!(A::AbstractMatrix{T}) where T<:RealOrComplexI
     # note: this function does not overwrite `A`
     Λ, V = LinearAlgebra.eigen(A)
     V⁻¹ = inv(V)
-    return V * LinearAlgebra.Diagonal(exp.(Λ)) * V⁻¹
+    if T <: Real
+        return real(V * LinearAlgebra.Diagonal(exp.(Λ)) * V⁻¹)
+    else
+        return V * LinearAlgebra.Diagonal(exp.(Λ)) * V⁻¹
+    end
 end
 
 function LinearAlgebra.log(A::AbstractMatrix{<:Interval})
