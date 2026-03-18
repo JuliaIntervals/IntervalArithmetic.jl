@@ -119,6 +119,24 @@ end
     @test issubset_interval(interval(0, 1)*interval(im), sqrt(interval(-1, 0) + interval(0)*interval(im)))
     @test issubset_interval(interval(0, 1) + interval(0, 1)*interval(im), sqrt(interval(-1, 1) + interval(0)*interval(im)))
     @test issubset_interval(interval(0, Inf) + interval(-3//8, Inf)*interval(im), sqrt(interval(-9//32, Inf)*interval(im)))
+
+    x = interval(-0.5) + interval(im) * interval(-1e-14, 1e-14)
+
+    y = interval(1)
+    @test issubset_interval(x^y, exp(y*log(x)))
+
+    y = interval(1.5, 2.5)
+    res = x^y
+    ref = exp(y*log(x))
+    # tighter on the real part (right half-plane)
+    @test inf(real(ref)) < -0.3 < -1e-13 < inf(real(res))
+
+    y = interval(-2, Inf)
+    @test isequal_interval(x^y, exp(y*log(x)))
+
+    @test isequal_interval(fastpown(x, 1), x^interval(1))
+    @test isequal_interval(fastpown(x, 2), x^interval(2))
+    @test isequal_interval(fastpown(x, 5), x^interval(5))
 end
 
 @testset "Literal powers" begin
