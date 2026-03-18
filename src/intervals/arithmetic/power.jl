@@ -67,6 +67,7 @@ Base.:^(x::Interval, n::Integer) = ^(x, n//one(n))
 Base.:^(x::Interval, y::Rational) = ^(x, convert(Interval{typeof(y)}, y))
 
 # power for complex intervals
+# See Improve power of complex intervals #745 for a description of the algorithm
 
 Base.:^(x::Complex{<:Interval}, y::Complex{<:Interval}) = ^(promote(x, y)...)
 
