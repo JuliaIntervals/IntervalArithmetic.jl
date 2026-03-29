@@ -15,6 +15,12 @@ See also: [`sup`](@ref), [`bounds`](@ref), [`mid`](@ref), [`diam`](@ref),
 [`radius`](@ref) and [`midradius`](@ref).
 """
 inf(x::BareInterval{T}) where {T<:AbstractFloat} = ifelse(isnan(x.lo), typemax(T), ifelse(iszero(x.lo), copysign(x.lo, -1), x.lo))
+function inf(x::BareInterval{T}) where {T<:BigFloat}
+    isnan(x.lo) && return typemax(T) # typemax(x.lo)
+    iszero(x.lo) && return copysign(x.lo, -1)
+    return x.lo
+end
+
 inf(x::BareInterval{<:Rational}) = x.lo
 
 function inf(x::Interval{T}) where {T<:AbstractFloat}
@@ -39,6 +45,11 @@ See also: [`inf`](@ref), [`bounds`](@ref), [`mid`](@ref), [`diam`](@ref),
 [`radius`](@ref) and [`midradius`](@ref).
 """
 sup(x::BareInterval{T}) where {T<:AbstractFloat} = ifelse(isnan(x.hi), typemin(T), x.hi)
+function sup(x::BareInterval{T}) where {T<:BigFloat}
+    isnan(x.hi) && return typemin(T) # typemin(x.hi)
+    return x.hi
+end
+
 sup(x::BareInterval{<:Rational}) = x.hi
 
 function sup(x::Interval{T}) where {T<:AbstractFloat}
