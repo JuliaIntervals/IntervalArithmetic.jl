@@ -203,7 +203,7 @@ end
 
 # matrix exponential and logarithm
 
-function LinearAlgebra.exp!(A::AbstractMatrix{T}) where T<:RealOrComplexI
+function LinearAlgebra.exp!(A::AbstractMatrix{T}) where {T<:RealOrComplexI}
     # note: this function does not overwrite `A`
     Λ, V = LinearAlgebra.eigen(A)
     V⁻¹ = inv(V)
