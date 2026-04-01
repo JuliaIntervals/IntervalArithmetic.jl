@@ -147,6 +147,8 @@ end
 mid(x::Real, α = 0.5) = mid(interval(x), α)
 mid(x::Complex, α = 0.5) = complex(mid(real(x), α), mid(imag(x), α))
 
+mid(x::AbstractArray, α = 0.5) = mid.(x, α)
+
 """
     diam(x)
 
