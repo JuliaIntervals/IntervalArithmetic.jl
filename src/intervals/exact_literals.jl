@@ -168,9 +168,38 @@ _str_repr(x::ExactReal{T}) where {T<:AbstractFloat} =
 
 Base.:-(x::ExactReal) = exact(-x.value)
 
-# by-pass default
+for T ∈ (:Rational, :Integer)
+    @eval Base.:^(x::ExactReal{<:$T}, y::ExactReal{<:Integer}) = exact(_exact_pow(x.value, y.value))
+    for S ∈ (:Rational, :Integer)
+        @eval begin
+            Base.:+(x::ExactReal{<:$T}, y::ExactReal{<:$S}) = exact(_exact_add(x.value, y.value))
+            Base.:-(x::ExactReal{<:$T}, y::ExactReal{<:$S}) = exact(_exact_sub(x.value, y.value))
+            Base.:*(x::ExactReal{<:$T}, y::ExactReal{<:$S}) = exact(_exact_mul(x.value, y.value))
+            Base.:/(x::ExactReal{<:$T}, y::ExactReal{<:$S}) = exact(_exact_div(x.value, y.value))
+        end
+    end
+end
 
-Base.:^(x::ExactReal, p::Integer) = ^(promote(x, p)...)
+_exact_add(x::Union{Rational,Integer}, y::Union{Rational,Integer}) = x + y
+_exact_add(x::Integer, y::Integer) = Base.checked_add(x, y)
+
+_exact_sub(x::Union{Rational,Integer}, y::Union{Rational,Integer}) = x - y
+_exact_sub(x::Integer, y::Integer) = Base.checked_sub(x, y)
+
+_exact_mul(x::Union{Rational,Integer}, y::Union{Rational,Integer}) = x * y
+_exact_mul(x::Integer, y::Integer) = Base.checked_mul(x, y)
+
+_exact_pow(x::Union{Rational,Integer}, y::Integer) = Rational(x) ^ y
+
+_exact_div(x::Union{Rational,Integer}, y::Union{Rational,Integer}) = x // y
+
+# in general, exactness is lost
+
+Base.:+(x::ExactReal, y::ExactReal) = x.value + y.value
+Base.:-(x::ExactReal, y::ExactReal) = x.value - y.value
+Base.:*(x::ExactReal, y::ExactReal) = x.value * y.value
+Base.:^(x::ExactReal, y::ExactReal) = x.value ^ y.value
+Base.:/(x::ExactReal, y::ExactReal) = x.value / y.value
 
 # basic operations with `BareInterval` and `ExactReal`
 
