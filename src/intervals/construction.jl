@@ -89,7 +89,7 @@ _sup(x::Real) = x
 
 _round(::Type{T}, a, r::RoundingMode) where {T<:NumTypes} = __round(T, a, r)
 # irrationals
-_round(::Type{<:NumTypes}, ::AbstractIrrational, ::RoundingMode) = throw(ArgumentError("only irrationals from MathConstants are supported"))
+_round(::Type{<:NumTypes}, ::AbstractIrrational, ::RoundingMode) = throw(ArgumentError("only irrationals from MathConstants or IrrationalConstants.jl are supported"))
 for irr ∈ (:(:π), :(:γ), :(:catalan)) # irrationals supported by MPFR
     @eval _round(::Type{T}, a::Irrational{$irr}, r::RoundingMode) where {T<:NumTypes} =
         __round(T, BigFloat(a, r), r)
