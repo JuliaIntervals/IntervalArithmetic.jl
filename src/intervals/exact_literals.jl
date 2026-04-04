@@ -201,10 +201,6 @@ Base.:*(x::ExactReal, y::ExactReal) = x.value * y.value
 Base.:^(x::ExactReal, y::ExactReal) = x.value ^ y.value
 Base.:/(x::ExactReal, y::ExactReal) = x.value / y.value
 
-# # by-pass default
-
-# Base.:^(x::ExactReal, p::Integer) = ^(promote(x, p)...)
-
 # basic operations with `BareInterval` and `ExactReal`
 
 for f ∈ (:+, :-, :*, :/, :\, :^)
