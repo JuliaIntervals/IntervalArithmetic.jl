@@ -126,6 +126,9 @@ LinearAlgebra.det(A::AbstractMatrix{<:Complex{<:Interval}}) = reduce(*, LinearAl
 # matrix eigendecomposition
 # note: use the contraction mapping theorem, only works when the entries of A have small radii, and A has simple eigenvalues
 
+LinearAlgebra.eigen(A::AbstractMatrix{<:RealOrComplexI}; permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby) =
+    LinearAlgebra.eigen!(A; permute, scale, sortby)
+
 function LinearAlgebra.eigen!(A::AbstractMatrix{<:RealOrComplexI}; permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby)
     # note: this function does not overwrite `A`
     λ, v = LinearAlgebra.eigen!(mid.(A); permute, scale, sortby)
