@@ -66,12 +66,13 @@
     @test_throws OverflowError exact(typemax(Int)) + exact(1)
     @test_throws OverflowError exact(typemin(Int)) - exact(1)
     @test_throws OverflowError exact(typemax(Int)) * exact(2)
+    @test_throws OverflowError -exact(typemin(Int))
 
     # Bool operations
     let x = @exact 1.5
         @test (x * exact(true)) isa ExactReal
         @test (x * exact(true)) === exact(1.5)
-        
+
         @test (x * exact(false)) isa ExactReal
         @test (x * exact(false)) === exact(0.0)
 
@@ -81,10 +82,10 @@
 
     # Loss of exactness
     let val = exact(1.5) + exact(2.0)
-        @test val isa Float64 
+        @test val isa Float64
         @test val == 3.5
     end
-    
+
     let val2 = exact(1.5) * exact(2.0)
         @test val2 isa Float64
         @test val2 == 3.0

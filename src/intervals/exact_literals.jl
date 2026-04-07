@@ -173,6 +173,7 @@ _str_repr(x::ExactReal{T}) where {T<:AbstractFloat} =
 # always exact
 
 Base.:-(x::ExactReal) = exact(-x.value)
+Base.:-(x::ExactReal{<:Integer}) = exact(Base.checked_neg(x.value))
 
 Base.:*(x::ExactReal, y::ExactReal{Bool}) = exact(x.value * y.value)
 Base.:*(x::ExactReal{Bool}, y::ExactReal) = exact(x.value * y.value)
@@ -214,7 +215,10 @@ _exact_mul(x::Union{Rational,Integer}, y::Union{Rational,Integer}) = x * y
 _exact_mul(x::Integer, y::Integer) = Base.checked_mul(x, y)
 
 _exact_pow(x::Rational, y::Integer) = x ^ y
-_exact_pow(x::Integer, y::Integer) = Base.checked_pow(x, y)
+_exact_pow(x::Integer, y::Integer) = _checked_power_by_squaring(x, y)
+# mimic `checked_pow` from Base (available starting from Julia 1.11, but not in 1.10)
+_checked_power_by_squaring(x::Integer, p::Integer) = Base.power_by_squaring(x, p; mul = Base.checked_mul)
+_checked_power_by_squaring(x::Bool, p::Integer) = Base.power_by_squaring(x, p)
 
 _exact_div(x::Union{Rational,Integer}, y::Union{Rational,Integer}) = x // y
 
