@@ -48,4 +48,50 @@
     @test isequal_interval(promote(bareinterval(1, 2), exact(3))[2], bareinterval(3))
 
     @test isequal_interval(promote(interval(1, 2), exact(3))[2], interval(3))
+
+    # Extended exactness operations
+
+    # Exact operations (Integers and Rationals)
+    @test exact(1) + exact(2) === exact(3)
+    @test exact(1) - exact(3) === exact(-2)
+    @test exact(2) * exact(3) === exact(6)
+    @test exact(4) / exact(2) === exact(2//1)
+    if VERSION ≥ v"1.11"
+        @test exact(2) ^ exact(3) === exact(8)
+    else
+        @test_throws ArgumentError exact(2) ^ exact(3)
+    end
+
+    @test exact(1//2) + exact(1//4) === exact(3//4)
+    @test exact(1//2) - exact(1//4) === exact(1//4)
+    @test exact(1//2) * exact(1//2) === exact(1//4)
+
+    # Checked Arithmetic Overflows
+    @test_throws OverflowError exact(typemax(Int)) + exact(1)
+    @test_throws OverflowError exact(typemin(Int)) - exact(1)
+    @test_throws OverflowError exact(typemax(Int)) * exact(2)
+    @test_throws OverflowError -exact(typemin(Int))
+
+    # Bool operations
+    let x = @exact 1.5
+        @test (x * exact(true)) isa ExactReal
+        @test (x * exact(true)) === exact(1.5)
+
+        @test (x * exact(false)) isa ExactReal
+        @test (x * exact(false)) === exact(0.0)
+
+        @test (x / exact(true)) isa ExactReal
+        @test (x / exact(true)) === exact(1.5)
+    end
+
+    # Loss of exactness
+    let val = exact(1.5) + exact(2.0)
+        @test val isa Float64
+        @test val == 3.5
+    end
+
+    let val2 = exact(1.5) * exact(2.0)
+        @test val2 isa Float64
+        @test val2 == 3.0
+    end
 end

@@ -94,10 +94,16 @@ Base.isnan(x::ExactReal) = isnan(x.value) # also ensures that `Base.isinf` works
 
 # conversion and promotion
 
-Base.convert(::Type{ExactReal{T}}, x::ExactReal{T}) where {T<:Real} = x
+Base.convert(::Type{ExactReal{T}}, x::ExactReal{T}) where {T<:Real} = x # needed since `ExactReal{T}(::T)` is not allowed
 
 Base.promote_rule(::Type{ExactReal{T}}, ::Type{ExactReal{S}}) where {T<:Real,S<:Real} =
     throw(ArgumentError("promotion between `ExactReal` is not allowed"))
+
+for T ∈ (:Rational, :Integer), S ∈ (:Rational, :Integer)
+    @eval Base.convert(::Type{ExactReal{R}}, x::ExactReal{U}) where {R<:$T,U<:$S} = exact(convert(R, x.value))
+
+    @eval Base.promote_rule(::Type{ExactReal{R}}, ::Type{ExactReal{U}}) where {R<:$T,U<:$S} = ExactReal{promote_type(R, U)}
+end
 
 # to BareInterval
 
@@ -166,11 +172,66 @@ _str_repr(x::ExactReal{T}) where {T<:AbstractFloat} =
 
 # always exact
 
-Base.:-(x::ExactReal) = exact(-x.value)
+Base.:-(x::ExactReal{<:Union{Float16,Float32,Float64,BigFloat}}) = exact(-x.value)
+Base.:-(x::ExactReal{<:Rational}) = exact(-x.value)
+Base.:-(x::ExactReal{<:Integer}) = exact(Base.checked_neg(x.value))
 
-# by-pass default
+Base.:*(x::ExactReal, y::ExactReal{Bool}) = exact(x.value * y.value)
+Base.:*(x::ExactReal{Bool}, y::ExactReal) = exact(x.value * y.value)
+Base.:/(x::ExactReal, y::ExactReal{Bool}) = exact(x.value / y.value)
+Base.:/(x::ExactReal{Bool}, y::ExactReal) = exact(x.value / y.value)
 
-Base.:^(x::ExactReal, p::Integer) = ^(promote(x, p)...)
+for T ∈ (:Rational, :Integer)
+    @eval Base.:^(x::ExactReal{<:$T}, y::ExactReal{<:Integer}) = exact(_exact_pow(x.value, y.value))
+    for S ∈ (:Rational, :Integer)
+        @eval begin
+            Base.:+(x::ExactReal{<:$T}, y::ExactReal{<:$S}) = exact(_exact_add(x.value, y.value))
+            Base.:-(x::ExactReal{<:$T}, y::ExactReal{<:$S}) = exact(_exact_sub(x.value, y.value))
+            Base.:*(x::ExactReal{<:$T}, y::ExactReal{<:$S}) = exact(_exact_mul(x.value, y.value))
+            Base.:/(x::ExactReal{<:$T}, y::ExactReal{<:$S}) = exact(_exact_div(x.value, y.value))
+        end
+    end
+end
+
+#- needed to resolve method ambiguities (since `Bool <: Integer`)
+Base.:*(x::ExactReal{Bool}, y::ExactReal{Bool}) = exact(_exact_mul(x.value, y.value))
+Base.:/(x::ExactReal{Bool}, y::ExactReal{Bool}) = exact(_exact_div(x.value, y.value))
+for T ∈ (:Rational, :Integer)
+    @eval begin
+        Base.:*(x::ExactReal{<:$T}, y::ExactReal{Bool}) = exact(_exact_mul(x.value, y.value))
+        Base.:*(x::ExactReal{Bool}, y::ExactReal{<:$T}) = exact(_exact_mul(x.value, y.value))
+        Base.:/(x::ExactReal{<:$T}, y::ExactReal{Bool}) = exact(_exact_div(x.value, y.value))
+        Base.:/(x::ExactReal{Bool}, y::ExactReal{<:$T}) = exact(_exact_div(x.value, y.value))
+    end
+end
+#-
+
+_exact_add(x::Union{Rational,Integer}, y::Union{Rational,Integer}) = x + y
+_exact_add(x::Integer, y::Integer) = Base.checked_add(x, y)
+
+_exact_sub(x::Union{Rational,Integer}, y::Union{Rational,Integer}) = x - y
+_exact_sub(x::Integer, y::Integer) = Base.checked_sub(x, y)
+
+_exact_mul(x::Union{Rational,Integer}, y::Union{Rational,Integer}) = x * y
+_exact_mul(x::Integer, y::Integer) = Base.checked_mul(x, y)
+
+_exact_pow(x::Rational, y::Integer) = x ^ y
+if VERSION ≥ v"1.11"
+    _exact_pow(x::Integer, y::Integer) = Base.checked_pow(x, y)
+else
+    _exact_pow(::Integer, ::Integer) = throw(ArgumentError("`checked_pow` requires at least Julia 1.11"))
+end
+
+_exact_div(x::Union{Rational,Integer}, y::Union{Rational,Integer}) = x // y
+
+# in general, exactness is lost
+
+Base.:-(x::ExactReal) = -x.value
+Base.:+(x::ExactReal, y::ExactReal) = x.value + y.value
+Base.:-(x::ExactReal, y::ExactReal) = x.value - y.value
+Base.:*(x::ExactReal, y::ExactReal) = x.value * y.value
+Base.:^(x::ExactReal, y::ExactReal) = x.value ^ y.value
+Base.:/(x::ExactReal, y::ExactReal) = x.value / y.value
 
 # basic operations with `BareInterval` and `ExactReal`
 
