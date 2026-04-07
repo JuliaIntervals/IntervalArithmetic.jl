@@ -216,10 +216,11 @@ _exact_mul(x::Union{Rational,Integer}, y::Union{Rational,Integer}) = x * y
 _exact_mul(x::Integer, y::Integer) = Base.checked_mul(x, y)
 
 _exact_pow(x::Rational, y::Integer) = x ^ y
-_exact_pow(x::Integer, y::Integer) = _checked_power_by_squaring(x, y)
-# mimic `checked_pow` from Base (available starting from Julia 1.11, but not in 1.10)
-_checked_power_by_squaring(x::Integer, p::Integer) = Base.power_by_squaring(x, p; mul = Base.checked_mul)
-_checked_power_by_squaring(x::Bool, p::Integer) = Base.power_by_squaring(x, p)
+if VERSION ≥ v"1.11"
+    _exact_pow(x::Integer, y::Integer) = Base.checked_pow(x, y)
+else
+    _exact_pow(::Integer, ::Integer) = throw(ArgumentError("`checked_pow` requires at least Julia 1.11"))
+end
 
 _exact_div(x::Union{Rational,Integer}, y::Union{Rational,Integer}) = x // y
 

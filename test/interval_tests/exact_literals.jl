@@ -56,7 +56,11 @@
     @test exact(1) - exact(3) === exact(-2)
     @test exact(2) * exact(3) === exact(6)
     @test exact(4) / exact(2) === exact(2//1)
-    @test exact(2) ^ exact(3) === exact(8)
+    if VERSION ≥ v"1.11"
+        @test exact(2) ^ exact(3) === exact(8)
+    else
+        @test_throws ArgumentError exact(2) ^ exact(3)
+    end
 
     @test exact(1//2) + exact(1//4) === exact(3//4)
     @test exact(1//2) - exact(1//4) === exact(1//4)
