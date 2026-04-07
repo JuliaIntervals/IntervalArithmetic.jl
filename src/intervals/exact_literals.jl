@@ -94,10 +94,16 @@ Base.isnan(x::ExactReal) = isnan(x.value) # also ensures that `Base.isinf` works
 
 # conversion and promotion
 
-Base.convert(::Type{ExactReal{T}}, x::ExactReal{T}) where {T<:Real} = x
+Base.convert(::Type{ExactReal{T}}, x::ExactReal{T}) where {T<:Real} = x # needed since `ExactReal{T}(::T)` is not allowed
 
 Base.promote_rule(::Type{ExactReal{T}}, ::Type{ExactReal{S}}) where {T<:Real,S<:Real} =
     throw(ArgumentError("promotion between `ExactReal` is not allowed"))
+
+for T ∈ (:Rational, :Integer), S ∈ (:Rational, :Integer)
+    @eval Base.convert(::Type{ExactReal{R}}, x::ExactReal{U}) where {R<:$T,U<:$S} = exact(convert(R, x.value))
+
+    @eval Base.promote_rule(::Type{ExactReal{R}}, ::Type{ExactReal{U}}) where {R<:$T,U<:$S} = ExactReal{promote_type(R, U)}
+end
 
 # to BareInterval
 
@@ -192,6 +198,15 @@ _exact_mul(x::Integer, y::Integer) = Base.checked_mul(x, y)
 _exact_pow(x::Union{Rational,Integer}, y::Integer) = Rational(x) ^ y
 
 _exact_div(x::Union{Rational,Integer}, y::Union{Rational,Integer}) = x // y
+
+#- * and / with Bool does not involve rounding
+
+Base.:*(x::ExactReal{Bool}, y::ExactReal{Bool}) = exact(x.value * y.value)
+Base.:*(x::ExactReal, y::ExactReal{Bool}) = exact(x.value * y.value)
+Base.:*(x::ExactReal{Bool}, y::ExactReal) = exact(x.value * y.value)
+Base.:/(x::ExactReal{Bool}, y::ExactReal{Bool}) = exact(x.value / y.value)
+Base.:/(x::ExactReal, y::ExactReal{Bool}) = exact(x.value / y.value)
+Base.:/(x::ExactReal{Bool}, y::ExactReal) = exact(x.value / y.value)
 
 # in general, exactness is lost
 
