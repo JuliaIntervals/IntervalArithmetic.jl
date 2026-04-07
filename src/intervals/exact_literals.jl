@@ -174,6 +174,11 @@ _str_repr(x::ExactReal{T}) where {T<:AbstractFloat} =
 
 Base.:-(x::ExactReal) = exact(-x.value)
 
+Base.:*(x::ExactReal, y::ExactReal{Bool}) = exact(x.value * y.value)
+Base.:*(x::ExactReal{Bool}, y::ExactReal) = exact(x.value * y.value)
+Base.:/(x::ExactReal, y::ExactReal{Bool}) = exact(x.value / y.value)
+Base.:/(x::ExactReal{Bool}, y::ExactReal) = exact(x.value / y.value)
+
 for T ∈ (:Rational, :Integer)
     @eval Base.:^(x::ExactReal{<:$T}, y::ExactReal{<:Integer}) = exact(_exact_pow(x.value, y.value))
     for S ∈ (:Rational, :Integer)
@@ -186,6 +191,19 @@ for T ∈ (:Rational, :Integer)
     end
 end
 
+#- needed to resolve method ambiguities (since `Bool <: Integer`)
+Base.:*(x::ExactReal{Bool}, y::ExactReal{Bool}) = exact(_exact_mul(x.value, y.value))
+Base.:/(x::ExactReal{Bool}, y::ExactReal{Bool}) = exact(_exact_div(x.value, y.value))
+for T ∈ (:Rational, :Integer)
+    @eval begin
+        Base.:*(x::ExactReal{<:$T}, y::ExactReal{Bool}) = exact(_exact_mul(x.value, y.value))
+        Base.:*(x::ExactReal{Bool}, y::ExactReal{<:$T}) = exact(_exact_mul(x.value, y.value))
+        Base.:/(x::ExactReal{<:$T}, y::ExactReal{Bool}) = exact(_exact_div(x.value, y.value))
+        Base.:/(x::ExactReal{Bool}, y::ExactReal{<:$T}) = exact(_exact_div(x.value, y.value))
+    end
+end
+#-
+
 _exact_add(x::Union{Rational,Integer}, y::Union{Rational,Integer}) = x + y
 _exact_add(x::Integer, y::Integer) = Base.checked_add(x, y)
 
@@ -195,18 +213,10 @@ _exact_sub(x::Integer, y::Integer) = Base.checked_sub(x, y)
 _exact_mul(x::Union{Rational,Integer}, y::Union{Rational,Integer}) = x * y
 _exact_mul(x::Integer, y::Integer) = Base.checked_mul(x, y)
 
-_exact_pow(x::Union{Rational,Integer}, y::Integer) = Rational(x) ^ y
+_exact_pow(x::Rational, y::Integer) = x ^ y
+_exact_pow(x::Integer, y::Integer) = Base.checked_pow(x, y)
 
 _exact_div(x::Union{Rational,Integer}, y::Union{Rational,Integer}) = x // y
-
-#- * and / with Bool does not involve rounding
-
-Base.:*(x::ExactReal{Bool}, y::ExactReal{Bool}) = exact(x.value * y.value)
-Base.:*(x::ExactReal, y::ExactReal{Bool}) = exact(x.value * y.value)
-Base.:*(x::ExactReal{Bool}, y::ExactReal) = exact(x.value * y.value)
-Base.:/(x::ExactReal{Bool}, y::ExactReal{Bool}) = exact(x.value / y.value)
-Base.:/(x::ExactReal, y::ExactReal{Bool}) = exact(x.value / y.value)
-Base.:/(x::ExactReal{Bool}, y::ExactReal) = exact(x.value / y.value)
 
 # in general, exactness is lost
 
