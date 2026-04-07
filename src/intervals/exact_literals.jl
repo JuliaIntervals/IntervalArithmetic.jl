@@ -172,7 +172,8 @@ _str_repr(x::ExactReal{T}) where {T<:AbstractFloat} =
 
 # always exact
 
-Base.:-(x::ExactReal) = exact(-x.value)
+Base.:-(x::ExactReal{<:Union{Float16,Float32,Float64,BigFloat}}) = exact(-x.value)
+Base.:-(x::ExactReal{<:Rational}) = exact(-x.value)
 Base.:-(x::ExactReal{<:Integer}) = exact(Base.checked_neg(x.value))
 
 Base.:*(x::ExactReal, y::ExactReal{Bool}) = exact(x.value * y.value)
@@ -224,6 +225,7 @@ _exact_div(x::Union{Rational,Integer}, y::Union{Rational,Integer}) = x // y
 
 # in general, exactness is lost
 
+Base.:-(x::ExactReal) = -x.value
 Base.:+(x::ExactReal, y::ExactReal) = x.value + y.value
 Base.:-(x::ExactReal, y::ExactReal) = x.value - y.value
 Base.:*(x::ExactReal, y::ExactReal) = x.value * y.value
