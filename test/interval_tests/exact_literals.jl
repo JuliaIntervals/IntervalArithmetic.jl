@@ -49,15 +49,18 @@
 
     @test isequal_interval(promote(interval(1, 2), exact(3))[2], interval(3))
 
-    # Extended exactness operations
-
     # Exact operations (Integers and Rationals)
     @test exact(1) + exact(2) === exact(3)
     @test exact(1) - exact(3) === exact(-2)
     @test exact(2) * exact(3) === exact(6)
-    @test exact(4) / exact(2) === exact(2//1)
+    @test exact(4) / exact(2) === exact(2.0)
+    @test exact(1) / exact(3) === 1/3
+    @test exact(1) / exact(2^60 + 1) === 1/2^60
+    @test exact(-1) / exact(typemin(Int32)) === exact(-1/typemin(Int32))
+    @test exact(-1) / exact(typemin(Int)) === -1/typemin(Int)
     if VERSION ≥ v"1.11"
         @test exact(2) ^ exact(3) === exact(8)
+        @test_throws DomainError exact(2) ^ (-2)
     else
         @test_throws ArgumentError exact(2) ^ exact(3)
     end

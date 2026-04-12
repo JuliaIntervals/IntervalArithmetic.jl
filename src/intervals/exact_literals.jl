@@ -188,7 +188,6 @@ for T ∈ (:Rational, :Integer)
             Base.:+(x::ExactReal{<:$T}, y::ExactReal{<:$S}) = exact(_exact_add(x.value, y.value))
             Base.:-(x::ExactReal{<:$T}, y::ExactReal{<:$S}) = exact(_exact_sub(x.value, y.value))
             Base.:*(x::ExactReal{<:$T}, y::ExactReal{<:$S}) = exact(_exact_mul(x.value, y.value))
-            Base.:/(x::ExactReal{<:$T}, y::ExactReal{<:$S}) = exact(_exact_div(x.value, y.value))
         end
     end
 end
@@ -222,7 +221,22 @@ else
     _exact_pow(::Integer, ::Integer) = throw(ArgumentError("`checked_pow` requires at least Julia 1.11"))
 end
 
-_exact_div(x::Union{Rational,Integer}, y::Union{Rational,Integer}) = x // y
+Base.literal_pow(::typeof(^), x::ExactReal{<:Integer}, ::Val{p}) where {p} =
+    x ^ p
+
+#
+
+Base.:/(x::ExactReal{<:Rational}, y::ExactReal{<:Rational}) = exact(x.value / y.value)
+Base.:/(x::ExactReal{<:Rational}, y::ExactReal{<:Integer}) = exact(x.value / y.value)
+Base.:/(x::ExactReal{<:Integer}, y::ExactReal{<:Rational}) = exact(x.value / y.value)
+
+function Base.:/(x::ExactReal{T}, y::ExactReal{S}) where {T<:Integer,S<:Integer}
+    r = x.value / y.value
+    (x.value == typemin(promote_type(T, S))) & (y.value == -1) && return r # check overflow
+    (y.value == typemin(promote_type(T, S))) & (x.value == -1) && return r # check overflow
+    x.value // y.value == r || return r
+    return exact(r)
+end
 
 # in general, exactness is lost
 
