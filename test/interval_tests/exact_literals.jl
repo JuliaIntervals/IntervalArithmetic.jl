@@ -55,8 +55,8 @@
     @test exact(2) * exact(3) === exact(6)
     @test exact(4) / exact(2) === exact(2.0)
     @test exact(1) / exact(3) === 1/3
-    @test exact(1) / exact(2^60 + 1) === 1/2^60
-    @test exact(-1) / exact(typemin(Int32)) === exact(-1/typemin(Int32))
+    @test exact(1) / exact(Int64(2)^Int64(60) + Int64(1)) === 1/Int64(2)^Int64(60)
+    @test exact(-Int64(1)) / exact(typemin(Int32)) === exact(-Int64(1)/typemin(Int32))
     @test exact(-1) / exact(typemin(Int)) === -1/typemin(Int)
     if VERSION ≥ v"1.11"
         @test exact(2) ^ exact(3) === exact(8)
