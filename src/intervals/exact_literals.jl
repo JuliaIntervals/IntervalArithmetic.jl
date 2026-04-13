@@ -66,6 +66,8 @@ exact(x::Complex) = complex(exact(real(x)), exact(imag(x)))
 
 exact(x::AbstractArray) = exact.(x)
 
+exact(x::ExactReal) = x # avoid nested `ExactReal`
+
 _value(x::ExactReal) = x.value # hook for interval constructor
 
 isguaranteed(::ExactReal) = true
