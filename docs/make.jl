@@ -21,6 +21,7 @@ makedocs(;
         "Overview" => "intro.md",
         "Philosophy" => "philosophy.md",
         "Manual" => [
+            "Cheat Sheet" => "manual/cheatsheet.md",
             "Constructing intervals" => "manual/construction.md",
             "Guarantee and `ExactReal`" => "manual/guarantee.md",
             "Usage" => "manual/usage.md",
