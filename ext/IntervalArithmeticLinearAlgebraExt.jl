@@ -187,6 +187,12 @@ function _fold_conjugate!(::Type{<:Interval}, λ, v)
 end
 
 # eigenvalue enclosure (eigenbox)
+# The Orthants iterator, eigenbox (Rohn and Hertz methods), and the reduction of
+# general/complex/Hermitian matrices to the symmetric case are derived from
+# IntervalLinearAlgebra.jl (https://github.com/JuliaIntervals/IntervalLinearAlgebra.jl)
+# Copyright (c) 2021 Luca Ferranti, MIT License.
+# See: Hladík, Daney, Tsigaridas, "Bounds on real eigenvalues and singular values
+# of interval matrices", APNUM 2013 (https://doi.org/10.1016/j.apnum.2012.09.003).
 
 struct Orthants
     n::Int
