@@ -8,70 +8,47 @@ import LinearAlgebra
     @test all(isnai, inv(B))
 end
 
-@testset "Eigenbox" begin
-    # Rohn: symmetric matrix with zero radius
-    A0 = LinearAlgebra.Symmetric(interval.([1.0 0.5; 0.5 2.0]))
+@testset "Eigendecomposition" begin
     exact_eigs = LinearAlgebra.eigvals(LinearAlgebra.Symmetric([1.0 0.5; 0.5 2.0]))
-    box0 = eigenbox(A0)
-    @test in_interval(exact_eigs[1], box0)
-    @test in_interval(exact_eigs[2], box0)
 
-    # Rohn: symmetric matrix with nonzero radius
-    A1 = LinearAlgebra.Symmetric(interval.([1.0 0.5; 0.5 2.0], 0.1; format = :midpoint))
-    box1 = eigenbox(A1)
-    @test in_interval(exact_eigs[1], box1)
-    @test in_interval(exact_eigs[2], box1)
-
-    # Hertz gives tighter bounds than Rohn
-    box1h = eigenbox(A1, Hertz())
-    @test in_interval(exact_eigs[1], box1h)
-    @test in_interval(exact_eigs[2], box1h)
-    @test inf(box1) ≤ inf(box1h)
-    @test sup(box1h) ≤ sup(box1)
-
-    # wider intervals
-    A2 = LinearAlgebra.Symmetric(interval.([1.0 0.5; 0.5 2.0], 0.3; format = :midpoint))
-    box2 = eigenbox(A2)
-    box2h = eigenbox(A2, Hertz())
-    @test in_interval(exact_eigs[1], box2)
-    @test in_interval(exact_eigs[2], box2)
-    @test inf(box2) ≤ inf(box2h)
-    @test sup(box2h) ≤ sup(box2)
-
-    # general (non-symmetric) matrix
-    M = [0.0 -1.0; 2.0 -0.5]
-    A3 = interval.(M, 0.5; format = :midpoint)
-    box3 = eigenbox(A3)
-    mid_eigs = LinearAlgebra.eigvals(M)
-    for λ in mid_eigs
-        @test in_interval(real(λ), real(box3))
-        @test in_interval(imag(λ), imag(box3))
-    end
-
-    # 3×3 symmetric
-    S3 = LinearAlgebra.Symmetric(interval.([2.0 1.0 0.0; 1.0 3.0 1.0; 0.0 1.0 4.0], 0.1; format = :midpoint))
-    exact3 = LinearAlgebra.eigvals(LinearAlgebra.Symmetric(mid.(S3)))
-    box3s = eigenbox(S3)
-    for λ in exact3
-        @test in_interval(λ, box3s)
-    end
-end
-
-@testset "Eigen fallback to eigenbox" begin
     # small radius: contraction mapping succeeds, tight individual bounds
     A_small = interval.([1.0 0.5; 0.5 2.0])
     r_small = LinearAlgebra.eigen(A_small)
-    exact_eigs = LinearAlgebra.eigvals(LinearAlgebra.Symmetric([1.0 0.5; 0.5 2.0]))
     @test in_interval(exact_eigs[1], real(r_small.values[1]))
     @test in_interval(exact_eigs[2], real(r_small.values[2]))
     @test !any(isnai, r_small.vectors)
 
-    # large radius: contraction mapping fails, eigenbox fallback
+    # moderate radius: contraction mapping may fail, fallback provides valid enclosure
+    A_mid = interval.([1.0 0.5; 0.5 2.0], 0.3; format = :midpoint)
+    r_mid = LinearAlgebra.eigen(A_mid)
+    @test in_interval(exact_eigs[1], real(r_mid.values[1]))
+    @test in_interval(exact_eigs[2], real(r_mid.values[2]))
+
+    # large radius: contraction mapping fails, eigenvalue enclosure fallback
     A_large = interval.([1.0 0.5; 0.5 2.0], 1.0; format = :midpoint)
     r_large = LinearAlgebra.eigen(A_large)
     @test in_interval(exact_eigs[1], real(r_large.values[1]))
     @test in_interval(exact_eigs[2], real(r_large.values[2]))
     @test all(isnai, r_large.vectors)
+
+    # general (non-symmetric) matrix with large radius
+    M = [0.0 -1.0; 2.0 -0.5]
+    mid_eigs = LinearAlgebra.eigvals(M)
+    A_gen = interval.(M, 0.5; format = :midpoint)
+    r_gen = LinearAlgebra.eigen(A_gen)
+    for λ in mid_eigs
+        @test in_interval(real(λ), real(r_gen.values[1]))
+        @test in_interval(imag(λ), imag(r_gen.values[1]))
+    end
+
+    # 3×3 symmetric with large radius
+    S3_mid = [2.0 1.0 0.0; 1.0 3.0 1.0; 0.0 1.0 4.0]
+    exact3 = LinearAlgebra.eigvals(LinearAlgebra.Symmetric(S3_mid))
+    A3 = interval.(S3_mid, 0.5; format = :midpoint)
+    r3 = LinearAlgebra.eigen(A3)
+    for λ in exact3
+        @test in_interval(λ, real(r3.values[1]))
+    end
 end
 
 @testset "Matrix multiplication" begin

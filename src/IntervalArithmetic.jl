@@ -238,15 +238,4 @@ bareinterval(::Type{BigFloat}, a::AbstractIrrational) = _unsafe_bareinterval(Big
     return :($x) # set body of the function to return the precomputed result
 end
 
-# eigenvalue enclosure types and functions (implementations in LinearAlgebra extension)
-
-abstract type AbstractIntervalEigenSolver end
-
-struct Rohn <: AbstractIntervalEigenSolver end
-struct Hertz <: AbstractIntervalEigenSolver end
-
-function eigenbox end
-
-    export eigenbox, AbstractIntervalEigenSolver, Rohn, Hertz
-
 end

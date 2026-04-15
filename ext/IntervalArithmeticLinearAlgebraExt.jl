@@ -158,8 +158,8 @@ function LinearAlgebra.eigen!(A::AbstractMatrix{<:RealOrComplexI}; permute::Bool
         _fold_conjugate!(eltype(A), true_λ, true_v)
         foreach(j -> true_v[:,j] .*= interval(ref_scale[j]), 1:n)
     else
-        # contraction mapping failed; fall back to eigenbox for eigenvalue bounds
-        box = IntervalArithmetic.eigenbox(A)
+        # contraction mapping failed; fall back to eigenvalue enclosure
+        box = _eigbox(A)
         true_λ = fill(box, n)
         true_v = fill(nai(eltype(v_bar)), n, n)
     end
@@ -186,34 +186,25 @@ function _fold_conjugate!(::Type{<:Interval}, λ, v)
     return λ, v
 end
 
-# eigenvalue enclosure (eigenbox)
-# The Orthants iterator, eigenbox (Rohn and Hertz methods), and the reduction of
+# eigenvalue enclosure for the eigen fallback
+# The Rohn method, Hertz method, Orthants iterator, and the reduction of
 # general/complex/Hermitian matrices to the symmetric case are derived from
 # IntervalLinearAlgebra.jl (https://github.com/JuliaIntervals/IntervalLinearAlgebra.jl)
 # Copyright (c) 2021 Luca Ferranti, MIT License.
 # See: Hladík, Daney, Tsigaridas, "Bounds on real eigenvalues and singular values
 # of interval matrices", APNUM 2013 (https://doi.org/10.1016/j.apnum.2012.09.003).
 
-struct Orthants
+struct _Orthants
     n::Int
 end
 
-Base.eltype(::Type{Orthants}) = Vector{Int}
-Base.length(O::Orthants) = 2^(O.n)
+Base.length(O::_Orthants) = 2^(O.n)
 
-function Base.iterate(O::Orthants, state=1)
+function Base.iterate(O::_Orthants, state=1)
     state > 2 ^ O.n && return nothing
     vec = -2*digits(state-1, base=2, pad=O.n) .+ 1
     return (vec, state+1)
 end
-
-function Base.getindex(O::Orthants, i::Int)
-    1 <= i <= length(O) || throw(BoundsError(O, i))
-    return -2*digits(i-1, base=2, pad=O.n) .+ 1
-end
-
-Base.firstindex(O::Orthants) = 1
-Base.lastindex(O::Orthants) = length(O)
 
 # rigorous eigmax/eigmin via interval eigvals
 
@@ -227,7 +218,9 @@ function _interval_eigmin(A::LinearAlgebra.Symmetric{<:Real, <:AbstractMatrix{<:
     return inf(minimum(real.(λs)))
 end
 
-function IntervalArithmetic.eigenbox(A::LinearAlgebra.Symmetric{Interval{T}, Matrix{Interval{T}}}, ::IntervalArithmetic.Rohn) where {T}
+# Rohn: fast eigenvalue enclosure for symmetric interval matrices
+
+function _eigbox_rohn(A::LinearAlgebra.Symmetric{Interval{T}, Matrix{Interval{T}}}) where {T}
     AΔ = LinearAlgebra.Symmetric(IntervalArithmetic.radius.(A))
     Ac = LinearAlgebra.Symmetric(mid.(A))
 
@@ -237,14 +230,16 @@ function IntervalArithmetic.eigenbox(A::LinearAlgebra.Symmetric{Interval{T}, Mat
     return interval(λmin - ρ, λmax + ρ)
 end
 
-function IntervalArithmetic.eigenbox(A::LinearAlgebra.Symmetric{Interval{T}, Matrix{Interval{T}}}, ::IntervalArithmetic.Hertz) where {T}
+# Hertz: exact hull for symmetric interval matrices (exponential complexity)
+
+function _eigbox_hertz(A::LinearAlgebra.Symmetric{Interval{T}, Matrix{Interval{T}}}) where {T}
     n = LinearAlgebra.checksquare(A)
     Amax = Matrix{T}(undef, n, n)
     Amin = Matrix{T}(undef, n, n)
 
     λmin = T(Inf)
     λmax = T(-Inf)
-    @inbounds for z in Orthants(n)
+    @inbounds for z in _Orthants(n)
         first(z) < 0 && continue
         for j in 1:n
             for i in 1:j
@@ -266,34 +261,35 @@ function IntervalArithmetic.eigenbox(A::LinearAlgebra.Symmetric{Interval{T}, Mat
     return interval(λmin, λmax)
 end
 
-function IntervalArithmetic.eigenbox(A::AbstractMatrix{Interval{T}},
-                  method::IntervalArithmetic.AbstractIntervalEigenSolver) where {T}
-    λ = IntervalArithmetic.eigenbox(LinearAlgebra.Symmetric(interval.(T, 0.5*(A + A'))), method)
+# eigenvalue enclosure for general and complex interval matrices (reduced to symmetric case)
+
+function _eigbox(A::LinearAlgebra.Symmetric{Interval{T}, Matrix{Interval{T}}}) where {T}
+    return _eigbox_rohn(A)
+end
+
+function _eigbox(A::AbstractMatrix{Interval{T}}) where {T}
+    λ = _eigbox(LinearAlgebra.Symmetric(interval.(T, 0.5*(A + A'))))
 
     n = size(A, 1)
     S = 0.5*(A - A')
-    μ = IntervalArithmetic.eigenbox(LinearAlgebra.Symmetric(interval.(T, [zeros(Interval{T}, n, n) S'; S zeros(Interval{T}, n, n)])), method)
+    μ = _eigbox(LinearAlgebra.Symmetric(interval.(T, [zeros(Interval{T}, n, n) S'; S zeros(Interval{T}, n, n)])))
 
     return λ + μ*im
 end
 
-function IntervalArithmetic.eigenbox(M::AbstractMatrix{Complex{Interval{T}}},
-                  method::IntervalArithmetic.AbstractIntervalEigenSolver) where {T}
+function _eigbox(M::AbstractMatrix{Complex{Interval{T}}}) where {T}
     A = real.(M)
     B = imag.(M)
-    λ = IntervalArithmetic.eigenbox(LinearAlgebra.Symmetric(interval.(T, 0.5*[A+A' B'-B; B-B' A+A'])), method)
-    μ = IntervalArithmetic.eigenbox(LinearAlgebra.Symmetric(interval.(T, 0.5*[B+B' A-A'; A'-A B+B'])), method)
+    λ = _eigbox(LinearAlgebra.Symmetric(interval.(T, 0.5*[A+A' B'-B; B-B' A+A'])))
+    μ = _eigbox(LinearAlgebra.Symmetric(interval.(T, 0.5*[B+B' A-A'; A'-A B+B'])))
     return λ + μ*im
 end
 
-function IntervalArithmetic.eigenbox(M::LinearAlgebra.Hermitian{Complex{Interval{T}}, Matrix{Complex{Interval{T}}}},
-                  method::IntervalArithmetic.AbstractIntervalEigenSolver) where {T}
+function _eigbox(M::LinearAlgebra.Hermitian{Complex{Interval{T}}, Matrix{Complex{Interval{T}}}}) where {T}
     A = real(M)
     B = imag(M)
-    return IntervalArithmetic.eigenbox(LinearAlgebra.Symmetric([A B'; B A]), method)
+    return _eigbox(LinearAlgebra.Symmetric([A B'; B A]))
 end
-
-IntervalArithmetic.eigenbox(A) = IntervalArithmetic.eigenbox(A, IntervalArithmetic.Rohn())
 
 # matrix inversion
 # note: use the contraction mapping theorem, only works when the entries of A have small radii
