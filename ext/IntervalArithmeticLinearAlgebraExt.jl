@@ -158,7 +158,9 @@ function LinearAlgebra.eigen!(A::AbstractMatrix{<:RealOrComplexI}; permute::Bool
         _fold_conjugate!(eltype(A), true_λ, true_v)
         foreach(j -> true_v[:,j] .*= interval(ref_scale[j]), 1:n)
     else
-        true_λ = fill(nai(eltype(λ_bar)), n)
+        # contraction mapping failed; fall back to eigenbox for eigenvalue bounds
+        box = IntervalArithmetic.eigenbox(A)
+        true_λ = fill(box, n)
         true_v = fill(nai(eltype(v_bar)), n, n)
     end
     _ensure_ng_flag!(true_v, all(isguaranteed, A))
@@ -183,6 +185,109 @@ function _fold_conjugate!(::Type{<:Interval}, λ, v)
     end
     return λ, v
 end
+
+# eigenvalue enclosure (eigenbox)
+
+struct Orthants
+    n::Int
+end
+
+Base.eltype(::Type{Orthants}) = Vector{Int}
+Base.length(O::Orthants) = 2^(O.n)
+
+function Base.iterate(O::Orthants, state=1)
+    state > 2 ^ O.n && return nothing
+    vec = -2*digits(state-1, base=2, pad=O.n) .+ 1
+    return (vec, state+1)
+end
+
+function Base.getindex(O::Orthants, i::Int)
+    1 <= i <= length(O) || throw(BoundsError(O, i))
+    return -2*digits(i-1, base=2, pad=O.n) .+ 1
+end
+
+Base.firstindex(O::Orthants) = 1
+Base.lastindex(O::Orthants) = length(O)
+
+# rigorous eigmax/eigmin via interval eigvals
+
+function _interval_eigmax(A::LinearAlgebra.Symmetric{<:Real, <:AbstractMatrix{<:Real}})
+    λs = LinearAlgebra.eigvals(LinearAlgebra.Symmetric(interval.(A)))
+    return sup(maximum(real.(λs)))
+end
+
+function _interval_eigmin(A::LinearAlgebra.Symmetric{<:Real, <:AbstractMatrix{<:Real}})
+    λs = LinearAlgebra.eigvals(LinearAlgebra.Symmetric(interval.(A)))
+    return inf(minimum(real.(λs)))
+end
+
+function IntervalArithmetic.eigenbox(A::LinearAlgebra.Symmetric{Interval{T}, Matrix{Interval{T}}}, ::IntervalArithmetic.Rohn) where {T}
+    AΔ = LinearAlgebra.Symmetric(IntervalArithmetic.radius.(A))
+    Ac = LinearAlgebra.Symmetric(mid.(A))
+
+    ρ = _interval_eigmax(AΔ)
+    λmax = _interval_eigmax(Ac)
+    λmin = _interval_eigmin(Ac)
+    return interval(λmin - ρ, λmax + ρ)
+end
+
+function IntervalArithmetic.eigenbox(A::LinearAlgebra.Symmetric{Interval{T}, Matrix{Interval{T}}}, ::IntervalArithmetic.Hertz) where {T}
+    n = LinearAlgebra.checksquare(A)
+    Amax = Matrix{T}(undef, n, n)
+    Amin = Matrix{T}(undef, n, n)
+
+    λmin = T(Inf)
+    λmax = T(-Inf)
+    @inbounds for z in Orthants(n)
+        first(z) < 0 && continue
+        for j in 1:n
+            for i in 1:j
+                if z[i] == z[j]
+                    Amax[i, j] = sup(A[i, j])
+                    Amin[i, j] = inf(A[i, j])
+                else
+                    Amax[i, j] = inf(A[i, j])
+                    Amin[i, j] = sup(A[i, j])
+                end
+            end
+        end
+
+        candmax = _interval_eigmax(LinearAlgebra.Symmetric(Amax))
+        candmin = _interval_eigmin(LinearAlgebra.Symmetric(Amin))
+        λmin = min(λmin, candmin)
+        λmax = max(λmax, candmax)
+    end
+    return interval(λmin, λmax)
+end
+
+function IntervalArithmetic.eigenbox(A::AbstractMatrix{Interval{T}},
+                  method::IntervalArithmetic.AbstractIntervalEigenSolver) where {T}
+    λ = IntervalArithmetic.eigenbox(LinearAlgebra.Symmetric(interval.(T, 0.5*(A + A'))), method)
+
+    n = size(A, 1)
+    S = 0.5*(A - A')
+    μ = IntervalArithmetic.eigenbox(LinearAlgebra.Symmetric(interval.(T, [zeros(Interval{T}, n, n) S'; S zeros(Interval{T}, n, n)])), method)
+
+    return λ + μ*im
+end
+
+function IntervalArithmetic.eigenbox(M::AbstractMatrix{Complex{Interval{T}}},
+                  method::IntervalArithmetic.AbstractIntervalEigenSolver) where {T}
+    A = real.(M)
+    B = imag.(M)
+    λ = IntervalArithmetic.eigenbox(LinearAlgebra.Symmetric(interval.(T, 0.5*[A+A' B'-B; B-B' A+A'])), method)
+    μ = IntervalArithmetic.eigenbox(LinearAlgebra.Symmetric(interval.(T, 0.5*[B+B' A-A'; A'-A B+B'])), method)
+    return λ + μ*im
+end
+
+function IntervalArithmetic.eigenbox(M::LinearAlgebra.Hermitian{Complex{Interval{T}}, Matrix{Complex{Interval{T}}}},
+                  method::IntervalArithmetic.AbstractIntervalEigenSolver) where {T}
+    A = real(M)
+    B = imag(M)
+    return IntervalArithmetic.eigenbox(LinearAlgebra.Symmetric([A B'; B A]), method)
+end
+
+IntervalArithmetic.eigenbox(A) = IntervalArithmetic.eigenbox(A, IntervalArithmetic.Rohn())
 
 # matrix inversion
 # note: use the contraction mapping theorem, only works when the entries of A have small radii
