@@ -62,9 +62,24 @@ end
 
 # matrix eigenvalues
 
-function LinearAlgebra.eigvals!(A::AbstractMatrix{<:Interval}; permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby, kwargs...)
+if isdefined(LinearAlgebra, :Algorithm)
+    struct IntervalEigen <: LinearAlgebra.Algorithm end
+else
+    struct IntervalEigen end
+end
+
+# Julia ≥ 1.12: override default_eigen_alg so that the Symmetric/Hermitian eigvals/eigen
+# paths pass IntervalEigen() instead of a LAPACK algorithm.
+if isdefined(LinearAlgebra, :default_eigen_alg)
+    LinearAlgebra.default_eigen_alg(::Union{
+        LinearAlgebra.Symmetric{<:RealIntervalType},
+        LinearAlgebra.Symmetric{<:Complex{<:RealIntervalType}},
+        LinearAlgebra.Hermitian{<:RealIntervalType},
+        LinearAlgebra.Hermitian{<:Complex{<:RealIntervalType}}}) = IntervalEigen()
+end
+
+function LinearAlgebra.eigvals!(A::AbstractMatrix{<:Interval}; alg::IntervalEigen=IntervalEigen(), permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby)
     # note: this function does not overwrite `A`
-    # kwargs absorbs e.g. `alg` passed by Symmetric eigvals in Julia ≥ 1.12
     λ = _eigvals(A, permute, scale, sortby)
     isreal(λ) && return real(λ)
     _fold_conjugate!(λ)
@@ -72,7 +87,7 @@ function LinearAlgebra.eigvals!(A::AbstractMatrix{<:Interval}; permute::Bool=tru
     return λ
 end
 
-LinearAlgebra.eigvals!(A::AbstractMatrix{<:Complex{<:Interval}}; permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby, kwargs...) =
+LinearAlgebra.eigvals!(A::AbstractMatrix{<:Complex{<:Interval}}; alg::IntervalEigen=IntervalEigen(), permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby) =
     # note: this function does not overwrite `A`
     _eigvals(A, permute, scale, sortby)
 
