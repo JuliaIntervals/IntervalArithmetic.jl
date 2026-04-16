@@ -365,6 +365,19 @@ function LinearAlgebra.mul!(C::AbstractMatrix{<:RealOrComplexI}, A::AbstractVecO
     return _mul!(IntervalArithmetic.default_matmul(), C, A, B, α, β)
 end
 
+# disambiguate with LinearAlgebra methods for structured matrices. Needed only for Julia v1.10.
+const _StructuredMatrix = Union{LinearAlgebra.Bidiagonal, LinearAlgebra.Diagonal, LinearAlgebra.SymTridiagonal, LinearAlgebra.Tridiagonal}
+
+function LinearAlgebra.mul!(C::AbstractMatrix{<:RealOrComplexI}, A::AbstractMatrix, B::_StructuredMatrix, α::Number, β::Number)
+    size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
+    return _mul!(IntervalArithmetic.default_matmul(), C, A, B, α, β)
+end
+
+function LinearAlgebra.mul!(C::AbstractMatrix{<:RealOrComplexI}, A::_StructuredMatrix, B::AbstractMatrix, α::Number, β::Number)
+    size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
+    return _mul!(IntervalArithmetic.default_matmul(), C, A, B, α, β)
+end
+
 #
 
 LinearAlgebra.mul!(C::AbstractVecOrMat{<:RealOrComplexI}, A::AbstractMatrix{<:RealOrComplexI}, B::AbstractVecOrMat{<:RealOrComplexI}) =
