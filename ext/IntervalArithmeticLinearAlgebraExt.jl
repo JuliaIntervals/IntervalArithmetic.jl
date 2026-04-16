@@ -62,8 +62,9 @@ end
 
 # matrix eigenvalues
 
-function LinearAlgebra.eigvals!(A::AbstractMatrix{<:Interval}; permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby)
+function LinearAlgebra.eigvals!(A::AbstractMatrix{<:Interval}; permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby, kwargs...)
     # note: this function does not overwrite `A`
+    # kwargs absorbs e.g. `alg` passed by Symmetric eigvals in Julia ≥ 1.12
     λ = _eigvals(A, permute, scale, sortby)
     isreal(λ) && return real(λ)
     _fold_conjugate!(λ)
@@ -71,7 +72,7 @@ function LinearAlgebra.eigvals!(A::AbstractMatrix{<:Interval}; permute::Bool=tru
     return λ
 end
 
-LinearAlgebra.eigvals!(A::AbstractMatrix{<:Complex{<:Interval}}; permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby) =
+LinearAlgebra.eigvals!(A::AbstractMatrix{<:Complex{<:Interval}}; permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby, kwargs...) =
     # note: this function does not overwrite `A`
     _eigvals(A, permute, scale, sortby)
 
