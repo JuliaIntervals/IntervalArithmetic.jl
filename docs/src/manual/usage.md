@@ -152,6 +152,28 @@ and deal properly with the decorations of intervals.
 
 
 
+### Linear algebra
+
+Interval matrices support standard linear algebra operations from the `LinearAlgebra`
+standard library. The eigendecomposition (`eigen`, `eigvals`) uses several algorithms
+that can be selected via the `alg` keyword argument:
+
+- [`IntervalEigen`](@ref IntervalArithmetic.IntervalEigen) (default): tries the contraction mapping theorem first, falls back to the Rohn enclosure.
+- [`IntervalEigenContraction`](@ref IntervalArithmetic.IntervalEigenContraction): contraction mapping only.
+- [`IntervalEigenRohn`](@ref IntervalArithmetic.IntervalEigenRohn): Rohn eigenvalue enclosure.
+- [`IntervalEigenHertz`](@ref IntervalArithmetic.IntervalEigenHertz): Hertz exact hull (exponential complexity).
+
+All algorithms are subtypes of [`AbstractIntervalEigenAlg`](@ref IntervalArithmetic.AbstractIntervalEigenAlg).
+
+```@repl usage
+using LinearAlgebra
+A = interval.([1.0 0.5; 0.5 2.0])
+eigen(A)
+eigen(A; alg = IntervalEigenRohn())
+```
+
+
+
 ### Custom interval bounds type
 
 A `BareInterval{T}` or `Interval{T}` have the restriction `T <: Union{Rational,AbstractFloat}` which is the parametric type for the bounds of the interval. Supposing one wishes to use their own numeric type `MyNumType <: Union{Rational,AbstractFloat}`, they must provide their own arithmetic operations (with correct rounding!).
