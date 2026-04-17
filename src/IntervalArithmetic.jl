@@ -113,7 +113,52 @@ function configure_power(power::Symbol)
     return power
 end
 
-# algorithms are defined in the package extension for LinearAlgebra
+# eigendecomposition algorithm types
+
+"""
+    AbstractIntervalEigenAlg
+
+Abstract supertype for interval eigendecomposition algorithms.
+
+See also: [`IntervalEigen`](@ref), [`IntervalEigenContraction`](@ref),
+[`IntervalEigenRohn`](@ref), [`IntervalEigenHertz`](@ref).
+"""
+abstract type AbstractIntervalEigenAlg end
+
+"""
+    IntervalEigen
+
+Default eigendecomposition algorithm for interval matrices. Tries the contraction
+mapping theorem first (tight bounds when radii are small and eigenvalues are simple),
+and falls back to the Rohn eigenvalue enclosure if it fails.
+"""
+struct IntervalEigen <: AbstractIntervalEigenAlg end
+
+"""
+    IntervalEigenContraction
+
+Eigendecomposition via the contraction mapping theorem only. Returns `nai` if the
+contraction fails (e.g. when interval radii are too large).
+"""
+struct IntervalEigenContraction <: AbstractIntervalEigenAlg end
+
+"""
+    IntervalEigenRohn
+
+Rohn eigenvalue enclosure (fast, O(n³)). Returns a single interval enclosing all
+eigenvalues and `nai` eigenvectors. Valid for any interval radius.
+"""
+struct IntervalEigenRohn <: AbstractIntervalEigenAlg end
+
+"""
+    IntervalEigenHertz
+
+Hertz exact hull of eigenvalues (exponential O(2ⁿ) complexity). Returns a single
+interval enclosing all eigenvalues and `nai` eigenvectors.
+"""
+struct IntervalEigenHertz <: AbstractIntervalEigenAlg end
+
+export AbstractIntervalEigenAlg, IntervalEigen, IntervalEigenContraction, IntervalEigenRohn, IntervalEigenHertz
 
 """
     MatMulMode{T}
