@@ -60,9 +60,12 @@ function LinearAlgebra.opnormInf(A::AbstractMatrix{T}) where {T<:RealOrComplexI}
     return convert(Tnorm, nrm)
 end
 
-# matrix eigenvalues
+# matrix eigenvalues – algorithm types
+# Types are defined in IntervalArithmetic; we use them here for dispatch.
 
-function LinearAlgebra.eigvals!(A::AbstractMatrix{<:Interval}; permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby)
+# Algorithm types (IntervalArithmetic.IntervalEigen etc.) are used with explicit prefix below.
+
+function LinearAlgebra.eigvals!(A::AbstractMatrix{<:Interval}; alg::IntervalArithmetic.AbstractIntervalEigenAlg=IntervalArithmetic.IntervalEigen(), permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby)
     # note: this function does not overwrite `A`
     λ = _eigvals(A, permute, scale, sortby)
     isreal(λ) && return real(λ)
@@ -71,9 +74,27 @@ function LinearAlgebra.eigvals!(A::AbstractMatrix{<:Interval}; permute::Bool=tru
     return λ
 end
 
-LinearAlgebra.eigvals!(A::AbstractMatrix{<:Complex{<:Interval}}; permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby) =
+LinearAlgebra.eigvals!(A::AbstractMatrix{<:Complex{<:Interval}}; alg::IntervalArithmetic.AbstractIntervalEigenAlg=IntervalArithmetic.IntervalEigen(), permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby) =
     # note: this function does not overwrite `A`
     _eigvals(A, permute, scale, sortby)
+
+# More specific methods for Symmetric/Hermitian wrappers to take priority over
+# LinearAlgebra's methods on Julia ≥ 1.12 (which require alg::Algorithm).
+const _SymHermInterval = Union{
+    LinearAlgebra.Symmetric{<:RealIntervalType},
+    LinearAlgebra.Symmetric{<:Complex{<:RealIntervalType}},
+    LinearAlgebra.Hermitian{<:RealIntervalType},
+    LinearAlgebra.Hermitian{<:Complex{<:RealIntervalType}}}
+
+function LinearAlgebra.eigvals(A::_SymHermInterval; alg::IntervalArithmetic.AbstractIntervalEigenAlg=IntervalArithmetic.IntervalEigen(), sortby::Union{Function,Nothing}=nothing)
+    sb = sortby === nothing ? LinearAlgebra.eigsortby : sortby
+    return LinearAlgebra.eigvals!(Matrix(A); alg, permute=true, scale=true, sortby=sb)
+end
+
+function LinearAlgebra.eigvals!(A::_SymHermInterval; alg::IntervalArithmetic.AbstractIntervalEigenAlg=IntervalArithmetic.IntervalEigen(), sortby::Union{Function,Nothing}=nothing)
+    sb = sortby === nothing ? LinearAlgebra.eigsortby : sortby
+    return LinearAlgebra.eigvals!(Matrix(A); alg, permute=true, scale=true, sortby=sb)
+end
 
 function _eigvals(A, permute, scale, sortby)
     # Gershgorin circle theorem
@@ -124,13 +145,45 @@ LinearAlgebra.det(A::AbstractMatrix{<:Interval}) = real(reduce(*, LinearAlgebra.
 LinearAlgebra.det(A::AbstractMatrix{<:Complex{<:Interval}}) = reduce(*, LinearAlgebra.eigvals(A))
 
 # matrix eigendecomposition
-# note: use the contraction mapping theorem, only works when the entries of A have small radii, and A has simple eigenvalues
 
-LinearAlgebra.eigen(A::AbstractMatrix{<:RealOrComplexI}; permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby) =
-    LinearAlgebra.eigen!(A; permute, scale, sortby)
+LinearAlgebra.eigen(A::AbstractMatrix{<:RealOrComplexI}; alg::IntervalArithmetic.AbstractIntervalEigenAlg=IntervalArithmetic.IntervalEigen(), permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby) =
+    LinearAlgebra.eigen!(A; alg, permute, scale, sortby)
 
-function LinearAlgebra.eigen!(A::AbstractMatrix{<:RealOrComplexI}; permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby)
+LinearAlgebra.eigen(A::_SymHermInterval; alg::IntervalArithmetic.AbstractIntervalEigenAlg=IntervalArithmetic.IntervalEigen(), permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby) =
+    LinearAlgebra.eigen!(A; alg, permute, scale, sortby)
+
+function LinearAlgebra.eigen!(A::AbstractMatrix{<:RealOrComplexI}; alg::IntervalArithmetic.AbstractIntervalEigenAlg=IntervalArithmetic.IntervalEigen(), permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby)
     # note: this function does not overwrite `A`
+    true_λ, true_v = _eigen_dispatch(alg, A, permute, scale, sortby)
+    _ensure_ng_flag!(true_v, all(isguaranteed, A))
+    return LinearAlgebra.Eigen(true_λ, true_v)
+end
+
+# IntervalEigen (default): try contraction mapping, fall back to Rohn on failure
+function _eigen_dispatch(::IntervalArithmetic.IntervalEigen, A, permute, scale, sortby)
+    contraction_ok, true_λ, true_v = _eigen_contraction(A, permute, scale, sortby)
+    contraction_ok && return true_λ, true_v
+    return _eigen_eigbox(A, _eigbox_rohn)
+end
+
+# IntervalEigenContraction: contraction mapping only (nai if it fails)
+function _eigen_dispatch(::IntervalArithmetic.IntervalEigenContraction, A, permute, scale, sortby)
+    contraction_ok, true_λ, true_v = _eigen_contraction(A, permute, scale, sortby)
+    contraction_ok && return true_λ, true_v
+    n = LinearAlgebra.checksquare(A)
+    T = eltype(A)
+    return fill(nai(T), n), fill(nai(T), n, n)
+end
+
+# IntervalEigenRohn: Rohn eigenvalue enclosure
+_eigen_dispatch(::IntervalArithmetic.IntervalEigenRohn, A, permute, scale, sortby) = _eigen_eigbox(A, _eigbox_rohn)
+
+# IntervalEigenHertz: Hertz exact hull
+_eigen_dispatch(::IntervalArithmetic.IntervalEigenHertz, A, permute, scale, sortby) = _eigen_eigbox(A, _eigbox_hertz)
+
+# shared: contraction mapping theorem (tight bounds when radii are small and eigenvalues are simple)
+
+function _eigen_contraction(A, permute, scale, sortby)
     λ, v = LinearAlgebra.eigen!(mid.(A); permute, scale, sortby)
     n = length(λ)
     inds = [argmax(i -> abs(v[i,j]), 1:n) for j ∈ 1:n]
@@ -157,12 +210,21 @@ function LinearAlgebra.eigen!(A::AbstractMatrix{<:RealOrComplexI}; permute::Bool
         true_v = interval.(v, r; format = :midpoint)
         _fold_conjugate!(eltype(A), true_λ, true_v)
         foreach(j -> true_v[:,j] .*= interval(ref_scale[j]), 1:n)
+        return true, true_λ, true_v
     else
-        true_λ = fill(nai(eltype(λ_bar)), n)
-        true_v = fill(nai(eltype(v_bar)), n, n)
+        return false, nothing, nothing
     end
-    _ensure_ng_flag!(true_v, all(isguaranteed, A))
-    return LinearAlgebra.Eigen(true_λ, true_v)
+end
+
+# shared: eigenvalue enclosure via eigbox (returns single enclosing interval for all eigenvalues, nai eigenvectors)
+
+function _eigen_eigbox(A, eigbox_method)
+    n = LinearAlgebra.checksquare(A)
+    box = _eigbox(A, eigbox_method)
+    v_bar = interval(mid.(A))  # just need the element type
+    true_λ = fill(box, n)
+    true_v = fill(nai(eltype(v_bar)), n, n)
+    return true_λ, true_v
 end
 
 _fold_conjugate!(::Type{<:ComplexI}, λ, v) = (λ, v)
@@ -182,6 +244,111 @@ function _fold_conjugate!(::Type{<:Interval}, λ, v)
         end
     end
     return λ, v
+end
+
+# eigenvalue enclosure for the eigen fallback
+# The Rohn method, Hertz method, Orthants iterator, and the reduction of
+# general/complex/Hermitian matrices to the symmetric case are derived from
+# IntervalLinearAlgebra.jl (https://github.com/JuliaIntervals/IntervalLinearAlgebra.jl)
+# Copyright (c) 2021 Luca Ferranti, MIT License.
+# See: Hladík, Daney, Tsigaridas, "Bounds on real eigenvalues and singular values
+# of interval matrices", APNUM 2013 (https://doi.org/10.1016/j.apnum.2012.09.003).
+
+struct _Orthants
+    n::Int
+end
+
+Base.length(O::_Orthants) = 2^(O.n)
+
+function Base.iterate(O::_Orthants, state=1)
+    state > 2 ^ O.n && return nothing
+    vec = -2*digits(state-1, base=2, pad=O.n) .+ 1
+    return (vec, state+1)
+end
+
+# rigorous eigmax/eigmin via interval eigvals
+
+function _interval_eigmax(A::LinearAlgebra.Symmetric{<:Real, <:AbstractMatrix{<:Real}})
+    λs = LinearAlgebra.eigvals(LinearAlgebra.Symmetric(interval.(A)))
+    return sup(maximum(real.(λs)))
+end
+
+function _interval_eigmin(A::LinearAlgebra.Symmetric{<:Real, <:AbstractMatrix{<:Real}})
+    λs = LinearAlgebra.eigvals(LinearAlgebra.Symmetric(interval.(A)))
+    return inf(minimum(real.(λs)))
+end
+
+# Rohn: fast eigenvalue enclosure for symmetric interval matrices
+
+function _eigbox_rohn(A::LinearAlgebra.Symmetric{Interval{T}, Matrix{Interval{T}}}) where {T}
+    AΔ = LinearAlgebra.Symmetric(IntervalArithmetic.radius.(A))
+    Ac = LinearAlgebra.Symmetric(mid.(A))
+
+    ρ = _interval_eigmax(AΔ)
+    λmax = _interval_eigmax(Ac)
+    λmin = _interval_eigmin(Ac)
+    return interval(λmin - ρ, λmax + ρ)
+end
+
+# Hertz: exact hull for symmetric interval matrices (exponential complexity)
+
+function _eigbox_hertz(A::LinearAlgebra.Symmetric{Interval{T}, Matrix{Interval{T}}}) where {T}
+    n = LinearAlgebra.checksquare(A)
+    Amax = Matrix{T}(undef, n, n)
+    Amin = Matrix{T}(undef, n, n)
+
+    λmin = T(Inf)
+    λmax = T(-Inf)
+    @inbounds for z in _Orthants(n)
+        first(z) < 0 && continue
+        for j in 1:n
+            for i in 1:j
+                if z[i] == z[j]
+                    Amax[i, j] = sup(A[i, j])
+                    Amin[i, j] = inf(A[i, j])
+                else
+                    Amax[i, j] = inf(A[i, j])
+                    Amin[i, j] = sup(A[i, j])
+                end
+            end
+        end
+
+        candmax = _interval_eigmax(LinearAlgebra.Symmetric(Amax))
+        candmin = _interval_eigmin(LinearAlgebra.Symmetric(Amin))
+        λmin = min(λmin, candmin)
+        λmax = max(λmax, candmax)
+    end
+    return interval(λmin, λmax)
+end
+
+# eigenvalue enclosure for general and complex interval matrices (reduced to symmetric case)
+
+function _eigbox(A::LinearAlgebra.Symmetric{Interval{T}, Matrix{Interval{T}}}, method=_eigbox_rohn) where {T}
+    return method(A)
+end
+
+function _eigbox(A::AbstractMatrix{Interval{T}}, method=_eigbox_rohn) where {T}
+    λ = _eigbox(LinearAlgebra.Symmetric(interval.(T, 0.5*(A + A'))), method)
+
+    n = size(A, 1)
+    S = 0.5*(A - A')
+    μ = _eigbox(LinearAlgebra.Symmetric(interval.(T, [zeros(Interval{T}, n, n) S'; S zeros(Interval{T}, n, n)])), method)
+
+    return λ + μ*im
+end
+
+function _eigbox(M::AbstractMatrix{Complex{Interval{T}}}, method=_eigbox_rohn) where {T}
+    A = real.(M)
+    B = imag.(M)
+    λ = _eigbox(LinearAlgebra.Symmetric(interval.(T, 0.5*[A+A' B'-B; B-B' A+A'])), method)
+    μ = _eigbox(LinearAlgebra.Symmetric(interval.(T, 0.5*[B+B' A-A'; A'-A B+B'])), method)
+    return λ + μ*im
+end
+
+function _eigbox(M::LinearAlgebra.Hermitian{Complex{Interval{T}}, Matrix{Complex{Interval{T}}}}, method=_eigbox_rohn) where {T}
+    A = real(M)
+    B = imag(M)
+    return _eigbox(LinearAlgebra.Symmetric([A B'; B A]), method)
 end
 
 # matrix inversion
@@ -238,6 +405,19 @@ function LinearAlgebra.mul!(C::AbstractVector{<:RealOrComplexI}, A::AbstractVecO
 end
 
 function LinearAlgebra.mul!(C::AbstractMatrix{<:RealOrComplexI}, A::AbstractVecOrMat, B::AbstractVecOrMat, α::Number, β::Number)
+    size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
+    return _mul!(IntervalArithmetic.default_matmul(), C, A, B, α, β)
+end
+
+# disambiguate with LinearAlgebra methods for structured matrices. Needed only for Julia v1.10.
+const _StructuredMatrix = Union{LinearAlgebra.Bidiagonal, LinearAlgebra.Diagonal, LinearAlgebra.SymTridiagonal, LinearAlgebra.Tridiagonal}
+
+function LinearAlgebra.mul!(C::AbstractMatrix{<:RealOrComplexI}, A::AbstractMatrix, B::_StructuredMatrix, α::Number, β::Number)
+    size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
+    return _mul!(IntervalArithmetic.default_matmul(), C, A, B, α, β)
+end
+
+function LinearAlgebra.mul!(C::AbstractMatrix{<:RealOrComplexI}, A::_StructuredMatrix, B::AbstractMatrix, α::Number, β::Number)
     size(A, 2) == size(B, 1) || return throw(DimensionMismatch("The number of columns of A must match the number of rows of B."))
     return _mul!(IntervalArithmetic.default_matmul(), C, A, B, α, β)
 end
