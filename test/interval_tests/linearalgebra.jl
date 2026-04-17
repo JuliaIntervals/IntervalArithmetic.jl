@@ -49,6 +49,29 @@ end
     for λ in exact3
         @test in_interval(λ, real(r3.values[1]))
     end
+
+    # explicit algorithm selection: IntervalEigenContraction on small-radius matrix
+    r_contraction = LinearAlgebra.eigen(A_small; alg = IntervalEigenContraction())
+    @test in_interval(exact_eigs[1], real(r_contraction.values[1]))
+    @test in_interval(exact_eigs[2], real(r_contraction.values[2]))
+    @test !any(isnai, r_contraction.vectors)
+
+    # explicit algorithm selection: IntervalEigenContraction on large-radius matrix → nai
+    r_contraction_large = LinearAlgebra.eigen(A_large; alg = IntervalEigenContraction())
+    @test all(isnai, r_contraction_large.values)
+    @test all(isnai, r_contraction_large.vectors)
+
+    # explicit algorithm selection: IntervalEigenRohn
+    r_rohn = LinearAlgebra.eigen(A_large; alg = IntervalEigenRohn())
+    @test in_interval(exact_eigs[1], real(r_rohn.values[1]))
+    @test in_interval(exact_eigs[2], real(r_rohn.values[2]))
+    @test all(isnai, r_rohn.vectors)
+
+    # explicit algorithm selection: IntervalEigenHertz
+    r_hertz = LinearAlgebra.eigen(A_large; alg = IntervalEigenHertz())
+    @test in_interval(exact_eigs[1], real(r_hertz.values[1]))
+    @test in_interval(exact_eigs[2], real(r_hertz.values[2]))
+    @test all(isnai, r_hertz.vectors)
 end
 
 @testset "Matrix multiplication" begin
