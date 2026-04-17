@@ -146,8 +146,8 @@ struct IntervalEigen <: AbstractIntervalEigenAlg end
 """
     IntervalEigenContraction
 
-Eigendecomposition via the contraction mapping theorem only. Returns `nai` if the
-contraction fails (e.g. when interval radii are too large).
+Eigendecomposition via the contraction mapping theorem only. Returns [`nai`](@ref)
+if the contraction fails (e.g. when interval radii are too large).
 """
 struct IntervalEigenContraction <: AbstractIntervalEigenAlg end
 
@@ -155,7 +155,7 @@ struct IntervalEigenContraction <: AbstractIntervalEigenAlg end
     IntervalEigenRohn
 
 Rohn eigenvalue enclosure (fast, O(n³)). Returns a single interval enclosing all
-eigenvalues and `nai` eigenvectors. Valid for any interval radius.
+eigenvalues and [`nai`](@ref) eigenvectors. Valid for any interval radius.
 """
 struct IntervalEigenRohn <: AbstractIntervalEigenAlg end
 
@@ -163,7 +163,7 @@ struct IntervalEigenRohn <: AbstractIntervalEigenAlg end
     IntervalEigenHertz
 
 Hertz exact hull of eigenvalues (exponential O(2ⁿ) complexity). Returns a single
-interval enclosing all eigenvalues and `nai` eigenvectors.
+interval enclosing all eigenvalues and [`nai`](@ref) eigenvectors.
 """
 struct IntervalEigenHertz <: AbstractIntervalEigenAlg end
 
