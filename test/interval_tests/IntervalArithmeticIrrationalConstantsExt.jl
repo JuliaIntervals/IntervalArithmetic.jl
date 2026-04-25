@@ -19,7 +19,7 @@ import IrrationalConstants
         end
 
         for T ∈ InteractiveUtils.subtypes(Signed)
-            @test in_interval(irr, interval(Rational{T}, irr)) broken=(irr == IrrationalConstants.invsqrt2π && T == Int8 && VERSION ≤ v"13")
+            @test in_interval(irr, interval(Rational{T}, irr)) broken=(irr == IrrationalConstants.invsqrt2π && T == Int8 && VERSION ≤ v"1.13")
         end
 
         # Negative irrationals obviously lack unsigned representations
