@@ -40,7 +40,7 @@ function LinearAlgebra.opnorm1(A::AbstractMatrix{T}) where {T<:RealOrComplexI}
     return convert(Tnorm, nrm)
 end
 
-LinearAlgebra.opnorm2(A::AbstractMatrix{T}) where {T<:RealOrComplexI} = sqrt(maximum(eigvals(adjoint(A)*A)))
+LinearAlgebra.opnorm2(A::AbstractMatrix{T}) where {T<:RealOrComplexI} = sqrt(maximum(abs, LinearAlgebra.eigvals(adjoint(A)*A)))
 
 function LinearAlgebra.opnormInf(A::AbstractMatrix{T}) where {T<:RealOrComplexI}
     LinearAlgebra.require_one_based_indexing(A)
