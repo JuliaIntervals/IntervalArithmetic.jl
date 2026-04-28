@@ -227,8 +227,8 @@ else
     _exact_pow(::Integer, ::Integer) = throw(ArgumentError("`checked_pow` requires at least Julia 1.11"))
 end
 
-# Base.literal_pow(::typeof(^), x::ExactReal{<:Integer}, ::Val{p}) where {p} =
-#     x ^ p
+Base.literal_pow(::typeof(^), x::ExactReal, ::Val{p}) where {p} =
+    x ^ exact(p)
 Base.:^(x::ExactReal, p::Integer) = x.value ^ p # by-pass default integer power behaviour
 
 #
