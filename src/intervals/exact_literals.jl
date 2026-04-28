@@ -174,6 +174,10 @@ _str_repr(x::ExactReal{T}) where {T<:AbstractFloat} =
 
 # always exact
 
+Base.://(x::ExactReal{<:Union{Integer,Rational}}, y::ExactReal{<:Union{Integer,Rational}}) = exact(x.value // y.value)
+Base.://(x::ExactReal{<:Union{Integer,Rational}}, y::Union{Integer,Rational}) = x.value // y
+Base.://(x::Union{Integer,Rational}, y::ExactReal{<:Union{Integer,Rational}}) = x // y.value
+
 Base.:-(x::ExactReal{<:Union{Float16,Float32,Float64,BigFloat}}) = exact(-x.value)
 Base.:-(x::ExactReal{<:Rational}) = exact(-x.value)
 Base.:-(x::ExactReal{<:Integer}) = exact(Base.checked_neg(x.value))
