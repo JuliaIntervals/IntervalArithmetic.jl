@@ -15,8 +15,8 @@ Each keyword argument sets a specific configuration option:
 ```@repl
 using IntervalArithmetic
 x = interval(π)
-configure(; pow = :fast)
+configure(; power = :fast)
 radius(x^2)
-configure(pow = :slow)
+configure(; power = :slow)
 radius(x^2)
 ```
