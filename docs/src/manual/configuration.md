@@ -1,9 +1,9 @@
 # Configuration options
 
-The IntervalArithmetic.jl package provides a [`configure`](@ref) function that allows users to fine-tune certain aspects of the package’s behavior. This is particularly useful for controlling trade-offs between computational speed and rigor.
+The IntervalArithmetic.jl package provides a [`configure`](@ref) function (not exported) that allows users to fine-tune certain aspects of the package’s behavior. This is particularly useful for controlling trade-offs between computational speed and rigor.
 
 !!! warning
-    The [`configure`](@ref) function redines methods that alter the internal behavior of IntervalArithmetic. This persists across the current Julia session and affect all subsequent interval arithmetic computations.
+    The [`configure`](@ref) function redefines methods that alter the internal behavior of IntervalArithmetic. This persists across the current Julia session and affect all subsequent interval arithmetic computations.
 
 Each keyword argument sets a specific configuration option:
 - `numtype`: control the default numerical type used to represent the bounds of the intervals.
@@ -15,8 +15,8 @@ Each keyword argument sets a specific configuration option:
 ```@repl
 using IntervalArithmetic
 x = interval(π)
-configure(; power = :fast)
+IntervalArithmetic.configure(; power = :fast) # default
 radius(x^2)
-configure(; power = :slow)
+IntervalArithmetic.configure(; power = :slow)
 radius(x^2)
 ```
