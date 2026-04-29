@@ -46,6 +46,36 @@ end
     @test all(isequal_interval.(extended_div(interval(-2.0, -1.0), interval(-2.0, 4.0)), (interval(-Inf, -0.25), interval(0.5, Inf))))
     @test all(isequal_interval.(extended_div(interval(0.0, 0.0), interval(-1.0, 1.0)), (entireinterval(c), emptyinterval(c))))
 
+    # IEEE 1788-2015 §10.5.5 mulRevToPair: decorations on extended_div outputs.
+    # When the numerator and denominator are nonempty and 0 ∉ denominator, the
+    # first output is decorated like normal division c/b and the second is
+    # empty/trv. In all other cases both outputs are decorated trv.
+    let r = extended_div(interval(-1.0, 1.0), interval(3.0, 4.0))  # 0 ∈ x, 0 ∉ y → normal division
+        @test decoration(r[1]) == com
+        @test decoration(r[2]) == trv
+    end
+    let r = extended_div(interval(-30.0, -15.0), interval(-5.0, -3.0))  # 0 ∉ x, 0 ∉ y → normal division
+        @test decoration(r[1]) == com
+        @test decoration(r[2]) == trv
+    end
+    let r = extended_div(interval(1.0, 2.0), interval(-4.0, 4.0))  # 0 ∈ interior(y) → trv
+        @test decoration(r[1]) == trv
+        @test decoration(r[2]) == trv
+    end
+    let r = extended_div(interval(-1.0, 1.0), interval(-1.0, 1.0))  # 0 ∈ x, 0 ∈ y → trv
+        @test decoration(r[1]) == trv
+        @test decoration(r[2]) == trv
+    end
+    let r = extended_div(interval(1.0, 2.0), interval(0.0, 1.0))  # 0 on boundary of y → trv
+        @test decoration(r[1]) == trv
+        @test decoration(r[2]) == trv
+    end
+    # Decoration of input is honoured (cannot exceed it) even when 0 ∉ y.
+    let r = extended_div(interval(-1.0, 1.0, trv), interval(3.0, 4.0))
+        @test decoration(r[1]) == trv
+        @test decoration(r[2]) == trv
+    end
+
     @test isequal_interval(interval(0, Inf) * interval(-1, Inf), interval(-Inf, Inf))
 
     result = interval(1.1) * interval(2) + interval(3)
