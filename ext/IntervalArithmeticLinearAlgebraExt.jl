@@ -60,10 +60,7 @@ function LinearAlgebra.opnormInf(A::AbstractMatrix{T}) where {T<:RealOrComplexI}
     return convert(Tnorm, nrm)
 end
 
-# matrix eigenvalues – algorithm types
-# Types are defined in IntervalArithmetic; we use them here for dispatch.
-
-# Algorithm types (IntervalArithmetic.IntervalEigen etc.) are used with explicit prefix below.
+# matrix eigenvalues
 
 function LinearAlgebra.eigvals!(A::AbstractMatrix{<:Interval}; alg::IntervalArithmetic.AbstractIntervalEigenAlg=IntervalArithmetic.IntervalEigen(), permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby)
     # note: this function does not overwrite `A`
@@ -154,32 +151,26 @@ LinearAlgebra.eigen(A::_SymHermInterval; alg::IntervalArithmetic.AbstractInterva
 
 function LinearAlgebra.eigen!(A::AbstractMatrix{<:RealOrComplexI}; alg::IntervalArithmetic.AbstractIntervalEigenAlg=IntervalArithmetic.IntervalEigen(), permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=LinearAlgebra.eigsortby)
     # note: this function does not overwrite `A`
-    true_λ, true_v = _eigen_dispatch(alg, A, permute, scale, sortby)
+    true_λ, true_v = _eigen(alg, A, permute, scale, sortby)
     _ensure_ng_flag!(true_v, all(isguaranteed, A))
     return LinearAlgebra.Eigen(true_λ, true_v)
 end
 
 # IntervalEigen (default): try contraction mapping, fall back to Rohn on failure
-function _eigen_dispatch(::IntervalArithmetic.IntervalEigen, A, permute, scale, sortby)
+function _eigen(::IntervalArithmetic.IntervalEigen, A, permute, scale, sortby)
     contraction_ok, true_λ, true_v = _eigen_contraction(A, permute, scale, sortby)
     contraction_ok && return true_λ, true_v
-    return _eigen_eigbox(A, _eigbox_rohn)
+    return _eigen(IntervalArithmetic.IntervalEigenRohn(), A, permute, scale, sortby)
 end
 
 # IntervalEigenContraction: contraction mapping only (nai if it fails)
-function _eigen_dispatch(::IntervalArithmetic.IntervalEigenContraction, A, permute, scale, sortby)
+function _eigen(::IntervalArithmetic.IntervalEigenContraction, A, permute, scale, sortby)
     contraction_ok, true_λ, true_v = _eigen_contraction(A, permute, scale, sortby)
     contraction_ok && return true_λ, true_v
     n = LinearAlgebra.checksquare(A)
     T = eltype(A)
     return fill(nai(T), n), fill(nai(T), n, n)
 end
-
-# IntervalEigenRohn: Rohn eigenvalue enclosure
-_eigen_dispatch(::IntervalArithmetic.IntervalEigenRohn, A, permute, scale, sortby) = _eigen_eigbox(A, _eigbox_rohn)
-
-# IntervalEigenHertz: Hertz exact hull
-_eigen_dispatch(::IntervalArithmetic.IntervalEigenHertz, A, permute, scale, sortby) = _eigen_eigbox(A, _eigbox_hertz)
 
 # shared: contraction mapping theorem (tight bounds when radii are small and eigenvalues are simple)
 
@@ -218,9 +209,15 @@ end
 
 # shared: eigenvalue enclosure via eigbox (returns single enclosing interval for all eigenvalues, nai eigenvectors)
 
-function _eigen_eigbox(A, eigbox_method)
+function _eigen(
+    alg::Union{IntervalArithmetic.IntervalEigenHertz,IntervalArithmetic.IntervalEigenRohn},
+    A,
+    permute,
+    scale,
+    sortby,
+)
     n = LinearAlgebra.checksquare(A)
-    box = _eigbox(A, eigbox_method)
+    box = _eigbox(A, alg)
     v_bar = interval(mid.(A))  # just need the element type
     true_λ = fill(box, n)
     true_v = fill(nai(eltype(v_bar)), n, n)
@@ -280,7 +277,7 @@ end
 
 # Rohn: fast eigenvalue enclosure for symmetric interval matrices
 
-function _eigbox_rohn(A::LinearAlgebra.Symmetric{Interval{T}, Matrix{Interval{T}}}) where {T}
+function _eigbox(A::LinearAlgebra.Symmetric{Interval{T}, Matrix{Interval{T}}}, ::IntervalArithmetic.IntervalEigenRohn) where {T}
     AΔ = LinearAlgebra.Symmetric(IntervalArithmetic.radius.(A))
     Ac = LinearAlgebra.Symmetric(mid.(A))
 
@@ -292,7 +289,7 @@ end
 
 # Hertz: exact hull for symmetric interval matrices (exponential complexity)
 
-function _eigbox_hertz(A::LinearAlgebra.Symmetric{Interval{T}, Matrix{Interval{T}}}) where {T}
+function _eigbox(A::LinearAlgebra.Symmetric{Interval{T}, Matrix{Interval{T}}}, ::IntervalArithmetic.IntervalEigenHertz) where {T}
     n = LinearAlgebra.checksquare(A)
     Amax = Matrix{T}(undef, n, n)
     Amin = Matrix{T}(undef, n, n)
