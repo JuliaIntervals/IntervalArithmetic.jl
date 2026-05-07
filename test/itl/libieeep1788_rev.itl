@@ -1,0 +1,1003 @@
+/*
+
+Unit tests from libieeep1788 for reverse interval operations
+(Original author: Marco Nehmeier)
+converted into portable ITL format by Oliver Heimlich.
+
+Copyright 2013-2015 Marco Nehmeier (nehmeier@informatik.uni-wuerzburg.de)
+Copyright 2015-2017 Oliver Heimlich (oheim@posteo.de)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+*/
+
+testcase minimal_sqr_rev_test {
+    sqrRev [empty] = [empty];
+    sqrRev [-10.0,-1.0] = [empty];
+    sqrRev [0.0,infinity] = [entire];
+    sqrRev [0.0,1.0] = [-1.0,1.0];
+    sqrRev [-0.5,1.0] = [-1.0,1.0];
+    sqrRev [-1000.0,1.0] = [-1.0,1.0];
+    sqrRev [0.0,25.0] = [-5.0,5.0];
+    sqrRev [-1.0,25.0] = [-5.0,5.0];
+
+
+    sqrRev [0X1.47AE147AE147BP-7,0X1.47AE147AE147CP-7] = [-0X1.999999999999BP-4,0X1.999999999999BP-4];
+    sqrRev [0.0,0X1.FFFFFFFFFFFE1P+1] = [-0x1.ffffffffffff1p+0,0x1.ffffffffffff1p+0];
+}
+
+testcase minimal_sqr_rev_bin_test {
+    sqrRevBin [empty] [-5.0,1.0] = [empty];
+    sqrRevBin [-10.0,-1.0] [-5.0,1.0] = [empty];
+    sqrRevBin [0.0,infinity] [-5.0,1.0] = [-5.0,1.0];
+    sqrRevBin [0.0,1.0] [-0.1,1.0] = [-0.1,1.0];
+    sqrRevBin [-0.5,1.0] [-0.1,1.0] = [-0.1,1.0];
+    sqrRevBin [-1000.0,1.0] [-0.1,1.0] = [-0.1,1.0];
+    sqrRevBin [0.0,25.0] [-4.1,6.0] = [-4.1,5.0];
+    sqrRevBin [-1.0,25.0] [-4.1,7.0] = [-4.1,5.0];
+    sqrRevBin [1.0,25.0] [0.0,7.0] = [1.0,5.0];
+
+
+    sqrRevBin [0X1.47AE147AE147BP-7,0X1.47AE147AE147CP-7] [-0.1,infinity] = [-0.1,0X1.999999999999BP-4];
+    sqrRevBin [0.0,0X1.FFFFFFFFFFFE1P+1] [-0.1,infinity] = [-0.1,0x1.ffffffffffff1p+0];
+}
+
+testcase minimal_sqr_rev_dec_test {
+    sqrRev [empty]_trv = [empty]_trv;
+    sqrRev [-10.0,-1.0]_com = [empty]_trv;
+    sqrRev [0.0,infinity]_dac = [entire]_trv;
+    sqrRev [0.0,1.0]_def = [-1.0,1.0]_trv;
+    sqrRev [-0.5,1.0]_dac = [-1.0,1.0]_trv;
+    sqrRev [-1000.0,1.0]_com = [-1.0,1.0]_trv;
+    sqrRev [0.0,25.0]_def = [-5.0,5.0]_trv;
+    sqrRev [-1.0,25.0]_dac = [-5.0,5.0]_trv;
+
+
+    sqrRev [0X1.47AE147AE147BP-7,0X1.47AE147AE147CP-7]_com = [-0X1.999999999999BP-4,0X1.999999999999BP-4]_trv;
+    sqrRev [0.0,0X1.FFFFFFFFFFFE1P+1]_def = [-0x1.ffffffffffff1p+0,0x1.ffffffffffff1p+0]_trv;
+}
+
+testcase minimal_sqr_rev_dec_bin_test {
+    sqrRevBin [empty]_trv [-5.0,1.0]_def = [empty]_trv;
+    sqrRevBin [-10.0,-1.0]_com [-5.0,1.0]_dac = [empty]_trv;
+    sqrRevBin [0.0,infinity]_def [-5.0,1.0]_dac = [-5.0,1.0]_trv;
+    sqrRevBin [0.0,1.0]_dac [-0.1,1.0]_def = [-0.1,1.0]_trv;
+    sqrRevBin [-0.5,1.0]_def [-0.1,1.0]_dac = [-0.1,1.0]_trv;
+    sqrRevBin [-1000.0,1.0]_com [-0.1,1.0]_def = [-0.1,1.0]_trv;
+    sqrRevBin [0.0,25.0]_def [-4.1,6.0]_com = [-4.1,5.0]_trv;
+    sqrRevBin [-1.0,25.0]_dac [-4.1,7.0]_def = [-4.1,5.0]_trv;
+    sqrRevBin [1.0,25.0]_dac [0.0,7.0]_def = [1.0,5.0]_trv;
+
+
+    sqrRevBin [0X1.47AE147AE147BP-7,0X1.47AE147AE147CP-7]_def [-0.1,infinity]_dac = [-0.1,0X1.999999999999BP-4]_trv;
+    sqrRevBin [0.0,0X1.FFFFFFFFFFFE1P+1]_dac [-0.1,infinity]_dac = [-0.1,0x1.ffffffffffff1p+0]_trv;
+}
+
+testcase minimal_abs_rev_test {
+    absRev [empty] = [empty];
+    absRev [-1.1,-0.4] = [empty];
+    absRev [0.0,infinity] = [entire];
+    absRev [1.1,2.1] = [-2.1,2.1];
+    absRev [-1.1,2.0] = [-2.0,2.0];
+    absRev [-1.1,0.0] = [0.0,0.0];
+    absRev [-1.9,0.2] = [-0.2,0.2];
+    absRev [0.0,0.2] = [-0.2,0.2];
+    absRev [-1.5,infinity] = [entire];
+}
+
+testcase minimal_abs_rev_bin_test {
+    absRevBin [empty] [-1.1,5.0] = [empty];
+    absRevBin [-1.1,-0.4] [-1.1,5.0] = [empty];
+    absRevBin [0.0,infinity] [-1.1,5.0] = [-1.1,5.0];
+    absRevBin [1.1,2.1] [-1.0,5.0] = [1.1,2.1];
+    absRevBin [-1.1,2.0] [-1.1,5.0] = [-1.1,2.0];
+    absRevBin [-1.1,0.0] [-1.1,5.0] = [0.0,0.0];
+    absRevBin [-1.9,0.2] [-1.1,5.0] = [-0.2,0.2];
+}
+
+testcase minimal_abs_rev_dec_test {
+    absRev [empty]_trv = [empty]_trv;
+    absRev [-1.1,-0.4]_dac = [empty]_trv;
+    absRev [0.0,infinity]_dac = [entire]_trv;
+    absRev [1.1,2.1]_com = [-2.1,2.1]_trv;
+    absRev [-1.1,2.0]_def = [-2.0,2.0]_trv;
+    absRev [-1.1,0.0]_dac = [0.0,0.0]_trv;
+    absRev [-1.9,0.2]_com = [-0.2,0.2]_trv;
+    absRev [0.0,0.2]_def = [-0.2,0.2]_trv;
+    absRev [-1.5,infinity]_def = [entire]_trv;
+}
+
+testcase minimal_abs_rev_dec_bin_test {
+    absRevBin [empty]_trv [-1.1,5.0]_com = [empty]_trv;
+    absRevBin [-1.1,-0.4]_dac [-1.1,5.0]_dac = [empty]_trv;
+    absRevBin [0.0,infinity]_def [-1.1,5.0]_def = [-1.1,5.0]_trv;
+    absRevBin [1.1,2.1]_dac [-1.0,5.0]_def = [1.1,2.1]_trv;
+    absRevBin [-1.1,2.0]_com [-1.1,5.0]_def = [-1.1,2.0]_trv;
+    absRevBin [-1.1,0.0]_def [-1.1,5.0]_def = [0.0,0.0]_trv;
+    absRevBin [-1.9,0.2]_dac [-1.1,5.0]_def = [-0.2,0.2]_trv;
+}
+
+testcase minimal_pown_rev_test {
+    pownRev [empty] 0 = [empty];
+    pownRev [1.0,1.0] 0 = [entire];
+    pownRev [-1.0,5.0] 0 = [entire];
+    pownRev [-1.0,0.0] 0 = [empty];
+    pownRev [-1.0,-0.0] 0 = [empty];
+    pownRev [1.1,10.0] 0 = [empty];
+
+    pownRev [empty] 1 = [empty];
+    pownRev [entire] 1 = [entire];
+    pownRev [0.0,0.0] 1 = [0.0,0.0];
+    pownRev [-0.0,-0.0] 1 = [0.0,0.0];
+    pownRev [13.1,13.1] 1 = [13.1,13.1];
+    pownRev [-7451.145,-7451.145] 1 = [-7451.145,-7451.145];
+    pownRev [0x1.FFFFFFFFFFFFFp1023,0x1.FFFFFFFFFFFFFp1023] 1 = [0x1.FFFFFFFFFFFFFp1023,0x1.FFFFFFFFFFFFFp1023];
+    pownRev [-0x1.FFFFFFFFFFFFFp1023,-0x1.FFFFFFFFFFFFFp1023] 1 = [-0x1.FFFFFFFFFFFFFp1023,-0x1.FFFFFFFFFFFFFp1023];
+    pownRev [0.0,infinity] 1 = [0.0,infinity];
+    pownRev [-0.0,infinity] 1 = [0.0,infinity];
+    pownRev [-infinity,0.0] 1 = [-infinity,0.0];
+    pownRev [-infinity,-0.0] 1 = [-infinity,0.0];
+    pownRev [-324.3,2.5] 1 = [-324.3,2.5];
+    pownRev [0.01,2.33] 1 = [0.01,2.33];
+    pownRev [-1.9,-0.33] 1 = [-1.9,-0.33];
+
+    pownRev [empty] 2 = [empty];
+    pownRev [-5.0,-1.0] 2 = [empty];
+    pownRev [0.0,infinity] 2 = [entire];
+    pownRev [-0.0,infinity] 2 = [entire];
+    pownRev [0.0,0.0] 2 = [0.0,0.0];
+    pownRev [-0.0,-0.0] 2 = [0.0,0.0];
+    pownRev [0X1.573851EB851EBP+7,0X1.573851EB851ECP+7] 2 = [-0x1.a333333333334p+3,0x1.a333333333334p+3];
+    pownRev [0X1.A794A4E7CFAADP+25,0X1.A794A4E7CFAAEP+25] 2 = [-0x1.d1b251eb851edp+12,0x1.d1b251eb851edp+12];
+    pownRev [0x1.FFFFFFFFFFFFFp1023,0x1.FFFFFFFFFFFFFp1023] 2 = [-0x1p+512,0x1p+512];
+    pownRev [0.0,0X1.9AD27D70A3D72P+16] 2 = [-0x1.444cccccccccep+8,0x1.444cccccccccep+8];
+    pownRev [-0.0,0X1.9AD27D70A3D72P+16] 2 = [-0x1.444cccccccccep+8,0x1.444cccccccccep+8];
+    pownRev [0X1.A36E2EB1C432CP-14,0X1.5B7318FC50482P+2] 2 = [-0x1.2a3d70a3d70a5p+1,0x1.2a3d70a3d70a5p+1];
+    pownRev [0X1.BE0DED288CE7P-4,0X1.CE147AE147AE1P+1] 2 = [-0x1.e666666666667p+0,0x1.e666666666667p+0];
+
+    pownRev [empty] 8 = [empty];
+    pownRev [entire] 8 = [entire];
+    pownRev [0.0,infinity] 8 = [entire];
+    pownRev [-0.0,infinity] 8 = [entire];
+    pownRev [0.0,0.0] 8 = [0.0,0.0];
+    pownRev [-0.0,-0.0] 8 = [0.0,0.0];
+    pownRev [0X1.9D8FD495853F5P+29,0X1.9D8FD495853F6P+29] 8 = [-0x1.a333333333334p+3,0x1.a333333333334p+3];
+    pownRev [0X1.DFB1BB622E70DP+102,0X1.DFB1BB622E70EP+102] 8 = [-0x1.d1b251eb851edp+12,0x1.d1b251eb851edp+12];
+    pownRev [0x1.FFFFFFFFFFFFFp1023,0x1.FFFFFFFFFFFFFp1023] 8 = [-0x1p+128,0x1p+128];
+    pownRev [0.0,0X1.A87587109655P+66] 8 = [-0x1.444cccccccccep+8,0x1.444cccccccccep+8];
+    pownRev [-0.0,0X1.A87587109655P+66] 8 = [-0x1.444cccccccccep+8,0x1.444cccccccccep+8];
+    pownRev [0X1.CD2B297D889BDP-54,0X1.B253D9F33CE4DP+9] 8 = [-0x1.2a3d70a3d70a5p+1,0x1.2a3d70a3d70a5p+1];
+    pownRev [0X1.26F1FCDD502A3P-13,0X1.53ABD7BFC4FC6P+7] 8 = [-0x1.e666666666667p+0,0x1.e666666666667p+0];
+
+    pownRev [empty] 3 = [empty];
+    pownRev [entire] 3 = [entire];
+    pownRev [0.0,0.0] 3 = [0.0,0.0];
+    pownRev [-0.0,-0.0] 3 = [0.0,0.0];
+    pownRev [0X1.1902E978D4FDEP+11,0X1.1902E978D4FDFP+11] 3 = [0x1.a333333333332p+3,0x1.a333333333334p+3];
+    pownRev [-0X1.81460637B9A3DP+38,-0X1.81460637B9A3CP+38] 3 = [-0x1.d1b251eb851edp+12,-0x1.d1b251eb851ebp+12];
+    pownRev [0x1.FFFFFFFFFFFFFp1023,0x1.FFFFFFFFFFFFFp1023] 3 = [0x1.428a2f98d728ap+341,0x1.428a2f98d728bp+341];
+    pownRev [-0x1.FFFFFFFFFFFFFp1023,-0x1.FFFFFFFFFFFFFp1023] 3 = [-0x1.428a2f98d728bp+341, -0x1.428a2f98d728ap+341];
+    pownRev [0.0,infinity] 3 = [0.0,infinity];
+    pownRev [-0.0,infinity] 3 = [0.0,infinity];
+    pownRev [-infinity,0.0] 3 = [-infinity,0.0];
+    pownRev [-infinity,-0.0] 3 = [-infinity,0.0];
+    pownRev [-0X1.0436D2F418938P+25,0X1.F4P+3] 3 = [-0x1.444cccccccccep+8,0x1.4p+1];
+    pownRev [0X1.0C6F7A0B5ED8DP-20,0X1.94C75E6362A6P+3] 3 = [0x1.47ae147ae147ap-7,0x1.2a3d70a3d70a5p+1];
+    pownRev [-0X1.B6F9DB22D0E55P+2,-0X1.266559F6EC5B1P-5] 3 = [-0x1.e666666666667p+0,-0x1.51eb851eb851ep-2];
+
+    pownRev [empty] 7 = [empty];
+    pownRev [entire] 7 = [entire];
+    pownRev [0.0,0.0] 7 = [0.0,0.0];
+    pownRev [-0.0,-0.0] 7 = [0.0,0.0];
+    pownRev [0X1.F91D1B185493BP+25,0X1.F91D1B185493CP+25] 7 = [0x1.a333333333332p+3,0x1.a333333333334p+3];
+    pownRev [-0X1.07B1DA32F9B59P+90,-0X1.07B1DA32F9B58P+90] 7 = [-0x1.d1b251eb851edp+12,-0x1.d1b251eb851ebp+12];
+    pownRev [0x1.FFFFFFFFFFFFFp1023,0x1.FFFFFFFFFFFFFp1023] 7 = [0x1.381147622f886p+146,0x1.381147622f887p+146];
+    pownRev [-0x1.FFFFFFFFFFFFFp1023,-0x1.FFFFFFFFFFFFFp1023] 7 = [-0x1.381147622f887p+146,-0x1.381147622f886p+146];
+    pownRev [0.0,infinity] 7 = [0.0,infinity];
+    pownRev [-0.0,infinity] 7 = [0.0,infinity];
+    pownRev [-infinity,0.0] 7 = [-infinity,0.0];
+    pownRev [-infinity,-0.0] 7 = [-infinity,0.0];
+    pownRev [-0X1.4F109959E6D7FP+58,0X1.312DP+9] 7 = [-0x1.444cccccccccep+8,0x1.4p+1];
+    pownRev [0X1.6849B86A12B9BP-47,0X1.74D0373C76313P+8] 7 = [0x1.47ae147ae147ap-7,0x1.2a3d70a3d70a5p+1];
+    pownRev [-0X1.658C775099757P+6,-0X1.BEE30301BF47AP-12] 7 = [-0x1.e666666666667p+0,-0x1.51eb851eb851ep-2];
+
+    pownRev [empty] -2 = [empty];
+    pownRev [0.0,infinity] -2 = [entire];
+    pownRev [-0.0,infinity] -2 = [entire];
+    pownRev [0.0,0.0] -2 = [empty];
+    pownRev [-0.0,-0.0] -2 = [empty];
+    pownRev [-10.0,0.0] -2 = [empty];
+    pownRev [-10.0,-0.0] -2 = [empty];
+    pownRev [0X1.7DE3A077D1568P-8,0X1.7DE3A077D1569P-8] -2 = [-0x1.a333333333334p+3,0x1.a333333333334p+3];
+    pownRev [0X1.3570290CD6E14P-26,0X1.3570290CD6E15P-26] -2 = [-0x1.d1b251eb851edp+12,0x1.d1b251eb851edp+12];
+    pownRev [0X0P+0,0X0.0000000000001P-1022] -2 = [entire];
+    pownRev [0X1.3F0C482C977C9P-17,infinity] -2 = [-0x1.444cccccccccep+8,0x1.444cccccccccep+8];
+    pownRev [0X1.793D85EF38E47P-3,0X1.388P+13] -2 = [-0x1.2a3d70a3d70a5p+1,0x1.2a3d70a3d70a5p+1];
+    pownRev [0X1.1BA81104F6C8P-2,0X1.25D8FA1F801E1P+3] -2 = [-0x1.e666666666667p+0,0x1.e666666666667p+0];
+
+    pownRev [empty] -8 = [empty];
+    pownRev [0.0,infinity] -8 = [entire];
+    pownRev [-0.0,infinity] -8 = [entire];
+    pownRev [0.0,0.0] -8 = [empty];
+    pownRev [-0.0,-0.0] -8 = [empty];
+    pownRev [0X1.3CEF39247CA6DP-30,0X1.3CEF39247CA6EP-30] -8 = [-0x1.a333333333334p+3,0x1.a333333333334p+3];
+    pownRev [0X1.113D9EF0A99ACP-103,0X1.113D9EF0A99ADP-103] -8 = [-0x1.d1b251eb851edp+12,0x1.d1b251eb851edp+12];
+    pownRev [0X0P+0,0X0.0000000000001P-1022] -8 = [entire];
+    pownRev [0X1.34CC3764D1E0CP-67,infinity] -8 = [-0x1.444cccccccccep+8,0x1.444cccccccccep+8];
+    pownRev [0X1.2DC80DB11AB7CP-10,0X1.1C37937E08P+53] -8 = [-0x1.2a3d70a3d70a5p+1,0x1.2a3d70a3d70a5p+1];
+    pownRev [0X1.81E104E61630DP-8,0X1.BC64F21560E34P+12] -8 = [-0x1.e666666666667p+0,0x1.e666666666667p+0];
+
+    pownRev [empty] -1 = [empty];
+    pownRev [entire] -1 = [entire];
+    pownRev [0.0,0.0] -1 = [empty];
+    pownRev [-0.0,-0.0] -1 = [empty];
+    pownRev [0X1.38ABF82EE6986P-4,0X1.38ABF82EE6987P-4] -1 = [0x1.a333333333332p+3,0x1.a333333333335p+3];
+    pownRev [-0X1.197422C9048BFP-13,-0X1.197422C9048BEP-13] -1 = [-0x1.d1b251eb851eep+12,-0x1.d1b251eb851ebp+12];
+    pownRev [0X0.4P-1022,0X0.4000000000001P-1022] -1 = [0x1.ffffffffffff8p+1023,infinity];
+    pownRev [-0X0.4000000000001P-1022,-0X0.4P-1022] -1 = [-infinity,-0x1.ffffffffffff8p+1023];
+    pownRev [0.0,infinity] -1 = [0.0,infinity];
+    pownRev [-0.0,infinity] -1 = [0.0,infinity];
+    pownRev [-infinity,0.0] -1 = [-infinity,0.0];
+    pownRev [-infinity,-0.0] -1 = [-infinity,0.0];
+    pownRev [0X1.B77C278DBBE13P-2,0X1.9P+6] -1 = [0x1.47ae147ae147ap-7,0x1.2a3d70a3d70a5p+1];
+    pownRev [-0X1.83E0F83E0F83EP+1,-0X1.0D79435E50D79P-1] -1 = [-0x1.e666666666667p+0,-0x1.51eb851eb851ep-2];
+
+    pownRev [empty] -3 = [empty];
+    pownRev [entire] -3 = [entire];
+    pownRev [0.0,0.0] -3 = [empty];
+    pownRev [-0.0,-0.0] -3 = [empty];
+    pownRev [0X1.D26DF4D8B1831P-12,0X1.D26DF4D8B1832P-12] -3 = [0x1.a333333333332p+3,0x1.a333333333334p+3];
+    pownRev [-0X1.54347DED91B19P-39,-0X1.54347DED91B18P-39] -3 = [-0x1.d1b251eb851edp+12,-0x1.d1b251eb851ebp+12];
+    pownRev [0X0P+0,0X0.0000000000001P-1022] -3 = [0x1p+358,infinity];
+    pownRev [-0X0.0000000000001P-1022,-0X0P+0] -3 = [-infinity,-0x1p+358];
+    pownRev [0.0,infinity] -3 = [0.0,infinity];
+    pownRev [-0.0,infinity] -3 = [0.0,infinity];
+    pownRev [-infinity,0.0] -3 = [-infinity,0.0];
+    pownRev [-infinity,-0.0] -3 = [-infinity,0.0];
+    pownRev [0X1.43CFBA61AACABP-4,0X1.E848P+19] -3 = [0x1.47ae147ae147ap-7,0x1.2a3d70a3d70a5p+1];
+    pownRev [-0X1.BD393CE9E8E7CP+4,-0X1.2A95F6F7C066CP-3] -3 = [-0x1.e666666666667p+0,-0x1.51eb851eb851ep-2];
+
+    pownRev [empty] -7 = [empty];
+    pownRev [entire] -7 = [entire];
+    pownRev [0.0,0.0] -7 = [empty];
+    pownRev [-0.0,-0.0] -7 = [empty];
+    pownRev [0X1.037D76C912DBCP-26,0X1.037D76C912DBDP-26] -7 = [0x1.a333333333332p+3,0x1.a333333333334p+3];
+    pownRev [-0X1.F10F41FB8858FP-91,-0X1.F10F41FB8858EP-91] -7 = [-0x1.d1b251eb851edp+12,-0x1.d1b251eb851ebp+12];
+    pownRev [0X0P+0,0X0.0000000000001P-1022] -7 = [0x1.588cea3f093bcp+153,infinity];
+    pownRev [-0X0.0000000000001P-1022,-0X0P+0] -7 = [-infinity,-0x1.588cea3f093bcp+153];
+    pownRev [0.0,infinity] -7 = [0.0,infinity];
+    pownRev [-0.0,infinity] -7 = [0.0,infinity];
+    pownRev [-infinity,0.0] -7 = [-infinity,0.0];
+    pownRev [-infinity,-0.0] -7 = [-infinity,0.0];
+    pownRev [0X1.5F934D64162A9P-9,0X1.6BCC41E9P+46] -7 = [0x1.47ae147ae147ap-7,0x1.2a3d70a3d70a5p+1];
+    pownRev [-0X1.254CDD3711DDBP+11,-0X1.6E95C4A761E19P-7] -7 = [-0x1.e666666666667p+0,-0x1.51eb851eb851ep-2];
+}
+
+testcase minimal_pown_rev_bin_test {
+    pownRevBin [empty] [1.0,1.0] 0 = [empty];
+    pownRevBin [1.0,1.0] [1.0,1.0] 0 = [1.0,1.0];
+    pownRevBin [-1.0,5.0] [-51.0,12.0] 0 = [-51.0,12.0];
+    pownRevBin [-1.0,0.0] [5.0,10.0] 0 = [empty];
+    pownRevBin [-1.0,-0.0] [-1.0,1.0] 0 = [empty];
+    pownRevBin [1.1,10.0] [1.0,41.0] 0 = [empty];
+
+    pownRevBin [empty] [0.0,100.1] 1 = [empty];
+    pownRevBin [entire] [-5.1,10.0] 1 = [-5.1,10.0];
+    pownRevBin [0.0,0.0] [-10.0,5.1] 1 = [0.0,0.0];
+    pownRevBin [-0.0,-0.0] [1.0,5.0] 1 = [empty];
+
+    pownRevBin [empty] [5.0,17.1] 2 = [empty];
+    pownRevBin [-5.0,-1.0] [5.0,17.1] 2 = [empty];
+    pownRevBin [0.0,infinity] [5.6,27.544] 2 = [5.6,27.544];
+    pownRevBin [0.0,0.0] [1.0,2.0] 2 = [empty];
+    pownRevBin [0X1.A36E2EB1C432CP-14,0X1.5B7318FC50482P+2] [1.0,infinity] 2 = [1.0,0x1.2a3d70a3d70a5p+1];
+    pownRevBin [0X1.BE0DED288CE7P-4,0X1.CE147AE147AE1P+1] [-infinity,-1.0] 2 = [-0x1.e666666666667p+0,-1.0];
+
+    pownRevBin [empty] [-23.0,-1.0] 3 = [empty];
+    pownRevBin [entire] [-23.0,-1.0] 3 = [-23.0,-1.0];
+    pownRevBin [0.0,0.0] [1.0,2.0] 3 = [empty];
+    pownRevBin [0X1.0C6F7A0B5ED8DP-20,0X1.94C75E6362A6P+3] [1.0,infinity] 3 = [1.0,0x1.2a3d70a3d70a5p+1];
+    pownRevBin [-0X1.B6F9DB22D0E55P+2,-0X1.266559F6EC5B1P-5] [-infinity,-1.0] 3 = [-0x1.e666666666667p+0,-1.0];
+
+    pownRevBin [empty] [-3.0,17.3] -2 = [empty];
+    pownRevBin [0.0,infinity] [-5.1,-0.1] -2 = [-5.1,-0.1];
+    pownRevBin [0.0,0.0] [27.2,55.1] -2 = [empty];
+    pownRevBin [0X1.3F0C482C977C9P-17,infinity] [-infinity,-0x1.FFFFFFFFFFFFFp1023] -2 = [empty];
+    pownRevBin [0X1.793D85EF38E47P-3,0X1.388P+13] [1.0,infinity] -2 = [1.0,0x1.2a3d70a3d70a5p+1];
+    pownRevBin [0X1.1BA81104F6C8P-2,0X1.25D8FA1F801E1P+3] [-infinity,-1.0] -2 = [-0x1.e666666666667p+0,-1.0];
+
+    pownRevBin [empty] [-5.1,55.5] -1 = [empty];
+    pownRevBin [entire] [-5.1,55.5] -1 = [-5.1,55.5];
+    pownRevBin [0.0,0.0] [-5.1,55.5] -1 = [empty];
+    pownRevBin [-infinity,-0.0] [-1.0,1.0] -1 = [-1.0,0.0];
+    pownRevBin [0X1.B77C278DBBE13P-2,0X1.9P+6] [-1.0,0.0] -1 = [empty];
+
+    pownRevBin [empty] [-5.1,55.5] -3 = [empty];
+    pownRevBin [entire] [-5.1,55.5] -3 = [-5.1,55.5];
+    pownRevBin [0.0,0.0] [-5.1,55.5] -3 = [empty];
+    pownRevBin [-infinity,0.0] [5.1,55.5] -3 = [empty];
+    pownRevBin [-infinity,-0.0] [-32.0,1.1] -3 = [-32.0,0.0];
+}
+
+testcase minimal_pown_rev_dec_test {
+    pownRev [empty]_trv 0 = [empty]_trv;
+    pownRev [1.0,1.0]_com 0 = [entire]_trv;
+    pownRev [-1.0,5.0]_dac 0 = [entire]_trv;
+    pownRev [-1.0,0.0]_def 0 = [empty]_trv;
+    pownRev [-1.0,-0.0]_dac 0 = [empty]_trv;
+    pownRev [1.1,10.0]_com 0 = [empty]_trv;
+
+    pownRev [empty]_trv 1 = [empty]_trv;
+    pownRev [entire]_def 1 = [entire]_trv;
+    pownRev [0.0,0.0]_com 1 = [0.0,0.0]_trv;
+    pownRev [-0.0,-0.0]_dac 1 = [0.0,0.0]_trv;
+    pownRev [13.1,13.1]_def 1 = [13.1,13.1]_trv;
+    pownRev [-7451.145,-7451.145]_dac 1 = [-7451.145,-7451.145]_trv;
+    pownRev [0x1.FFFFFFFFFFFFFp1023,0x1.FFFFFFFFFFFFFp1023]_com 1 = [0x1.FFFFFFFFFFFFFp1023,0x1.FFFFFFFFFFFFFp1023]_trv;
+    pownRev [-0x1.FFFFFFFFFFFFFp1023,-0x1.FFFFFFFFFFFFFp1023]_com 1 = [-0x1.FFFFFFFFFFFFFp1023,-0x1.FFFFFFFFFFFFFp1023]_trv;
+    pownRev [0.0,infinity]_dac 1 = [0.0,infinity]_trv;
+    pownRev [-0.0,infinity]_dac 1 = [0.0,infinity]_trv;
+    pownRev [-infinity,0.0]_def 1 = [-infinity,0.0]_trv;
+    pownRev [-infinity,-0.0]_def 1 = [-infinity,0.0]_trv;
+    pownRev [-324.3,2.5]_dac 1 = [-324.3,2.5]_trv;
+    pownRev [0.01,2.33]_com 1 = [0.01,2.33]_trv;
+    pownRev [-1.9,-0.33]_def 1 = [-1.9,-0.33]_trv;
+
+    pownRev [empty]_trv 2 = [empty]_trv;
+    pownRev [0.0,infinity]_dac 2 = [entire]_trv;
+    pownRev [-0.0,infinity]_def 2 = [entire]_trv;
+    pownRev [0.0,0.0]_com 2 = [0.0,0.0]_trv;
+    pownRev [-0.0,-0.0]_dac 2 = [0.0,0.0]_trv;
+    pownRev [0X1.573851EB851EBP+7,0X1.573851EB851ECP+7]_def 2 = [-0x1.a333333333334p+3,0x1.a333333333334p+3]_trv;
+    pownRev [0X1.A794A4E7CFAADP+25,0X1.A794A4E7CFAAEP+25]_def 2 = [-0x1.d1b251eb851edp+12,0x1.d1b251eb851edp+12]_trv;
+    pownRev [0x1.FFFFFFFFFFFFFp1023,0x1.FFFFFFFFFFFFFp1023]_dac 2 = [-0x1p+512,0x1p+512]_trv;
+    pownRev [0.0,0X1.9AD27D70A3D72P+16]_dac 2 = [-0x1.444cccccccccep+8,0x1.444cccccccccep+8]_trv;
+    pownRev [-0.0,0X1.9AD27D70A3D72P+16]_def 2 = [-0x1.444cccccccccep+8,0x1.444cccccccccep+8]_trv;
+    pownRev [0X1.A36E2EB1C432CP-14,0X1.5B7318FC50482P+2]_com 2 = [-0x1.2a3d70a3d70a5p+1,0x1.2a3d70a3d70a5p+1]_trv;
+    pownRev [0X1.BE0DED288CE7P-4,0X1.CE147AE147AE1P+1]_def 2 = [-0x1.e666666666667p+0,0x1.e666666666667p+0]_trv;
+
+    pownRev [empty]_trv 8 = [empty]_trv;
+    pownRev [entire]_def 8 = [entire]_trv;
+    pownRev [0.0,infinity]_dac 8 = [entire]_trv;
+    pownRev [-0.0,infinity]_dac 8 = [entire]_trv;
+    pownRev [0.0,0.0]_def 8 = [0.0,0.0]_trv;
+    pownRev [-0.0,-0.0]_dac 8 = [0.0,0.0]_trv;
+    pownRev [0X1.9D8FD495853F5P+29,0X1.9D8FD495853F6P+29]_com 8 = [-0x1.a333333333334p+3,0x1.a333333333334p+3]_trv;
+    pownRev [0X1.DFB1BB622E70DP+102,0X1.DFB1BB622E70EP+102]_dac 8 = [-0x1.d1b251eb851edp+12,0x1.d1b251eb851edp+12]_trv;
+    pownRev [0x1.FFFFFFFFFFFFFp1023,0x1.FFFFFFFFFFFFFp1023]_def 8 = [-0x1p+128,0x1p+128]_trv;
+    pownRev [0.0,0X1.A87587109655P+66]_dac 8 = [-0x1.444cccccccccep+8,0x1.444cccccccccep+8]_trv;
+    pownRev [-0.0,0X1.A87587109655P+66]_def 8 = [-0x1.444cccccccccep+8,0x1.444cccccccccep+8]_trv;
+    pownRev [0X1.CD2B297D889BDP-54,0X1.B253D9F33CE4DP+9]_com 8 = [-0x1.2a3d70a3d70a5p+1,0x1.2a3d70a3d70a5p+1]_trv;
+    pownRev [0X1.26F1FCDD502A3P-13,0X1.53ABD7BFC4FC6P+7]_dac 8 = [-0x1.e666666666667p+0,0x1.e666666666667p+0]_trv;
+
+    pownRev [empty]_trv 3 = [empty]_trv;
+    pownRev [entire]_def 3 = [entire]_trv;
+    pownRev [0.0,0.0]_dac 3 = [0.0,0.0]_trv;
+    pownRev [-0.0,-0.0]_def 3 = [0.0,0.0]_trv;
+    pownRev [0X1.1902E978D4FDEP+11,0X1.1902E978D4FDFP+11]_com 3 = [0x1.a333333333332p+3,0x1.a333333333334p+3]_trv;
+    pownRev [-0X1.81460637B9A3DP+38,-0X1.81460637B9A3CP+38]_def 3 = [-0x1.d1b251eb851edp+12,-0x1.d1b251eb851ebp+12]_trv;
+    pownRev [0x1.FFFFFFFFFFFFFp1023,0x1.FFFFFFFFFFFFFp1023]_dac 3 = [0x1.428a2f98d728ap+341,0x1.428a2f98d728bp+341]_trv;
+    pownRev [-0x1.FFFFFFFFFFFFFp1023,-0x1.FFFFFFFFFFFFFp1023]_com 3 = [-0x1.428a2f98d728bp+341, -0x1.428a2f98d728ap+341]_trv;
+    pownRev [0.0,infinity]_def 3 = [0.0,infinity]_trv;
+    pownRev [-0.0,infinity]_def 3 = [0.0,infinity]_trv;
+    pownRev [-infinity,0.0]_dac 3 = [-infinity,0.0]_trv;
+    pownRev [-infinity,-0.0]_def 3 = [-infinity,0.0]_trv;
+    pownRev [-0X1.0436D2F418938P+25,0X1.F4P+3]_com 3 = [-0x1.444cccccccccep+8,0x1.4p+1]_trv;
+    pownRev [0X1.0C6F7A0B5ED8DP-20,0X1.94C75E6362A6P+3]_dac 3 = [0x1.47ae147ae147ap-7,0x1.2a3d70a3d70a5p+1]_trv;
+    pownRev [-0X1.B6F9DB22D0E55P+2,-0X1.266559F6EC5B1P-5]_def 3 = [-0x1.e666666666667p+0,-0x1.51eb851eb851ep-2]_trv;
+
+    pownRev [empty]_trv 7 = [empty]_trv;
+    pownRev [entire]_def 7 = [entire]_trv;
+    pownRev [0.0,0.0]_com 7 = [0.0,0.0]_trv;
+    pownRev [-0.0,-0.0]_dac 7 = [0.0,0.0]_trv;
+    pownRev [0X1.F91D1B185493BP+25,0X1.F91D1B185493CP+25]_def 7 = [0x1.a333333333332p+3,0x1.a333333333334p+3]_trv;
+    pownRev [-0X1.07B1DA32F9B59P+90,-0X1.07B1DA32F9B58P+90]_dac 7 = [-0x1.d1b251eb851edp+12,-0x1.d1b251eb851ebp+12]_trv;
+    pownRev [0x1.FFFFFFFFFFFFFp1023,0x1.FFFFFFFFFFFFFp1023]_com 7 = [0x1.381147622f886p+146,0x1.381147622f887p+146]_trv;
+    pownRev [-0x1.FFFFFFFFFFFFFp1023,-0x1.FFFFFFFFFFFFFp1023]_def 7 = [-0x1.381147622f887p+146,-0x1.381147622f886p+146]_trv;
+    pownRev [0.0,infinity]_dac 7 = [0.0,infinity]_trv;
+    pownRev [-0.0,infinity]_dac 7 = [0.0,infinity]_trv;
+    pownRev [-infinity,0.0]_def 7 = [-infinity,0.0]_trv;
+    pownRev [-infinity,-0.0]_def 7 = [-infinity,0.0]_trv;
+    pownRev [-0X1.4F109959E6D7FP+58,0X1.312DP+9]_dac 7 = [-0x1.444cccccccccep+8,0x1.4p+1]_trv;
+    pownRev [0X1.6849B86A12B9BP-47,0X1.74D0373C76313P+8]_com 7 = [0x1.47ae147ae147ap-7,0x1.2a3d70a3d70a5p+1]_trv;
+    pownRev [-0X1.658C775099757P+6,-0X1.BEE30301BF47AP-12]_def 7 = [-0x1.e666666666667p+0,-0x1.51eb851eb851ep-2]_trv;
+
+    pownRev [empty]_trv -2 = [empty]_trv;
+    pownRev [0.0,infinity]_dac -2 = [entire]_trv;
+    pownRev [-0.0,infinity]_dac -2 = [entire]_trv;
+    pownRev [0.0,0.0]_def -2 = [empty]_trv;
+    pownRev [-0.0,-0.0]_com -2 = [empty]_trv;
+    pownRev [-10.0,0.0]_dac -2 = [empty]_trv;
+    pownRev [-10.0,-0.0]_def -2 = [empty]_trv;
+    pownRev [0X1.7DE3A077D1568P-8,0X1.7DE3A077D1569P-8]_dac -2 = [-0x1.a333333333334p+3,0x1.a333333333334p+3]_trv;
+    pownRev [0X1.3570290CD6E14P-26,0X1.3570290CD6E15P-26]_def -2 = [-0x1.d1b251eb851edp+12,0x1.d1b251eb851edp+12]_trv;
+    pownRev [0X0P+0,0X0.0000000000001P-1022]_com -2 = [entire]_trv;
+    pownRev [0X1.3F0C482C977C9P-17,infinity]_dac -2 = [-0x1.444cccccccccep+8,0x1.444cccccccccep+8]_trv;
+    pownRev [0X1.793D85EF38E47P-3,0X1.388P+13]_def -2 = [-0x1.2a3d70a3d70a5p+1,0x1.2a3d70a3d70a5p+1]_trv;
+    pownRev [0X1.1BA81104F6C8P-2,0X1.25D8FA1F801E1P+3]_com -2 = [-0x1.e666666666667p+0,0x1.e666666666667p+0]_trv;
+
+    pownRev [empty]_trv -8 = [empty]_trv;
+    pownRev [0.0,infinity]_def -8 = [entire]_trv;
+    pownRev [-0.0,infinity]_dac -8 = [entire]_trv;
+    pownRev [0.0,0.0]_def -8 = [empty]_trv;
+    pownRev [-0.0,-0.0]_dac -8 = [empty]_trv;
+    pownRev [0X1.3CEF39247CA6DP-30,0X1.3CEF39247CA6EP-30]_com -8 = [-0x1.a333333333334p+3,0x1.a333333333334p+3]_trv;
+    pownRev [0X1.113D9EF0A99ACP-103,0X1.113D9EF0A99ADP-103]_def -8 = [-0x1.d1b251eb851edp+12,0x1.d1b251eb851edp+12]_trv;
+    pownRev [0X0P+0,0X0.0000000000001P-1022]_dac -8 = [entire]_trv;
+    pownRev [0X1.34CC3764D1E0CP-67,infinity]_def -8 = [-0x1.444cccccccccep+8,0x1.444cccccccccep+8]_trv;
+    pownRev [0X1.2DC80DB11AB7CP-10,0X1.1C37937E08P+53]_com -8 = [-0x1.2a3d70a3d70a5p+1,0x1.2a3d70a3d70a5p+1]_trv;
+    pownRev [0X1.81E104E61630DP-8,0X1.BC64F21560E34P+12]_def -8 = [-0x1.e666666666667p+0,0x1.e666666666667p+0]_trv;
+
+    pownRev [empty]_trv -1 = [empty]_trv;
+    pownRev [entire]_def -1 = [entire]_trv;
+    pownRev [0.0,0.0]_dac -1 = [empty]_trv;
+    pownRev [-0.0,-0.0]_dac -1 = [empty]_trv;
+    pownRev [0X1.38ABF82EE6986P-4,0X1.38ABF82EE6987P-4]_def -1 = [0x1.a333333333332p+3,0x1.a333333333335p+3]_trv;
+    pownRev [-0X1.197422C9048BFP-13,-0X1.197422C9048BEP-13]_dac -1 = [-0x1.d1b251eb851eep+12,-0x1.d1b251eb851ebp+12]_trv;
+    pownRev [0X0.4P-1022,0X0.4000000000001P-1022]_dac -1 = [0x1.ffffffffffff8p+1023,infinity]_trv;
+    pownRev [-0X0.4000000000001P-1022,-0X0.4P-1022]_def -1 = [-infinity,-0x1.ffffffffffff8p+1023]_trv;
+    pownRev [0.0,infinity]_dac -1 = [0.0,infinity]_trv;
+    pownRev [-0.0,infinity]_dac -1 = [0.0,infinity]_trv;
+    pownRev [-infinity,0.0]_dac -1 = [-infinity,0.0]_trv;
+    pownRev [-infinity,-0.0]_def -1 = [-infinity,0.0]_trv;
+    pownRev [0X1.B77C278DBBE13P-2,0X1.9P+6]_com -1 = [0x1.47ae147ae147ap-7,0x1.2a3d70a3d70a5p+1]_trv;
+    pownRev [-0X1.83E0F83E0F83EP+1,-0X1.0D79435E50D79P-1]_com -1 = [-0x1.e666666666667p+0,-0x1.51eb851eb851ep-2]_trv;
+    
+    pownRev [empty]_trv -3 = [empty]_trv;
+    pownRev [entire]_def -3 = [entire]_trv;
+    pownRev [0.0,0.0]_def -3 = [empty]_trv;
+    pownRev [-0.0,-0.0]_dac -3 = [empty]_trv;
+    pownRev [0X1.D26DF4D8B1831P-12,0X1.D26DF4D8B1832P-12]_com -3 = [0x1.a333333333332p+3,0x1.a333333333334p+3]_trv;
+    pownRev [-0X1.54347DED91B19P-39,-0X1.54347DED91B18P-39]_def -3 = [-0x1.d1b251eb851edp+12,-0x1.d1b251eb851ebp+12]_trv;
+    pownRev [0X0P+0,0X0.0000000000001P-1022]_dac -3 = [0x1p+358,infinity]_trv;
+    pownRev [-0X0.0000000000001P-1022,-0X0P+0]_def -3 = [-infinity,-0x1p+358]_trv;
+    pownRev [0.0,infinity]_dac -3 = [0.0,infinity]_trv;
+    pownRev [-0.0,infinity]_dac -3 = [0.0,infinity]_trv;
+    pownRev [-infinity,0.0]_def -3 = [-infinity,0.0]_trv;
+    pownRev [-infinity,-0.0]_def -3 = [-infinity,0.0]_trv;
+    pownRev [0X1.43CFBA61AACABP-4,0X1.E848P+19]_com -3 = [0x1.47ae147ae147ap-7,0x1.2a3d70a3d70a5p+1]_trv;
+    pownRev [-0X1.BD393CE9E8E7CP+4,-0X1.2A95F6F7C066CP-3]_def -3 = [-0x1.e666666666667p+0,-0x1.51eb851eb851ep-2]_trv;
+
+    pownRev [empty]_trv -7 = [empty]_trv;
+    pownRev [entire]_def -7 = [entire]_trv;
+    pownRev [0.0,0.0]_com -7 = [empty]_trv;
+    pownRev [-0.0,-0.0]_def -7 = [empty]_trv;
+    pownRev [0X1.037D76C912DBCP-26,0X1.037D76C912DBDP-26]_dac -7 = [0x1.a333333333332p+3,0x1.a333333333334p+3]_trv;
+    pownRev [-0X1.F10F41FB8858FP-91,-0X1.F10F41FB8858EP-91]_dac -7 = [-0x1.d1b251eb851edp+12,-0x1.d1b251eb851ebp+12]_trv;
+    pownRev [0X0P+0,0X0.0000000000001P-1022]_def -7 = [0x1.588cea3f093bcp+153,infinity]_trv;
+    pownRev [-0X0.0000000000001P-1022,-0X0P+0]_def -7 = [-infinity,-0x1.588cea3f093bcp+153]_trv;
+    pownRev [0.0,infinity]_dac -7 = [0.0,infinity]_trv;
+    pownRev [-0.0,infinity]_def -7 = [0.0,infinity]_trv;
+    pownRev [-infinity,0.0]_dac -7 = [-infinity,0.0]_trv;
+    pownRev [-infinity,-0.0]_def -7 = [-infinity,0.0]_trv;
+    pownRev [0X1.5F934D64162A9P-9,0X1.6BCC41E9P+46]_com -7 = [0x1.47ae147ae147ap-7,0x1.2a3d70a3d70a5p+1]_trv;
+    pownRev [-0X1.254CDD3711DDBP+11,-0X1.6E95C4A761E19P-7]_com -7 = [-0x1.e666666666667p+0,-0x1.51eb851eb851ep-2]_trv;
+}
+
+testcase minimal_pown_rev_dec_bin_test {
+    pownRevBin [empty]_trv [1.0,1.0]_def 0 = [empty]_trv;
+    pownRevBin [1.0,1.0]_dac [1.0,1.0]_dac 0 = [1.0,1.0]_trv;
+    pownRevBin [-1.0,5.0]_def [-51.0,12.0]_dac 0 = [-51.0,12.0]_trv;
+    pownRevBin [-1.0,0.0]_com [5.0,10.0]_dac 0 = [empty]_trv;
+    pownRevBin [-1.0,-0.0]_dac [-1.0,1.0]_def 0 = [empty]_trv;
+    pownRevBin [1.1,10.0]_def [1.0,41.0]_dac 0 = [empty]_trv;
+
+    pownRevBin [empty]_trv [0.0,100.1]_dac 1 = [empty]_trv;
+    pownRevBin [entire]_def [-5.1,10.0]_def 1 = [-5.1,10.0]_trv;
+    pownRevBin [0.0,0.0]_com [-10.0,5.1]_dac 1 = [0.0,0.0]_trv;
+    pownRevBin [-0.0,-0.0]_def [1.0,5.0]_dac 1 = [empty]_trv;
+
+    pownRevBin [empty]_trv [5.0,17.1]_def 2 = [empty]_trv;
+    pownRevBin [0.0,infinity]_dac [5.6,27.544]_dac 2 = [5.6,27.544]_trv;
+    pownRevBin [0.0,0.0]_def [1.0,2.0]_def 2 = [empty]_trv;
+    pownRevBin [0X1.A36E2EB1C432CP-14,0X1.5B7318FC50482P+2]_com [1.0,infinity]_def 2 = [1.0,0x1.2a3d70a3d70a5p+1]_trv;
+    pownRevBin [0X1.BE0DED288CE7P-4,0X1.CE147AE147AE1P+1]_dac [-infinity,-1.0]_def 2 = [-0x1.e666666666667p+0,-1.0]_trv;
+
+    pownRevBin [empty]_trv [-23.0,-1.0]_dac 3 = [empty]_trv;
+    pownRevBin [entire]_def [-23.0,-1.0]_com 3 = [-23.0,-1.0]_trv;
+    pownRevBin [0.0,0.0]_def [1.0,2.0]_dac 3 = [empty]_trv;
+    pownRevBin [0X1.0C6F7A0B5ED8DP-20,0X1.94C75E6362A6P+3]_com [1.0,infinity]_dac 3 = [1.0,0x1.2a3d70a3d70a5p+1]_trv;
+    pownRevBin [-0X1.B6F9DB22D0E55P+2,-0X1.266559F6EC5B1P-5]_com [-infinity,-1.0]_dac 3 = [-0x1.e666666666667p+0,-1.0]_trv;
+
+    pownRevBin [empty]_trv [-3.0,17.3]_def -2 = [empty]_trv;
+    pownRevBin [0.0,infinity]_dac [-5.1,-0.1]_dac -2 = [-5.1,-0.1]_trv;
+    pownRevBin [0.0,0.0]_def [27.2,55.1]_dac -2 = [empty]_trv;
+    pownRevBin [0X1.3F0C482C977C9P-17,infinity]_def [-infinity,-0x1.FFFFFFFFFFFFFp1023]_dac -2 = [empty]_trv;
+    pownRevBin [0X1.793D85EF38E47P-3,0X1.388P+13]_com [1.0,infinity]_dac -2 = [1.0,0x1.2a3d70a3d70a5p+1]_trv;
+    pownRevBin [0X1.1BA81104F6C8P-2,0X1.25D8FA1F801E1P+3]_com [-infinity,-1.0]_dac -2 = [-0x1.e666666666667p+0,-1.0]_trv;
+
+    pownRevBin [empty]_trv [-5.1,55.5]_def -1 = [empty]_trv;
+    pownRevBin [entire]_def [-5.1,55.5]_dac -1 = [-5.1,55.5]_trv;
+    pownRevBin [0.0,0.0]_dac [-5.1,55.5]_def -1 = [empty]_trv;
+    pownRevBin [-infinity,-0.0]_dac [-1.0,1.0]_com -1 = [-1.0,0.0]_trv;
+    pownRevBin [0X1.B77C278DBBE13P-2,0X1.9P+6]_def [-1.0,0.0]_dac -1 = [empty]_trv;
+
+    pownRevBin [empty]_trv [-5.1,55.5]_dac -3 = [empty]_trv;
+    pownRevBin [entire]_def [-5.1,55.5]_def -3 = [-5.1,55.5]_trv;
+    pownRevBin [0.0,0.0]_def [-5.1,55.5]_def -3 = [empty]_trv;
+    pownRevBin [-infinity,0.0]_dac [5.1,55.5]_com -3 = [empty]_trv;
+    pownRevBin [-infinity,-0.0]_dac [-32.0,1.1]_def -3 = [-32.0,0.0]_trv;
+}
+
+testcase minimal_sin_rev_test {
+    sinRev [empty] = [empty];
+
+    sinRev [-2.0,-1.1] = [empty];
+    sinRev [1.1, 2.0] = [empty];
+
+    sinRev [-1.0,1.0] = [entire];
+    sinRev [0.0,0.0] = [entire];
+    sinRev [0X1.1A62633145C06P-53,0X1.1A62633145C07P-53] = [entire];
+}
+
+
+testcase minimal_sin_rev_bin_test {
+    sinRevBin [empty] [-1.2,12.1] = [empty];
+
+    sinRevBin [-2.0,-1.1] [-5.0, 5.0] = [empty];
+    sinRevBin [1.1, 2.0] [-5.0, 5.0] = [empty];
+
+    sinRevBin [-1.0,1.0] [-1.2,12.1] = [-1.2,12.1];
+
+    sinRevBin [0.0,0.0] [-1.0,1.0] = [0.0,0.0];
+    sinRevBin [-0.0,-0.0] [2.0,2.5] = [empty];
+    sinRevBin [-0.0,-0.0] [3.0,3.5] = [0x1.921fb54442d18p+1,0x1.921fb54442d19p+1];
+    sinRevBin [0X1.FFFFFFFFFFFFFP-1,0X1P+0] [1.57,1.58 ] = [0x1.921fb50442d18p+0,0x1.921fb58442d1ap+0];
+    sinRevBin [0.0,0X1P+0] [-0.1,1.58] = [0.0,1.58];
+
+    sinRevBin [0X1.1A62633145C06P-53,0X1.1A62633145C07P-53] [3.14,3.15] = [0X1.921FB54442D17P+1,0X1.921FB54442D19P+1];
+    sinRevBin [-0X1.72CECE675D1FDP-52,-0X1.72CECE675D1FCP-52] [3.14,3.15] = [0X1.921FB54442D18P+1,0X1.921FB54442D1aP+1];
+    sinRevBin [-0X1.72CECE675D1FDP-52,0X1.1A62633145C07P-53] [3.14,3.15] = [0X1.921FB54442D17P+1,0X1.921FB54442D1aP+1];
+    sinRevBin [0.0,1.0] [-0.1,3.15] = [0.0,0X1.921FB54442D19P+1];
+    sinRevBin [0.0,1.0] [-0.1,3.15] = [-0.0,0X1.921FB54442D19P+1];
+    sinRevBin [-0X1.72CECE675D1FDP-52,1.0] [-0.1,3.15] = [-0x1.72cece675d1fep-52,0X1.921FB54442D1aP+1];
+    sinRevBin [-0X1.72CECE675D1FDP-52,1.0] [0.0,3.15] = [0.0,0X1.921FB54442D1aP+1];
+
+    sinRevBin [0X1.1A62633145C06P-53,0X1P+0] [3.14,3.15] = [3.14,0X1.921FB54442D19P+1];
+    sinRevBin [-0X1.72CECE675D1FDP-52,0X1P+0] [1.57,3.15] = [1.57,0X1.921FB54442D1AP+1];
+
+    sinRevBin [0X1.1A62633145C06P-53,0X1.1A62633145C07P-53] [-infinity,3.15] = [-infinity,0X1.921FB54442D19P+1];
+    sinRevBin [-0X1.72CECE675D1FDP-52,-0X1.72CECE675D1FCP-52] [3.14,infinity] = [0X1.921FB54442D18P+1,infinity];
+}
+
+testcase minimal_sin_rev_dec_test {
+    sinRev [empty]_trv = [empty]_trv;
+
+    sinRev [-2.0,-1.1]_com = [empty]_trv;
+    sinRev [1.1, 2.0]_dac = [empty]_trv;
+
+    sinRev [-1.0,1.0]_com = [entire]_trv;
+    sinRev [0.0,0.0]_dac = [entire]_trv;
+    sinRev [0X1.1A62633145C06P-53,0X1.1A62633145C07P-53]_def = [entire]_trv;
+}
+
+testcase minimal_sin_rev_dec_bin_test {
+    sinRevBin [empty]_trv [-1.2,12.1]_com = [empty]_trv;
+
+    sinRevBin [-2.0,-1.1]_def [-5.0, 5.0]_def = [empty]_trv;
+    sinRevBin [1.1, 2.0]_dac [-5.0, 5.0]_com = [empty]_trv;
+
+    sinRevBin [-1.0,1.0]_com [-1.2,12.1]_def = [-1.2,12.1]_trv;
+
+    sinRevBin [0.0,0.0]_dac [-1.0,1.0]_def = [0.0,0.0]_trv;
+    sinRevBin [-0.0,-0.0]_def [2.0,2.5]_trv = [empty]_trv;
+    sinRevBin [-0.0,-0.0]_def [3.0,3.5]_dac = [0x1.921fb54442d18p+1,0x1.921fb54442d19p+1]_trv;
+    sinRevBin [0X1.FFFFFFFFFFFFFP-1,0X1P+0]_dac [1.57,1.58]_dac = [0x1.921fb50442d18p+0,0x1.921fb58442d1ap+0]_trv;
+    sinRevBin [0.0,0X1P+0]_com [-0.1,1.58]_dac = [0.0,1.58]_trv;
+
+    sinRevBin [0X1.1A62633145C06P-53,0X1.1A62633145C07P-53]_com [3.14,3.15]_def = [0X1.921FB54442D17P+1,0X1.921FB54442D19P+1]_trv;
+    sinRevBin [-0X1.72CECE675D1FDP-52,-0X1.72CECE675D1FCP-52]_com [3.14,3.15]_dac = [0X1.921FB54442D18P+1,0X1.921FB54442D1aP+1]_trv;
+    sinRevBin [-0X1.72CECE675D1FDP-52,0X1.1A62633145C07P-53]_dac [3.14,3.15]_com = [0X1.921FB54442D17P+1,0X1.921FB54442D1aP+1]_trv;
+    sinRevBin [0.0,1.0]_def [-0.1,3.15]_def = [0.0,0X1.921FB54442D19P+1]_trv;
+    sinRevBin [0.0,1.0]_dac [-0.1,3.15]_com = [-0.0,0X1.921FB54442D19P+1]_trv;
+    sinRevBin [-0X1.72CECE675D1FDP-52,1.0]_def [-0.1,3.15]_def = [-0x1.72cece675d1fep-52,0X1.921FB54442D1aP+1]_trv;
+    sinRevBin [-0X1.72CECE675D1FDP-52,1.0]_com [0.0,3.15]_dac = [0.0,0X1.921FB54442D1aP+1]_trv;
+
+    sinRevBin [0X1.1A62633145C06P-53,0X1P+0]_def [3.14,3.15]_com = [3.14,0X1.921FB54442D19P+1]_trv;
+    sinRevBin [-0X1.72CECE675D1FDP-52,0X1P+0]_dac [1.57,3.15]_com = [1.57,0X1.921FB54442D1AP+1]_trv;
+
+    sinRevBin [0X1.1A62633145C06P-53,0X1.1A62633145C07P-53]_com [-infinity,3.15]_dac = [-infinity,0X1.921FB54442D19P+1]_trv;
+    sinRevBin [-0X1.72CECE675D1FDP-52,-0X1.72CECE675D1FCP-52]_com [3.14,infinity]_dac = [0X1.921FB54442D18P+1,infinity]_trv;
+}
+
+testcase minimal_cos_rev_test {
+    cosRev [empty] = [empty];
+
+    cosRev [-2.0,-1.1] = [empty];
+    cosRev [1.1, 2.0] = [empty];
+
+    cosRev [-1.0,1.0] = [entire];
+    cosRev [0.0,0.0] = [entire];
+    cosRev [0X1.1A62633145C06P-53,0X1.1A62633145C07P-53] = [entire];
+}
+
+testcase minimal_cos_rev_bin_test {
+    cosRevBin [empty] [-1.2,12.1] = [empty];
+
+    cosRevBin [-2.0,-1.1] [-5.0, 5.0] = [empty];
+    cosRevBin [1.1, 2.0] [-5.0, 5.0] = [empty];
+
+    cosRevBin [-1.0,1.0] [-1.2,12.1] = [-1.2,12.1];
+
+    cosRevBin [1.0,1.0] [-0.1,0.1] = [0.0,0.0];
+    cosRevBin [-1.0,-1.0] [3.14,3.15] = [0x1.921fb54442d18p+1,0x1.921fb54442d1ap+1];
+
+    cosRevBin [0X1.1A62633145C06P-54,0X1.1A62633145C07P-54] [1.57,1.58] = [0X1.921FB54442D17P+0,0X1.921FB54442D19P+0];
+    cosRevBin [-0X1.72CECE675D1FDP-53,-0X1.72CECE675D1FCP-53] [1.57,1.58] = [0X1.921FB54442D18P+0,0X1.921FB54442D1AP+0];
+    cosRevBin [-0X1.72CECE675D1FDP-53,0X1.1A62633145C07P-54] [1.57,1.58] = [0X1.921FB54442D17P+0,0X1.921FB54442D1aP+0];
+    cosRevBin [0X1.1A62633145C06P-54,1.0] [-2.0,2.0] = [-0X1.921FB54442D19P+0, 0X1.921FB54442D19P+0];
+    cosRevBin [0X1.1A62633145C06P-54,1.0] [0.0,2.0] = [0.0,0X1.921FB54442D19P+0];
+    cosRevBin [-0X1.72CECE675D1FDP-53,1.0] [-0.1,1.5708] = [-0.1,0X1.921FB54442D1aP+0];
+
+    cosRevBin [-0X1P+0,-0X1.FFFFFFFFFFFFFP-1] [3.14,3.15] = [0x1.921fb52442d18p+1,0x1.921fb56442d1ap+1];
+    cosRevBin [-0X1P+0,-0X1.FFFFFFFFFFFFFP-1] [-3.15,-3.14] = [-0x1.921fb56442d1ap+1,-0x1.921fb52442d18p+1];
+    cosRevBin [-0X1P+0,-0X1.FFFFFFFFFFFFFP-1] [9.42,9.45] = [0x1.2d97c7eb321d2p+3,0x1.2d97c7fb321d3p+3];
+
+    cosRevBin [0X1.87996529F9D92P-1,1.0] [-1.0,0.1] = [-0x1.6666666666667p-1,0.1];
+    cosRevBin [-0X1.AA22657537205P-2,0X1.14A280FB5068CP-1] [0.0,2.1] = [0x1.fffffffffffffp-1,0x1.0000000000001p+1];
+
+    cosRevBin [0X1.1A62633145C06P-53,0X1.1A62633145C07P-53] [-infinity,1.58] = [-infinity,0X1.921FB54442D18P+0];
+    cosRevBin [0X1.1A62633145C06P-53,0X1.1A62633145C07P-53] [-infinity,1.5] = [-infinity,-0X1.921FB54442D17P+0];
+    cosRevBin [-0X1.72CECE675D1FDP-52,-0X1.72CECE675D1FCP-52] [-1.58,infinity] = [-0x1.921fb54442d1ap+0,infinity];
+    cosRevBin [-0X1.72CECE675D1FDP-52,-0X1.72CECE675D1FCP-52] [-1.5,infinity] = [0x1.921fb54442d19p+0,infinity];
+}
+
+testcase minimal_cos_rev_dec_test {
+    cosRev [empty]_trv = [empty]_trv;
+
+    cosRev [-2.0,-1.1]_def = [empty]_trv;
+    cosRev [1.1, 2.0]_dac = [empty]_trv;
+
+    cosRev [-1.0,1.0]_com = [entire]_trv;
+    cosRev [0.0,0.0]_def = [entire]_trv;
+    cosRev [0X1.1A62633145C06P-53,0X1.1A62633145C07P-53]_dac = [entire]_trv;
+}
+
+testcase minimal_cos_rev_dec_bin_test {
+    cosRevBin [empty]_trv [-1.2,12.1]_def = [empty]_trv;
+
+    cosRevBin [-2.0,-1.1]_dac [-5.0, 5.0]_com = [empty]_trv;
+    cosRevBin [1.1, 2.0]_dac [-5.0, 5.0]_com = [empty]_trv;
+
+    cosRevBin [-1.0,1.0]_dac [-1.2,12.1]_def = [-1.2,12.1]_trv;
+
+    cosRevBin [1.0,1.0]_def [-0.1,0.1]_dac = [0.0,0.0]_trv;
+    cosRevBin [-1.0,-1.0]_com [3.14,3.15]_dac = [0x1.921fb54442d18p+1,0x1.921fb54442d1ap+1]_trv;
+
+    cosRevBin [0X1.1A62633145C06P-54,0X1.1A62633145C07P-54]_def [1.57,1.58]_def = [0X1.921FB54442D17P+0,0X1.921FB54442D19P+0]_trv;
+    cosRevBin [-0X1.72CECE675D1FDP-53,-0X1.72CECE675D1FCP-53]_dac [1.57,1.58]_dac = [0X1.921FB54442D18P+0,0X1.921FB54442D1AP+0]_trv;
+    cosRevBin [-0X1.72CECE675D1FDP-53,0X1.1A62633145C07P-54]_com [1.57,1.58]_dac = [0X1.921FB54442D17P+0,0X1.921FB54442D1aP+0]_trv;
+    cosRevBin [0X1.1A62633145C06P-54,1.0]_def [-2.0,2.0]_com = [-0X1.921FB54442D19P+0, 0X1.921FB54442D19P+0]_trv;
+    cosRevBin [0X1.1A62633145C06P-54,1.0]_dac [0.0,2.0]_def = [0.0,0X1.921FB54442D19P+0]_trv;
+    cosRevBin [-0X1.72CECE675D1FDP-53,1.0]_def [-0.1,1.5708]_dac = [-0.1,0X1.921FB54442D1aP+0]_trv;
+
+    cosRevBin [-0X1P+0,-0X1.FFFFFFFFFFFFFP-1]_dac [3.14,3.15]_def = [0x1.921fb52442d18p+1,0x1.921fb56442d1ap+1]_trv;
+    cosRevBin [-0X1P+0,-0X1.FFFFFFFFFFFFFP-1]_def [-3.15,-3.14]_com = [-0x1.921fb56442d1ap+1,-0x1.921fb52442d18p+1]_trv;
+    cosRevBin [-0X1P+0,-0X1.FFFFFFFFFFFFFP-1]_def [9.42,9.45]_dac = [0x1.2d97c7eb321d2p+3,0x1.2d97c7fb321d3p+3]_trv;
+
+    cosRevBin [0X1.87996529F9D92P-1,1.0]_dac [-1.0,0.1]_def = [-0x1.6666666666667p-1,0.1]_trv;
+    cosRevBin [-0X1.AA22657537205P-2,0X1.14A280FB5068CP-1]_com [0.0,2.1]_dac = [0x1.fffffffffffffp-1,0x1.0000000000001p+1]_trv;
+
+    cosRevBin [0X1.1A62633145C06P-53,0X1.1A62633145C07P-53]_com [-infinity,1.58]_dac = [-infinity,0X1.921FB54442D18P+0]_trv;
+    cosRevBin [0X1.1A62633145C06P-53,0X1.1A62633145C07P-53]_def [-infinity,1.5]_dac = [-infinity,-0X1.921FB54442D17P+0]_trv;
+    cosRevBin [-0X1.72CECE675D1FDP-52,-0X1.72CECE675D1FCP-52]_dac [-1.58,infinity]_dac = [-0x1.921fb54442d1ap+0,infinity]_trv;
+    cosRevBin [-0X1.72CECE675D1FDP-52,-0X1.72CECE675D1FCP-52]_def [-1.5,infinity]_dac = [0x1.921fb54442d19p+0,infinity]_trv;
+}
+
+testcase minimal_tan_rev_test {
+    tanRev [empty] = [empty];
+
+    tanRev [-1.0,1.0] = [entire];
+    tanRev [-156.0,-12.0] = [entire];
+    tanRev [0.0,0.0] = [entire];
+    tanRev [0X1.1A62633145C06P-53,0X1.1A62633145C07P-53] = [entire];
+}
+
+testcase minimal_tan_rev_bin_test {
+    tanRevBin [empty] [-1.5708,1.5708] = [empty];
+    tanRevBin [entire] [-1.5708,1.5708] = [-1.5708,1.5708];
+    tanRevBin [0.0,0.0] [-1.5708,1.5708] = [0.0,0.0];
+
+    tanRevBin [0X1.D02967C31CDB4P+53,0X1.D02967C31CDB5P+53] [-1.5708,1.5708] = [-0x1.921fb54442d1bp+0,0x1.921fb54442d19p+0];
+    tanRevBin [-0X1.1A62633145C07P-53,-0X1.1A62633145C06P-53] [3.14,3.15] = [0X1.921FB54442D17P+1,0X1.921FB54442D19P+1];
+    tanRevBin [0X1.72CECE675D1FCP-52,0X1.72CECE675D1FDP-52] [-3.15,3.15] = [-0X1.921FB54442D19P+1,0X1.921FB54442D1aP+1];
+
+    tanRevBin [-0X1.D02967C31p+53,0X1.D02967C31p+53] [-infinity,1.5707965] = [-infinity, +0x1.921FB82C2BD7Fp0];
+    tanRevBin [-0X1.D02967C31p+53,0X1.D02967C31p+53] [-1.5707965,infinity] = [-0x1.921FB82C2BD7Fp0, +infinity];
+    tanRevBin [-0X1.D02967C31p+53,0X1.D02967C31p+53] [-1.5707965,1.5707965] = [-0x1.921FB82C2BD7Fp0, +0x1.921FB82C2BD7Fp0];
+    tanRevBin [-0X1.D02967C31CDB5P+53,0X1.D02967C31CDB5P+53] [-1.5707965,1.5707965] = [-1.5707965,1.5707965];
+}
+
+testcase minimal_tan_rev_dec_test {
+    tanRev [empty]_trv = [empty]_trv;
+
+    tanRev [-1.0,1.0]_com = [entire]_trv;
+    tanRev [-156.0,-12.0]_dac = [entire]_trv;
+    tanRev [0.0,0.0]_def = [entire]_trv;
+    tanRev [0X1.1A62633145C06P-53,0X1.1A62633145C07P-53]_com = [entire]_trv;
+}
+
+testcase minimal_tan_rev_dec_bin_test {
+    tanRevBin [empty]_trv [-1.5708,1.5708]_def = [empty]_trv;
+    tanRevBin [entire]_def [-1.5708,1.5708]_dac = [-1.5708,1.5708]_trv;
+    tanRevBin [0.0,0.0]_com [-1.5708,1.5708]_def = [0.0,0.0]_trv;
+
+    tanRevBin [0X1.D02967C31CDB4P+53,0X1.D02967C31CDB5P+53]_dac [-1.5708,1.5708]_def = [-0x1.921fb54442d1bp+0,0x1.921fb54442d19p+0]_trv;
+    tanRevBin [-0X1.1A62633145C07P-53,-0X1.1A62633145C06P-53]_def [3.14,3.15]_dac = [0X1.921FB54442D17P+1,0X1.921FB54442D19P+1]_trv;
+    tanRevBin [0X1.72CECE675D1FCP-52,0X1.72CECE675D1FDP-52]_com [-3.15,3.15]_com = [-0X1.921FB54442D19P+1,0X1.921FB54442D1aP+1]_trv;
+
+    tanRevBin [-0X1.D02967C31p+53,0X1.D02967C31p+53]_def [-infinity,1.5707965]_def = [-infinity,0x1.921FB82C2BD7Fp0]_trv;
+    tanRevBin [-0X1.D02967C31p+53,0X1.D02967C31p+53]_com [-1.5707965,infinity]_dac = [-0x1.921FB82C2BD7Fp0,infinity]_trv;
+    tanRevBin [-0X1.D02967C31p+53,0X1.D02967C31p+53]_com [-1.5707965,1.5707965]_com = [-0x1.921FB82C2BD7Fp0,0x1.921FB82C2BD7Fp0]_trv;
+    tanRevBin [-0X1.D02967C31CDB5P+53,0X1.D02967C31CDB5P+53]_dac [-1.5707965,1.5707965]_def = [-1.5707965,1.5707965]_trv;
+}
+
+testcase minimal_cosh_rev_test {
+    coshRev [empty] = [empty];
+
+    coshRev [1.0,infinity] = [entire];
+    coshRev [0.0,infinity] = [entire];
+    coshRev [1.0,1.0] = [0.0,0.0];
+
+    coshRev [0X1.8B07551D9F55P+0,0X1.89BCA168970C6P+432] = [-0X1.2C903022DD7ABP+8,0X1.2C903022DD7ABP+8];
+}
+
+testcase minimal_cosh_rev_bin_test {
+    coshRevBin [empty] [0.0,infinity] = [empty];
+
+    coshRevBin [1.0,infinity] [0.0,infinity] = [0.0,infinity];
+    coshRevBin [0.0,infinity] [1.0,2.0] = [1.0,2.0];
+    coshRevBin [1.0,1.0] [1.0,infinity] = [empty];
+
+    coshRevBin [0X1.8B07551D9F55P+0,0X1.89BCA168970C6P+432] [-infinity,0.0] = [-0X1.2C903022DD7ABP+8,-0x1.fffffffffffffp-1];
+}
+
+testcase minimal_cosh_rev_dec_test {
+    coshRev [empty]_trv = [empty]_trv;
+
+    coshRev [1.0,infinity]_dac = [entire]_trv;
+    coshRev [0.0,infinity]_dac = [entire]_trv;
+    coshRev [1.0,1.0]_def = [0.0,0.0]_trv;
+
+    coshRev [0X1.8B07551D9F55P+0,0X1.89BCA168970C6P+432]_com = [-0X1.2C903022DD7ABP+8,0X1.2C903022DD7ABP+8]_trv;
+}
+
+testcase minimal_cosh_rev_dec_bin_test {
+    coshRevBin [empty]_trv [0.0,infinity]_dac = [empty]_trv;
+
+    coshRevBin [1.0,infinity]_def [0.0,infinity]_dac = [0.0,infinity]_trv;
+    coshRevBin [0.0,infinity]_def [1.0,2.0]_com = [1.0,2.0]_trv;
+    coshRevBin [1.0,1.0]_dac [1.0,infinity]_def = [empty]_trv;
+
+    coshRevBin [0X1.8B07551D9F55P+0,0X1.89BCA168970C6P+432]_com [-infinity,0.0]_dac = [-0X1.2C903022DD7ABP+8,-0x1.fffffffffffffp-1]_trv;
+}
+
+testcase minimal_mul_rev_test {
+    mulRev [empty] [1.0, 2.0] = [empty];
+    mulRev [1.0, 2.0] [empty] = [empty];
+    mulRev [empty] [empty] = [empty];
+
+    mulRev [-2.0, -0.1] [-2.1, -0.4]  = [0X1.999999999999AP-3, 0X1.5P+4];
+    mulRev [-2.0, 0.0] [-2.1, -0.4]  = [0X1.999999999999AP-3, infinity];
+    mulRev [-2.0, 1.1] [-2.1, -0.4]  = [entire];
+    mulRev [0.0, 1.1] [-2.1, -0.4]  = [-infinity, -0X1.745D1745D1745P-2];
+    mulRev [0.01, 1.1] [-2.1, -0.4]  = [-0X1.A400000000001P+7, -0X1.745D1745D1745P-2];
+    mulRev [0.0, 0.0] [-2.1, -0.4] = [empty];
+    mulRev [-infinity, -0.1] [-2.1, -0.4]  = [0.0, 0X1.5P+4];
+    mulRev [-infinity, 0.0] [-2.1, -0.4]  = [0.0, infinity];
+    mulRev [-infinity, 1.1] [-2.1, -0.4]  = [entire];
+    mulRev [-2.0, infinity] [-2.1, -0.4]  = [entire];
+    mulRev [0.0, infinity] [-2.1, -0.4]  = [-infinity, 0.0];
+    mulRev [0.01, infinity] [-2.1, -0.4]  = [-0X1.A400000000001P+7, 0.0];
+    mulRev [entire] [-2.1, -0.4]  = [entire];
+
+    mulRev [-2.0, -0.1] [-2.1, 0.0]  = [0.0, 0X1.5P+4];
+    mulRev [-2.0, 0.0] [-2.1, 0.0]  = [entire];
+    mulRev [-2.0, 1.1] [-2.1, 0.0]  = [entire];
+    mulRev [0.0, 1.1] [-2.1, 0.0]  = [entire];
+    mulRev [0.01, 1.1] [-2.1, 0.0]  = [-0X1.A400000000001P+7, 0.0];
+    mulRev [0.0, 0.0] [-2.1, 0.0]  = [entire];
+    mulRev [-infinity, -0.1] [-2.1, 0.0]  = [0.0, 0X1.5P+4];
+    mulRev [-infinity, 0.0] [-2.1, 0.0]  = [entire];
+    mulRev [-infinity, 1.1] [-2.1, 0.0]  = [entire];
+    mulRev [-2.0, infinity] [-2.1, 0.0]  = [entire];
+    mulRev [0.0, infinity] [-2.1, 0.0]  = [entire];
+    mulRev [0.01, infinity] [-2.1, 0.0]  = [-0X1.A400000000001P+7, 0.0];
+    mulRev [entire] [-2.1, 0.0]  = [entire];
+
+    mulRev [-2.0, -0.1] [-2.1, 0.12]  = [-0X1.3333333333333P+0, 0X1.5P+4];
+    mulRev [-2.0, 0.0] [-2.1, 0.12]  = [entire];
+    mulRev [-2.0, 1.1] [-2.1, 0.12]  = [entire];
+    mulRev [0.0, 1.1] [-2.1, 0.12]  = [entire];
+    mulRev [0.01, 1.1] [-2.1, 0.12]  = [-0X1.A400000000001P+7 , 0X1.8P+3];
+    mulRev [0.0, 0.0] [-2.1, 0.12]  = [entire];
+    mulRev [-infinity, -0.1] [-2.1, 0.12]  = [-0X1.3333333333333P+0, 0X1.5P+4];
+    mulRev [-infinity, 0.0] [-2.1, 0.12]  = [entire];
+    mulRev [-infinity, 1.1] [-2.1, 0.12]  = [entire];
+    mulRev [-2.0, infinity] [-2.1, 0.12]  = [entire];
+    mulRev [0.0, infinity] [-2.1, 0.12]  = [entire];
+    mulRev [0.01, infinity] [-2.1, 0.12]  = [-0X1.A400000000001P+7 , 0X1.8P+3];
+    mulRev [entire] [-2.1, 0.12]  = [entire];
+
+    mulRev [-2.0, -0.1] [0.0, 0.12]  = [-0X1.3333333333333P+0, 0.0];
+    mulRev [-2.0, 0.0] [0.0, 0.12]  = [entire];
+    mulRev [-2.0, 1.1] [0.0, 0.12]  = [entire];
+    mulRev [0.0, 1.1] [0.0, 0.12]  = [entire];
+    mulRev [0.01, 1.1] [0.0, 0.12]  = [0.0, 0X1.8P+3];
+    mulRev [0.0, 0.0] [0.0, 0.12]  = [entire];
+    mulRev [-infinity, -0.1] [0.0, 0.12]  = [-0X1.3333333333333P+0, 0.0];
+    mulRev [-infinity, 0.0] [0.0, 0.12]  = [entire];
+    mulRev [-infinity, 1.1] [0.0, 0.12]  = [entire];
+    mulRev [-2.0, infinity] [0.0, 0.12]  = [entire];
+    mulRev [0.0, infinity] [0.0, 0.12]  = [entire];
+    mulRev [0.01, infinity] [0.0, 0.12]  = [0.0, 0X1.8P+3];
+    mulRev [entire] [0.0, 0.12]  = [entire];
+
+    mulRev [-2.0, -0.1] [0.01, 0.12]  = [-0X1.3333333333333P+0, -0X1.47AE147AE147BP-8];
+    mulRev [-2.0, 0.0] [0.01, 0.12]  = [-infinity, -0X1.47AE147AE147BP-8];
+    mulRev [-2.0, 1.1] [0.01, 0.12]  = [entire];
+    mulRev [0.0, 1.1] [0.01, 0.12]  = [0X1.29E4129E4129DP-7, infinity];
+    mulRev [0.01, 1.1] [0.01, 0.12]  = [0X1.29E4129E4129DP-7, 0X1.8P+3];
+    mulRev [0.0, 0.0] [0.01, 0.12] = [empty];
+    mulRev [-infinity, -0.1] [0.01, 0.12]  = [-0X1.3333333333333P+0, 0.0];
+    mulRev [-infinity, 0.0] [0.01, 0.12]  = [-infinity, 0.0];
+    mulRev [-infinity, 1.1] [0.01, 0.12]  = [entire];
+    mulRev [-2.0, infinity] [0.01, 0.12]  = [entire];
+    mulRev [0.0, infinity] [0.01, 0.12]  = [0.0, infinity];
+    mulRev [0.01, infinity] [0.01, 0.12]  = [0.0, 0X1.8P+3];
+    mulRev [entire] [0.01, 0.12]  = [entire];
+
+    mulRev [-2.0, -0.1] [0.0, 0.0]  = [0.0, 0.0];
+    mulRev [-2.0, 0.0] [0.0, 0.0]  = [entire];
+    mulRev [-2.0, 1.1] [0.0, 0.0]  = [entire];
+    mulRev [0.0, 1.1] [0.0, 0.0]  = [entire];
+    mulRev [0.01, 1.1] [0.0, 0.0]  = [0.0, 0.0];
+    mulRev [0.0, 0.0] [0.0, 0.0]  = [entire];
+    mulRev [-infinity, -0.1] [0.0, 0.0]  = [0.0, 0.0];
+    mulRev [-infinity, 0.0] [0.0, 0.0]  = [entire];
+    mulRev [-infinity, 1.1] [0.0, 0.0]  = [entire];
+    mulRev [-2.0, infinity] [0.0, 0.0]  = [entire];
+    mulRev [0.0, infinity] [0.0, 0.0]  = [entire];
+    mulRev [0.01, infinity] [0.0, 0.0]  = [0.0, 0.0];
+    mulRev [entire] [0.0, 0.0]  = [entire];
+
+
+    mulRev [-2.0, -0.1] [-infinity, -0.1]  = [0X1.999999999999AP-5, infinity];
+    mulRev [-2.0, 0.0] [-infinity, -0.1]  = [0X1.999999999999AP-5 , infinity];
+    mulRev [-2.0, 1.1] [-infinity, -0.1]  = [entire];
+    mulRev [0.0, 1.1] [-infinity, -0.1]  = [-infinity, -0X1.745D1745D1745P-4];
+    mulRev [0.01, 1.1] [-infinity, -0.1]  = [-infinity, -0X1.745D1745D1745P-4];
+    mulRev [0.0, 0.0] [-infinity, -0.1] = [empty];
+    mulRev [-infinity, -0.1] [-infinity, -0.1]  = [0.0, infinity];
+    mulRev [-infinity, 0.0] [-infinity, -0.1]  = [0.0, infinity];
+    mulRev [-infinity, 1.1] [-infinity, -0.1]  = [entire];
+    mulRev [-2.0, infinity] [-infinity, -0.1]  = [entire];
+    mulRev [0.0, infinity] [-infinity, -0.1]  = [-infinity, 0.0];
+    mulRev [0.01, infinity] [-infinity, -0.1]  = [-infinity, 0.0];
+    mulRev [entire] [-infinity, -0.1]  = [entire];
+
+    mulRev [-2.0, -0.1] [-infinity, 0.0]  = [0.0, infinity];
+    mulRev [-2.0, 0.0] [-infinity, 0.0]  = [entire];
+    mulRev [-2.0, 1.1] [-infinity, 0.0]  = [entire];
+    mulRev [0.0, 1.1] [-infinity, 0.0]  = [entire];
+    mulRev [0.01, 1.1] [-infinity, 0.0]  = [-infinity, 0.0];
+    mulRev [0.0, 0.0] [-infinity, 0.0]  = [entire];
+    mulRev [-infinity, -0.1] [-infinity, 0.0]  = [0.0, infinity];
+    mulRev [-infinity, 0.0] [-infinity, 0.0]  = [entire];
+    mulRev [-infinity, 1.1] [-infinity, 0.0]  = [entire];
+    mulRev [-2.0, infinity] [-infinity, 0.0]  = [entire];
+    mulRev [0.0, infinity] [-infinity, 0.0]  = [entire];
+    mulRev [0.01, infinity] [-infinity, 0.0]  = [-infinity, 0.0];
+    mulRev [entire] [-infinity, 0.0]  = [entire];
+
+    mulRev [-2.0, -0.1] [-infinity, 0.3]  = [-0X1.8P+1, infinity];
+    mulRev [-2.0, 0.0] [-infinity, 0.3]  = [entire];
+    mulRev [-2.0, 1.1] [-infinity, 0.3]  = [entire];
+    mulRev [0.0, 1.1] [-infinity, 0.3]  = [entire];
+    mulRev [0.01, 1.1] [-infinity, 0.3]  = [-infinity, 0X1.EP+4];
+    mulRev [0.0, 0.0] [-infinity, 0.3]  = [entire];
+    mulRev [-infinity, -0.1] [-infinity, 0.3]  = [-0X1.8P+1, infinity];
+    mulRev [-infinity, 0.0] [-infinity, 0.3]  = [entire];
+    mulRev [-infinity, 1.1] [-infinity, 0.3]  = [entire];
+    mulRev [-2.0, infinity] [-infinity, 0.3]  = [entire];
+    mulRev [0.0, infinity] [-infinity, 0.3]  = [entire];
+    mulRev [0.01, infinity] [-infinity, 0.3]  = [-infinity, 0X1.EP+4];
+    mulRev [entire] [-infinity, 0.3]  = [entire];
+
+    mulRev [-2.0, -0.1] [-0.21, infinity]  = [-infinity , 0X1.0CCCCCCCCCCCDP+1];
+    mulRev [-2.0, 0.0] [-0.21, infinity]  = [entire];
+    mulRev [-2.0, 1.1] [-0.21, infinity]  = [entire];
+    mulRev [0.0, 1.1] [-0.21, infinity]  = [entire];
+    mulRev [0.01, 1.1] [-0.21, infinity]  = [-0X1.5P+4, infinity];
+    mulRev [0.0, 0.0] [-0.21, infinity]  = [entire];
+    mulRev [-infinity, -0.1] [-0.21, infinity]  = [-infinity, 0X1.0CCCCCCCCCCCDP+1];
+    mulRev [-infinity, 0.0] [-0.21, infinity]  = [entire];
+    mulRev [-infinity, 1.1] [-0.21, infinity]  = [entire];
+    mulRev [-2.0, infinity] [-0.21, infinity]  = [entire];
+    mulRev [0.0, infinity] [-0.21, infinity]  = [entire];
+    mulRev [0.01, infinity] [-0.21, infinity]  = [-0X1.5P+4, infinity];
+    mulRev [entire] [-0.21, infinity]  = [entire];
+
+
+    mulRev [-2.0, -0.1] [0.0, infinity]  = [-infinity, 0.0];
+    mulRev [-2.0, 0.0] [0.0, infinity]  = [entire];
+    mulRev [-2.0, 1.1] [0.0, infinity]  = [entire];
+    mulRev [0.0, 1.1] [0.0, infinity]  = [entire];
+    mulRev [0.01, 1.1] [0.0, infinity]  = [0.0, infinity];
+    mulRev [0.0, 0.0] [0.0, infinity]  = [entire];
+    mulRev [-infinity, -0.1] [0.0, infinity]  = [-infinity, 0.0];
+    mulRev [-infinity, 0.0] [0.0, infinity]  = [entire];
+    mulRev [-infinity, 1.1] [0.0, infinity]  = [entire];
+    mulRev [-2.0, infinity] [0.0, infinity]  = [entire];
+    mulRev [0.0, infinity] [0.0, infinity]  = [entire];
+    mulRev [0.01, infinity] [0.0, infinity]  = [0.0, infinity];
+    mulRev [entire] [0.0, infinity]  = [entire];
+
+    mulRev [-2.0, -0.1] [0.04, infinity]  = [-infinity, -0X1.47AE147AE147BP-6];
+    mulRev [-2.0, 0.0] [0.04, infinity]  = [-infinity, -0X1.47AE147AE147BP-6];
+    mulRev [-2.0, 1.1] [0.04, infinity]  = [entire];
+    mulRev [0.0, 1.1] [0.04, infinity]  = [0X1.29E4129E4129DP-5, infinity];
+    mulRev [0.01, 1.1] [0.04, infinity]  = [0X1.29E4129E4129DP-5, infinity];
+    mulRev [0.0, 0.0] [0.04, infinity] = [empty];
+    mulRev [-infinity, -0.1] [0.04, infinity]  = [-infinity, 0.0];
+    mulRev [-infinity, 0.0] [0.04, infinity]  = [-infinity, 0.0];
+    mulRev [-infinity, 1.1] [0.04, infinity]  = [entire];
+    mulRev [-2.0, infinity] [0.04, infinity]  = [entire];
+    mulRev [0.0, infinity] [0.04, infinity]  = [0.0, infinity];
+    mulRev [0.01, infinity] [0.04, infinity]  = [0.0, infinity];
+    mulRev [entire] [0.04, infinity]  = [entire];
+
+    mulRev [-2.0, -0.1] [entire]  = [entire];
+    mulRev [-2.0, 0.0] [entire]  = [entire];
+    mulRev [-2.0, 1.1] [entire]  = [entire];
+    mulRev [0.0, 1.1] [entire]  = [entire];
+    mulRev [0.01, 1.1] [entire]  = [entire];
+    mulRev [0.0, 0.0] [entire]  = [entire];
+    mulRev [-infinity, -0.1] [entire]  = [entire];
+    mulRev [-infinity, 0.0] [entire]  = [entire];
+    mulRev [-infinity, 1.1] [entire]  = [entire];
+    mulRev [-2.0, infinity] [entire]  = [entire];
+    mulRev [0.0, infinity] [entire]  = [entire];
+    mulRev [0.01, infinity] [entire]  = [entire];
+    mulRev [entire] [entire]  = [entire];
+}
+
+testcase minimal_mul_rev_ten_test {
+    mulRevTen [-2.0, -0.1] [-2.1, -0.4] [-2.1, -0.4]  = [empty];
+    mulRevTen [-2.0, 1.1] [-2.1, -0.4] [-2.1, -0.4]  = [-2.1, -0.4];
+    mulRevTen [0.01, 1.1] [-2.1, 0.0] [-2.1, 0.0]  = [-2.1,0.0];
+    mulRevTen [-infinity, -0.1] [0.0, 0.12] [0.0, 0.12] = [0.0, 0.0];
+    mulRevTen [-2.0, 1.1] [0.04, infinity] [0.04, infinity]  = [0.04, infinity];
+}
+
+testcase minimal_mul_rev_dec_test {
+    mulRev [nai] [1.0,2.0]_dac = [nai];
+    mulRev [1.0,2.0]_dac [nai] = [nai];
+    mulRev [nai] [nai] = [nai];
+
+    mulRev [-2.0, -0.1]_dac [-2.1, -0.4]_dac  = [0X1.999999999999AP-3, 0X1.5P+4]_trv;
+    mulRev [-2.0, -0.1]_def [-2.1, 0.0]_def  = [0.0, 0X1.5P+4]_trv;
+    mulRev [-2.0, -0.1]_com [-2.1, 0.12]_dac  = [-0X1.3333333333333P+0, 0X1.5P+4]_trv;
+    mulRev [-infinity, -0.1]_dac [0.0, 0.12]_com  = [-0X1.3333333333333P+0, 0.0]_trv;
+    mulRev [0.01, 1.1]_def [0.01, 0.12]_dac  = [0X1.29E4129E4129DP-7, 0X1.8P+3]_trv;
+    mulRev [0.01, 1.1]_dac [-infinity, 0.3]_def  = [-infinity, 0X1.EP+4]_trv;
+    mulRev [-infinity, -0.1]_trv [-0.21, infinity]_dac  = [-infinity, 0X1.0CCCCCCCCCCCDP+1]_trv;
+}
+
+testcase minimal_mul_rev_dec_ten_test {
+    mulRevTen [-2.0, -0.1]_dac [-2.1, -0.4]_dac [-2.1, -0.4]_dac  = [empty]_trv;
+    mulRevTen [-2.0, 1.1]_def [-2.1, -0.4]_com [-2.1, -0.4]_com  = [-2.1, -0.4]_trv;
+    mulRevTen [0.01, 1.1]_com [-2.1, 0.0]_dac [-2.1, 0.0]_dac  = [-2.1,0.0]_trv;
+    mulRevTen [-infinity, -0.1]_dac [0.0, 0.12]_com [0.0, 0.12]_com = [0.0, 0.0]_trv;
+    mulRevTen [-2.0, 1.1]_def [0.04, infinity]_dac [0.04, infinity]_dac  = [0.04, infinity]_trv;
+}

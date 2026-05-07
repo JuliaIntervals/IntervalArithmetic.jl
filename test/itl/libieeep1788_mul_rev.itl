@@ -1,0 +1,406 @@
+/*
+
+Unit tests from libieeep1788 for interval reverse multiplication
+(Original author: Marco Nehmeier)
+converted into portable ITL format by Oliver Heimlich.
+
+Copyright 2013-2015 Marco Nehmeier (nehmeier@informatik.uni-wuerzburg.de)
+Copyright 2015-2017 Oliver Heimlich (oheim@posteo.de)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+*/
+
+testcase minimal_mulRevToPair_test {
+    mulRevToPair [empty] [1.0, 2.0] = [empty] [empty];
+    mulRevToPair [1.0, 2.0] [empty] = [empty] [empty];
+    mulRevToPair [empty] [empty] = [empty] [empty];
+
+
+    mulRevToPair [-2.0, -0.1] [-2.1, -0.4] = [0X1.999999999999AP-3, 0X1.5P+4] [empty];
+    mulRevToPair [-2.0, 0.0] [-2.1, -0.4] = [0X1.999999999999AP-3, infinity] [empty];
+    mulRevToPair [-2.0, 1.1] [-2.1, -0.4] = [-infinity, -0X1.745D1745D1745P-2] [0X1.999999999999AP-3, infinity];
+    mulRevToPair [0.0, 1.1] [-2.1, -0.4] = [-infinity, -0X1.745D1745D1745P-2] [empty];
+    mulRevToPair [0.01, 1.1] [-2.1, -0.4] = [-0X1.A400000000001P+7, -0X1.745D1745D1745P-2] [empty];
+    mulRevToPair [0.0, 0.0] [-2.1, -0.4] = [empty] [empty];
+    mulRevToPair [-infinity, -0.1] [-2.1, -0.4] = [0.0, 0X1.5P+4] [empty];
+    mulRevToPair [-infinity, 0.0] [-2.1, -0.4] = [0.0, infinity] [empty];
+    mulRevToPair [-infinity, 1.1] [-2.1, -0.4] = [-infinity, -0X1.745D1745D1745P-2] [0.0, infinity];
+    mulRevToPair [-2.0, infinity] [-2.1, -0.4] = [-infinity, 0.0] [0X1.999999999999AP-3, infinity];
+    mulRevToPair [0.0, infinity] [-2.1, -0.4] = [-infinity, 0.0] [empty];
+    mulRevToPair [0.01, infinity] [-2.1, -0.4] = [-0X1.A400000000001P+7, 0.0] [empty];
+    mulRevToPair [entire] [-2.1, -0.4] = [-infinity, 0.0] [0.0, infinity];
+
+    mulRevToPair [-2.0, -0.1] [-2.1, 0.0] = [0.0, 0X1.5P+4] [empty];
+    mulRevToPair [-2.0, 0.0] [-2.1, 0.0] = [entire] [empty];
+    mulRevToPair [-2.0, 1.1] [-2.1, 0.0] = [entire] [empty];
+    mulRevToPair [0.0, 1.1] [-2.1, 0.0] = [entire] [empty];
+    mulRevToPair [0.01, 1.1] [-2.1, 0.0] = [-0X1.A400000000001P+7, 0.0] [empty];
+    mulRevToPair [0.0, 0.0] [-2.1, 0.0] = [entire] [empty];
+    mulRevToPair [-infinity, -0.1] [-2.1, 0.0] = [0.0, 0X1.5P+4] [empty];
+    mulRevToPair [-infinity, 0.0] [-2.1, 0.0] = [entire] [empty];
+    mulRevToPair [-infinity, 1.1] [-2.1, 0.0] = [entire] [empty];
+    mulRevToPair [-2.0, infinity] [-2.1, 0.0] = [entire] [empty];
+    mulRevToPair [0.0, infinity] [-2.1, 0.0] = [entire] [empty];
+    mulRevToPair [0.01, infinity] [-2.1, 0.0] = [-0X1.A400000000001P+7, 0.0] [empty];
+    mulRevToPair [entire] [-2.1, 0.0] = [entire] [empty];
+
+    mulRevToPair [-2.0, -0.1] [-2.1, 0.12] = [-0X1.3333333333333P+0, 0X1.5P+4] [empty];
+    mulRevToPair [-2.0, 0.0] [-2.1, 0.12] = [entire] [empty];
+    mulRevToPair [-2.0, 1.1] [-2.1, 0.12] = [entire] [empty];
+    mulRevToPair [0.0, 1.1] [-2.1, 0.12] = [entire] [empty];
+    mulRevToPair [0.01, 1.1] [-2.1, 0.12] = [-0X1.A400000000001P+7 , 0X1.8P+3] [empty];
+    mulRevToPair [0.0, 0.0] [-2.1, 0.12] = [entire] [empty];
+    mulRevToPair [-infinity, -0.1] [-2.1, 0.12] = [-0X1.3333333333333P+0, 0X1.5P+4] [empty];
+    mulRevToPair [-infinity, 0.0] [-2.1, 0.12] = [entire] [empty];
+    mulRevToPair [-infinity, 1.1] [-2.1, 0.12] = [entire] [empty];
+    mulRevToPair [-2.0, infinity] [-2.1, 0.12] = [entire] [empty];
+    mulRevToPair [0.0, infinity] [-2.1, 0.12] = [entire] [empty];
+    mulRevToPair [0.01, infinity] [-2.1, 0.12] = [-0X1.A400000000001P+7 , 0X1.8P+3] [empty];
+    mulRevToPair [entire] [-2.1, 0.12] = [entire] [empty];
+
+    mulRevToPair [-2.0, -0.1] [0.0, 0.12] = [-0X1.3333333333333P+0, 0.0] [empty];
+    mulRevToPair [-2.0, 0.0] [0.0, 0.12] = [entire] [empty];
+    mulRevToPair [-2.0, 1.1] [0.0, 0.12] = [entire] [empty];
+    mulRevToPair [0.0, 1.1] [0.0, 0.12] = [entire] [empty];
+    mulRevToPair [0.01, 1.1] [0.0, 0.12] = [0.0, 0X1.8P+3] [empty];
+    mulRevToPair [0.0, 0.0] [0.0, 0.12] = [entire] [empty];
+    mulRevToPair [-infinity, -0.1] [0.0, 0.12] = [-0X1.3333333333333P+0, 0.0] [empty];
+    mulRevToPair [-infinity, 0.0] [0.0, 0.12] = [entire] [empty];
+    mulRevToPair [-infinity, 1.1] [0.0, 0.12] = [entire] [empty];
+    mulRevToPair [-2.0, infinity] [0.0, 0.12] = [entire] [empty];
+    mulRevToPair [0.0, infinity] [0.0, 0.12] = [entire] [empty];
+    mulRevToPair [0.01, infinity] [0.0, 0.12] = [0.0, 0X1.8P+3] [empty];
+    mulRevToPair [entire] [0.0, 0.12] = [entire] [empty];
+
+    mulRevToPair [-2.0, -0.1] [0.01, 0.12] = [-0X1.3333333333333P+0, -0X1.47AE147AE147BP-8] [empty];
+    mulRevToPair [-2.0, 0.0] [0.01, 0.12] = [-infinity, -0X1.47AE147AE147BP-8] [empty];
+    mulRevToPair [-2.0, 1.1] [0.01, 0.12] = [-infinity, -0X1.47AE147AE147BP-8] [0X1.29E4129E4129DP-7, infinity];
+    mulRevToPair [0.0, 1.1] [0.01, 0.12] = [0X1.29E4129E4129DP-7, infinity] [empty];
+    mulRevToPair [0.01, 1.1] [0.01, 0.12] = [0X1.29E4129E4129DP-7, 0X1.8P+3] [empty];
+    mulRevToPair [0.0, 0.0] [0.01, 0.12] = [empty] [empty];
+    mulRevToPair [-infinity, -0.1] [0.01, 0.12] = [-0X1.3333333333333P+0, 0.0] [empty];
+    mulRevToPair [-infinity, 0.0] [0.01, 0.12] = [-infinity, 0.0] [empty];
+    mulRevToPair [-infinity, 1.1] [0.01, 0.12] = [-infinity, 0.0] [0X1.29E4129E4129DP-7, infinity];
+    mulRevToPair [-2.0, infinity] [0.01, 0.12] = [-infinity, -0X1.47AE147AE147BP-8] [0.0, infinity];
+    mulRevToPair [0.0, infinity] [0.01, 0.12] = [0.0, infinity] [empty];
+    mulRevToPair [0.01, infinity] [0.01, 0.12] = [0.0, 0X1.8P+3] [empty];
+    mulRevToPair [entire] [0.01, 0.12] = [-infinity, 0.0] [0.0, infinity];
+
+    mulRevToPair [-2.0, -0.1] [0.0, 0.0] = [0.0, 0.0] [empty];
+    mulRevToPair [-2.0, 0.0] [0.0, 0.0] = [entire] [empty];
+    mulRevToPair [-2.0, 1.1] [0.0, 0.0] = [entire] [empty];
+    mulRevToPair [0.0, 1.1] [0.0, 0.0] = [entire] [empty];
+    mulRevToPair [0.01, 1.1] [0.0, 0.0] = [0.0, 0.0] [empty];
+    mulRevToPair [0.0, 0.0] [0.0, 0.0] = [entire] [empty];
+    mulRevToPair [-infinity, -0.1] [0.0, 0.0] = [0.0, 0.0] [empty];
+    mulRevToPair [-infinity, 0.0] [0.0, 0.0] = [entire] [empty];
+    mulRevToPair [-infinity, 1.1] [0.0, 0.0] = [entire] [empty];
+    mulRevToPair [-2.0, infinity] [0.0, 0.0] = [entire] [empty];
+    mulRevToPair [0.0, infinity] [0.0, 0.0] = [entire] [empty];
+    mulRevToPair [0.01, infinity] [0.0, 0.0] = [0.0, 0.0] [empty];
+    mulRevToPair [entire] [0.0, 0.0] = [entire] [empty];
+
+
+    mulRevToPair [-2.0, -0.1] [-infinity, -0.1] = [0X1.999999999999AP-5, infinity] [empty];
+    mulRevToPair [-2.0, 0.0] [-infinity, -0.1] = [0X1.999999999999AP-5 , infinity] [empty];
+    mulRevToPair [-2.0, 1.1] [-infinity, -0.1] = [-infinity , -0X1.745D1745D1745P-4] [0X1.999999999999AP-5 , infinity];
+    mulRevToPair [0.0, 1.1] [-infinity, -0.1] = [-infinity, -0X1.745D1745D1745P-4] [empty];
+    mulRevToPair [0.01, 1.1] [-infinity, -0.1] = [-infinity, -0X1.745D1745D1745P-4] [empty];
+    mulRevToPair [0.0, 0.0] [-infinity, -0.1] = [empty] [empty];
+    mulRevToPair [-infinity, -0.1] [-infinity, -0.1] = [0.0, infinity] [empty];
+    mulRevToPair [-infinity, 0.0] [-infinity, -0.1] = [0.0, infinity] [empty];
+    mulRevToPair [-infinity, 1.1] [-infinity, -0.1] = [-infinity, -0X1.745D1745D1745P-4] [0.0, infinity];
+    mulRevToPair [-2.0, infinity] [-infinity, -0.1] = [-infinity, 0.0] [0X1.999999999999AP-5 , infinity];
+    mulRevToPair [0.0, infinity] [-infinity, -0.1] = [-infinity, 0.0] [empty];
+    mulRevToPair [0.01, infinity] [-infinity, -0.1] = [-infinity, 0.0] [empty];
+    mulRevToPair [entire] [-infinity, -0.1] = [-infinity, 0.0] [0.0, infinity];
+
+    mulRevToPair [-2.0, -0.1] [-infinity, 0.0] = [0.0, infinity] [empty];
+    mulRevToPair [-2.0, 0.0] [-infinity, 0.0] = [entire] [empty];
+    mulRevToPair [-2.0, 1.1] [-infinity, 0.0] = [entire] [empty];
+    mulRevToPair [0.0, 1.1] [-infinity, 0.0] = [entire] [empty];
+    mulRevToPair [0.01, 1.1] [-infinity, 0.0] = [-infinity, 0.0] [empty];
+    mulRevToPair [0.0, 0.0] [-infinity, 0.0] = [entire] [empty];
+    mulRevToPair [-infinity, -0.1] [-infinity, 0.0] = [0.0, infinity] [empty];
+    mulRevToPair [-infinity, 0.0] [-infinity, 0.0] = [entire] [empty];
+    mulRevToPair [-infinity, 1.1] [-infinity, 0.0] = [entire] [empty];
+    mulRevToPair [-2.0, infinity] [-infinity, 0.0] = [entire] [empty];
+    mulRevToPair [0.0, infinity] [-infinity, 0.0] = [entire] [empty];
+    mulRevToPair [0.01, infinity] [-infinity, 0.0] = [-infinity, 0.0] [empty];
+    mulRevToPair [entire] [-infinity, 0.0] = [entire] [empty];
+
+    mulRevToPair [-2.0, -0.1] [-infinity, 0.3] = [-0X1.8P+1, infinity] [empty];
+    mulRevToPair [-2.0, 0.0] [-infinity, 0.3] = [entire] [empty];
+    mulRevToPair [-2.0, 1.1] [-infinity, 0.3] = [entire] [empty];
+    mulRevToPair [0.0, 1.1] [-infinity, 0.3] = [entire] [empty];
+    mulRevToPair [0.01, 1.1] [-infinity, 0.3] = [-infinity, 0X1.EP+4] [empty];
+    mulRevToPair [0.0, 0.0] [-infinity, 0.3] = [entire] [empty];
+    mulRevToPair [-infinity, -0.1] [-infinity, 0.3] = [-0X1.8P+1, infinity] [empty];
+    mulRevToPair [-infinity, 0.0] [-infinity, 0.3] = [entire] [empty];
+    mulRevToPair [-infinity, 1.1] [-infinity, 0.3] = [entire] [empty];
+    mulRevToPair [-2.0, infinity] [-infinity, 0.3] = [entire] [empty];
+    mulRevToPair [0.0, infinity] [-infinity, 0.3] = [entire] [empty];
+    mulRevToPair [0.01, infinity] [-infinity, 0.3] = [-infinity, 0X1.EP+4] [empty];
+    mulRevToPair [entire] [-infinity, 0.3] = [entire] [empty];
+
+    mulRevToPair [-2.0, -0.1] [-0.21, infinity] = [-infinity , 0X1.0CCCCCCCCCCCDP+1] [empty];
+    mulRevToPair [-2.0, 0.0] [-0.21, infinity] = [entire] [empty];
+    mulRevToPair [-2.0, 1.1] [-0.21, infinity] = [entire] [empty];
+    mulRevToPair [0.0, 1.1] [-0.21, infinity] = [entire] [empty];
+    mulRevToPair [0.01, 1.1] [-0.21, infinity] = [-0X1.5P+4, infinity] [empty];
+    mulRevToPair [0.0, 0.0] [-0.21, infinity] = [entire] [empty];
+    mulRevToPair [-infinity, -0.1] [-0.21, infinity] = [-infinity, 0X1.0CCCCCCCCCCCDP+1] [empty];
+    mulRevToPair [-infinity, 0.0] [-0.21, infinity] = [entire] [empty];
+    mulRevToPair [-infinity, 1.1] [-0.21, infinity] = [entire] [empty];
+    mulRevToPair [-2.0, infinity] [-0.21, infinity] = [entire] [empty];
+    mulRevToPair [0.0, infinity] [-0.21, infinity] = [entire] [empty];
+    mulRevToPair [0.01, infinity] [-0.21, infinity] = [-0X1.5P+4, infinity] [empty];
+    mulRevToPair [entire] [-0.21, infinity] = [entire] [empty];
+
+    mulRevToPair [-2.0, -0.1] [0.0, infinity] = [-infinity, 0.0] [empty];
+    mulRevToPair [-2.0, 0.0] [0.0, infinity] = [entire] [empty];
+    mulRevToPair [-2.0, 1.1] [0.0, infinity] = [entire] [empty];
+    mulRevToPair [0.0, 1.1] [0.0, infinity] = [entire] [empty];
+    mulRevToPair [0.01, 1.1] [0.0, infinity] = [0.0, infinity] [empty];
+    mulRevToPair [0.0, 0.0] [0.0, infinity] = [entire] [empty];
+    mulRevToPair [-infinity, -0.1] [0.0, infinity] = [-infinity, 0.0] [empty];
+    mulRevToPair [-infinity, 0.0] [0.0, infinity] = [entire] [empty];
+    mulRevToPair [-infinity, 1.1] [0.0, infinity] = [entire] [empty];
+    mulRevToPair [-2.0, infinity] [0.0, infinity] = [entire] [empty];
+    mulRevToPair [0.0, infinity] [0.0, infinity] = [entire] [empty];
+    mulRevToPair [0.01, infinity] [0.0, infinity] = [0.0, infinity] [empty];
+    mulRevToPair [entire] [0.0, infinity] = [entire] [empty];
+
+    mulRevToPair [-2.0, -0.1] [0.04, infinity] = [-infinity, -0X1.47AE147AE147BP-6] [empty];
+    mulRevToPair [-2.0, 0.0] [0.04, infinity] = [-infinity, -0X1.47AE147AE147BP-6] [empty];
+    mulRevToPair [-2.0, 1.1] [0.04, infinity] = [-infinity, -0X1.47AE147AE147BP-6] [0X1.29E4129E4129DP-5, infinity];
+    mulRevToPair [0.0, 1.1] [0.04, infinity] = [0X1.29E4129E4129DP-5, infinity] [empty];
+    mulRevToPair [0.01, 1.1] [0.04, infinity] = [0X1.29E4129E4129DP-5, infinity] [empty];
+    mulRevToPair [0.0, 0.0] [0.04, infinity] = [empty] [empty];
+    mulRevToPair [-infinity, -0.1] [0.04, infinity] = [-infinity, 0.0] [empty];
+    mulRevToPair [-infinity, 0.0] [0.04, infinity] = [-infinity, 0.0] [empty];
+    mulRevToPair [-infinity, 1.1] [0.04, infinity] = [-infinity, 0.0] [0X1.29E4129E4129DP-5, infinity];
+    mulRevToPair [-2.0, infinity] [0.04, infinity] = [-infinity, -0X1.47AE147AE147BP-6] [0.0, infinity];
+    mulRevToPair [0.0, infinity] [0.04, infinity] = [0.0, infinity] [empty];
+    mulRevToPair [0.01, infinity] [0.04, infinity] = [0.0, infinity] [empty];
+    mulRevToPair [entire] [0.04, infinity] = [-infinity, 0.0] [0.0, infinity];
+
+    mulRevToPair [-2.0, -0.1] [entire] = [entire] [empty];
+    mulRevToPair [-2.0, 0.0] [entire] = [entire] [empty];
+    mulRevToPair [-2.0, 1.1] [entire] = [entire] [empty];
+    mulRevToPair [0.0, 1.1] [entire] = [entire] [empty];
+    mulRevToPair [0.01, 1.1] [entire] = [entire] [empty];
+    mulRevToPair [0.0, 0.0] [entire] = [entire] [empty];
+    mulRevToPair [-infinity, -0.1] [entire] = [entire] [empty];
+    mulRevToPair [-infinity, 0.0] [entire] = [entire] [empty];
+    mulRevToPair [-infinity, 1.1] [entire] = [entire] [empty];
+    mulRevToPair [-2.0, infinity] [entire] = [entire] [empty];
+    mulRevToPair [0.0, infinity] [entire] = [entire] [empty];
+    mulRevToPair [0.01, infinity] [entire] = [entire] [empty];
+    mulRevToPair [entire] [entire] = [entire] [empty];
+}
+
+testcase minimal_mulRevToPair_dec_test {
+    mulRevToPair [nai] [1.0,2.0]_def = [nai] [nai];
+    mulRevToPair [1.0,2.0]_com [nai] = [nai] [nai];
+    mulRevToPair [nai] [nai] = [nai] [nai];
+
+    mulRevToPair [empty]_trv [1.0, 2.0]_def = [empty]_trv [empty]_trv;
+    mulRevToPair [1.0, 2.0]_com [empty]_trv = [empty]_trv [empty]_trv;
+    mulRevToPair [empty]_trv [empty]_trv = [empty]_trv [empty]_trv;
+
+    mulRevToPair [-2.0, -0.1]_com [-2.1, -0.4]_com = [0X1.999999999999AP-3, 0X1.5P+4]_com [empty]_trv;
+    mulRevToPair [-2.0, 0.0]_dac [-2.1, -0.4]_com = [0X1.999999999999AP-3, infinity]_trv [empty]_trv;
+    mulRevToPair [-2.0, 1.1]_com [-2.1, -0.4]_dac = [-infinity, -0X1.745D1745D1745P-2]_trv [0X1.999999999999AP-3, infinity]_trv;
+    mulRevToPair [0.0, 1.1]_trv [-2.1, -0.4]_def = [-infinity, -0X1.745D1745D1745P-2]_trv [empty]_trv;
+    mulRevToPair [0.01, 1.1]_com [-2.1, -0.4]_com = [-0X1.A400000000001P+7, -0X1.745D1745D1745P-2]_com [empty]_trv;
+    mulRevToPair [0.0, 0.0]_dac [-2.1, -0.4]_def = [empty]_trv [empty]_trv;
+    mulRevToPair [-infinity, -0.1]_dac [-2.1, -0.4]_dac = [0.0, 0X1.5P+4]_dac [empty]_trv;
+    mulRevToPair [-infinity, 0.0]_def [-2.1, -0.4]_com = [0.0, infinity]_trv [empty]_trv;
+    mulRevToPair [-infinity, 1.1]_trv [-2.1, -0.4]_def = [-infinity, -0X1.745D1745D1745P-2]_trv [0.0, infinity]_trv;
+    mulRevToPair [-2.0, infinity]_dac [-2.1, -0.4]_dac = [-infinity, 0.0]_trv [0X1.999999999999AP-3, infinity]_trv;
+    mulRevToPair [0.0, infinity]_def [-2.1, -0.4]_com = [-infinity, 0.0]_trv [empty]_trv;
+    mulRevToPair [0.01, infinity]_def [-2.1, -0.4]_def = [-0X1.A400000000001P+7, 0.0]_def [empty]_trv;
+    mulRevToPair [entire]_dac [-2.1, -0.4]_dac = [-infinity, 0.0]_trv [0.0, infinity]_trv;
+
+    mulRevToPair [-2.0, -0.1]_dac [-2.1, 0.0]_com = [0.0, 0X1.5P+4]_dac [empty]_trv;
+    mulRevToPair [-2.0, 0.0]_dac [-2.1, 0.0]_com = [entire]_trv [empty]_trv;
+    mulRevToPair [-2.0, 1.1]_dac [-2.1, 0.0]_com = [entire]_trv [empty]_trv;
+    mulRevToPair [0.0, 1.1]_dac [-2.1, 0.0]_com = [entire]_trv [empty]_trv;
+    mulRevToPair [0.01, 1.1]_dac [-2.1, 0.0]_com = [-0X1.A400000000001P+7, 0.0]_dac [empty]_trv;
+    mulRevToPair [0.0, 0.0]_dac [-2.1, 0.0]_com = [entire]_trv [empty]_trv;
+    mulRevToPair [-infinity, -0.1]_dac [-2.1, 0.0]_com = [0.0, 0X1.5P+4]_dac [empty]_trv;
+    mulRevToPair [-infinity, 0.0]_dac [-2.1, 0.0]_com = [entire]_trv [empty]_trv;
+    mulRevToPair [-infinity, 1.1]_dac [-2.1, 0.0]_com = [entire]_trv [empty]_trv;
+    mulRevToPair [-2.0, infinity]_dac [-2.1, 0.0]_com = [entire]_trv [empty]_trv;
+    mulRevToPair [0.0, infinity]_dac [-2.1, 0.0]_com = [entire]_trv [empty]_trv;
+    mulRevToPair [0.01, infinity]_dac [-2.1, 0.0]_com = [-0X1.A400000000001P+7, 0.0]_dac [empty]_trv;
+    mulRevToPair [entire]_dac [-2.1, 0.0]_com = [entire]_trv [empty]_trv;
+
+    mulRevToPair [-2.0, -0.1]_def [-2.1, 0.12]_dac = [-0X1.3333333333333P+0, 0X1.5P+4]_def [empty]_trv;
+    mulRevToPair [-2.0, 0.0]_def [-2.1, 0.12]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [-2.0, 1.1]_def [-2.1, 0.12]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [0.0, 1.1]_def [-2.1, 0.12]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [0.01, 1.1]_def [-2.1, 0.12]_dac = [-0X1.A400000000001P+7 , 0X1.8P+3]_def [empty]_trv;
+    mulRevToPair [0.0, 0.0]_def [-2.1, 0.12]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [-infinity, -0.1]_def [-2.1, 0.12]_dac = [-0X1.3333333333333P+0, 0X1.5P+4]_def [empty]_trv;
+    mulRevToPair [-infinity, 0.0]_def [-2.1, 0.12]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [-infinity, 1.1]_def [-2.1, 0.12]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [-2.0, infinity]_def [-2.1, 0.12]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [0.0, infinity]_def [-2.1, 0.12]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [0.01, infinity]_def [-2.1, 0.12]_dac = [-0X1.A400000000001P+7 , 0X1.8P+3]_def [empty]_trv;
+    mulRevToPair [entire]_def [-2.1, 0.12]_dac = [entire]_trv [empty]_trv;
+
+    mulRevToPair [-2.0, -0.1]_com [0.0, 0.12]_com = [-0X1.3333333333333P+0, 0.0]_com [empty]_trv;
+    mulRevToPair [-2.0, 0.0]_com [0.0, 0.12]_com = [entire]_trv [empty]_trv;
+    mulRevToPair [-2.0, 1.1]_com [0.0, 0.12]_com = [entire]_trv [empty]_trv;
+    mulRevToPair [0.0, 1.1]_com [0.0, 0.12]_com = [entire]_trv [empty]_trv;
+    mulRevToPair [0.01, 1.1]_com [0.0, 0.12]_com = [0.0, 0X1.8P+3]_com [empty]_trv;
+    mulRevToPair [0.0, 0.0]_com [0.0, 0.12]_com = [entire]_trv [empty]_trv;
+    mulRevToPair [-infinity, -0.1]_dac [0.0, 0.12]_com = [-0X1.3333333333333P+0, 0.0]_dac [empty]_trv;
+    mulRevToPair [-infinity, 0.0]_dac [0.0, 0.12]_com = [entire]_trv [empty]_trv;
+    mulRevToPair [-infinity, 1.1]_dac [0.0, 0.12]_com = [entire]_trv [empty]_trv;
+    mulRevToPair [-2.0, infinity]_dac [0.0, 0.12]_com = [entire]_trv [empty]_trv;
+    mulRevToPair [0.0, infinity]_dac [0.0, 0.12]_com = [entire]_trv [empty]_trv;
+    mulRevToPair [0.01, infinity]_dac [0.0, 0.12]_com = [0.0, 0X1.8P+3]_dac [empty]_trv;
+    mulRevToPair [entire]_dac [0.0, 0.12]_com = [entire]_trv [empty]_trv;
+
+    mulRevToPair [-2.0, -0.1]_dac [0.01, 0.12]_dac = [-0X1.3333333333333P+0, -0X1.47AE147AE147BP-8]_dac [empty]_trv;
+    mulRevToPair [-2.0, 0.0]_dac [0.01, 0.12]_dac = [-infinity, -0X1.47AE147AE147BP-8]_trv [empty]_trv;
+    mulRevToPair [-2.0, 1.1]_dac [0.01, 0.12]_dac = [-infinity, -0X1.47AE147AE147BP-8]_trv [0X1.29E4129E4129DP-7, infinity]_trv;
+    mulRevToPair [0.0, 1.1]_dac [0.01, 0.12]_dac = [0X1.29E4129E4129DP-7, infinity]_trv [empty]_trv;
+    mulRevToPair [0.01, 1.1]_dac [0.01, 0.12]_dac = [0X1.29E4129E4129DP-7, 0X1.8P+3]_dac [empty]_trv;
+    mulRevToPair [0.0, 0.0]_dac [0.01, 0.12]_dac = [empty]_trv [empty]_trv;
+    mulRevToPair [-infinity, -0.1]_dac [0.01, 0.12]_dac = [-0X1.3333333333333P+0, 0.0]_dac [empty]_trv;
+    mulRevToPair [-infinity, 0.0]_dac [0.01, 0.12]_dac = [-infinity, 0.0]_trv [empty]_trv;
+    mulRevToPair [-infinity, 1.1]_dac [0.01, 0.12]_dac = [-infinity, 0.0]_trv [0X1.29E4129E4129DP-7, infinity]_trv;
+    mulRevToPair [-2.0, infinity]_dac [0.01, 0.12]_dac = [-infinity, -0X1.47AE147AE147BP-8]_trv [0.0, infinity]_trv;
+    mulRevToPair [0.0, infinity]_dac [0.01, 0.12]_dac = [0.0, infinity]_trv [empty]_trv;
+    mulRevToPair [0.01, infinity]_dac [0.01, 0.12]_dac = [0.0, 0X1.8P+3]_dac [empty]_trv;
+    mulRevToPair [entire]_dac [0.01, 0.12]_dac = [-infinity, 0.0]_trv [0.0, infinity]_trv;
+
+    mulRevToPair [-2.0, -0.1]_com [0.0, 0.0]_com = [0.0, 0.0]_com [empty]_trv;
+    mulRevToPair [-2.0, 0.0]_com [0.0, 0.0]_com = [entire]_trv [empty]_trv;
+    mulRevToPair [-2.0, 1.1]_com [0.0, 0.0]_com = [entire]_trv [empty]_trv;
+    mulRevToPair [0.0, 1.1]_com [0.0, 0.0]_com = [entire]_trv [empty]_trv;
+    mulRevToPair [0.01, 1.1]_com [0.0, 0.0]_com = [0.0, 0.0]_com [empty]_trv;
+    mulRevToPair [0.0, 0.0]_com [0.0, 0.0]_com = [entire]_trv [empty]_trv;
+    mulRevToPair [-infinity, -0.1]_dac [0.0, 0.0]_com = [0.0, 0.0]_dac [empty]_trv;
+    mulRevToPair [-infinity, 0.0]_dac [0.0, 0.0]_com = [entire]_trv [empty]_trv;
+    mulRevToPair [-infinity, 1.1]_dac [0.0, 0.0]_com = [entire]_trv [empty]_trv;
+    mulRevToPair [-2.0, infinity]_dac [0.0, 0.0]_com = [entire]_trv [empty]_trv;
+    mulRevToPair [0.0, infinity]_dac [0.0, 0.0]_com = [entire]_trv [empty]_trv;
+    mulRevToPair [0.01, infinity]_dac [0.0, 0.0]_com = [0.0, 0.0]_dac [empty]_trv;
+    mulRevToPair [entire]_dac [0.0, 0.0]_com = [entire]_trv [empty]_trv;
+
+
+
+    mulRevToPair [-2.0, -0.1]_dac [-infinity, -0.1]_dac = [0X1.999999999999AP-5, infinity]_dac [empty]_trv;
+    mulRevToPair [-2.0, 0.0]_dac [-infinity, -0.1]_dac = [0X1.999999999999AP-5 , infinity]_trv [empty]_trv;
+    mulRevToPair [-2.0, 1.1]_dac [-infinity, -0.1]_dac = [-infinity , -0X1.745D1745D1745P-4]_trv [0X1.999999999999AP-5 , infinity]_trv;
+    mulRevToPair [0.0, 1.1]_dac [-infinity, -0.1]_dac = [-infinity, -0X1.745D1745D1745P-4]_trv [empty]_trv;
+    mulRevToPair [0.01, 1.1]_dac [-infinity, -0.1]_dac = [-infinity, -0X1.745D1745D1745P-4]_dac [empty]_trv;
+    mulRevToPair [0.0, 0.0]_dac [-infinity, -0.1]_dac = [empty]_trv [empty]_trv;
+    mulRevToPair [-infinity, -0.1]_dac [-infinity, -0.1]_dac = [0.0, infinity]_dac [empty]_trv;
+    mulRevToPair [-infinity, 0.0]_dac [-infinity, -0.1]_dac = [0.0, infinity]_trv [empty]_trv;
+    mulRevToPair [-infinity, 1.1]_dac [-infinity, -0.1]_dac = [-infinity, -0X1.745D1745D1745P-4]_trv [0.0, infinity]_trv;
+    mulRevToPair [-2.0, infinity]_dac [-infinity, -0.1]_dac = [-infinity, 0.0]_trv [0X1.999999999999AP-5 , infinity]_trv;
+    mulRevToPair [0.0, infinity]_dac [-infinity, -0.1]_dac = [-infinity, 0.0]_trv [empty]_trv;
+    mulRevToPair [0.01, infinity]_dac [-infinity, -0.1]_dac = [-infinity, 0.0]_dac [empty]_trv;
+    mulRevToPair [entire]_dac [-infinity, -0.1]_dac = [-infinity, 0.0]_trv [0.0, infinity]_trv;
+
+    mulRevToPair [-2.0, -0.1]_dac [-infinity, 0.0]_dac = [0.0, infinity]_dac [empty]_trv;
+    mulRevToPair [-2.0, 0.0]_dac [-infinity, 0.0]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [-2.0, 1.1]_dac [-infinity, 0.0]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [0.0, 1.1]_dac [-infinity, 0.0]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [0.01, 1.1]_dac [-infinity, 0.0]_dac = [-infinity, 0.0]_dac [empty]_trv;
+    mulRevToPair [0.0, 0.0]_dac [-infinity, 0.0]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [-infinity, -0.1]_dac [-infinity, 0.0]_dac = [0.0, infinity]_dac [empty]_trv;
+    mulRevToPair [-infinity, 0.0]_dac [-infinity, 0.0]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [-infinity, 1.1]_dac [-infinity, 0.0]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [-2.0, infinity]_dac [-infinity, 0.0]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [0.0, infinity]_dac [-infinity, 0.0]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [0.01, infinity]_dac [-infinity, 0.0]_dac = [-infinity, 0.0]_dac [empty]_trv;
+    mulRevToPair [entire]_dac [-infinity, 0.0]_dac = [entire]_trv [empty]_trv;
+
+    mulRevToPair [-2.0, -0.1]_dac [-infinity, 0.3]_dac = [-0X1.8P+1, infinity]_dac [empty]_trv;
+    mulRevToPair [-2.0, 0.0]_dac [-infinity, 0.3]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [-2.0, 1.1]_dac [-infinity, 0.3]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [0.0, 1.1]_dac [-infinity, 0.3]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [0.01, 1.1]_dac [-infinity, 0.3]_dac = [-infinity, 0X1.EP+4]_dac [empty]_trv;
+    mulRevToPair [0.0, 0.0]_dac [-infinity, 0.3]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [-infinity, -0.1]_dac [-infinity, 0.3]_dac = [-0X1.8P+1, infinity]_dac [empty]_trv;
+    mulRevToPair [-infinity, 0.0]_dac [-infinity, 0.3]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [-infinity, 1.1]_dac [-infinity, 0.3]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [-2.0, infinity]_dac [-infinity, 0.3]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [0.0, infinity]_dac [-infinity, 0.3]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [0.01, infinity]_dac [-infinity, 0.3]_dac = [-infinity, 0X1.EP+4]_dac [empty]_trv;
+    mulRevToPair [entire]_dac [-infinity, 0.3]_dac = [entire]_trv [empty]_trv;
+
+    mulRevToPair [-2.0, -0.1]_dac [-0.21, infinity]_dac = [-infinity , 0X1.0CCCCCCCCCCCDP+1]_dac [empty]_trv;
+    mulRevToPair [-2.0, 0.0]_dac [-0.21, infinity]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [-2.0, 1.1]_dac [-0.21, infinity]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [0.0, 1.1]_dac [-0.21, infinity]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [0.01, 1.1]_dac [-0.21, infinity]_dac = [-0X1.5P+4, infinity]_dac [empty]_trv;
+    mulRevToPair [0.0, 0.0]_dac [-0.21, infinity]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [-infinity, -0.1]_dac [-0.21, infinity]_dac = [-infinity, 0X1.0CCCCCCCCCCCDP+1]_dac [empty]_trv;
+    mulRevToPair [-infinity, 0.0]_dac [-0.21, infinity]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [-infinity, 1.1]_dac [-0.21, infinity]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [-2.0, infinity]_dac [-0.21, infinity]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [0.0, infinity]_dac [-0.21, infinity]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [0.01, infinity]_dac [-0.21, infinity]_dac = [-0X1.5P+4, infinity]_dac [empty]_trv;
+    mulRevToPair [entire]_dac [-0.21, infinity]_dac = [entire]_trv [empty]_trv;
+
+    mulRevToPair [-2.0, -0.1]_dac [0.0, infinity]_dac = [-infinity, 0.0]_dac [empty]_trv;
+    mulRevToPair [-2.0, 0.0]_dac [0.0, infinity]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [-2.0, 1.1]_dac [0.0, infinity]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [0.0, 1.1]_dac [0.0, infinity]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [0.01, 1.1]_dac [0.0, infinity]_dac = [0.0, infinity]_dac [empty]_trv;
+    mulRevToPair [0.0, 0.0]_dac [0.0, infinity]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [-infinity, -0.1]_dac [0.0, infinity]_dac = [-infinity, 0.0]_dac [empty]_trv;
+    mulRevToPair [-infinity, 0.0]_dac [0.0, infinity]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [-infinity, 1.1]_dac [0.0, infinity]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [-2.0, infinity]_dac [0.0, infinity]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [0.0, infinity]_dac [0.0, infinity]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [0.01, infinity]_dac [0.0, infinity]_dac = [0.0, infinity]_dac [empty]_trv;
+    mulRevToPair [entire]_dac [0.0, infinity]_dac = [entire]_trv [empty]_trv;
+
+    mulRevToPair [-2.0, -0.1]_dac [0.04, infinity]_dac = [-infinity, -0X1.47AE147AE147BP-6]_dac [empty]_trv;
+    mulRevToPair [-2.0, 0.0]_dac [0.04, infinity]_dac = [-infinity, -0X1.47AE147AE147BP-6]_trv [empty]_trv;
+    mulRevToPair [-2.0, 1.1]_dac [0.04, infinity]_dac = [-infinity, -0X1.47AE147AE147BP-6]_trv [0X1.29E4129E4129DP-5, infinity]_trv;
+    mulRevToPair [0.0, 1.1]_dac [0.04, infinity]_dac = [0X1.29E4129E4129DP-5, infinity]_trv [empty]_trv;
+    mulRevToPair [0.01, 1.1]_dac [0.04, infinity]_dac = [0X1.29E4129E4129DP-5, infinity]_dac [empty]_trv;
+    mulRevToPair [0.0, 0.0]_dac [0.04, infinity]_dac = [empty]_trv [empty]_trv;
+    mulRevToPair [-infinity, -0.1]_dac [0.04, infinity]_dac = [-infinity, 0.0]_dac [empty]_trv;
+    mulRevToPair [-infinity, 0.0]_dac [0.04, infinity]_dac = [-infinity, 0.0]_trv [empty]_trv;
+    mulRevToPair [-infinity, 1.1]_dac [0.04, infinity]_dac = [-infinity, 0.0]_trv [0X1.29E4129E4129DP-5, infinity]_trv;
+    mulRevToPair [-2.0, infinity]_dac [0.04, infinity]_dac = [-infinity, -0X1.47AE147AE147BP-6]_trv [0.0, infinity]_trv;
+    mulRevToPair [0.0, infinity]_dac [0.04, infinity]_dac = [0.0, infinity]_trv [empty]_trv;
+    mulRevToPair [0.01, infinity]_dac [0.04, infinity]_dac = [0.0, infinity]_dac [empty]_trv;
+    mulRevToPair [entire]_dac [0.04, infinity]_dac = [-infinity, 0.0]_trv [0.0, infinity]_trv;
+
+    mulRevToPair [-2.0, -0.1]_dac [entire]_dac = [entire]_dac [empty]_trv;
+    mulRevToPair [-2.0, 0.0]_dac [entire]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [-2.0, 1.1]_dac [entire]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [0.0, 1.1]_dac [entire]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [0.01, 1.1]_dac [entire]_dac = [entire]_dac [empty]_trv;
+    mulRevToPair [0.0, 0.0]_dac [entire]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [-infinity, -0.1]_dac [entire]_dac = [entire]_dac [empty]_trv;
+    mulRevToPair [-infinity, 0.0]_dac [entire]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [-infinity, 1.1]_dac [entire]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [-2.0, infinity]_dac [entire]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [0.0, infinity]_dac [entire]_dac = [entire]_trv [empty]_trv;
+    mulRevToPair [0.01, infinity]_dac [entire]_dac = [entire]_dac [empty]_trv;
+    mulRevToPair [entire]_dac [entire]_dac = [entire]_trv [empty]_trv;
+}
