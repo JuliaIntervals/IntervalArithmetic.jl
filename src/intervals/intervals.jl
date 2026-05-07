@@ -55,4 +55,6 @@ include("interval_operations/reverse.jl")
         sinh_rev, tanh_rev,
         asin_rev, acos_rev, atan_rev,
         asinh_rev, acosh_rev, atanh_rev,
-        inv_rev, sign_rev, pow_rev1, pow_rev2
+        inv_rev, sign_rev, pow_rev1, pow_rev2,
+        plus_rev, minus_rev, times_rev, div_rev, power_rev,
+        max_rev, min_rev

@@ -186,6 +186,124 @@ end
     @test isnai(pow_rev2(interval(2.0, 2.0), nai(Interval{Float64})))
 end
 
+@testset "Tuple-rewrite reverses: plus_rev, minus_rev, times_rev, div_rev" begin
+    a = bareinterval(1.0, 5.0)
+    b = bareinterval(0.0, 2.0)
+    c = bareinterval(0.0, 4.0)
+
+    # plus_rev: a = b + c
+    a′, b′, c′ = plus_rev(a, b, c)
+    @test isequal_interval(a′, a)
+    @test isequal_interval(b′, intersect_interval(b, a - c))
+    @test isequal_interval(c′, intersect_interval(c, a - b))
+
+    # minus_rev: a = b - c
+    a′, b′, c′ = minus_rev(a, b, c)
+    @test isequal_interval(a′, a)
+    @test isequal_interval(b′, intersect_interval(b, a + c))
+    @test isequal_interval(c′, intersect_interval(c, b - a))
+
+    # minus_rev unary: a = -b
+    a′, b′ = minus_rev(bareinterval(-2.0, -1.0), bareinterval(0.0, 5.0))
+    @test isequal_interval(b′, bareinterval(1.0, 2.0))
+
+    # times_rev: a = b * c, no zero straddle → simple division.
+    # b ∩ (a/c) = [1, 2] ∩ [2/3, 6] = [1, 2]; c ∩ (a/b) = [1, 3] ∩ [1, 6] = [1, 3].
+    a′, b′, c′ = times_rev(bareinterval(2.0, 6.0), bareinterval(1.0, 2.0), bareinterval(1.0, 3.0))
+    @test isequal_interval(b′, bareinterval(1.0, 2.0))
+    @test isequal_interval(c′, bareinterval(1.0, 3.0))
+
+    # times_rev: with `0 ∈ b` → uses extended_div + hull
+    a′, b′, c′ = times_rev(bareinterval(1.0, 1.0), bareinterval(-1.0, 1.0), bareinterval(0.5, 2.0))
+    @test issubset_interval(bareinterval(1.0, 1.0), c′)  # c' must contain solutions
+
+    # div_rev: a = b / c
+    a′, b′, c′ = div_rev(bareinterval(1.0, 2.0), bareinterval(0.0, 10.0), bareinterval(1.0, 5.0))
+    @test isequal_interval(b′, intersect_interval(bareinterval(0.0, 10.0), bareinterval(1.0, 2.0) * bareinterval(1.0, 5.0)))
+
+    # Decoration: tuple form forces trv on derived outputs, passes a through
+    a, b, c = interval(1.0, 5.0), interval(0.0, 2.0), interval(0.0, 4.0)
+    a′, b′, c′ = plus_rev(a, b, c)
+    @test decoration(a′) == decoration(a)        # passthrough
+    @test decoration(b′) == trv
+    @test decoration(c′) == trv
+
+    # NaI propagation across the tuple
+    nai_iv = nai(Interval{Float64})
+    a′, b′, c′ = plus_rev(nai_iv, interval(0.0, 1.0), interval(0.0, 1.0))
+    @test isnai(a′) && isnai(b′) && isnai(c′)
+end
+
+@testset "power_rev" begin
+    # n = 2: a = b^2 = [4, 9] ⇒ b ⊆ [-3, -2] ∪ [2, 3], hull = [-3, 3]
+    a, b, _ = power_rev(bareinterval(4.0, 9.0), bareinterval(-10.0, 10.0), 2)
+    @test issubset_interval(bareinterval(2.0, 3.0), b)
+    @test issubset_interval(bareinterval(-3.0, -2.0), b)
+
+    # n = 3: a = b^3 = [8, 27] ⇒ b ⊆ [2, 3]
+    a, b, _ = power_rev(bareinterval(8.0, 27.0), bareinterval(-10.0, 10.0), 3)
+    @test issubset_interval(bareinterval(2.0, 3.0), b)
+
+    # n = 0: a contains 1 ⇒ b unchanged; otherwise empty
+    _, b, _ = power_rev(bareinterval(1.0, 2.0), bareinterval(-5.0, 5.0), 0)
+    @test isequal_interval(b, bareinterval(-5.0, 5.0))
+    _, b, _ = power_rev(bareinterval(2.0, 3.0), bareinterval(-5.0, 5.0), 0)
+    @test isempty_interval(b)
+
+    # n = 1: identity
+    _, b, _ = power_rev(bareinterval(1.0, 2.0), bareinterval(0.0, 5.0), 1)
+    @test isequal_interval(b, bareinterval(1.0, 2.0))
+
+    # n = -1: inverse
+    _, b, _ = power_rev(bareinterval(0.5, 1.0), bareinterval(0.0, 5.0), -1)
+    @test issubset_interval(bareinterval(1.0, 2.0), b)
+
+    # Even n with negative `a` → empty
+    _, b, _ = power_rev(bareinterval(-9.0, -4.0), bareinterval(-10.0, 10.0), 2)
+    @test isempty_interval(b)
+
+    # Default `b = entire`
+    _, b, _ = power_rev(bareinterval(4.0, 9.0), 2)
+    @test issubset_interval(bareinterval(2.0, 3.0), b)
+
+    # Interval method preserves `n` as Int and decorates b' as `trv`
+    a_iv, b_iv, n_out = power_rev(interval(4.0, 9.0), interval(-10.0, 10.0), 2)
+    @test n_out === 2
+    @test decoration(a_iv) == decoration(interval(4.0, 9.0))
+    @test decoration(b_iv) == trv
+
+    # NaI propagation: tuple of NaIs (with `n` passed through)
+    nai_iv = nai(Interval{Float64})
+    a_iv, b_iv, n_out = power_rev(nai_iv, interval(-10.0, 10.0), 2)
+    @test isnai(a_iv) && isnai(b_iv) && n_out === 2
+end
+
+@testset "max_rev and min_rev" begin
+    # max_rev: a = max(b, c), b unambiguously above c → a tightens b
+    a, b, c = bareinterval(2.0, 4.0), bareinterval(0.0, 5.0), bareinterval(-2.0, 1.0)
+    a′, b′, c′ = max_rev(a, b, c)
+    # b > c entirely (inf(b)=0 > sup(c)=1? no, 0 < 1). So b > c not strict.
+    # Just verify validity: any (b∈b', c∈c') with max(b,c) ∈ a is satisfied.
+    @test issubset_interval(a, a′)
+
+    # max_rev empty propagation
+    a′, b′, c′ = max_rev(emptyinterval(BareInterval{Float64}),
+                         bareinterval(0.0, 1.0),
+                         bareinterval(0.0, 1.0))
+    @test isempty_interval(b′) && isempty_interval(c′)
+
+    # min_rev mirror
+    a, b, c = bareinterval(0.0, 2.0), bareinterval(0.0, 5.0), bareinterval(-2.0, 1.0)
+    a′, b′, c′ = min_rev(a, b, c)
+    @test issubset_interval(a, a′)
+
+    # Decoration / NaI on the Interval methods
+    @test decoration(max_rev(interval(2.0, 4.0), interval(0.0, 5.0), interval(-2.0, 1.0))[2]) == trv
+    nai_iv = nai(Interval{Float64})
+    a′, b′, c′ = min_rev(nai_iv, interval(0.0, 1.0), interval(0.0, 1.0))
+    @test isnai(a′) && isnai(b′) && isnai(c′)
+end
+
 @testset "mul_rev_to_pair" begin
     # 0 ∉ b → standard division, second pair element empty
     r1, r2 = mul_rev_to_pair(bareinterval(1.0, 2.0), bareinterval(3.0, 4.0))

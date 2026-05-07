@@ -35,6 +35,31 @@ function _rev_dispatch(bare_impl, intervals::Tuple, extras::Tuple, dec)
     return _set_decoration(_unsafe_interval(r, decoration(r), guaranteed), dec)
 end
 
+# Bridge a tuple-returning `BareInterval` reverse to the `Interval` API. The
+# bare impl returns `(o₁, …, oₘ)` where the first `n_pass` outputs are
+# inputs returned unchanged and the remaining `m - n_pass` are derived
+# values to be wrapped as `Interval`s with the §11.7.1 `trv` decoration
+# (or `dec` if the user overrides). On any NaI input the entire tuple is
+# `nai`. Carrying `n_pass` as a `Val` keeps the output tuple type-stable.
+function _rev_dispatch_tuple(bare_impl, intervals::NTuple{N,Interval},
+                             ::Val{n_pass}, dec) where {N, n_pass}
+    if any(isnai, intervals)
+        T = promote_type(map(numtype, intervals)...)
+        nai_iv = nai(Interval{T})
+        return ntuple(_ -> nai_iv, Val(N))
+    end
+    bare_results = bare_impl(map(bareinterval, intervals)...)
+    g = mapreduce(isguaranteed, &, intervals)
+    return ntuple(Val(N)) do i
+        if i ≤ n_pass
+            return intervals[i]
+        else
+            r = bare_results[i]
+            return _set_decoration(_unsafe_interval(r, decoration(r), g), dec)
+        end
+    end
+end
+
 # Largest `|k|` for which `T(k)` and `T(2k)` are exactly representable.
 # Beyond this scale the period of sin/cos/tan is unresolvable in `T` and the
 # trigonometric reverses fall back to returning `x` unchanged.
@@ -815,3 +840,240 @@ pow_rev2(a::Interval, c::Interval; dec = :default) =
     _rev_dispatch(pow_rev2, (a, c), (), dec)
 pow_rev2(a::Interval, c::Interval, x::Interval; dec = :default) =
     _rev_dispatch(pow_rev2, (a, c, x), (), dec)
+
+# ------------------------------------------------------------------
+# Tuple-rewriting reverses
+# ------------------------------------------------------------------
+#
+# These follow the constraint-propagation convention `f_rev(a, b, c)` for a
+# binary forward `a = f(b, c)`: given current enclosures of `a`, `b`, `c`,
+# return the triplet `(a, b', c')` where `b' ⊆ b` and `c' ⊆ c` are the
+# tightenings induced by the constraint. `a` is returned unchanged.
+#
+# Equivalent IEEE 1788-style per-variable solves are available as
+# `add_rev`, `sub_rev1`/`sub_rev2`, `mul_rev`, `div_rev1`/`div_rev2`,
+# `pown_rev`. The tuple form here is convenient for contractor-style code.
+#
+# `times_rev` is the multiplicative tuple-rewrite (renamed from the
+# IntervalContractors name `mul_rev` to avoid colliding with the IEEE 1788
+# `mul_rev(b, c, x)` already exported by this module).
+
+# `plus_rev` — `a = b + c`
+"""
+    plus_rev(a, b, c)
+
+Given `a = b + c`, return `(a, b ∩ (a - c), c ∩ (a - b))`.
+"""
+function plus_rev(a::BareInterval{T}, b::BareInterval{T}, c::BareInterval{T}) where {T<:NumTypes}
+    return (a,
+            intersect_interval(b, a - c),
+            intersect_interval(c, a - b))
+end
+plus_rev(a::BareInterval, b::BareInterval, c::BareInterval) =
+    plus_rev(promote(a, b, c)...)
+
+plus_rev(a::Interval, b::Interval, c::Interval; dec = :default) =
+    _rev_dispatch_tuple(plus_rev, (a, b, c), Val(1), dec)
+
+# `minus_rev` — `a = b - c` (and unary `a = -b`)
+"""
+    minus_rev(a, b, c)
+    minus_rev(a, b)
+
+Given `a = b - c`, return `(a, b ∩ (a + c), c ∩ (b - a))`. The two-argument
+form treats `a = -b` and returns `(a, b ∩ -a)`.
+"""
+function minus_rev(a::BareInterval{T}, b::BareInterval{T}, c::BareInterval{T}) where {T<:NumTypes}
+    return (a,
+            intersect_interval(b, a + c),
+            intersect_interval(c, b - a))
+end
+minus_rev(a::BareInterval, b::BareInterval, c::BareInterval) =
+    minus_rev(promote(a, b, c)...)
+
+function minus_rev(a::BareInterval{T}, b::BareInterval{T}) where {T<:NumTypes}
+    return (a, intersect_interval(b, -a))
+end
+minus_rev(a::BareInterval, b::BareInterval) = minus_rev(promote(a, b)...)
+
+minus_rev(a::Interval, b::Interval, c::Interval; dec = :default) =
+    _rev_dispatch_tuple(minus_rev, (a, b, c), Val(1), dec)
+minus_rev(a::Interval, b::Interval; dec = :default) =
+    _rev_dispatch_tuple(minus_rev, (a, b), Val(1), dec)
+
+# `times_rev` — `a = b * c`
+"""
+    times_rev(a, b, c)
+
+Given `a = b * c`, return `(a, b', c')` with `b' ⊆ b`, `c' ⊆ c` tightened by
+the constraint. Uses the two-output extended division when `0 ∈ b` (resp.
+`0 ∈ c`) and takes the hull, yielding a single-interval enclosure of each
+output. Renamed from IntervalContractors' `mul_rev` to avoid the collision
+with the IEEE 1788-style `mul_rev(b, c, x)`.
+"""
+function times_rev(a::BareInterval{T}, b::BareInterval{T}, c::BareInterval{T}) where {T<:NumTypes}
+    if in_interval(0, b)
+        t1, t2 = extended_div(a, b)
+        c_new = hull(intersect_interval(c, t1), intersect_interval(c, t2))
+    else
+        c_new = intersect_interval(c, a / b)
+    end
+    if in_interval(0, c)
+        t1, t2 = extended_div(a, c)
+        b_new = hull(intersect_interval(b, t1), intersect_interval(b, t2))
+    else
+        b_new = intersect_interval(b, a / c)
+    end
+    return (a, b_new, c_new)
+end
+times_rev(a::BareInterval, b::BareInterval, c::BareInterval) =
+    times_rev(promote(a, b, c)...)
+
+times_rev(a::Interval, b::Interval, c::Interval; dec = :default) =
+    _rev_dispatch_tuple(times_rev, (a, b, c), Val(1), dec)
+
+# `div_rev` — `a = b / c`
+"""
+    div_rev(a, b, c)
+
+Given `a = b / c`, return `(a, b', c')` with `b' = b ∩ (a · c)` and
+`c' = c ∩ (b' / a)`. The second tightening uses the already-tightened
+`b'` to deliver a sharper enclosure than the symmetric formula would.
+"""
+function div_rev(a::BareInterval{T}, b::BareInterval{T}, c::BareInterval{T}) where {T<:NumTypes}
+    b_new = intersect_interval(b, a * c)
+    c_new = intersect_interval(c, b_new / a)
+    return (a, b_new, c_new)
+end
+div_rev(a::BareInterval, b::BareInterval, c::BareInterval) =
+    div_rev(promote(a, b, c)...)
+
+div_rev(a::Interval, b::Interval, c::Interval; dec = :default) =
+    _rev_dispatch_tuple(div_rev, (a, b, c), Val(1), dec)
+
+# `power_rev` — `a = b^n` (integer `n`) and `a = b^c` (interval `c`)
+"""
+    power_rev(a, b, n::Integer)
+    power_rev(a, n::Integer)
+
+Reverse for integer power `a = b^n`. Returns `(a, b', n)` with `b'` the
+tightening of `b` induced by the constraint. The two-argument form takes
+`b = entireinterval()`.
+"""
+function power_rev(a::BareInterval{T}, b::BareInterval{T}, n::Integer) where {T<:AbstractFloat}
+    (isempty_interval(a) | isempty_interval(b)) &&
+        return (a, emptyinterval(BareInterval{T}), n)
+
+    if iszero(n)
+        in_interval(1, a) && return (a, b, n)
+        return (a, emptyinterval(BareInterval{T}), n)
+    end
+
+    n ==  1 && return (a, intersect_interval(b, a), n)
+    n == -1 && return (a, intersect_interval(b, inv(a)), n)
+
+    # `rootn(a, n)` already handles: clipping to `[0, ∞)` for even `|n|`,
+    # sign-preserving root for odd `|n|`, and `n < 0` via `inv(rootn(·, |n|))`.
+    root = rootn(a, n)
+    b_new = iseven(n) ? _pm_fold(root, b) : intersect_interval(root, b)
+    return (a, b_new, n)
+end
+power_rev(a::BareInterval{T}, n::Integer) where {T<:NumTypes} =
+    power_rev(a, entireinterval(BareInterval{T}), n)
+
+# `Interval` dispatch for `power_rev(a, b, n::Integer)` — `n` passes through
+# unchanged (it's an `Int`, not an `Interval`).
+function power_rev(a::Interval, b::Interval, n::Integer; dec = :default)
+    if isnai(a) | isnai(b)
+        T = promote_type(numtype(a), numtype(b))
+        nai_iv = nai(Interval{T})
+        return (nai_iv, nai_iv, n)
+    end
+    _, b_bare, _ = power_rev(bareinterval(a), bareinterval(b), n)
+    g = isguaranteed(a) & isguaranteed(b)
+    b_new = _set_decoration(_unsafe_interval(b_bare, decoration(b_bare), g), dec)
+    return (a, b_new, n)
+end
+power_rev(a::Interval, n::Integer; dec = :default) =
+    power_rev(a, entireinterval(typeof(a)), n; dec = dec)
+
+"""
+    power_rev(a, b, c)
+
+Reverse for general power `a = b^c`. When `c` reduces to a thin integer this
+defers to `power_rev(a, b, Int(c))`; otherwise computes
+`b' = b ∩ a^(1/c)` and `c' = c ∩ log(a)/log(b)`.
+"""
+function power_rev(a::BareInterval{T}, b::BareInterval{T}, c::BareInterval{T}) where {T<:NumTypes}
+    if isthininteger(c)
+        a2, b2, _ = power_rev(a, b, Int(inf(c)))
+        return (a2, b2, c)
+    end
+    b_new = intersect_interval(b, a ^ inv(c))
+    c_new = intersect_interval(c, log(a) / log(b))
+    return (a, b_new, c_new)
+end
+power_rev(a::BareInterval, b::BareInterval, c::BareInterval) =
+    power_rev(promote(a, b, c)...)
+
+power_rev(a::Interval, b::Interval, c::Interval; dec = :default) =
+    _rev_dispatch_tuple(power_rev, (a, b, c), Val(1), dec)
+
+# `max_rev`, `min_rev`
+"""
+    max_rev(a, b, c)
+
+Given `a = max(b, c)`, return `(a, b', c')` with the tightenings induced
+by the constraint. When `b` is unambiguously above `c` (resp. below)
+the entirety of `a` is attributed to `b` (resp. `c`); otherwise only the
+unambiguous portions are propagated.
+"""
+function max_rev(a::BareInterval{T}, b::BareInterval{T}, c::BareInterval{T}) where {T<:NumTypes}
+    (isempty_interval(a) | isempty_interval(b) | isempty_interval(c)) &&
+        return (a, emptyinterval(BareInterval{T}), emptyinterval(BareInterval{T}))
+
+    B_lo, B_hi = inf(b), sup(b)
+    C_lo, C_hi = inf(c), sup(c)
+
+    (inf(b) > sup(c)) && (B_lo = max(inf(b), inf(a)))
+    (inf(b) < inf(c)) && (C_lo = max(inf(c), inf(a)))
+    (sup(b) > sup(c)) && (B_hi = min(sup(b), sup(a)))
+    (sup(b) < sup(c)) && (C_hi = min(sup(c), sup(a)))
+
+    b_new = B_lo > B_hi ? emptyinterval(BareInterval{T}) : _unsafe_bareinterval(T, B_lo, B_hi)
+    c_new = C_lo > C_hi ? emptyinterval(BareInterval{T}) : _unsafe_bareinterval(T, C_lo, C_hi)
+    return (a, b_new, c_new)
+end
+max_rev(a::BareInterval, b::BareInterval, c::BareInterval) =
+    max_rev(promote(a, b, c)...)
+
+max_rev(a::Interval, b::Interval, c::Interval; dec = :default) =
+    _rev_dispatch_tuple(max_rev, (a, b, c), Val(1), dec)
+
+"""
+    min_rev(a, b, c)
+
+Given `a = min(b, c)`, return `(a, b', c')` with the tightenings induced
+by the constraint. Symmetric counterpart of `max_rev`.
+"""
+function min_rev(a::BareInterval{T}, b::BareInterval{T}, c::BareInterval{T}) where {T<:NumTypes}
+    (isempty_interval(a) | isempty_interval(b) | isempty_interval(c)) &&
+        return (a, emptyinterval(BareInterval{T}), emptyinterval(BareInterval{T}))
+
+    B_lo, B_hi = inf(b), sup(b)
+    C_lo, C_hi = inf(c), sup(c)
+
+    (inf(b) > inf(c)) && (B_lo = max(inf(c), inf(a)))
+    (inf(b) < inf(c)) && (C_lo = max(inf(b), inf(a)))
+    (sup(b) > sup(c)) && (B_hi = min(sup(c), sup(a)))
+    (sup(b) < sup(c)) && (C_hi = min(sup(b), sup(a)))
+
+    b_new = B_lo > B_hi ? emptyinterval(BareInterval{T}) : _unsafe_bareinterval(T, B_lo, B_hi)
+    c_new = C_lo > C_hi ? emptyinterval(BareInterval{T}) : _unsafe_bareinterval(T, C_lo, C_hi)
+    return (a, b_new, c_new)
+end
+min_rev(a::BareInterval, b::BareInterval, c::BareInterval) =
+    min_rev(promote(a, b, c)...)
+
+min_rev(a::Interval, b::Interval, c::Interval; dec = :default) =
+    _rev_dispatch_tuple(min_rev, (a, b, c), Val(1), dec)
