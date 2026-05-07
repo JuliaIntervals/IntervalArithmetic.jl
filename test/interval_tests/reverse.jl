@@ -131,3 +131,88 @@ end
     @test isnai(log_rev(nai(Interval{Float64}), interval(1.0, 2.0)))
     @test isnai(asin_rev(interval(0.0, 1.0), nai(Interval{Float64})))
 end
+
+@testset "inv_rev" begin
+    # inv is its own inverse: inv_rev(c) = inv(c)
+    @test isequal_interval(inv_rev(bareinterval(1.0, 2.0)), bareinterval(0.5, 1.0))
+    @test isequal_interval(inv_rev(bareinterval(0.5, 1.0)), bareinterval(1.0, 2.0))
+    # intersect with x
+    @test isequal_interval(inv_rev(bareinterval(1.0, 2.0), bareinterval(0.0, 0.7)),
+                           bareinterval(0.5, 0.7))
+    # NaI + decoration
+    @test isnai(inv_rev(nai(Interval{Float64})))
+    @test decoration(inv_rev(interval(1.0, 2.0))) == trv
+end
+
+@testset "sign_rev" begin
+    # only 1 ∈ c → preimage is [0, ∞)
+    @test isequal_interval(sign_rev(bareinterval(1.0, 1.0)),
+                           _unsafe_bareinterval(Float64, 0.0, Inf))
+    # only -1 ∈ c → preimage is (-∞, 0]
+    @test isequal_interval(sign_rev(bareinterval(-1.0, -1.0)),
+                           _unsafe_bareinterval(Float64, -Inf, 0.0))
+    # only 0 ∈ c → preimage is {0}
+    @test isequal_interval(sign_rev(bareinterval(0.0, 0.0)), bareinterval(0.0, 0.0))
+    # all three values in c → entire real line
+    @test isentire_interval(sign_rev(bareinterval(-1.0, 1.0)))
+    # nothing in {-1, 0, 1} → empty
+    @test isempty_interval(sign_rev(bareinterval(0.5, 0.7)))
+    # restrict to x
+    @test isequal_interval(sign_rev(bareinterval(0.0, 1.0), bareinterval(-5.0, 3.0)),
+                           bareinterval(0.0, 3.0))
+    # NaI + decoration
+    @test isnai(sign_rev(nai(Interval{Float64})))
+    @test decoration(sign_rev(interval(0.0, 1.0))) == trv
+end
+
+@testset "pow_rev1 and pow_rev2" begin
+    # pow_rev1: solve c = x^b for x, with b = 2, c = [4, 9] → x ⊇ [2, 3]
+    r = pow_rev1(bareinterval(2.0, 2.0), bareinterval(4.0, 9.0))
+    @test issubset_interval(bareinterval(2.0, 3.0), r)
+    # Tight enclosure (within a few ulps of [2, 3])
+    @test diam(r) - 1.0 < 1e-12
+
+    # pow_rev2: solve c = a^x for x, with a = 2, c = [4, 8] → x ⊇ [2, 3]
+    r = pow_rev2(bareinterval(2.0, 2.0), bareinterval(4.0, 8.0))
+    @test issubset_interval(bareinterval(2.0, 3.0), r)
+    @test diam(r) - 1.0 < 1e-12  # diam ≈ 1 with a few ulps slack
+
+    # decoration trv on Interval form
+    @test decoration(pow_rev1(interval(2.0, 2.0), interval(4.0, 9.0))) == trv
+    @test decoration(pow_rev2(interval(2.0, 2.0), interval(4.0, 8.0))) == trv
+
+    # NaI propagation
+    @test isnai(pow_rev1(nai(Interval{Float64}), interval(1.0, 2.0)))
+    @test isnai(pow_rev2(interval(2.0, 2.0), nai(Interval{Float64})))
+end
+
+@testset "mul_rev_to_pair" begin
+    # 0 ∉ b → standard division, second pair element empty
+    r1, r2 = mul_rev_to_pair(bareinterval(1.0, 2.0), bareinterval(3.0, 4.0))
+    @test isequal_interval(r1, bareinterval(1.5, 4.0))
+    @test isempty_interval(r2)
+
+    # 0 ∈ b, 0 ∉ c → genuine split into two half-rays
+    r1, r2 = mul_rev_to_pair(bareinterval(-1.0, 1.0), bareinterval(1.0, 2.0))
+    @test isequal_interval(r1, _unsafe_bareinterval(Float64, -Inf, -1.0))
+    @test isequal_interval(r2, _unsafe_bareinterval(Float64, 1.0, Inf))
+
+    # 0 ∈ b and 0 ∈ c → entire reals (no split)
+    r1, r2 = mul_rev_to_pair(bareinterval(-1.0, 1.0), bareinterval(-1.0, 1.0))
+    @test isentire_interval(r1)
+    @test isempty_interval(r2)
+
+    # NaI propagation: both outputs are NaI
+    nai_iv = nai(Interval{Float64})
+    r1, r2 = mul_rev_to_pair(nai_iv, interval(1.0, 2.0))
+    @test isnai(r1) && isnai(r2)
+
+    # §11.7.1 decoration: split case forces `trv`
+    r1, r2 = mul_rev_to_pair(interval(-1.0, 1.0), interval(1.0, 2.0))
+    @test decoration(r1) == trv
+    @test decoration(r2) == trv
+    # non-split case: r1 carries the standard division decoration, r2 is `trv`
+    r1, r2 = mul_rev_to_pair(interval(1.0, 2.0), interval(3.0, 4.0))
+    @test decoration(r2) == trv
+    @test decoration(r1) ≥ trv  # at least trv; typically `com`
+end

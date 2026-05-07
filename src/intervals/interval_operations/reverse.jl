@@ -673,3 +673,145 @@ div_rev2(a::Interval, c::Interval; dec = :default) =
     _rev_dispatch(div_rev2, (a, c), (), dec)
 div_rev2(a::Interval, c::Interval, x::Interval; dec = :default) =
     _rev_dispatch(div_rev2, (a, c, x), (), dec)
+
+# ------------------------------------------------------------------
+# `mul_rev_to_pair` — Section 10.5.5
+# ------------------------------------------------------------------
+
+"""
+    mul_rev_to_pair(b, c)
+
+Two-output reverse multiplication. Returns the pair `(x₁, x₂)` whose
+union is an enclosure of ``\\{y : ∃ b' ∈ b,\\ b' \\cdot y ∈ c\\}``.
+
+When `b` does not straddle zero this is the ordinary division `c / b`,
+returned as `(c / b, ∅)`. When `0 ∈ b` and `0 ∉ c` the preimage splits
+into two disjoint half-rays, both of which are returned.
+
+Implements `mulRevToPair` of the IEEE Standard 1788-2015 (§10.5.5).
+"""
+mul_rev_to_pair(b::BareInterval, c::BareInterval) = extended_div(c, b)
+
+function mul_rev_to_pair(b::Interval, c::Interval)
+    if isnai(b) | isnai(c)
+        T = promote_type(numtype(b), numtype(c))
+        nai_iv = nai(Interval{T})
+        return (nai_iv, nai_iv)
+    end
+    bb, bc = bareinterval(b), bareinterval(c)
+    r1, r2 = extended_div(bc, bb)
+    g = isguaranteed(b) & isguaranteed(c)
+    # §11.7.1: when this is a true split (`0 ∈ b`) both outputs are `trv`;
+    # otherwise the call reduces to a standard division and `r1` propagates
+    # the usual `min(input_decorations, range_dec)`.
+    if isempty_interval(bb) | isempty_interval(bc) | in_interval(0, bb)
+        d1 = trv
+    else
+        d1 = min(decoration(b), decoration(c), decoration(r1))
+    end
+    return (_unsafe_interval(r1, d1, g), _unsafe_interval(r2, trv, g))
+end
+
+# ------------------------------------------------------------------
+# `inv_rev`
+# ------------------------------------------------------------------
+
+"""
+    inv_rev(c)
+    inv_rev(c, x)
+
+Reverse function for `inv`. Returns an enclosure of
+``\\{y ∈ x : 1/y ∈ c\\} = \\mathrm{inv}(c) ∩ x``. Since `inv` is an
+involution, `inv_rev(c)` is just `inv(c)` (intersected with `x`).
+"""
+inv_rev(c::BareInterval{T}, x::BareInterval{T}) where {T<:NumTypes} =
+    intersect_interval(inv(c), x)
+inv_rev(c::BareInterval, x::BareInterval) = inv_rev(promote(c, x)...)
+inv_rev(c::BareInterval{T}) where {T<:NumTypes} =
+    inv_rev(c, entireinterval(BareInterval{T}))
+
+inv_rev(c::Interval; dec = :default) = _rev_dispatch(inv_rev, (c,), (), dec)
+inv_rev(c::Interval, x::Interval; dec = :default) =
+    _rev_dispatch(inv_rev, (c, x), (), dec)
+
+# ------------------------------------------------------------------
+# `sign_rev`
+# ------------------------------------------------------------------
+
+"""
+    sign_rev(c)
+    sign_rev(c, x)
+
+Reverse function for `sign`. Since `sign` maps `ℝ` into `{-1, 0, 1}`, the
+preimage of `c` is determined by which of those values lie in `c`:
+
+- `1 ∈ c`  contributes `(0, ∞)` (enclosed as `[0, ∞)`);
+- `0 ∈ c`  contributes `{0}`;
+- `-1 ∈ c` contributes `(-∞, 0)` (enclosed as `(-∞, 0]`).
+
+Returns the intersection of the resulting set with `x`; the single-argument
+form takes `x = entireinterval()`.
+"""
+function sign_rev(c::BareInterval{T}, x::BareInterval{T}) where {T<:NumTypes}
+    isempty_interval(c) && return c
+    isempty_interval(x) && return x
+    has_neg = in_interval(-1, c)
+    has_zer = in_interval( 0, c)
+    has_pos = in_interval( 1, c)
+    (has_neg | has_zer | has_pos) || return emptyinterval(BareInterval{T})
+    lo = has_neg ? typemin(T) : zero(T)
+    hi = has_pos ? typemax(T) : zero(T)
+    return intersect_interval(_unsafe_bareinterval(T, lo, hi), x)
+end
+sign_rev(c::BareInterval, x::BareInterval) = sign_rev(promote(c, x)...)
+sign_rev(c::BareInterval{T}) where {T<:NumTypes} =
+    sign_rev(c, entireinterval(BareInterval{T}))
+
+sign_rev(c::Interval; dec = :default) = _rev_dispatch(sign_rev, (c,), (), dec)
+sign_rev(c::Interval, x::Interval; dec = :default) =
+    _rev_dispatch(sign_rev, (c, x), (), dec)
+
+# ------------------------------------------------------------------
+# `pow_rev1`, `pow_rev2`
+# ------------------------------------------------------------------
+
+"""
+    pow_rev1(b, c)
+    pow_rev1(b, c, x)
+
+Reverse for the base of `^`: returns an enclosure of
+``\\{y ∈ x : ∃ b' ∈ b,\\ y^{b'} ∈ c\\}``, computed as `c^(1/b) ∩ x`.
+Use `pown_rev` instead when the exponent is integer.
+"""
+pow_rev1(b::BareInterval{T}, c::BareInterval{T}, x::BareInterval{T}) where {T<:NumTypes} =
+    intersect_interval(c^inv(b), x)
+pow_rev1(b::BareInterval, c::BareInterval, x::BareInterval) =
+    pow_rev1(promote(b, c, x)...)
+pow_rev1(b::BareInterval{T}, c::BareInterval{T}) where {T<:NumTypes} =
+    pow_rev1(b, c, entireinterval(BareInterval{T}))
+
+pow_rev1(b::Interval, c::Interval; dec = :default) =
+    _rev_dispatch(pow_rev1, (b, c), (), dec)
+pow_rev1(b::Interval, c::Interval, x::Interval; dec = :default) =
+    _rev_dispatch(pow_rev1, (b, c, x), (), dec)
+
+"""
+    pow_rev2(a, c)
+    pow_rev2(a, c, x)
+
+Reverse for the exponent of `^`: returns an enclosure of
+``\\{y ∈ x : ∃ a' ∈ a,\\ (a')^{y} ∈ c\\}``, computed as
+`(log(c) / log(a)) ∩ x`. Requires `a` and `c` to lie in the positive
+reals; outside that the enclosure may be loose or empty.
+"""
+pow_rev2(a::BareInterval{T}, c::BareInterval{T}, x::BareInterval{T}) where {T<:NumTypes} =
+    intersect_interval(log(c) / log(a), x)
+pow_rev2(a::BareInterval, c::BareInterval, x::BareInterval) =
+    pow_rev2(promote(a, c, x)...)
+pow_rev2(a::BareInterval{T}, c::BareInterval{T}) where {T<:NumTypes} =
+    pow_rev2(a, c, entireinterval(BareInterval{T}))
+
+pow_rev2(a::Interval, c::Interval; dec = :default) =
+    _rev_dispatch(pow_rev2, (a, c), (), dec)
+pow_rev2(a::Interval, c::Interval, x::Interval; dec = :default) =
+    _rev_dispatch(pow_rev2, (a, c, x), (), dec)
