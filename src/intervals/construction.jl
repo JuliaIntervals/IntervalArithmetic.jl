@@ -308,8 +308,6 @@ bareinterval(::Type{T}, x::Interval) where {T} = bareinterval(T, bareinterval(x)
 
 Return the decoration of interval x.
 
-Return the default decoration of a `BareInterval`.
-
 See [`Decoration`](@ref) for more infomation.
 """
 decoration(x::Interval) = x.decoration
