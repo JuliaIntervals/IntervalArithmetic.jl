@@ -1,6 +1,6 @@
 # Construction and composability with numbers
 include("construction.jl")
-    export BareInterval, bareinterval, decoration, ill, trv, def, dac, com,
+    export BareInterval, bareinterval, decoration, Decoration, ill, trv, def, dac, com,
         Interval, interval, isguaranteed, @interval, @I_str
 include("parsing.jl")
 include("real_interface.jl")

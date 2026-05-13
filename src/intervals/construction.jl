@@ -197,10 +197,24 @@ Base.convert(::Type{BareInterval{T}}, x::BareInterval) where {T<:NumTypes} =
 Enumeration constant for the types of interval decorations described in
 Section 11.2 of the IEEE Standard 1788-2015:
 - `com -> 4` (common): non-empty, continuous and bounded interval.
+    This is the best possible decoration, the computations that generated it
+    only involved operations that are well-defined, continuous and bounded.
 - `dac -> 3` (defined and continuous): non-empty and continuous interval.
+    This decoration means that the computation encountered some infinite values,
+    for example because it started from an unbound interval, e.g. `inv(interval(1, Inf))`.
 - `def -> 2` (defined): non-empty interval.
+    This decoration occurs when the computations used a non-continuous function,
+    typically when using a [`Piecewise`](@ref) function.
 - `trv -> 1` (trivial): meaningless interval.
+    Something wrong happen during the computation, generally an ill defined operation,
+    or an operation that returns the empty interval, e.g. `sqrt(interval(-10, -1))`.
 - `ill -> 0` (ill-formed): not an interval (NaI).
+    The returned object is not even an interval.
+    This is the equivalent of `Nan` for intervals.
+
+The decoration `com`, `dac` and `def` are considered safe,
+whereas `trv` and `ill` mean that something went wrong and no meaningful
+result could be return.
 """
 @enum Decoration begin
     ill = 0
@@ -211,6 +225,19 @@ Section 11.2 of the IEEE Standard 1788-2015:
 end
 # note: `isless`, and hence `<`, `min` and `max`, are automatically defined
 
+"""
+    decoration(x::BareInterval)
+
+Return the default decoration of a `BareInterval`.
+
+Since `BareInterval` does not cary decoration information,
+return the most optimistic one possible based on its value:
+- `trv` if the interval is empty
+- `dac` if the interval is unbounded
+- `com` otherwise
+
+See [`Decoration`](@ref) for more infomation.
+"""
 function decoration(x::BareInterval)
     isempty_interval(x) && return trv
     isunbounded(x) && return dac
@@ -275,6 +302,14 @@ function bareinterval(x::Interval)
     return x.bareinterval
 end
 bareinterval(::Type{T}, x::Interval) where {T} = bareinterval(T, bareinterval(x))
+
+"""
+    decoration(x::Interval)
+
+Return the decoration of interval x.
+
+See [`Decoration`](@ref) for more infomation.
+"""
 decoration(x::Interval) = x.decoration
 decoration(x::Complex{<:Interval}) = min(decoration(real(x)), decoration(imag(x)))
 
