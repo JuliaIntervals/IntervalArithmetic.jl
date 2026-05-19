@@ -17,7 +17,7 @@ setprecision(BigFloat, 256) do
 
                 @test sprint(show, MIME("text/plain"), emptyinterval(BareInterval{Float64})) == "∅"
 
-                @test sprint(show, MIME("text/plain"), a) == "[-2.22507e-308, 1.3]"
+                @test sprint(show, MIME("text/plain"), a) == "[-2.22508e-308, 1.3]"
                 @test sprint(show, MIME("text/plain"), large_expo) ==
                     "[0.0, 1.0e+123456789]₂₅₆"
             end
@@ -28,7 +28,7 @@ setprecision(BigFloat, 256) do
 
                 @test sprint(show, MIME("text/plain"), a) == "[-2.2250738585072014e-308, 1.3]"
                 @test sprint(show, MIME("text/plain"), large_expo) ==
-                    "[0.0, 1.0e+123456789]₂₅₆"
+                    "[0.0, 1.0000000000000000001e+123456789]₂₅₆"
             end
         end
 
@@ -81,8 +81,8 @@ setprecision(BigFloat, 256) do
 
                     @test sprint(show, MIME("text/plain"), a)    == "[1.0, 2.0]_com"
                     @test sprint(show, MIME("text/plain"), a_NG) == "[1.0, 2.0]_com_NG"
-                    @test sprint(show, MIME("text/plain"), b)    == "[-2.22507e-308, 1.3]_com"
-                    @test sprint(show, MIME("text/plain"), b32)  == "[-1.17549f-38, 1.3f0]_com"
+                    @test sprint(show, MIME("text/plain"), b)    == "[-2.22508e-308, 1.3]_com"
+                    @test sprint(show, MIME("text/plain"), b32)  == "[-1.1755f-38, 1.3f0]_com"
                     @test sprint(show, MIME("text/plain"), b16)  == "[Float16(-6.104e-5), Float16(1.3)]_com"
                     @test sprint(show, MIME("text/plain"), br)   == "[-11//10, 13//10]_com"
                     @test sprint(show, MIME("text/plain"), c)    == "[-1.0, ∞)_dac"
@@ -99,8 +99,8 @@ setprecision(BigFloat, 256) do
 
                     @test sprint(show, MIME("text/plain"), a)    == "[1.0, 2.0]"
                     @test sprint(show, MIME("text/plain"), a_NG) == "[1.0, 2.0]_NG"
-                    @test sprint(show, MIME("text/plain"), b)    == "[-2.22507e-308, 1.3]"
-                    @test sprint(show, MIME("text/plain"), b32)  == "[-1.17549f-38, 1.3f0]"
+                    @test sprint(show, MIME("text/plain"), b)    == "[-2.22508e-308, 1.3]"
+                    @test sprint(show, MIME("text/plain"), b32)  == "[-1.1755f-38, 1.3f0]"
                     @test sprint(show, MIME("text/plain"), b16)  == "[Float16(-6.104e-5), Float16(1.3)]"
                     @test sprint(show, MIME("text/plain"), br)   == "[-11//10, 13//10]"
                     @test sprint(show, MIME("text/plain"), c)    == "[-1.0, ∞)"
@@ -122,7 +122,7 @@ setprecision(BigFloat, 256) do
                 @test sprint(show, MIME("text/plain"), c)    == "[-1.0, ∞)_dac"
                 @test sprint(show, MIME("text/plain"), cr)   == "[-1//1, ∞)_dac"
                 @test sprint(show, MIME("text/plain"), large_expo) ==
-                    "[0.0, 1.0e+123456789]₂₅₆_com"
+                    "[0.0, 1.0000000000000000001e+123456789]₂₅₆_com"
             end
         end
 
@@ -202,7 +202,7 @@ setprecision(BigFloat, 256) do
 
                     @test sprint(show, MIME("text/plain"), a) == "[0.0, 2.0]_com + im*[1.0, 1.0]_com"
                     @test sprint(show, MIME("text/plain"), b) == "[0.0, 2.0]_com - im*[1.0, 1.0]_com"
-                    @test sprint(show, MIME("text/plain"), c) == "[0.0, 1.0e-70]_com - im*[1.0e-70, 1.0e-70]_com"
+                    @test sprint(show, MIME("text/plain"), c) == "[0.0, 1.0e-70]_com - im*[9.9999e-71, 1.0e-70]_com"
                 end
 
                 @testset "No decorations" begin
@@ -210,7 +210,7 @@ setprecision(BigFloat, 256) do
 
                     @test sprint(show, MIME("text/plain"), a) == "[0.0, 2.0] + im*[1.0, 1.0]"
                     @test sprint(show, MIME("text/plain"), b) == "[0.0, 2.0] - im*[1.0, 1.0]"
-                    @test sprint(show, MIME("text/plain"), c) == "[0.0, 1.0e-70] - im*[1.0e-70, 1.0e-70]"
+                    @test sprint(show, MIME("text/plain"), c) == "[0.0, 1.0e-70] - im*[9.9999e-71, 1.0e-70]"
                 end
             end
         end
