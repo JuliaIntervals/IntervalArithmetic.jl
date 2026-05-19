@@ -307,13 +307,13 @@ julia> f(x) = 1.2 * x + 0.1
 f (generic function with 1 method)
 
 julia> f(interval(1, 2))
-[1.3, 2.5]_com_NG
+[1.29999, 2.5]_com_NG
 
 julia> @exact g(x) = 1.2 * x + 0.1
 g (generic function with 1 method)
 
 julia> g(interval(1, 2))
-[1.3, 2.5]_com
+[1.29999, 2.5]_com
 
 julia> g(1.4)
 1.78

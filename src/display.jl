@@ -201,15 +201,15 @@ function _str_basic_repr(a::BareInterval{<:AbstractFloat}, format::Symbol)
         # str_hi = ifelse(hi ≥ 0, string('+', str_hi), str_hi)
         return string(str_lo, ", ", str_hi)
     elseif format === :midpoint
-        m = mid(a)
-        str_m = _round_string(m, sigdigits)
-        # str_m = ifelse(m ≥ 0, string('+', str_m), str_m)
-        output = string(str_m, " ± ", _round_string(radius(a), sigdigits))
+        m_d, r_d = _display_midpoint_radius(a, sigdigits)
+        str_m = _round_string(m_d, sigdigits)
+        # str_m = ifelse(m_d ≥ 0, string('+', str_m), str_m)
+        output = string(str_m, " ± ", _round_string(r_d, sigdigits))
         return replace(output, "Inf" => '∞')
     else
-        str_lo = _round_string(lo, sigdigits)
+        str_lo = _round_string(lo, sigdigits, RoundDown)
         # str_lo = ifelse(lo ≥ 0, string('+', str_lo), str_lo)
-        str_hi = _round_string(hi, sigdigits)
+        str_hi = _round_string(hi, sigdigits, RoundUp)
         # str_hi = ifelse(hi ≥ 0, string('+', str_hi), str_hi)
         output = string('[', str_lo, ", ", str_hi, ']')
         return replace(output, "Inf]" => "∞)", "[-Inf" => "(-∞")
@@ -236,27 +236,27 @@ function _str_basic_repr(a::BareInterval{Float32}, format::Symbol)
         # str_hi = ifelse(hi ≥ 0, string('+', str_hi), str_hi)
         return string(str_lo, ", ", str_hi)
     elseif format === :midpoint
-        m = mid(a)
-        str_m = _round_string(m, sigdigits)
+        m_d, r_d = _display_midpoint_radius(a, sigdigits)
+        str_m = _round_string(m_d, sigdigits)
         str_m = replace(string(str_m, "f0"), "NaNf0" => "NaN32", "Inff0" => "Inf32")
         if contains(str_m, 'e')
             str_m = replace(str_m, 'e' => 'f', "f0" => "")
         end
-        # str_m = ifelse(m ≥ 0, string('+', str_m), str_m)
-        str_r = _round_string(radius(a), sigdigits)
+        # str_m = ifelse(m_d ≥ 0, string('+', str_m), str_m)
+        str_r = _round_string(r_d, sigdigits)
         str_r = replace(string(str_r, "f0"), "NaNf0" => "NaN32", "Inff0" => "Inf32")
         if contains(str_r, 'e')
             str_r = replace(str_r, 'e' => 'f', "f0" => "")
         end
         return string(str_m, " ± ", str_r)
     else
-        str_lo = _round_string(lo, sigdigits)
+        str_lo = _round_string(lo, sigdigits, RoundDown)
         str_lo = replace(string('[', str_lo, "f0"), "NaNf0" => "NaN32", "[-Inff0" => "(-∞")
         if contains(str_lo, 'e')
             str_lo = replace(str_lo, 'e' => 'f', "f0" => "")
         end
         # str_lo = ifelse(lo ≥ 0, string('+', str_lo), str_lo)
-        str_hi = _round_string(hi, sigdigits)
+        str_hi = _round_string(hi, sigdigits, RoundUp)
         str_hi = replace(string(str_hi, "f0]"), "NaNf0" => "NaN32", "Inff0]" => "∞)")
         if contains(str_hi, 'e')
             str_hi = replace(str_hi, 'e' => 'f', "f0" => "")
@@ -279,15 +279,15 @@ function _str_basic_repr(a::BareInterval{Float16}, format::Symbol)
         output = string("Float16(", str_lo, "), Float16(", str_hi, ')')
         return replace(output, "Float16(NaN)" => "NaN16", "Float16(-Inf)" => "-Inf16", "Float16(Inf)" => "Inf16")
     elseif format === :midpoint
-        m = mid(a)
-        str_m = _round_string(m, sigdigits)
-        # str_m = ifelse(m ≥ 0, string('+', str_m), str_m)
-        output = string("Float16(", str_m, ") ± Float16(", _round_string(radius(a), sigdigits), ')')
+        m_d, r_d = _display_midpoint_radius(a, sigdigits)
+        str_m = _round_string(m_d, sigdigits)
+        # str_m = ifelse(m_d ≥ 0, string('+', str_m), str_m)
+        output = string("Float16(", str_m, ") ± Float16(", _round_string(r_d, sigdigits), ')')
         return replace(output, "Float16(NaN)" => "NaN16", "Float16(Inf)" => '∞')
     else
-        str_lo = _round_string(lo, sigdigits)
+        str_lo = _round_string(lo, sigdigits, RoundDown)
         # str_lo = ifelse(lo ≥ 0, string('+', str_lo), str_lo)
-        str_hi = _round_string(sup(a), sigdigits)
+        str_hi = _round_string(hi, sigdigits, RoundUp)
         # str_hi = ifelse(hi ≥ 0, string('+', str_hi), str_hi)
         output = string("[Float16(", str_lo, "), Float16(", str_hi, ")]")
         return replace(output, "Float16(NaN)" => "NaN16", "[Float16(-Inf)" => "(-∞", "Float16(Inf)]" => "∞)")
@@ -320,15 +320,40 @@ end
 
 function _round_string(x::AbstractFloat, sigdigits::Int)
     !isfinite(x) && return string(x)
-    max_sig_digits = _count_sigdigits(string(x))
+    max_sig_digits = _count_sigdigits(string(x)) # cap, e.g. `0.1` gives `"0.1"` rather than expanding
     ndigits = min(sigdigits, max_sig_digits)
-    str = Printf.@sprintf("%.*g", ndigits, x)
+    str = Printf.@sprintf("%.*g", ndigits, x) # round to nearest, no-op if 3-arg `_round_string` was called before
     occursin(r"[eE]", str) && return replace(str, r"^([+-]?\d+)(?=[eE])" => s"\1.0", r"([eE][+-])0+(\d+)" => s"\1\2")
     !occursin(r"\.", str) && return str * ".0"
     return str
 end
 
+_round_string(x::AbstractFloat, sigdigits::Int, mode::RoundingMode) =
+    _round_string(round(x, mode; sigdigits = sigdigits), sigdigits)
+
 _count_sigdigits(s::AbstractString) = length(replace(split(s, r"[eE]")[1], '-' => "", '.' => "", r"^0+" => ""))
+
+# compute display values `(m_d, r_d)` for the midpoint format such that
+# `[m_d - r_d, m_d + r_d]` encloses the original interval, both rounded to
+# `sigdigits` significant digits (`RoundNearest` for `m_d`, `RoundUp` for `r_d`)
+
+function _display_midpoint_radius(a::BareInterval{<:AbstractFloat}, sigdigits::Int)
+    m = mid(a)
+    r = radius(a)
+    isfinite(m) || return m, r
+    m_d = round(m, RoundNearest; sigdigits = sigdigits)
+    isfinite(r) || return m_d, r
+    if m_d == m
+        r_d = round(r, RoundUp; sigdigits = sigdigits)
+    else
+        lo, hi = bounds(a)
+        diff_hi = sup(bareinterval(hi) - bareinterval(m_d))
+        diff_lo = sup(bareinterval(m_d) - bareinterval(lo))
+        r_required = max(diff_hi, diff_lo)
+        r_d = ifelse(isfinite(r_required), round(r_required, RoundUp; sigdigits = sigdigits), r_required)
+    end
+    return m_d, r_d
+end
 
 #
 
