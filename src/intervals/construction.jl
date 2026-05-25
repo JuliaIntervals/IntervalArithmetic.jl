@@ -297,8 +297,11 @@ _inf(x::Interval) = x.bareinterval.lo
 _sup(x::Interval) = x.bareinterval.hi
 #
 
+# avoid inlining the expanded code from @warn
+@noinline _warn_interval_nai() = @warn "interval part of NaI"
+
 function bareinterval(x::Interval)
-    decoration(x) == ill && @warn "interval part of NaI"
+    decoration(x) == ill && _warn_interval_nai()
     return x.bareinterval
 end
 bareinterval(::Type{T}, x::Interval) where {T} = bareinterval(T, bareinterval(x))
