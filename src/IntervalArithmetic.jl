@@ -77,6 +77,7 @@ mutable struct ConfigurationOptions
     rounding :: Symbol
     power    :: Symbol
     matmul   :: Symbol
+    nthreads :: Union{Nothing,Integer}
 end
 
 function Base.show(io::IO, ::MIME"text/plain", params::ConfigurationOptions)
@@ -85,10 +86,12 @@ function Base.show(io::IO, ::MIME"text/plain", params::ConfigurationOptions)
     println(io, "  - flavor: ", params.flavor)
     println(io, "  - interval rounding: ", params.rounding)
     println(io, "  - power mode: ", params.power)
-    print(io, "  - matrix multiplication mode: ", params.matmul)
+    isnothing(params.nthreads) && return print(io, "  - matrix multiplication mode: ", params.matmul)
+    println(io, "  - matrix multiplication mode: ", params.matmul)
+    return print(io,   "  - number of threads for `:fast` matrix multiplication mode: ", params.nthreads)
 end
 
-const configuration_options = ConfigurationOptions(Float64, :set_based, :correct, :fast, :fast) # default
+const configuration_options = ConfigurationOptions(Float64, :set_based, :correct, :fast, :fast, nothing) # default
 
 function configure_numtype(numtype::Type{<:NumTypes})
     @eval default_numtype() = $numtype
@@ -132,6 +135,8 @@ function configure_matmul(matmul)
     return matmul
 end
 
+configure_threads(::Nothing) = nothing
+
 """
     configure(; numtype=Float64, flavor=:set_based, rounding=:correct, power=:fast, matmul=:fast)
 
@@ -158,12 +163,18 @@ Configure the default behavior for:
   multiplications. The default is an efficient algorithm prioritizing
   performance over precision. Learn more:
   [`IntervalArithmetic.MatMulMode`](@ref).
+
+- **Number of threads**: The number of threads used by the custom BLAS library
+  backing fast interval matrix multiplication. By default (`nothing`) the thread
+  count is left unchanged. Setting it requires `LinearAlgebra` to be loaded and
+  is unavailable on 32-bit systems.
 """
 function configure(; numtype::Type{<:NumTypes}=configuration_options.numtype,
         flavor::Symbol=configuration_options.flavor,
         rounding::Symbol=configuration_options.rounding,
         power::Symbol=configuration_options.power,
-        matmul::Symbol=configuration_options.matmul)
+        matmul::Symbol=configuration_options.matmul,
+        nthreads::Union{Nothing,Integer}=nothing)
 
     if configuration_options.numtype !== numtype
         configure_numtype(numtype)
@@ -185,6 +196,7 @@ function configure(; numtype::Type{<:NumTypes}=configuration_options.numtype,
         configure_matmul(matmul)
         configuration_options.matmul = matmul
     end
+    configuration_options.nthreads = configure_threads(nthreads)
     return configuration_options
 end
 
