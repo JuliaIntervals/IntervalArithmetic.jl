@@ -28,3 +28,7 @@ The following table summarizes the functions, the usage with the corresponding (
 | `intersect_interval(x, y)`         | `⊓(x, y)` | `\sqcap<tab>`       | Intersection of intervals                                   |
 | `emptyinterval()`                  | `∅`       | `\emptyset<tab>`    | Empty interval                                              |
 | `entireinterval()`                 | `ℝ`       | `\bbR<tab>`         | Entire real line                                            |
+
+```@autodocs
+Modules = [IntervalArithmetic.Symbols]
+```

@@ -33,7 +33,8 @@ makedocs(;
         ],
         "Examples" => ["Rigorous computation of ``\\pi``" => "examples/pi.md"],
     ],
-    warnonly = true
+    checkdocs = :exported,
+    warnonly = false
 )
 
 deploydocs(;

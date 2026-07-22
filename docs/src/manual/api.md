@@ -8,3 +8,10 @@ CollapsedDocStrings = true
 Modules = [IntervalArithmetic]
 Private = false
 ```
+
+## Internal
+
+```@docs
+IntervalArithmetic.is_valid_interval
+IntervalArithmetic.atomic
+```

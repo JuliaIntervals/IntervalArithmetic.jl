@@ -132,7 +132,7 @@ returned.
     rounded to the nearest when parsed (e.g. `0.1`). In such cases, parse the
     string containing the desired value to ensure its tight enclosure.
 
-See also: [`interval`](@ref), [`±`](@ref), [`..`](@ref) and [`@I_str`](@ref).
+See also: [`interval`](@ref), [`±`](@ref IntervalArithmetic.Symbols.:(±)), [`..`](@ref IntervalArithmetic.Symbols.:(..)) and [`@I_str`](@ref).
 
 # Examples
 
@@ -264,11 +264,11 @@ Fields:
 
 Constructors compliant with the IEEE Standard 1788-2015:
 - [`interval`](@ref)
-- [`..`](@ref)
-- [`±`](@ref)
+- [`..`](@ref IntervalArithmetic.Symbols.:(..))
+- [`±`](@ref IntervalArithmetic.Symbols.:(±))
 - [`@I_str`](@ref)
 
-See also: [`±`](@ref), [`..`](@ref) and [`@I_str`](@ref).
+See also: [`±`](@ref IntervalArithmetic.Symbols.:(±)), [`..`](@ref IntervalArithmetic.Symbols.:(..)) and [`@I_str`](@ref).
 """
 struct Interval{T<:NumTypes} <: Real
     bareinterval :: BareInterval{T}
@@ -396,7 +396,7 @@ returned.
     rounded to the nearest when parsed (e.g. `0.1`). In such cases, parse the
     string containing the desired value to ensure its tight enclosure.
 
-See also: [`±`](@ref), [`..`](@ref) and [`@I_str`](@ref).
+See also: [`±`](@ref IntervalArithmetic.Symbols.:(±)), [`..`](@ref IntervalArithmetic.Symbols.:(..)) and [`@I_str`](@ref).
 
 # Examples
 
@@ -657,7 +657,7 @@ atomic(x) = atomic(default_numtype(), x)
     @interval([T], expr1, expr2)
 
 Walk through an expression and wrap each argument of functions with the internal
-constructor [`atomic`](@ref).
+constructor [`atomic`](@ref IntervalArithmetic.atomic).
 
 # Examples
 

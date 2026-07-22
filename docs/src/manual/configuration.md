@@ -1,5 +1,9 @@
 # Configuration options
 
+```@meta
+CurrentModule = IntervalArithmetic
+```
+
 The IntervalArithmetic.jl package provides a [`configure`](@ref) function (not exported) that allows users to fine-tune certain aspects of the package’s behavior. This is particularly useful for controlling trade-offs between computational speed and rigor.
 
 !!! warning
@@ -19,4 +23,13 @@ IntervalArithmetic.configure(; power = :slow)
 radius(x^3)
 IntervalArithmetic.configure(; power = :fast) # default
 radius(x^3)
+```
+
+```@docs
+IntervalArithmetic.configure
+IntervalArithmetic.NumTypes
+IntervalArithmetic.Flavor
+IntervalArithmetic.IntervalRounding
+IntervalArithmetic.PowerMode
+IntervalArithmetic.MatMulMode
 ```
