@@ -28,7 +28,7 @@ for f ∈ (:float, :big)
     end
 end
 
-for f ∈ (:zero, :one)
+for f ∈ (:zero, :one, :floatmin, :floatmax)
     @eval begin
         Base.$f(::Type{BareInterval{T}}) where {T<:NumTypes} = _unsafe_bareinterval(T, $f(T), $f(T))
         Base.$f(::BareInterval{T}) where {T<:NumTypes} = $f(BareInterval{T})
@@ -111,6 +111,17 @@ Base.isnan(x::Interval) = isnai(x)
 function Base.isinteger(x::Interval)
     isthin(x) | isdisjoint_interval(x, floor(x), ceil(x)) && return isthininteger(x)
     return throw(InconclusiveBooleanOperation("isinteger($x)", "isthininteger"))
+end
+
+function Base.issubnormal(x::Interval{T}) where {T<:AbstractFloat}
+    isempty_interval(x) && return false
+    lo, hi = bounds(x)
+    y = floatmin(T)
+    # all elements of `x` lie in `(-floatmin(T), 0) ∪ (0, floatmin(T))`
+    ((-y < lo) & (hi < y) & !in_interval(0, x)) && return true
+    # no element of `x` lies in `(-floatmin(T), 0) ∪ (0, floatmin(T))`
+    ((hi ≤ -y) | (lo ≥ y) | isthinzero(x)) && return false
+    return throw(InconclusiveBooleanOperation("issubnormal($x)", "issubset_interval"))
 end
 
 # disallowed

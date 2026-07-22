@@ -177,7 +177,7 @@ and julia requires that `hash` returns a `UInt`.
 | :---- | :---- | :---- | :---- |
 | Arithmetic operations | `+`, `-`, `*`, `/`, `^` | Interval extension | Produce the `NG` flag when mixed with non-interval |
 | Other numeric function | `sin`, `exp`, `sqrt`, etc. | Interval extension |  |
-| Boolean operations | `==`, `<`, `<=`, `iszero`, `isnan`, `isinteger`, `isfinite` | Error if the result can not be guaranteed to be either `true` or `false` | See [`isequal_interval`](@ref) to test equality of intervals, and [`isbounded`](@ref) to test the finiteness of the elements |
+| Boolean operations | `==`, `<`, `<=`, `iszero`, `isfinite`, `isnan`, `isinteger`, `issubnormal` | Error if the result can not be guaranteed to be either `true` or `false` | See [`isequal_interval`](@ref) to test equality of intervals, and [`isbounded`](@ref) to test the finiteness of the elements |
 | Set operations | `in`, `issubset`, `isdisjoint`, `issetequal`, `isempty`, `union`, `intersect` | Always error | Use the `*_interval` function instead (e.g. [`in_interval`](@ref))
 | Exceptions | `≈`, `setdiff` | Always error | No meaningful interval extension |
 | Hash | `hash` | Hash the interval as a julia object | |

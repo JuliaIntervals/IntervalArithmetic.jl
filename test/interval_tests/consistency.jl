@@ -22,6 +22,10 @@
         @test isequal_interval(typemax(typeof(a)), interval(prevfloat(Inf), Inf))
         @test isequal_interval(typemin(a), typemin(typeof(a)))
         @test isequal_interval(typemax(a), typemax(typeof(a)))
+        @test isequal_interval(floatmin(typeof(a)), interval(floatmin(Float64)))
+        @test isequal_interval(floatmax(typeof(a)), interval(floatmax(Float64)))
+        @test isequal_interval(floatmin(a), floatmin(typeof(a)))
+        @test isequal_interval(floatmax(a), floatmax(typeof(a)))
 
         @test isequal_interval(a, interval(inf(a), sup(a)))
         @test isequal_interval(emptyinterval(Rational{Int}), emptyinterval())
@@ -375,6 +379,14 @@
         @test_throws IntervalArithmetic.InconclusiveBooleanOperation interval(1, 2) != y
         @test_throws IntervalArithmetic.InconclusiveBooleanOperation y != interval(1, 2)
         @test_throws IntervalArithmetic.InconclusiveBooleanOperation interval(1, 2) == interval(1, 2)
+
+        @test !issubnormal(interval(1, 2))
+        @test issubnormal(interval(floatmin(Float64)/4, floatmin(Float64)/2))
+        @test issubnormal(interval(-floatmin(Float64)/2, -floatmin(Float64)/4))
+        @test !issubnormal(interval(0))
+        @test !issubnormal(emptyinterval())
+        @test_throws IntervalArithmetic.InconclusiveBooleanOperation issubnormal(interval(0, 1))
+        @test_throws IntervalArithmetic.InconclusiveBooleanOperation issubnormal(interval(-floatmin(Float64), floatmin(Float64)))
 
         @test x < y
         @test x < 2
