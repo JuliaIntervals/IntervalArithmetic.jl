@@ -28,6 +28,32 @@ Base.:(==)(x::Dual, y::Interval) = value(x) == y
 Base.:<(x::Interval, y::Dual) = x < value(y)
 Base.:<(x::Dual, y::Interval) = value(x) < y
 
+# ForwardDiff tests partials for structural zero with `iszero`, whose generic
+# fallback is `x == zero(x)` and therefore throws `InconclusiveBooleanOperation`
+# for a non-thin interval. A partial carries no perturbation exactly when it is
+# (recursively) the thin interval [0, 0], so `isthinzero` is a safe and correct
+# answer.
+#
+# `_iszero` is kept separate from `Base.iszero(::Interval)`, so this change is
+# restricted to this extension.
+#
+# Higher-order derivatives nest `Dual`s around intervals to a depth equal to the
+# derivative order, and dispatch cannot express "an `Interval` under any number
+# of `Dual` layers"; `NestedInterval` spells out up to 4 layers, which seems
+# sufficient for practical use.
+const NestedInterval = let
+    U = Interval
+    for _ in 1:4
+        U = Union{U, Dual{T,<:U} where {T}}
+    end
+    U
+end
+_iszero(x::Interval) = isthinzero(x)
+_iszero(d::Dual) = _iszero(value(d)) & _iszero(partials(d))
+_iszero(p::Partials) = all(_iszero, p.values)
+Base.iszero(d::Dual{T,<:NestedInterval}) where {T} = _iszero(d)
+Base.iszero(p::Partials{N,<:NestedInterval}) where {N} = _iszero(p)
+
 function Base.:(^)(x::Dual{Txy,<:Interval}, y::Dual{Txy,<:Interval}) where {Txy}
     vx, vy = value(x), value(y)
     expv = vx^vy
