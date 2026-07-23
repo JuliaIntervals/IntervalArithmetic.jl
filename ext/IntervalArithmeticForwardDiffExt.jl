@@ -28,6 +28,20 @@ Base.:(==)(x::Dual, y::Interval) = value(x) == y
 Base.:<(x::Interval, y::Dual) = x < value(y)
 Base.:<(x::Dual, y::Interval) = value(x) < y
 
+# ForwardDiff's `^` methods use `iszero(partials(x))`, which is undecidable for
+# non-thin intervals. Use a recursive thin-zero test instead. `NestedInterval`
+# supports intervals nested in up to four `Dual` layers.
+const NestedInterval = let
+    U = Interval
+    for _ in 1:4
+        U = Union{U, Dual{T,<:U} where {T}}
+    end
+    U
+end
+_isthinzero(x::Interval) = isthinzero(x)
+_isthinzero(x::Real) = iszero(x)
+_isthinzero(d::Dual) = _isthinzero(value(d)) && all(_isthinzero, partials(d))
+
 function Base.:(^)(x::Dual{Txy,<:Interval}, y::Dual{Txy,<:Interval}) where {Txy}
     vx, vy = value(x), value(y)
     expv = vx^vy
@@ -49,13 +63,28 @@ function Base.:(^)(x::Dual{Tx,<:Interval}, y::Dual{Ty,<:Interval}) where {Tx,Ty}
     end
 end
 
-function Base.:(^)(x::Dual{Tx,<:Interval}, y::Interval) where {Tx}
+function Base.:(^)(x::Dual{Tx,<:NestedInterval}, y::Interval) where {Tx}
     v = value(x)
     expv = v^y
-    if isthinzero(y) || all(isthinzero, values(partials(x)))
+    if isthinzero(y) || all(_isthinzero, values(partials(x)))
         return Dual{Tx}(expv, zero(partials(x)))
     else
         return Dual{Tx}(expv, partials(x) * y * v^(y - interval(1)))
+    end
+end
+
+# A `y::Real` method would be ambiguous with ForwardDiff's generated `^`
+# methods and its `Dual^Dual` tag methods, so define the relevant concrete
+# exponent types instead.
+for R in (:Integer, :Rational, :AbstractFloat, :Irrational)
+    @eval function Base.:(^)(x::Dual{Tx,<:NestedInterval}, y::$R) where {Tx}
+        v = value(x)
+        expv = v^y
+        if iszero(y) || all(_isthinzero, values(partials(x)))
+            return Dual{Tx}(expv, zero(partials(x)))
+        else
+            return Dual{Tx}(expv, partials(x) * y * v^(y - 1))
+        end
     end
 end
 
@@ -76,7 +105,7 @@ Base.:(^)(x::ExactReal, y::Dual{<:Any,I}) where {I<:Interval} = convert(I, x)^y
 function Base.:(^)(x::Dual{Tx}, y::ExactReal) where {Tx}
     v = value(x)
     expv = v^y
-    if iszero(y.value) || all(iszero, values(partials(x)))
+    if iszero(y.value) || all(_isthinzero, values(partials(x)))
         return Dual{Tx}(expv, zero(partials(x)))
     else
         return Dual{Tx}(expv, partials(x) * y * v^(y - 1))

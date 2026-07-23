@@ -105,4 +105,35 @@ end
         @exact g(x) = 2^x + 6sin(x^3) - 33
         @test isguaranteed(ForwardDiff.derivative(f, interval(1)))
     end
+
+    @testset "thick partials" begin
+        # Differentiating by a real leaves interval-valued constants in the partials.
+        x, w = 2.0, interval(-0.5, 0.5)
+
+        # Test real, interval, and exact exponents.
+        for n ∈ (4, 4.0, interval(4), exact(4))
+            @test isequal_interval(ForwardDiff.derivative(t -> (x + t*w)^n, 0), interval(4x^3) * w)
+            @test isequal_interval(ForwardDiff.derivative(t -> ForwardDiff.derivative(s -> (x + s*w)^n, t), 0),
+                                   interval(12x^2) * w * w)
+        end
+
+        # Each derivative order adds a `Dual` layer.
+        ϕ(t)     = (x + t*w)^4
+        dϕ(t)    = ForwardDiff.derivative(ϕ, t)
+        ddϕ(t)   = ForwardDiff.derivative(dϕ, t)
+        dddϕ(t)  = ForwardDiff.derivative(ddϕ, t)
+        ddddϕ(t) = ForwardDiff.derivative(dddϕ, t)
+
+        @test isequal_interval(dϕ(0)   , interval(4x^3) * w)
+        @test isequal_interval(ddϕ(0)  , interval(12x^2) * w * w)
+        @test isequal_interval(dddϕ(0) , interval(24x) * w * w * w)
+        @test isequal_interval(ddddϕ(0), interval(24) * w * w * w * w)
+
+        # Test multivariate first- and second-order derivatives.
+        ψ(v) = (v[1]*w + v[2])^5
+        @test all(isequal_interval.(ForwardDiff.gradient(ψ, [0, 1]), [interval(5) * w, interval(5)]))
+        @test all(isequal_interval.(ForwardDiff.hessian(ψ, [0, 1]),
+            [interval(20) * w * w  interval(20) * w
+             interval(20) * w      interval(20)    ]))
+    end
 end
