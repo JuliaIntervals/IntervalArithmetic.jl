@@ -36,6 +36,11 @@ following parameters. All defaults can be modified using
   performance over precision. Learn more:
   [`IntervalArithmetic.MatMulMode`](@ref).
 
+- **Number of threads**: The number of threads used by the custom BLAS library
+  backing the `:fast` matrix multiplication mode. By default, it matches the
+  number of threads Julia uses for its own BLAS library. Learn more:
+  [`IntervalArithmetic.default_threads`](@ref).
+
 ## Display settings
 
 The display of intervals is controlled by [`setdisplay`](@ref). By default, the
@@ -45,6 +50,7 @@ with decorations and up to 6 significant digits.
 module IntervalArithmetic
 
 import RoundingEmulator, CRlibm, CoreMath, Base.MPFR
+import OpenBLASConsistentFPCSR_jll # 32-bit systems are not supported
 
 using MacroTools: MacroTools, prewalk, postwalk, @capture
 
@@ -77,7 +83,7 @@ mutable struct ConfigurationOptions
     rounding :: Symbol
     power    :: Symbol
     matmul   :: Symbol
-    nthreads :: Union{Nothing,Integer}
+    nthreads :: Int
 end
 
 function Base.show(io::IO, ::MIME"text/plain", params::ConfigurationOptions)
@@ -86,12 +92,12 @@ function Base.show(io::IO, ::MIME"text/plain", params::ConfigurationOptions)
     println(io, "  - flavor: ", params.flavor)
     println(io, "  - interval rounding: ", params.rounding)
     println(io, "  - power mode: ", params.power)
-    isnothing(params.nthreads) && return print(io, "  - matrix multiplication mode: ", params.matmul)
     println(io, "  - matrix multiplication mode: ", params.matmul)
     return print(io,   "  - number of threads for `:fast` matrix multiplication mode: ", params.nthreads)
 end
 
-const configuration_options = ConfigurationOptions(Float64, :set_based, :correct, :fast, :fast, nothing) # default
+# `nthreads` is resolved in `__init__`, since it depends on the machine
+const configuration_options = ConfigurationOptions(Float64, :set_based, :correct, :fast, :fast, 1) # default
 
 function configure_numtype(numtype::Type{<:NumTypes})
     @eval default_numtype() = $numtype
@@ -116,8 +122,6 @@ function configure_power(power::Symbol)
     return power
 end
 
-# algorithms are defined in the package extension for LinearAlgebra
-
 """
     MatMulMode{T}
 
@@ -129,16 +133,56 @@ Available mode types:
 """
 struct MatMulMode{T} end
 
+# algorithms are defined in the package extension for LinearAlgebra
 function configure_matmul(matmul)
     matmul ∈ (:slow, :fast) || return throw(ArgumentError("only the matrix multiplication mode `:slow` and `:fast` are available"))
     @eval default_matmul() = MatMulMode{$(QuoteNode(matmul))}()
     return matmul
 end
 
-configure_threads(::Nothing) = nothing
+"""
+    IntervalArithmetic.default_threads()
+
+Number of threads used by the `:fast` matrix multiplication mode when it is not
+configured explicitly. This mirrors the choice made by Julia for its own BLAS
+library: the environment variables `OPENBLAS_NUM_THREADS`, `GOTO_NUM_THREADS`
+and `OMP_NUM_THREADS` take precedence, otherwise half of the available CPU
+threads are used (all of them on Apple silicon).
+
+See also: [`IntervalArithmetic.configure`](@ref).
+"""
+function default_threads()
+    # cf. the `__init__` of the LinearAlgebra standard library
+    if haskey(ENV, "OPENBLAS_NUM_THREADS") || haskey(ENV, "GOTO_NUM_THREADS") || haskey(ENV, "OMP_NUM_THREADS")
+        return _get_num_threads() # these variables are honoured by OpenBLAS itself
+    elseif Sys.isapple() && Sys.ARCH === :aarch64
+        return max(1, Sys.CPU_THREADS)
+    else
+        return max(1, Sys.CPU_THREADS ÷ 2)
+    end
+end
+
+function configure_threads(nthreads::Integer)
+    nthreads > 0 || return throw(ArgumentError("the number of threads must be positive"))
+    return _set_num_threads(nthreads)
+end
+
+if Int == Int32 # OpenBLASConsistentFPCSR_jll is not available on 32-bit systems
+    _get_num_threads() = 1
+    _set_num_threads(::Integer) = 1
+else
+    _get_num_threads() =
+        Int(ccall((:openblas_get_num_threads64_, OpenBLASConsistentFPCSR_jll.libopenblas),
+            Cint, ()))
+    function _set_num_threads(nthreads::Integer)
+        ccall((:openblas_set_num_threads64_, OpenBLASConsistentFPCSR_jll.libopenblas),
+            Cvoid, (Cint,), nthreads)
+        return _get_num_threads()
+    end
+end
 
 """
-    configure(; numtype=Float64, flavor=:set_based, rounding=:correct, power=:fast, matmul=:fast)
+    configure(; numtype=Float64, flavor=:set_based, rounding=:correct, power=:fast, matmul=:fast, nthreads=IntervalArithmetic.default_threads())
 
 Configure the default behavior for:
 
@@ -165,16 +209,19 @@ Configure the default behavior for:
   [`IntervalArithmetic.MatMulMode`](@ref).
 
 - **Number of threads**: The number of threads used by the custom BLAS library
-  backing fast interval matrix multiplication. By default (`nothing`) the thread
-  count is left unchanged. Setting it requires `LinearAlgebra` to be loaded and
-  is unavailable on 32-bit systems.
+  backing the `:fast` matrix multiplication mode. By default, it matches the
+  number of threads Julia uses for its own BLAS library. Learn more:
+  [`IntervalArithmetic.default_threads`](@ref).
+
+Each keyword defaults to the value currently in use, so that only the given
+options are modified.
 """
 function configure(; numtype::Type{<:NumTypes}=configuration_options.numtype,
         flavor::Symbol=configuration_options.flavor,
         rounding::Symbol=configuration_options.rounding,
         power::Symbol=configuration_options.power,
         matmul::Symbol=configuration_options.matmul,
-        nthreads::Union{Nothing,Integer}=nothing)
+        nthreads::Integer=configuration_options.nthreads)
 
     if configuration_options.numtype !== numtype
         configure_numtype(numtype)
@@ -205,6 +252,9 @@ configure_flavor(configuration_options.flavor)
 configure_rounding(configuration_options.rounding)
 configure_power(configuration_options.power)
 configure_matmul(configuration_options.matmul)
+
+# the number of threads can only be resolved at runtime
+__init__() = configuration_options.nthreads = configure_threads(default_threads())
 
 #
 

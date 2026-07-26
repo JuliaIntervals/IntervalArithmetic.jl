@@ -4,24 +4,6 @@ using IntervalArithmetic
 import LinearAlgebra
 import OpenBLASConsistentFPCSR_jll # 32-bit systems are not supported
 
-function __init__()
-    if Int != Int32
-        # use the same number of threads as the default BLAS library
-        ccall((:openblas_set_num_threads64_, OpenBLASConsistentFPCSR_jll.libopenblas),
-            Cint, (Cint,),
-            LinearAlgebra.BLAS.get_num_threads())
-    end
-end
-
-if Int != Int32
-    function IntervalArithmetic.configure_threads(nthreads::Integer)
-        ccall((:openblas_set_num_threads64_, OpenBLASConsistentFPCSR_jll.libopenblas),
-            Cint, (Cint,), nthreads)
-        return Int(ccall((:openblas_get_num_threads64_, OpenBLASConsistentFPCSR_jll.libopenblas),
-            Cint, ()))
-    end
-end
-
 # contructor for `UniformScaling`
 
 IntervalArithmetic._interval_infsup(::Type{T}, J::LinearAlgebra.UniformScaling, H::LinearAlgebra.UniformScaling, d::IntervalArithmetic.Decoration) where {T<:IntervalArithmetic.NumTypes} =

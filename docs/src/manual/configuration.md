@@ -15,6 +15,7 @@ Each keyword argument sets a specific configuration option:
 - `rounding`: control the rounding type.
 - `power`: control the implementation used for the interval power operation, that is, the computation of `x^n` where `x` is an interval and `n` is a number. The choice of power implementation has implications for both performance and accuracy.
 - `matmul`: control the matrix multiplication algorithm.
+- `nthreads`: control the number of threads used by the `:fast` matrix multiplication algorithm.
 
 ```@repl
 using IntervalArithmetic
@@ -32,4 +33,5 @@ IntervalArithmetic.Flavor
 IntervalArithmetic.IntervalRounding
 IntervalArithmetic.PowerMode
 IntervalArithmetic.MatMulMode
+IntervalArithmetic.default_threads
 ```
