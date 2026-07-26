@@ -54,17 +54,25 @@ Base.typemax(::Type{BareInterval{T}}) where {T<:NumTypes} =
 Base.typemax(::Type{Interval{T}}) where {T<:NumTypes} =
     _unsafe_interval(typemax(BareInterval{T}), dac, true)
 
-function Base.eps(::Type{BareInterval{T}}) where {T<:NumTypes}
-    x = eps(T)
-    return _unsafe_bareinterval(T, x, x)
+Base.eps(::Type{BareInterval{T}}) where {T<:AbstractFloat} =
+    _unsafe_bareinterval(T, eps(T), eps(T))
+function Base.eps(x::BareInterval{T}) where {T<:AbstractFloat}
+    isempty_interval(x) && return x
+    # `eps` is even and non-decreasing in magnitude, so the range of `eps` over
+    # `x` is attained at `mig(x)` and `mag(x)`; note that `eps(±Inf)` is `NaN`
+    m = mag(x)
+    return _unsafe_bareinterval(T, eps(mig(x)), ifelse(isinf(m), m, eps(m)))
 end
-function Base.eps(x::BareInterval{T}) where {T<:NumTypes}
-    y = max(eps(inf(x)), eps(sup(x)))
-    return _unsafe_bareinterval(T, y, y)
-end
-Base.eps(::Type{Interval{T}}) where {T<:NumTypes} =
+
+Base.eps(::Type{Interval{T}}) where {T<:AbstractFloat} =
     _unsafe_interval(eps(BareInterval{T}), com, true)
-Base.eps(x::Interval) = _unsafe_interval(eps(bareinterval(x)), com, isguaranteed(x))
+function Base.eps(x::Interval{T}) where {T<:AbstractFloat}
+    isnai(x) && return x
+    r = eps(bareinterval(x))
+    # `eps` is a step function; it is continuous on `x` if and only if it is constant
+    d = min(decoration(x), ifelse(isthin(r) & isbounded(r), com, def))
+    return _unsafe_interval(r, d, isguaranteed(x))
+end
 
 """
     hash(x::BareInterval, h::UInt)

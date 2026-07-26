@@ -18,6 +18,18 @@
         @test isthin(one(a), big(1.0))
         @test !isequal_interval(a, b)
         @test isequal_interval(eps(typeof(a)), eps(one(typeof(a))))
+        @test isequal_interval(eps(interval(1e-12, 1.0)), interval(eps(1e-12), eps(1.0)))
+        @test decoration(eps(interval(1e-12, 1.0))) == def
+        @test isequal_interval(eps(interval(1.0, 1.5)), interval(eps(1.0))) # `eps` is constant on `x`
+        @test decoration(eps(interval(1.0, 1.5))) == com
+        @test isequal_interval(eps(interval(-3.0, 1.0)), interval(eps(0.0), eps(3.0))) # `eps` is even
+        @test isequal_interval(eps(interval(-1.0, 2.0)), interval(eps(0.0), eps(2.0))) # `0 ∈ x`
+        @test isequal_interval(eps(interval(1.0, Inf)), interval(eps(1.0), Inf)) # `eps(Inf)` is `NaN`
+        @test isequal_interval(eps(emptyinterval()), emptyinterval())
+        @test decoration(eps(emptyinterval())) == trv
+        @test isnai(eps(nai()))
+        @test isequal_interval(eps(bareinterval(-3.0, 1.0)), bareinterval(eps(0.0), eps(3.0)))
+        @test isequal_interval(eps(emptyinterval(BareInterval{Float64})), emptyinterval(BareInterval{Float64}))
         @test isequal_interval(typemin(typeof(a)), interval(-Inf, nextfloat(-Inf)))
         @test isequal_interval(typemax(typeof(a)), interval(prevfloat(Inf), Inf))
         @test isequal_interval(typemin(a), typemin(typeof(a)))
