@@ -32,7 +32,8 @@ end
 """
     mince(x, n)
 
-Split an interval `x` in `n` intervals of the same diameter.
+Split an interval `x` in `n` intervals of the same diameter. An unbounded `x`
+has no such splitting and is rejected; use [`bisect`](@ref) instead.
 
 Split the `i`-th component of a vector `x` in `n[i]` intervals of the
 same diameter; `n` can be a tuple of integers, or a single integer in which case
@@ -46,12 +47,24 @@ mince(x::AbstractVector, n::NTuple{N,Integer}) where {N} = mince!(Vector{typeof(
 
 mince(x::AbstractVector, n::Integer) = mince(x, ntuple(_ -> n, length(x)))
 
+# an infinite diameter cannot be divided in equal parts: interpolating between
+# infinite bounds yields nodes that are not a number
+_check_minceable(x) = isbounded(x) ||
+    throw(DomainError(x, "cannot split an unbounded interval in intervals of the same diameter; see instead `bisect`"))
+
 """
     mince!(v, x, n)
 
 In-place version of [`mince`](@ref).
 """
 function mince!(v::AbstractVector{<:BareInterval}, x::BareInterval{T}, n::Integer) where {T<:NumTypes}
+    if isempty_interval(x) # an empty interval has no nodes to interpolate
+        for i ∈ 1:n
+            v[i] = emptyinterval(x)
+        end
+        return v
+    end
+    _check_minceable(x)
     nodes = LinRange(inf(x), sup(x), n+1)
     @inbounds for i ∈ 1:n
         v[i] = _unsafe_bareinterval(T, nodes[i], nodes[i+1])
@@ -60,6 +73,14 @@ function mince!(v::AbstractVector{<:BareInterval}, x::BareInterval{T}, n::Intege
 end
 
 function mince!(v::AbstractVector{<:Interval}, x::Interval{T}, n::Integer) where {T<:NumTypes}
+    if isnai(x) | isempty_interval(x) # neither has nodes to interpolate
+        y = isnai(x) ? nai(x) : emptyinterval(x)
+        for i ∈ 1:n
+            v[i] = y
+        end
+        return v
+    end
+    _check_minceable(x)
     nodes = LinRange(inf(x), sup(x), n+1)
     d = decoration(x)
     t = isguaranteed(x)

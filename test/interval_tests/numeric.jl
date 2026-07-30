@@ -324,6 +324,27 @@ end
     v = mince(II, 8)
     @test length(v) == 8
     @test isequal_interval(hull(v...), II)
+
+    # an empty interval and an NaI have no nodes to interpolate
+    @test all(isempty_interval, mince(emptyinterval(BareInterval{Float64}), 3))
+    @test all(isempty_interval, mince(emptyinterval(), 3))
+    @test all(isnai, mince(nai(Float64), 3))
+
+    # an infinite diameter cannot be divided in equal parts
+    @test_throws "cannot split an unbounded interval" mince(entireinterval(), 2)
+    @test_throws "cannot split an unbounded interval" mince(interval(0, Inf), 2)
+    @test_throws "cannot split an unbounded interval" mince(entireinterval(BareInterval{Float64}), 2)
+    @test_throws "cannot split an unbounded interval" mince([interval(0, 1), entireinterval()], 2)
+
+    # every piece is a valid interval and together they cover the input
+    for x ∈ (interval(-1, 1), interval(0, 1e300), interval(-1e300, 1e300), interval(3, 3))
+        for n ∈ (1, 2, 3, 7)
+            v = mince(x, n)
+            @test length(v) == n
+            @test isequal_interval(reduce(hull, v), x)
+            @test all(z -> !isnan(inf(z)) & !isnan(sup(z)), v)
+        end
+    end
 end
 
 @testset "rootn test" begin
