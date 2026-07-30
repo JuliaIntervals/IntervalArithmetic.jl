@@ -302,6 +302,8 @@ _unsafe_interval
 # used only to construct intervals
 _inf(x::Interval) = x.bareinterval.lo
 _sup(x::Interval) = x.bareinterval.hi
+# Access the bare interval after ruling out NaI, without repeating the warning check.
+_bareinterval(x::Interval) = x.bareinterval
 #
 
 # avoid inlining the expanded code from @warn
