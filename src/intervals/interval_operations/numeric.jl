@@ -14,9 +14,8 @@ Implement the `inf` function of the IEEE Standard 1788-2015 (Table 9.2).
 See also: [`sup`](@ref), [`bounds`](@ref), [`mid`](@ref), [`diam`](@ref),
 [`radius`](@ref) and [`midradius`](@ref).
 """
-inf(x::BareInterval{T}) where {T<:AbstractFloat} = ifelse(isnan(x.lo), typemax(T), ifelse(iszero(x.lo), copysign(x.lo, -1), x.lo))
-function inf(x::BareInterval{T}) where {T<:BigFloat}
-    isnan(x.lo) && return typemax(T) # typemax(x.lo)
+inf(x::BareInterval{<:AbstractFloat}) = ifelse(iszero(x.lo), copysign(x.lo, -1), x.lo)
+function inf(x::BareInterval{BigFloat})
     iszero(x.lo) && return copysign(x.lo, -1)
     return x.lo
 end
@@ -44,13 +43,7 @@ Implement the `sup` function of the IEEE Standard 1788-2015 (Table 9.2).
 See also: [`inf`](@ref), [`bounds`](@ref), [`mid`](@ref), [`diam`](@ref),
 [`radius`](@ref) and [`midradius`](@ref).
 """
-sup(x::BareInterval{T}) where {T<:AbstractFloat} = ifelse(isnan(x.hi), typemin(T), x.hi)
-function sup(x::BareInterval{T}) where {T<:BigFloat}
-    isnan(x.hi) && return typemin(T) # typemin(x.hi)
-    return x.hi
-end
-
-sup(x::BareInterval{<:Rational}) = x.hi
+sup(x::BareInterval) = x.hi
 
 function sup(x::Interval{T}) where {T<:AbstractFloat}
     isnai(x) && return convert(T, NaN)
@@ -72,8 +65,7 @@ not normalize the infimum of the interval.
 See also: [`inf`](@ref), [`sup`](@ref), [`mid`](@ref), [`diam`](@ref),
 [`radius`](@ref) and [`midradius`](@ref).
 """
-bounds(x::BareInterval{T}) where {T<:AbstractFloat} = (ifelse(isnan(x.lo), typemax(T), x.lo), sup(x))
-bounds(x::BareInterval{<:Rational}) = (inf(x), sup(x))
+bounds(x::BareInterval) = (x.lo, x.hi)
 
 function bounds(x::Interval{T}) where {T<:AbstractFloat}
     isnai(x) && return (convert(T, NaN), convert(T, NaN))
