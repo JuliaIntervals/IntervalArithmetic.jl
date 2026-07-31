@@ -2,7 +2,7 @@
 IntervalArithmetic
 
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliaintervals.github.io/IntervalArithmetic.jl/stable)
-[![DOI](https://zenodo.org/badge/87007945.svg)](https://zenodo.org/badge/latestdoi/87007945)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.3336308-blue)](https://doi.org/10.5281/zenodo.3336308)
 [![Build Status](https://github.com/JuliaIntervals/IntervalArithmetic.jl/workflows/CI/badge.svg)](https://github.com/JuliaIntervals/IntervalArithmetic.jl/actions/workflows/CI.yml)
 [![coverage](https://codecov.io/gh/JuliaIntervals/IntervalArithmetic.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaIntervals/IntervalArithmetic.jl)
 </h1>
