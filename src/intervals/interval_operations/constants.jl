@@ -9,11 +9,7 @@ lower bound is larger than the upper one.
 
 Implement the `empty` function of the IEEE Standard 1788-2015 (Section 10.5.2).
 """
-emptyinterval(::Type{BareInterval{T}}) where {T<:AbstractFloat} = _unsafe_bareinterval(T, convert(T, NaN), convert(T, NaN))
-# note: `using Base.unsafe_rational(Int, 0, 0)` as an equivalent to `NaN` for `Rational`
-# does not work well since most codes for `Rational` assume that the denominator cannot be zero
-# e.g. `iszero(Base.unsafe_rational(Int, 0, 0)) == true`
-emptyinterval(::Type{BareInterval{T}}) where {T<:Rational} = _unsafe_bareinterval(T, typemax(T), typemin(T))
+emptyinterval(::Type{BareInterval{T}}) where {T<:NumTypes} = _unsafe_bareinterval(T, typemax(T), typemin(T))
 emptyinterval(::BareInterval{T}) where {T<:NumTypes} = emptyinterval(BareInterval{T})
 
 emptyinterval(::Type{Interval{T}}) where {T<:NumTypes} = _unsafe_interval(emptyinterval(BareInterval{T}), trv, true)

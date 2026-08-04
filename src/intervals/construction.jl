@@ -44,6 +44,13 @@ Fields:
 - `lo :: T`
 - `hi :: T`
 
+The stored bounds satisfy two representation invariants: neither is `NaN`, the
+empty interval being stored as `(typemax(T), typemin(T))`; and a zero bound is
+stored as `+0`, with [`inf`](@ref) restoring the `-0` required by the standard.
+The inner constructor normalizes zero bounds, while keeping `NaN` out is left to
+the callers. [`sup`](@ref) and [`bounds`](@ref) rely on both invariants to read
+the fields directly.
+
 Constructor compliant with the IEEE Standard 1788-2015: [`bareinterval`](@ref).
 
 See also: [`Interval`](@ref).
@@ -295,6 +302,8 @@ _unsafe_interval
 # used only to construct intervals
 _inf(x::Interval) = x.bareinterval.lo
 _sup(x::Interval) = x.bareinterval.hi
+# Access the bare interval after ruling out NaI, without repeating the warning check.
+_bareinterval(x::Interval) = x.bareinterval
 #
 
 # avoid inlining the expanded code from @warn

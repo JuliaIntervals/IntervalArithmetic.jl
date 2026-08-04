@@ -1,3 +1,30 @@
+@testset "Representation invariants of the bounds" begin
+    # `inf` and `sup` read the fields directly, so no operation may store a
+    # `NaN` bound; the empty interval is `(typemax(T), typemin(T))` instead
+    for T ∈ (Float16, Float32, Float64, BigFloat, Rational{Int}, Rational{BigInt})
+        e = emptyinterval(BareInterval{T})
+        @test (e.lo == typemax(T)) & (e.hi == typemin(T))
+        @test isempty_interval(e)
+        @test (inf(e) == typemax(T)) & (sup(e) == typemin(T))
+
+        f = bareinterval(T, 2, 1) # ill-formed, hence empty
+        @test (f.lo == typemax(T)) & (f.hi == typemin(T))
+
+        g = nai(Interval{T})
+        @test (g.bareinterval.lo == typemax(T)) & (g.bareinterval.hi == typemin(T))
+    end
+
+    # a zero bound is stored as `+0`, `inf` restoring the `-0` of the standard
+    x = bareinterval(0.0, 1.0)
+    @test (x.lo === 0.0) & (inf(x) === -0.0) & (sup(x) === 1.0)
+    y = bareinterval(-1.0, -0.0)
+    @test (y.hi === 0.0) & (sup(y) === 0.0)
+
+    # `bounds` reports what is stored, without normalizing the infimum
+    @test bounds(x) === (0.0, 1.0)
+    @test bounds(emptyinterval(BareInterval{Float64})) === (Inf, -Inf)
+end
+
 @testset "Difference between checked and unchecked bare intervals" begin
     @test IntervalArithmetic._unsafe_bareinterval(Float64, 1, 2) === bareinterval(1, 2)
 

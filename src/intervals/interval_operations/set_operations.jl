@@ -13,39 +13,57 @@ end
 """
     intersect_interval(x, y; dec = :default)
 
-Returns the intersection of the intervals `x` and `y`, considered as (extended)
-sets of real numbers. That is, the set that contains the points common in `x`
-and `y`.
+Return the intersection of `x` and `y`, considered as extended sets of real
+numbers.
 
-The keywork `dec` argument controls the decoration of the result. It can be
-either a specific decoration, or one of two following options:
+The keyword argument `dec` controls the decoration of the result. It can be a
+specific decoration or one of the following two options:
 - `:default`: if at least one of the input intervals is `ill`,
   then the result is `ill`, otherwise it is `trv` (Section 11.7.1).
-- `:auto`: the ouptut has the minimal decoration of the inputs.
+- `:auto`: the output has the minimal decoration of the inputs.
 
 Implement the `intersection` function of the IEEE Standard 1788-2015 (Section 9.3).
 """
 function intersect_interval(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
-    lo = max(inf(x), inf(y))
-    hi = min(sup(x), sup(y))
-    if lo > hi
-        return emptyinterval(BareInterval{T})
-    else
-        return _unsafe_bareinterval(T, lo, hi)
-    end
+    # An empty interval has bounds `(typemax(T), typemin(T))`, so an empty
+    # operand makes `lo > hi` without requiring a separate check.
+    lo = max(x.lo, y.lo)
+    hi = min(x.hi, y.hi)
+    lo > hi && return emptyinterval(BareInterval{T})
+    return _unsafe_bareinterval(T, lo, hi)
 end
 intersect_interval(x::BareInterval, y::BareInterval) = intersect_interval(promote(x, y)...)
 
 function intersect_interval(x::Interval{T}, y::Interval{S}; dec = :default) where {T<:NumTypes,S<:NumTypes}
-    isnai(x) | isnai(y) && return nai(promote_type(T, S))
-    r = intersect_interval(bareinterval(x), bareinterval(y))
     d = min(decoration(x), decoration(y))
+    d == ill && return nai(promote_type(T, S)) # one of the inputs is an NaI
+    r = intersect_interval(_bareinterval(x), _bareinterval(y))
     t = isguaranteed(x) & isguaranteed(y)
+    dec === :default && return _unsafe_interval(r, trv, t)
     return _set_decoration(_unsafe_interval(r, d, t), dec)
 end
 
 intersect_interval(x, y, z, w...; dec = :default) =
     reduce((a, b) -> intersect_interval(a, b; dec = dec), (x, y, z, w...))
+
+# Bare intervals carry no decoration, so they take no `dec` keyword.
+intersect_interval(x::BareInterval, y::BareInterval, z::BareInterval, w::Vararg{BareInterval,N}) where {N} =
+    reduce(intersect_interval, (x, y, z, w...))
+
+# Share the decoration checks across all arguments. `Vararg{Interval,N}` is
+# required over `Interval...`: without the `N` the method is not specialized on
+# the number of arguments past six, and the reductions below then allocate and
+# dispatch dynamically.
+function intersect_interval(x::Interval, y::Interval, z::Interval, w::Vararg{Interval,N}; dec = :default) where {N}
+    xs = (x, y, z, w...)
+    r = mapreduce(_bareinterval, intersect_interval, xs)
+    d = mapreduce(decoration, min, xs)
+    d == ill && return nai(numtype(r)) # one of the inputs is an NaI
+    t = mapreduce(isguaranteed, &, xs)
+    dec === :default && return _unsafe_interval(r, trv, t)
+    return _set_decoration(_unsafe_interval(r, d, t), dec)
+end
+
 intersect_interval(x::Complex, y::Complex; dec = :default) =
     complex(intersect_interval(real(x), real(y); dec = dec), intersect_interval(imag(x), imag(y); dec = dec))
 intersect_interval(x::Real, y::Complex; dec = :default) =
@@ -60,30 +78,51 @@ Return the interval hull of the intervals `x` and `y`, considered as (extended)
 sets of real numbers, i.e. the smallest interval that contains all of `x` and
 `y`.
 
-The keywork `dec` argument controls the decoration of the result. It can be
-either a specific decoration, or one of two following options:
+The keyword argument `dec` controls the decoration of the result. It can be a
+specific decoration or one of the following two options:
 - `:default`: if at least one of the input intervals is `ill`,
   then the result is `ill`, otherwise it is `trv` (Section 11.7.1).
-- `:auto`: the ouptut has the minimal decoration of the inputs.
+- `:auto`: the output has the minimal decoration of the inputs.
 
 Implement the `convexHull` function of the IEEE Standard 1788-2015 (Section 9.3).
 """
 function hull(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
-    isempty_interval(x) & isempty_interval(y) && return x
-    return _unsafe_bareinterval(T, min(inf(x), inf(y)), max(sup(x), sup(y)))
+    # The bounds of an empty interval are neutral under `min` and `max`, so no
+    # separate emptiness check is required.
+    return _unsafe_bareinterval(T, min(x.lo, y.lo), max(x.hi, y.hi))
 end
 hull(x::BareInterval, y::BareInterval) = hull(promote(x, y)...)
 
 function hull(x::Interval{T}, y::Interval{S}; dec = :default) where {T<:NumTypes,S<:NumTypes}
-    isnai(x) | isnai(y) && return nai(promote_type(T, S))
-    r = hull(bareinterval(x), bareinterval(y))
     d = min(decoration(x), decoration(y))
+    d == ill && return nai(promote_type(T, S)) # one of the inputs is an NaI
+    r = hull(_bareinterval(x), _bareinterval(y))
     t = isguaranteed(x) & isguaranteed(y)
+    dec === :default && return _unsafe_interval(r, trv, t)
     return _set_decoration(_unsafe_interval(r, d, t), dec)
 end
 
 hull(x, y, z, w...; dec = :default) =
     reduce((a, b) -> hull(a, b; dec = dec), (x, y, z, w...))
+
+# Bare intervals carry no decoration, so they take no `dec` keyword.
+hull(x::BareInterval, y::BareInterval, z::BareInterval, w::Vararg{BareInterval,N}) where {N} =
+    reduce(hull, (x, y, z, w...))
+
+# Share the decoration checks across all arguments. `Vararg{Interval,N}` is
+# required over `Interval...`: without the `N` the method is not specialized on
+# the number of arguments past six, and the reductions below then allocate and
+# dispatch dynamically.
+function hull(x::Interval, y::Interval, z::Interval, w::Vararg{Interval,N}; dec = :default) where {N}
+    xs = (x, y, z, w...)
+    r = mapreduce(_bareinterval, hull, xs)
+    d = mapreduce(decoration, min, xs)
+    d == ill && return nai(numtype(r)) # one of the inputs is an NaI
+    t = mapreduce(isguaranteed, &, xs)
+    dec === :default && return _unsafe_interval(r, trv, t)
+    return _set_decoration(_unsafe_interval(r, d, t), dec)
+end
+
 hull(x::Complex, y::Complex; dec = :default) =
     complex(hull(real(x), real(y); dec = dec), hull(imag(x), imag(y); dec = dec))
 hull(x::Real, y::Complex; dec = :default) =
