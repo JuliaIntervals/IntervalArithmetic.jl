@@ -98,3 +98,59 @@
         @test val2 == 3.0
     end
 end
+
+@testset "Exact literals with bare intervals" begin
+    # `+`, `-`, `*`, `/` and `\` on a matching number type bypass the promotion to
+    # a thin interval, so they must be more specific than the generic methods and
+    # must return exactly what those return.
+    specialized(f, S, R) = which(f, Tuple{S,R}).sig isa UnionAll
+    @test all(f -> specialized(f, BareInterval{Float64}, ExactReal{Float64}), (+, -, *, /))
+    @test all(f -> specialized(f, ExactReal{Float64}, BareInterval{Float64}), (+, -, *, \))
+
+    # ... and the mixed number types must not, since the promotion is where the
+    # `ExactReal` gets rounded to the interval's number type.
+    @test !specialized(*, BareInterval{Float64}, ExactReal{Int})
+
+    viapromotion(f, x, y) = f(promote(x, y)...)
+    samebits(x::BareInterval, y::BareInterval) = (inf(x) === inf(y)) & (sup(x) === sup(y))
+
+    for T ∈ (Float64, Float32, Rational{Int})
+        vals = T <: Rational ?
+            (zero(T), one(T), -one(T), T(1//2), T(-5//3)) :
+            (zero(T), -zero(T), one(T), -one(T), T(0.5), T(-2.5), T(0.1), T(-0.1),
+             floatmax(T), floatmin(T))
+        ivs = (bareinterval(T, 1, 2), bareinterval(T, -2, -1), bareinterval(T, -1, 2),
+               bareinterval(T, 0, 1), bareinterval(T, -1, 0), bareinterval(T, 0, 0),
+               bareinterval(T(1//10), T(1//10)), bareinterval(T, -Inf, 2),
+               bareinterval(T, 3, Inf), entireinterval(BareInterval{T}),
+               emptyinterval(BareInterval{T}))
+        for v ∈ vals, x ∈ ivs
+            k = exact(v)
+            @test samebits(x + k, viapromotion(+, x, k))
+            @test samebits(k + x, viapromotion(+, k, x))
+            @test samebits(x - k, viapromotion(-, x, k))
+            @test samebits(k - x, viapromotion(-, k, x))
+            @test samebits(x * k, viapromotion(*, x, k))
+            @test samebits(k * x, viapromotion(*, k, x))
+            @test samebits(x / k, viapromotion(/, x, k))
+            @test samebits(k \ x, viapromotion(\, k, x))
+        end
+    end
+
+    # A non-finite `ExactReal` has no thin interval; both routes warn and return
+    # the empty interval.
+    let x = bareinterval(1.0, 2.0)
+        for v ∈ (Inf, -Inf, NaN)
+            @test isempty_interval(@test_logs (:warn,) x + exact(v))
+            @test isempty_interval(@test_logs (:warn,) x - exact(v))
+            @test isempty_interval(@test_logs (:warn,) exact(v) - x)
+            @test isempty_interval(@test_logs (:warn,) x * exact(v))
+            @test isempty_interval(@test_logs (:warn,) x / exact(v))
+        end
+    end
+
+    # Mixed number types still round through the promotion.
+    @test isequal_interval(bareinterval(1.0, 2.0) * exact(2), bareinterval(2.0, 4.0))
+    @test isequal_interval(bareinterval(1.0, 2.0) + exact(1//3),
+                           bareinterval(1.0, 2.0) + bareinterval(Float64, 1//3))
+end

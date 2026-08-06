@@ -261,6 +261,57 @@ for f ∈ (:+, :-, :*, :/, :\, :^)
     @eval Base.$f(x::ExactReal, y::BareInterval) = $f(promote(x, y)...)
 end
 
+# These specializations improve efficiency, but always agree precisely with
+# the promoting fallbacks above. Several circumstances fall back to promotion: a
+# non-finite point (whose thin interval is not even valid), an unbounded interval
+# times a point (`0 * ∞` is flavor dependent), and division by zero (likewise).
+# The type parameter is bounded so that these methods are more specific than the
+# generic `Base.$f(::ExactReal, ::BareInterval)`, whose own parameters are bounded
+# by `Real` and `NumTypes`.
+
+function Base.:+(x::BareInterval{T}, y::ExactReal{T}) where {T<:NumTypes}
+    v = y.value
+    isfinite(v) || return +(promote(x, y)...)
+    isempty_interval(x) && return x
+    return @round(T, inf(x) + v, sup(x) + v)
+end
+Base.:+(x::ExactReal{T}, y::BareInterval{T}) where {T<:NumTypes} = y + x
+
+function Base.:-(x::BareInterval{T}, y::ExactReal{T}) where {T<:NumTypes}
+    v = y.value
+    isfinite(v) || return -(promote(x, y)...)
+    isempty_interval(x) && return x
+    return @round(T, inf(x) - v, sup(x) - v)
+end
+
+function Base.:-(x::ExactReal{T}, y::BareInterval{T}) where {T<:NumTypes}
+    v = x.value
+    isfinite(v) || return -(promote(x, y)...)
+    isempty_interval(y) && return y
+    return @round(T, v - sup(y), v - inf(y))
+end
+
+function Base.:*(x::BareInterval{T}, y::ExactReal{T}) where {T<:NumTypes}
+    v = y.value
+    isempty_interval(x) && return x # `isbounded` is true for the empty interval
+    (isfinite(v) & isbounded(x)) || return *(promote(x, y)...)
+    signbit(v) && return @round(T, v * sup(x), v * inf(x))
+    return @round(T, v * inf(x), v * sup(x))
+end
+Base.:*(x::ExactReal{T}, y::BareInterval{T}) where {T<:NumTypes} = y * x
+
+function Base.:/(x::BareInterval{T}, y::ExactReal{T}) where {T<:NumTypes}
+    v = y.value
+    isempty_interval(x) && return x
+    (isfinite(v) & !iszero(v)) || return /(promote(x, y)...)
+    signbit(v) && return @round(T, sup(x) / v, inf(x) / v)
+    return @round(T, inf(x) / v, sup(x) / v)
+end
+
+# `x \ y` is `y / x`; the reverse case is a point divided by an interval, which
+# has no shortcut — the zero-crossing tree of `/` is the whole computation.
+Base.:\(x::ExactReal{T}, y::BareInterval{T}) where {T<:NumTypes} = y / x
+
 """
     has_exact_display(x::Real)
 
