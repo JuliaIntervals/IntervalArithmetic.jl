@@ -5,11 +5,14 @@ include("construction.jl")
 include("parsing.jl")
 include("real_interface.jl")
     export numtype
-include("exact_literals.jl")
-    export ExactReal, exact, @exact, has_exact_display
 
 # Rounding
 include("rounding.jl")
+
+# after `rounding.jl`: the interval operations on `ExactReal` round their
+# endpoints with `@round`
+include("exact_literals.jl")
+    export ExactReal, exact, @exact, has_exact_display
 
 # Flavor
 include("flavor.jl")
