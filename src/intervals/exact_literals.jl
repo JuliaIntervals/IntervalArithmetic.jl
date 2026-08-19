@@ -224,7 +224,7 @@ _exact_pow(x::Rational, y::Integer) = x ^ y
 if VERSION ≥ v"1.11"
     _exact_pow(x::Integer, y::Integer) = Base.checked_pow(x, y)
 else
-    _exact_pow(::Integer, ::Integer) = throw(ArgumentError("`checked_pow` requires at least Julia 1.11"))
+    _exact_pow(x::Integer, y::Integer) = Integer(Rational(x)^y)
 end
 
 Base.literal_pow(::typeof(^), x::ExactReal, ::Val{p}) where {p} =
