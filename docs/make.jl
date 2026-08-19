@@ -1,4 +1,5 @@
-using Documenter, IntervalArithmetic
+using Documenter, DocumenterCodeBlocks
+using IntervalArithmetic
 
 DocMeta.setdocmeta!(IntervalArithmetic, :DocTestSetup, :(using IntervalArithmetic))
 
@@ -33,6 +34,7 @@ makedocs(;
         ],
         "Examples" => ["Rigorous computation of ``\\pi``" => "examples/pi.md"],
     ],
+    plugins = [CodeBlocks()],
     checkdocs = :exported,
     warnonly = false
 )
