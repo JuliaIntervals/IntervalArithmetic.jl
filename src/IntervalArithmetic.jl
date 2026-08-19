@@ -141,21 +141,17 @@ function configure_matmul(matmul)
 end
 
 """
-    IntervalArithmetic.default_threads()
+    default_threads()
 
 Number of threads used by the `:fast` matrix multiplication mode when it is not
-configured explicitly. This mirrors the choice made by Julia for its own BLAS
-library: the environment variables `OPENBLAS_NUM_THREADS`, `GOTO_NUM_THREADS`
-and `OMP_NUM_THREADS` take precedence, otherwise half of the available CPU
-threads are used (all of them on Apple silicon).
+configured explicitly. Half of the available CPU threads are used (all of them
+on Apple silicon).
 
 See also: [`IntervalArithmetic.configure`](@ref).
 """
 function default_threads()
     # cf. the `__init__` of the LinearAlgebra standard library
-    if haskey(ENV, "OPENBLAS_NUM_THREADS") || haskey(ENV, "GOTO_NUM_THREADS") || haskey(ENV, "OMP_NUM_THREADS")
-        return _get_num_threads() # these variables are honoured by OpenBLAS itself
-    elseif Sys.isapple() && Sys.ARCH === :aarch64
+    if Sys.isapple() && Sys.ARCH === :aarch64
         return max(1, Sys.CPU_THREADS)
     else
         return max(1, Sys.CPU_THREADS ÷ 2)
