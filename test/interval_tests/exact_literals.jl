@@ -59,7 +59,11 @@
     @test exact(-Int64(1)) / exact(typemin(Int32)) === exact(-Int64(1)/typemin(Int32))
     @test exact(-1) / exact(typemin(Int)) === -1/typemin(Int)
     @test exact(2) ^ exact(3) === exact(8)
-    @test_throws DomainError exact(2) ^ (-2)
+    if VERSION ≥ v"1.11"
+        @test_throws DomainError exact(2) ^ (-2)
+    else
+        @test_throws InexactError exact(2) ^ (-2)
+    end
 
     @test exact(1//2) + exact(1//4) === exact(3//4)
     @test exact(1//2) - exact(1//4) === exact(1//4)
