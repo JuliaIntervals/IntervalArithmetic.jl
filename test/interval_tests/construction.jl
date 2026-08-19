@@ -219,3 +219,26 @@ end
     @test !isguaranteed(interval(0, convert(Interval{Float64}, 1)))
     @test !isguaranteed(interval(convert(Interval{Float64}, 0), 1))
 end
+
+@testset "`@interval` macro" begin
+    x = 1
+    T = Float32
+    # single expression
+    @test isequal_interval(@interval(sin(1)), sin(interval(1)))
+    # first argument as the bound type
+    @test isequal_interval(@interval(Float32, sin(1)), sin(interval(Float32, 1)))
+    @test isequal_interval(@interval(Float64, x), interval(1))
+    @test isequal_interval(@interval(T, sin(x)), sin(interval(Float32, 1)))
+    @test isequal_interval(@interval(Float64, sin(1), exp(1)), interval(inf(sin(interval(1))), sup(exp(interval(1)))))
+    # first argument as the lower bound
+    @test isequal_interval(@interval(1, 2), interval(1, 2))
+    @test isequal_interval(@interval(x, 2), interval(1, 2))
+    @test isequal_interval(@interval(exp(1), exp(1)), exp(interval(1)))
+    @test isequal_interval(@interval(sin(1), exp(1)), interval(inf(sin(interval(1))), sup(exp(interval(1)))))
+    # tightness of the upper bound
+    @test isequal_interval(@interval(3, sin(5) + 10), interval(3, sup(sin(interval(5)) + interval(10))))
+    # bounds in the wrong order return an NaI, consistently with `interval`
+    @test isnai(@interval(2, 1))
+    @test isnai(@interval(x, sin(x))) # sin(1) < 1
+    @test isnai(@interval(Float64, 2, 1))
+end

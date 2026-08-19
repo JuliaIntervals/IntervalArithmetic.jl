@@ -681,6 +681,9 @@ Interval{Float64}(0.8414709848078965, 0.8414709848078966, com, true)
 julia> @interval Float32 sin(1)
 Interval{Float32}(0.84147096f0, 0.841471f0, com, true)
 
+julia> @interval sin(1) exp(1)
+Interval{Float64}(0.8414709848078965, 2.7182818284590455, com, true)
+
 julia> @interval Float64 sin(1) exp(1)
 Interval{Float64}(0.8414709848078965, 2.7182818284590455, com, true)
 ```
@@ -691,8 +694,16 @@ end
 
 macro interval(expr1, expr2)
     x = _wrap_interval(expr1)
-    y = _wrap_interval(expr1, expr2)
-    return :(interval($x, $y))
+    y_typed = _wrap_interval(expr1, expr2)
+    y_plain = _wrap_interval(expr2)
+    return quote
+        local lo = $x
+        if lo isa Type # `expr1` is the bound type of the interval
+            interval(lo, $y_typed)
+        else # `expr1` is the lower bound of the interval
+            interval(lo, $y_plain)
+        end
+    end
 end
 
 macro interval(T, expr1, expr2)
@@ -701,7 +712,6 @@ macro interval(T, expr1, expr2)
     return :(interval($x, $y))
 end
 
-_atomic(x, y) = hull(atomic(x), atomic(y); dec = :auto) # use `hull` in case `atomic(x)` is larger than `atomic(y)`
 _atomic(T::Type, x) = atomic(T, x)
 _atomic(::Type, T::Type) = T
 
