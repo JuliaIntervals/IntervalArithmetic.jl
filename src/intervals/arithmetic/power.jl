@@ -26,9 +26,18 @@ struct PowerMode{T} end
     ^(x::BareInterval, y::BareInterval)
     ^(x::Interval, y::Interval)
 
-Compute the power of `x` by `y`. Unless `y` is an integer, the positive real
-part of `x^y` is returned. This function is not in the IEEE Standard 1788-2015.
-Its behaviour depends on the current [`PowerMode`](@ref).
+Compute the power of `x` by `y`. This function is not in the IEEE Standard
+1788-2015; its behaviour depends on `y` and on the current
+[`PowerMode`](@ref):
+
+- if `y` is a thin integer `n`, then `x ^ y` is the interval extension of the
+  point function `x -> x^n`, which is defined for negative values of `x`; this
+  is [`pown`](@ref) in `:slow` mode and [`fastpown`](@ref) in `:fast` mode.
+
+- otherwise, `x ^ y` is the interval extension of the point function
+  `(x, y) -> exp(y * log(x))`, which is only defined for positive values of
+  `x`; this is [`pow`](@ref) in `:slow` mode and [`fastpow`](@ref) in `:fast`
+  mode. In particular, the part of `x` lying in `(-Inf, 0)` is discarded.
 
 See also: [`pow`](@ref), [`pown`](@ref), [`fastpow`](@ref) and
 [`fastpown`](@ref).
@@ -48,6 +57,12 @@ Interval{Float64}(-1.0, 1.0, com, true)
 
 julia> interval(-1, 1) ^ interval(-3)
 Interval{Float64}(-Inf, Inf, trv, true)
+
+julia> interval(-4, -2) ^ interval(2) # thin integer exponent, `pown` is used
+Interval{Float64}(4.0, 16.0, com, true)
+
+julia> interval(-4, -2) ^ interval(2.5) # otherwise `pow` is used
+∅_trv
 ```
 """
 function Base.:^(x::BareInterval, y::BareInterval)
@@ -124,10 +139,24 @@ _select_pow(::PowerMode{:slow}, x, y) = pow(x, y)
 _select_pown(::PowerMode{:slow}, x, y) = pown(x, y)
 
 """
-    pow(x, y)
+    pow(x::BareInterval, y::BareInterval)
+    pow(x::Interval, y::Interval)
 
-Compute the power of the positive real part of `x` by `y`. In particular, even
-if `y` is a thin integer, this is not equivalent to `pown(x, sup(y))`.
+Compute the power of `x` by `y`, that is the interval extension of the point
+function `(x, y) -> exp(y * log(x))`. This point function is only defined for
+`x > 0`, together with `x = 0` whenever `y > 0` where it is extended by
+continuity. Accordingly:
+
+- the part of `x` lying in `(-Inf, 0)` is discarded; in particular the result
+  is empty whenever `sup(x) < 0`.
+
+- the decoration of the result is `trv` whenever the pair `(x, y)` is not
+  contained in the domain of definition.
+
+Even if `y` is a thin integer `n`, this is not equivalent to `pown(x, n)`, since
+the point function `x -> x^n` is also defined for negative values of `x`. Note
+also that `pow` is not an alias for `^`, which dispatches on `pown` for thin
+integer exponents.
 
 Implement the `pow` function of the IEEE Standard 1788-2015 (Table 9.1).
 
@@ -143,11 +172,14 @@ julia> setdisplay(:full);
 julia> pow(bareinterval(2, 3), bareinterval(2))
 BareInterval{Float64}(4.0, 9.0)
 
-julia> pow(interval(-1, 1), interval(3))
+julia> pow(interval(-1, 1), interval(3)) # only the part [0, 1] contributes
 Interval{Float64}(0.0, 1.0, trv, true)
 
 julia> pow(interval(-1, 1), interval(-3))
 Interval{Float64}(1.0, Inf, trv, true)
+
+julia> pow(interval(-4, -2), interval(2)) # empty, the base is negative
+∅_trv
 ```
 """
 pow(x, y)
@@ -219,7 +251,13 @@ for U ∈ (:AbstractFloat, :Rational) # needed to resolve ambiguity
 end
 
 """
-    pown(x, n)
+    pown(x::BareInterval, n::Integer)
+    pown(x::Interval, n::Integer)
+
+Compute the `n`-th power of `x`, that is the interval extension of the point
+function `x -> x^n`. In contrast with [`pow`](@ref), this point function is
+defined for every real number when `n ≥ 0`, and for every non-zero real number
+when `n < 0`; in particular, negative values of `x` are allowed.
 
 Implement the `pown` function of the IEEE Standard 1788-2015 (Table 9.1).
 
@@ -240,6 +278,9 @@ Interval{Float64}(-1.0, 1.0, com, true)
 
 julia> pown(interval(-1, 1), -3)
 Interval{Float64}(-Inf, Inf, trv, true)
+
+julia> pown(interval(-4, -2), 2)
+Interval{Float64}(4.0, 16.0, com, true)
 ```
 """
 function pown(x::BareInterval{T}, n::Integer) where {T<:NumTypes}
@@ -294,10 +335,36 @@ end
 
 """
     rootn(x::BareInterval, n::Integer)
+    rootn(x::Interval, n::Integer)
 
-Compute the real `n`-th root of `x`.
+Compute the real `n`-th root of `x`, that is the interval extension of the
+point function `x -> x^(1/n)`. This point function is defined for every real
+number when `n` is odd, and only for non-negative real numbers when `n` is
+even; in the latter case, the part of `x` lying in `(-Inf, 0)` is discarded
+and the decoration of the result is `trv` whenever `x` is not contained in the
+domain of definition.
 
 Implement the `rootn` function of the IEEE Standard 1788-2015 (Table 9.1).
+
+See also: [`pow`](@ref), [`pown`](@ref), [`fastpow`](@ref) and
+[`fastpown`](@ref).
+
+# Examples
+
+```jldoctest
+julia> using IntervalArithmetic
+
+julia> setdisplay(:full);
+
+julia> rootn(bareinterval(4, 9), 2)
+BareInterval{Float64}(2.0, 3.0)
+
+julia> rootn(interval(-8, -1), 3)
+Interval{Float64}(-2.0, -1.0, com, true)
+
+julia> rootn(interval(-8, -1), 2)
+∅_trv
+```
 """
 function rootn(x::BareInterval{T}, n::Integer) where {T<:AbstractFloat}
     isempty_interval(x) && return x
@@ -339,9 +406,27 @@ Base.hypot(x::Interval, y::Interval) = sqrt(_select_pown(x, 2) + _select_pown(y,
     fastpow(x, y)
 
 A faster implementation of `pow(x, y)`, at the cost of maybe returning a larger
-interval.
+interval. In particular, it obeys the same domain convention, so the part of `x`
+lying in `(-Inf, 0)` is discarded.
 
 See also: [`pow`](@ref), [`pown`](@ref) and [`fastpown`](@ref).
+
+# Examples
+
+```jldoctest
+julia> using IntervalArithmetic
+
+julia> setdisplay(:full);
+
+julia> fastpow(bareinterval(2, 3), bareinterval(2))
+BareInterval{Float64}(4.0, 9.0)
+
+julia> fastpow(interval(-4, -2), interval(2)) # empty, the base is negative
+∅_trv
+
+julia> fastpown(interval(-4, -2), 2) # `fastpown` is defined for negative bases
+Interval{Float64}(4.0, 16.0, com, true)
+```
 """
 function fastpow(x::BareInterval{T}, y::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(y) && return y
@@ -379,9 +464,27 @@ fastpow(x::Interval, y::Real) = fastpow(x, interval(y))
     fastpown(x, n)
 
 A faster implementation of `pown(x, n)`, at the cost of maybe returning a larger
-interval.
+interval. In particular, it obeys the same domain convention so negative values
+of `x` are allowed.
 
 See also: [`pown`](@ref), [`pow`](@ref) and [`fastpow`](@ref).
+
+# Examples
+
+```jldoctest
+julia> using IntervalArithmetic
+
+julia> setdisplay(:full);
+
+julia> fastpown(bareinterval(2, 3), 2)
+BareInterval{Float64}(4.0, 9.0)
+
+julia> fastpown(interval(-4, -2), 2)
+Interval{Float64}(4.0, 16.0, com, true)
+
+julia> fastpown(interval(-1, 1), -3)
+Interval{Float64}(-Inf, Inf, trv, true)
+```
 """
 function fastpown(x::BareInterval{T}, n::Integer) where {T<:NumTypes}
     isempty_interval(x) && return x

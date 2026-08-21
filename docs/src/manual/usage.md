@@ -61,6 +61,35 @@ X - X
 
 
 
+### Powers
+
+Several power functions coexist, and they differ by the domain of definition of the underlying point function:
+
+| Function | Point function | Domain of definition |
+|:---|:---|:---|
+| [`pown(x, n)`](@ref pown) | ``x^n``, with ``n`` an integer | all reals if ``n \ge 0``, all non-zero reals if ``n < 0`` |
+| [`pow(x, y)`](@ref pow) | ``\exp(y \log(x))`` | ``x > 0``, together with ``x = 0`` if ``y > 0`` |
+| [`rootn(x, n)`](@ref rootn) | ``x^{1/n}``, with ``n`` an integer | all reals if ``n`` is odd, all non-negative reals if ``n`` is even |
+
+These are the functions `pown`, `pow` and `rootn` of Table 9.1 of the IEEE Standard 1788-2015. The pairs lying outside of the domain of definition are simply discarded; the result may then be empty, and the decoration of the result is `trv` whenever the arguments are not entirely contained in the domain of definition. In particular, since the point function underlying `pow` is only defined for a positive base, the negative part of the interval is discarded:
+
+```@repl usage
+x = interval(-4, -2)
+pown(x, 2)
+pow(x, interval(2))
+```
+
+The operator `^` is not part of the IEEE Standard 1788-2015. It falls back on `pown` whenever the exponent is a thin integer, and on `pow` otherwise:
+
+```@repl usage
+x ^ interval(2)
+x ^ interval(2.5)
+```
+
+Lastly, [`fastpow`](@ref) and [`fastpown`](@ref) are faster variants of `pow` and `pown` respectively, at the cost of maybe returning a larger interval. They follow the same domain conventions as their counterparts, and they are the ones used by `^` under the default `:fast` power mode, see [Configuration options](@ref).
+
+
+
 ### Elementary functions
 
 The main elementary functions are implemented. The functions for `Interval{Float64}` internally use routines from the correctly-rounded [CRlibm library](https://github.com/dpsanders/CRlibm.jl) where possible, i.e. for the following functions defined in that library:
