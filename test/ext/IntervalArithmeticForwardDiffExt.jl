@@ -331,3 +331,61 @@ end
         [interval(20) * w * w  interval(20) * w
          interval(20) * w      interval(20)    ]))
 end
+
+@testset "BareInterval" begin
+    @testset "sin" begin
+        # Evaluate `ϕ` at duals: plain reals do not support bare-interval arithmetic.
+        x, w = bareinterval(2), bareinterval(-0.5, 0.5)
+        ϕ(t)    = sin(x + (1+t)*w)
+        dϕ(t)   = ForwardDiff.derivative(ϕ, t)
+        ddϕ(t)  = ForwardDiff.derivative(dϕ, t)
+        dddϕ(t) = ForwardDiff.derivative(ddϕ, t)
+
+        @test isequal_interval(dϕ(0),   cos(x + w) * w)
+        @test isequal_interval(ddϕ(0), -sin(x + w) * w * w)
+        @test isequal_interval(dddϕ(0), -cos(x + w) * w * w * w)
+    end
+
+    @testset "derivative at a bare interval" begin
+        @test isequal_interval(ForwardDiff.derivative(exp, bareinterval(0, 1)),
+                               exp(bareinterval(0, 1)))
+        @test isequal_interval(ForwardDiff.derivative(x -> x^3, bareinterval(1, 2)),
+                               bareinterval(3) * bareinterval(1, 2)^2)
+    end
+
+    @testset "thick partials" begin
+        x, w = bareinterval(2), bareinterval(-0.5, 0.5)
+        for n ∈ (4, 4.0, bareinterval(4), exact(4))
+            @test isequal_interval(ForwardDiff.derivative(t -> (x + t*w)^n, 0),
+                                   bareinterval(4) * x^3 * w)
+            @test isequal_interval(ForwardDiff.derivative(t -> ForwardDiff.derivative(s -> (x + s*w)^n, t), 0),
+                                   bareinterval(12) * x^2 * w * w)
+        end
+    end
+
+    @testset "real constants in nested bare duals" begin
+        g(x) = 2.5 * exp(-x^2 / 2) - 1 / (x + 4)
+        xb, wb = bareinterval(0.25), bareinterval(-0.5, 0.5)
+        xd, wd = interval(0.25), interval(-0.5, 0.5)
+        ϕb(t) = g(xb + (1+t)*wb)
+        ϕd(t) = g(xd + (1+t)*wd)
+        db1(t)  = ForwardDiff.derivative(ϕb, t)
+        db2(t)  = ForwardDiff.derivative(db1, t)
+        db3(t)  = ForwardDiff.derivative(db2, t)
+        dd1(t)  = ForwardDiff.derivative(ϕd, t)
+        dd2(t)  = ForwardDiff.derivative(dd1, t)
+        dd3(t)  = ForwardDiff.derivative(dd2, t)
+        for (fb, fd) in ((db1, dd1), (db2, dd2), (db3, dd3))
+            b, d = fb(0), fd(0)
+            @test inf(b) == inf(d) && sup(b) == sup(d)
+        end
+    end
+
+    @testset "zero partials short-circuit" begin
+        T = ForwardDiff.Tag{Nothing, BareInterval{Float64}}
+        d0 = ForwardDiff.Dual{T}(bareinterval(1, 2), ForwardDiff.Partials((bareinterval(0),)))
+        @test isequal_interval(ForwardDiff.value(d0^3), bareinterval(1, 2)^3)
+        @test isequal_interval(ForwardDiff.value(d0^4), bareinterval(1, 2)^4)
+        @test all(isthinzero, ForwardDiff.partials(d0^4).values)
+    end
+end
