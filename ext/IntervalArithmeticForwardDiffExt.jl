@@ -2,7 +2,7 @@ module IntervalArithmeticForwardDiffExt
 
 using IntervalArithmetic, ForwardDiff
 using IntervalArithmetic: isempty_domain, overlap_domain, intersect_domain, in_domain, leftof
-using ForwardDiff: Dual, Partials, ≺, value, partials
+using ForwardDiff: Dual, Partials, ≺, value, partials, DiffRules
 
 ForwardDiff.can_dual(::Type{ExactReal}) = true
 
@@ -32,7 +32,7 @@ Base.:<(x::Dual, y::Interval) = value(x) < y
 # non-thin intervals. Use a recursive thin-zero test instead. `NestedInterval`
 # supports intervals nested in up to four `Dual` layers.
 const NestedInterval = let
-    U = Union{Interval, BareInterval}
+    U = Interval
     for _ in 1:4
         U = Union{U, Dual{T,<:U} where {T}}
     end
@@ -42,11 +42,6 @@ _isthinzero(x::Interval) = isthinzero(x)
 _isthinzero(x::BareInterval) = isthinzero(x)
 _isthinzero(x::Real) = iszero(x)
 _isthinzero(d::Dual) = _isthinzero(value(d)) && all(_isthinzero, partials(d))
-# Use thin-zero checks for interval partials when ForwardDiff supports them.
-@static if isdefined(ForwardDiff, :unwrap_dual)
-    ForwardDiff._iszero_tuple(::Type{<:Union{Interval, BareInterval}}, tup::Tuple) =
-        all(_isthinzero, tup)
-end
 
 function Base.:(^)(x::Dual{Txy,<:Interval}, y::Dual{Txy,<:Interval}) where {Txy}
     vx, vy = value(x), value(y)
@@ -179,8 +174,6 @@ ForwardDiff.DiffRules._abs_deriv(x::Dual{T,<:Interval}) where {T} =
     Dual{T}(ForwardDiff.DiffRules._abs_deriv(value(x)), zero(partials(x)))
 
 # ForwardDiff support for `BareInterval`, which is not a subtype of `Number`.
-# Real constants and derivative coefficients are treated as exact. Use
-# decorated `Interval`s to track this assumption through `isguaranteed`.
 
 ForwardDiff.can_dual(::Type{<:BareInterval}) = true
 
@@ -198,33 +191,28 @@ const NestedBareInterval = let
     U
 end
 
-# Convert nested dual values and partials to bare intervals, treating reals as exact.
-_bare(x::BareInterval) = x
-_bare(x::Real) = bareinterval(x)
-_bare(d::Dual{T,<:NestedBareInterval}) where {T} = d
-_bare(d::Dual{T}) where {T} = Dual{T}(_bare(value(d)), _bare(partials(d)))
-_bare(p::Partials) = Partials(map(_bare, p.values))
+# numtype of the bare interval at the center of a nest of `Dual` layers
+_numtype_bare(x::BareInterval) = numtype(x)
+_numtype_bare(d::Dual) = _numtype_bare(value(d))
 
-Base.:+(d::Dual{T}, x::BareInterval) where {T} = (db = _bare(d); Dual{T}(value(db) + x, partials(db)))
-Base.:+(x::BareInterval, d::Dual) = d + x
-Base.:-(d::Dual{T}, x::BareInterval) where {T} = (db = _bare(d); Dual{T}(value(db) - x, partials(db)))
-Base.:-(x::BareInterval, d::Dual{T}) where {T} = (db = _bare(d); Dual{T}(x - value(db), -partials(db)))
-Base.:*(d::Dual{T}, x::BareInterval) where {T} = (db = _bare(d); Dual{T}(value(db) * x, partials(db) * x))
-Base.:*(x::BareInterval, d::Dual) = d * x
-Base.:/(d::Dual{T}, x::BareInterval) where {T} = (db = _bare(d); Dual{T}(value(db) / x, partials(db) / x))
-Base.:/(x::BareInterval, d::Dual) = x * inv(d)
+Base.:+(d::Dual{T,<:NestedBareInterval}, x::BareInterval) where {T} = Dual{T}(value(d) + x, partials(d))
+Base.:+(x::BareInterval, d::Dual{<:Any,<:NestedBareInterval}) = d + x
+Base.:-(d::Dual{T,<:NestedBareInterval}, x::BareInterval) where {T} = Dual{T}(value(d) - x, partials(d))
+Base.:-(x::BareInterval, d::Dual{T,<:NestedBareInterval}) where {T} = Dual{T}(x - value(d), -partials(d))
+Base.:*(d::Dual{T,<:NestedBareInterval}, x::BareInterval) where {T} = Dual{T}(value(d) * x, partials(d) * x)
+Base.:*(x::BareInterval, d::Dual{<:Any,<:NestedBareInterval}) = d * x
+Base.:/(d::Dual{T,<:NestedBareInterval}, x::BareInterval) where {T} = Dual{T}(value(d) / x, partials(d) / x)
+Base.:/(x::BareInterval, d::Dual{<:Any,<:NestedBareInterval}) = x * inv(d)
 
 # Extend ForwardDiff's partial scaling to bare intervals.
 Base.:*(p::Partials, x::BareInterval) = Partials(ForwardDiff.scale_tuple(p.values, x))
 Base.:*(x::BareInterval, p::Partials) = p * x
 Base.:/(p::Partials, x::BareInterval) = Partials(ForwardDiff.div_tuple_by_scalar(p.values, x))
 ForwardDiff._mul_partial(p::BareInterval, x::BareInterval) = p * x
-ForwardDiff._mul_partial(p::BareInterval, x::Real) = p * exact(x)
-ForwardDiff._mul_partial(p::Real, x::BareInterval) = exact(p) * x
+ForwardDiff._mul_partial(p::BareInterval, x::ExactReal) = p * x
 ForwardDiff._mul_partial(p::Dual, x::BareInterval) = p * x
 ForwardDiff._div_partial(p::BareInterval, x::BareInterval) = p / x
-ForwardDiff._div_partial(p::BareInterval, x::Real) = p / exact(x)
-ForwardDiff._div_partial(p::Real, x::BareInterval) = exact(p) / x
+ForwardDiff._div_partial(p::BareInterval, x::ExactReal) = p / x
 ForwardDiff._div_partial(p::Dual, x::BareInterval) = p / x
 
 # Derivative rules may return either bare intervals or real coefficients.
@@ -243,10 +231,18 @@ for p in 0:3
 end
 Base.literal_pow(::typeof(^), x::Dual{T,<:NestedBareInterval}, ::Val{p}) where {T,p} = (n = p; x^n)
 
-# Convert floating-point and irrational exponents to thin bare intervals.
-# Integer and rational exponents retain their semantics for bases crossing zero.
-for R in (:AbstractFloat, :Irrational)
-    @eval Base.:(^)(x::Dual{Tx,<:NestedBareInterval}, y::$R) where {Tx} = x^bareinterval(y)
+# Integer and rational exponents are exactly representable, and keep their
+# `IntervalArithmetic` semantics for a base straddling zero.
+for R in (:Integer, :Rational)
+    @eval function Base.:(^)(x::Dual{Tx,<:NestedBareInterval}, y::$R) where {Tx}
+        v = value(x)
+        expv = v^y
+        if iszero(y) || all(_isthinzero, values(partials(x)))
+            return Dual{Tx}(expv, zero(partials(x)))
+        else
+            return Dual{Tx}(expv, partials(x) * exact(y) * v^(y - 1))
+        end
+    end
 end
 
 function Base.:(^)(x::Dual{Tx,<:NestedBareInterval}, y::BareInterval) where {Tx}
@@ -259,33 +255,80 @@ function Base.:(^)(x::Dual{Tx,<:NestedBareInterval}, y::BareInterval) where {Tx}
     end
 end
 
-# Treat real operands as exact. Delegate `ExactReal` and dual-dual operations
-# to ForwardDiff to avoid recursion and preserve its arithmetic rules.
-for f in (:+, :-, :*, :/)
-    # Match ForwardDiff's `AMBIGUOUS_TYPES` to avoid method ambiguities.
-    for R in (:AbstractFloat, :Irrational, :Integer, :Rational, :Real)
-        @eval begin
-            Base.$f(d::Dual{T,<:NestedBareInterval}, x::$R) where {T} = $f(d, exact(x))
-            Base.$f(x::$R, d::Dual{T,<:NestedBareInterval}) where {T} = $f(exact(x), d)
-        end
-    end
-    @eval begin
-        Base.$f(d::Dual{T,<:NestedBareInterval}, x::ExactReal) where {T} =
-            invoke($f, Tuple{Dual{T}, Real}, d, x)
-        Base.$f(x::ExactReal, d::Dual{T,<:NestedBareInterval}) where {T} =
-            invoke($f, Tuple{Real, Dual{T}}, x, d)
-        Base.$f(x::Dual{Tx,<:NestedBareInterval}, y::Dual{Ty}) where {Tx,Ty} =
-            invoke($f, Tuple{Dual{Tx}, Dual{Ty}}, x, y)
-        Base.$f(x::Dual{Tx}, y::Dual{Ty,<:NestedBareInterval}) where {Tx,Ty} =
-            invoke($f, Tuple{Dual{Tx}, Dual{Ty}}, x, y)
-        Base.$f(x::Dual{Tx,<:NestedBareInterval}, y::Dual{Ty,<:NestedBareInterval}) where {Tx,Ty} =
-            invoke($f, Tuple{Dual{Tx}, Dual{Ty}}, x, y)
-    end
-end
-
+# `true` and `false` scale a dual without naming an interval of their own.
 # ForwardDiff's `(Dual, Bool)` method inspects `signbit(value(d))`; an interval
 # has no single sign bit and does not distinguish ±0.
 Base.:*(d::Dual{T,<:NestedBareInterval}, x::Bool) where {T} = x ? d : zero(d)
 Base.:*(x::Bool, d::Dual{T,<:NestedBareInterval}) where {T} = d * x
+
+DiffRules._abs_deriv(x::Dual{T,<:NestedBareInterval}) where {T} =
+    Dual{T}(DiffRules._abs_deriv(value(x)), zero(partials(x)))
+
+# Derivative rules for bare intervals
+#
+# The rules tabulated by `DiffRules` embed bare numbers, and ForwardDiff splices
+# them into its `Dual` methods unchanged. Vendor them with `ExactReal` or enclosing
+# bare interval.
+
+_rigorous(x::Integer) = :(exact($x))
+_rigorous(c::AbstractIrrational) = :(bareinterval(_numtype_bare(x), $c, $c))
+_rigorous(x::Number) = error("no rigorous `BareInterval` form for the constant `$x`")
+function _rigorous(s::Symbol)
+    s === :π && return _rigorous(π)
+    s ∈ (:x, :y, :vx, :vy) && return s
+    return error("unrecognized symbol `$s` in a derivative rule")
+end
+function _rigorous(ex::Expr)
+    ex.head === :call || error("unsupported expression head `$(ex.head)` in a derivative rule")
+    return Expr(:call, ex.args[1], map(_rigorous, ex.args[2:end])...)
+end
+
+# The functions of one argument that `DiffRules` tabulates and
+# `IntervalArithmetic` implements on `BareInterval`. `+`, `-`, `sin` and `cos`
+# are absent because ForwardDiff differentiates them without consulting the
+# rule table.
+const BARE_UNARY_RULES = (
+    :abs, :abs2, :acos, :acosh, :acot, :acoth, :asin, :asinh, :atan, :atanh,
+    :cbrt, :cosd, :cosh, :cospi, :cot, :coth, :csc, :csch, :deg2rad, :exp,
+    :exp10, :exp2, :expm1, :inv, :log, :log10, :log1p, :log2, :rad2deg, :sec,
+    :sech, :sind, :sinh, :sinpi, :sqrt, :tan, :tanh,
+)
+
+for f in BARE_UNARY_RULES
+    rule = _rigorous(DiffRules.diffrule(:Base, f, :x))
+    # Share subexpressions between the value and the derivative, as ForwardDiff
+    # does for its own rules: a derivative that repeats the value (`exp`, `inv`,
+    # `tan`, …) otherwise evaluates it twice per `Dual` layer.
+    work = ForwardDiff.qualified_cse!(quote
+        val = $f(x)
+        deriv = $rule
+    end)
+    @eval function Base.$f(d::Dual{T,<:NestedBareInterval}) where {T}
+        x = value(d)
+        $work
+        return ForwardDiff.dual_definition_retval(Val{T}(), val, deriv, partials(d))
+    end
+end
+
+# Binary rules with a bare interval on one side. ForwardDiff's `Dual`-`Dual`
+# methods carry bare intervals through unchanged; its `Dual`-`Real` methods do
+# not apply, because a `BareInterval` is not a `Real`.
+# `^` and the field operations are defined above.
+for f in (:atan, :hypot)
+    dvx, _ = DiffRules.diffrule(:Base, f, :vx, :y)
+    _, dvy = DiffRules.diffrule(:Base, f, :x, :vy)
+    @eval begin
+        function Base.$f(x::Dual{Tx,<:NestedBareInterval}, y::BareInterval) where {Tx}
+            vx = value(x)
+            val = Base.$f(vx, y)
+            return ForwardDiff.dual_definition_retval(Val{Tx}(), val, $(_rigorous(dvx)), partials(x))
+        end
+        function Base.$f(x::BareInterval, y::Dual{Ty,<:NestedBareInterval}) where {Ty}
+            vy = value(y)
+            val = Base.$f(x, vy)
+            return ForwardDiff.dual_definition_retval(Val{Ty}(), val, $(_rigorous(dvy)), partials(y))
+        end
+    end
+end
 
 end
