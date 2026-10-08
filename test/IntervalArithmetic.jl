@@ -309,5 +309,17 @@ end
         @test nextfloat(inf(z128)) == sup(z128)
     end
 
+    # irrational enclosures are rigorous whatever the configured rounding mode
+    try
+        IntervalArithmetic.configure(rounding = :none)
+        for irr ∈ (MathConstants.ℯ, MathConstants.golden), T ∈ (Float64, BigFloat)
+            y = Base.invokelatest(bareinterval, T, irr)
+            @test in_interval(irr, y)
+            @test inf(y) < sup(y)
+        end
+    finally
+        IntervalArithmetic.configure(rounding = :correct)
+    end
+
     @test_throws ArgumentError("only irrationals from MathConstants or IrrationalConstants.jl are supported") bareinterval(Float64, Base.Irrational{:foo}())
 end
