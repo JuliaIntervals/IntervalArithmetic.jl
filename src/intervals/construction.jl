@@ -101,15 +101,18 @@ for irr ∈ (:(:π), :(:γ), :(:catalan)) # irrationals supported by MPFR
     @eval _round(::Type{T}, a::Irrational{$irr}, r::RoundingMode) where {T<:NumTypes} =
         __round(T, BigFloat(a, r), r)
 end
-# irrationals not supported by MPFR, use their exact formula ℯ = exp(1), φ = (1+sqrt(5))/2
-_round(::Type{T}, ::Irrational{:ℯ}, r::RoundingMode{:Down}) where {T<:NumTypes} =
-    __round(T, inf(exp(bareinterval(BigFloat, 1))), r)
-_round(::Type{T}, ::Irrational{:ℯ}, r::RoundingMode{:Up}) where {T<:NumTypes} =
-    __round(T, sup(exp(bareinterval(BigFloat, 1))), r)
-_round(::Type{T}, ::Irrational{:φ}, r::RoundingMode{:Down}) where {T<:NumTypes} =
-    __round(T, inf((bareinterval(BigFloat, 1) + sqrt(bareinterval(BigFloat, 5))) / bareinterval(BigFloat, 2)), r)
-_round(::Type{T}, ::Irrational{:φ}, r::RoundingMode{:Up}) where {T<:NumTypes} =
-    __round(T, sup((bareinterval(BigFloat, 1) + sqrt(bareinterval(BigFloat, 5))) / bareinterval(BigFloat, 2)), r)
+# irrationals not supported by MPFR, use their exact formula ℯ = exp(1), φ = (1+sqrt(5))/2.
+# The rounding mode is fixed to `:correct` rather than taken from `default_rounding()`:
+# the enclosure of a constant must be rigorous whatever the configuration, and the
+# generated `bareinterval(::Type{T}, ::AbstractIrrational)` bakes the result in at its
+# first generation, which method invalidation does not track.
+_round(::Type{T}, ::Irrational{:ℯ}, r::RoundingMode) where {T<:NumTypes} =
+    __round(T, _fround(exp, IntervalRounding{:correct}(), one(BigFloat), r), r)
+function _round(::Type{T}, ::Irrational{:φ}, r::RoundingMode) where {T<:NumTypes}
+    ir = IntervalRounding{:correct}()
+    sqrt5 = _fround(sqrt, ir, BigFloat(5), r)
+    return __round(T, _fround(/, ir, _fround(+, ir, one(BigFloat), sqrt5, r), BigFloat(2), r), r)
+end
 # floats
 __round(::Type{T}, a, r::RoundingMode) where {T<:AbstractFloat} = T(a, r)
 # rationals
