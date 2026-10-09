@@ -40,7 +40,15 @@ end
 end
 
 @testset "BareInterval" begin
-    @test_throws MethodError ForwardDiff.derivative(abs, bareinterval(-1, 1))
+    @test DiffRules._abs_deriv(bareinterval(-2, -1)) === bareinterval(-1.0, -1.0)
+    @test DiffRules._abs_deriv(bareinterval(0)) === bareinterval(-1.0, 1.0)
+    @test DiffRules._abs_deriv(bareinterval(BigFloat, 1, 2)) isa BareInterval{BigFloat}
+
+    @test ForwardDiff.derivative(abs, bareinterval(-2, -1)) === bareinterval(-1.0, -1.0)
+    @test ForwardDiff.derivative(abs, bareinterval(1, 2)) === bareinterval(1.0, 1.0)
+    @test ForwardDiff.derivative(abs, bareinterval(0)) === bareinterval(-1.0, 1.0)
+    @test ForwardDiff.derivative(abs, bareinterval(-1, 0)) === bareinterval(-1.0, 0.0)
+    @test ForwardDiff.derivative(abs, bareinterval(-2, 2)) === bareinterval(-1.0, 1.0)
 end
 
 @testset "ForwardDiff abs" begin
