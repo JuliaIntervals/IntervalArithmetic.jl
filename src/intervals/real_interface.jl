@@ -96,11 +96,19 @@ Base.showerror(io::IO, e::InconclusiveBooleanOperation) =
 
 #
 
-function Base.:(==)(x::Interval, y::Interval) # also returned when calling `≤`, `≥`, `isequal`
-    isthin(x) & isthin(y) && return isequal_interval(x, y)
-    isdisjoint_interval(x, y) && return false
+# `==` is the pointwise extension of equality: it agrees with `isequal_interval`
+# whenever the result is unambiguous, i.e. when both intervals are thin or when they
+# are disjoint (in particular when one of them is empty), and errors otherwise
+function _pointwise_equal(x, y)
+    (isthin(x) & isthin(y)) | isdisjoint_interval(x, y) && return isequal_interval(x, y)
     return throw(InconclusiveBooleanOperation("$x == $y", "isequal_interval"))
 end
+
+Base.:(==)(x::BareInterval, y::BareInterval) = _pointwise_equal(x, y)
+Base.:(==)(x::Interval, y::Interval) = _pointwise_equal(x, y) # also returned when calling `≤`, `≥`, `isequal`
+Base.:(==)(x::Complex{<:Interval}, y::Complex{<:Interval}) = _pointwise_equal(x, y)
+Base.:(==)(x::Complex{<:Interval}, y::Interval) = _pointwise_equal(x, y)
+Base.:(==)(x::Interval, y::Complex{<:Interval}) = _pointwise_equal(x, y)
 
 function Base.:<(x::Interval, y::Interval)
     strictprecedes(x, y) && return true

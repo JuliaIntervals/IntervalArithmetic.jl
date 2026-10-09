@@ -86,7 +86,8 @@ f(x, y) \in f(X, Y), \qquad \forall x \in X, y \in Y.
 
 With this in mind, an operation such as `==` can easily be defined for intervals
 
-1. If the intervals are disjoints (`X ∩ Y === ∅`), then `X == Y` is `[false]`.
+1. If the intervals are disjoint (`X ∩ Y === ∅`), then `X == Y` is `[false]`.
+   The only exception is `∅ == ∅`, which is `true`.
 2. If the intervals both contain a single floating point number,
    and that element is the same for both,
    `X == Y` is `[true]`.

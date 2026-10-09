@@ -192,11 +192,47 @@ end
 
     @test_throws InconclusiveBooleanOperation nai(Interval{Float64}) == nai(Interval{Float64})
     @test_throws InconclusiveBooleanOperation nai(Interval{Float64}) < interval(1)
-    @test (emptyinterval(Interval{Float64}) == emptyinterval(Interval{Float64})) == false
+    @test emptyinterval(Interval{Float64}) == emptyinterval(Interval{Float64})
+    @test isequal(emptyinterval(Interval{Float64}), emptyinterval(Interval{Float64}))
+    @test emptyinterval(Interval{Float64}) != interval(1, 2)
+    @test_throws InconclusiveBooleanOperation emptyinterval(Interval{Float64}) == nai(Interval{Float64})
     @test emptyinterval(Interval{Float64}) < interval(1)
 
     @test isequal_interval(maximum([interval(1, 2), interval(3, 4)]), interval(3, 4))
     @test all(isequal_interval.(sort([interval(3, 4), interval(1, 2)]), [interval(1, 2), interval(3, 4)]))
+
+    @test bareinterval(1) == bareinterval(1)
+    @test bareinterval(1) != bareinterval(2)
+    @test bareinterval(BigFloat, 1) == bareinterval(BigFloat, 1)
+    @test isequal(bareinterval(BigFloat, 1), bareinterval(BigFloat, 1))
+    @test bareinterval(1, 2) != bareinterval(3, 4)
+    @test_throws InconclusiveBooleanOperation bareinterval(1, 2) == bareinterval(1, 2)
+    @test emptyinterval(BareInterval{Float64}) == emptyinterval(BareInterval{Float64})
+
+    @test complex(interval(1), interval(2)) == complex(interval(1), interval(2))
+    @test complex(interval(1), interval(0)) == interval(1)
+    @test complex(interval(1, 2), interval(1, 2)) != complex(interval(3, 4), interval(1, 2))
+    @test complex(interval(1, 2), interval(0, 1)) != interval(5, 6)
+    @test interval(5, 6) != complex(interval(1, 2), interval(0, 1))
+    @test_throws InconclusiveBooleanOperation complex(interval(1, 2), interval(1, 2)) == complex(interval(1, 2), interval(1, 2))
+
+    # `==` agrees with `isequal_interval`, except that it errors for overlapping
+    # intervals which are not both thin (the empty interval is disjoint from everything)
+    zs = (emptyinterval(), interval(1), interval(1, 2), interval(3, 4))
+    @testset "agreement with isequal_interval" for xs ∈ (
+            (emptyinterval(BareInterval{Float64}), bareinterval(1), bareinterval(2), bareinterval(1, 2), bareinterval(2, 3), bareinterval(3, 4), entireinterval(BareInterval{Float64}), bareinterval(BigFloat, 1), bareinterval(BigFloat, 1, 2)),
+            (emptyinterval(), interval(1), interval(2), interval(1, 2), interval(2, 3), interval(3, 4), entireinterval(), interval(BigFloat, 1), interval(BigFloat, 1, 2)),
+            (zs..., (complex(a, b) for a ∈ zs for b ∈ zs)...),
+        )
+        for x ∈ xs, y ∈ xs
+            if isdisjoint_interval(x, y) | (isthin(x) & isthin(y))
+                @test (x == y) === isequal_interval(x, y)
+                @test (x != y) === !isequal_interval(x, y)
+            else
+                @test_throws InconclusiveBooleanOperation x == y
+            end
+        end
+    end
 end
 
 @testset "isfinite, isnan, isinteger, issubnormal" begin
