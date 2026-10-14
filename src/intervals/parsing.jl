@@ -192,7 +192,7 @@ function _parse(::Type{T}, str::AbstractString) where {T<:NumTypes}
             if '.' ∈ m # ulp is last decimal position
                 n_decimals = length(split(m, '.')[2])
                 ulp = 1 // BigInt(10)^n_decimals
-                numerator = parse(Int, join(split(m, ".")))
+                numerator = parse(BigInt, join(split(m, ".")))
                 m = numerator // BigInt(10)^n_decimals
             else # no decimal, hence ulp is unit
                 ulp = 1
