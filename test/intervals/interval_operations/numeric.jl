@@ -86,8 +86,8 @@ end
         @test mid(bareinterval(-Inf, 1), α) == -floatmax(Float64)
         @test mid(bareinterval(1, Inf), α) == floatmax(Float64)
 
-        @test_throws DomainError mid(x, 0.0)
-        @test_throws DomainError mid(x, 1.0)
+        @test_throws DomainError mid(bareinterval(-Inf, 1), 0.0)
+        @test_throws DomainError mid(bareinterval(1, Inf), 1.0)
     end
     # `typemin`/`typemax` do not exist for `BigInt`, so the clamp throws an informative error
     @test mid(entireinterval(BareInterval{Rational{BigInt}})) == 0//1
