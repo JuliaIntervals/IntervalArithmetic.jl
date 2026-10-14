@@ -8,10 +8,8 @@ using IntervalArithmetic
     @test all(isequal_interval.(bisect(x, 0.25), (bareinterval(0, 0.25), bareinterval(0.25, 1))))
     @test sup(bisect(x)[1]) == inf(bisect(x)[2]) == mid(x, 0.5)
 
-    y = bareinterval(1, 3)
-    @test all(isequal_interval.(bisect(y, 0), (bareinterval(1, 1), y)))
-    @test all(isequal_interval.(bisect(y, 1), (y, bareinterval(3, 3))))
-
+    @test_throws DomainError bisect(x, 0.0)
+    @test_throws DomainError bisect(x, 1.0)
     @test_throws DomainError bisect(x, -0.1)
     @test_throws DomainError bisect(x, 1.5)
     @test_throws DomainError bisect(x, NaN)

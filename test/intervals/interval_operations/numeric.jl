@@ -82,22 +82,16 @@ end
     # `α` acts as a threshold: the finite bound is reachable when `α` selects its side
     @test mid(bareinterval(-Inf, 1)) == -floatmax(Float64)
     @test mid(bareinterval(1, Inf)) == floatmax(Float64)
-    for α ∈ (0.0, 0.25, 0.5)
+    for α ∈ (0.25, 0.5, 0.75)
         @test mid(bareinterval(-Inf, 1), α) == -floatmax(Float64)
-    end
-    for α ∈ (0.75, 1.0)
-        @test mid(bareinterval(-Inf, 1), α) == 1.0
-    end
-    for α ∈ (0.0, 0.25)
-        @test mid(bareinterval(1, Inf), α) == 1.0
-    end
-    for α ∈ (0.5, 0.75, 1.0)
         @test mid(bareinterval(1, Inf), α) == floatmax(Float64)
+
+        @test_throws DomainError mid(x, 0.0)
+        @test_throws DomainError mid(x, 1.0)
     end
     # `typemin`/`typemax` do not exist for `BigInt`, so the clamp throws an informative error
     @test mid(entireinterval(BareInterval{Rational{BigInt}})) == 0//1
     @test midradius(entireinterval(BareInterval{Rational{BigInt}})) == (0//1, 1//0)
-    @test mid(bareinterval(Rational{BigInt}(-1, 0), Rational{BigInt}(1)), 1.0) == 1//1
     @test_throws ArgumentError mid(bareinterval(Rational{BigInt}(-1, 0), Rational{BigInt}(1)))
     @test_throws "no smallest finite" mid(bareinterval(Rational{BigInt}(-1, 0), Rational{BigInt}(1)))
     @test_throws "no largest finite" mid(entireinterval(BareInterval{Rational{BigInt}}), 0.75)
@@ -111,9 +105,12 @@ end
     @test mid(interval(Rational{Int}, 1//2)) == 1//2
 
     for x ∈ (bareinterval(0, 1), bareinterval(-1e308, 1e308), bareinterval(0.1, 0.3), bareinterval(-Inf, 1), bareinterval(1, Inf), entireinterval(BareInterval{Float64}))
-        for α ∈ (0.0, 0.25, 0.5, 0.75, 1.0)
+        for α ∈ (0.25, 0.5, 0.75)
             @test inf(x) ≤ mid(x, α) ≤ sup(x)
         end
+
+        @test_throws DomainError mid(x, 0.0)
+        @test_throws DomainError mid(x, 1.0)
     end
 
     @test mid(bareinterval(-1e308, 1e308), 0.25) == -5.0e307
