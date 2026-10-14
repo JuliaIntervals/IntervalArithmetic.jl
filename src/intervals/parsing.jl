@@ -190,18 +190,26 @@ function _parse(::Type{T}, str::AbstractString) where {T<:NumTypes}
 
             # ulp computation
             if '.' ∈ m # ulp is last decimal position
-                ulp = inv(big(10.0) ^ length(split(m, '.')[2]))
+                n_decimals = length(split(m, '.')[2])
+                ulp = 1 // BigInt(10)^n_decimals
+                numerator = parse(Int, join(split(m, ".")))
+                m = numerator // BigInt(10)^n_decimals
             else # no decimal, hence ulp is unit
-                ulp = big(1.0)
+                ulp = 1
+                m = parse(BigInt, m)
             end
-            m = parse(BigFloat, m)
 
             if 'e' ∈ vde
                 vd, e = split(vde, 'e')
-                e = big(10.0) ^ parse(BigInt, e)
+                e = parse(BigInt, e)
+                if e < 0
+                    e = 1 // 10^(-e)
+                else
+                    e = 10^e
+                end
             else
                 vd = vde
-                e = big(1.0)
+                e = 1
             end
 
             if 'u' ∈ vd || 'd' ∈ vd
@@ -213,6 +221,7 @@ function _parse(::Type{T}, str::AbstractString) where {T<:NumTypes}
             end
 
             v = isempty(v) ? 1//2 : parse(BigInt, v)
+
             if d == 'd'
                 lo = T((m - v * ulp) * e, RoundDown)
                 hi = T(m * e, RoundUp)

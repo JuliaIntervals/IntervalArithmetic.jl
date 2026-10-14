@@ -116,6 +116,12 @@ end
     x = parse(Interval{Float64}, "3??d")
     @test (bounds(x) == (-Inf, 3.0)) & (decoration(x) == dac)
     @test isequal_interval(parse(Interval{Float64}, "3??"), entireinterval(Interval{Float64}))
+
+    x = parse(Interval{Float64}, "0.03?3")
+    @test inf(x) == 0
+
+    x = parse(Interval{Float64}, "100.03?3")
+    @test inf(x) == 100
 end
 
 @testset "Decimal string enclosures" begin
