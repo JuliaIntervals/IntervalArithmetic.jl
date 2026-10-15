@@ -81,6 +81,10 @@ end
 Base.:^(x::Interval, n::Integer) = ^(x, n//one(n))
 Base.:^(x::Interval, y::Rational) = ^(x, convert(Interval{typeof(y)}, y))
 
+# `BareInterval` has no `convert` method for scalar exponents.
+Base.:^(x::BareInterval, n::Integer) = ^(x, n//one(n))
+Base.:^(x::BareInterval, y::Rational) = ^(x, bareinterval(typeof(y), y))
+
 # power for complex intervals
 # See Improve power of complex intervals #745 for a description of the algorithm
 
@@ -125,6 +129,7 @@ Base.:^(x::Complex{<:Interval}, y::Interval) = ^(promote(x, y)...)
 Base.:^(x::Interval, y::Complex{<:Interval}) = ^(promote(x, y)...)
 
 # overwrite behaviour for small integer powers from https://github.com/JuliaLang/julia/pull/24240
+Base.literal_pow(::typeof(^), x::BareInterval, ::Val{n}) where {n} = _select_pown(x, n)
 Base.literal_pow(::typeof(^), x::Interval, ::Val{n}) where {n} = _select_pown(x, n)
 Base.literal_pow(::typeof(^), x::Complex{<:Interval}, ::Val{n}) where {n} = fastpown(x, n)
 

@@ -331,3 +331,174 @@ end
         [interval(20) * w * w  interval(20) * w
          interval(20) * w      interval(20)    ]))
 end
+
+@testset "BareInterval" begin
+    @testset "sin" begin
+        x, w = bareinterval(2), bareinterval(-0.5, 0.5)
+        z = bareinterval(0)
+        ϕ(t)    = sin(x + (exact(1)+t)*w)
+        dϕ(t)   = ForwardDiff.derivative(ϕ, t)
+        ddϕ(t)  = ForwardDiff.derivative(dϕ, t)
+        dddϕ(t) = ForwardDiff.derivative(ddϕ, t)
+
+        @test isequal_interval(dϕ(z),   cos(x + w) * w)
+        @test isequal_interval(ddϕ(z), -sin(x + w) * w * w)
+        @test isequal_interval(dddϕ(z), -cos(x + w) * w * w * w)
+    end
+
+    @testset "derivative at a bare interval" begin
+        @test isequal_interval(ForwardDiff.derivative(exp, bareinterval(0, 1)),
+                               exp(bareinterval(0, 1)))
+        @test isequal_interval(ForwardDiff.derivative(x -> x^3, bareinterval(1, 2)),
+                               bareinterval(3) * bareinterval(1, 2)^2)
+    end
+
+    @testset "thick partials" begin
+        x, w, z = bareinterval(2), bareinterval(-0.5, 0.5), bareinterval(0)
+        for n ∈ (4, 4//1, bareinterval(4), exact(4))
+            @test isequal_interval(ForwardDiff.derivative(t -> (x + t*w)^n, z),
+                                   bareinterval(4) * x^3 * w)
+            @test isequal_interval(ForwardDiff.derivative(t -> ForwardDiff.derivative(s -> (x + s*w)^n, t), z),
+                                   bareinterval(12) * x^2 * w * w)
+        end
+        @test_throws MethodError ForwardDiff.derivative(t -> (x + t*w)^4.0, z)
+        @test_throws MethodError ForwardDiff.derivative(t -> (x + t*w)^π, z)
+    end
+
+    @testset "exact constants in nested bare duals" begin
+        g(x) = exact(2.5) * exp(-x^exact(2) / exact(2)) - exact(1) / (x + exact(4))
+        xb, wb = bareinterval(0.25), bareinterval(-0.5, 0.5)
+        xd, wd = interval(0.25), interval(-0.5, 0.5)
+        ϕb(t) = g(xb + (exact(1)+t)*wb)
+        ϕd(t) = g(xd + (exact(1)+t)*wd)
+        db1(t)  = ForwardDiff.derivative(ϕb, t)
+        db2(t)  = ForwardDiff.derivative(db1, t)
+        db3(t)  = ForwardDiff.derivative(db2, t)
+        dd1(t)  = ForwardDiff.derivative(ϕd, t)
+        dd2(t)  = ForwardDiff.derivative(dd1, t)
+        dd3(t)  = ForwardDiff.derivative(dd2, t)
+        for (fb, fd) in ((db1, dd1), (db2, dd2), (db3, dd3))
+            b, d = fb(bareinterval(0)), fd(interval(0))
+            @test inf(b) == inf(d) && sup(b) == sup(d)
+        end
+    end
+
+    @testset "plain reals are rejected" begin
+        X = bareinterval(0.3, 0.7)
+        T = ForwardDiff.Tag{Nothing, BareInterval{Float64}}
+        d = ForwardDiff.Dual{T}(X, ForwardDiff.Partials((one(X),)))
+
+        for c ∈ (2, 2.0, 1//2, π, ℯ)
+            @test_throws MethodError d + c
+            @test_throws MethodError c + d
+            @test_throws MethodError d - c
+            @test_throws MethodError c - d
+            @test_throws MethodError d * c
+            @test_throws MethodError c * d
+            @test_throws MethodError d / c
+            @test_throws MethodError c / d
+        end
+
+        for c ∈ (exact(2), bareinterval(2))
+            @test isequal_interval(ForwardDiff.value(d + c), X + bareinterval(2))
+            @test isequal_interval(ForwardDiff.value(c + d), X + bareinterval(2))
+            @test isequal_interval(ForwardDiff.value(d - c), X - bareinterval(2))
+            @test isequal_interval(ForwardDiff.value(c - d), bareinterval(2) - X)
+            @test isequal_interval(ForwardDiff.value(d * c), X * bareinterval(2))
+            @test isequal_interval(ForwardDiff.value(c * d), X * bareinterval(2))
+            @test isequal_interval(ForwardDiff.value(d / c), X / bareinterval(2))
+            @test isequal_interval(ForwardDiff.value(c / d), bareinterval(2) / X)
+        end
+
+        # Exponents: exactly representable ones apply, inexact ones do not.
+        @test_throws MethodError d^2.5
+        @test_throws MethodError d^π
+        @test isequal_interval(ForwardDiff.value(d^exact(3)), X^3)
+        @test isequal_interval(ForwardDiff.derivative(t -> t^exact(3), X), bareinterval(3) * X^2)
+        @test isequal_interval(ForwardDiff.derivative(t -> ForwardDiff.derivative(s -> s^exact(3), t), X),
+                               bareinterval(6) * X)
+
+        # A `Dual` over plain reals does not acquire bare-interval arithmetic.
+        S = ForwardDiff.Tag{Nothing, Float64}
+        e = ForwardDiff.Dual{S}(1.0, ForwardDiff.Partials((1.0,)))
+        @test_throws MethodError e * X
+        @test_throws MethodError X * e
+        @test_throws MethodError e + X
+
+        # `true` and `false` scale a dual without naming an interval.
+        @test d * true === d
+        @test all(isthinzero, ForwardDiff.partials(d * false).values)
+    end
+
+    @testset "zero partials short-circuit" begin
+        T = ForwardDiff.Tag{Nothing, BareInterval{Float64}}
+        d0 = ForwardDiff.Dual{T}(bareinterval(1, 2), ForwardDiff.Partials((bareinterval(0),)))
+        @test isequal_interval(ForwardDiff.value(d0^3), bareinterval(1, 2)^3)
+        @test isequal_interval(ForwardDiff.value(d0^4), bareinterval(1, 2)^4)
+        @test all(isthinzero, ForwardDiff.partials(d0^4).values)
+    end
+
+    ext = Base.get_extension(IntervalArithmetic, :IntervalArithmeticForwardDiffExt)
+    unary_rules = ext.BARE_UNARY_RULES
+
+    @testset "vendored rule coverage" begin
+        # Test the functions of one argument that `DiffRules` tabulates and
+        # `IntervalArithmetic` implements on `BareInterval`. No need to test
+        # those ForwardDiff differentiates without consulting the rule table.
+        sample = bareinterval(0.3, 0.7)
+        supported = Symbol[]
+        for (M, f, arity) ∈ ForwardDiff.DiffRules.diffrules(; filter_modules = (:Base,))
+            arity == 1 || continue
+            (M, f) ∈ ((:Base, :+), (:Base, :-), (:Base, :sin), (:Base, :cos)) && continue
+            isdefined(Base, f) || continue
+            ok = try
+                getfield(Base, f)(sample) isa BareInterval
+            catch
+                false
+            end
+            ok && push!(supported, f)
+        end
+        @test sort(supported) == sort(collect(unary_rules))
+    end
+
+    @testset "derivative rules" begin
+        @test isempty(detect_ambiguities(ext))
+
+        # Intervals lying inside the domain of each rule.
+        domains = Dict(:acosh => (1.3, 1.7), :acoth => (1.3, 1.7))
+        D = ForwardDiff.Dual{ForwardDiff.Tag{Nothing,BareInterval{Float64}},BareInterval{Float64},1}
+
+        for f ∈ unary_rules
+            g = getfield(Base, f)
+            @test which(g, Tuple{D}).module === ext
+
+            lo, hi = get(domains, f, (0.3, 0.7))
+            X = bareinterval(lo, hi)
+            d₁ = ForwardDiff.derivative(g, X)
+            d₂ = ForwardDiff.derivative(t -> ForwardDiff.derivative(g, t), X)
+            for t ∈ (lo, (lo + hi) / 2, hi)
+                @test in_interval(ForwardDiff.derivative(g, big(t)), d₁)
+                @test in_interval(ForwardDiff.derivative(s -> ForwardDiff.derivative(g, s), big(t)), d₂)
+            end
+        end
+    end
+
+    @testset "binary derivative rules" begin
+        X, Y = bareinterval(0.3, 0.7), bareinterval(1.1, 1.4)
+        for g ∈ (atan, hypot)
+            dx = ForwardDiff.derivative(t -> g(t, Y), X)
+            dy = ForwardDiff.derivative(t -> g(X, t), Y)
+            for (t, u) ∈ ((0.3, 1.1), (0.5, 1.25), (0.7, 1.4))
+                @test in_interval(ForwardDiff.derivative(s -> g(s, big(u)), big(t)), dx)
+                @test in_interval(ForwardDiff.derivative(s -> g(big(t), s), big(u)), dy)
+            end
+        end
+    end
+
+    @testset "abs" begin
+        @test isequal_interval(ForwardDiff.derivative(abs, bareinterval(-2, -1)), bareinterval(-1))
+        @test isequal_interval(ForwardDiff.derivative(abs, bareinterval(1, 2)), bareinterval(1))
+        @test isequal_interval(ForwardDiff.derivative(abs, bareinterval(0)), bareinterval(-1, 1))
+        @test isequal_interval(ForwardDiff.derivative(abs, bareinterval(-2, 2)), bareinterval(-1, 1))
+    end
+end
