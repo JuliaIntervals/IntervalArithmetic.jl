@@ -22,7 +22,8 @@ function _quadrant(f, x::T) where {T<:AbstractFloat}
         x2 <  PI_HI && return f(0, 1) # [0, π/2) or [π/2, π)
         return 1 # [π/2, π)
     else
-        k = bareinterval(BigFloat, x2) / _big_pi(x)
+        X = BigFloat(x; precision = precision(x))
+        k = _unsafe_scale(_unsafe_bareinterval(BigFloat, X, X), BigFloat(2)) / _big_pi(x)
         fk = floor(k)
         lfk, hfk = bounds(fk)
         return Int(mod(f(lfk, hfk), 4))

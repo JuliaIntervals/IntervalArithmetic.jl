@@ -498,6 +498,10 @@ end
     @test isequal_interval(sin(x), interval(-1, 1))
     @test isequal_interval(cos(x), interval(-1, 1))
     @test isequal_interval(tan(x), interval(-Inf, Inf))
+
+    for f ∈ (sin, cos, tan, cot, sec, csc)
+        @test in_interval(f(big(1e308)), f(interval(1e308)))
+    end
 end
 
 @testset "inverse roots of unity" begin
