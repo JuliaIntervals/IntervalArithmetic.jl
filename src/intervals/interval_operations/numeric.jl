@@ -88,6 +88,14 @@ _finitemin(::Type{Rational{BigInt}}) =
 _finitemax(::Type{Rational{BigInt}}) =
     throw(ArgumentError("cannot compute the midpoint of unbounded intervals with `Rational{BigInt}` bounds; there is no largest finite `Rational{BigInt}`"))
 
+_midpoint(lo, hi, β) = β * (hi + lo * (1/β - 1))
+
+function _midpoint(lo::BigFloat, hi::BigFloat, β::BigFloat)
+    β = BigFloat(β; precision = max(precision(lo), precision(hi), precision(β)))
+    γ = _fround(-, _fround(/, one(β), β, RoundNearest), one(β), RoundNearest)
+    return _fround(*, β, _fround(+, hi, _fround(*, lo, γ, RoundNearest), RoundNearest), RoundNearest)
+end
+
 """
     mid(x, α = 0.5)
 
@@ -103,14 +111,6 @@ Implement the `mid` function of the IEEE Standard 1788-2015 (Table 9.2).
 See also: [`inf`](@ref), [`sup`](@ref), [`bounds`](@ref), [`diam`](@ref),
 [`radius`](@ref) and [`midradius`](@ref).
 """
-_midpoint(lo, hi, β) = β * (hi + lo * (1/β - 1))
-
-function _midpoint(lo::BigFloat, hi::BigFloat, β::BigFloat)
-    β = BigFloat(β; precision = max(precision(lo), precision(hi), precision(β)))
-    γ = _fround(-, _fround(/, one(β), β, RoundNearest), one(β), RoundNearest)
-    return _fround(*, β, _fround(+, hi, _fround(*, lo, γ, RoundNearest), RoundNearest), RoundNearest)
-end
-
 function mid(x::BareInterval{T}, α = 0.5) where {T<:AbstractFloat}
     0 < α < 1 || return throw(DomainError(α, "α must be strictly between 0 and 1"))
     isempty_interval(x) && return convert(T, NaN)
