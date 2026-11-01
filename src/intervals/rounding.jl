@@ -106,7 +106,7 @@ for f ∈ (:cbrt, :exp, :exp2, :exp10, :expm1, # exponential
                 bigz::Ref{BigFloat},
                 one(bigx)::Ref{BigFloat},
                 bigx::Ref{BigFloat},
-                RoundUp::Base.MPFR.MPFRRoundingMode
+                RoundDown::Base.MPFR.MPFRRoundingMode
             )::Int32
             bigw = _fround($g, ir, bigz, r)
             return BigFloat(bigw, r; precision = prec)
@@ -119,7 +119,7 @@ for f ∈ (:cbrt, :exp, :exp2, :exp10, :expm1, # exponential
                 bigz::Ref{BigFloat},
                 one(bigx)::Ref{BigFloat},
                 bigx::Ref{BigFloat},
-                RoundDown::Base.MPFR.MPFRRoundingMode
+                RoundUp::Base.MPFR.MPFRRoundingMode
             )::Int32
             bigw = _fround($g, ir, bigz, r)
             return BigFloat(bigw, r; precision = prec)

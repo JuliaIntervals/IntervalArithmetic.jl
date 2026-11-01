@@ -183,6 +183,9 @@ end
     @test isequal_interval(acoth(bareinterval(1.0, 2.0)), bareinterval(0.5493061443340548, Inf))
     @test isequal_interval(acoth(bareinterval(-2.0, -1.0)), bareinterval(-Inf, -0.5493061443340548))
     @test isequal_interval(acoth(bareinterval(2.0, 3.0)), bareinterval(0.34657359027997264, 0.5493061443340549))
+    x = 1.0122020710883537
+    r = acoth(bareinterval(x))
+    @test inf(r) ≤ acoth(big(x)) ≤ sup(r)
     @test isequal_interval(acoth(bareinterval(-3.0, -2.0)), bareinterval(-0.5493061443340549, -0.34657359027997264))
     @test isempty_interval(acoth(emptyinterval(BareInterval{Float64})))
     @test isentire_interval(acoth(entireinterval(BareInterval{Float64})))

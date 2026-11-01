@@ -375,6 +375,9 @@ end
     r = acot(bareinterval(1.0, 2.0))
     @test bounds(r) == (0.4636476090008061, 0.7853981633974484)
     @test inf(r) ≤ acot(2.0) && acot(1.0) ≤ sup(r)
+    x = 0x1.9c14c6477256cp-1
+    r = acot(bareinterval(x))
+    @test inf(r) ≤ acot(big(x)) ≤ sup(r)
     @test isempty_interval(acot(emptyinterval(BareInterval{Float64})))
 
     # acot(0) = π/2; the jump at 0 is decorated like the branch cut of two-argument atan
