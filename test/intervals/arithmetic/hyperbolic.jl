@@ -178,8 +178,10 @@ end
 @testset "acoth" begin
     @test isempty_interval(acoth(bareinterval(-1.0, 1.0)))
     @test isentire_interval(acoth(bareinterval(-2.0, 2.0)))
-    @test isempty_interval(acoth(bareinterval(0.5, 2.0)))
-    @test isempty_interval(acoth(bareinterval(-2.0, 0.5)))
+    @test isequal_interval(acoth(bareinterval(0.5, 2.0)), bareinterval(0.5493061443340548, Inf))
+    @test isequal_interval(acoth(bareinterval(-2.0, 0.5)), bareinterval(-Inf, -0.5493061443340548))
+    @test isequal_interval(acoth(bareinterval(-1.0, 2.0)), bareinterval(0.5493061443340548, Inf))
+    @test isequal_interval(acoth(bareinterval(-2.0, 1.0)), bareinterval(-Inf, -0.5493061443340548))
     @test isequal_interval(acoth(bareinterval(1.0, 2.0)), bareinterval(0.5493061443340548, Inf))
     @test isequal_interval(acoth(bareinterval(-2.0, -1.0)), bareinterval(-Inf, -0.5493061443340548))
     @test isequal_interval(acoth(bareinterval(2.0, 3.0)), bareinterval(0.34657359027997264, 0.5493061443340549))
@@ -196,7 +198,7 @@ end
     @test isempty_interval(r)
     @test decoration(r) == trv
     r = acoth(interval(0.5, 2.0))
-    @test isempty_interval(r)
+    @test isequal_interval(r, interval(0.5493061443340548, Inf))
     @test decoration(r) == trv
 end
 

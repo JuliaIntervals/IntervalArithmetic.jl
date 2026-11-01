@@ -199,13 +199,11 @@ function Base.acoth(x::BareInterval{T}) where {T<:AbstractFloat}
     singular_domain = _unsafe_bareinterval(T, -one(T), one(T))
     issubset_interval(x, singular_domain) && return emptyinterval(BareInterval{T})
     lo, hi = bounds(x)
-    if lo ≤ -1 && 1 ≤ hi
+    if lo < -1 && 1 < hi
         return entireinterval(BareInterval{T})
-    elseif lo < -1 < hi || lo < 1 < hi
-        return emptyinterval(BareInterval{T})
-    elseif lo == 1
+    elseif lo ≤ 1 < hi
         return @round(T, acoth(hi), typemax(T))
-    elseif hi == -1
+    elseif lo < -1 ≤ hi
         return @round(T, typemin(T), acoth(lo))
     else
         return @round(T, acoth(hi), acoth(lo))
