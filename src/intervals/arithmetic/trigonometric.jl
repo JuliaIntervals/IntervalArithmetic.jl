@@ -237,7 +237,12 @@ end
 
 Base.cot(x::BareInterval{<:Rational}) = cot(float(x))
 
-# automatically defined for `Interval` since it is a subtype of `Real`
+function Base.cot(x::Interval)
+    @inline r = cot(bareinterval(x))
+    d = min(decoration(x), decoration(r))
+    d = min(d, ifelse(isbounded(r), d, trv))
+    return _unsafe_interval(r, d, isguaranteed(x))
+end
 
 """
     sec(::BareInterval)
@@ -260,7 +265,12 @@ end
 
 Base.sec(x::BareInterval{<:Rational}) = sec(float(x))
 
-# automatically defined for `Interval` since it is a subtype of `Real`
+function Base.sec(x::Interval)
+    @inline r = sec(bareinterval(x))
+    d = min(decoration(x), decoration(r))
+    d = min(d, ifelse(isbounded(r), d, trv))
+    return _unsafe_interval(r, d, isguaranteed(x))
+end
 
 """
     csc(::BareInterval)
@@ -285,7 +295,12 @@ end
 
 Base.csc(x::BareInterval{<:Rational}) = csc(float(x))
 
-# automatically defined for `Interval` since it is a subtype of `Real`
+function Base.csc(x::Interval)
+    @inline r = csc(bareinterval(x))
+    d = min(decoration(x), decoration(r))
+    d = min(d, ifelse(isbounded(r), d, trv))
+    return _unsafe_interval(r, d, isguaranteed(x))
+end
 
 """
     asin(::BareInterval)

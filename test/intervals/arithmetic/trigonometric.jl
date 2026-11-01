@@ -302,10 +302,16 @@ end
     @test isentire_interval(cot(entireinterval(BareInterval{Float64})))
     @test isempty_interval(cot(emptyinterval(BareInterval{Float64})))
     @test numtype(cot(bareinterval(1//2))) === Float64
-    # cot(::Interval) falls back to 1/tan defined by Base, hence the slightly wider bound
     r = cot(interval(0.5, 1.0))
-    @test bounds(r) == (0.6420926159343306, 1.8304877217124522)
+    @test bounds(r) == (0.6420926159343306, 1.830487721712452)
     @test decoration(r) == com
+    @test isequal_interval(cot(bareinterval(0.0, 1.0)), bareinterval(0.6420926159343306, Inf))
+    @test decoration(cot(interval(0.0, 1.0))) == trv
+    @test decoration(cot(interval(3.0, 3.5))) == trv
+    r = cot(interval(1.0, 2.0))
+    @test bounds(r) == (-0.45765755436028577, 0.6420926159343308)
+    @test decoration(r) == com
+    @test isempty_interval(cot(interval(0.0)))
 
     @test isthin(sec(bareinterval(0.0)), 1.0)
     @test isequal_interval(sec(bareinterval(0.0, 1.0)), bareinterval(1.0, 1.8508157176809257))
@@ -318,8 +324,9 @@ end
     @test isempty_interval(sec(emptyinterval(BareInterval{Float64})))
     @test numtype(sec(bareinterval(1//2))) === Float64
     r = sec(interval(0.0, 1.0))
-    @test bounds(r) == (1.0, 1.850815717680926)
+    @test bounds(r) == (1.0, 1.8508157176809257)
     @test decoration(r) == com
+    @test decoration(sec(interval(1.0, 2.0))) == trv
 
     @test isempty_interval(csc(bareinterval(0.0)))
     @test isequal_interval(csc(bareinterval(0.5, 1.0)), bareinterval(1.188395105778121, 2.0858296429334886))
@@ -333,8 +340,10 @@ end
     @test isempty_interval(csc(emptyinterval(BareInterval{Float64})))
     @test numtype(csc(bareinterval(1//2))) === Float64
     r = csc(interval(0.5, 1.0))
-    @test issubset_interval(interval(1.188395105778121, 2.0858296429334886), r)
+    @test bounds(r) == (1.188395105778121, 2.0858296429334886)
     @test decoration(r) == com
+    @test decoration(csc(interval(-1.0, 0.0))) == trv
+    @test isequal_interval(csc(bareinterval(0.0, 1.0)), bareinterval(1.188395105778121, Inf))
 end
 
 @testset "asin" begin
