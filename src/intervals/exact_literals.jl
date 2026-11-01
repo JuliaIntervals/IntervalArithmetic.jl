@@ -189,8 +189,8 @@ Base.:-(x::ExactReal{<:Integer}) = exact(Base.checked_neg(x.value))
 
 Base.:*(x::ExactReal, y::ExactReal{Bool}) = exact(x.value * y.value)
 Base.:*(x::ExactReal{Bool}, y::ExactReal) = exact(x.value * y.value)
-Base.:/(x::ExactReal, y::ExactReal{Bool}) = exact(x.value / y.value)
-Base.:/(x::ExactReal{Bool}, y::ExactReal) = exact(x.value / y.value)
+Base.:/(x::ExactReal, y::ExactReal{Bool}) = y.value ? x : x.value / y.value
+Base.:/(x::ExactReal{Bool}, y::ExactReal) = x.value / y.value
 
 for T ∈ (:Rational, :Integer)
     @eval Base.:^(x::ExactReal{<:$T}, y::ExactReal{<:Integer}) = exact(_exact_pow(x.value, y.value))
@@ -205,7 +205,8 @@ end
 Base.:/(x::ExactReal{<:Rational}, y::ExactReal{<:Rational}) = exact(x.value / y.value)
 Base.:/(x::ExactReal{<:Rational}, y::ExactReal{<:Integer}) = exact(x.value / y.value)
 Base.:/(x::ExactReal{<:Integer}, y::ExactReal{<:Rational}) = exact(x.value / y.value)
-function Base.:/(x::ExactReal{T}, y::ExactReal{S}) where {T<:Integer,S<:Integer}
+Base.:/(x::ExactReal{<:Integer}, y::ExactReal{<:Integer}) = _exact_div(x, y)
+function _exact_div(x::ExactReal{T}, y::ExactReal{S}) where {T<:Integer,S<:Integer}
     r = x.value / y.value
     (x.value == typemin(promote_type(T, S))) & (y.value == -1) && return r # check overflow
     (y.value == typemin(promote_type(T, S))) & (x.value == -1) && return r # check overflow
@@ -220,8 +221,8 @@ for T ∈ (:Rational, :Integer)
     @eval begin
         Base.:*(x::ExactReal{<:$T}, y::ExactReal{Bool}) = exact(x.value * y.value)
         Base.:*(x::ExactReal{Bool}, y::ExactReal{<:$T}) = exact(x.value * y.value)
-        Base.:/(x::ExactReal{<:$T}, y::ExactReal{Bool}) = exact(x.value / y.value)
-        Base.:/(x::ExactReal{Bool}, y::ExactReal{<:$T}) = exact(x.value / y.value)
+        Base.:/(x::ExactReal{<:$T}, y::ExactReal{Bool}) = $(T === :Integer ? :(_exact_div(x, y)) : :(exact(x.value / y.value)))
+        Base.:/(x::ExactReal{Bool}, y::ExactReal{<:$T}) = $(T === :Integer ? :(_exact_div(x, y)) : :(exact(x.value / y.value)))
     end
 end
 #-

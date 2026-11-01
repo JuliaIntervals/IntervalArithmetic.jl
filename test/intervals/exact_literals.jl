@@ -181,6 +181,15 @@ end
     t = setprecision(() -> big(1) / 3, BigFloat, 512)
     @test precision((-exact(t)).value) == 512
     @test (-exact(t)).value == setprecision(() -> -t, BigFloat, 512)
+
+    @test !(exact(true) / exact(3.0) isa ExactReal)
+    @test !(exact(true) / exact(3) isa ExactReal)
+    @test !(exact(2^60 + 1) / exact(true) isa ExactReal)
+    @test exact(6) / exact(true) === exact(6.0)
+    @test exact(true) / exact(4) === exact(0.25)
+    @test exact(2.5) / exact(true) === exact(2.5)
+    @test exact(1//3) / exact(true) === exact(1//3)
+    @test (exact(t) / exact(true)).value === t
 end
 
 @testset "Interaction with intervals" begin
