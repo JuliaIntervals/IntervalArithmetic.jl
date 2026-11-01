@@ -263,6 +263,7 @@ end
     @test isequal_interval(tan(interval(0.5, 1.67)), entireinterval())
     @test isequal_interval(tan(interval(1.67, 3.2)), interval(-10.047182299210307, 0.05847385445957865))
     @test isequal_interval(tan(interval(6.638314112824137, 8.38263151220128)), entireinterval())
+    @test isentire_interval(tan(bareinterval(-3.1415926535897936, 0.0)))
 
     @test issubset_interval(tan(interval(BigFloat, 0.5, 0.5)), tan(interval(0.5)))
     @test isequal_interval(tan(interval(BigFloat, 0.5, 1.67)), entireinterval(BigFloat))
@@ -281,6 +282,7 @@ end
     @test isequal_interval(cot(bareinterval(-1.0, 0.0)), bareinterval(-Inf, -0.6420926159343306))
     @test isequal_interval(cot(bareinterval(2.0, 3.0)), bareinterval(-7.015252551434534, -0.4576575543602857))
     @test isentire_interval(cot(bareinterval(3.0, 3.5)))
+    @test isentire_interval(cot(bareinterval(-3.1415926535897936, 0.0)))
     @test isentire_interval(cot(entireinterval(BareInterval{Float64})))
     @test isempty_interval(cot(emptyinterval(BareInterval{Float64})))
     @test numtype(cot(bareinterval(1//2))) === Float64

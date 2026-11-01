@@ -279,7 +279,7 @@ Implement the `tan` function of the IEEE Standard 1788-2015 (Table 9.1).
 function Base.tan(x::BareInterval{T}) where {T<:AbstractFloat}
     isempty_interval(x) && return x
 
-    diam(x) > sup(bareinterval(T, π)) && return entireinterval(BareInterval{T})
+    diam(x) ≥ sup(bareinterval(T, π)) && return entireinterval(BareInterval{T})
 
     lo, hi = bounds(x)
 
@@ -317,7 +317,7 @@ This function is not part of the IEEE Standard 1788-2015.
 function Base.cot(x::BareInterval{T}) where {T<:AbstractFloat}
     isempty_interval(x) && return x
 
-    diam(x) > sup(bareinterval(T, π)) && return entireinterval(BareInterval{T})
+    diam(x) ≥ sup(bareinterval(T, π)) && return entireinterval(BareInterval{T})
 
     isthinzero(x) && return emptyinterval(BareInterval{T})
 
