@@ -135,6 +135,11 @@ end
     @test isequal_interval(fastpown(xc, 1), xc ^ interval(1))
     @test isequal_interval(fastpown(xc, 2), xc ^ interval(2))
     @test isequal_interval(fastpown(xc, 5), xc ^ interval(5))
+
+    a = setprecision(() -> big(2.5) - big(2.0)^-300, BigFloat, 2000)
+    y = setprecision(() -> complex(interval(BigFloat, a, 4)), BigFloat, 2000)
+    z = setprecision(() -> complex(interval(BigFloat, 2)), BigFloat, 2000) ^ y
+    @test inf(real(z)) ≤ setprecision(() -> big(2.0)^BigFloat(a; precision = 4000), BigFloat, 4000)
 end
 
 @testset "pow" begin
