@@ -1,6 +1,5 @@
 using Test
 using IntervalArithmetic
-using Logging
 
 @testset "helper functions" begin
     for (x, q, Q) ∈ ((0.0, 0, -1), (1.0, 0, 0), (2.0, 1, 1), (-1.0, -1, -1), (-2.0, -2, -2), (100.0, 63, 63), (-100.0, -64, -64),
