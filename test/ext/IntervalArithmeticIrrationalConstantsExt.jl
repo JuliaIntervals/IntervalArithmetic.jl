@@ -27,8 +27,8 @@ end
         @test isguaranteed(x)
         b = bareinterval(BigFloat, c)
         @test inf(x) <= inf(b) && sup(b) <= sup(x)
-        # the generated bareinterval in src/IntervalArithmetic.jl cannot see the extension _round methods
-        @test_throws MethodError bareinterval(Float64, c)
+        @test isequal_interval(bareinterval(Float64, c), bareinterval(x))
+        @test isequal_interval(bareinterval(c), bareinterval(x))
     end
 end
 
