@@ -147,6 +147,13 @@ end
     setprecision(BigFloat, 53) do
         @test bounds(bareinterval(BigFloat, 1, π)) == (1.0, 3.1415926535897936)
     end
+    setprecision(BigFloat, 20) do
+        for c ∈ (π, ℯ, MathConstants.φ)
+            @test nextfloat(IntervalArithmetic._round(Float64, c, RoundDown)) == IntervalArithmetic._round(Float64, c, RoundUp)
+        end
+    end
+    p20 = setprecision(() -> bareinterval(Rational{BigInt}, π), BigFloat, 20)
+    @test diam(bareinterval(Rational{BigInt}, π)) < diam(p20)
 
     @test bareinterval(1) === bareinterval(1.0, 1.0)
     @test typeof(bareinterval(1)) == BareInterval{Float64}

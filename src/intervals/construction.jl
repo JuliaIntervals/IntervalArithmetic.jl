@@ -99,7 +99,7 @@ _round(::Type{T}, a, r::RoundingMode) where {T<:NumTypes} = __round(T, a, r)
 _round(::Type{<:NumTypes}, ::AbstractIrrational, ::RoundingMode) = throw(ArgumentError("only irrationals from MathConstants or IrrationalConstants.jl are supported"))
 for irr ∈ (:(:π), :(:γ), :(:catalan)) # irrationals supported by MPFR
     @eval _round(::Type{T}, a::Irrational{$irr}, r::RoundingMode) where {T<:NumTypes} =
-        __round(T, BigFloat(a, r), r)
+        __round(T, BigFloat(a, r; precision = precision(float(T))), r)
 end
 # irrationals not supported by MPFR, use their exact formula ℯ = exp(1), φ = (1+sqrt(5))/2.
 # The rounding mode is fixed to `:correct` rather than taken from `default_rounding()`:
@@ -107,10 +107,10 @@ end
 # generated `bareinterval(::Type{T}, ::AbstractIrrational)` bakes the result in at its
 # first generation, which method invalidation does not track.
 _round(::Type{T}, ::Irrational{:ℯ}, r::RoundingMode) where {T<:NumTypes} =
-    __round(T, _fround(exp, IntervalRounding{:correct}(), one(BigFloat), r), r)
+    __round(T, _fround(exp, IntervalRounding{:correct}(), BigFloat(1; precision = precision(float(T))), r), r)
 function _round(::Type{T}, ::Irrational{:φ}, r::RoundingMode) where {T<:NumTypes}
     ir = IntervalRounding{:correct}()
-    sqrt5 = _fround(sqrt, ir, BigFloat(5), r)
+    sqrt5 = _fround(sqrt, ir, BigFloat(5; precision = precision(float(T))), r)
     return __round(T, _fround(/, ir, _fround(+, ir, one(BigFloat), sqrt5, r), BigFloat(2), r), r)
 end
 # floats

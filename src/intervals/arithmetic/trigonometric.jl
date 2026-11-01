@@ -4,8 +4,8 @@
 
 # helper functions
 
-_big_pi(::T) where {T<:AbstractFloat} =
-    _unsafe_bareinterval(BigFloat, BigFloat(π, RoundDown; precision = 256), BigFloat(π, RoundUp; precision = 256))
+_big_pi(x::T) where {T<:AbstractFloat} =
+    _unsafe_bareinterval(BigFloat, BigFloat(π, RoundDown; precision = exponent(x) + precision(x) + 64), BigFloat(π, RoundUp; precision = exponent(x) + precision(x) + 64))
 
 _big_pi(x::BigFloat) =
     _unsafe_bareinterval(BigFloat, BigFloat(π, RoundDown; precision = precision(x)+32), BigFloat(π, RoundUp; precision = precision(x)+32))
@@ -22,7 +22,8 @@ function _quadrant(f, x::T) where {T<:AbstractFloat}
         x2 <  PI_HI && return f(0, 1) # [0, π/2) or [π/2, π)
         return 1 # [π/2, π)
     else
-        k = bareinterval(BigFloat, x2) / _big_pi(x)
+        X = BigFloat(x; precision = precision(x))
+        k = _unsafe_scale(_unsafe_bareinterval(BigFloat, X, X), BigFloat(2)) / _big_pi(x)
         fk = floor(k)
         lfk, hfk = bounds(fk)
         return Int(mod(f(lfk, hfk), 4))
@@ -279,7 +280,7 @@ Implement the `tan` function of the IEEE Standard 1788-2015 (Table 9.1).
 function Base.tan(x::BareInterval{T}) where {T<:AbstractFloat}
     isempty_interval(x) && return x
 
-    diam(x) > sup(bareinterval(T, π)) && return entireinterval(BareInterval{T})
+    diam(x) ≥ sup(bareinterval(T, π)) && return entireinterval(BareInterval{T})
 
     lo, hi = bounds(x)
 
@@ -317,7 +318,7 @@ This function is not part of the IEEE Standard 1788-2015.
 function Base.cot(x::BareInterval{T}) where {T<:AbstractFloat}
     isempty_interval(x) && return x
 
-    diam(x) > sup(bareinterval(T, π)) && return entireinterval(BareInterval{T})
+    diam(x) ≥ sup(bareinterval(T, π)) && return entireinterval(BareInterval{T})
 
     isthinzero(x) && return emptyinterval(BareInterval{T})
 

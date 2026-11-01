@@ -11,7 +11,7 @@ using Logging
     @test IntervalArithmetic._quadrant(min, 100.0) == 3
     @test IntervalArithmetic._quadrant(max, 100.0) == 3
     Logging.with_logger(Logging.NullLogger()) do
-        @test_throws InexactError IntervalArithmetic._quadrant(min, Inf)
+        @test_throws DomainError IntervalArithmetic._quadrant(min, Inf)
     end
 
     for x ∈ (1.5707963267948966, 1.5707963267948968, 3.141592653589793, 3.1415926535897936, -1.5707963267948966, -3.141592653589793)
@@ -24,7 +24,7 @@ using Logging
 
     bp = IntervalArithmetic._big_pi(1.0)
     @test bp isa BareInterval{BigFloat}
-    @test precision(inf(bp)) == 256
+    @test precision(inf(bp)) == precision(1.0) + 64
     @test inf(bp) < π < sup(bp)
     bp = IntervalArithmetic._big_pi(BigFloat(1))
     @test precision(inf(bp)) == precision(BigFloat(1)) + 32
@@ -263,6 +263,7 @@ end
     @test isequal_interval(tan(interval(0.5, 1.67)), entireinterval())
     @test isequal_interval(tan(interval(1.67, 3.2)), interval(-10.047182299210307, 0.05847385445957865))
     @test isequal_interval(tan(interval(6.638314112824137, 8.38263151220128)), entireinterval())
+    @test isentire_interval(tan(bareinterval(-3.1415926535897936, 0.0)))
 
     @test issubset_interval(tan(interval(BigFloat, 0.5, 0.5)), tan(interval(0.5)))
     @test isequal_interval(tan(interval(BigFloat, 0.5, 1.67)), entireinterval(BigFloat))
@@ -281,6 +282,7 @@ end
     @test isequal_interval(cot(bareinterval(-1.0, 0.0)), bareinterval(-Inf, -0.6420926159343306))
     @test isequal_interval(cot(bareinterval(2.0, 3.0)), bareinterval(-7.015252551434534, -0.4576575543602857))
     @test isentire_interval(cot(bareinterval(3.0, 3.5)))
+    @test isentire_interval(cot(bareinterval(-3.1415926535897936, 0.0)))
     @test isentire_interval(cot(entireinterval(BareInterval{Float64})))
     @test isempty_interval(cot(emptyinterval(BareInterval{Float64})))
     @test numtype(cot(bareinterval(1//2))) === Float64
@@ -373,6 +375,9 @@ end
     r = acot(bareinterval(1.0, 2.0))
     @test bounds(r) == (0.4636476090008061, 0.7853981633974484)
     @test inf(r) ≤ acot(2.0) && acot(1.0) ≤ sup(r)
+    x = 0x1.9c14c6477256cp-1
+    r = acot(bareinterval(x))
+    @test inf(r) ≤ acot(big(x)) ≤ sup(r)
     @test isempty_interval(acot(emptyinterval(BareInterval{Float64})))
 
     # acot(0) = π/2; the jump at 0 is decorated like the branch cut of two-argument atan
@@ -493,6 +498,15 @@ end
     @test isequal_interval(sin(x), interval(-1, 1))
     @test isequal_interval(cos(x), interval(-1, 1))
     @test isequal_interval(tan(x), interval(-Inf, Inf))
+
+    for f ∈ (sin, cos, tan, cot, sec, csc)
+        @test in_interval(f(big(1e308)), f(interval(1e308)))
+    end
+
+    @test isbounded(tan(interval(0x1.3c0ca428c59fbp+255)))
+    setprecision(BigFloat, 1000) do
+        @test isbounded(tan(interval(0x1.117203831ce2fp+626)))
+    end
 end
 
 @testset "inverse roots of unity" begin
