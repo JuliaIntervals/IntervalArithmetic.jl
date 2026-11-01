@@ -15,6 +15,21 @@ end
     @test _fround(sqrt, 2.0, RoundUp) === _fround(sqrt, default_rounding(), 2.0, RoundUp)
 end
 
+@testset "exact operations" begin
+    _exact = IntervalArithmetic._exact
+    @test _exact(-, 1.5) === -1.5
+    @test _exact(floor, -1.5) === -2.0
+    @test _exact(round, 2.5, RoundNearest) === 2.0
+    @test _exact(ldexp, 3.0, 1) === 6.0
+    v = setprecision(() -> 1 + big(2.0)^-400, BigFloat, 512)
+    for (f, args, t) ∈ ((-, (), setprecision(() -> -v, BigFloat, 512)), (abs, (), v), (floor, (), 1), (ceil, (), 2), (trunc, (), 1), (round, (RoundNearest,), 1),
+                        (round, (RoundNearestTiesAway,), 1), (ldexp, (1,), setprecision(() -> 2v, BigFloat, 512)))
+        z = _exact(f, f === abs ? setprecision(() -> -v, BigFloat, 512) : v, args...)
+        @test precision(z) == 512
+        @test z == t
+    end
+end
+
 @testset "directed Float64 arithmetic" begin
     @test _fround(+, 0.1, 0.2, RoundDown) == 0.3
     @test _fround(+, 0.1, 0.2, RoundUp) == 0.30000000000000004 == 0.1 + 0.2

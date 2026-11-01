@@ -267,7 +267,7 @@ See also: [`mig`](@ref).
 """
 function mag(x::BareInterval{T}) where {T<:AbstractFloat}
     isempty_interval(x) && return convert(T, NaN)
-    return max(abs(inf(x)), abs(sup(x)))
+    return max(_exact(abs, inf(x)), _exact(abs, sup(x)))
 end
 function mag(x::BareInterval{<:Rational})
     isempty_interval(x) && return throw(ArgumentError("cannot compute the magnitude of empty intervals; cannot return a `Rational` NaN"))
@@ -302,7 +302,7 @@ See also: [`mag`](@ref).
 function mig(x::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(x) && return convert(T, NaN)
     in_interval(0, x) && return zero(T)
-    return min(abs(inf(x)), abs(sup(x)))
+    return min(_exact(abs, inf(x)), _exact(abs, sup(x)))
 end
 function mig(x::BareInterval{T}) where {T<:Rational}
     isempty_interval(x) && return throw(ArgumentError("cannot compute the mignitude of empty intervals; cannot return a `Rational` NaN"))

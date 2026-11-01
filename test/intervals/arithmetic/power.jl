@@ -332,6 +332,10 @@ end
     @test isequal_interval(pown(interval(2.5), 3), interval(15.625, 15.625))
     @test isequal_interval(pown(interval(5//2), 3), interval(125//8))
     @test decoration(pown(interval(0, 3), -2)) == trv
+    v = setprecision(() -> 1 + big(2.0)^-300, BigFloat, 512)
+    x = setprecision(() -> interval(BigFloat, -v, 0.5), BigFloat, 512)
+    @test sup(pown(x, 2)) ≥ setprecision(() -> v^2, BigFloat, 512)
+    @test inf(pown(x, -2)) ≤ setprecision(() -> inv(v^2), BigFloat, 512)
 end
 
 @testset "rootn" begin

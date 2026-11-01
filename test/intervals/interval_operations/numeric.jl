@@ -241,6 +241,11 @@ end
     @test isnan(mig(complex(emptyinterval(), interval(1, 2))))
     @test isnan(mig(complex(interval(1, 2), emptyinterval())))
     @test_throws ArgumentError mag(complex(emptyinterval(Interval{Rational{Int}}), interval(Rational{Int}, 1, 2)))
+    v = setprecision(() -> 1 + big(2.0)^-300, BigFloat, 512)
+    x = setprecision(() -> bareinterval(BigFloat, -v, 0.5), BigFloat, 512)
+    @test mag(x) == v
+    x = setprecision(() -> bareinterval(BigFloat, -3, -v), BigFloat, 512)
+    @test mig(x) == v
     @test_throws ArgumentError mig(complex(emptyinterval(Interval{Rational{Int}}), interval(Rational{Int}, 1, 2)))
 end
 

@@ -27,6 +27,14 @@ using IntervalArithmetic
     end
     @test numtype(abs(bareinterval(-1//2, 3//2))) === Rational{Int}
     @test isequal_interval(abs(bareinterval(Rational{Int32}(-1//2), Rational{Int32}(3//2))), bareinterval(Rational{Int32}(0//1), Rational{Int32}(3//2)))
+
+    v = setprecision(() -> 1 + big(2.0)^-400, BigFloat, 512)
+    x = setprecision(() -> bareinterval(BigFloat, -v, 0.5), BigFloat, 512)
+    @test sup(abs(x)) == v
+    @test sup(abs(-x)) == v
+    x = setprecision(() -> bareinterval(BigFloat, -v, -0.5), BigFloat, 512)
+    @test bounds(abs(x)) == (0.5, v)
+    @test precision(sup(abs(x))) == 512
 end
 
 @testset "abs on Interval" begin

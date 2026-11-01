@@ -177,6 +177,10 @@ end
     @test exact(2.0) ^ exact(3.0) === 8.0
     @test exact(0.5) + exact(0.25) === 0.75
     @test exact(0.5) * exact(0.5) === 0.25
+
+    t = setprecision(() -> big(1) / 3, BigFloat, 512)
+    @test precision((-exact(t)).value) == 512
+    @test (-exact(t)).value == setprecision(() -> -t, BigFloat, 512)
 end
 
 @testset "Interaction with intervals" begin

@@ -34,7 +34,7 @@ Implement the `neg` function of the IEEE Standard 1788-2015 (Table 9.1).
 """
 function Base.:-(x::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(x) && return x
-    return _unsafe_bareinterval(T, -sup(x), -inf(x))
+    return _unsafe_bareinterval(T, _exact(-, sup(x)), _exact(-, inf(x)))
 end
 
 Base.:-(x::Interval) = _unsafe_interval(-bareinterval(x), decoration(x), isguaranteed(x))
