@@ -4,8 +4,8 @@
 
 # helper functions
 
-_big_pi(::T) where {T<:AbstractFloat} =
-    _unsafe_bareinterval(BigFloat, BigFloat(π, RoundDown; precision = 256), BigFloat(π, RoundUp; precision = 256))
+_big_pi(x::T) where {T<:AbstractFloat} =
+    _unsafe_bareinterval(BigFloat, BigFloat(π, RoundDown; precision = exponent(x) + precision(x) + 64), BigFloat(π, RoundUp; precision = exponent(x) + precision(x) + 64))
 
 _big_pi(x::BigFloat) =
     _unsafe_bareinterval(BigFloat, BigFloat(π, RoundDown; precision = precision(x)+32), BigFloat(π, RoundUp; precision = precision(x)+32))

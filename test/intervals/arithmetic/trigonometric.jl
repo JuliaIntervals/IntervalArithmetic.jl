@@ -11,7 +11,7 @@ using Logging
     @test IntervalArithmetic._quadrant(min, 100.0) == 3
     @test IntervalArithmetic._quadrant(max, 100.0) == 3
     Logging.with_logger(Logging.NullLogger()) do
-        @test_throws InexactError IntervalArithmetic._quadrant(min, Inf)
+        @test_throws DomainError IntervalArithmetic._quadrant(min, Inf)
     end
 
     for x ∈ (1.5707963267948966, 1.5707963267948968, 3.141592653589793, 3.1415926535897936, -1.5707963267948966, -3.141592653589793)
@@ -24,7 +24,7 @@ using Logging
 
     bp = IntervalArithmetic._big_pi(1.0)
     @test bp isa BareInterval{BigFloat}
-    @test precision(inf(bp)) == 256
+    @test precision(inf(bp)) == precision(1.0) + 64
     @test inf(bp) < π < sup(bp)
     bp = IntervalArithmetic._big_pi(BigFloat(1))
     @test precision(inf(bp)) == precision(BigFloat(1)) + 32
@@ -501,6 +501,11 @@ end
 
     for f ∈ (sin, cos, tan, cot, sec, csc)
         @test in_interval(f(big(1e308)), f(interval(1e308)))
+    end
+
+    @test isbounded(tan(interval(0x1.3c0ca428c59fbp+255)))
+    setprecision(BigFloat, 1000) do
+        @test isbounded(tan(interval(0x1.117203831ce2fp+626)))
     end
 end
 
