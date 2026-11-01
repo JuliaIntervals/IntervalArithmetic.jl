@@ -3,31 +3,47 @@ using IntervalArithmetic
 using Logging
 
 @testset "helper functions" begin
-    @test IntervalArithmetic._quadrant(min, 0.0) == 0
-    @test IntervalArithmetic._quadrant(min, 1.0) == 0
-    @test IntervalArithmetic._quadrant(min, 2.0) == 1
-    @test IntervalArithmetic._quadrant(min, -1.0) == 3
-    @test IntervalArithmetic._quadrant(min, -2.0) == 2
-    @test IntervalArithmetic._quadrant(min, 100.0) == 3
-    @test IntervalArithmetic._quadrant(max, 100.0) == 3
-    Logging.with_logger(Logging.NullLogger()) do
-        @test_throws DomainError IntervalArithmetic._quadrant(min, Inf)
+    for (x, q, Q) ∈ ((0.0, 0, -1), (1.0, 0, 0), (2.0, 1, 1), (-1.0, -1, -1), (-2.0, -2, -2), (100.0, 63, 63), (-100.0, -64, -64),
+                     (1.5707963267948966, 0, 0), (1.5707963267948968, 1, 1), (-1.5707963267948966, -1, -1), (-1.5707963267948968, -2, -2))
+        @test IntervalArithmetic._quadrant(floor, x) == q
+        @test IntervalArithmetic._quadrant(ceil, x) == Q
     end
 
-    for x ∈ (1.5707963267948966, 1.5707963267948968, 3.141592653589793, 3.1415926535897936, -1.5707963267948966, -3.141592653589793)
-        @test IntervalArithmetic._quadrant(min, x) ≤ IntervalArithmetic._quadrant(max, x)
+    for x ∈ (3.141592653589793, 3.1415926535897936, 1e15, -1e15, 1e308, -1e308, 6381956970095103 * 2.0^797, Float32(1e30), Float16(1000))
+        t = setprecision(() -> BigFloat(x; precision = 4000) / (big(π) / 2), BigFloat, 4000)
+        @test IntervalArithmetic._quadrant(floor, x) == floor(BigInt, t)
+        @test IntervalArithmetic._quadrant(ceil, x) == ceil(BigInt, t) - 1
     end
 
-    for (x, q) ∈ ((0.0, 0), (0.4, 0), (0.6, 1), (1.2, 2), (1.6, 3), (-0.4, 3), (-0.6, 2), (-1.2, 1), (-1.6, 0), (2.0, 0), (-2.0, 0))
-        @test IntervalArithmetic._quadrantpi(x) == q
+    x = setprecision(() -> -big(π) - big(2.0)^-342, BigFloat, 2000)
+    @test IntervalArithmetic._quadrant(floor, x) == -3
+    @test IntervalArithmetic._quadrant(ceil, x) == -3
+    @test IntervalArithmetic._quadrant(floor, BigFloat(0)) == 0
+    @test IntervalArithmetic._quadrant(ceil, BigFloat(0)) == -1
+
+    for (x, q, Q) ∈ ((0.0, 0, -1), (0.25, 0, 0), (0.5, 1, 0), (-0.5, -1, -2), (1.0, 2, 1), (-0.75, -2, -2), (1e300, BigInt(2e300), BigInt(2e300) - 1))
+        @test IntervalArithmetic._quadrantpi(floor, x) == q
+        @test IntervalArithmetic._quadrantpi(ceil, x) == Q
     end
+    x = setprecision(() -> big(1) / 2 - big(2.0)^-300, BigFloat, 2000)
+    @test IntervalArithmetic._quadrantpi(floor, x) == 0
+    @test IntervalArithmetic._quadrantpi(ceil, x) == 0
+
+    @test IntervalArithmetic._quadrants(IntervalArithmetic._quadrant, -1.0, 2.0) == (3, 2)
+    @test IntervalArithmetic._quadrants(IntervalArithmetic._quadrant, 0.5, 1.0) == (0, 0)
+    @test IntervalArithmetic._quadrants(IntervalArithmetic._quadrant, -100.0, 100.0) == (0, 4)
+    @test IntervalArithmetic._has(0, 1, 1) & !IntervalArithmetic._has(0, 1, 2)
+    @test IntervalArithmetic._has(3, 2, 1) & !IntervalArithmetic._has(3, 2, 2)
+    @test all(t -> IntervalArithmetic._has(2, 4, t), 0:3)
+    @test !any(t -> IntervalArithmetic._has(1, 0, t), 0:3)
 
     bp = IntervalArithmetic._big_pi(1.0)
     @test bp isa BareInterval{BigFloat}
     @test precision(inf(bp)) == precision(1.0) + 64
     @test inf(bp) < π < sup(bp)
-    bp = IntervalArithmetic._big_pi(BigFloat(1))
-    @test precision(inf(bp)) == precision(BigFloat(1)) + 32
+    @test precision(inf(IntervalArithmetic._big_pi(1e300))) == exponent(1e300) + precision(1e300) + 64
+    @test precision(inf(IntervalArithmetic._big_pi(BigFloat(1)))) == precision(BigFloat(1)) + 64
+    @test precision(inf(IntervalArithmetic._big_pi(BigFloat(1e-300)))) == precision(BigFloat(1)) + 64
 
     @test bounds(IntervalArithmetic._unsafe_scale(bareinterval(1.0, 2.0), 0.5)) == (0.5, 1.0)
     r = IntervalArithmetic._unsafe_scale(bareinterval(3.0), 0.1)
@@ -507,6 +523,41 @@ end
     setprecision(BigFloat, 1000) do
         @test isbounded(tan(interval(0x1.117203831ce2fp+626)))
     end
+end
+
+@testset "range reduction" begin
+    for (lo, hi) ∈ ((9.671908032480526e8, 9.671908055277463e8), (5.142340753624898e7, 5.142340808219828e7), (-1.0, 2.0), (1e5, 1e5 + 1)),
+            f ∈ (sin, cos, tan, cot, sec, csc, sinpi, cospi)
+        x = bareinterval(lo, hi)
+        r = f(x)
+        @test isequal_interval(setprecision(() -> f(x), BigFloat, 12), r)
+        @test inf(r) ≤ sup(r)
+        @test in_interval(f(big(lo)), r) & in_interval(f(big(hi)), r)
+    end
+
+    p = setprecision(() -> big(π), BigFloat, 2000)
+    x = setprecision(() -> interval(BigFloat, -p - big(2.0)^-342, 0.5 - p), BigFloat, 2000)
+    @test isentire_interval(cot(x))
+    @test isentire_interval(csc(x))
+    @test in_interval(-1, cos(x))
+    @test in_interval(-1, sec(x))
+    lo, hi = setprecision(BigFloat, 2000) do
+        l = big(π) / 2 - big(2.0)^-300
+        return l, l + 2big(π) + big(2.0)^-290
+    end
+    @test isequal_interval(sin(setprecision(() -> bareinterval(BigFloat, lo, hi), BigFloat, 2000)), bareinterval(-1, 1))
+    x = setprecision(() -> interval(BigFloat, 1 - big(2.0)^-300, 1 + big(2.0)^-200), BigFloat, 2000)
+    @test in_interval(-1, cospi(x))
+    x = setprecision(() -> interval(BigFloat, big(1) / 2 - big(2.0)^-300, big(1) / 2 + big(2.0)^-200), BigFloat, 2000)
+    @test in_interval(1, sinpi(x))
+    v = setprecision(() -> 1 - big(2.0)^-280, BigFloat, 512)
+    x = setprecision(() -> interval(BigFloat, v), BigFloat, 512)
+    @test in_interval(setprecision(() -> cospi(v), BigFloat, 1000), cospi(x))
+
+    x = 6381956970095103 * 2.0^797
+    r = tan(interval(x))
+    @test in_interval(setprecision(() -> tan(BigFloat(x; precision = 2000)), BigFloat, 2000), r)
+    @test diam(r) ≤ 2eps(abs(sup(r)))
 end
 
 @testset "inverse roots of unity" begin
