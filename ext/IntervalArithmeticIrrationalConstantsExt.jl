@@ -9,9 +9,9 @@ import IrrationalConstants as IC
 const _INTERVAL_IRRATIONAL_FUNCS = (:+, :-, :*, :/, :sqrt, :log, :inv)
 
 _intervalize(x) = x
-_intervalize(x::Number) = :(IA.bareinterval(BigFloat, $x))
+_intervalize(x::Number) = :(IA._unsafe_bareinterval(BigFloat, BigFloat($x, RoundDown; precision = prec), BigFloat($x, RoundUp; precision = prec)))
 _intervalize(x::Symbol) =
-    x in _INTERVAL_IRRATIONAL_FUNCS ? x : :(IA.bareinterval(BigFloat, $x))
+    x in _INTERVAL_IRRATIONAL_FUNCS ? x : :(IA._unsafe_bareinterval(BigFloat, BigFloat($x, RoundDown; precision = prec), BigFloat($x, RoundUp; precision = prec)))
 function _intervalize(ex::Expr)
     ex.head === :call || return ex
     return Expr(:call, _intervalize(ex.args[1]), map(_intervalize, ex.args[2:end])...)
@@ -21,10 +21,14 @@ macro interval_irrational(sym, def)
     constant = Expr(:., :IC, QuoteNode(sym))
     interval_def = _intervalize(def)
     return esc(quote
-        IA._round(::Type{T}, ::typeof($constant), r::RoundingMode{:Down}) where {T<:IA.NumTypes} =
-            IA.__round(T, IA.inf($interval_def), r)
-        IA._round(::Type{T}, ::typeof($constant), r::RoundingMode{:Up}) where {T<:IA.NumTypes} =
-            IA.__round(T, IA.sup($interval_def), r)
+        function IA._round(::Type{T}, ::typeof($constant), r::RoundingMode{:Down}) where {T<:IA.NumTypes}
+            prec = precision(float(T)) + 64
+            return IA.__round(T, IA.inf($interval_def), r)
+        end
+        function IA._round(::Type{T}, ::typeof($constant), r::RoundingMode{:Up}) where {T<:IA.NumTypes}
+            prec = precision(float(T)) + 64
+            return IA.__round(T, IA.sup($interval_def), r)
+        end
     end)
 end
 

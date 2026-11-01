@@ -65,6 +65,12 @@ end
     end
 end
 
+@testset "Independent of the BigFloat precision" begin
+    for c ∈ IC_CONSTANTS, T ∈ (Float16, Float32, Float64)
+        @test isequal_interval(setprecision(() -> interval(T, c), BigFloat, 20), interval(T, c))
+    end
+end
+
 @testset "BigFloat precision" begin
     x = interval(BigFloat, IrrationalConstants.sqrt2)
     @test precision(inf(x)) == precision(BigFloat)
@@ -91,16 +97,17 @@ end
 
 @testset "_intervalize" begin
     ext = Base.get_extension(IntervalArithmetic, :IntervalArithmeticIrrationalConstantsExt)
-    @test ext._intervalize(2) == :(IA.bareinterval(BigFloat, 2))
+    atom(x) = :(IA._unsafe_bareinterval(BigFloat, BigFloat($x, RoundDown; precision = prec), BigFloat($x, RoundUp; precision = prec)))
+    @test ext._intervalize(2) == atom(2)
     for op ∈ (:+, :-, :*, :/, :sqrt, :log, :inv)
         @test ext._intervalize(op) === op
     end
-    @test ext._intervalize(:π) == :(IA.bareinterval(BigFloat, π))
+    @test ext._intervalize(:π) == atom(:π)
     ex = ext._intervalize(:(2 * π))
     @test ex.head === :call
     @test ex.args[1] === :*
-    @test ex.args[2] == :(IA.bareinterval(BigFloat, 2))
-    @test ex.args[3] == :(IA.bareinterval(BigFloat, π))
+    @test ex.args[2] == atom(2)
+    @test ex.args[3] == atom(:π)
     @test ext._intervalize(:(a = b)) == :(a = b)
     @test ext._intervalize("str") == "str"
     @test ext._intervalize(nothing) === nothing
