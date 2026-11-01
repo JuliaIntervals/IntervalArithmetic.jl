@@ -285,7 +285,7 @@ _value_max(::Type{T}) where {T<:AbstractFloat} = floatmax(T)
 
 #
 
-bareinterval(::Type{BigFloat}, a::AbstractIrrational) = _unsafe_bareinterval(BigFloat, a, a)
+bareinterval(::Type{T}, a::AbstractIrrational) where {T<:Union{BigFloat,Rational{BigInt}}} = _unsafe_bareinterval(T, a, a)
 
 # Note: generated functions must be defined after all the methods they use
 @generated function bareinterval(::Type{T}, a::AbstractIrrational) where {T<:NumTypes}

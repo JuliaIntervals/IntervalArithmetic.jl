@@ -152,6 +152,8 @@ end
             @test nextfloat(IntervalArithmetic._round(Float64, c, RoundDown)) == IntervalArithmetic._round(Float64, c, RoundUp)
         end
     end
+    p20 = setprecision(() -> bareinterval(Rational{BigInt}, π), BigFloat, 20)
+    @test diam(bareinterval(Rational{BigInt}, π)) < diam(p20)
 
     @test bareinterval(1) === bareinterval(1.0, 1.0)
     @test typeof(bareinterval(1)) == BareInterval{Float64}
