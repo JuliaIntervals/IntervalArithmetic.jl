@@ -71,6 +71,14 @@ end
 
     d = ForwardDiff.derivative(x -> interval(2.0)^x, interval(3.0))
     @test in_interval(8 * log(2), d)
+
+    d = ForwardDiff.derivative(x -> x^1e-20, interval(2.0))
+    @test in_interval(setprecision(() -> big(1e-20) * big(2.0)^(big(1e-20) - 1), BigFloat, 4000), d)
+    t = setprecision(() -> big(1) / 3, BigFloat, 512)
+    d = ForwardDiff.derivative(x -> x^t, setprecision(() -> interval(BigFloat, 2), BigFloat, 512))
+    @test in_interval(setprecision(() -> BigFloat(t; precision = 4000) * big(2.0)^(BigFloat(t; precision = 4000) - 1), BigFloat, 4000), d)
+    @test isequal_interval(ForwardDiff.derivative(x -> x^3, interval(-2.0)), interval(12.0))
+    @test isequal_interval(ForwardDiff.derivative(x -> x^2.0, interval(-2.0)), interval(-4.0))
     @test isequal_interval(ForwardDiff.derivative(x -> interval(0.0)^x, interval(3.0)), interval(0.0))
 end
 

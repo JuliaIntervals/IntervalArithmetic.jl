@@ -70,6 +70,16 @@ end
     @test isequal_interval(floor(interval(0.1, 1.1)), interval(0, 1))
     @test isequal_interval(ceil(interval(0.1, 1.1)), interval(1, 2))
     @test isequal_interval(trunc(interval(0.1, 1.1)), interval(0.0, 1.0))
+
+    w, n = setprecision(BigFloat, 512) do
+        return big(2.0)^300 + 1 + big(2.0)^-100, big(2.0)^300 + 1
+    end
+    x = setprecision(() -> bareinterval(BigFloat, w), BigFloat, 512)
+    @test inf(floor(x)) == sup(floor(x)) == n
+    @test inf(ceil(x)) == sup(ceil(x)) == setprecision(() -> n + 1, BigFloat, 512)
+    @test inf(trunc(x)) == sup(trunc(x)) == n
+    @test inf(floor(-x)) == setprecision(() -> -n - 1, BigFloat, 512)
+    @test inf(trunc(-x)) == setprecision(() -> -n, BigFloat, 512)
 end
 
 @testset "round" begin
@@ -119,6 +129,15 @@ end
     @test isequal_interval(round(interval(0.1, 1.5), RoundNearestTiesAway), interval(0.0, 2.0))
     @test isequal_interval(round(interval(-1.5, 0.1), RoundNearestTiesAway), interval(-2.0, 0.0))
     @test isequal_interval(round(interval(-2.5, 0.1), RoundNearestTiesAway), interval(-3.0, 0.0))
+
+    w, n = setprecision(BigFloat, 512) do
+        return big(2.0)^300 + 1 + big(2.0)^-100, big(2.0)^300 + 1
+    end
+    x = setprecision(() -> bareinterval(BigFloat, w), BigFloat, 512)
+    @test inf(round(x)) == sup(round(x)) == n
+    @test inf(round(x, RoundNearestTiesAway)) == n
+    x = setprecision(() -> interval(BigFloat, big(0.5) + big(2.0)^-300), BigFloat, 512)
+    @test decoration(round(x)) == com
 end
 
 @testset "numtype stability" begin

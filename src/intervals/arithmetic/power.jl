@@ -101,14 +101,14 @@ function Base.:^(x::Complex{Interval{T}}, y::Complex{Interval{T}}) where {T<:Num
             return res
         end
         # kmin slice
-        u = interval(T, a - kmin, 0.5)
+        u = interval(T, inf(p - exact(kmin)), 0.5)
         res = _pow(x, kmin, u, logx)
         u = interval(T, -0.5, 0.5)
         for k ∈ kmin+1:kmax-1
             res = union_interval(res, _pow(x, k, u, logx); dec = :auto)
         end
         # kmax slice
-        u = interval(T, -0.5, b - kmax)
+        u = interval(T, -0.5, sup(p - exact(kmax)))
         res = union_interval(res, _pow(x, kmax, u, logx); dec = :auto)
         return res
     end
