@@ -22,6 +22,9 @@ Each keyword argument sets a specific configuration option:
 - `matmul`: control the matrix multiplication algorithm.
 - `nthreads`: control the number of threads used by the `:fast` matrix multiplication algorithm.
 
+!!! warning
+    Interval results are only correct when subnormal numbers are not flushed to zero. Do not call `set_zero_subnormals(true)`.
+
 ```@repl
 using IntervalArithmetic
 x = interval(π)
