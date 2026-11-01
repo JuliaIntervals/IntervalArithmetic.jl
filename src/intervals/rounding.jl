@@ -17,10 +17,10 @@ _fround(f::Function, x, r)    = _fround(f, default_rounding(), x, r)
 
 # exact operations
 
-_exact(f::Function, x, args...) = f(x, args...)
+_fexact(f::Function, x, args...) = f(x, args...)
 
 for (f, mpfr_f) ∈ ((:-, :mpfr_neg), (:abs, :mpfr_abs), (:floor, :mpfr_rint_floor), (:ceil, :mpfr_rint_ceil), (:trunc, :mpfr_rint_trunc))
-    @eval function _exact(::typeof($f), x::BigFloat)
+    @eval function _fexact(::typeof($f), x::BigFloat)
         z = BigFloat(; precision = precision(x))
         @ccall Base.MPFR.libmpfr.$mpfr_f(
             z::Ref{BigFloat},
@@ -32,7 +32,7 @@ for (f, mpfr_f) ∈ ((:-, :mpfr_neg), (:abs, :mpfr_abs), (:floor, :mpfr_rint_flo
 end
 
 for (R, mpfr_f) ∈ ((:RoundNearest, :mpfr_rint_roundeven), (:RoundNearestTiesAway, :mpfr_rint_round))
-    @eval function _exact(::typeof(round), x::BigFloat, ::typeof($R))
+    @eval function _fexact(::typeof(round), x::BigFloat, ::typeof($R))
         z = BigFloat(; precision = precision(x))
         @ccall Base.MPFR.libmpfr.$mpfr_f(
             z::Ref{BigFloat},
@@ -43,7 +43,7 @@ for (R, mpfr_f) ∈ ((:RoundNearest, :mpfr_rint_roundeven), (:RoundNearestTiesAw
     end
 end
 
-function _exact(::typeof(ldexp), x::BigFloat, n::Integer)
+function _fexact(::typeof(ldexp), x::BigFloat, n::Integer)
     z = BigFloat(; precision = precision(x))
     @ccall Base.MPFR.libmpfr.mpfr_mul_2si(
         z::Ref{BigFloat},

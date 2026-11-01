@@ -30,7 +30,7 @@ Implement the `ceil` function of the IEEE Standard 1788-2015 (Table 9.1).
 function Base.ceil(x::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(x) && return x
     lo, hi = bounds(x)
-    return _unsafe_bareinterval(T, _exact(ceil, lo), _exact(ceil, hi))
+    return _unsafe_bareinterval(T, _fexact(ceil, lo), _fexact(ceil, hi))
 end
 
 function Base.ceil(x::Interval)
@@ -50,7 +50,7 @@ Implement the `floor` function of the IEEE Standard 1788-2015 (Table 9.1).
 function Base.floor(x::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(x) && return x
     lo, hi = bounds(x)
-    return _unsafe_bareinterval(T, _exact(floor, lo), _exact(floor, hi))
+    return _unsafe_bareinterval(T, _fexact(floor, lo), _fexact(floor, hi))
 end
 
 function Base.floor(x::Interval)
@@ -70,7 +70,7 @@ Implement the `trunc` function of the IEEE Standard 1788-2015 (Table 9.1).
 function Base.trunc(x::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(x) && return x
     lo, hi = bounds(x)
-    return _unsafe_bareinterval(T, _exact(trunc, lo), _exact(trunc, hi))
+    return _unsafe_bareinterval(T, _fexact(trunc, lo), _fexact(trunc, hi))
 end
 
 function Base.trunc(x::Interval)
@@ -99,13 +99,13 @@ for (S, R) ∈ ((:(:Nearest), :RoundNearest), (:(:NearestTiesAway), :RoundNeares
         function Base.round(x::BareInterval{T}, ::RoundingMode{$S}) where {T<:NumTypes}
             isempty_interval(x) && return x
             lo, hi = bounds(x)
-            return _unsafe_bareinterval(T, _exact(round, lo, $R), _exact(round, hi, $R))
+            return _unsafe_bareinterval(T, _fexact(round, lo, $R), _fexact(round, hi, $R))
         end
 
         function Base.round(x::Interval, ::RoundingMode{$S})
             r = round(bareinterval(x), $R)
             d = decoration(x)
-            d = min(d, ifelse(isinteger(_exact(ldexp, inf(x), 1)) | isinteger(_exact(ldexp, sup(x), 1)), dac, d))
+            d = min(d, ifelse(isinteger(_fexact(ldexp, inf(x), 1)) | isinteger(_fexact(ldexp, sup(x), 1)), dac, d))
             d = min(d, ifelse(isthin(r), d, def))
             return _unsafe_interval(r, d, isguaranteed(x))
         end

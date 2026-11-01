@@ -11,8 +11,8 @@ Implement the `abs` function of the IEEE Standard 1788-2015 (Table 9.1).
 function Base.abs(x::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(x) && return x
     inf(x) > 0 && return x
-    sup(x) < 0 && return _unsafe_bareinterval(T, _exact(-, sup(x)), _exact(-, inf(x)))
-    return _unsafe_bareinterval(T, zero(T), max(_exact(-, inf(x)), sup(x)))
+    sup(x) < 0 && return _unsafe_bareinterval(T, _fexact(-, sup(x)), _fexact(-, inf(x)))
+    return _unsafe_bareinterval(T, zero(T), max(_fexact(-, inf(x)), sup(x)))
 end
 
 Base.abs(x::Interval) = _unsafe_interval(abs(bareinterval(x)), decoration(x), isguaranteed(x))

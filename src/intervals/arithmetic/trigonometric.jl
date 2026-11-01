@@ -10,7 +10,7 @@ function _big_pi(x::AbstractFloat)
 end
 
 function _halfpi_ratio(x::AbstractFloat)
-    X = _exact(ldexp, BigFloat(x; precision = precision(x)), 1)
+    X = _fexact(ldexp, BigFloat(x; precision = precision(x)), 1)
     return _unsafe_bareinterval(BigFloat, X, X) / _big_pi(x)
 end
 
@@ -34,12 +34,12 @@ end
 _quadrant(::typeof(ceil), x::AbstractFloat) = iszero(x) ? -1 : ceil(BigInt, sup(_halfpi_ratio(x))) - 1
 
 _quadrantpi(::typeof(floor), x::T) where {T<:Union{Float16,Float32,Float64}} =
-    abs(x) ≤ maxintfloat(T) ? floor(Int64, 2x) : floor(BigInt, _exact(ldexp, BigFloat(x; precision = precision(x)), 1))
-_quadrantpi(::typeof(floor), x::AbstractFloat) = floor(BigInt, _exact(ldexp, BigFloat(x; precision = precision(x)), 1))
+    abs(x) ≤ maxintfloat(T) ? floor(Int64, 2x) : floor(BigInt, _fexact(ldexp, BigFloat(x; precision = precision(x)), 1))
+_quadrantpi(::typeof(floor), x::AbstractFloat) = floor(BigInt, _fexact(ldexp, BigFloat(x; precision = precision(x)), 1))
 
 _quadrantpi(::typeof(ceil), x::T) where {T<:Union{Float16,Float32,Float64}} =
-    abs(x) ≤ maxintfloat(T) ? ceil(Int64, 2x) - 1 : ceil(BigInt, _exact(ldexp, BigFloat(x; precision = precision(x)), 1)) - 1
-_quadrantpi(::typeof(ceil), x::AbstractFloat) = ceil(BigInt, _exact(ldexp, BigFloat(x; precision = precision(x)), 1)) - 1
+    abs(x) ≤ maxintfloat(T) ? ceil(Int64, 2x) - 1 : ceil(BigInt, _fexact(ldexp, BigFloat(x; precision = precision(x)), 1)) - 1
+_quadrantpi(::typeof(ceil), x::AbstractFloat) = ceil(BigInt, _fexact(ldexp, BigFloat(x; precision = precision(x)), 1)) - 1
 
 function _quadrants(quadrant, lo, hi)
     q = quadrant(floor, lo)
@@ -166,7 +166,7 @@ else
     function Base.cospi(x::BareInterval{T}) where {T<:AbstractFloat}
         isempty_interval(x) && return x
         lo, hi = bounds(x)
-        isthin(x) & !isinteger(lo) & isinteger(_exact(ldexp, lo, 1)) && return zero(BareInterval{T}) # by-pass rounding to improve accuracy for 32 bit systems
+        isthin(x) & !isinteger(lo) & isinteger(_fexact(ldexp, lo, 1)) && return zero(BareInterval{T}) # by-pass rounding to improve accuracy for 32 bit systems
         isthin(x) && return @round(T, cospi(lo), cospi(lo))
         diam(x) ≥ 2 && return _unsafe_bareinterval(T, -one(T), one(T))
         r, n = _quadrants(_quadrantpi, lo, hi)
