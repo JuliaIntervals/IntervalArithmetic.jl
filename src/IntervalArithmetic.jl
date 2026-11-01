@@ -137,9 +137,10 @@ abstract type AbstractIntervalEigenAlg end
 """
     IntervalEigen
 
-Default eigendecomposition algorithm for interval matrices. Tries the contraction
-mapping theorem first (tight bounds when radii are small and eigenvalues are simple),
-and falls back to the Rohn eigenvalue enclosure if it fails.
+Default eigendecomposition algorithm for interval matrices. For `eigen`, tries the
+contraction mapping theorem first (tight bounds when radii are small and eigenvalues are
+simple). For `eigvals`, uses the Gershgorin circle theorem after a similarity transform.
+In both cases, falls back to the Rohn eigenvalue enclosure if it fails.
 """
 struct IntervalEigen <: AbstractIntervalEigenAlg end
 

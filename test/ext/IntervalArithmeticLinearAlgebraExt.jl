@@ -94,7 +94,7 @@ end
     @test all(B .=== A)
 
     W = A .+ interval(-1, 1)
-    EW = eigen(W)
+    EW = eigen(W; alg = IntervalEigenContraction())
     @test all(isnai, EW.values)
     @test all(isnai, EW.vectors)
 
@@ -177,6 +177,58 @@ end
     @test in_interval(exact_eigs[1], real(r_hertz.values[1]))
     @test in_interval(exact_eigs[2], real(r_hertz.values[2]))
     @test all(isnai, r_hertz.vectors)
+
+    # `eigvals` uses the algorithm
+    λ_rohn = eigvals(A_large; alg = IntervalEigenRohn())
+    @test all(λ -> issubset_interval(interval(-1.2, 4.2), λ), λ_rohn)
+    λ_hertz = eigvals(A_large; alg = IntervalEigenHertz())
+    @test all(λ -> issubset_interval(λ, λ_rohn[1]), λ_hertz)
+    @test all(isnai, eigvals(A_large; alg = IntervalEigenContraction()))
+    @test all(isguaranteed, eigvals(A_large))
+
+    # Rohn bounds are rigorous
+    D = interval.([1.0 0.0; 0.0 1.0], 0.1; format = :midpoint)
+    @test all(λ -> in_interval(0.9, λ) && in_interval(1.1, λ), eigvals(D; alg = IntervalEigenRohn()))
+
+    # NG flag
+    @test !any(isguaranteed, eigen(A_large .+ 1; alg = IntervalEigenRohn()).values)
+    @test !any(isguaranteed, eigvals(A_large .+ 1; alg = IntervalEigenRohn()))
+    @test !any(isguaranteed, eigen(LinearAlgebra.Symmetric(A_large .+ 1)).values)
+    @test all(isguaranteed, eigen(A_gen; alg = IntervalEigenRohn()).values)
+
+    # `Symmetric` and `Hermitian` wrappers with non-thin diagonal
+    r_sym = eigen(LinearAlgebra.Symmetric(A_mid))
+    @test in_interval(exact_eigs[1], real(r_sym.values[1]))
+    @test in_interval(exact_eigs[2], real(r_sym.values[2]))
+    r_herm = eigen(LinearAlgebra.Hermitian(complex.(A_mid)))
+    @test in_interval(exact_eigs[1], real(r_herm.values[1]))
+    @test in_interval(exact_eigs[2], real(r_herm.values[2]))
+    @test in_interval(exact_eigs[1], eigvals(LinearAlgebra.Symmetric(A_mid))[1])
+    @test in_interval(exact_eigs[1], real(eigvals(LinearAlgebra.Hermitian(complex.(A_mid)))[1]))
+
+    # repeated eigenvalues fall back to Rohn
+    r_rep = eigen(interval.([1.0 0.0; 0.0 1.0]))
+    @test all(λ -> isequal_interval(λ, interval(1)), r_rep.values)
+    @test all(isnai, eigen(interval.([1.0 0.0; 0.0 1.0]); alg = IntervalEigenContraction()).values)
+
+    # unbounded entries
+    U = [interval(1) interval(0, Inf); interval(0) interval(1)]
+    for alg ∈ (IntervalEigen(), IntervalEigenContraction(), IntervalEigenRohn(), IntervalEigenHertz())
+        @test all(isnai, eigen(U; alg).values)
+        @test all(isnai, eigvals(U; alg))
+    end
+
+    # LinearAlgebra matrix functions of `Symmetric` and `Hermitian` matrices are not rigorous
+    S = interval.([2.0 1.0 0.0; 1.0 2.0 0.0; 0.0 0.0 -2.0^-50])
+    @test_throws ArgumentError sqrt(S)
+    @test_throws ArgumentError sqrt(LinearAlgebra.Symmetric(S))
+    @test_throws ArgumentError LinearAlgebra.Symmetric(S)^0.5
+    @test_throws ArgumentError LinearAlgebra.svd(LinearAlgebra.Symmetric(S))
+    @test_throws ArgumentError LinearAlgebra.svdvals!(LinearAlgebra.Symmetric(S))
+    @test all(isequal_interval.(LinearAlgebra.Symmetric(S)^2, S * S))
+    @test all(isequal_interval.(LinearAlgebra.Symmetric(S)^2.0, S * S))
+    @test all(isequal_interval.(exp(LinearAlgebra.Symmetric(A_small)), exp(A_small)))
+    @test all(isequal_interval.(log(LinearAlgebra.Symmetric(A_small)), log(A_small)))
 end
 
 @testset "inv" begin

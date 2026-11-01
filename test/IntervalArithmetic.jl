@@ -32,6 +32,8 @@ end
         :mag, :mid, :midradius, :mig, :mince, :mince!, :nai, :numtype, :overlap,
         :pieces, :pow, :pown, :precedes, :radius, :rootn, :sample, :setdisplay,
         :strictprecedes, :sup, :trv, :union_interval]
+    append!(expected, [:AbstractIntervalEigenAlg, :IntervalEigen, :IntervalEigenContraction,
+        :IntervalEigenHertz, :IntervalEigenRohn])
     @test sort(names(IntervalArithmetic)) == sort(expected)
 
     @test haskey(Base.Docs.meta(IntervalArithmetic),
