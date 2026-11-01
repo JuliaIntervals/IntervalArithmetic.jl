@@ -103,6 +103,14 @@ Implement the `mid` function of the IEEE Standard 1788-2015 (Table 9.2).
 See also: [`inf`](@ref), [`sup`](@ref), [`bounds`](@ref), [`diam`](@ref),
 [`radius`](@ref) and [`midradius`](@ref).
 """
+_midpoint(lo, hi, β) = β * (hi + lo * (1/β - 1))
+
+function _midpoint(lo::BigFloat, hi::BigFloat, β::BigFloat)
+    β = BigFloat(β; precision = max(precision(lo), precision(hi), precision(β)))
+    γ = _fround(-, _fround(/, one(β), β, RoundNearest), one(β), RoundNearest)
+    return _fround(*, β, _fround(+, hi, _fround(*, lo, γ, RoundNearest), RoundNearest), RoundNearest)
+end
+
 function mid(x::BareInterval{T}, α = 0.5) where {T<:AbstractFloat}
     0 < α < 1 || return throw(DomainError(α, "α must be strictly between 0 and 1"))
     isempty_interval(x) && return convert(T, NaN)
@@ -119,7 +127,7 @@ function mid(x::BareInterval{T}, α = 0.5) where {T<:AbstractFloat}
             return prevfloat(hi)
         end
         β = convert(T, α)
-        midpoint = β * (hi + lo * (1/β - 1)) # exactly 0.5 * (hi + lo) for β = 0.5
+        midpoint = _midpoint(lo, hi, β) # exactly 0.5 * (hi + lo) for β = 0.5
         midpoint = ifelse(isfinite(midpoint), midpoint, (1 - β) * lo + β * hi)
         midpoint = ifelse(midpoint < lo, lo, midpoint)
         midpoint = ifelse(midpoint > hi, hi, midpoint)

@@ -130,6 +130,11 @@ end
     @test mid(2.0, 0.25) == 2.0
     @test mid(complex(interval(0, 3), interval(0, 4))) == 1.5 + 2im
     @test mid([interval(0, 1), interval(1, 3)]) == [0.5, 2.0]
+
+    x = setprecision(() -> bareinterval(BigFloat, 1, 1 + big(2.0)^-400), BigFloat, 512)
+    @test mid(x) == setprecision(() -> 1 + big(2.0)^-401, BigFloat, 512)
+    @test inf(x) < mid(x, 0.3) < sup(x)
+    @test all(y -> diam(y) > 0, bisect(x))
 end
 
 @testset "diam" begin
