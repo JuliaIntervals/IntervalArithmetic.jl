@@ -184,7 +184,7 @@ end
 
     @test !(exact(true) / exact(3.0) isa ExactReal)
     @test !(exact(true) / exact(3) isa ExactReal)
-    @test !(exact(2^60 + 1) / exact(true) isa ExactReal)
+    @test !(exact(Int64(2)^60 + 1) / exact(true) isa ExactReal)
     @test exact(6) / exact(true) === exact(6.0)
     @test exact(true) / exact(4) === exact(0.25)
     @test exact(2.5) / exact(true) === exact(2.5)
