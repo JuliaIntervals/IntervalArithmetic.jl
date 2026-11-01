@@ -32,10 +32,10 @@ using Logging
     @test IntervalArithmetic._quadrants(IntervalArithmetic._quadrant, -1.0, 2.0) == (3, 2)
     @test IntervalArithmetic._quadrants(IntervalArithmetic._quadrant, 0.5, 1.0) == (0, 0)
     @test IntervalArithmetic._quadrants(IntervalArithmetic._quadrant, -100.0, 100.0) == (0, 4)
-    @test IntervalArithmetic._has(0, 1, 1) & !IntervalArithmetic._has(0, 1, 2)
-    @test IntervalArithmetic._has(3, 2, 1) & !IntervalArithmetic._has(3, 2, 2)
-    @test all(t -> IntervalArithmetic._has(2, 4, t), 0:3)
-    @test !any(t -> IntervalArithmetic._has(1, 0, t), 0:3)
+    @test IntervalArithmetic._crosses(0, 1, 1) & !IntervalArithmetic._crosses(0, 1, 2)
+    @test IntervalArithmetic._crosses(3, 2, 1) & !IntervalArithmetic._crosses(3, 2, 2)
+    @test all(t -> IntervalArithmetic._crosses(2, 4, t), 0:3)
+    @test !any(t -> IntervalArithmetic._crosses(1, 0, t), 0:3)
 
     bp = IntervalArithmetic._big_pi(1.0)
     @test bp isa BareInterval{BigFloat}

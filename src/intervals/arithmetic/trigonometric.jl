@@ -41,12 +41,13 @@ _quadrantpi(::typeof(ceil), x::T) where {T<:Union{Float16,Float32,Float64}} =
     abs(x) ≤ maxintfloat(T) ? ceil(Int64, 2x) - 1 : ceil(BigInt, _fexact(ldexp, BigFloat(x; precision = precision(x)), 1)) - 1
 _quadrantpi(::typeof(ceil), x::AbstractFloat) = ceil(BigInt, _fexact(ldexp, BigFloat(x; precision = precision(x)), 1)) - 1
 
+# quadrant of lo, and number (at most 4) of multiples of π/2 (or 1/2) strictly inside (lo, hi)
 function _quadrants(quadrant, lo, hi)
     q = quadrant(floor, lo)
     return Int(mod(q, 4)), Int(min(quadrant(ceil, hi) - q, 4))
 end
 
-_has(r, n, t) = n > mod(t - r - 1, 4)
+_crosses(q, n, t) = n > mod(t - q - 1, 4)
 
 # not in the IEEE Standard 1788-2015
 
@@ -78,12 +79,12 @@ function Base.sin(x::BareInterval{T}) where {T<:AbstractFloat}
     lo, hi = bounds(x)
     isthin(x) && return @round(T, sin(lo), sin(lo))
     diam(x) ≥ 2sup(bareinterval(T, π)) && return _unsafe_bareinterval(T, -one(T), one(T))
-    r, n = _quadrants(_quadrant, lo, hi)
-    hasmax, hasmin = _has(r, n, 1), _has(r, n, 3)
+    q, n = _quadrants(_quadrant, lo, hi)
+    hasmax, hasmin = _crosses(q, n, 1), _crosses(q, n, 3)
     hasmax & hasmin && return _unsafe_bareinterval(T, -one(T), one(T))
     hasmax && return @round(T, min(sin(lo), sin(hi)), one(T))
     hasmin && return @round(T, -one(T), max(sin(lo), sin(hi)))
-    (r == 0) | (r == 3) && return @round(T, sin(lo), sin(hi))
+    (q == 0) | (q == 3) && return @round(T, sin(lo), sin(hi))
     return @round(T, sin(hi), sin(lo))
 end
 
@@ -107,12 +108,12 @@ else
         lo, hi = bounds(x)
         isthin(x) && return @round(T, sinpi(lo), sinpi(lo))
         diam(x) ≥ 2 && return _unsafe_bareinterval(T, -one(T), one(T))
-        r, n = _quadrants(_quadrantpi, lo, hi)
-        hasmax, hasmin = _has(r, n, 1), _has(r, n, 3)
+        q, n = _quadrants(_quadrantpi, lo, hi)
+        hasmax, hasmin = _crosses(q, n, 1), _crosses(q, n, 3)
         hasmax & hasmin && return _unsafe_bareinterval(T, -one(T), one(T))
         hasmax && return @round(T, min(sinpi(lo), sinpi(hi)), one(T))
         hasmin && return @round(T, -one(T), max(sinpi(lo), sinpi(hi)))
-        (r == 0) | (r == 3) && return @round(T, sinpi(lo), sinpi(hi))
+        (q == 0) | (q == 3) && return @round(T, sinpi(lo), sinpi(hi))
         return @round(T, sinpi(hi), sinpi(lo))
     end
 end
@@ -139,12 +140,12 @@ function Base.cos(x::BareInterval{T}) where {T<:AbstractFloat}
     lo, hi = bounds(x)
     isthin(x) && return @round(T, cos(lo), cos(lo))
     diam(x) ≥ 2sup(bareinterval(T, π)) && return _unsafe_bareinterval(T, -one(T), one(T))
-    r, n = _quadrants(_quadrant, lo, hi)
-    hasmax, hasmin = _has(r, n, 0), _has(r, n, 2)
+    q, n = _quadrants(_quadrant, lo, hi)
+    hasmax, hasmin = _crosses(q, n, 0), _crosses(q, n, 2)
     hasmax & hasmin && return _unsafe_bareinterval(T, -one(T), one(T))
     hasmax && return @round(T, min(cos(lo), cos(hi)), one(T))
     hasmin && return @round(T, -one(T), max(cos(lo), cos(hi)))
-    (r == 2) | (r == 3) && return @round(T, cos(lo), cos(hi))
+    (q == 2) | (q == 3) && return @round(T, cos(lo), cos(hi))
     return @round(T, cos(hi), cos(lo))
 end
 
@@ -169,12 +170,12 @@ else
         isthin(x) & !isinteger(lo) & isinteger(_fexact(ldexp, lo, 1)) && return zero(BareInterval{T}) # by-pass rounding to improve accuracy for 32 bit systems
         isthin(x) && return @round(T, cospi(lo), cospi(lo))
         diam(x) ≥ 2 && return _unsafe_bareinterval(T, -one(T), one(T))
-        r, n = _quadrants(_quadrantpi, lo, hi)
-        hasmax, hasmin = _has(r, n, 0), _has(r, n, 2)
+        q, n = _quadrants(_quadrantpi, lo, hi)
+        hasmax, hasmin = _crosses(q, n, 0), _crosses(q, n, 2)
         hasmax & hasmin && return _unsafe_bareinterval(T, -one(T), one(T))
         hasmax && return @round(T, min(cospi(lo), cospi(hi)), one(T))
         hasmin && return @round(T, -one(T), max(cospi(lo), cospi(hi)))
-        (r == 2) | (r == 3) && return @round(T, cospi(lo), cospi(hi))
+        (q == 2) | (q == 3) && return @round(T, cospi(lo), cospi(hi))
         return @round(T, cospi(hi), cospi(lo))
     end
 end
@@ -201,8 +202,8 @@ function Base.tan(x::BareInterval{T}) where {T<:AbstractFloat}
     lo, hi = bounds(x)
     isthin(x) && return @round(T, tan(lo), tan(lo))
     diam(x) ≥ sup(bareinterval(T, π)) && return entireinterval(BareInterval{T})
-    r, n = _quadrants(_quadrant, lo, hi)
-    _has(r, n, 1) | _has(r, n, 3) && return entireinterval(BareInterval{T})
+    q, n = _quadrants(_quadrant, lo, hi)
+    _crosses(q, n, 1) | _crosses(q, n, 3) && return entireinterval(BareInterval{T})
     return @round(T, tan(lo), tan(hi))
 end
 
@@ -229,8 +230,8 @@ function Base.cot(x::BareInterval{T}) where {T<:AbstractFloat}
     lo, hi = bounds(x)
     isthin(x) && return @round(T, cot(lo), cot(lo))
     diam(x) ≥ sup(bareinterval(T, π)) && return entireinterval(BareInterval{T})
-    r, n = _quadrants(_quadrant, lo, hi)
-    _has(r, n, 0) | _has(r, n, 2) && return entireinterval(BareInterval{T})
+    q, n = _quadrants(_quadrant, lo, hi)
+    _crosses(q, n, 0) | _crosses(q, n, 2) && return entireinterval(BareInterval{T})
     lo, hi = ifelse(iszero(lo), zero(T), lo), ifelse(iszero(hi), -zero(T), hi)
     return @round(T, cot(hi), cot(lo))
 end
@@ -255,11 +256,11 @@ function Base.sec(x::BareInterval{T}) where {T<:AbstractFloat}
     lo, hi = bounds(x)
     isthin(x) && return @round(T, sec(lo), sec(lo))
     diam(x) ≥ sup(bareinterval(T, π)) && return entireinterval(BareInterval{T})
-    r, n = _quadrants(_quadrant, lo, hi)
-    _has(r, n, 1) | _has(r, n, 3) && return entireinterval(BareInterval{T})
-    _has(r, n, 0) && return @round(T, one(T), max(sec(lo), sec(hi)))
-    _has(r, n, 2) && return @round(T, min(sec(lo), sec(hi)), -one(T))
-    (r == 0) | (r == 1) && return @round(T, sec(lo), sec(hi))
+    q, n = _quadrants(_quadrant, lo, hi)
+    _crosses(q, n, 1) | _crosses(q, n, 3) && return entireinterval(BareInterval{T})
+    _crosses(q, n, 0) && return @round(T, one(T), max(sec(lo), sec(hi)))
+    _crosses(q, n, 2) && return @round(T, min(sec(lo), sec(hi)), -one(T))
+    (q == 0) | (q == 1) && return @round(T, sec(lo), sec(hi))
     return @round(T, sec(hi), sec(lo))
 end
 
@@ -284,12 +285,12 @@ function Base.csc(x::BareInterval{T}) where {T<:AbstractFloat}
     lo, hi = bounds(x)
     isthin(x) && return @round(T, csc(lo), csc(lo))
     diam(x) ≥ sup(bareinterval(T, π)) && return entireinterval(BareInterval{T})
-    r, n = _quadrants(_quadrant, lo, hi)
-    _has(r, n, 0) | _has(r, n, 2) && return entireinterval(BareInterval{T})
+    q, n = _quadrants(_quadrant, lo, hi)
+    _crosses(q, n, 0) | _crosses(q, n, 2) && return entireinterval(BareInterval{T})
     lo, hi = ifelse(iszero(lo), zero(T), lo), ifelse(iszero(hi), -zero(T), hi)
-    _has(r, n, 1) && return @round(T, one(T), max(csc(lo), csc(hi)))
-    _has(r, n, 3) && return @round(T, min(csc(lo), csc(hi)), -one(T))
-    (r == 0) | (r == 3) && return @round(T, csc(hi), csc(lo))
+    _crosses(q, n, 1) && return @round(T, one(T), max(csc(lo), csc(hi)))
+    _crosses(q, n, 3) && return @round(T, min(csc(lo), csc(hi)), -one(T))
+    (q == 0) | (q == 3) && return @round(T, csc(hi), csc(lo))
     return @round(T, csc(lo), csc(hi))
 end
 
