@@ -83,7 +83,7 @@ for R in (:Integer, :Rational, :AbstractFloat, :Irrational)
         if iszero(y) || all(_isthinzero, values(partials(x)))
             return Dual{Tx}(expv, zero(partials(x)))
         else
-            return Dual{Tx}(expv, partials(x) * y * v^(y - 1))
+            return Dual{Tx}(expv, partials(x) * y * v^$(R ∈ (:Integer, :Rational) ? :(y - 1) : :(y - interval(1))))
         end
     end
 end
