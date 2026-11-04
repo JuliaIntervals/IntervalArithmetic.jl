@@ -30,7 +30,8 @@ makedocs(;
             "API" => "manual/api.md"
         ],
         "Interfaces" => [
-            "Arblib.jl" => "interfaces/arblib.md"
+            "Arblib.jl" => "interfaces/arblib.md",
+            "LinearAlgebra" => "interfaces/linearalgebra.md"
         ],
         "Examples" => ["Rigorous computation of ``\\pi``" => "examples/pi.md"],
     ],

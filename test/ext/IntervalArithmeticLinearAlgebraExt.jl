@@ -142,8 +142,7 @@ end
     A_gen = interval.(M, 0.5; format = :midpoint)
     r_gen = LinearAlgebra.eigen(A_gen)
     for λ in mid_eigs
-        @test in_interval(real(λ), real(r_gen.values[1]))
-        @test in_interval(imag(λ), imag(r_gen.values[1]))
+        @test any(μ -> in_interval(real(λ), real(μ)) && in_interval(imag(λ), imag(μ)), r_gen.values)
     end
 
     # 3×3 symmetric with large radius
@@ -179,10 +178,27 @@ end
     @test all(isnai, r_hertz.vectors)
 
     # `eigvals` uses the algorithm
-    λ_rohn = eigvals(A_large; alg = IntervalEigenRohn())
+    λ_rohn = eigvals(LinearAlgebra.Symmetric(A_large); alg = IntervalEigenRohn())
     @test all(λ -> issubset_interval(interval(-1.2, 4.2), λ), λ_rohn)
-    λ_hertz = eigvals(A_large; alg = IntervalEigenHertz())
+    λ_hertz = eigvals(LinearAlgebra.Symmetric(A_large); alg = IntervalEigenHertz())
     @test all(λ -> issubset_interval(λ, λ_rohn[1]), λ_hertz)
+
+    # default intersects Gershgorin with Rohn, which is tighter than both
+    A_01 = interval.([1.0 0.5; 0.5 2.0], 0.1; format = :midpoint)
+    λ_default = eigvals(LinearAlgebra.Symmetric(A_01))
+    λ_box = eigvals(LinearAlgebra.Symmetric(A_01); alg = IntervalEigenRohn())
+    @test all(λ -> issubset_interval(λ, λ_box[1]), λ_default)
+    @test !isequal_interval(λ_default[1], λ_box[1])
+    @test isdisjoint_interval(λ_default[1], λ_default[2])
+    @test in_interval(exact_eigs[1], λ_default[1]) && in_interval(exact_eigs[2], λ_default[2])
+
+    # a plain matrix with symmetric entries also contains non-symmetric matrices
+    # e.g. `[0 1; -1 0]` with eigenvalues ±i
+    K = [interval(0) interval(-1, 1); interval(-1, 1) interval(0)]
+    for alg ∈ (IntervalEigen(), IntervalEigenRohn(), IntervalEigenHertz())
+        @test all(λ -> in_interval(1, imag(λ)) && in_interval(-1, imag(λ)), eigvals(K; alg))
+        @test all(λ -> isthinzero(imag(λ)), eigvals(LinearAlgebra.Symmetric(K); alg))
+    end
     @test all(isnai, eigvals(A_large; alg = IntervalEigenContraction()))
     @test all(isguaranteed, eigvals(A_large))
 
@@ -206,6 +222,21 @@ end
     @test in_interval(exact_eigs[1], eigvals(LinearAlgebra.Symmetric(A_mid))[1])
     @test in_interval(exact_eigs[1], real(eigvals(LinearAlgebra.Hermitian(complex.(A_mid)))[1]))
 
+    # eigenvalues of `Symmetric` and `Hermitian` matrices are real
+    C = interval.([1.0 1e-8; 1e-8 1.0])
+    for alg ∈ (IntervalEigen(), IntervalEigenContraction(), IntervalEigenRohn(), IntervalEigenHertz())
+        @test eigvals(LinearAlgebra.Symmetric(C); alg) isa Vector{Interval{Float64}}
+        @test eigvals(LinearAlgebra.Hermitian(C); alg) isa Vector{Interval{Float64}}
+        @test eigvals(LinearAlgebra.Hermitian(complex.(C)); alg) isa Vector{Interval{Float64}}
+        @test eigen(LinearAlgebra.Symmetric(C); alg).values isa Vector{Interval{Float64}}
+        @test eigen(LinearAlgebra.Symmetric(C); alg).vectors isa Matrix{Interval{Float64}}
+        @test eigen(LinearAlgebra.Hermitian(complex.(C)); alg).values isa Vector{Interval{Float64}}
+        @test eigen(LinearAlgebra.Hermitian(complex.(C)); alg).vectors isa Matrix{Complex{Interval{Float64}}}
+    end
+    # but not those of complex symmetric matrices
+    CS = interval.(complex.([1.0 1.0; 1.0 2.0], [1.0 0.0; 0.0 0.0]))
+    @test all(λ -> !in_interval(0, imag(λ)), eigvals(LinearAlgebra.Symmetric(CS)))
+
     # repeated eigenvalues fall back to Rohn
     r_rep = eigen(interval.([1.0 0.0; 0.0 1.0]))
     @test all(λ -> isequal_interval(λ, interval(1)), r_rep.values)
@@ -224,7 +255,8 @@ end
     @test_throws ArgumentError sqrt(LinearAlgebra.Symmetric(S))
     @test_throws ArgumentError LinearAlgebra.Symmetric(S)^0.5
     @test_throws ArgumentError LinearAlgebra.svd(LinearAlgebra.Symmetric(S))
-    @test_throws ArgumentError LinearAlgebra.svdvals!(LinearAlgebra.Symmetric(S))
+    σ = LinearAlgebra.svdvals(LinearAlgebra.Symmetric(S))
+    @test in_interval(3, σ[1]) && in_interval(1, σ[2]) && in_interval(2.0^-50, σ[3])
     @test all(isequal_interval.(LinearAlgebra.Symmetric(S)^2, S * S))
     @test all(isequal_interval.(LinearAlgebra.Symmetric(S)^2.0, S * S))
     @test all(isequal_interval.(exp(LinearAlgebra.Symmetric(A_small)), exp(A_small)))
