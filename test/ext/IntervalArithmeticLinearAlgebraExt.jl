@@ -125,6 +125,9 @@ end
     @test all(x -> !isguaranteed(x), inv(ANG))
     @test inv(complex.(A, interval(0))) isa Matrix{Complex{Interval{Float64}}}
     @test all(isnai, inv(A .+ interval(-1, 1)))
+    B = [interval(0.75, 1.25) interval(-0.5, 0.5); interval(0.0) interval(1.0, 3.0)]
+    @test all(in_interval.([3//4 1//2; 0 1], B))
+    @test all(in_interval.([4//3 -2//3; 0 1], inv(B)))
 end
 
 @testset "Matrix inversion" begin
