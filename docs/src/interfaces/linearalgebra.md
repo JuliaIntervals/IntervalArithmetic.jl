@@ -33,14 +33,14 @@ enclosure is always tighter than the other, the default takes their intersection
 ```@repl linearalgebra
 eigvals(A)
 eigen(A)
-eigvals(Symmetric(A); alg = IntervalEigenRohn())
-eigvals(Symmetric(A); alg = IntervalEigenHertz())
+eigvals(Symmetric(A); alg = IntervalArithmetic.IntervalEigenRohn())
+eigvals(Symmetric(A); alg = IntervalArithmetic.IntervalEigenHertz())
 ```
 
 When the algorithm fails, the eigenvalues and eigenvectors are NaIs.
 
 ```@repl linearalgebra
-eigen(interval.([1.0 0.5; 0.5 2.0], 1.0; format = :midpoint); alg = IntervalEigenContraction())
+eigen(interval.([1.0 0.5; 0.5 2.0], 1.0; format = :midpoint); alg = IntervalArithmetic.IntervalEigenContraction())
 ```
 
 A matrix of intervals contains non-symmetric matrices, even if its entries are
@@ -49,7 +49,7 @@ and Hermitian matrices: their eigenvalues are real, and the Rohn and Hertz enclo
 are tighter.
 
 ```@repl linearalgebra
-eigvals(A; alg = IntervalEigenRohn())
+eigvals(A; alg = IntervalArithmetic.IntervalEigenRohn())
 eigvals(Symmetric(A))
 ```
 
@@ -59,3 +59,11 @@ eigvals(Symmetric(A))
     eigenvalues are accurate up to roundoff errors. They throw an `ArgumentError` for
     interval matrices, except `exp`, `log` and integer powers, which have rigorous
     implementations.
+
+```@docs
+IntervalArithmetic.AbstractIntervalEigenAlg
+IntervalArithmetic.IntervalEigen
+IntervalArithmetic.IntervalEigenContraction
+IntervalArithmetic.IntervalEigenRohn
+IntervalArithmetic.IntervalEigenHertz
+```

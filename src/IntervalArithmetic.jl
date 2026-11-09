@@ -174,8 +174,6 @@ eigenvectors.
 """
 struct IntervalEigenHertz <: AbstractIntervalEigenAlg end
 
-export AbstractIntervalEigenAlg, IntervalEigen, IntervalEigenContraction, IntervalEigenRohn, IntervalEigenHertz
-
 """
     MatMulMode{T}
 

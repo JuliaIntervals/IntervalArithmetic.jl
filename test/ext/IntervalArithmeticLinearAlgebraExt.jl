@@ -1,5 +1,6 @@
 using Test
 using IntervalArithmetic
+using IntervalArithmetic: IntervalEigen, IntervalEigenContraction, IntervalEigenRohn, IntervalEigenHertz
 import LinearAlgebra
 using LinearAlgebra: I, UniformScaling, opnorm, eigvals, eigvals!, eigen, det, mul!
 
