@@ -122,6 +122,58 @@ function configure_power(power::Symbol)
     return power
 end
 
+# eigendecomposition algorithm types
+
+"""
+    AbstractIntervalEigenAlg
+
+Abstract supertype for interval eigendecomposition algorithms.
+
+See also: [`IntervalEigen`](@ref), [`IntervalEigenContraction`](@ref),
+[`IntervalEigenRohn`](@ref), [`IntervalEigenHertz`](@ref).
+"""
+abstract type AbstractIntervalEigenAlg end
+
+"""
+    IntervalEigen
+
+Default eigendecomposition algorithm for interval matrices:
+- `eigvals` uses the Gershgorin circle theorem, after a similarity transform by the
+  approximate eigenvectors of the midpoint matrix, intersected with
+  [`IntervalEigenRohn`](@ref). When the Gershgorin circle theorem fails (e.g. when
+  interval radii are too large), it returns the enclosure of [`IntervalEigenRohn`](@ref).
+- `eigen` uses the contraction mapping theorem, as [`IntervalEigenContraction`](@ref).
+  When it fails, it returns the eigenvalues of `eigvals` and [`nai`](@ref) eigenvectors.
+"""
+struct IntervalEigen <: AbstractIntervalEigenAlg end
+
+"""
+    IntervalEigenContraction
+
+Eigendecomposition via the contraction mapping theorem only, which gives tight bounds
+when the interval radii are small and the eigenvalues are simple. Returns [`nai`](@ref)
+if the contraction fails (e.g. when interval radii are too large).
+"""
+struct IntervalEigenContraction <: AbstractIntervalEigenAlg end
+
+"""
+    IntervalEigenRohn
+
+Rohn eigenvalue enclosure (fast, O(n³)). Returns a single interval enclosing all
+eigenvalues and, when called with `eigen`, [`nai`](@ref) eigenvectors. Valid for any
+interval radius.
+"""
+struct IntervalEigenRohn <: AbstractIntervalEigenAlg end
+
+"""
+    IntervalEigenHertz
+
+Hertz exact hull of eigenvalues (exponential O(2ⁿ) complexity). Returns a single
+interval enclosing all eigenvalues and, when called with `eigen`, [`nai`](@ref)
+eigenvectors.
+"""
+struct IntervalEigenHertz <: AbstractIntervalEigenAlg end
+
 """
     MatMulMode{T}
 
