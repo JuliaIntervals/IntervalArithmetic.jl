@@ -36,7 +36,7 @@ IntervalArithmeticSparseArraysExt = "SparseArrays"
 
 [compat]
 Arblib = "1.3.0"
-CRlibm = "1.0.2"
+CRlibm = "1.2.0"
 CoreMath = "0.1.0"
 DiffRules = "1"
 ForwardDiff = "1"
