@@ -337,10 +337,11 @@ _value_max(::Type{T}) where {T<:AbstractFloat} = floatmax(T)
 
 #
 
-bareinterval(::Type{T}, a::AbstractIrrational) where {T<:Union{BigFloat,Rational{BigInt}}} = _unsafe_bareinterval(T, a, a)
+bareinterval(::Type{T}, a::AbstractIrrational) where {T<:NumTypes} = _unsafe_bareinterval(T, a, a)
+bareinterval(::Type{T}, a::Irrational) where {T<:Union{BigFloat,Rational{BigInt}}} = _unsafe_bareinterval(T, a, a)
 
 # Note: generated functions must be defined after all the methods they use
-@generated function bareinterval(::Type{T}, a::AbstractIrrational) where {T<:NumTypes}
+@generated function bareinterval(::Type{T}, a::Irrational) where {T<:NumTypes}
     x = _unsafe_bareinterval(T, a(), a()) # precompute the interval
     return :($x) # set body of the function to return the precomputed result
 end

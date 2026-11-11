@@ -22,6 +22,11 @@ using IntervalArithmetic
     a = interval(0.1, 1.1)
     @test isequal_interval(+a, a)
     @test isequal_interval(-a, interval(-sup(a), -inf(a)))
+
+    v = setprecision(() -> 1 + big(2.0)^-400, BigFloat, 512)
+    r = -setprecision(() -> bareinterval(BigFloat, v), BigFloat, 512)
+    @test precision(inf(r)) == precision(sup(r)) == 512
+    @test inf(r) == sup(r) == setprecision(() -> -v, BigFloat, 512)
 end
 
 @testset "addition" begin

@@ -88,6 +88,14 @@ _finitemin(::Type{Rational{BigInt}}) =
 _finitemax(::Type{Rational{BigInt}}) =
     throw(ArgumentError("cannot compute the midpoint of unbounded intervals with `Rational{BigInt}` bounds; there is no largest finite `Rational{BigInt}`"))
 
+_midpoint(lo, hi, β) = β * (hi + lo * (1/β - 1))
+
+function _midpoint(lo::BigFloat, hi::BigFloat, β::BigFloat)
+    β = BigFloat(β; precision = max(precision(lo), precision(hi), precision(β)))
+    γ = _fround(-, _fround(/, one(β), β, RoundNearest), one(β), RoundNearest)
+    return _fround(*, β, _fround(+, hi, _fround(*, lo, γ, RoundNearest), RoundNearest), RoundNearest)
+end
+
 """
     mid(x, α = 0.5)
 
@@ -119,7 +127,7 @@ function mid(x::BareInterval{T}, α = 0.5) where {T<:AbstractFloat}
             return prevfloat(hi)
         end
         β = convert(T, α)
-        midpoint = β * (hi + lo * (1/β - 1)) # exactly 0.5 * (hi + lo) for β = 0.5
+        midpoint = _midpoint(lo, hi, β) # exactly 0.5 * (hi + lo) for β = 0.5
         midpoint = ifelse(isfinite(midpoint), midpoint, (1 - β) * lo + β * hi)
         midpoint = ifelse(midpoint < lo, lo, midpoint)
         midpoint = ifelse(midpoint > hi, hi, midpoint)
@@ -267,7 +275,7 @@ See also: [`mig`](@ref).
 """
 function mag(x::BareInterval{T}) where {T<:AbstractFloat}
     isempty_interval(x) && return convert(T, NaN)
-    return max(abs(inf(x)), abs(sup(x)))
+    return max(_fexact(abs, inf(x)), _fexact(abs, sup(x)))
 end
 function mag(x::BareInterval{<:Rational})
     isempty_interval(x) && return throw(ArgumentError("cannot compute the magnitude of empty intervals; cannot return a `Rational` NaN"))
@@ -302,7 +310,7 @@ See also: [`mag`](@ref).
 function mig(x::BareInterval{T}) where {T<:NumTypes}
     isempty_interval(x) && return convert(T, NaN)
     in_interval(0, x) && return zero(T)
-    return min(abs(inf(x)), abs(sup(x)))
+    return min(_fexact(abs, inf(x)), _fexact(abs, sup(x)))
 end
 function mig(x::BareInterval{T}) where {T<:Rational}
     isempty_interval(x) && return throw(ArgumentError("cannot compute the mignitude of empty intervals; cannot return a `Rational` NaN"))

@@ -104,7 +104,7 @@ end
 # irrationals not supported by MPFR, use their exact formula ℯ = exp(1), φ = (1+sqrt(5))/2.
 # The rounding mode is fixed to `:correct` rather than taken from `default_rounding()`:
 # the enclosure of a constant must be rigorous whatever the configuration, and the
-# generated `bareinterval(::Type{T}, ::AbstractIrrational)` bakes the result in at its
+# generated `bareinterval(::Type{T}, ::Irrational)` bakes the result in at its
 # first generation, which method invalidation does not track.
 _round(::Type{T}, ::Irrational{:ℯ}, r::RoundingMode) where {T<:NumTypes} =
     __round(T, _fround(exp, IntervalRounding{:correct}(), BigFloat(1; precision = precision(float(T))), r), r)
