@@ -17,31 +17,41 @@ _fround(f::Function, x, r)    = _fround(f, default_rounding(), x, r)
 
 # exact operations
 
-_fexact(f::Function, x, args...) = f(x, args...)
-
 for (f, mpfr_f) ∈ ((:-, :mpfr_neg), (:abs, :mpfr_abs), (:floor, :mpfr_rint_floor), (:ceil, :mpfr_rint_ceil), (:trunc, :mpfr_rint_trunc))
-    @eval function _fexact(::typeof($f), x::BigFloat)
-        z = BigFloat(; precision = precision(x))
-        @ccall Base.MPFR.libmpfr.$mpfr_f(
-            z::Ref{BigFloat},
-            x::Ref{BigFloat},
-            Base.MPFR.MPFRRoundNearest::Base.MPFR.MPFRRoundingMode
-        )::Int32
-        return z
+    @eval begin
+        _fexact(::typeof($f), x) = $f(x)
+
+        function _fexact(::typeof($f), x::BigFloat)
+            z = BigFloat(; precision = precision(x))
+            @ccall Base.MPFR.libmpfr.$mpfr_f(
+                z::Ref{BigFloat},
+                x::Ref{BigFloat},
+                Base.MPFR.MPFRRoundNearest::Base.MPFR.MPFRRoundingMode
+            )::Int32
+            return z
+        end
     end
 end
 
 for (R, mpfr_f) ∈ ((:RoundNearest, :mpfr_rint_roundeven), (:RoundNearestTiesAway, :mpfr_rint_round))
-    @eval function _fexact(::typeof(round), x::BigFloat, ::typeof($R))
-        z = BigFloat(; precision = precision(x))
-        @ccall Base.MPFR.libmpfr.$mpfr_f(
-            z::Ref{BigFloat},
-            x::Ref{BigFloat},
-            Base.MPFR.MPFRRoundNearest::Base.MPFR.MPFRRoundingMode
-        )::Int32
-        return z
+    @eval begin
+        _fexact(::typeof(round), x, r::typeof($R)) = round(x, r)
+
+        function _fexact(::typeof(round), x::BigFloat, ::typeof($R))
+            z = BigFloat(; precision = precision(x))
+            @ccall Base.MPFR.libmpfr.$mpfr_f(
+                z::Ref{BigFloat},
+                x::Ref{BigFloat},
+                Base.MPFR.MPFRRoundNearest::Base.MPFR.MPFRRoundingMode
+            )::Int32
+            return z
+        end
     end
 end
+
+_fexact(::typeof(ldexp), x::AbstractFloat, n::Integer) = ldexp(x, n)
+
+_fexact(::typeof(ldexp), x::Rational, n::Integer) = x * (2//1)^n
 
 function _fexact(::typeof(ldexp), x::BigFloat, n::Integer)
     z = BigFloat(; precision = precision(x))

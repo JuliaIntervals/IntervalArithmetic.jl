@@ -33,12 +33,12 @@ end
 
 _quadrant(::typeof(ceil), x::AbstractFloat) = iszero(x) ? -1 : ceil(BigInt, sup(_halfpi_ratio(x))) - 1
 
-_quadrantpi(::typeof(floor), x::T) where {T<:Union{Float16,Float32,Float64}} =
-    abs(x) ≤ maxintfloat(T) ? floor(Int64, 2x) : floor(BigInt, _fexact(ldexp, BigFloat(x; precision = precision(x)), 1))
+# `sinpi` and `cospi` only pass the bounds of non-thin intervals of width less than 2,
+# so `2x` is exact and fits in `Int64` for `Float16`, `Float32` and `Float64`
+_quadrantpi(::typeof(floor), x::Union{Float16,Float32,Float64}) = floor(Int64, 2x)
 _quadrantpi(::typeof(floor), x::AbstractFloat) = floor(BigInt, _fexact(ldexp, BigFloat(x; precision = precision(x)), 1))
 
-_quadrantpi(::typeof(ceil), x::T) where {T<:Union{Float16,Float32,Float64}} =
-    abs(x) ≤ maxintfloat(T) ? ceil(Int64, 2x) - 1 : ceil(BigInt, _fexact(ldexp, BigFloat(x; precision = precision(x)), 1)) - 1
+_quadrantpi(::typeof(ceil), x::Union{Float16,Float32,Float64}) = ceil(Int64, 2x) - 1
 _quadrantpi(::typeof(ceil), x::AbstractFloat) = ceil(BigInt, _fexact(ldexp, BigFloat(x; precision = precision(x)), 1)) - 1
 
 # quadrant of lo, and number (at most 4) of multiples of π/2 (or 1/2) strictly inside (lo, hi)
@@ -239,9 +239,10 @@ end
 Base.cot(x::BareInterval{<:Rational}) = cot(float(x))
 
 function Base.cot(x::Interval)
-    @inline r = cot(bareinterval(x))
+    bx = bareinterval(x)
+    r = cot(bx)
     d = min(decoration(x), decoration(r))
-    d = min(d, ifelse(isbounded(r), d, trv))
+    d = min(d, ifelse(in_interval(0, bx) | isentire_interval(r), trv, d))
     return _unsafe_interval(r, d, isguaranteed(x))
 end
 
@@ -267,9 +268,9 @@ end
 Base.sec(x::BareInterval{<:Rational}) = sec(float(x))
 
 function Base.sec(x::Interval)
-    @inline r = sec(bareinterval(x))
+    r = sec(bareinterval(x))
     d = min(decoration(x), decoration(r))
-    d = min(d, ifelse(isbounded(r), d, trv))
+    d = min(d, ifelse(isentire_interval(r), trv, d))
     return _unsafe_interval(r, d, isguaranteed(x))
 end
 
@@ -297,9 +298,10 @@ end
 Base.csc(x::BareInterval{<:Rational}) = csc(float(x))
 
 function Base.csc(x::Interval)
-    @inline r = csc(bareinterval(x))
+    bx = bareinterval(x)
+    r = csc(bx)
     d = min(decoration(x), decoration(r))
-    d = min(d, ifelse(isbounded(r), d, trv))
+    d = min(d, ifelse(in_interval(0, bx) | isentire_interval(r), trv, d))
     return _unsafe_interval(r, d, isguaranteed(x))
 end
 
