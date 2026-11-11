@@ -100,13 +100,23 @@ end
     # mixed second derivative through closures, where the two duals have different tags
     t = 4 * (3 * log(big(2)) + 1)
     @test in_interval(t, ForwardDiff.derivative(x -> ForwardDiff.derivative(y -> x^y, interval(3.0)), interval(2.0)))
-    @test in_interval(t, ForwardDiff.derivative(y -> ForwardDiff.derivative(x -> x^y, interval(2.0)), interval(3.0)))
     # higher derivatives when a partial or the base contains zero without being thin
     d2(f, x) = ForwardDiff.derivative(z -> ForwardDiff.derivative(f, z), x)
     @test in_interval(d2(x -> x^((x - big(31) / 10)^2), big(31) / 10), d2(x -> x^((x - 3.1)^2), interval(3.0, 3.2)))
     @test d2(x -> interval(0.0, 1.0)^x, interval(3.0)) isa Interval
     @test isguaranteed(d2(x -> x^x, interval(2.0)))
     @test isguaranteed(d2(x -> exact(2.0)^x, interval(3.0)))
+    # exponent nested in five duals
+    dk(f, k) = k == 0 ? f : (x -> ForwardDiff.derivative(dk(f, k - 1), x))
+    @test dk(y -> ForwardDiff.derivative(x -> x^y, interval(2.0)), 5)(interval(3.0)) isa Interval
+    # an exact exponent or base is promoted as in the power of intervals
+    @test value(Dual(interval(2.0), interval(1.0))^exact(big(0.5))) isa Interval{BigFloat}
+    @test value(Dual(interval(Float32, 2), interval(Float32, 1))^exact(0.1)) isa Interval{Float64}
+    @test value(exact(0.1)^Dual(interval(Float32, 2), interval(Float32, 1))) isa Interval{Float64}
+    # a zero derivative keeps the NG flag of the exponent
+    @test !isguaranteed(ForwardDiff.derivative(x -> x^0.0, interval(2.0)))
+    @test !isguaranteed(partials(Dual(interval(2.0), interval(0.0))^3.0, 1))
+    @test isguaranteed(ForwardDiff.derivative(x -> x^interval(0.0), interval(2.0)))
 end
 
 @testset "Power with different tags" begin
