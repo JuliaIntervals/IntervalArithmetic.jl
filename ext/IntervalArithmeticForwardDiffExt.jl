@@ -69,14 +69,16 @@ function Base.:(^)(x::Dual{Tx,<:NestedInterval}, y::Interval) where {Tx}
     if isthinzero(y) || all(_isthinzero, values(partials(x)))
         return Dual{Tx}(expv, zero(partials(x)))
     else
-        return Dual{Tx}(expv, partials(x) * y * v^(y - interval(1)))
+        return Dual{Tx}(expv, partials(x) * y * v^(y - one(y)))
     end
 end
 
 # A `y::Real` method would be ambiguous with ForwardDiff's generated `^`
 # methods and its `Dual^Dual` tag methods, so define the relevant concrete
 # exponent types instead.
-for R in (:Integer, :Rational, :AbstractFloat, :Irrational)
+
+# `y - 1` is exact for integers and rationals
+for R in (:Integer, :Rational)
     @eval function Base.:(^)(x::Dual{Tx,<:NestedInterval}, y::$R) where {Tx}
         v = value(x)
         expv = v^y
@@ -87,6 +89,16 @@ for R in (:Integer, :Rational, :AbstractFloat, :Irrational)
         end
     end
 end
+
+# `y - 1` is not exact for floats and irrationals: convert `y` to the interval
+# it is promoted to in `value(x)^y`, and use the rule for interval exponents
+for R in (:AbstractFloat, :Irrational)
+    @eval Base.:(^)(x::Dual{Tx,<:NestedInterval}, y::$R) where {Tx} =
+        x^convert(promote_type(_intervaltype(x), typeof(y)), y)
+end
+
+_intervaltype(x::Interval) = typeof(x)
+_intervaltype(x::Dual) = _intervaltype(value(x))
 
 function Base.:(^)(x::Interval, y::Dual{Ty,<:Interval}) where {Ty}
     v = value(y)

@@ -71,6 +71,25 @@ end
 
     d = ForwardDiff.derivative(x -> interval(2.0)^x, interval(3.0))
     @test in_interval(8 * log(2), d)
+
+    d = ForwardDiff.derivative(x -> x^1e-20, interval(2.0))
+    @test in_interval(setprecision(() -> big(1e-20) * big(2.0)^(big(1e-20) - 1), BigFloat, 4000), d)
+    t = setprecision(() -> big(1) / 3, BigFloat, 512)
+    d = ForwardDiff.derivative(x -> x^t, setprecision(() -> interval(BigFloat, 2), BigFloat, 512))
+    @test in_interval(setprecision(() -> BigFloat(t; precision = 4000) * big(2.0)^(BigFloat(t; precision = 4000) - 1), BigFloat, 4000), d)
+    @test isequal_interval(ForwardDiff.derivative(x -> x^3, interval(-2.0)), interval(12.0))
+    @test isequal_interval(ForwardDiff.derivative(x -> x^2.0, interval(-2.0)), interval(-4.0))
+    for T ∈ (Float16, Float32)
+        x = Dual(interval(T, 2), interval(T, 1))
+        @test x^T(0.5) isa Dual{Nothing,Interval{T},1}
+        @test x^π isa Dual{Nothing,Interval{T},1}
+        @test in_interval(setprecision(() -> big(T(0.1)) * big(2.0)^(big(T(0.1)) - 1), BigFloat, 4000), partials(x^T(0.1))[1])
+    end
+    @test ForwardDiff.gradient(v -> v[1]^0.5f0, [interval(Float32, 2)]) isa Vector{Interval{Float32}}
+    @test ForwardDiff.derivative(x -> ForwardDiff.derivative(z -> z^0.5f0, x), interval(Float32, 2)) isa Interval{Float32}
+    @test Dual(interval(Float32, 2), interval(Float32, 1))^interval(Float32, 0.5) isa Dual{Nothing,Interval{Float32},1}
+    d = ForwardDiff.derivative(x -> ForwardDiff.derivative(z -> z^1e-20, x), interval(2.0))
+    @test in_interval(setprecision(() -> big(1e-20) * (big(1e-20) - 1) * big(2.0)^(big(1e-20) - 2), BigFloat, 4000), d)
     @test isequal_interval(ForwardDiff.derivative(x -> interval(0.0)^x, interval(3.0)), interval(0.0))
 end
 

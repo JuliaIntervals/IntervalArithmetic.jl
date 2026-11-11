@@ -52,6 +52,10 @@ end
         @test issubset_interval(cosh(interval(BigFloat, lo_hi...)), cosh(interval(lo_hi...)))
     end
 
+    a = setprecision(() -> -(100 + big(2.0)^-251), BigFloat, 512)
+    x = setprecision(() -> interval(BigFloat, a), BigFloat, 512)
+    @test in_interval(setprecision(() -> cosh(BigFloat(a; precision = 4000)), BigFloat, 4000), cosh(x))
+
     z = complex(interval(0.3), interval(0.4))
     @test isequal_interval(cosh(z), (exp(z) + exp(-z)) / interval(Float64, 2))
 end
