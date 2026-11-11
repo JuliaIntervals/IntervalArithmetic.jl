@@ -49,17 +49,19 @@ _isthinzero(d::Dual) = _isthinzero(value(d)) && all(_isthinzero, partials(d))
 _interval(x::Interval) = x
 _interval(d::Dual) = _interval(value(d))
 
+# `y` as the interval it is promoted to in an operation with `x`
+_promote(x, y) = convert(promote_type(typeof(_interval(x)), typeof(y)), y)
+
 # enclosure of `y - 1`, where `x` is the base
-_decrement(x, y::Union{NestedInterval,Integer,Rational}) = y - exact(1)
-_decrement(x, y::Union{AbstractFloat,Irrational}) = # `y` as the interval it is promoted to in `x^y`
-    _decrement(x, convert(promote_type(typeof(_interval(x)), typeof(y)), y))
+_decrement(x, y::Union{Interval,Dual,Integer,Rational}) = y - exact(1)
+_decrement(x, y::Union{AbstractFloat,Irrational}) = _promote(x, y) - exact(1)
 
 # `x^y` where only `x` carries the partials
 function _pow_x(x::Dual{Tx}, y) where {Tx}
     v = value(x)
     expv = v^y
     if _isthinzero(y) || all(_isthinzero, values(partials(x)))
-        return Dual{Tx}(expv, zero(partials(x)))
+        return Dual{Tx}(expv, zero(partials(x)) * y) # `y` passes on its NG flag
     else
         return Dual{Tx}(expv, partials(x) * y * v^_decrement(x, y))
     end
@@ -102,9 +104,9 @@ end
 
 Base.:(^)(x::Interval, y::Dual{Ty,<:NestedInterval}) where {Ty} = _pow_y(x, y)
 
-Base.:(^)(x::Dual{<:Any,<:NestedInterval}, y::ExactReal) = x^convert(typeof(_interval(x)), y)
+Base.:(^)(x::Dual{<:Any,<:NestedInterval}, y::ExactReal) = x^_promote(x, y)
 
-Base.:(^)(x::ExactReal, y::Dual{<:Any,<:NestedInterval}) = convert(typeof(_interval(y)), x)^y
+Base.:(^)(x::ExactReal, y::Dual{<:Any,<:NestedInterval}) = _promote(y, x)^y
 
 # Piecewise functions
 
