@@ -101,6 +101,8 @@ end
 
     @test isequal_interval(round(bareinterval(-1//2, 3//2)), bareinterval(0//1, 2//1))
     @test numtype(round(bareinterval(-1//2, 3//2))) === Rational{Int}
+    @test isequal_interval(round(interval(1//2, 3//2)), interval(0//1, 2//1))
+    @test isequal_interval(round(interval(1//2, 3//2), RoundNearestTiesAway), interval(1//1, 2//1))
 
     @test decoration(round(interval(0.5, 0.7))) == def
     @test decoration(round(interval(-1.5, 2.5))) == def

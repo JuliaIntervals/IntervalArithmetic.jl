@@ -198,6 +198,10 @@ end
     @test !(exact(true) / exact(big(3)) isa ExactReal)
     @test !(exact(big(6)) / exact(big(3)) isa ExactReal)
     @test !(exact(big(2)^300 + 1) / exact(1) isa ExactReal)
+    @test exact(6) / exact(0) === Inf
+    @test exact(6) / exact(false) === Inf
+    @test isnan(exact(0) / exact(0)) & !(exact(0) / exact(0) isa ExactReal)
+    @test isnan(exact(false) / exact(false)) & !(exact(false) / exact(false) isa ExactReal)
 end
 
 @testset "Interaction with intervals" begin

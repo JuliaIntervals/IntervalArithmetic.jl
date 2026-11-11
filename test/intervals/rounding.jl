@@ -21,6 +21,9 @@ end
     @test _fexact(floor, -1.5) === -2.0
     @test _fexact(round, 2.5, RoundNearest) === 2.0
     @test _fexact(ldexp, 3.0, 1) === 6.0
+    @test _fexact(ldexp, 3//4, 1) === 3//2
+    @test_throws MethodError _fexact(sqrt, big(2.0))
+    @test_throws MethodError _fexact(round, big(2.5), RoundUp)
     v = setprecision(() -> 1 + big(2.0)^-400, BigFloat, 512)
     for (f, args, t) ∈ ((-, (), setprecision(() -> -v, BigFloat, 512)), (abs, (), v), (floor, (), 1), (ceil, (), 2), (trunc, (), 1), (round, (RoundNearest,), 1),
                         (round, (RoundNearestTiesAway,), 1), (ldexp, (1,), setprecision(() -> 2v, BigFloat, 512)))

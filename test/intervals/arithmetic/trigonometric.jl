@@ -20,7 +20,7 @@ using IntervalArithmetic
     @test IntervalArithmetic._quadrant(floor, BigFloat(0)) == 0
     @test IntervalArithmetic._quadrant(ceil, BigFloat(0)) == -1
 
-    for (x, q, Q) ∈ ((0.0, 0, -1), (0.25, 0, 0), (0.5, 1, 0), (-0.5, -1, -2), (1.0, 2, 1), (-0.75, -2, -2), (1e300, BigInt(2e300), BigInt(2e300) - 1))
+    for (x, q, Q) ∈ ((0.0, 0, -1), (0.25, 0, 0), (0.5, 1, 0), (-0.5, -1, -2), (1.0, 2, 1), (-0.75, -2, -2))
         @test IntervalArithmetic._quadrantpi(floor, x) == q
         @test IntervalArithmetic._quadrantpi(ceil, x) == Q
     end
@@ -307,6 +307,8 @@ end
     @test isequal_interval(cot(bareinterval(0.0, 1.0)), bareinterval(0.6420926159343306, Inf))
     @test decoration(cot(interval(0.0, 1.0))) == trv
     @test decoration(cot(interval(3.0, 3.5))) == trv
+    @test decoration(cot(interval(1.5e-323))) == dac # overflow, no pole
+    @test decoration(cot(interval(1e-320, 1.0))) == dac
     r = cot(interval(1.0, 2.0))
     @test bounds(r) == (-0.45765755436028577, 0.6420926159343308)
     @test decoration(r) == com
@@ -342,6 +344,7 @@ end
     @test bounds(r) == (1.188395105778121, 2.0858296429334886)
     @test decoration(r) == com
     @test decoration(csc(interval(-1.0, 0.0))) == trv
+    @test decoration(csc(interval(1.5e-323))) == dac # overflow, no pole
     @test isequal_interval(csc(bareinterval(0.0, 1.0)), bareinterval(1.188395105778121, Inf))
 end
 

@@ -208,6 +208,7 @@ Base.:/(x::ExactReal{<:Integer}, y::ExactReal{<:Integer}) = _exact_div(x, y)
 function _exact_div(x::ExactReal{T}, y::ExactReal{S}) where {T<:Integer,S<:Integer}
     r = x.value / y.value
     r isa BigFloat && return r # the exactness of a `BigFloat` quotient is not checked
+    iszero(y.value) && return r # a division by zero is not exact
     big(x.value) // big(y.value) == r || return r # `big` prevents overflows
     return exact(r)
 end
