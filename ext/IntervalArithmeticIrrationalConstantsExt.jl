@@ -9,9 +9,9 @@ import IrrationalConstants as IC
 const _INTERVAL_IRRATIONAL_FUNCS = (:+, :-, :*, :/, :sqrt, :log, :inv)
 
 _intervalize(x) = x
-_intervalize(x::Number) = :(IA.bareinterval(BigFloat, $x))
+_intervalize(x::Number) = :(IA.bareinterval(float(T), $x))
 _intervalize(x::Symbol) =
-    x in _INTERVAL_IRRATIONAL_FUNCS ? x : :(IA.bareinterval(BigFloat, $x))
+    x in _INTERVAL_IRRATIONAL_FUNCS ? x : :(IA.bareinterval(float(T), $x))
 function _intervalize(ex::Expr)
     ex.head === :call || return ex
     return Expr(:call, _intervalize(ex.args[1]), map(_intervalize, ex.args[2:end])...)
