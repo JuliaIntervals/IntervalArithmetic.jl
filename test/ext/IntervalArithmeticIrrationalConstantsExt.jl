@@ -22,7 +22,7 @@ end
         x = interval(c)
         @test x isa Interval{Float64}
         @test inf(x) <= BigFloat(c; precision = 256) <= sup(x)
-        @test sup(x) == nextfloat(inf(x))
+        @test sup(x) <= nextfloat(inf(x), 2) # the formula is evaluated at the precision of the bound type
         @test decoration(x) === com
         @test isguaranteed(x)
         b = bareinterval(BigFloat, c)
@@ -49,7 +49,7 @@ end
         for T ∈ (Float16, Float32, Float64, BigFloat)
             @test in_interval(irr, interval(T, irr))
             if T !== BigFloat
-                @test nextfloat(inf(interval(T, irr))) == sup(interval(T, irr))
+                @test sup(interval(T, irr)) <= nextfloat(inf(interval(T, irr)), 3)
             end
         end
 
@@ -62,6 +62,12 @@ end
         for T ∈ InteractiveUtils.subtypes(Unsigned)
             @test in_interval(irr, interval(Rational{T}, irr))
         end
+    end
+end
+
+@testset "Independent of the BigFloat precision" begin
+    for c ∈ IC_CONSTANTS, T ∈ (Float16, Float32, Float64)
+        @test isequal_interval(setprecision(() -> interval(T, c), BigFloat, 20), interval(T, c))
     end
 end
 
@@ -91,16 +97,16 @@ end
 
 @testset "_intervalize" begin
     ext = Base.get_extension(IntervalArithmetic, :IntervalArithmeticIrrationalConstantsExt)
-    @test ext._intervalize(2) == :(IA.bareinterval(BigFloat, 2))
+    @test ext._intervalize(2) == :(IA.bareinterval(float(T), 2))
     for op ∈ (:+, :-, :*, :/, :sqrt, :log, :inv)
         @test ext._intervalize(op) === op
     end
-    @test ext._intervalize(:π) == :(IA.bareinterval(BigFloat, π))
+    @test ext._intervalize(:π) == :(IA.bareinterval(float(T), π))
     ex = ext._intervalize(:(2 * π))
     @test ex.head === :call
     @test ex.args[1] === :*
-    @test ex.args[2] == :(IA.bareinterval(BigFloat, 2))
-    @test ex.args[3] == :(IA.bareinterval(BigFloat, π))
+    @test ex.args[2] == :(IA.bareinterval(float(T), 2))
+    @test ex.args[3] == :(IA.bareinterval(float(T), π))
     @test ext._intervalize(:(a = b)) == :(a = b)
     @test ext._intervalize("str") == "str"
     @test ext._intervalize(nothing) === nothing
