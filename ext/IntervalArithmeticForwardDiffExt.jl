@@ -28,9 +28,11 @@ Base.:(==)(x::Dual, y::Interval) = value(x) == y
 Base.:<(x::Interval, y::Dual) = x < value(y)
 Base.:<(x::Dual, y::Interval) = value(x) < y
 
-# ForwardDiff's `^` methods use `iszero(partials(x))`, which is undecidable for
-# non-thin intervals. Use a recursive thin-zero test instead. `NestedInterval`
-# supports intervals nested in up to four `Dual` layers.
+# ForwardDiff's rules for `^` use `iszero(partials(x))`, `iszero(x)` and `y > 0`,
+# which are undecidable for non-thin intervals, and they compute `y - 1` in the
+# type of `y`. The rules below are ForwardDiff's, with thin-zero tests and an
+# enclosure of `y - 1`. `NestedInterval` supports intervals nested in up to four
+# `Dual` layers.
 const NestedInterval = let
     U = Interval
     for _ in 1:4
@@ -38,101 +40,71 @@ const NestedInterval = let
     end
     U
 end
+
 _isthinzero(x::Interval) = isthinzero(x)
 _isthinzero(x::Real) = iszero(x)
 _isthinzero(d::Dual) = _isthinzero(value(d)) && all(_isthinzero, partials(d))
 
-function Base.:(^)(x::Dual{Txy,<:Interval}, y::Dual{Txy,<:Interval}) where {Txy}
-    vx, vy = value(x), value(y)
-    expv = vx^vy
-    powval = vy * vx^(vy - interval(1))
-    if all(isthinzero, values(partials(y)))
-        return Dual{Txy}(expv, ForwardDiff._mul_partials(partials(x), partials(y), powval, one(expv)))
-    elseif isthinzero(vx) && inf(vy) > 0
-        return Dual{Txy}(expv, ForwardDiff._mul_partials(partials(x), partials(y), powval, zero(vx)))
-    else
-        return Dual{Txy}(expv, ForwardDiff._mul_partials(partials(x), partials(y), powval, expv * log(vx)))
-    end
-end
+# interval at the core of nested duals
+_interval(x::Interval) = x
+_interval(d::Dual) = _interval(value(d))
 
-function Base.:(^)(x::Dual{Tx,<:Interval}, y::Dual{Ty,<:Interval}) where {Tx,Ty}
-    if Ty ≺ Tx
-        return x^value(y)
-    else
-        return value(x)^y
-    end
-end
+# enclosure of `y - 1`, where `x` is the base
+_decrement(x, y::Union{NestedInterval,Integer,Rational}) = y - exact(1)
+_decrement(x, y::Union{AbstractFloat,Irrational}) = # `y` as the interval it is promoted to in `x^y`
+    _decrement(x, convert(promote_type(typeof(_interval(x)), typeof(y)), y))
 
-function Base.:(^)(x::Dual{Tx,<:NestedInterval}, y::Interval) where {Tx}
+# `x^y` where only `x` carries the partials
+function _pow_x(x::Dual{Tx}, y) where {Tx}
     v = value(x)
     expv = v^y
-    if isthinzero(y) || all(_isthinzero, values(partials(x)))
+    if _isthinzero(y) || all(_isthinzero, values(partials(x)))
         return Dual{Tx}(expv, zero(partials(x)))
     else
-        return Dual{Tx}(expv, partials(x) * y * v^(y - one(y)))
+        return Dual{Tx}(expv, partials(x) * y * v^_decrement(x, y))
     end
 end
+
+# `x^y` where only `y` carries the partials
+function _pow_y(x, y::Dual{Ty}) where {Ty}
+    v = value(y)
+    expv = x^v
+    if _isthinzero(x) && inf(_interval(v)) > 0
+        return Dual{Ty}(expv, zero(expv) * partials(y))
+    else
+        return Dual{Ty}(expv, expv * log(x) * partials(y))
+    end
+end
+
+function Base.:(^)(x::Dual{Txy,<:NestedInterval}, y::Dual{Txy,<:NestedInterval}) where {Txy}
+    vx, vy = value(x), value(y)
+    expv = vx^vy
+    powval = vy * vx^_decrement(vx, vy)
+    if all(_isthinzero, values(partials(y)))
+        logval = one(expv)
+    elseif _isthinzero(vx) && inf(_interval(vy)) > 0
+        logval = zero(vx)
+    else
+        logval = expv * log(vx)
+    end
+    return Dual{Txy}(expv, ForwardDiff._mul_partials(partials(x), partials(y), powval, logval))
+end
+
+Base.:(^)(x::Dual{Tx,<:NestedInterval}, y::Dual{Ty,<:NestedInterval}) where {Tx,Ty} =
+    Ty ≺ Tx ? _pow_x(x, y) : _pow_y(x, y)
 
 # A `y::Real` method would be ambiguous with ForwardDiff's generated `^`
 # methods and its `Dual^Dual` tag methods, so define the relevant concrete
 # exponent types instead.
-
-# `y - 1` is exact for integers and rationals
-for R in (:Integer, :Rational)
-    @eval function Base.:(^)(x::Dual{Tx,<:NestedInterval}, y::$R) where {Tx}
-        v = value(x)
-        expv = v^y
-        if iszero(y) || all(_isthinzero, values(partials(x)))
-            return Dual{Tx}(expv, zero(partials(x)))
-        else
-            return Dual{Tx}(expv, partials(x) * y * v^(y - 1))
-        end
-    end
+for R in (:Interval, :Integer, :Rational, :AbstractFloat, :Irrational)
+    @eval Base.:(^)(x::Dual{Tx,<:NestedInterval}, y::$R) where {Tx} = _pow_x(x, y)
 end
 
-# `y - 1` is not exact for floats and irrationals: convert `y` to the interval
-# it is promoted to in `value(x)^y`, and use the rule for interval exponents
-for R in (:AbstractFloat, :Irrational)
-    @eval Base.:(^)(x::Dual{Tx,<:NestedInterval}, y::$R) where {Tx} =
-        x^convert(promote_type(_intervaltype(x), typeof(y)), y)
-end
+Base.:(^)(x::Interval, y::Dual{Ty,<:NestedInterval}) where {Ty} = _pow_y(x, y)
 
-_intervaltype(x::Interval) = typeof(x)
-_intervaltype(x::Dual) = _intervaltype(value(x))
+Base.:(^)(x::Dual{<:Any,<:NestedInterval}, y::ExactReal) = x^convert(typeof(_interval(x)), y)
 
-function Base.:(^)(x::Interval, y::Dual{Ty,<:Interval}) where {Ty}
-    v = value(y)
-    expv = x^v
-    if isthinzero(x) && inf(v) > 0
-        return Dual{Ty}(expv, zero(expv) * partials(y))
-    else
-        return Dual{Ty}(expv, expv * log(x) * partials(y))
-    end
-end
-
-Base.:(^)(x::Dual{<:Any,I}, y::ExactReal) where {I<:Interval} = x^convert(I, y)
-
-Base.:(^)(x::ExactReal, y::Dual{<:Any,I}) where {I<:Interval} = convert(I, x)^y
-
-function Base.:(^)(x::Dual{Tx}, y::ExactReal) where {Tx}
-    v = value(x)
-    expv = v^y
-    if iszero(y.value) || all(_isthinzero, values(partials(x)))
-        return Dual{Tx}(expv, zero(partials(x)))
-    else
-        return Dual{Tx}(expv, partials(x) * y * v^(y - 1))
-    end
-end
-
-function Base.:(^)(x::ExactReal, y::Dual{<:Ty}) where {Ty}
-    v = value(y)
-    expv = x^v
-    if iszero(x) && inf(v) > 0
-        return Dual{Ty}(expv, zero(expv) * partials(y))
-    else
-        return Dual{Ty}(expv, expv * log(x) * partials(y))
-    end
-end
+Base.:(^)(x::ExactReal, y::Dual{<:Any,<:NestedInterval}) = convert(typeof(_interval(y)), x)^y
 
 # Piecewise functions
 

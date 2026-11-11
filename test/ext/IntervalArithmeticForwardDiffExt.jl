@@ -88,9 +88,25 @@ end
     @test ForwardDiff.gradient(v -> v[1]^0.5f0, [interval(Float32, 2)]) isa Vector{Interval{Float32}}
     @test ForwardDiff.derivative(x -> ForwardDiff.derivative(z -> z^0.5f0, x), interval(Float32, 2)) isa Interval{Float32}
     @test Dual(interval(Float32, 2), interval(Float32, 1))^interval(Float32, 0.5) isa Dual{Nothing,Interval{Float32},1}
+    @test isequal_interval(value(Dual(interval(1e300), interval(1.0))^big(2.0)), interval(1e300)^big(2.0))
+    @test value(Dual(interval(Float32, 2), interval(Float32, 1))^2.0) === interval(Float32, 2)^2.0
     d = ForwardDiff.derivative(x -> ForwardDiff.derivative(z -> z^1e-20, x), interval(2.0))
     @test in_interval(setprecision(() -> big(1e-20) * (big(1e-20) - 1) * big(2.0)^(big(1e-20) - 2), BigFloat, 4000), d)
+    d = ForwardDiff.derivative(x -> ForwardDiff.derivative(z -> z^exact(1e-20), x), interval(2.0))
+    @test in_interval(setprecision(() -> big(1e-20) * (big(1e-20) - 1) * big(2.0)^(big(1e-20) - 2), BigFloat, 4000), d)
+    @test isguaranteed(d)
     @test isequal_interval(ForwardDiff.derivative(x -> interval(0.0)^x, interval(3.0)), interval(0.0))
+
+    # mixed second derivative through closures, where the two duals have different tags
+    t = 4 * (3 * log(big(2)) + 1)
+    @test in_interval(t, ForwardDiff.derivative(x -> ForwardDiff.derivative(y -> x^y, interval(3.0)), interval(2.0)))
+    @test in_interval(t, ForwardDiff.derivative(y -> ForwardDiff.derivative(x -> x^y, interval(2.0)), interval(3.0)))
+    # higher derivatives when a partial or the base contains zero without being thin
+    d2(f, x) = ForwardDiff.derivative(z -> ForwardDiff.derivative(f, z), x)
+    @test in_interval(d2(x -> x^((x - big(31) / 10)^2), big(31) / 10), d2(x -> x^((x - 3.1)^2), interval(3.0, 3.2)))
+    @test d2(x -> interval(0.0, 1.0)^x, interval(3.0)) isa Interval
+    @test isguaranteed(d2(x -> x^x, interval(2.0)))
+    @test isguaranteed(d2(x -> exact(2.0)^x, interval(3.0)))
 end
 
 @testset "Power with different tags" begin
@@ -101,14 +117,15 @@ end
     y = Dual{TB}(interval(3.0), interval(1.0))
     z = x^y
     @test z isa Dual{TB}
-    @test isequal_interval(value(z), interval(8))
-    @test in_interval(8 * log(2), partials(z, 1))
+    @test isequal_interval(value(value(z)), interval(8))
+    @test in_interval(8 * log(2), value(partials(z, 1)))
     z = y^x
     @test z isa Dual{TB}
-    @test isequal_interval(value(z), interval(9)) & isequal_interval(partials(z, 1), interval(6))
-    # each cross-tag reduction treats the other variable as a constant
+    @test isequal_interval(value(value(z)), interval(9)) & isequal_interval(value(partials(z, 1)), interval(6))
+    # as in ForwardDiff, the dual with the lower tag is kept inside the result
     dd = ForwardDiff.derivative(y -> ForwardDiff.derivative(t -> t^y, interval(2.0)), interval(3.0))
-    @test isequal_interval(dd, interval(0))
+    @test in_interval(4 * (3 * log(big(2)) + 1), dd)
+    @test ForwardDiff.derivative(y -> ForwardDiff.derivative(t -> t^y, 2.0), 3.0) ≈ 4 * (3 * log(2) + 1)
 end
 
 @testset "Power and ExactReal" begin
