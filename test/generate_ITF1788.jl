@@ -22,7 +22,7 @@ function generate(filename::AbstractString)
             push!(testsets, "@testset \"$name\" begin\n" * join("\n    $t\n" for t ∈ tests) * "\nend\n")
             name = nothing
         elseif !isnothing(name) && !isempty(line) && !startswith(line, "//")
-            push!(tests, test(adapt(line)))
+            push!(tests, parse_test(adapt(line)))
         end
     end
     dest = joinpath(@__DIR__, "ITF1788_tests", replace(filename, ".itl" => ".jl"))
@@ -66,14 +66,14 @@ const FUNCTIONS = Dict(
 const EXTRA_ARGUMENT = Dict("sqr" => "2", "roundTiesToAway" => "RoundNearestTiesAway")
 
 # e.g. `add [1.0, 2.0] [1.0, 2.0] = [2.0, 4.0];`, `inf [nai] = NaN;` or `b-numsToInterval 2 1 = [empty] signal UndefinedOperation;`
-function test(line)
+function parse_test(line)
     fname, args, results, signal = match(r"^(\S+)\s+(.*?)\s*=\s*(.*?)(\s+signal\s+\w+)?\s*;$", line)
     name = replace(fname, r"^[bd]-" => "")
     T = startswith(fname, "d-") ? "Interval" : "BareInterval"
     if name == "textToInterval" # the argument is a string
         call = "parse($T{Float64}, $args)"
     else
-        args = map(value, eachmatch(TOKEN, replace(args, "infinity" => "Inf", "X" => "x")))
+        args = map(parse_value, eachmatch(TOKEN, replace(args, "infinity" => "Inf", "X" => "x")))
         if name == "numsToInterval"
             call = "$(lowercase(T))($(join(args, ',')))"
         else
@@ -82,7 +82,7 @@ function test(line)
         end
     end
     results = map(eachmatch(TOKEN, replace(results, "infinity" => "Inf", "X" => "x"))) do m
-        isnothing(m[1]) || return value(m)
+        isnothing(m[1]) || return parse_value(m)
         name == "overlap" && return "IntervalArithmetic.Overlap." * replace(m.match, r"[A-Z]" => c -> "_" * lowercase(c))
         return isnothing(tryparse(Int64, m.match)) ? m.match : m.match * ".0"
     end
@@ -97,7 +97,7 @@ end
 
 # an interval, possibly decorated, or any other value
 const TOKEN = r"\[([^\]]*)\](?:_(\w+))?|\S+"
-function value(m::RegexMatch)
+function parse_value(m::RegexMatch)
     isnothing(m[1]) && return m.match
     m[1] == "nai" && return "nai(Interval{Float64})"
     x = m[1] == "empty" ? "emptyinterval(BareInterval{Float64})" :
