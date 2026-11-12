@@ -524,6 +524,39 @@ end
     @test_throws DomainError convert(Interval{Float64}, complex(interval(1), interval(2)))
 end
 
+@testset "Rounding of rationals" begin
+    # numerator and denominator which are not representable as `Float64`
+    q = -2691471182270816692//5988537021250517473
+    x = interval(Float64, q)
+    @test (inf(x) < big(q) < sup(x)) & (sup(x) == nextfloat(inf(x)))
+    # negative value whose denominator does not fit in the precision
+    q = -1 // (big(2)^300 + 1)
+    x = interval(BigFloat, q)
+    @test (inf(x) < q < sup(x)) & (sup(x) == nextfloat(inf(x)))
+    # the global `BigFloat` precision does not affect the other bound types
+    setprecision(BigFloat, 32) do
+        @test bounds(interval(Float64, big(1)//1000)) == (0.0009999999999999998, 0.001)
+    end
+    @test bounds(interval(Float64, 1//2)) == (0.5, 0.5)
+    @test bounds(interval(Float32, 1//3)) === (0.3333333f0, 0.33333334f0)
+    # the result is of the bound type for every rounding mode
+    @test _round(Float64, 1//3, RoundNearest) === 1/3
+    @test _round(Float64, big(1) // big(3)^50, RoundNearest) === Float64(big(1) // big(3)^50)
+
+    # `Rational` bound types: exact if the value fits, otherwise the closest rationals around it
+    @test bounds(interval(Rational{Int8}, 22//7)) == (22//7, 22//7)
+    @test bounds(interval(Rational{Int8}, -128//1)) == (-128//1, -128//1)
+    @test bounds(interval(Rational{Int8}, 1//1000)) == (0//1, 1//127)
+    @test bounds(interval(Rational{Int8}, -1//1000)) == (-1//127, 0//1)
+    @test bounds(interval(Rational{Int8}, 355//113)) == (113//36, 22//7)
+    @test bounds(interval(Rational{Int8}, 1000//1)) == (127//1, 1//0)
+    @test bounds(interval(Rational{Int8}, -129//1)) == (-1//0, -128//1)
+    @test bounds(interval(Rational{Int8}, -1537//1527)) == (-128//127, -1//1)
+    @test_throws ArgumentError interval(Rational{UInt8}, -1//2)
+    @test bounds(interval(Rational{Int64}, big(10)^30 // 1)) == (typemax(Int64)//1, 1//0)
+    @test bounds(interval(Rational{BigInt}, 1//3)) == (1//3, 1//3)
+end
+
 @testset "atomic" begin
     x = atomic(Float64, 0.1)
     @test bounds(x) == (0.09999999999999999, 0.1)
@@ -542,6 +575,15 @@ end
     @test bounds(atomic(Rational{Int64}, 0.1)) == (1//10, 1//10)
     @test bounds(atomic(Float64, big"0.1")) == (0.09999999999999999, 0.1)
     @test isequal_interval(atomic(0.1), atomic(Float64, 0.1))
+    @test bounds(atomic(Float64, 1//3)) == (0.3333333333333333, 0.33333333333333337)
+    @test bounds(atomic(Rational{Int64}, 1e-30)) == (0//1, 1//typemax(Int64))
+    x = big(2.0)^10_000_000
+    @test isnai(@test_logs (:warn, r"exponent larger than 10\^6") atomic(BigFloat, x))
+    @test isnai(@test_logs (:warn, r"parsing error") atomic(Float64, NaN))
+    @test isnai(@test_logs (:warn, r"parsing error") atomic(Float64, Inf))
+    @test_throws ArgumentError atomic(Float64, NaN + 1im)
+    @test bounds(atomic(Float64, "1//3")) == bounds(parse(Interval{Float64}, string(1//3))) == (0.3333333333333333, 0.33333333333333337)
+    @test_throws ArgumentError atomic(Float64, 1 + 2im)
 end
 
 @testset "`@interval` macro" begin
