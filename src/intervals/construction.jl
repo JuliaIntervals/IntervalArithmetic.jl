@@ -115,9 +115,60 @@ function _round(::Type{T}, ::Irrational{:φ}, r::RoundingMode) where {T<:NumType
 end
 # floats
 __round(::Type{T}, a, r::RoundingMode) where {T<:AbstractFloat} = T(a, r)
+# Base's `T(::Rational, r)` can round the wrong way, so a directed division is used when the
+# numerator and the denominator are exact in `T`, and `_bigfloat` otherwise. Rounding twice in
+# the same direction is correct
+function __round(::Type{T}, a::Rational, r::Union{RoundingMode{:Down},RoundingMode{:Up}}) where {T<:AbstractFloat}
+    num, den = T(numerator(a)), T(denominator(a))
+    (num == numerator(a)) & (den == denominator(a)) &&
+        return T(_fround(/, IntervalRounding{:correct}(), num, den, r), r)
+    return T(_bigfloat(a, r; precision = precision(T)), r)
+end
+# `BigFloat(x, r; precision)` from JuliaLang/julia#64545, until every supported Julia has it
+function _bigfloat(x::Rational, r::RoundingMode; precision::Integer)
+    # the numerator is converted exactly, so the division is the only rounding
+    num = numerator(x)
+    n = BigFloat(num; precision = ndigits(num; base = 2))
+    d = BigInt(denominator(x))
+    z = BigFloat(; precision)
+    ccall((:mpfr_div_z, Base.MPFR.libmpfr), Int32,
+          (Ref{BigFloat}, Ref{BigFloat}, Ref{BigInt}, Base.MPFR.MPFRRoundingMode), z, n, d, r)
+    return z
+end
 # rationals
-__round(::Type{T}, a::Rational, ::RoundingMode{:Down}) where {S<:Integer,T<:Rational{S}} = T(a)
-__round(::Type{T}, a::Rational, ::RoundingMode{:Up}) where {S<:Integer,T<:Rational{S}} = T(a)
+__round(::Type{T}, a::Rational, r::RoundingMode{:Down}) where {S<:Integer,T<:Rational{S}} = __round_rational(T, a, r)
+__round(::Type{T}, a::Rational, r::RoundingMode{:Up}) where {S<:Integer,T<:Rational{S}} = __round_rational(T, a, r)
+__round_rational(::Type{Rational{BigInt}}, a::Rational, ::RoundingMode) = Rational{BigInt}(a)
+# Outward rounding to a rational whose numerator and denominator fit in `S`; it is exact if
+# `a` fits in `T`. Otherwise, the convergents and semiconvergents of the continued fraction
+# of `|a|` approach `|a|` alternately from below and from above: the last one which fits on
+# the wanted side is used, or zero or an infinity if there is none.
+function __round_rational(::Type{T}, a::Rational, r::RoundingMode) where {S<:Integer,T<:Rational{S}}
+    (typemin(S) ≤ numerator(a) ≤ typemax(S)) & (denominator(a) ≤ typemax(S)) && return T(a)
+    neg = a < 0
+    if neg & (S <: Unsigned)
+        r === RoundUp && return zero(T)
+        throw(ArgumentError("$a has no lower bound in $T"))
+    end
+    x = abs(Rational{BigInt}(a))
+    down = (r === RoundDown) != neg # is `|a|` rounded down?
+    P, Q = ifelse(neg, -big(typemin(S)), big(typemax(S))), big(typemax(S)) # largest numerator, denominator
+    bound = ifelse(down, zero(x), big(1) // big(0))
+    p₀, q₀, p, q = big(0), big(1), big(1), big(0) # the two previous convergents, 0/1 and 1/0
+    y, below = x, true
+    # the continued fraction of a rational is finite and its last convergent is `x`, which does
+    # not fit: hence the loop ends
+    while true
+        n = fld(numerator(y), denominator(y))
+        # largest `k ≤ n` such that the semiconvergent `(k p + p₀) / (k q + q₀)` fits
+        k = min(n, p == 0 ? n : (P - p₀) ÷ p, q == 0 ? n : (Q - q₀) ÷ q)
+        c = (k * p + p₀) // (k * q + q₀)
+        below == down && (bound = c)
+        k < n && return T(ifelse(neg, -bound, bound))
+        p₀, q₀, p, q = p, q, numerator(c), denominator(c)
+        y, below = inv(y - n), !below
+    end
+end
 __round(::Type{T}, a, r::RoundingMode{:Down}) where {S<:Integer,T<:Rational{S}} =
     rationalize(S, prevfloat(__float(S)(a, r)))
 __round(::Type{T}, a, r::RoundingMode{:Up}) where {S<:Integer,T<:Rational{S}} =
@@ -624,9 +675,9 @@ end
 """
     atomic(T<:Union{Rational,AbstractFloat}, x)
 
-Create an interval according to the IEEE Standard 1788-2015. The returned
-`Interval{T}` always contains the value `x`; this is semantically equivalent
-to `parse(Interval{T}, string(x))` if `x` is a `Number`.
+Create an interval according to the IEEE Standard 1788-2015. A float `x` is read
+as the number printed by `string(x)` and calls `parse(Interval{T}, string(x))`.
+Any other real `x` calls `interval(T, x)`.
 
 # Examples
 
@@ -649,13 +700,9 @@ true
 ```
 """
 atomic(::Type{T}, x::AbstractString) where {T<:NumTypes} = parse(Interval{T}, x)
-atomic(::Type{T}, x::Interval) where {T<:NumTypes} = interval(T, x)
-atomic(::Type{T}, x::Integer) where {T<:NumTypes} = interval(T, x)
-atomic(::Type{T}, x::AbstractIrrational) where {T<:NumTypes} = interval(T, x)
-function atomic(::Type{T}, x::Number) where {T<:NumTypes}
-    str = string(x)
-    return interval(T, _parse_num(T, str, RoundDown), _parse_num(T, str, RoundUp))
-end
+atomic(::Type{T}, x::AbstractFloat) where {T<:NumTypes} = atomic(T, string(x)) # warns and returns NaI for e.g. NaN
+atomic(::Type{T}, x::Real) where {T<:NumTypes} = interval(T, x)
+atomic(::Type{<:NumTypes}, x::Number) = throw(ArgumentError("$x is not a real number"))
 atomic(x) = atomic(default_numtype(), x)
 
 
