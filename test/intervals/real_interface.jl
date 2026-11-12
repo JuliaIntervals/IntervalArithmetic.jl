@@ -339,6 +339,22 @@ end
     @test_throws ArgumentError setdiff(x, 2, [1], 4.0, 5)
     @test_throws ArgumentError setdiff(x, interval(2.0), interval(3.0))
     @test_throws ArgumentError setdiff!(Set(), x)
+
+    # mixed arguments (#762)
+    x = interval(1.0, 2.0)
+    errmsg(f) = try f(); "" catch e; e isa ArgumentError ? sprint(showerror, e) : "" end
+    @test occursin("intersect_interval", errmsg(() -> intersect(x, 1.0)))
+    @test occursin("intersect_interval", errmsg(() -> intersect(x, [1.0])))
+    @test occursin("intersect_interval", errmsg(() -> intersect(x, x, 1.0)))
+    @test occursin("intersect_interval", errmsg(() -> intersect(Set([1.0]), x)))
+    @test occursin("intersect_interval", errmsg(() -> intersect(Set([x]), x)))
+    @test occursin("intersect_interval", errmsg(() -> intersect(1.0, x)))
+    @test occursin("intersect_interval", errmsg(() -> intersect([1.0], x)))
+    @test occursin("hull", errmsg(() -> union(x, 1.0)))
+    @test occursin("interiordiff", errmsg(() -> setdiff(x, 1.0)))
+    @test occursin("interiordiff", errmsg(() -> symdiff(x, 1.0)))
+    @test occursin("isequal_interval", errmsg(() -> issetequal(x, 1.0)))
+    @test occursin("isequal_interval", errmsg(() -> issetequal(x, Set([1.0]))))
 end
 
 @testset "Broadcasting" begin
