@@ -3,6 +3,9 @@ module IntervalArithmeticDiffRulesExt
 using IntervalArithmetic
 import DiffRules
 
+DiffRules._abs_deriv(x::BareInterval{T}) where {T<:IntervalArithmetic.NumTypes} =
+    ifelse(isthinzero(x), bareinterval(-one(T), one(T)), sign(x))
+
 function DiffRules._abs_deriv(x::Interval{T}) where {T<:IntervalArithmetic.NumTypes}
     r = ifelse(isthinzero(x), bareinterval(-one(T), one(T)), sign(bareinterval(x)))
     d = decoration(x)

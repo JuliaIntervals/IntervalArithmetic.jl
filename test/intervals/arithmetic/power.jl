@@ -77,6 +77,31 @@ end
     @test isequal_interval(x ^ 3, x)
 end
 
+@testset "BareInterval powers" begin
+    x = bareinterval(2, 3)
+    y = bareinterval(-1, 1)
+    n = 2 # a non-literal exponent bypasses `literal_pow`
+
+    @test isequal_interval(x^2, bareinterval(4, 9))
+    @test isequal_interval(x^n, bareinterval(4, 9))
+    @test isequal_interval(x^(2//1), bareinterval(4, 9))
+    @test isequal_interval(x^0, bareinterval(1, 1))
+    @test isequal_interval(y^2, bareinterval(0, 1))
+    @test isequal_interval(y^3, y)
+    @test isequal_interval(y^-1, entireinterval(BareInterval{Float64}))
+    @test isequal_interval(emptyinterval(BareInterval{Float64})^2, emptyinterval(BareInterval{Float64}))
+
+    for m ∈ (-3, -2, -1, 0, 1, 2, 3)
+        @test isequal_interval(x^m, bareinterval(interval(2, 3)^m))
+        @test isequal_interval(y^m, bareinterval(interval(-1, 1)^m))
+    end
+    @test isequal_interval(x^(1//3), bareinterval(interval(2, 3)^(1//3)))
+
+    r = bareinterval(Rational{Int64}, 1//2, 3//4)
+    @test r^2 isa BareInterval{Rational{Int64}}
+    @test isequal_interval(r^2, bareinterval(Rational{Int64}, 1//4, 9//16))
+end
+
 @testset "complex powers" begin
     z = complex(interval(1.0, 2.0), interval(1.0, 2.0))
     @test isequal_interval(z ^ complex(interval(2.0), interval(0.0)), complex(interval(-3.0, 3.0), interval(2.0, 8.0)))
