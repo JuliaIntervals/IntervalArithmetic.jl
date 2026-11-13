@@ -137,6 +137,7 @@ setprecision(BigFloat, 256) do
             @test repr(entireinterval()) == "(-∞, ∞)_dac"
             @test repr(interval(1, Inf)) == "[1.0, ∞)_dac"
             @test repr(interval(-Inf, 1)) == "(-∞, 1.0]_dac"
+            @test repr(interval(-floatmax(Float64), prevfloat(floatmax(Float64)))) == "[-1.7976931348623157e+308, 1.7976931348623155e+308]_com"
 
             setdisplay(; decorations = false)
             @test repr(emptyinterval()) == "∅"
